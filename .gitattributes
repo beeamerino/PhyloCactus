@@ -1,0 +1,11 @@
+# Override GitHub Linguist language detection
+man/*.Rd linguist-documentation
+docs/** linguist-vendored
+*.csv linguist-generated
+*.tree linguist-generated
+*.tre linguist-generated
+*.support linguist-generated
+*.pdf linguist-generated
+*.jpg linguist-generated
+*.png linguist-generated
+*.svg linguist-generated
