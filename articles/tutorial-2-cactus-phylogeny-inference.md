@@ -1,0 +1,695 @@
+# Tutorial 2: Phylogenetics Pipeline: Inference & Dating
+
+## Abstract
+
+Phylogenetic inference represents the transition from a curated
+molecular dataset to an explicit evolutionary hypothesis. After
+assembling and preparing multilocus sequence matrices in [Tutorial
+1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html),
+the next challenge is to estimate evolutionary relationships while
+accounting for the heterogeneous processes that shape molecular
+evolution.
+
+This tutorial describes the second stage of the `PhyloCactus` workflow,
+where concatenated multilocus datasets are transformed into
+statistically evaluated phylogenetic hypotheses. The pipeline integrates
+partition specific substitution model selection, constrained maximum
+likelihood inference, assessment of topological uncertainty, and
+divergence time estimation using penalized likelihood.
+
+Large phylogenomic datasets often contain substantial uncertainty due to
+incomplete molecular sampling, uneven taxonomic representation, and
+heterogeneous sequence availability. However, relationships among major
+taxonomic lineages may already be supported by previous phylogenetic
+studies. To incorporate this available biological knowledge while
+allowing the placement of newly sampled species, `PhyloCactus` uses a
+taxonomic constraint scaffold defined in `cactus_constraints.csv`. This
+file assigns sampled species to established higher level clades and
+subfamilies, providing a biologically informed framework that reduces
+exploration of unsupported regions of tree space while preserving
+inference among unresolved relationships within major lineages.
+
+Divergence time estimation requires the integration of molecular branch
+lengths with temporal information derived from fossil evidence or
+previously estimated evolutionary frameworks. Because **Cactaceae**
+lacks reliable direct fossil calibrations suitable for dating the entire
+family, `PhyloCactus` implements temporal constraints through the
+`calibrations_bounds.csv` file. These bounds incorporate lineage
+specific temporal estimates from Hernández-Hernández *et al*. (2014) for
+major cactus clades and subfamilies, together with secondary calibration
+information for **Cactaceae** based on the broader flowering plant
+framework proposed by Ramírez-Barahona *et al*. (2020). This strategy
+allows the estimation of a temporal framework while acknowledging the
+limitations imposed by the fossil record.
+
+Because evolutionary history cannot be directly observed, phylogenetic
+reconstruction relies on statistical models that approximate the
+processes generating molecular variation. Therefore, the resulting
+phylogeny should be interpreted as the evolutionary hypothesis that best
+explains the observed molecular data under the selected models and
+assumptions, rather than as an absolute representation of historical
+relationships.
+
+The workflow combines `ModelTest-NG`, `RAxML-NG`, and `treePL` to
+estimate a time calibrated phylogeny from the curated supermatrices
+generated in the previous tutorial. The resulting evolutionary framework
+provides the foundation for downstream comparative analyses, including
+historical biogeography, diversification dynamics, and trait evolution.
+
+## Complete Pipeline Execution Workflow
+
+### Setup: Creating a Clean Workspace
+
+Before proceeding with **Module 7**, ensure that the required external
+phylogenetic binaries (`ModelTest-NG`, `RAxML-NG`, and `treePL`) are
+installed on your machine and accessible via your system’s `$PATH`.
+
+*If you are using macOS, many of these can be installed via Homebrew
+(`brew install raxml-ng`, etc.). On Linux/Windows, ensure they are
+compiled and mapped correctly to your `$PATH`. Alternatively, if you
+receive a “command not found” error, you can provide the absolute path
+to the executable file (e.g., `raxml_path = "/usr/local/bin/raxml-ng"`)
+directly in the function arguments.*
+
+To quickly run the analyses in this module, you can copy the entire
+executable script to your tutorial directory:
+
+``` r
+
+tutorial_dir <- "~/Desktop/PhyloCactus_Tutorial"
+setwd(tutorial_dir)
+
+# Copy the entire tutorial script for easy execution
+file.copy(
+  system.file("scripts", "tutorial-2-cactus-phylogeny-inference.R", package = "PhyloCactus"),
+  file.path(tutorial_dir, "tutorial-2-cactus-phylogeny-inference.R")
+)
+```
+
+### Module 7: Preprocess and Substitution Models
+
+Phylogenetic datasets derived from multiple molecular markers often
+contain substantial evolutionary heterogeneity. Different loci may
+evolve under distinct substitution patterns, nucleotide compositions,
+and selective constraints. If these differences are ignored, a single
+evolutionary model applied across the entire dataset may inadequately
+describe the observed sequence variation and introduce biases during
+likelihood based phylogenetic inference.
+
+Therefore, before estimating the phylogenetic relationships, the
+concatenated supermatrix must be represented within a statistical
+framework that accounts for variation among molecular partitions.
+Partition specific substitution models provide a more realistic
+approximation of sequence evolution by allowing each genomic region to
+be analyzed according to its own evolutionary characteristics.
+
+The
+**[`preprocess_partitions()`](https://beeamerino.github.io/PhyloCactus/reference/preprocess_partitions.md)**
+function prepares the concatenated supermatrix generated in Module 6 for
+downstream phylogenetic inference. It reads the alignment and partition
+files, verifies their structural compatibility using the `RAxML-NG`
+parser, and generates standardized input files required for substitution
+model evaluation and maximum likelihood analysis.
+
+The
+**[`run_modeltest_ng()`](https://beeamerino.github.io/PhyloCactus/reference/run_modeltest_ng.md)**
+function performs automated substitution model evaluation for each
+predefined molecular partition. By interfacing with `ModelTest-NG`
+(Darriba *et al*., 2020; Flouri *et al*., 2015), the function compares
+alternative models of nucleotide evolution and identifies the model that
+provides the best statistical explanation of the observed sequence
+variation according to information criteria such as AICc (Akaike, 1974;
+Hurvich & Tsai, 1989). Selecting optimal partition-specific substitution
+models is crucial for controlling mutational rate heterogeneity across
+loci and mitigating systematic artifacts such as Long-Branch Attraction
+(LBA), where rapidly evolving non-homologous lineages false-group
+together. The resulting model scheme provides the statistical foundation
+for maximum-likelihood tree inference.
+
+``` r
+
+library(PhyloCactus)
+
+# Setup directories
+output_dir <- "7_Phylogenetics"
+dir.create(output_dir, showWarnings = FALSE)
+
+# Get model test path. Note: Configure these in your .Renviron file
+modeltest_path <- Sys.getenv("PATH_MODELTEST_NG", "modeltest-ng")
+raxml_path     <- Sys.getenv("PATH_RAXML_NG", "raxml-ng")
+treepl_path    <- Sys.getenv("PATH_TREEPL", "treePL")
+
+preprocess_partitions(
+  phy_matrix = "6_Concatenated/concatenated_alignments/ALIGNMENT_supermatrix.phy",
+  part_file = "6_Concatenated/concatenated_alignments/PARTITION_iqtree.part",
+  raxml_path = raxml_path,
+  output_dir = output_dir
+)
+
+# Run `ModelTest-NG` to select substitution models for each partition
+# Use alternative working directory to avoid modeltest error.
+setwd(output_dir)
+best_models <- run_modeltest_ng(
+  modeltest_exec_path = modeltest_path,
+  aln_file = "cactus_check.raxml.reduced.phy",
+  part_file = "cactus_check.raxml.reduced.clean.partition",
+  prefix = "cactus_phylo_modeltest",
+  threads = 8
+)
+setwd("..")
+```
+
+### Module 8: Constraint Trees and Maximum Likelihood Search
+
+Maximum likelihood inference estimates the evolutionary hypothesis that
+provides the best explanation of the observed molecular data under a
+defined substitution model. The resulting phylogeny should not be
+interpreted as an absolute representation of biological history, but
+rather as the topology that maximizes the likelihood of observing the
+molecular alignment given the evolutionary models, constraints, and
+available molecular evidence.
+
+Large phylogenetic datasets frequently include incomplete taxonomic
+sampling, uneven sequence availability, and uncertainty associated with
+the placement of newly incorporated species. These challenges become
+particularly relevant when expanding datasets to include a large number
+of taxa from highly diverse evolutionary radiations. In such cases,
+previously established phylogenetic knowledge can be incorporated to
+reduce uncertainty and improve the efficiency of tree space exploration.
+
+The
+**[`build_constraint_scaffold()`](https://beeamerino.github.io/PhyloCactus/reference/build_constraint_scaffold.md)**
+function generates a topological constraint scaffold from the taxonomic
+framework provided in `cactus_constraints.csv`. This file assigns
+sampled species to major evolutionary groups within **Cactaceae**,
+including recognized subfamilies and internal clades. These assignments
+are based on previously published phylogenetic evidence and current
+evolutionary consensus regarding relationships among major cactus
+lineages, particularly the framework established by Guerrero *et al*.
+(2019).
+
+The constraint scaffold is not intended to replace molecular inference
+or impose a complete predefined phylogeny. Instead, it incorporates well
+supported relationships among higher level lineages while allowing
+unresolved relationships, particularly among newly incorporated species,
+to be inferred directly from the molecular dataset. By constraining only
+relationships supported by previous evidence, the approach reduces
+uncertainty during maximum likelihood inference and focuses the analysis
+on the evolutionary relationships that remain to be resolved.
+
+The
+**[`calculate_ml_tree()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_ml_tree.md)**
+function interfaces with `RAxML-NG` (Kozlov *et al*., 2019) to estimate
+the maximum likelihood topology from the concatenated molecular matrix
+using the partition specific substitution models identified in **Module
+7**. The analysis searches for the tree configuration that maximizes the
+likelihood of observing the sequence data under the selected
+evolutionary framework while incorporating the constraint scaffold
+defined for **Cactaceae**.
+
+The resulting maximum likelihood tree represents the best supported
+evolutionary hypothesis under the available molecular evidence,
+substitution models, and prior phylogenetic framework. This topology
+serves as the reference tree for subsequent branch support estimation
+and divergence time analyses.
+
+The
+**[`calculate_rf_distances()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_rf_distances.md)**
+function evaluates topological variability among independently inferred
+trees by calculating pairwise Robinson Foulds distances (Robinson &
+Foulds, 1981). These comparisons provide an additional measure of
+consistency among alternative tree searches and allow the assessment of
+whether independent analyses converge toward similar evolutionary
+hypotheses.
+
+``` r
+
+# Assembles taxonomic classifications into a constraint scaffold
+constraint_tree <- build_constraint_scaffold(
+  alignment_path = file.path(output_dir, "cactus_check.raxml.reduced.phy"),
+  constraints_csv_path = system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"),
+  output_dir = output_dir
+)
+
+# Execute maximum-likelihood search with `RAxML-NG`
+ml_results <- calculate_ml_tree(
+  raxml_bin_path = raxml_path,
+  aln_file = file.path(output_dir, "cactus_check.raxml.reduced.phy"),
+  part_file = file.path(output_dir, "cactus_phylo_modeltest.part.aicc"),
+  constraint_file = file.path(output_dir, "cactus_constraints.tree"),
+  outgroup = "Portulaca_fulgens",
+  n_init_trees = "rand{25},pars{25}",
+  seed = 1111,
+  n_workers = 1,
+  threads = 8, 
+  output_dir = output_dir,
+  prefix = "cactus_search"
+)
+
+# Calculate Robinson-Foulds distance among maximum-likelihood trees
+cat("Calculating distances among maximum-likelihood trees...\n")
+rf_dist <- calculate_rf_distances(
+  raxml_bin_path = raxml_path,
+  ml_trees_file = ml_results$mlTrees,
+  output_dir = output_dir
+)
+```
+
+### Module 9: Topological Validation via Bootstrap Support
+
+Once the maximum likelihood topology has been inferred, the statistical
+support of recovered clades must be evaluated by quantifying topological
+stability associated with each internal node. Bootstrap analyses provide
+an empirical measure of topological stability by assessing how
+consistently specific relationships are recovered under resampling of
+the original sequence alignment.
+
+The
+**[`generate_bootstrap_script()`](https://beeamerino.github.io/PhyloCactus/reference/generate_bootstrap_script.md)**
+and
+**[`run_local_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/run_local_bootstraps.md)**
+functions configure and execute bootstrap searches using `RAxML-NG`.
+These procedures generate independent resampled datasets while
+maintaining the same substitution model, constraint tree and partition
+scheme defined during the maximum likelihood inference. The resulting
+bootstrap trees represent alternative evolutionary hypotheses derived
+from the molecular dataset and allow the assessment of uncertainty
+across the inferred topology.
+
+The
+**[`collect_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/collect_bootstraps.md)**
+function gathers the independent bootstrap searches, while
+**[`check_bs_convergence()`](https://beeamerino.github.io/PhyloCactus/reference/check_bs_convergence.md)**
+evaluates whether a sufficient number of replicates has been generated
+using the bootstopping criterion (Pattengale *et al*., 2010). This
+procedure prevents unnecessary computational effort while ensuring that
+bootstrap support values have reached stable estimates.
+
+The
+**[`map_branch_supports()`](https://beeamerino.github.io/PhyloCactus/reference/map_branch_supports.md)**
+function summarizes bootstrap information and transfers support values
+onto the best maximum likelihood topology. Instead of relying
+exclusively on traditional bipartition frequencies, `PhyloCactus` uses
+Transfer Bootstrap Expectation (`TBE`; Lemoine *et al*., 2018), which
+provides a more informative measure of node support when analysing large
+phylogenies containing incomplete taxonomic sampling and heterogeneous
+amounts of missing data.
+
+#### Temporal Bootstrap Replicates for Divergence Time Estimation
+
+Divergence time estimation requires an additional assessment of
+uncertainty because branch lengths inferred during maximum likelihood
+analysis are influenced by sampling variation in the molecular data.
+Following the empirical protocol proposed by Maurin (2020) for dating
+large phylogenies with `treePL`, `PhyloCactus` generates a second set of
+bootstrap replicates specifically designed for temporal analyses.
+
+The
+**[`calculate_temporal_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_temporal_bootstraps.md)**
+function generates bootstrap alignments and performs maximum likelihood
+searches while constraining the topology to the previously inferred
+maximum likelihood tree. This constraint does not force branch lengths
+to be identical; instead, it preserves the supported evolutionary
+relationships while allowing each bootstrap replicate to independently
+estimate branch length variation from the resampled molecular data.
+
+This strategy is particularly important for large phylogenetic datasets
+where many relationships are already strongly supported at higher
+taxonomic levels, but uncertainty remains associated with branch length
+estimation and the placement of newly incorporated taxa. By maintaining
+a common topological framework, temporal bootstrap replicates provide a
+distribution of alternative branch length estimates that can be
+propagated into downstream divergence time analyses.
+
+The resulting bootstrap trees are subsequently used by the dating module
+with `treePL` (Smith & O’Meara, 2012). Following the protocol described
+by Maurin (2020), the best maximum likelihood topology is first
+optimized to determine the appropriate penalized likelihood parameters
+and smoothing value. These parameters are then applied to the temporal
+bootstrap replicates to estimate a distribution of dated trees, from
+which confidence intervals for node ages can be obtained.
+
+Therefore, `PhyloCactus` distinguishes between two complementary
+bootstrap procedures: standard bootstrap analyses evaluate the
+topological stability of inferred relationships, whereas temporal
+bootstrap replicates quantify uncertainty in molecular branch length
+estimates required for divergence time estimation.
+
+``` r
+
+# -------------------------------------------------------------
+# Estimate Bootstrap Replicates
+# -------------------------------------------------------------
+# `RAxML-NG` supports running Bootstraps either locally or via HPC array chunks.
+# You can set run_local_bs to TRUE to run them now on your machine, 
+# or FALSE to generate an HPC bash script to run them remotely.
+run_local_bs <- FALSE
+
+if (run_local_bs) {
+  cat("\n1. Estimating bootstraps locally...\n")
+  bs_dir <- file.path(output_dir, "local_bs")
+  local_bs <- run_local_bootstraps(
+    raxml_bin_path = raxml_path,
+    aln_file = file.path(output_dir, "cactus_check.raxml.reduced.phy"),
+    part_file = file.path(output_dir, "cactus_phylo_modeltest.part.aicc"),
+    constraint_file = file.path(output_dir, "cactus_constraints.tree"),
+    bs_trees = 500,
+    outgroup = "Portulaca_fulgens",
+    threads = 8,
+    workers = 1,
+    output_dir = bs_dir
+  )
+} else {
+  cat("\n1. Generating BS script for HPC chunks...\n")
+  bs_dir <- file.path(output_dir, "bs_chunks")
+  bs_script <- generate_bootstrap_script(
+    alignment_file = file.path(output_dir, "cactus_check.raxml.reduced.phy"),
+    partition_file = file.path(output_dir, "cactus_phylo_modeltest.part.aicc"),
+    constraint_file = file.path(output_dir, "cactus_constraints.tree"),
+    outgroup = "Portulaca_fulgens",
+    bs_per_rep = 500,
+    max_reps = 2,   # E.g. to reach 1000 replicates using 2 scripts/jobs 
+    threads = 120,
+    workers = 20,
+    output_dir = file.path(output_dir)
+  )
+}
+
+# -------------------------------------------------------------
+# Collect Bootstrap Replicates
+# -------------------------------------------------------------
+# Before running this step, ensure that your bootstrap replicates have finished.
+# If you ran them on HPC, make sure all chunks completed successfully and
+# optionally sync the files back to your local repository.
+
+cat("\n2. Collecting bootstrap replicates...\n")
+# bs_dir was defined in Step 1 depending on whether you ran locally or via HPC chunks
+bs_concat_file <- collect_bootstraps(
+  bs_dir = bs_dir,
+  output_dir = output_dir
+)
+cat("   Bootstraps concatenated to:", bs_concat_file, "\n")
+
+# -------------------------------------------------------------
+# Check Bootstrap Convergence
+# -------------------------------------------------------------
+cat("\n3. Checking bootstrap convergence...\n")
+converge_log <- check_bs_convergence(
+  raxml_bin_path = raxml_path,
+  bs_trees_file = file.path(output_dir, "cactus_ALL_bootstraps.tree"),
+  bs_cutoff = 0.03,
+  seed = 111,
+  threads = 8,
+  output_dir = output_dir,
+  prefix = "cactus_bs_convergence"
+)
+cat("   Convergence log saved to:", converge_log, "\n")
+
+# -------------------------------------------------------------
+# Map TBE Supports onto Best Tree
+# -------------------------------------------------------------
+cat("\nMapping TBE supports onto the best tree...\n")
+
+support_tree <- map_branch_supports(
+  raxml_bin = raxml_path,
+  best_tree = file.path(output_dir, "cactus_search.raxml.bestTree"),
+  bootstraps_file = file.path(output_dir, "cactus_ALL_bootstraps.tree"),
+  metric = "tbe",
+  output_dir = output_dir,
+  prefix = "cactus_support"
+)
+cat("   Support tree generated at:", support_tree, "\n")
+
+# Note: for Dating, run sequential temporal bootstraps constrained over the best tree.
+cat("Temporal Bootstraps for date intervals...\n")
+temporal_bs <- calculate_temporal_bootstraps(
+  raxml_bin_path = raxml_path,
+  aln_file = file.path(output_dir, "cactus_check.raxml.reduced.phy"),
+  part_file = file.path(output_dir, "cactus_phylo_modeltest.part.aicc"),
+  best_tree_file = file.path(output_dir, "cactus_search.raxml.bestTree"),
+  outgroup = "Portulaca_fulgens",
+  bs_trees = 100, # For demo speed. Adjust to 500 or 1000.
+  threads = 8,
+  output_dir = file.path(output_dir, "cactus_temporal_bs")
+)
+```
+
+### Module 10: Estimating Divergence Times via Penalized Likelihood
+
+The inferred maximum likelihood topology provides a robust hypothesis of
+evolutionary relationships; however, branch lengths estimated from
+molecular data represent substitutions per site rather than geological
+time. To reconstruct the temporal history of **Cactaceae**
+diversification, the phylogenetic tree must therefore be transformed
+into an ultrametric chronogram by integrating molecular branch length
+information with temporal constraints derived from previous evolutionary
+studies.
+
+`PhyloCactus` estimates divergence times using the penalized likelihood
+framework implemented in `treePL` (Sanderson, 2002; Smith & O’Meara,
+2012). This approach is particularly suitable for large phylogenetic
+datasets because it accommodates lineage specific variation in
+evolutionary rates while remaining computationally feasible for analyses
+involving hundreds or thousands of taxa.
+
+Temporal constraints are provided through the `calibrations_bounds.csv`
+reference file distributed with the package. This file defines minimum
+and maximum age boundaries for major **Cactaceae** lineages, including
+subfamilies and internal clades. Each calibration is assigned to
+specific nodes of the phylogeny based on taxonomic relationships and
+previously published divergence time estimates.
+
+The calibration strategy follows the current understanding of
+**Cactaceae** evolutionary history. Internal calibrations for major
+cactus lineages are derived from the temporal framework proposed by
+Hernández-Hernández *et al.* (2014), which estimated divergence times
+among the principal evolutionary groups of the family, including
+**Opuntioideae**, **Cactoideae**, and major internal clades within these
+lineages.
+
+Because **Cactaceae** lacks a sufficiently informative fossil record
+suitable for direct calibration of the family crown age, the temporal
+constraint for the family level node is derived from a secondary
+calibration based on the dated phylogenetic framework of
+Ramírez-Barahona *et al.* (2020). This strategy follows common practice
+in large scale plant phylogenies, where broader temporal constraints
+derived from independent dated analyses are used when direct fossil
+evidence is unavailable or insufficient.
+
+The use of secondary calibration for the family crown age allows the
+analysis to incorporate current evolutionary knowledge while explicitly
+acknowledging uncertainty associated with the absence of direct fossil
+evidence. Rather than relying on uncertain fossil assignments,
+`PhyloCactus` applies transparent and reproducible temporal boundaries
+derived from previous comprehensive studies.
+
+The
+**[`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)**
+function performs the complete divergence time estimation workflow.
+First, it prepares the maximum likelihood topology, branch length
+information, and calibration constraints required by `treePL`. The
+function then performs the optimization procedure required to estimate
+appropriate penalized likelihood parameters, including the smoothing
+parameter selected through cross validation.
+
+Following the empirical protocol described by Maurin (2020), the
+optimization and cross validation steps are performed using the best
+scoring maximum likelihood tree without bootstrap annotations. This
+approach ensures that the dating parameters are optimized using the
+primary evolutionary hypothesis before being propagated to replicate
+datasets.
+
+After the optimal `treePL` parameters have been identified, the dating
+procedure is applied to the temporal bootstrap replicates generated in
+**Module 9**. These replicates were obtained by resampling the original
+alignment while maintaining the maximum likelihood topology as a
+constraint. This strategy preserves the inferred relationships among
+taxa while allowing branch lengths to vary according to molecular
+sampling uncertainty.
+
+Propagating temporal uncertainty through these bootstrap replicates
+allows divergence time estimates to incorporate variation in branch
+length estimation. The resulting collection of dated bootstrap trees
+represents uncertainty associated with the temporal reconstruction under
+a maximum likelihood framework and provides the basis for estimating
+confidence intervals around divergence times.
+
+#### Summarizing Dated Temporal Bootstrap Replicates
+
+After all temporal bootstrap replicates have been independently dated,
+the resulting chronograms must be summarized into a single
+representative time calibrated tree. Following the empirical workflow
+proposed by Maurin (2020), `PhyloCactus` uses `TreeAnnotator` (Helfrich
+*et al.*, 2018) to summarize the dated bootstrap distribution.
+
+Because temporal bootstrap replicates are generated under the maximum
+likelihood topology constraint, all replicate trees share identical
+branching relationships. Therefore, the summary procedure does not
+evaluate alternative topologies, but instead estimates the distribution
+of node ages across independently dated replicate trees.
+
+The recommended `TreeAnnotator` configuration specifies a maximum sum of
+clade credibility target tree type, mean height node age estimates, and
+0% burn-in.
+
+Under this framework, `TreeAnnotator` calculates the mean age of each
+node and summarizes the uncertainty associated with divergence time
+estimation across the dated temporal bootstrap replicates.
+
+TreeAnnotator reports these uncertainty intervals as highest posterior
+density (HPD) values due to compatibility with Bayesian phylogenetic
+workflows. However, these values should not be interpreted as Bayesian
+posterior distributions. Within the `PhyloCactus` framework, they
+represent confidence intervals derived from variation among
+independently dated temporal bootstrap replicates generated through
+penalized likelihood optimization.
+
+Here is how you execute, print, and visualize these chronological
+calculations:
+
+``` r
+
+dating_dir <- "8_Dating"
+dir.create(dating_dir, showWarnings = FALSE)
+
+# 1. Prepare Calibrations
+cat("Creating `treePL` calibrations configurations...\n")
+calibs_all <- read.csv(system.file("extdata", "calibrations_bounds.csv", package = "PhyloCactus"))
+calibs <- calibs_all[calibs_all$used_in_analysis == TRUE, ]
+
+constraints <- read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
+ml_tree <- ape::read.tree(file.path(output_dir, "cactus_search.raxml.bestTree"))
+tip_labels <- ml_tree$tip.label
+num_sites <- 12700
+
+cfg_lines <- c()
+for (i in seq_len(nrow(calibs))) {
+  row <- calibs[i, ]
+  tips_all <- unique(constraints[constraints[[row$column]] == row$value, "Specie_name"])
+  tips_in_tree <- tips_all[tips_all %in% tip_labels]
+  
+  if (length(tips_in_tree) < 2) next
+  
+  mrca_line <- paste("mrca =", row$mrca, paste(tips_in_tree, collapse = " "))
+  min_line  <- sprintf("min = %s %f", row$mrca, row$min)
+  max_line  <- sprintf("max = %s %f", row$mrca, row$max)
+  
+  cfg_lines <- c(cfg_lines, mrca_line, min_line, max_line)
+}
+
+treepl_cfg <- c(
+  paste0("numsites = ", num_sites),
+  cfg_lines,
+  "nthreads = 8",
+  "thorough"
+)
+
+calibrations_cfg_path <- file.path(dating_dir, "calibrations_treePL_fulltips.cfg")
+writeLines(treepl_cfg, calibrations_cfg_path)
+cat("   Calibrations compiled successfully to:", calibrations_cfg_path, "\n")
+
+# 2. Run Fast Automated `treePL` Dating Pipeline
+cat("\nRunning automated `treePL` wrapper script over maximum-likelihood tree and bootstrap replicates...\n")
+
+# Provide the wrapper shell script provided in your extdata
+# See reference: https://github.com/tongjial/treepl_wrapper
+wrapper_sh_path <- system.file("extdata", "treepl_wrapper_v1.sh", package = "PhyloCactus")
+
+# Note: For tutorial purposes, you can limit the number of bootstrap trees to process
+# by setting `num_bs = 100` (or any other number). If not provided, it will process all
+# available bootstrap trees. Here we set it to 100 for faster tutorial execution.
+automate_treePL(
+  cfg_file = calibrations_cfg_path,
+  wrapper_sh = wrapper_sh_path,
+  ml_tree_file = file.path(output_dir, "cactus_search.raxml.bestTree"),
+  bs_trees_file = file.path(output_dir, "cactus_temporal_bs", "cactus_temporal_bs.raxml.bootstraps"),
+  results_dir = file.path(dating_dir, "auto_results"),
+  treePL_out = dating_dir,
+  num_bs = 100
+)
+
+# 3. View and evaluate dating metrics cleanly in R
+cat("\n--- Chronological Dating Results Summary ---\n")
+if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
+  ml_chronogram <- ape::read.tree(file.path(dating_dir, "BestTree_treePL.tree"))
+  cat("   Best ML Chronogram:\n")
+  cat("     - File path:", file.path(dating_dir, "BestTree_treePL.tree"), "\n")
+  cat("     - Root age:", max(ape::node.depth.edgelength(ml_chronogram)), "Mya\n")
+  cat("     - Number of tips:", length(ml_chronogram$tip.label), "\n")
+}
+cat("--------------------------------------------\n")
+```
+
+------------------------------------------------------------------------
+
+## Next Steps
+
+At this stage, phylogenetic inference and divergence time estimation
+have been completed. The resulting maximum likelihood topology, branch
+support estimates, and time calibrated chronogram provide the
+evolutionary framework required for downstream comparative analyses.
+
+The next stage of the `PhyloCactus` workflow focuses on integrating
+phylogenetic outputs with biological metadata and generating publication
+quality visualizations. In the following tutorial, users will learn how
+to visualize the maximum likelihood phylogeny with branch support
+values, display the dated chronogram with temporal uncertainty
+estimates, and integrate external biodiversity information, including
+IUCN Red List conservation categories.
+
+[Continue to Tutorial 3: Data Visualization and IUCN
+Summaries](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html)
+
+------------------------------------------------------------------------
+
+#### References
+
+- Arakaki *et al*., 2011. Contemporaneous and recent radiations of the
+  world’s major succulent plant lineages. *Proceedings of the National
+  Academy of Sciences of the United States of America*, *108*(20),
+  8379–8384. <https://doi.org/10.1073/pnas.1100628108>
+- Hernández-Hernández *et al*., 2014. Beyond aridification: Multiple
+  explanations for the elevated diversification of cacti in the New
+  World Succulent Biome. *New Phytologist*, *202*(4), 1382–1397.
+  <https://doi.org/10.1111/nph.12752>
+- Ramírez-Barahona *et al*., *2020*. The delayed and geographically
+  heterogeneous diversification of flowering plant families. *Nature
+  Ecology and Evolution*, *4*(9), 1232–1238.
+  <https://doi.org/10.1038/s41559-020-1241-3>
+- Darriba *et al.*, 2020. ModelTest-NG: a new and scalable tool for the
+  selection of DNA and protein evolutionary models. *Molecular Biology
+  and Evolution*, *37*(1), 291-294.
+  <https://doi.org/10.1093/molbev/msz189>
+- Flouri *et al.,* 2014. The Phylogenetic Likelihood Library.
+  *Systematic Biology*, *64*(2): 356-362.
+  <https://doi.org/10.1093/sysbio/syu084>
+- Akaike, H. 1974. A new look at the statistical model identification.
+  *IEEE transactions on automatic control*, *19*(6), 716-723.
+  <http://dx.doi.org/10.1109/TAC.1974.1100705>
+- Kozlov *et al*. 2019. RAxML-NG: A fast, scalable and user-friendly
+  tool for maximum likelihood phylogenetic inference. *Bioinformatics*,
+  *35*(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305>
+- Robinson, D. F., & Foulds, L. R. 1981. Comparison of phylogenetic
+  trees. *Mathematical biosciences*, *53*(1-2), 131-147.
+  <https://doi.org/10.1016/0025-5564(81)90043-2>
+- Pattengale *et al*., 2010. How many bootstrap replicates are
+  necessary?. *Journal of computational biology*, *17*(3), 337–354.
+  <https://doi.org/10.1089/cmb.2009.0179>
+- Lemoine *et al*., 2018. Renewing Felsenstein’s phylogenetic bootstrap
+  in the era of big data. *Nature*, *556*(7702), 452-456.
+  <https://doi.org/10.1038/s41586-018-0043-0>
+- Maurin, K. J. 2020. An empirical guide for producing a dated phylogeny
+  with treePL in a maximum likelihood framework. *arXiv preprint
+  arXiv:2008.07054*. <https://doi.org/10.48550/arXiv.2008.07054>
+- Smith, S. A., & O’Meara, B. C. 2012. TreePL: Divergence time
+  estimation using penalized likelihood for large phylogenies.
+  *Bioinformatics*, *28*(20), 2689–2690.
+  <https://doi.org/10.1093/bioinformatics/bts492>
+- Sanderson, M. J. 2002. Estimating Absolute Rates of Molecular
+  Evolution and Divergence Times: A Penalized Likelihood Approach. *Mol.
+  Biol. Evol*, *19*(1), 101–109.
+  <https://academic.oup.com/mbe/article/19/1/101/1066733>
+- Helfrich *et al*. (2018). TreeAnnotator: versatile visual annotation
+  of hierarchical text relations. *Proceedings of the Eleventh
+  International Conference on Language Resources and Evaluation*.
+  <https://lrec.elra.info/lrec2018-main-308>

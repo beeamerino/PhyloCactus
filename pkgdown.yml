@@ -1,0 +1,14 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  PhyloCactus: PhyloCactus.html
+  tutorial-1-cactus-phylogeny-prep: tutorial-1-cactus-phylogeny-prep.html
+  tutorial-2-cactus-phylogeny-inference: tutorial-2-cactus-phylogeny-inference.html
+  tutorial-3-cactus-phylogeny-visualization: tutorial-3-cactus-phylogeny-visualization.html
+  tutorial-4-cactus-phylogeny-validation: tutorial-4-cactus-phylogeny-validation.html
+  tutorial-5-cactus-phylogeny-functions: tutorial-5-cactus-phylogeny-functions.html
+last_built: 2026-07-23T22:28Z
+urls:
+  reference: https://beeamerino.github.io/PhyloCactus/reference
+  article: https://beeamerino.github.io/PhyloCactus/articles
