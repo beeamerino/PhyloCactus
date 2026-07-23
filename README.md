@@ -3,7 +3,7 @@
 <!-- badges: start -->
 
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)[![R-CMD-check](https://github.com/beeamerino/PhyloCactus/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/beeamerino/PhyloCactus/actions/workflows/R-CMD-check.yaml)
-[![R-CMD-check](https://github.com/beeamerino/PhyloCactus/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/beeamerino/PhyloCactus/actions/workflows/R-CMD-check.yaml)
+
 <!-- badges: end -->
 
 ### Reproducible phylogenetic workflows for data assembly, inference, and divergence time estimation
@@ -61,7 +61,7 @@ remotes::install_github("beeamerino/PhyloCactus")
 `PhyloCactus` relies on packages available from both CRAN and Bioconductor.
 
 | Repository | Main packages |
-|:---|:---|
+|:-----------------------------------|:-----------------------------------|
 | **remotes** | `phylotaR` |
 | **Bioconductor** | `DECIPHER`, `Biostrings` |
 | **CRAN** | ape, ggplot2, dplyr, tidyr, readr, stringr, purrr, rredlist, forcats, scales, RColorBrewer |
@@ -71,7 +71,7 @@ remotes::install_github("beeamerino/PhyloCactus")
 Several analyses performed by `PhyloCactus` rely on external command-line software that must be installed separately and available from your system `PATH`.
 
 | Software | Purpose | Citation |
-|:---|:---|:---|
+|:-----------------------|:-----------------------|:-----------------------|
 | [**`BLAST+`**](https://www.ncbi.nlm.nih.gov/books/NBK279690/) | Local sequence alignment and database searching | Camacho, C. *et al*. (2009). BLAST+: Architecture and applications. *BMC Bioinformatics*, *10*. <https://doi.org/10.1186/1471-2105-10-421> |
 | [**`MAFFT`**](https://mafft.cbrc.jp/alignment/software/) | Multiple sequence alignment | Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7: Improvements in performance and usability. Molecular Biology and Evolution, 30(4), 772–780. <https://doi.org/10.1093/molbev/mst010> |
 | [**`ModelTest-NG`**](https://github.com/ddarriba/modeltest) | Model selection | Darriba, D. *et al*. (2020). ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. Molecular Biology and Evolution, 37(1), 291-294. doi.org/10.1093/molbev/msz189 |
@@ -85,7 +85,7 @@ Several analyses performed by `PhyloCactus` rely on external command-line softwa
 The recommended way to learn `PhyloCactus` is by following the tutorials in sequence.
 
 | Tutorial | Description |
-|:---|:---|
+|:-----------------------------------|:-----------------------------------|
 | [**Get Started**](https://beeamerino.github.io/PhyloCactus/articles/PhyloCactus.html) | Package overview and installation |
 | [**Tutorial 1**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) | Data Assembly and Preparation |
 | [**Tutorial 2**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html) | Phylogenetic Inference and Divergence Time Estimation |

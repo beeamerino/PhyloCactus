@@ -1,7 +1,7 @@
 Package: PhyloCactus
 Type: Package
 Title: Phylogenetic Inference and Divergence Time Estimation Pipeline for Cactaceae
-Version: 0.1.0
+Version: 0.2.0
 Author: Beatriz M. Meriño <b.vergara.m@gmail.com> [aut, cre]
 Maintainer: Beatriz M. Meriño <b.vergara.m@gmail.com>
 Description: Provides a reproducible workflow for reconstructing Cactaceae phylogenies from DNA sequence data. The pipeline automates GenBank sequence  retrieval, multiple-sequence alignment, substitution model selection, saturation assessment, supermatrix construction, maximum-likelihood phylogenetic inference using RAxML-NG, divergence time estimation with treePL, and tree-space analyses for assessing phylogenetic stability across bootstrap replicates.
