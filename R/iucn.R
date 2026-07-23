@@ -52,10 +52,18 @@ extract_locations <- function(locs) {
        is_endemic = length(endemic_names) > 0)
 }
 
-#' Extract IUCN Data from rredlist
-#' 
-#' @param sp_name The scientific name of the species
-#' @return A tibble with extracted IUCN metadata
+#' Fetch IUCN Red List Metadata via rredlist API
+#'
+#' Queries the IUCN Red List API (`rredlist`) to retrieve verified macroevolutionary conservation threat categories (e.g., CR, EN, VU),
+#' population trends, habitat descriptions, and geographic endemism metrics for a focal species.
+#' Enriching phylogenetic datasets with IUCN conservation statuses enables evolutionary distinctness and extinction vulnerability analyses.
+#'
+#' @param sp_name Character. Standardized binomial scientific name of the target species (e.g., `"Astrophytum asterias"`).
+#' @return A single-row `tibble` containing extracted IUCN conservation metadata fields.
+#' @examples
+#' \dontrun{
+#' get_iucn_data("Astrophytum asterias")
+#' }
 #' @export
 get_iucn_data <- function(sp_name) {
   message("Processing: ", sp_name)
@@ -149,9 +157,20 @@ get_iucn_data <- function(sp_name) {
   })
 }
 
-#' IUCN Category Color Scale for ggplot2
+#' Standardized IUCN Category Color Scale for ggplot2
 #' 
-#' @param ... arguments passed to scale_fill_manual
+#' Applies a standardized, publication-grade hex color palette representing official IUCN Red List threat categories
+#' (EX, EW, CR, EN, VU, NT, LC, DD, NE) onto `ggplot2` comparative phylogenetic graphics.
+#'
+#' @param ... Additional arguments passed directly to `ggplot2::scale_fill_manual`.
+#' @return A `ggplot2` manual scale fill layer object.
+#' @examples
+#' \dontrun{
+#' library(ggplot2)
+#' ggplot(df, aes(x = species, fill = iucn_category)) +
+#'   geom_bar() +
+#'   scale_fill_iucn()
+#' }
 #' @export
 scale_fill_iucn <- function(...) {
   iucn_colors <- c(

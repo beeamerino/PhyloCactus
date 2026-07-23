@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{calculate_ml_tree}
 \alias{calculate_ml_tree}
-\title{Execute ML Search in RAxML-NG}
+\title{Infer Maximum-Likelihood Phylogeny under Constrained Search}
 \usage{
 calculate_ml_tree(
   raxml_bin_path,
@@ -19,31 +19,48 @@ calculate_ml_tree(
 )
 }
 \arguments{
-\item{raxml_bin_path}{Character. System RAxML-NG path.}
+\item{raxml_bin_path}{Character. System command or full path to executable `RAxML-NG` binary.}
 
-\item{aln_file}{Character. PHYLIP matrix path.}
+\item{aln_file}{Character. Path to input PHYLIP supermatrix alignment file.}
 
-\item{part_file}{Character. Partitions model path.}
+\item{part_file}{Character. Path to partition file specifying substitution models per partition.}
 
-\item{constraint_file}{Character. Constraints scaffold tree path.}
+\item{constraint_file}{Character. Path to Newick topological constraint scaffold file.}
 
-\item{outgroup}{Character. Outgroup species name to root the tree. Defaults to NULL.}
+\item{outgroup}{Character. Optional outgroup taxon binomial to root the resulting tree topology. Defaults to `NULL`.}
 
-\item{n_init_trees}{Character. Initial trees configuration for search. Defaults to "rand{25},pars{25}".}
+\item{n_init_trees}{Character. Initial starting tree specifications. Defaults to `"rand{25},pars{25}"` (25 random + 25 parsimony trees).}
 
-\item{seed}{Integer. Seed for reproducibility. Defaults to 111.}
+\item{seed}{Integer. Random seed for reproducible tree search initialization. Defaults to `111`.}
 
-\item{n_workers}{Integer. Number of workers. Defaults to 1.}
+\item{n_workers}{Integer. Parallel worker process count for RAxML-NG. Defaults to `1`.}
 
-\item{threads}{Integer. Run threads.}
+\item{threads}{Integer. Number of CPU threads per worker. Defaults to `4`.}
 
-\item{output_dir}{Character. Directory to write outputs. Defaults to aln_file directory.}
+\item{output_dir}{Character. Directory path to save resulting maximum-likelihood tree files. Defaults to `dirname(aln_file)`.}
 
-\item{prefix}{Character. Prefix for output files. Defaults to "cactus_search".}
+\item{prefix}{Character. Output file prefix. Defaults to `"cactus_search"`.}
 }
 \value{
-List of output paths.
+A named list containing paths to the best ML tree (`.raxml.bestTree`) and all evaluated trees (`.raxml.mlTrees`).
 }
 \description{
-Execute ML Search in RAxML-NG
+Infers the maximum-likelihood evolutionary hypothesis explaining the concatenated supermatrix under specified partition models
+and topological constraint scaffolds using `RAxML-NG` (Kozlov *et al.*, 2019).
+Executes multiple independent tree searches starting from randomized and parsimony starting trees to avoid local likelihood Optima.
+}
+\examples{
+\dontrun{
+calculate_ml_tree(
+  raxml_bin_path = "raxml-ng",
+  aln_file = "ALIGNMENT_supermatrix.phy",
+  part_file = "MODELTEST_cactus_phylo.part.aicc",
+  constraint_file = "cactus_constraints.tree"
+)
+}
+}
+\references{
+Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
+user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
+\doi{10.1093/bioinformatics/btz305}
 }

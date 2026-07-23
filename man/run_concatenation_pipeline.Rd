@@ -2,15 +2,29 @@
 % Please edit documentation in R/concatenation.R
 \name{run_concatenation_pipeline}
 \alias{run_concatenation_pipeline}
-\title{Run Concatenation Pipeline}
+\title{Concatenate Locus Alignments and Build Partition Coordinate Maps}
 \usage{
 run_concatenation_pipeline(input_dir, output_dir)
 }
 \arguments{
-\item{input_dir}{Character.}
+\item{input_dir}{Character. Path to directory containing curated, aligned locus FASTA files.}
 
-\item{output_dir}{Character.}
+\item{output_dir}{Character. Path to destination root directory for concatenated alignments and partition maps.}
+}
+\value{
+A data frame containing supermatrix dimensions, taxon coverage, and genomic partition bounds.
 }
 \description{
-Run Concatenation Pipeline
+Concatenates individual orthologous locus alignments end-to-end into a unified multilocus supermatrix.
+Combining independent genomic loci increases statistical power to resolve difficult ancestral nodes while
+allowing partitioned substitution modeling to account for mutational rate heterogeneity across genomic regions.
+Exports partition files compatible with `RAxML-NG`, `IQ-TREE`, `PartitionFinder2`, and `MrBayes`.
+}
+\examples{
+\dontrun{
+run_concatenation_pipeline(
+  input_dir = "5_MAFFT_Cleaned/aligned_markers",
+  output_dir = "6_Concatenated"
+)
+}
 }

@@ -2,11 +2,21 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{apply_clade_label_layers}
 \alias{apply_clade_label_layers}
-\title{Apply clade label layers}
+\title{Apply Multiple Taxonomic Clade Label Layers onto ggtree Plot}
 \usage{
 apply_clade_label_layers(p, registry, layer_specs)
 }
+\arguments{
+\item{p}{A `ggtree` plot object.}
+
+\item{registry}{Named list of node annotation data frames.}
+
+\item{layer_specs}{Data frame defining visual style specifications per annotation layer.}
+}
+\value{
+Updated `ggtree` plot object.
+}
 \description{
-Apply clade label layers
+Sequentially overlays hierarchical taxonomic clade annotations (e.g., subfamilies, tribes, genera) onto a `ggtree` plot.
 }
 \keyword{internal}

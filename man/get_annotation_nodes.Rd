@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{get_annotation_nodes}
 \alias{get_annotation_nodes}
-\title{Get annotation nodes}
+\title{Extract Monophyletic Internal Annotation Nodes}
 \usage{
 get_annotation_nodes(
   tree,
@@ -13,7 +13,23 @@ get_annotation_nodes(
   require_monophyly = TRUE
 )
 }
+\arguments{
+\item{tree}{Object of class `phylo`.}
+
+\item{constraints_tbl}{Data frame containing taxonomic classification.}
+
+\item{group_col}{Character. Column name defining group annotations.}
+
+\item{group_values}{Character vector. Optional subset of group values. Defaults to `NULL`.}
+
+\item{min_tips}{Integer. Minimum tip count. Defaults to `2L`.}
+
+\item{require_monophyly}{Logical. Exclude non-monophyletic groups? Defaults to `TRUE`.}
+}
+\value{
+A `tibble` of node annotations.
+}
 \description{
-Get annotation nodes
+Retrieves internal node numbers for monophyletic taxonomic groups across a phylogenetic tree.
 }
 \keyword{internal}

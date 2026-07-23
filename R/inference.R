@@ -1,10 +1,18 @@
-#' Preprocess Partitions and Run Alignment Check
+#' Preprocess Partitions and Validate Alignment Syntax
 #'
-#' @param phy_matrix Character. Input PHYLIP file path.
-#' @param part_file Character. Input partition mapping file.
-#' @param raxml_path Character. Location of the RAxML-NG executable.
-#' @param output_dir Character. Folders for validated partitions outputs. Defaults to dirname(phy_matrix).
-#' @param force_check Logical. Bypass run checks if validation exists.
+#' Validates PHYLIP alignment syntax and partition file coordinates using `RAxML-NG` (Kozlov *et al.*, 2019).
+#' Verifies site ranges, formatting compatibility, and data integrity prior to substitution model evaluation.
+#'
+#' @param phy_matrix Character. Path to input PHYLIP supermatrix file.
+#' @param part_file Character. Path to input partition mapping text file.
+#' @param raxml_path Character. System command or full path to executable `RAxML-NG` binary.
+#' @param output_dir Character. Output directory for validated partition outputs. Defaults to `dirname(phy_matrix)`.
+#' @param force_check Logical. Bypass validation check if cleaned partition output file already exists? Defaults to `FALSE`.
+#' @return Character path to the cleaned partition map file ready for model evaluation.
+#' @references
+#' Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
+#' user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
+#' \doi{10.1093/bioinformatics/btz305}
 #' @export
 preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir = dirname(phy_matrix), force_check = FALSE) {
   
@@ -50,14 +58,30 @@ preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir 
   return(clean_part)
 }
 
-#' Run ModelTest-NG Partition Evaluations
+#' Evaluate Nucleotide Substitution Models via ModelTest-NG
 #'
-#' @param modeltest_exec_path Character. Path to ModelTest-NG.
-#' @param aln_file Character. Checked PHYLIP alignment path.
-#' @param part_file Character. Cleaned partitions path.
-#' @param prefix Character. File output prefix.
-#' @param threads Integer. Processing threads count.
-#' @return Character path to the resulting partition map file.
+#' Evaluates nucleotide substitution model fit per predefined supermatrix partition using `ModelTest-NG` (Darriba *et al.*, 2020).
+#' Selecting optimal substitution models under the AICc criterion controls for mutational rate heterogeneity across genomic regions,
+#' mitigating systematic long-branch attraction (LBA) bias during maximum-likelihood inference.
+#'
+#' @param modeltest_exec_path Character. System command or full path to executable `ModelTest-NG` binary.
+#' @param aln_file Character. Path to validated PHYLIP supermatrix file.
+#' @param part_file Character. Path to cleaned partition mapping file.
+#' @param prefix Character. Output filename prefix. Defaults to `"MODELTEST_cactus_phylo"`.
+#' @param threads Integer. Number of processing threads. Defaults to `4`.
+#' @return Character path to the resulting partition file containing selected model parameters (`.part.aicc`).
+#' @references
+#' Darriba, D., Posada, D., Kozlov, A. M., Stamatakis, A., Morel, B., & Flouri, T. (2020). ModelTest-NG: a new and
+#' scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291-294.
+#' \doi{10.1093/molbev/msz189}
+#' @examples
+#' \dontrun{
+#' run_modeltest_ng(
+#'   modeltest_exec_path = "modeltest-ng",
+#'   aln_file = "ALIGNMENT_supermatrix.phy",
+#'   part_file = "PARTITION_raxml_ng.txt"
+#' )
+#' }
 #' @export
 run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = "MODELTEST_cactus_phylo", threads = 4) {
   
@@ -89,12 +113,23 @@ run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = 
   return(expected_out)
 }
 
-#' Generate Newick Constraint Scaffold
+#' Synthesize Multifurcating Monophyly Constraint Scaffold
 #'
-#' @param alignment_path Character. Path to input PHYLIP file.
-#' @param constraints_csv_path Character. Path to the taxonomy CSV.
-#' @param output_dir Character. Directory to write outputs. Defaults to the alignment path's directory.
-#' @return Character. The file path to the saved constraint tree.
+#' Constructs a Newick multifurcating constraint tree enforcing monophyly of established higher taxonomic ranks (e.g., subfamilies, tribes).
+#' Constrained maximum-likelihood searches restrict branch topology exploration to scientifically verified monophyletic backbone clades,
+#' preventing aberrant tree topologies when analyzing sparse supermatrices.
+#'
+#' @param alignment_path Character. Path to input PHYLIP supermatrix alignment file.
+#' @param constraints_csv_path Character. Path to taxonomy CSV table mapping species binomials to taxonomic ranks.
+#' @param output_dir Character. Directory path to save generated constraint scaffold file. Defaults to `dirname(alignment_path)`.
+#' @return Character string path to the saved Newick constraint tree file (`cactus_constraints.tree`).
+#' @examples
+#' \dontrun{
+#' build_constraint_scaffold(
+#'   alignment_path = "ALIGNMENT_supermatrix.phy",
+#'   constraints_csv_path = "Cactaceae_taxonomy.csv"
+#' )
+#' }
 #' @export
 build_constraint_scaffold <- function(alignment_path, constraints_csv_path, output_dir = dirname(alignment_path)) {
   
@@ -333,20 +368,37 @@ build_constraint_scaffold <- function(alignment_path, constraints_csv_path, outp
   return(out_tree)
 }
 
-#' Execute ML Search in RAxML-NG
+#' Infer Maximum-Likelihood Phylogeny under Constrained Search
 #'
-#' @param raxml_bin_path Character. System RAxML-NG path.
-#' @param aln_file Character. PHYLIP matrix path.
-#' @param part_file Character. Partitions model path.
-#' @param constraint_file Character. Constraints scaffold tree path.
-#' @param outgroup Character. Outgroup species name to root the tree. Defaults to NULL.
-#' @param n_init_trees Character. Initial trees configuration for search. Defaults to "rand{25},pars{25}".
-#' @param seed Integer. Seed for reproducibility. Defaults to 111.
-#' @param n_workers Integer. Number of workers. Defaults to 1.
-#' @param threads Integer. Run threads.
-#' @param output_dir Character. Directory to write outputs. Defaults to aln_file directory.
-#' @param prefix Character. Prefix for output files. Defaults to "cactus_search".
-#' @return List of output paths.
+#' Infers the maximum-likelihood evolutionary hypothesis explaining the concatenated supermatrix under specified partition models
+#' and topological constraint scaffolds using `RAxML-NG` (Kozlov *et al.*, 2019).
+#' Executes multiple independent tree searches starting from randomized and parsimony starting trees to avoid local likelihood Optima.
+#'
+#' @param raxml_bin_path Character. System command or full path to executable `RAxML-NG` binary.
+#' @param aln_file Character. Path to input PHYLIP supermatrix alignment file.
+#' @param part_file Character. Path to partition file specifying substitution models per partition.
+#' @param constraint_file Character. Path to Newick topological constraint scaffold file.
+#' @param outgroup Character. Optional outgroup taxon binomial to root the resulting tree topology. Defaults to `NULL`.
+#' @param n_init_trees Character. Initial starting tree specifications. Defaults to `"rand{25},pars{25}"` (25 random + 25 parsimony trees).
+#' @param seed Integer. Random seed for reproducible tree search initialization. Defaults to `111`.
+#' @param n_workers Integer. Parallel worker process count for RAxML-NG. Defaults to `1`.
+#' @param threads Integer. Number of CPU threads per worker. Defaults to `4`.
+#' @param output_dir Character. Directory path to save resulting maximum-likelihood tree files. Defaults to `dirname(aln_file)`.
+#' @param prefix Character. Output file prefix. Defaults to `"cactus_search"`.
+#' @return A named list containing paths to the best ML tree (`.raxml.bestTree`) and all evaluated trees (`.raxml.mlTrees`).
+#' @references
+#' Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
+#' user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
+#' \doi{10.1093/bioinformatics/btz305}
+#' @examples
+#' \dontrun{
+#' calculate_ml_tree(
+#'   raxml_bin_path = "raxml-ng",
+#'   aln_file = "ALIGNMENT_supermatrix.phy",
+#'   part_file = "MODELTEST_cactus_phylo.part.aicc",
+#'   constraint_file = "cactus_constraints.tree"
+#' )
+#' }
 #' @export
 calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_file, 
                               outgroup = NULL, n_init_trees = "rand{25},pars{25}",
@@ -388,16 +440,32 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
   ))
 }
 
-#' Calculate and Burn Branch Supports
+#' Map Transfer Bootstrap Expectation (TBE) Support Values onto Reference Phylogeny
 #'
-#' @param raxml_bin Character. System RAxML-NG path.
-#' @param best_tree Character. Best tree topology path.
-#' @param bootstraps_file Character. Replicates tree file path.
-#' @param metric Character. Support type ('tbe' or 'fbp').
-#' @param threads Integer. Calculations threads count.
-#' @param output_dir Character. Directory to write the support file. Defaults to dirname(best_tree).
-#' @param prefix Character. Output prefix. Defaults to "cactus_support".
-#' @return Character path to the written support tree.
+#' Maps statistical clade support metrics derived from non-parametric bootstrap replicates onto the best maximum-likelihood tree topology.
+#' Implements Transfer Bootstrap Expectation (TBE; Lemoine *et al.*, 2018) as the primary support metric, which provides
+#' robust support evaluation for large plant phylogenies without underestimating support for minor clade position shifts.
+#'
+#' @param raxml_bin Character. System command or full path to executable `RAxML-NG` binary.
+#' @param best_tree Character. Path to reference maximum-likelihood tree file.
+#' @param bootstraps_file Character. Path to concatenated non-parametric bootstrap trees file.
+#' @param metric Character. Bootstrap support metric: `"tbe"` (Transfer Bootstrap Expectation) or `"fbp"` (Felsenstein's Bootstrap Percentage). Defaults to `"tbe"`.
+#' @param threads Integer. Number of CPU threads. Defaults to `4`.
+#' @param output_dir Character. Output directory for annotated support tree. Defaults to `dirname(best_tree)`.
+#' @param prefix Character. Output file prefix. Defaults to `"cactus_support"`.
+#' @return Character path to the annotated support tree file (`.raxml.support`).
+#' @references
+#' Lemoine, F., Entfellner, J. B., Gascuel, O., & Gascuel, O. (2018). Renewing Felsenstein’s phylogenetic
+#' bootstrap in the era of big data. *Nature*, 556(7702), 452-456. \doi{10.1038/s41586-018-0043-0}
+#' @examples
+#' \dontrun{
+#' map_branch_supports(
+#'   raxml_bin = "raxml-ng",
+#'   best_tree = "cactus_search.raxml.bestTree",
+#'   bootstraps_file = "cactus_ALL_bootstraps.tree",
+#'   metric = "tbe"
+#' )
+#' }
 #' @export
 map_branch_supports <- function(raxml_bin, best_tree, bootstraps_file, metric = "tbe", threads = 4, output_dir = dirname(best_tree), prefix = "cactus_support") {
   
@@ -422,13 +490,16 @@ map_branch_supports <- function(raxml_bin, best_tree, bootstraps_file, metric = 
   return(paste0(out_prefix, ".raxml.support"))
 }
 
-#' Compute Robinson-Foulds Distances between Maximum-Likelihood Trees
+#' Compute Robinson-Foulds Distances Across Maximum-Likelihood Trees
 #'
-#' @param raxml_bin_path Character. System RAxML-NG path.
-#' @param ml_trees_file Character. Path to .raxml.mlTrees file.
-#' @param output_dir Character. Directory for outputs. Defaults to ml_trees_file directory.
-#' @param prefix Character. Output prefix. Defaults to "cactus_RF".
-#' @return Output prefix distance path.
+#' Computes pairwise Robinson-Foulds (RF) topological distances across tree topologies generated during maximum-likelihood search in `RAxML-NG`.
+#' Quantifying topological variance evaluates whether independent search runs converged on identical tree topologies.
+#'
+#' @param raxml_bin_path Character. System command or full path to executable `RAxML-NG` binary.
+#' @param ml_trees_file Character. Path to input `.raxml.mlTrees` file containing multiple ML tree search replicates.
+#' @param output_dir Character. Output directory for RF distance calculations. Defaults to `dirname(ml_trees_file)`.
+#' @param prefix Character. Output file prefix. Defaults to `"cactus_RF"`.
+#' @return Character path to the resulting RF distance output file (`.raxml.rfdist`).
 #' @export
 calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = dirname(ml_trees_file), prefix = "cactus_RF") {
   
@@ -445,20 +516,27 @@ calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = d
   return(paste0(out_prefix, ".raxml.rfdist"))
 }
 
-#' Run Bootstrap Search Locally
+#' Generate Non-Parametric Bootstrap Trees Locally
 #'
-#' @param raxml_bin_path Character. System RAxML-NG path.
-#' @param aln_file Character. Multiple sequence alignment path.
-#' @param part_file Character. Partitions model path.
-#' @param constraint_file Character. Constraint tree path.
-#' @param bs_trees Integer. Total number of bootstrap trees to generate. Defaults to 500.
-#' @param outgroup Character. Outgroup taxon. Defaults to NULL.
-#' @param seed Integer. Seed. Defaults to 111.
-#' @param threads Integer. Run threads. Defaults to 4.
-#' @param workers Integer. Number of workers. Defaults to 1.
-#' @param output_dir Character. Directory to write outputs.
-#' @param prefix Character. Output prefix. Defaults to "cactus_bs".
-#' @return Output bootstrap trees file.
+#' Performs non-parametric bootstrap resampling over supermatrix site columns to infer a distribution of bootstrap tree topologies (`RAxML-NG`).
+#' Evaluates topological variation under non-parametric resampling to quantify node support via Transfer Bootstrap Expectation (TBE).
+#'
+#' @param raxml_bin_path Character. System command or full path to executable `RAxML-NG` binary.
+#' @param aln_file Character. Path to input PHYLIP supermatrix alignment file.
+#' @param part_file Character. Path to partition file specifying substitution models.
+#' @param constraint_file Character. Path to Newick topological constraint scaffold file.
+#' @param bs_trees Integer. Total number of non-parametric bootstrap trees to generate. Defaults to `500`.
+#' @param outgroup Character. Optional outgroup taxon binomial to root bootstrap topologies. Defaults to `NULL`.
+#' @param seed Integer. Random seed for reproducible bootstrap initialization. Defaults to `111`.
+#' @param threads Integer. Number of CPU threads. Defaults to `8`.
+#' @param workers Integer. Parallel worker process count. Defaults to `1`.
+#' @param output_dir Character. Output directory for generated bootstrap trees. Defaults to `dirname(aln_file)`.
+#' @param prefix Character. Output file prefix. Defaults to `"cactus_bs"`.
+#' @return Character path to the output bootstrap trees file (`.raxml.bootstraps`).
+#' @references
+#' Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
+#' user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
+#' \doi{10.1093/bioinformatics/btz305}
 #' @export
 run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file, constraint_file,
                                  bs_trees = 500, outgroup = NULL, seed = 111,
@@ -494,28 +572,31 @@ run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file, constraint
   return(paste0(out_prefix, ".raxml.bootstraps"))
 }
 
-#' Generate Chunk Bootstrap Shell Script
+#' Generate HPC SLURM Batch Script for Parallel Bootstrapping
 #'
-#' @param alignment_file Character. Alignment file path.
-#' @param partition_file Character. Partition model file path.
-#' @param constraint_file Character. Constraint tree file path.
-#' @param outgroup Character. Outgroup taxon. Defaults to NULL.
-#' @param bs_per_rep Integer. Bootstraps per replicate. Defaults to 500.
-#' @param max_reps Integer. Number of chunks. Defaults to 4.
-#' @param base_seed Integer. Base seed. Defaults to 111.
-#' @param seed_step Integer. Step in seed increments per chunk. Defaults to 1000.
-#' @param threads Integer. Threads per task. Defaults to 120.
-#' @param workers Integer. Workers per task. Defaults to 20.
-#' @param output_dir Character. Where to output scripts and chunks.
-#' @param script_name Character. The name of the bash file.
-#' @param cluster_job_name Character. Job name for SLURM. Defaults to "C-raxml-bs".
-#' @param cluster_mem Character. Memory for SLURM. Defaults to "32G".
-#' @param cluster_time Character. Time limit for SLURM. Defaults to "7-00:00".
-#' @param cluster_partition Character. Partition for SLURM. Defaults to "general".
-#' @param cluster_queue Character. Queue for SLURM. Defaults to "public".
-#' @param load_module Character. Module to load in SLURM script. Defaults to "raxml-ng-1.1.0-gcc-11.2.0".
-#' @param raxml_exec Character. RAxML executable to use. Defaults to "raxml-ng-mpi".
-#' @return The path to the generated script.
+#' Generates an executable Bash script with SLURM scheduler directives to parallelize non-parametric bootstrapping across HPC compute nodes.
+#' Chunking bootstrap searches into parallel sub-jobs accelerates support estimation for large supermatrices.
+#'
+#' @param alignment_file Character. Path to input PHYLIP alignment file.
+#' @param partition_file Character. Path to partition file.
+#' @param constraint_file Character. Path to constraint scaffold tree file.
+#' @param outgroup Character. Optional outgroup taxon binomial. Defaults to `NULL`.
+#' @param bs_per_rep Integer. Number of bootstrap trees generated per chunk replicate. Defaults to `500`.
+#' @param max_reps Integer. Total number of parallel chunk replicates to spawn. Defaults to `4`.
+#' @param base_seed Integer. Base random seed. Defaults to `111`.
+#' @param seed_step Integer. Seed increment value between consecutive chunks. Defaults to `1000`.
+#' @param threads Integer. Number of CPU cores requested per SLURM task. Defaults to `120`.
+#' @param workers Integer. Number of RAxML-NG worker processes. Defaults to `20`.
+#' @param output_dir Character. Destination directory for script and chunk logs. Defaults to `getwd()`.
+#' @param script_name Character. Name of output Bash script file. Defaults to `"run_bs_chunks.sh"`.
+#' @param cluster_job_name Character. SLURM job name identifier. Defaults to `"C-raxml.bs"`.
+#' @param cluster_mem Character. Memory allocation string for SLURM. Defaults to `"32G"`.
+#' @param cluster_time Character. Time limit allocation string for SLURM. Defaults to `"7-00:00"`.
+#' @param cluster_partition Character. SLURM partition name. Defaults to `"general"`.
+#' @param cluster_queue Character. SLURM queue name. Defaults to `"public"`.
+#' @param load_module Character. Environment module command to load prior to execution. Defaults to `"raxml-ng-1.1.0-gcc-11.2.0"`.
+#' @param raxml_exec Character. Executable `RAxML-NG` binary name. Defaults to `"raxml-ng-mpi"`.
+#' @return Character path to the generated SLURM batch script file.
 #' @export
 generate_bootstrap_script <- function(alignment_file, partition_file, constraint_file,
                                       outgroup = NULL, bs_per_rep = 500, max_reps = 4,
@@ -582,12 +663,14 @@ generate_bootstrap_script <- function(alignment_file, partition_file, constraint
   return(bash_script)
 }
 
-#' Collect Bootstrap Trees
+#' Collect and Concatenate Parallel Bootstrap Tree Outputs
 #'
-#' @param bs_dir Character. Directory where bootstraps chunks are stored.
-#' @param output_dir Character. Directory to write concatenated bootstraps. Defaults to bs_dir.
-#' @param prefix Character. Prefix to use. Defaults to "cactus_ALL_bootstraps".
-#' @return Path to concatenated trees file.
+#' Scans a target directory for chunked bootstrap output files (`.raxml.bootstraps`) and concatenates them into a single Newick tree file.
+#'
+#' @param bs_dir Character. Directory path containing chunked bootstrap output files.
+#' @param output_dir Character. Output directory path to save concatenated bootstrap file. Defaults to `bs_dir`.
+#' @param prefix Character. File output prefix. Defaults to `"cactus_ALL_bootstraps"`.
+#' @return Character path to the concatenated bootstrap tree file (`.tree`).
 #' @export
 collect_bootstraps <- function(bs_dir, output_dir = bs_dir, prefix = "cactus_ALL_bootstraps") {
   
@@ -608,16 +691,19 @@ collect_bootstraps <- function(bs_dir, output_dir = bs_dir, prefix = "cactus_ALL
   return(bs_concat_file)
 }
 
-#' Check Bootstrap Convergence
+#' Check Bootstrap Convergence Criterion in RAxML-NG
 #'
-#' @param raxml_bin_path Character. RAxML-NG bin path.
-#' @param bs_trees_file Character. Path to concatenated bootstrap trees file.
-#' @param bs_cutoff Numeric. Cutoff for convergence. Defaults to 0.03.
-#' @param seed Integer. Seed. Defaults to 111.
-#' @param threads Integer. Threads. Defaults to 4.
-#' @param output_dir Character. Directory to write logs. Defaults to dirname(bs_trees_file).
-#' @param prefix Character. Prefix to use. Defaults to "cactus_bs_convergence".
-#' @return Path to convergence log.
+#' Evaluates whether the generated pool of non-parametric bootstrap trees has achieved statistical convergence (`RAxML-NG`).
+#' Convergence is assessed using the MRE-based cutoff criterion (typically <= 0.03), ensuring that a sufficient number of bootstrap replicates were sampled.
+#'
+#' @param raxml_bin_path Character. System command or full path to executable `RAxML-NG` binary.
+#' @param bs_trees_file Character. Path to concatenated bootstrap tree file.
+#' @param bs_cutoff Numeric. Permutation cutoff threshold for convergence. Defaults to `0.03`.
+#' @param seed Integer. Random seed for reproducible convergence testing. Defaults to `111`.
+#' @param threads Integer. Number of CPU threads. Defaults to `4`.
+#' @param output_dir Character. Directory path to save convergence report logs. Defaults to `dirname(bs_trees_file)`.
+#' @param prefix Character. Output file prefix. Defaults to `"cactus_bs_convergence"`.
+#' @return Character path to the convergence log file (`.raxml.log`).
 #' @export
 check_bs_convergence <- function(raxml_bin_path, bs_trees_file, bs_cutoff = 0.03,
                                  seed = 111, threads = 4, 
@@ -640,19 +726,23 @@ check_bs_convergence <- function(raxml_bin_path, bs_trees_file, bs_cutoff = 0.03
   return(paste0(out_prefix, ".raxml.log"))
 }
 
-#' Compute Temporal Best Maximum-Likelihood Tree Constrained Bootstrap Replicates
+#' Estimate Temporal Bootstrap Replicates Constrained to Best ML Topology
 #'
-#' @param raxml_bin_path Character. System RAxML-NG path.
-#' @param aln_file Character. Multiple sequence alignment path.
-#' @param part_file Character. Partitions model path.
-#' @param best_tree_file Character. Best tree topology path (used as constraint).
-#' @param bs_trees Integer. Bootstrap replicates for temporal analysis. Defaults to 500.
-#' @param outgroup Character. Outgroup taxon. Defaults to NULL.
-#' @param seed Integer. Seed. Defaults to 111.
-#' @param threads Integer. Run threads.
-#' @param output_dir Character. Directory to write outputs.
-#' @param prefix Character. Output prefix. Defaults to "cactus_temporal".
-#' @return Output bootstrap trees file.
+#' Generates non-parametric bootstrap tree replicates where branch lengths are re-estimated while holding the focal maximum-likelihood topology constrained.
+#' Temporal bootstraps propagate branch length uncertainty into downstream penalized likelihood divergence time estimation (`treePL`),
+#' providing empirical confidence intervals for node ages without introducing topological variance.
+#'
+#' @param raxml_bin_path Character. System command or full path to executable `RAxML-NG` binary.
+#' @param aln_file Character. Path to input PHYLIP supermatrix alignment file.
+#' @param part_file Character. Path to partition file specifying substitution models.
+#' @param best_tree_file Character. Path to reference maximum-likelihood tree topology file (used as constraint).
+#' @param bs_trees Integer. Total number of temporal bootstrap trees to generate. Defaults to `500`.
+#' @param outgroup Character. Optional outgroup taxon binomial. Defaults to `NULL`.
+#' @param seed Integer. Random seed for reproducible temporal bootstrap initialization. Defaults to `111`.
+#' @param threads Integer. Number of CPU threads. Defaults to `4`.
+#' @param output_dir Character. Directory path to save output temporal bootstrap trees. Defaults to `dirname(aln_file)`.
+#' @param prefix Character. Output file prefix. Defaults to `"cactus_temporal"`.
+#' @return Character path to the resulting temporal bootstrap trees file (`.raxml.bootstraps`).
 #' @export
 calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, best_tree_file,
                                           bs_trees = 500, outgroup = NULL, seed = 111,
@@ -686,3 +776,4 @@ calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, b
   system2(command = raxml_bin_path, args = args)
   return(paste0(out_prefix, ".raxml.bootstraps"))
 }
+                                          

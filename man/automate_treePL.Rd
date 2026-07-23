@@ -2,7 +2,7 @@
 % Please edit documentation in R/dating.R
 \name{automate_treePL}
 \alias{automate_treePL}
-\title{Automate treePL bootstrap pipeline}
+\title{Automate treePL Divergence Time Estimation Pipeline Across Bootstrap Cohorts}
 \usage{
 automate_treePL(
   cfg_file,
@@ -15,20 +15,49 @@ automate_treePL(
 )
 }
 \arguments{
-\item{cfg_file}{Character. Configuration file.}
+\item{cfg_file}{Character. Path to primary `treePL` configuration file specifying calibration bounds and parameters.}
 
-\item{wrapper_sh}{Character. Wrapper script path.}
+\item{wrapper_sh}{Character. Path to `treePL` shell wrapper script (`treepl_wrapper_v1.sh`).}
 
-\item{ml_tree_file}{Character. Path to the maximum-likelihood tree.}
+\item{ml_tree_file}{Character. Path to input maximum-likelihood reference tree file.}
 
-\item{bs_trees_file}{Character. Bootstraps tree path.}
+\item{bs_trees_file}{Character. Path to input temporal bootstrap trees file.}
 
-\item{results_dir}{Character. Results output dir.}
+\item{results_dir}{Character. Directory path to save intermediate optimization results.}
 
-\item{treePL_out}{Character. Output treePL directory.}
+\item{treePL_out}{Character. Destination directory path for final output chronograms.}
 
-\item{num_bs}{Integer or NULL. Number of bootstrap trees to use. If NULL, uses all available.}
+\item{num_bs}{Integer or NULL. Maximum number of temporal bootstrap trees to evaluate. If `NULL`, processes all available trees.}
+}
+\value{
+Invisible NULL upon completion.
 }
 \description{
-Automate treePL bootstrap pipeline
+Automates cross-validation parameter optimization, rate smoothing selection, and chronogram estimation
+across temporal bootstrap replicates using `treePL` (Sanderson, 2002; Smith & O'Meara, 2012).
+Propagating temporal uncertainty across branch-length resampled bootstrap trees yields empirical confidence intervals
+for node age estimates.
+}
+\examples{
+\dontrun{
+automate_treePL(
+  cfg_file = "calibrations.cfg",
+  wrapper_sh = "treepl_wrapper_v1.sh",
+  ml_tree_file = "bestTree.tree",
+  bs_trees_file = "temporal_bootstraps.tree",
+  results_dir = "auto_results",
+  treePL_out = "8_Dating",
+  num_bs = 100
+)
+}
+}
+\references{
+Sanderson, M. J. (2002). Estimating absolute rates of molecular evolution and divergence times:
+a penalized likelihood approach. *Molecular Biology and Evolution*, 19(1), 101-109. \doi{10.1093/oxfordjournals.molbev.a003974}
+
+Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
+for large phylogenies. *Bioinformatics*, 28(20), 2689-2690. \doi{10.1093/bioinformatics/bts492}
+
+Maurin, K. J. (2020). An empirical guide for producing a dated phylogeny with treePL in a maximum likelihood framework.
+*arXiv preprint arXiv:2008.07054*. \doi{10.48550/arXiv.2008.07054}
 }

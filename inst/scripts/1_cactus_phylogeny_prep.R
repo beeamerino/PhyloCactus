@@ -1,15 +1,15 @@
 # -------------------------------------------------------------
-# CactusPhylo: Tutorial 1 - Phylogenetics Pipeline: Data Assembly & Preparation
+# PhyloCactus: Tutorial 1 - Phylogenetics Pipeline: Data Assembly & Preparation
 # -------------------------------------------------------------
 # This script covers Stages 1 to 6 of the phylogenetic pipeline:
 # Sequence Mining, Alignment, Screening, and Concatenation.
 # -------------------------------------------------------------
-library(CactusPhylo)
+library(PhyloCactus)
 
 # -------------------------------------------------------------
 # Setup: Creating a Clean Workspace
 # -------------------------------------------------------------
-tutorial_dir <- "~/Desktop/CactusPhylo_Tutorial"
+tutorial_dir <- "~/Desktop/PhyloCactus_Tutorial"
 dir.create(tutorial_dir, showWarnings = FALSE)
 setwd(tutorial_dir)
 
@@ -22,9 +22,9 @@ dir.create("0_phylotaR_raw_Outgroup", showWarnings = FALSE)
 # Mine ingroup taxonomic database
 ingroup_assembly <- assemble_ingroup_phylotar(
   wd_path = "0_phylotaR_raw_Ingroup",
-  target_genes_file = system.file("extdata", "target_genes.txt", package = "CactusPhylo"),
-  genes_map_file = system.file("extdata", "genes_map.csv", package = "CactusPhylo"),
-  manual_exclusions_file = system.file("extdata", "manual_exclusions_ingroup.csv", package = "CactusPhylo"),
+  target_genes_file = system.file("extdata", "target_genes.txt", package = "PhyloCactus"),
+  genes_map_file = system.file("extdata", "genes_map.csv", package = "PhyloCactus"),
+  manual_exclusions_file = system.file("extdata", "manual_exclusions_ingroup.csv", package = "PhyloCactus"),
   min_species = 50,
   force_download = FALSE
 )
@@ -32,9 +32,9 @@ ingroup_assembly <- assemble_ingroup_phylotar(
 # Mine outgroup taxonomic database
 outgroup_assembly <- assemble_outgroup_phylotar(
   wd_path = "0_phylotaR_raw_Outgroup",
-  target_genes_file = system.file("extdata", "target_genes.txt", package = "CactusPhylo"),
-  genes_map_file = system.file("extdata", "genes_map.csv", package = "CactusPhylo"),
-  manual_exclusions_file = system.file("extdata", "manual_exclusions_outgroup.csv", package = "CactusPhylo"),
+  target_genes_file = system.file("extdata", "target_genes.txt", package = "PhyloCactus"),
+  genes_map_file = system.file("extdata", "genes_map.csv", package = "PhyloCactus"),
+  manual_exclusions_file = system.file("extdata", "manual_exclusions_outgroup.csv", package = "PhyloCactus"),
   outgroups = c("107598", "107617", "107583", "3582"),
   force_download = FALSE
 )
@@ -75,7 +75,7 @@ integrate_and_clean_markers(
   ingroup_dir = "3_Saturation/filtered_markers",
   outgroup_dir = "2_MAFFT_Outgroup/alignments",
   output_dir = "4_Cleaned",
-  accepted_list_file = system.file("extdata", "CactaceaeFullList_accepted.csv", package = "CactusPhylo"),
+  accepted_list_file = system.file("extdata", "CactaceaeFullList_accepted.csv", package = "PhyloCactus"),
   metadata_in_file = "1_phylotaR_out_ingroup/TABLE_ACCESSION_OCCUPANCY_INGROUP_CLEAN.csv",
   metadata_out_file = "1_phylotaR_out_outgroup/TABLE_ACCESSION_OCCUPANCY_OUTGROUP_CLEAN.csv"
 )

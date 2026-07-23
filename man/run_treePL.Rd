@@ -2,19 +2,30 @@
 % Please edit documentation in R/dating.R
 \name{run_treePL}
 \alias{run_treePL}
-\title{Run treePL via Wrapper}
+\title{Estimate Divergence Times via treePL Wrapper}
 \usage{
 run_treePL(cfg, treefile, label, wrapper_sh)
 }
 \arguments{
-\item{cfg}{Character. Configuration file.}
+\item{cfg}{Character. Path to `treePL` configuration text file specifying calibrations and parameters.}
 
-\item{treefile}{Character. Tree file.}
+\item{treefile}{Character. Path to input input phylogenetic tree file (Newick format).}
 
-\item{label}{Character. Label for the run.}
+\item{label}{Character. Descriptive run label identifier.}
 
-\item{wrapper_sh}{Character. Path to the treepl wrapper shell script.}
+\item{wrapper_sh}{Character. Path to the `treePL` shell wrapper script (`treepl_wrapper_v1.sh`).}
+}
+\value{
+Invisible NULL upon system command execution.
 }
 \description{
-Cites the reference treePL wrapper: https://github.com/tongjial/treepl_wrapper
+Interfacing with `treePL` (Sanderson, 2002; Smith & O'Meara, 2012) via a shell wrapper script to estimate
+ultrametric chronograms under penalized likelihood. Integrates molecular branch lengths with temporal calibration bounds.
+}
+\references{
+Sanderson, M. J. (2002). Estimating absolute rates of molecular evolution and divergence times:
+a penalized likelihood approach. *Molecular Biology and Evolution*, 19(1), 101-109. \doi{10.1093/oxfordjournals.molbev.a003974}
+
+Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
+for large phylogenies. *Bioinformatics*, 28(20), 2689-2690. \doi{10.1093/bioinformatics/bts492}
 }

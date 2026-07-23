@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{run_local_bootstraps}
 \alias{run_local_bootstraps}
-\title{Run Bootstrap Search Locally}
+\title{Generate Non-Parametric Bootstrap Trees Locally}
 \usage{
 run_local_bootstraps(
   raxml_bin_path,
@@ -19,31 +19,37 @@ run_local_bootstraps(
 )
 }
 \arguments{
-\item{raxml_bin_path}{Character. System RAxML-NG path.}
+\item{raxml_bin_path}{Character. System command or full path to executable `RAxML-NG` binary.}
 
-\item{aln_file}{Character. Multiple sequence alignment path.}
+\item{aln_file}{Character. Path to input PHYLIP supermatrix alignment file.}
 
-\item{part_file}{Character. Partitions model path.}
+\item{part_file}{Character. Path to partition file specifying substitution models.}
 
-\item{constraint_file}{Character. Constraint tree path.}
+\item{constraint_file}{Character. Path to Newick topological constraint scaffold file.}
 
-\item{bs_trees}{Integer. Total number of bootstrap trees to generate. Defaults to 500.}
+\item{bs_trees}{Integer. Total number of non-parametric bootstrap trees to generate. Defaults to `500`.}
 
-\item{outgroup}{Character. Outgroup taxon. Defaults to NULL.}
+\item{outgroup}{Character. Optional outgroup taxon binomial to root bootstrap topologies. Defaults to `NULL`.}
 
-\item{seed}{Integer. Seed. Defaults to 111.}
+\item{seed}{Integer. Random seed for reproducible bootstrap initialization. Defaults to `111`.}
 
-\item{threads}{Integer. Run threads. Defaults to 4.}
+\item{threads}{Integer. Number of CPU threads. Defaults to `8`.}
 
-\item{workers}{Integer. Number of workers. Defaults to 1.}
+\item{workers}{Integer. Parallel worker process count. Defaults to `1`.}
 
-\item{output_dir}{Character. Directory to write outputs.}
+\item{output_dir}{Character. Output directory for generated bootstrap trees. Defaults to `dirname(aln_file)`.}
 
-\item{prefix}{Character. Output prefix. Defaults to "cactus_bs".}
+\item{prefix}{Character. Output file prefix. Defaults to `"cactus_bs"`.}
 }
 \value{
-Output bootstrap trees file.
+Character path to the output bootstrap trees file (`.raxml.bootstraps`).
 }
 \description{
-Run Bootstrap Search Locally
+Performs non-parametric bootstrap resampling over supermatrix site columns to infer a distribution of bootstrap tree topologies (`RAxML-NG`).
+Evaluates topological variation under non-parametric resampling to quantify node support via Transfer Bootstrap Expectation (TBE).
+}
+\references{
+Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
+user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
+\doi{10.1093/bioinformatics/btz305}
 }

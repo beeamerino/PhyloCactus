@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{map_branch_supports}
 \alias{map_branch_supports}
-\title{Calculate and Burn Branch Supports}
+\title{Map Transfer Bootstrap Expectation (TBE) Support Values onto Reference Phylogeny}
 \usage{
 map_branch_supports(
   raxml_bin,
@@ -15,23 +15,39 @@ map_branch_supports(
 )
 }
 \arguments{
-\item{raxml_bin}{Character. System RAxML-NG path.}
+\item{raxml_bin}{Character. System command or full path to executable `RAxML-NG` binary.}
 
-\item{best_tree}{Character. Best tree topology path.}
+\item{best_tree}{Character. Path to reference maximum-likelihood tree file.}
 
-\item{bootstraps_file}{Character. Replicates tree file path.}
+\item{bootstraps_file}{Character. Path to concatenated non-parametric bootstrap trees file.}
 
-\item{metric}{Character. Support type ('tbe' or 'fbp').}
+\item{metric}{Character. Bootstrap support metric: `"tbe"` (Transfer Bootstrap Expectation) or `"fbp"` (Felsenstein's Bootstrap Percentage). Defaults to `"tbe"`.}
 
-\item{threads}{Integer. Calculations threads count.}
+\item{threads}{Integer. Number of CPU threads. Defaults to `4`.}
 
-\item{output_dir}{Character. Directory to write the support file. Defaults to dirname(best_tree).}
+\item{output_dir}{Character. Output directory for annotated support tree. Defaults to `dirname(best_tree)`.}
 
-\item{prefix}{Character. Output prefix. Defaults to "cactus_support".}
+\item{prefix}{Character. Output file prefix. Defaults to `"cactus_support"`.}
 }
 \value{
-Character path to the written support tree.
+Character path to the annotated support tree file (`.raxml.support`).
 }
 \description{
-Calculate and Burn Branch Supports
+Maps statistical clade support metrics derived from non-parametric bootstrap replicates onto the best maximum-likelihood tree topology.
+Implements Transfer Bootstrap Expectation (TBE; Lemoine *et al.*, 2018) as the primary support metric, which provides
+robust support evaluation for large plant phylogenies without underestimating support for minor clade position shifts.
+}
+\examples{
+\dontrun{
+map_branch_supports(
+  raxml_bin = "raxml-ng",
+  best_tree = "cactus_search.raxml.bestTree",
+  bootstraps_file = "cactus_ALL_bootstraps.tree",
+  metric = "tbe"
+)
+}
+}
+\references{
+Lemoine, F., Entfellner, J. B., Gascuel, O., & Gascuel, O. (2018). Renewing Felsenstein’s phylogenetic
+bootstrap in the era of big data. *Nature*, 556(7702), 452-456. \doi{10.1038/s41586-018-0043-0}
 }

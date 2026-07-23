@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{check_bs_convergence}
 \alias{check_bs_convergence}
-\title{Check Bootstrap Convergence}
+\title{Check Bootstrap Convergence Criterion in RAxML-NG}
 \usage{
 check_bs_convergence(
   raxml_bin_path,
@@ -15,23 +15,24 @@ check_bs_convergence(
 )
 }
 \arguments{
-\item{raxml_bin_path}{Character. RAxML-NG bin path.}
+\item{raxml_bin_path}{Character. System command or full path to executable `RAxML-NG` binary.}
 
-\item{bs_trees_file}{Character. Path to concatenated bootstrap trees file.}
+\item{bs_trees_file}{Character. Path to concatenated bootstrap tree file.}
 
-\item{bs_cutoff}{Numeric. Cutoff for convergence. Defaults to 0.03.}
+\item{bs_cutoff}{Numeric. Permutation cutoff threshold for convergence. Defaults to `0.03`.}
 
-\item{seed}{Integer. Seed. Defaults to 111.}
+\item{seed}{Integer. Random seed for reproducible convergence testing. Defaults to `111`.}
 
-\item{threads}{Integer. Threads. Defaults to 4.}
+\item{threads}{Integer. Number of CPU threads. Defaults to `4`.}
 
-\item{output_dir}{Character. Directory to write logs. Defaults to dirname(bs_trees_file).}
+\item{output_dir}{Character. Directory path to save convergence report logs. Defaults to `dirname(bs_trees_file)`.}
 
-\item{prefix}{Character. Prefix to use. Defaults to "cactus_bs_convergence".}
+\item{prefix}{Character. Output file prefix. Defaults to `"cactus_bs_convergence"`.}
 }
 \value{
-Path to convergence log.
+Character path to the convergence log file (`.raxml.log`).
 }
 \description{
-Check Bootstrap Convergence
+Evaluates whether the generated pool of non-parametric bootstrap trees has achieved statistical convergence (`RAxML-NG`).
+Convergence is assessed using the MRE-based cutoff criterion (typically <= 0.03), ensuring that a sufficient number of bootstrap replicates were sampled.
 }

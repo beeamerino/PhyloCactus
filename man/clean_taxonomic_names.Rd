@@ -2,7 +2,7 @@
 % Please edit documentation in R/alignment.R
 \name{clean_taxonomic_names}
 \alias{clean_taxonomic_names}
-\title{Reconcile and Validate Taxonomic Names}
+\title{Reconcile and Validate Taxonomic Nomenclature}
 \usage{
 clean_taxonomic_names(
   raw_input_fasta,
@@ -12,14 +12,28 @@ clean_taxonomic_names(
 )
 }
 \arguments{
-\item{raw_input_fasta}{Character path. Raw download coordinates folder.}
+\item{raw_input_fasta}{Character. Path to input FASTA file containing raw GenBank sequence accessions.}
 
-\item{checklist_path}{Character. Excel Cactaceae accepted spelling table file.}
+\item{checklist_path}{Character. Path to accepted taxonomic checklist CSV or Excel file.}
 
-\item{output_clean_dir}{Character. Folders for cleaned configurations.}
+\item{output_clean_dir}{Character. Directory path where standardized FASTA sequence output will be saved.}
 
-\item{force_process}{Logical. Skip cache check.}
+\item{force_process}{Logical. Force reprocessing if output cached file exists? Defaults to `FALSE`.}
+}
+\value{
+Character string path to the generated FASTA file with standardized species binomials.
 }
 \description{
-Reconcile and Validate Taxonomic Names
+Reconciles sequence tip labels against authoritative botanical checklists (e.g., Caryophyllales.org checklist).
+Resolves taxonomic synonymies, infraspecific variants, and orthographic errors, guaranteeing nomenclatural stability
+across public GenBank sequence downloads.
+}
+\examples{
+\dontrun{
+clean_taxonomic_names(
+  raw_input_fasta = "marker_rbcl.fasta",
+  checklist_path = "CactaceaeFullList_accepted.csv",
+  output_clean_dir = "cleaned_names"
+)
+}
 }

@@ -1,11 +1,16 @@
 #' Render Final Publication Figures and Registry
 #'
+#' Maps statistical support values (e.g., Transfer Bootstrap Expectation, TBE) onto nodes of the
+#' final chronogram and maximum-likelihood phylogeny. Nodes failing to meet the minimum support threshold
+#' (`collapse_cutoff`) are systematically collapsed into soft polytomies (analytical uncertainty)
+#' to produce conservative, publication-ready figures.
+#'
 #' @param ml_support_tree_path Character. Best ML support tree path.
 #' @param summary_chronogram_path Character. Chronogram path with HPD annotations.
 #' @param constraints_path Character. Taxonomy constraints CSV path.
 #' @param out_dir Character. Publication figures directory.
-#' @param collapse_cutoff Numeric. TBE threshold to collapse nodes (0.0 to 1.0).
-#' @return A matrix listing exported items and verification parameters.
+#' @param collapse_cutoff Numeric. TBE threshold to collapse weak nodes into soft polytomies (0.0 to 1.0; default 0.70).
+#' @return A data frame listing exported figure files and threshold parameters.
 #' @export
 integrate_publication_tree <- function(ml_support_tree_path, summary_chronogram_path, constraints_path, out_dir, collapse_cutoff = 0.70) {
   

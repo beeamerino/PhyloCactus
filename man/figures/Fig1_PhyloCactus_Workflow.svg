@@ -48,7 +48,7 @@
 <rect x='620.83' y='165.32' width='142.36' height='110.21' style='stroke-width: 1.28; stroke: #5E548E; stroke-linecap: butt; stroke-linejoin: miter; fill: #FFFFFF;' />
 <rect x='620.83' y='312.26' width='142.36' height='110.21' style='stroke-width: 1.28; stroke: #5E548E; stroke-linecap: butt; stroke-linejoin: miter; fill: #FFFFFF;' />
 <rect x='620.83' y='459.21' width='142.36' height='110.21' style='stroke-width: 1.28; stroke: #5E548E; stroke-linecap: butt; stroke-linejoin: miter; fill: #FFFFFF;' />
-<text x='332.95' y='37.63' style='font-size: 17.07px; font-weight: bold;fill: #FFFFFF; font-family: "Arial";' textLength='103.33px' lengthAdjust='spacingAndGlyphs'>CactusPhylo</text>
+<text x='332.95' y='37.63' style='font-size: 17.07px; font-weight: bold;fill: #FFFFFF; font-family: "Arial";' textLength='103.33px' lengthAdjust='spacingAndGlyphs'>PhyloCactus</text>
 <text x='441.01' y='37.63' style='font-size: 17.07px; font-weight: bold;fill: #FFFFFF; font-family: "Arial";' textLength='16.91px' lengthAdjust='spacingAndGlyphs'>🌵</text>
 <text x='95.19' y='55.49' style='font-size: 17.07px;fill: #FFFFFF; font-family: "Arial";' textLength='97.67px' lengthAdjust='spacingAndGlyphs'>Phylogenetic</text>
 <text x='197.60' y='55.49' style='font-size: 17.07px;fill: #FFFFFF; font-family: "Arial";' textLength='71.11px' lengthAdjust='spacingAndGlyphs'>Inference</text>
@@ -87,7 +87,7 @@
 <text x='118.08' y='388.72' style='font-size: 9.10px; font-family: "Arial";' textLength='33.88px' lengthAdjust='spacingAndGlyphs'>masking</text>
 <text x='52.58' y='497.57' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='26.80px' lengthAdjust='spacingAndGlyphs'>Matrix</text>
 <text x='81.91' y='497.57' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='63.22px' lengthAdjust='spacingAndGlyphs'>Concatenation</text>
-<text x='73.33' y='516.61' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='51.06px' lengthAdjust='spacingAndGlyphs'>CactusPhylo</text>
+<text x='73.33' y='516.61' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='51.06px' lengthAdjust='spacingAndGlyphs'>PhyloCactus</text>
 <text x='50.30' y='526.14' style='font-size: 9.10px; font-family: "Arial";' textLength='43.48px' lengthAdjust='spacingAndGlyphs'>Taxonomic</text>
 <text x='96.32' y='526.14' style='font-size: 9.10px; font-family: "Arial";' textLength='42.50px' lengthAdjust='spacingAndGlyphs'>integration</text>
 <text x='141.35' y='526.14' style='font-size: 9.10px; font-family: "Arial";' textLength='6.06px' lengthAdjust='spacingAndGlyphs'>&amp;</text>
@@ -167,7 +167,7 @@
 <text x='699.34' y='203.67' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='23.78px' lengthAdjust='spacingAndGlyphs'>Trees</text>
 <text x='649.02' y='222.72' style='font-size: 9.10px; font-family: "Arial";' textLength='49.05px' lengthAdjust='spacingAndGlyphs'>Comparison</text>
 <text x='700.59' y='222.72' style='font-size: 9.10px; font-family: "Arial";' textLength='34.41px' lengthAdjust='spacingAndGlyphs'>between</text>
-<text x='666.48' y='232.24' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='51.06px' lengthAdjust='spacingAndGlyphs'>CactusPhylo</text>
+<text x='666.48' y='232.24' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='51.06px' lengthAdjust='spacingAndGlyphs'>PhyloCactus</text>
 <text x='652.29' y='241.77' style='font-size: 9.10px; font-family: "Arial";' textLength='15.19px' lengthAdjust='spacingAndGlyphs'>and</text>
 <text x='670.01' y='241.77' style='font-size: 9.10px; font-family: "Arial";' textLength='38.95px' lengthAdjust='spacingAndGlyphs'>published</text>
 <text x='711.49' y='241.77' style='font-size: 9.10px; font-family: "Arial";' textLength='20.23px' lengthAdjust='spacingAndGlyphs'>trees</text>

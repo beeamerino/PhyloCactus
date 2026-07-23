@@ -2,7 +2,7 @@
 % Please edit documentation in R/assembly.R
 \name{assemble_outgroup_phylotar}
 \alias{assemble_outgroup_phylotar}
-\title{Assemble Outgroup phylotaR Clusters}
+\title{Assemble Outgroup Sequence Clusters via phylotaR}
 \usage{
 assemble_outgroup_phylotar(
   wd_path,
@@ -15,20 +15,38 @@ assemble_outgroup_phylotar(
 )
 }
 \arguments{
-\item{wd_path}{Character. Path to the phylotaR workspace directory (where phylotaR cache and parameters are).}
+\item{wd_path}{Character. Path to the `phylotaR` workspace directory.}
 
-\item{target_genes_file}{Character. Path to the list of target markers. If NULL, defaults to package inst/extdata file.}
+\item{target_genes_file}{Character. Path to the target locus list text file. If `NULL`, defaults to package `inst/extdata/target_genes.txt`.}
 
-\item{genes_map_file}{Character. Path to the locus mapping CSV file. If NULL, defaults to package inst/extdata file.}
+\item{genes_map_file}{Character. Path to the gene synonymy mapping CSV file. If `NULL`, defaults to package `inst/extdata/genes_map.csv`.}
 
-\item{manual_exclusions_file}{Character. Path to the manual exclusions CSV file. If NULL, defaults to package inst/extdata file.}
+\item{manual_exclusions_file}{Character. Path to outgroup exclusions CSV file. If `NULL`, defaults to package `inst/extdata/manual_exclusions_outgroup.csv`.}
 
-\item{outgroups}{Character vector of outgroup SIDs to pull clusters for.}
+\item{outgroups}{Character vector of NCBI Taxonomy IDs for outgroup lineages. Defaults to `c("107598", "107617", "107583", "3582")`.}
 
-\item{force_download}{Logical. If TRUE, executes fresh database calls; if FALSE (default) relies on local cache.}
+\item{force_download}{Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.}
 
-\item{out_dir}{Character. Directory to save all tables and fasta sequences.}
+\item{out_dir}{Character. Output directory path to save outgroup cluster tables and FASTA sequence files.}
+}
+\value{
+A list containing the processed outgroup cluster objects and retained cluster IDs.
 }
 \description{
-Assemble Outgroup phylotaR Clusters
+Retrieves orthologous sequence clusters for specified outgroup lineages (e.g., *Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*)
+matching the locus target constraints defined for the focal ingroup. Outer reference sampling provides phylogenetically
+informative root positions necessary for maximum-likelihood tree search and divergence time estimation.
+}
+\examples{
+\dontrun{
+assemble_outgroup_phylotar(
+  wd_path = "0_phylotaR_raw_Outgroup",
+  outgroups = c("3582", "107583")
+)
+}
+}
+\references{
+Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. (2018).
+phylotaR: An automated pipeline for retrieving orthologous DNA sequences from GenBank in R.
+*Life*, 8(2), 20. \doi{10.3390/life8020020}
 }

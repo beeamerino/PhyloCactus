@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{run_modeltest_ng}
 \alias{run_modeltest_ng}
-\title{Run ModelTest-NG Partition Evaluations}
+\title{Evaluate Nucleotide Substitution Models via ModelTest-NG}
 \usage{
 run_modeltest_ng(
   modeltest_exec_path,
@@ -13,19 +13,35 @@ run_modeltest_ng(
 )
 }
 \arguments{
-\item{modeltest_exec_path}{Character. Path to ModelTest-NG.}
+\item{modeltest_exec_path}{Character. System command or full path to executable `ModelTest-NG` binary.}
 
-\item{aln_file}{Character. Checked PHYLIP alignment path.}
+\item{aln_file}{Character. Path to validated PHYLIP supermatrix file.}
 
-\item{part_file}{Character. Cleaned partitions path.}
+\item{part_file}{Character. Path to cleaned partition mapping file.}
 
-\item{prefix}{Character. File output prefix.}
+\item{prefix}{Character. Output filename prefix. Defaults to `"MODELTEST_cactus_phylo"`.}
 
-\item{threads}{Integer. Processing threads count.}
+\item{threads}{Integer. Number of processing threads. Defaults to `4`.}
 }
 \value{
-Character path to the resulting partition map file.
+Character path to the resulting partition file containing selected model parameters (`.part.aicc`).
 }
 \description{
-Run ModelTest-NG Partition Evaluations
+Evaluates nucleotide substitution model fit per predefined supermatrix partition using `ModelTest-NG` (Darriba *et al.*, 2020).
+Selecting optimal substitution models under the AICc criterion controls for mutational rate heterogeneity across genomic regions,
+mitigating systematic long-branch attraction (LBA) bias during maximum-likelihood inference.
+}
+\examples{
+\dontrun{
+run_modeltest_ng(
+  modeltest_exec_path = "modeltest-ng",
+  aln_file = "ALIGNMENT_supermatrix.phy",
+  part_file = "PARTITION_raxml_ng.txt"
+)
+}
+}
+\references{
+Darriba, D., Posada, D., Kozlov, A. M., Stamatakis, A., Morel, B., & Flouri, T. (2020). ModelTest-NG: a new and
+scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291-294.
+\doi{10.1093/molbev/msz189}
 }

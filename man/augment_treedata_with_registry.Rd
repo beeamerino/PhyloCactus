@@ -2,15 +2,18 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{augment_treedata_with_registry}
 \alias{augment_treedata_with_registry}
-\title{Augment treedata with registry annotations}
+\title{Augment treedata Object with Registry Metadata}
 \usage{
 augment_treedata_with_registry(treedata_obj, registry)
 }
 \arguments{
-\item{treedata_obj}{A treedata object}
+\item{treedata_obj}{An object of class `treedata` or `phylo`.}
 
-\item{registry}{A registry data frame}
+\item{registry}{A named list of annotation registry data frames.}
+}
+\value{
+An augmented `treedata` object.
 }
 \description{
-Augment treedata with registry annotations
+Joins multi-level taxonomic clade annotations from a registry onto a `treedata` object.
 }

@@ -1,15 +1,15 @@
 # -------------------------------------------------------------
-# CactusPhylo: Tutorial 2 - Phylogenetics Pipeline: Inference & Dating
+# PhyloCactus: Tutorial 2 - Phylogenetics Pipeline: Inference & Dating
 # -------------------------------------------------------------
 # This script covers Stages 7 to 10 of the phylogenetic pipeline:
 # Substitution Models, ML search, Bootstraps, and treePL dating.
 # -------------------------------------------------------------
-library(CactusPhylo)
+library(PhyloCactus)
 
 # -------------------------------------------------------------
 # Setup
 # -------------------------------------------------------------
-tutorial_dir <- "~/Desktop/CactusPhylo_Tutorial"
+tutorial_dir <- "~/Desktop/PhyloCactus_Tutorial"
 setwd(tutorial_dir)
 
 output_dir <- "7_Phylogenetics"
@@ -49,7 +49,7 @@ setwd(tutorial_dir) # return to original working directory
 # Assemble taxonomic classifications into a constraint scaffold
 constraint_tree <- build_constraint_scaffold(
   alignment_path = file.path(output_dir, "cactus_check.raxml.reduced.phy"),
-  constraints_csv_path = system.file("extdata", "cactus_constraints.csv", package = "CactusPhylo"),
+  constraints_csv_path = system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"),
   output_dir = output_dir
 )
 
@@ -183,11 +183,11 @@ dir.create(dating_dir, showWarnings = FALSE)
 
 # 10.1 Prepare Calibrations
 cat("Creating treePL calibrations configurations...\n")
-calibs_all <- read.csv(system.file("extdata", "calibrations_bounds.csv", package = "CactusPhylo"))
+calibs_all <- read.csv(system.file("extdata", "calibrations_bounds.csv", package = "PhyloCactus"))
 calibs <- calibs_all[calibs_all$used_in_analysis == TRUE, ]
 
 # Load constraints and phylogeny tips to map calibrations
-constraints <- read.csv(system.file("extdata", "cactus_constraints.csv", package = "CactusPhylo"))
+constraints <- read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
 ml_tree <- ape::read.tree(file.path(output_dir, "cactus_search.raxml.bestTree"))
 tip_labels <- ml_tree$tip.label
 num_sites <- 12700
@@ -223,7 +223,7 @@ cat("\nRunning automated treePL wrapper script over maximum-likelihood tree and 
 
 # Provide the wrapper shell script provided in your extdata
 # See reference: https://github.com/tongjial/treepl_wrapper
-wrapper_sh_path <- system.file("extdata", "treepl_wrapper_v1.sh", package = "CactusPhylo")
+wrapper_sh_path <- system.file("extdata", "treepl_wrapper_v1.sh", package = "PhyloCactus")
 
 # Note: For tutorial purposes, you can limit the number of bootstrap trees to process
 # by setting `num_bs = 100` (or any other number). If not provided, it will process all

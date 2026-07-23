@@ -1,4 +1,4 @@
-url: https://beeamerino.github.io/CactusPhylo/
+url: https://beeamerino.github.io/PhyloCactus/
 template:
   bootstrap: 5
   bootswatch: yeti
@@ -13,7 +13,7 @@ navbar:
   components:
     intro:
       text: Get Started
-      href: articles/CactusPhylo.html
+      href: articles/PhyloCactus.html
     reference:
       text: Reference Manual
       href: reference/index.html
@@ -31,34 +31,31 @@ navbar:
       - text: 5. Internal Functions Guide
         href: articles/tutorial-5-cactus-phylogeny-functions.html
 reference:
-- title: Sequence Assemblies & PhylotaR Import
-  desc: Functions to setup databases, pull taxonomic clusters, and download GenBank
-    accessions safely.
+- title: Sequence Assemblies & phylotaR Import
+  desc: Setup local taxonomic databases, pull orthologous sequence clusters via `phylotaR`, and retrieve GenBank metadata.
   contents:
   - assemble_ingroup_phylotar
   - assemble_outgroup_phylotar
   - fetch_genbank_metadata
 - title: Taxonomic Cleaning & Reconciliations
-  desc: Check name spelling, audit duplicates, and verify records against checklists.
+  desc: Verify nomenclatural spelling, audit duplicates, and reconcile species names against accepted botanical checklists.
   contents:
   - clean_taxonomic_names
   - integrate_and_clean_markers
 - title: Multiple Alignment, DECIPHER Cleaners, & Masking
-  desc: Run system MAFFT and refine aligned nucleotides using gap-masking procedures.
+  desc: Infer positional homology using `MAFFT` and refine nucleotide alignments with `DECIPHER` automated masking.
   contents:
   - run_mafft
   - run_alignment_pipeline
   - run_joint_realignment
 - title: Locus Quality Control & Saturation Screening
-  desc: Detect distance outliers and perform saturation regression checks.
+  desc: Detect sequence length outliers and evaluate substitution saturation regressions across orthologous markers.
   contents: run_marker_screening
 - title: Concatenation and Partitioning Maps
-  desc: Bind loci end-to-end to assemble a master phylogenetic matrix and export format
-    partitions.
+  desc: Concatenate locus alignments end-to-end into a supermatrix and define genomic partition coordinates.
   contents: run_concatenation_pipeline
-- title: Phylogenetic Search & Constrained Inference
-  desc: Run model testers (ModelTest-NG) and ML estimations (RAxML-NG) guided by Newick
-    scaffolds.
+- title: Phylogenetic Inference & Constrained Search
+  desc: Evaluate nucleotide substitution models (`ModelTest-NG`) and infer maximum-likelihood phylogenies (`RAxML-NG`) guided by constraint scaffolds.
   contents:
   - preprocess_partitions
   - run_modeltest_ng
@@ -71,25 +68,21 @@ reference:
   - check_bs_convergence
   - calculate_temporal_bootstraps
   - map_branch_supports
-- title: Chronological Dating & treePL Automation
-  desc: Automated treePL cross-validation and chronological calibrations over bootstrap
-    cohorts.
+- title: Divergence Time Estimation & treePL Automation
+  desc: Automate `treePL` penalized-likelihood cross-validation and estimate divergence time chronograms over temporal bootstrap cohorts.
   contents:
   - rescale_tree
   - run_treePL
   - run_treePL_direct
   - automate_treePL
-- title: Multi-Scale Topologies Validation
-  desc: Compare comparative tree structures using Robinson-Foulds, DPI, and project
-    into 2D MDS scopes.
+- title: Topological Validation & Tree Space Projections
+  desc: Quantify topological congruence across comparative trees using Robinson–Foulds distances and multidimensional tree-space projections.
   contents: validate_phylogenies
-- title: Manuscript Figures & Publication Polish
-  desc: Integrate final results, apply editorial clade collapses, and draw SVG/PDF
-    panels.
+- title: Publication Integration & Clade Summaries
+  desc: Map branch support values, collapse poorly supported nodes into soft polytomies (`integrate_publication_tree`), and export figures.
   contents: integrate_publication_tree
-- title: IUCN Conservation Metadata
-  desc: Extract threat metrics and habitats using rredlist and map color scales for
-    plotting.
+- title: IUCN Conservation Metadata Integration
+  desc: Extract threat metrics and habitats via `rredlist` and apply standardized IUCN color scales to phylogenetic trees.
   contents:
   - get_iucn_data
   - scale_fill_iucn

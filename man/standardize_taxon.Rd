@@ -2,11 +2,17 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{standardize_taxon}
 \alias{standardize_taxon}
-\title{Standardization helper}
+\title{Standardize Taxon Name Strings}
 \usage{
 standardize_taxon(x)
 }
+\arguments{
+\item{x}{Character vector of taxon binomial strings.}
+}
+\value{
+Character vector of formatted taxon names.
+}
 \description{
-Standardization helper
+Standardizes scientific taxon binomials by replacing whitespace, dashes, and duplicate underscores with single underscores.
 }
 \keyword{internal}

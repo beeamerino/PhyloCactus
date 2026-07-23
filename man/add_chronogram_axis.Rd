@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{add_chronogram_axis}
 \alias{add_chronogram_axis}
-\title{Add chronogram axis}
+\title{Add Geological Time Scale Axis to a Chronogram ggtree Plot}
 \usage{
 add_chronogram_axis(
   p,
@@ -17,7 +17,31 @@ add_chronogram_axis(
   segment_size = 2.5
 )
 }
+\arguments{
+\item{p}{A `ggtree` plot object.}
+
+\item{tree}{Object of class `phylo`.}
+
+\item{by}{Numeric. Interval in Ma between consecutive tick marks. Defaults to `5`.}
+
+\item{digits}{Integer. Decimal precision for age labels. Defaults to `0L`.}
+
+\item{axis_offset_frac}{Numeric. Vertical offset fraction for axis line. Defaults to `0.052`.}
+
+\item{tick_height_frac}{Numeric. Vertical height fraction for tick marks. Defaults to `0.010`.}
+
+\item{label_offset_frac}{Numeric. Vertical offset fraction for age text labels. Defaults to `0.028`.}
+
+\item{title_margin_top}{Numeric. Top margin for axis title. Defaults to `28`.}
+
+\item{bar_size}{Numeric. Axis title font size. Defaults to `12`.}
+
+\item{segment_size}{Numeric. Text font size for age labels. Defaults to `2.5`.}
+}
+\value{
+Updated `ggtree` plot object containing the geological age axis layer.
+}
 \description{
-Add chronogram axis
+Draws a standardized geological timeline axis (Ma before present) beneath an ultrametric chronogram `ggtree` plot.
 }
 \keyword{internal}

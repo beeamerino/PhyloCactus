@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{add_clade_labels_by_level}
 \alias{add_clade_labels_by_level}
-\title{Add clade labels by level}
+\title{Add Clade Labels to ggtree Plot by Taxonomic Level}
 \usage{
 add_clade_labels_by_level(
   p,
@@ -17,7 +17,31 @@ add_clade_labels_by_level(
   align = TRUE
 )
 }
+\arguments{
+\item{p}{A `ggtree` plot object.}
+
+\item{label_tbl}{Data frame containing node label annotations.}
+
+\item{fontsize}{Numeric. Font size for clade labels. Defaults to `3`.}
+
+\item{barsize}{Numeric. Line width for clade annotation bars. Defaults to `0.45`.}
+
+\item{offset}{Numeric. Horizontal offset fraction for clade bars. Defaults to `0.03`.}
+
+\item{offset_text}{Numeric. Offset fraction for label text. Defaults to `0.004`.}
+
+\item{fontface}{Character. Font face specification (e.g., `"plain"`, `"bold"`, `"italic"`). Defaults to `"plain"`.}
+
+\item{sort_desc}{Logical. Sort clade labels in descending order by tip height? Defaults to `TRUE`.}
+
+\item{angle}{Numeric. Rotation angle for text labels in degrees. Defaults to `0`.}
+
+\item{align}{Logical. Align clade bars to common rightmost margin? Defaults to `TRUE`.}
+}
+\value{
+Updated `ggtree` plot object containing clade label layers.
+}
 \description{
-Add clade labels by level
+Annotates clade labels and vertical bars onto a `ggtree` plot object corresponding to monophyletic node annotations.
 }
 \keyword{internal}

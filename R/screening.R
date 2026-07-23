@@ -1,15 +1,28 @@
-#' Run Ingroup Marker Screening Pipeline
+#' Screen Locus Alignments for Substitution Saturation and Informativeness
 #'
-#' @param fasta_folder Character. Directory containing aligned FASTAs.
-#' @param out_base Character. Base directory for output files.
-#' @param min_cols_to_evaluate Integer. Minimum columns to evaluate.
-#' @param min_aln_len_to_retain Integer. Minimum alignment length to retain.
-#' @param min_nseq_to_retain Integer. Minimum sequences to retain.
-#' @param max_marker_missing Numeric. Maximum missing fraction for a marker.
-#' @param saturation_flag_cutoff Numeric.
-#' @param saturation_keep_cutoff Numeric. Retention threshold for the saturation slope.
-#' @param iqr_multiplier Numeric. Scale factor for IQR outlier bounds detection.
-#' @return Summarized table.
+#' Evaluates phylogenetic informativeness, sequence coverage, alignment length, and substitution saturation across individual locus alignments.
+#' Filtering out loci exhibiting high substitution saturation or severe site length anomalies prevents systematic noise
+#' and long-branch attraction (LBA) artifacts from distorting maximum-likelihood supermatrix inference.
+#'
+#' @param fasta_folder Character. Directory path containing aligned locus FASTA files.
+#' @param out_base Character. Base destination directory for diagnostic plots and screened FASTA outputs (`filtered_markers/`).
+#' @param min_cols_to_evaluate Integer. Minimum number of alignment columns required to compute saturation metrics. Defaults to `50L`.
+#' @param min_aln_len_to_retain Integer. Minimum alignment length in base pairs required to retain a locus. Defaults to `200L`.
+#' @param min_nseq_to_retain Integer. Minimum number of sequences required per locus alignment. Defaults to `100L`.
+#' @param max_marker_missing Numeric. Maximum allowable missing data fraction per locus. Defaults to `0.7`.
+#' @param saturation_flag_cutoff Numeric. Uncorrected p-distance vs. raw distance slope threshold to flag substitution saturation. Defaults to `0.3`.
+#' @param saturation_keep_cutoff Numeric. Saturation slope cutoff threshold below which saturated loci are excluded. Defaults to `0.5`.
+#' @param iqr_multiplier Numeric. Interquartile range (IQR) multiplier for identifying site-length outlier bounds. Defaults to `1.5`.
+#' @return A data frame summarizing saturation statistics, alignment dimensions, and retention decisions across screened loci.
+#' @examples
+#' \dontrun{
+#' run_marker_screening(
+#'   fasta_folder = "2_MAFFT_Cactaceae/alignments",
+#'   out_base = "3_Screening_Ingroup",
+#'   min_aln_len_to_retain = 200L,
+#'   min_nseq_to_retain = 50L
+#' )
+#' }
 #' @export
 run_marker_screening <- function(
   fasta_folder,

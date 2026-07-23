@@ -2,18 +2,27 @@
 % Please edit documentation in R/dating.R
 \name{rescale_tree}
 \alias{rescale_tree}
-\title{Rescale all branches of a tree}
+\title{Rescale Branch Lengths of a Phylogenetic Tree}
 \usage{
 rescale_tree(tree, factor = 100)
 }
 \arguments{
-\item{tree}{phylo.}
+\item{tree}{An object of class `phylo` representing a phylogenetic tree.}
 
-\item{factor}{numeric.}
+\item{factor}{Numeric multiplier applied to all edge lengths. Defaults to `100`.}
 }
 \value{
-phylo
+A rescaled `phylo` object with updated edge lengths.
 }
 \description{
-Rescale all branches of a tree
+Multiplies all edge lengths of a `phylo` tree object by a constant scaling factor.
+Rescaling is used prior to penalized likelihood dating (`treePL`) to prevent numerical underflow issues
+caused by small substitution rates per site.
+}
+\examples{
+\dontrun{
+library(ape)
+tree <- rtree(10)
+rescaled_tree <- rescale_tree(tree, factor = 100)
+}
 }

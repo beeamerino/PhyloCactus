@@ -2,11 +2,17 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{get_tree_max_depth}
 \alias{get_tree_max_depth}
-\title{Get tree max depth}
+\title{Compute Maximum Depth of a Dated Chronogram Tree}
 \usage{
 get_tree_max_depth(tree)
 }
+\arguments{
+\item{tree}{Object of class `phylo`.}
+}
+\value{
+Numeric scalar representing maximum tree depth.
+}
 \description{
-Get tree max depth
+Calculates the maximum root-to-tip temporal distance of an ultrametric tree in Millions of Years ago (Ma).
 }
 \keyword{internal}

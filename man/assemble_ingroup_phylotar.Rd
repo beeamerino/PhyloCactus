@@ -2,7 +2,7 @@
 % Please edit documentation in R/assembly.R
 \name{assemble_ingroup_phylotar}
 \alias{assemble_ingroup_phylotar}
-\title{Assemble Ingroup phylotaR Clusters}
+\title{Assemble Ingroup Sequence Clusters via phylotaR Similarity Mining}
 \usage{
 assemble_ingroup_phylotar(
   wd_path,
@@ -17,24 +17,44 @@ assemble_ingroup_phylotar(
 )
 }
 \arguments{
-\item{wd_path}{Character. Path to the phylotaR workspace directory (where phylotaR cache and parameters are).}
+\item{wd_path}{Character. Path to the `phylotaR` workspace directory storing local parameters and database caches.}
 
-\item{target_genes_file}{Character. Path to the list of target markers. If NULL, defaults to package inst/extdata file.}
+\item{target_genes_file}{Character. Path to the target locus list text file. If `NULL`, defaults to package `inst/extdata/target_genes.txt`.}
 
-\item{genes_map_file}{Character. Path to the locus mapping CSV file. If NULL, defaults to package inst/extdata file.}
+\item{genes_map_file}{Character. Path to the gene synonymy mapping CSV file. If `NULL`, defaults to package `inst/extdata/genes_map.csv`.}
 
-\item{manual_exclusions_file}{Character. Path to the manual exclusions CSV file. If NULL, defaults to package inst/extdata file.}
+\item{manual_exclusions_file}{Character. Path to the accession exclusion CSV file. If `NULL`, defaults to package `inst/extdata/manual_exclusions_ingroup.csv`.}
 
-\item{min_species}{Integer. Minimum species count per cluster to retain. Defaults to 50.}
+\item{min_species}{Integer. Minimum number of distinct species required to retain an orthologous sequence cluster. Defaults to `50`.}
 
-\item{preferred_parent}{Character. NCBI taxonomy ID of focal parent. Defaults to "3593" (Cactaceae).}
+\item{preferred_parent}{Character. NCBI Taxonomy ID of the focal ingroup parent node. Defaults to `"3593"` (Cactaceae).}
 
-\item{ncbi_dr}{Character. Path to the local BLAST+ binaries directory. If NULL, attempts to auto-detect.}
+\item{ncbi_dr}{Character. Path to local `BLAST+` binaries directory. If `NULL`, attempts system environment auto-detection.}
 
-\item{force_download}{Logical. If TRUE, executes fresh database calls; if FALSE (default) relies on local cache.}
+\item{force_download}{Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.}
 
-\item{out_dir}{Character. Directory to save all tables and fasta sequences.}
+\item{out_dir}{Character. Output directory path to save cluster summaries, FASTA sequence matrices, and log reports.}
+}
+\value{
+A data frame summarizing sequence occupancy, taxon representation, and cluster characteristics across retained loci.
 }
 \description{
-Assemble Ingroup phylotaR Clusters
+Retrieves orthologous sequence clusters for a focal taxonomic ingroup (e.g., family **Cactaceae**, NCBI Taxonomy ID: 3593)
+directly from GenBank using similarity clustering via `phylotaR` (Bennett *et al.*, 2018).
+Relying on sequence similarity rather than inconsistent locus annotations prevents missing orthologous sequence data
+caused by gene synonymy or mislabeling in public sequence repositories.
+}
+\examples{
+\dontrun{
+assemble_ingroup_phylotar(
+  wd_path = "0_phylotaR_raw_Ingroup",
+  min_species = 50,
+  preferred_parent = "3593"
+)
+}
+}
+\references{
+Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. (2018).
+phylotaR: An automated pipeline for retrieving orthologous DNA sequences from GenBank in R.
+*Life*, 8(2), 20. \doi{10.3390/life8020020}
 }

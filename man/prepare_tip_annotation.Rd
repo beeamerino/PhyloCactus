@@ -2,11 +2,19 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{prepare_tip_annotation}
 \alias{prepare_tip_annotation}
-\title{Prepare tip annotation}
+\title{Prepare Tip Annotations Matched to Tree Leaves}
 \usage{
 prepare_tip_annotation(tree, constraints_tbl)
 }
+\arguments{
+\item{tree}{Object of class `phylo` representing a phylogenetic tree.}
+
+\item{constraints_tbl}{Data frame containing taxonomic constraint annotations.}
+}
+\value{
+Data frame of tip annotations filtered to matching tree tips.
+}
 \description{
-Prepare tip annotation
+Matches and standardizes taxonomic metadata from a classification table against tree tip labels.
 }
 \keyword{internal}

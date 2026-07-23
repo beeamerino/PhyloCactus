@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{compute_group_nodes}
 \alias{compute_group_nodes}
-\title{Compute group nodes}
+\title{Compute Most Recent Common Ancestor (MRCA) Nodes for Taxon Groups}
 \usage{
 compute_group_nodes(
   tree,
@@ -12,7 +12,21 @@ compute_group_nodes(
   min_tips = 2L
 )
 }
+\arguments{
+\item{tree}{Object of class `phylo`.}
+
+\item{tip_tbl}{Data frame containing tip annotations.}
+
+\item{group_col}{Character. Column name in `tip_tbl` specifying group assignments.}
+
+\item{group_values}{Character vector. Optional subset of group values to evaluate. Defaults to `NULL`.}
+
+\item{min_tips}{Integer. Minimum required tips per group. Defaults to `2L`.}
+}
+\value{
+A `tibble` containing group names, MRCA node numbers, tip counts, and monophyly logical indicators.
+}
 \description{
-Compute group nodes
+Identifies internal MRCA node numbers and evaluates monophyly for specified taxonomic groups within a phylogenetic tree.
 }
 \keyword{internal}

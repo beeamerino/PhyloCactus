@@ -25,13 +25,13 @@ The assembly of multilocus phylogenetic datasets from public sequence repositori
 
 The family **Cactaceae** represents one of the largest radiations of succulent dicots within the order Caryophyllales (Guerrero *et al*. 2019) and provides an ideal system for illustrating these challenges. Recent phylogenetic studies increasingly rely on multilocus datasets assembled from publicly available DNA sequences, making reproducible data acquisition and quality control essential components of evolutionary analyses.
 
-`CactusPhylo` is an R package designed to automate the assembly and curation of multilocus phylogenetic datasets. The workflow builds upon the orthology based sequence mining strategy implemented in `phylotaR`, extending it with comprehensive taxonomic reconciliation, automated quality control procedures, marker specific filtering, multiple sequence alignment to infer positional homology, and concatenation of curated loci into supermatrices. These datasets serve as the foundation for downstream analyses implemented throughout the package, including maximum-likelihood phylogenetic inference with `RAxML-NG`, divergence time estimation with `treePL`, historical biogeographic reconstruction, and diversification analyses.
+`PhyloCactus` is an R package designed to automate the assembly and curation of multilocus phylogenetic datasets. The workflow builds upon the orthology based sequence mining strategy implemented in `phylotaR`, extending it with comprehensive taxonomic reconciliation, automated quality control procedures, marker specific filtering, multiple sequence alignment to infer positional homology, and concatenation of curated loci into supermatrices. These datasets serve as the foundation for downstream analyses implemented throughout the package, including maximum-likelihood phylogenetic inference with `RAxML-NG`, divergence time estimation with `treePL`, historical biogeographic reconstruction, and diversification analyses.
 
-The complete `CactusPhylo` workflow is organized into thirteen interoperable modules distributed across four analytical stages. This vignette introduces the first stage of the pipeline, guiding users through orthology based sequence retrieval, taxonomic standardization, sequence quality assessment, alignment, and matrix assembly. The resulting curated multilocus datasets constitute the starting point for all subsequent phylogenetic, biogeographic, and macroevolutionary analyses performed within the `CactusPhylo` framework.
+The complete `PhyloCactus` workflow is organized into thirteen interoperable modules distributed across four analytical stages. This vignette introduces the first stage of the pipeline, guiding users through orthology based sequence retrieval, taxonomic standardization, sequence quality assessment, alignment, and matrix assembly. The resulting curated multilocus datasets constitute the starting point for all subsequent phylogenetic, biogeographic, and macroevolutionary analyses performed within the `PhyloCactus` framework.
 
 ## Complete Pipeline Execution Workflow
 
-Below is a demonstration of how the `CactusPhylo` package functions align end-to-end to assemble the initial multilocus sequences.
+Below is a demonstration of how the `PhyloCactus` package functions align end-to-end to assemble the initial multilocus sequences.
 
 ### Setup: Creating a Clean Workspace
 
@@ -39,7 +39,7 @@ Before beginning the pipeline, it is highly recommended to create a dedicated fo
 
 ```{r, eval = FALSE}
 # Create a dedicated tutorial folder on your Desktop (or any preferred location)
-tutorial_dir <- "~/Desktop/CactusPhylo_Tutorial"
+tutorial_dir <- "~/Desktop/PhyloCactus_Tutorial"
 dir.create(tutorial_dir, showWarnings = FALSE)
 
 # Set the tutorial folder as your working directory
@@ -47,7 +47,7 @@ setwd(tutorial_dir)
 
 # You can also copy the entire tutorial R script to this folder for easy execution
 file.copy(
-  system.file("scripts", "tutorial-1-cactus-phylogeny-prep.R", package = "CactusPhylo"),
+  system.file("scripts", "tutorial-1-cactus-phylogeny-prep.R", package = "PhyloCactus"),
   file.path(tutorial_dir, "tutorial-1-cactus-phylogeny-prep.R")
 )
 ```
@@ -58,7 +58,7 @@ The first stage of the workflow assembles the molecular dataset by retrieving or
 
 For the default workflow, the ingroup is defined as the family **Cactaceae** (NCBI Taxonomy ID: **3593**), allowing all descendant taxa within this lineage to be automatically retrieved from the `phylotaR` database. Outgroup sampling is based on four closely related genera within the Portulacineae suborder within Caryophyllales: *Portulaca* (NCBI Taxonomy ID: **3582**), *Anacampseros* (**107583**), *Talinopsis* (**107598**), and *Grahamia* (**107617**). These taxa provide phylogenetically informative external references for rooting and subsequent phylogenetic inference. Although these taxonomic identifiers constitute the default configuration distributed with the package, users may specify alternative ingroup or outgroup NCBI Taxonomy IDs to adapt the workflow to other evolutionary systems.
 
-To ensure reproducible taxonomic and molecular data curation, `CactusPhylo` relies on a collection of editable reference files distributed with the package (`inst/extdata`) and accessed internally using the `system.file()` function. Taxonomic standardization is based on a curated taxonomic backbone (`CactaceaeFullList_accepted.csv`) derived from the **Caryophyllales.org** project (Korotkova *et al.*, 2021). This checklist contains the currently accepted species of **Cactaceae**, **Portulacaceae**, and **Anacampserotaceae** and serves as the authoritative reference for reconciling species names throughout the pipeline. By relying on an external taxonomic backbone rather than GenBank nomenclature alone, `CactusPhylo` minimizes inconsistencies arising from outdated names, spelling variants, and unresolved synonymies.
+To ensure reproducible taxonomic and molecular data curation, `PhyloCactus` relies on a collection of editable reference files distributed with the package (`inst/extdata`) and accessed internally using the `system.file()` function. Taxonomic standardization is based on a curated taxonomic backbone (`CactaceaeFullList_accepted.csv`) derived from the **Caryophyllales.org** project (Korotkova *et al.*, 2021). This checklist contains the currently accepted species of **Cactaceae**, **Portulacaceae**, and **Anacampserotaceae** and serves as the authoritative reference for reconciling species names throughout the pipeline. By relying on an external taxonomic backbone rather than GenBank nomenclature alone, `PhyloCactus` minimizes inconsistencies arising from outdated names, spelling variants, and unresolved synonymies.
 
 Locus selection is controlled by `target_genes.txt`, which defines the set of molecular markers targeted during sequence retrieval. The default file contains a curated list of loci widely used in **Cactaceae** phylogenetics, although users may freely modify or replace this list to accommodate alternative taxonomic groups or marker sets. Gene nomenclature is standardized using `genes_map.csv`, a curated dictionary of synonymous gene names commonly encountered in GenBank. During data processing, heterogeneous locus annotations are harmonized into standardized marker names, ensuring that equivalent loci are consistently recognized despite differences in nomenclature among independent sequencing projects. Together, these editable configuration files separate biological customization from analytical code, allowing the same analytical workflow to be readily adapted to different evolutionary systems without modifying the package source code.
 
@@ -67,7 +67,7 @@ The `assemble_ingroup_phylotar()` function retrieves all orthologous sequence cl
 The `assemble_outgroup_phylotar()` function performs the same procedure for the selected outgroup taxa. To maximize comparability across the final multilocus dataset, only orthologous loci corresponding to the standardized marker set recovered for the ingroup are retained. The resulting FASTA files and occupancy metadata are written to the `1_phylotaR_out_outgroup` directory, producing a harmonized collection of orthologous loci that serves as the input for downstream analyses.
 
 ```{r, eval = FALSE}
-library(CactusPhylo)
+library(PhyloCactus)
 
 # Define and create working directories for `phylotaR`
 dir.create("0_phylotaR_raw_Ingroup", showWarnings = FALSE)
@@ -76,8 +76,8 @@ dir.create("0_phylotaR_raw_Outgroup", showWarnings = FALSE)
 # Mine ingroup taxonomic database
 ingroup_assembly <- assemble_ingroup_phylotar(
   wd_path = "0_phylotaR_raw_Ingroup",
-  target_genes_file = system.file("extdata", "target_genes.txt", package = "CactusPhylo"),
-  genes_map_file = system.file("extdata", "genes_map.csv", package = "CactusPhylo"),
+  target_genes_file = system.file("extdata", "target_genes.txt", package = "PhyloCactus"),
+  genes_map_file = system.file("extdata", "genes_map.csv", package = "PhyloCactus"),
   min_species = 50,
   force_download = FALSE
 )
@@ -85,14 +85,14 @@ ingroup_assembly <- assemble_ingroup_phylotar(
 # Mine outgroup taxonomic database
 outgroup_assembly <- assemble_outgroup_phylotar(
   wd_path = "0_phylotaR_raw_Outgroup",
-  target_genes_file = system.file("extdata", "target_genes.txt", package = "CactusPhylo"),
-  genes_map_file = system.file("extdata", "genes_map.csv", package = "CactusPhylo"),
+  target_genes_file = system.file("extdata", "target_genes.txt", package = "PhyloCactus"),
+  genes_map_file = system.file("extdata", "genes_map.csv", package = "PhyloCactus"),
   outgroups = c("107598", "107617", "107583", "3582"),
   force_download = FALSE
 )
 
 # Load the accepted species checklist
-checklist_path <- system.file("extdata", "CactaceaeFullList_accepted.csv", package = "CactusPhylo")
+checklist_path <- system.file("extdata", "CactaceaeFullList_accepted.csv", package = "PhyloCactus")
 if (file.exists(checklist_path)) {
   cactaceae_checklist <- read.csv(checklist_path, stringsAsFactors = FALSE)
   message(paste("Loaded", nrow(cactaceae_checklist), "taxa from the accepted checklist. \U0001f335"))
@@ -103,12 +103,12 @@ if (file.exists(checklist_path)) {
 
 Multiple sequence alignment represents the fundamental hypothesis of positional homology upon which all subsequent phylogenetic analyses depend. Errors introduced during sequence alignment can propagate throughout the analytical pipeline, biasing branch length estimation, reducing nodal support, and potentially leading to incorrect phylogenetic inference. Consequently, objective alignment and quality assessment are essential before constructing concatenated multilocus datasets.
 
-The `run_alignment_pipeline()` function processes the orthologous sequence clusters generated in Module 1 to produce high quality multiple sequence alignments (MSAs). Primary alignments are inferred using **MAFFT** (Katoh & Standley, 2013), a fast and accurate multiple sequence alignment algorithm widely adopted in molecular phylogenetics. Following alignment, `CactusPhylo` applies the **DECIPHER** framework (Wright, 2024) to identify and mask poorly aligned regions, ambiguous nucleotide positions, long insertions or deletions, and other alignment segments with low confidence that are unlikely to represent reliable positional homology. This automated masking procedure minimizes the influence of alignment uncertainty while preserving informative phylogenetic signal.
+The `run_alignment_pipeline()` function processes the orthologous sequence clusters generated in Module 1 to produce high quality multiple sequence alignments (MSAs). Primary alignments are inferred using **MAFFT** (Katoh & Standley, 2013), a fast and accurate multiple sequence alignment algorithm widely adopted in molecular phylogenetics. Following alignment, `PhyloCactus` applies the **DECIPHER** framework (Wright, 2024) to identify and mask poorly aligned regions, ambiguous nucleotide positions, long insertions or deletions, and other alignment segments with low confidence that are unlikely to represent reliable positional homology. This automated masking procedure minimizes the influence of alignment uncertainty while preserving informative phylogenetic signal.
 
 Finally, the pipeline filters sequences and nucleotide sites according to user defined occupancy thresholds, removing loci or taxa with excessive missing data and retaining only well supported alignment columns suitable for downstream analyses.
 
 ```{r, eval = FALSE}
-# Align sequences and mask alignments safely using the robust batch pipeline
+# Align sequences and mask alignments safely using the automated batch pipeline
 ingroup_alignment_manifest <- run_alignment_pipeline(
   input_folder = "1_phylotaR_out_ingroup",
   output_dir = "2_MAFFT_Cactaceae",
@@ -160,7 +160,7 @@ integrate_and_clean_markers(
   ingroup_dir = "3_Saturation/filtered_markers",
   outgroup_dir = "2_MAFFT_Outgroup/alignments",
   output_dir = "4_Cleaned",
-  accepted_list_file = system.file("extdata", "CactaceaeFullList_accepted.csv", package = "CactusPhylo"),
+  accepted_list_file = system.file("extdata", "CactaceaeFullList_accepted.csv", package = "PhyloCactus"),
   metadata_in_file = "1_phylotaR_out_ingroup/TABLE_ACCESSION_OCCUPANCY_INGROUP_CLEAN.csv",
   metadata_out_file = "1_phylotaR_out_outgroup/TABLE_ACCESSION_OCCUPANCY_OUTGROUP_CLEAN.csv"
 )
@@ -204,9 +204,9 @@ run_concatenation_pipeline(
 
 At this stage, the molecular dataset has been fully assembled, curated, and prepared for phylogenetic analysis. Orthologous loci have been retrieved, taxonomic names standardized, multiple sequence alignments refined, phylogenetically informative markers selected, and the final multilocus supermatrix constructed together with its corresponding partition scheme. These outputs constitute the complete analytical dataset required for evolutionary inference.
 
-The next stage of the `CactusPhylo` workflow focuses on reconstructing evolutionary relationships and estimating the temporal framework of diversification. In the following tutorial, we will infer a maximum likelihood phylogeny using `RAxML-NG`, evaluate branch support, and estimate divergence times under a penalized likelihood framework using `treePL`. The resulting time calibrated phylogeny will serve as the foundation for the historical biogeographic and macroevolutionary analyses presented in the subsequent tutorials.
+The next stage of the `PhyloCactus` workflow focuses on reconstructing evolutionary relationships and estimating the temporal framework of diversification. In the following tutorial, we will infer a maximum likelihood phylogeny using `RAxML-NG`, evaluate branch support, and estimate divergence times under a penalized likelihood framework using `treePL`. The resulting time calibrated phylogeny will serve as the foundation for the historical biogeographic and macroevolutionary analyses presented in the subsequent tutorials.
 
-[Continue to Tutorial 2: Inference and Divergence Time Estimation](https://beeamerino.github.io/CactusPhylo/articles/tutorial-2-cactus-phylogeny-inference.html)
+[Continue to Tutorial 2: Inference and Divergence Time Estimation](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html)
 
 ------------------------------------------------------------------------
 

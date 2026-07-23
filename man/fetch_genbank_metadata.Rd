@@ -2,7 +2,7 @@
 % Please edit documentation in R/assembly.R
 \name{fetch_genbank_metadata}
 \alias{fetch_genbank_metadata}
-\title{Fetch Genbank Metadata}
+\title{Fetch GenBank Sequence Metadata via NCBI Entrez Utilities}
 \usage{
 fetch_genbank_metadata(
   sids,
@@ -14,18 +14,30 @@ fetch_genbank_metadata(
 )
 }
 \arguments{
-\item{sids}{A character vector of Sequence IDs to fetch.}
+\item{sids}{Character vector of GenBank Sequence Identifiers (SIDs) to query.}
 
-\item{cache_file}{Character string specifying the cache file path.}
+\item{cache_file}{Character. File path to store and load cached metadata tables.}
 
-\item{batch_size}{Integer for download batch size.}
+\item{batch_size}{Integer. Number of sequence IDs requested per HTTP batch query. Defaults to `200`.}
 
-\item{sleep_time}{Numeric for delay between batches.}
+\item{sleep_time}{Numeric. Pause duration in seconds between consecutive batch requests to respect NCBI rate limits. Defaults to `0.5`.}
 
-\item{max_retries}{Integer for maximum retry attempts.}
+\item{max_retries}{Integer. Maximum retry attempts permitted per batch before failing. Defaults to `5`.}
 
-\item{force_download}{Logical, if TRUE overrides existing cache.}
+\item{force_download}{Logical. Force fresh Entrez queries instead of loading local cache? Defaults to `FALSE`.}
+}
+\value{
+A data frame containing fetched GenBank metadata fields for each requested sequence ID.
 }
 \description{
-Fetch Genbank Metadata
+Queries NCBI Entrez Utilities to retrieve sequence lengths, organism taxonomy, publication titles, and accession IDs
+for a collection of GenBank sequence identifiers (SIDs). Metadata retrieval enriches raw sequence clusters with verifiable audit data.
+}
+\examples{
+\dontrun{
+fetch_genbank_metadata(
+  sids = c("AY123456", "AY123457"),
+  cache_file = "cache_metadata.csv"
+)
+}
 }

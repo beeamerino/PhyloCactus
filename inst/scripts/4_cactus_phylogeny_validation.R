@@ -1,10 +1,10 @@
 # -------------------------------------------------------------
-# CactusPhylo: Tutorial 4 - Phylogenetic Validation and Sub-tree Comparisons
+# PhyloCactus: Tutorial 4 - Phylogenetic Validation and Sub-tree Comparisons
 # -------------------------------------------------------------
 # This script covers Stage 13 of the phylogenetic pipeline:
 # Sub-trees, ASTRAL-III integration, and Phylogenetic Validation.
 # -------------------------------------------------------------
-library(CactusPhylo)
+library(PhyloCactus)
 library(ape)
 library(stringr)
 library(readr)
@@ -13,7 +13,7 @@ library(dplyr)
 # -------------------------------------------------------------
 # Setup: Creating a Clean Workspace
 # -------------------------------------------------------------
-tutorial_dir <- "~/Desktop/CactusPhylo_Tutorial"
+tutorial_dir <- "~/Desktop/PhyloCactus_Tutorial"
 dir.create(tutorial_dir, showWarnings = FALSE)
 setwd(tutorial_dir)
 
@@ -113,8 +113,8 @@ existing_trees <- tree_paths[sapply(tree_paths, function(x) file.exists(x) && nz
 
 if(length(existing_trees) > 1) {
   
-  checklist_file   <- system.file("extdata", "CactaceaeFullList_accepted.csv", package = "CactusPhylo")
-  constraints_file <- system.file("extdata", "cactus_constraints.csv", package = "CactusPhylo")
+  checklist_file   <- system.file("extdata", "CactaceaeFullList_accepted.csv", package = "PhyloCactus")
+  constraints_file <- system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus")
   
   validation_outputs <- validate_phylogenies(
     trees_mapping_list = existing_trees,

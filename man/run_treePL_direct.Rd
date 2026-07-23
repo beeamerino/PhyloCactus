@@ -2,17 +2,24 @@
 % Please edit documentation in R/dating.R
 \name{run_treePL_direct}
 \alias{run_treePL_direct}
-\title{Run treePL directly}
+\title{Run treePL Executable Directly}
 \usage{
 run_treePL_direct(cfg_file, label, cwd = NULL)
 }
 \arguments{
-\item{cfg_file}{Character. Configuration file.}
+\item{cfg_file}{Character. Path to `treePL` configuration file.}
 
-\item{label}{Character. Label.}
+\item{label}{Character. Descriptive run label identifier.}
 
-\item{cwd}{Character. Working directory.}
+\item{cwd}{Character. Optional working directory context. Defaults to `NULL`.}
+}
+\value{
+Invisible NULL upon system command execution.
 }
 \description{
-Run treePL directly
+Executes the `treePL` binary directly to estimate divergence times from a prepared configuration file.
+}
+\references{
+Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
+for large phylogenies. *Bioinformatics*, 28(20), 2689-2690. \doi{10.1093/bioinformatics/bts492}
 }

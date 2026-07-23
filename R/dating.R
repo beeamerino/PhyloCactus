@@ -1,7 +1,18 @@
-#' Rescale all branches of a tree
-#' @param tree phylo. 
-#' @param factor numeric.
-#' @return phylo
+#' Rescale Branch Lengths of a Phylogenetic Tree
+#'
+#' Multiplies all edge lengths of a `phylo` tree object by a constant scaling factor.
+#' Rescaling is used prior to penalized likelihood dating (`treePL`) to prevent numerical underflow issues
+#' caused by small substitution rates per site.
+#'
+#' @param tree An object of class `phylo` representing a phylogenetic tree.
+#' @param factor Numeric multiplier applied to all edge lengths. Defaults to `100`.
+#' @return A rescaled `phylo` object with updated edge lengths.
+#' @examples
+#' \dontrun{
+#' library(ape)
+#' tree <- rtree(10)
+#' rescaled_tree <- rescale_tree(tree, factor = 100)
+#' }
 #' @export
 rescale_tree <- function(tree, factor = 100){
   cat("Rescaling all branches by factor:", factor, "\n")
@@ -9,14 +20,22 @@ rescale_tree <- function(tree, factor = 100){
   return(tree)
 }
 
-#' Run treePL via Wrapper
+#' Estimate Divergence Times via treePL Wrapper
 #'
-#' Cites the reference treePL wrapper: https://github.com/tongjial/treepl_wrapper
+#' Interfacing with `treePL` (Sanderson, 2002; Smith & O'Meara, 2012) via a shell wrapper script to estimate
+#' ultrametric chronograms under penalized likelihood. Integrates molecular branch lengths with temporal calibration bounds.
 #'
-#' @param cfg Character. Configuration file.
-#' @param treefile Character. Tree file.
-#' @param label Character. Label for the run.
-#' @param wrapper_sh Character. Path to the treepl wrapper shell script.
+#' @param cfg Character. Path to `treePL` configuration text file specifying calibrations and parameters.
+#' @param treefile Character. Path to input input phylogenetic tree file (Newick format).
+#' @param label Character. Descriptive run label identifier.
+#' @param wrapper_sh Character. Path to the `treePL` shell wrapper script (`treepl_wrapper_v1.sh`).
+#' @return Invisible NULL upon system command execution.
+#' @references
+#' Sanderson, M. J. (2002). Estimating absolute rates of molecular evolution and divergence times:
+#' a penalized likelihood approach. *Molecular Biology and Evolution*, 19(1), 101-109. \doi{10.1093/oxfordjournals.molbev.a003974}
+#'
+#' Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
+#' for large phylogenies. *Bioinformatics*, 28(20), 2689-2690. \doi{10.1093/bioinformatics/bts492}
 #' @export
 run_treePL <- function(cfg, treefile, label, wrapper_sh){
   cmd <- paste("bash", shQuote(wrapper_sh), shQuote(cfg), shQuote(treefile), shQuote(label))
@@ -25,11 +44,17 @@ run_treePL <- function(cfg, treefile, label, wrapper_sh){
   cat("Finished:", label, "\n\n")
 }
 
-#' Run treePL directly
+#' Run treePL Executable Directly
 #'
-#' @param cfg_file Character. Configuration file.
-#' @param label Character. Label.
-#' @param cwd Character. Working directory.
+#' Executes the `treePL` binary directly to estimate divergence times from a prepared configuration file.
+#'
+#' @param cfg_file Character. Path to `treePL` configuration file.
+#' @param label Character. Descriptive run label identifier.
+#' @param cwd Character. Optional working directory context. Defaults to `NULL`.
+#' @return Invisible NULL upon system command execution.
+#' @references
+#' Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
+#' for large phylogenies. *Bioinformatics*, 28(20), 2689-2690. \doi{10.1093/bioinformatics/bts492}
 #' @export
 run_treePL_direct <- function(cfg_file, label, cwd = NULL){
   if(!is.null(cwd)) oldwd <- getwd() else oldwd <- NULL
@@ -43,15 +68,42 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL){
   if(!is.null(oldwd)) setwd(oldwd)
 }
 
-#' Automate treePL bootstrap pipeline
+#' Automate treePL Divergence Time Estimation Pipeline Across Bootstrap Cohorts
 #'
-#' @param cfg_file Character. Configuration file.
-#' @param wrapper_sh Character. Wrapper script path.
-#' @param ml_tree_file Character. Path to the maximum-likelihood tree.
-#' @param bs_trees_file Character. Bootstraps tree path.
-#' @param results_dir Character. Results output dir.
-#' @param treePL_out Character. Output treePL directory.
-#' @param num_bs Integer or NULL. Number of bootstrap trees to use. If NULL, uses all available.
+#' Automates cross-validation parameter optimization, rate smoothing selection, and chronogram estimation
+#' across temporal bootstrap replicates using `treePL` (Sanderson, 2002; Smith & O'Meara, 2012).
+#' Propagating temporal uncertainty across branch-length resampled bootstrap trees yields empirical confidence intervals
+#' for node age estimates.
+#'
+#' @param cfg_file Character. Path to primary `treePL` configuration file specifying calibration bounds and parameters.
+#' @param wrapper_sh Character. Path to `treePL` shell wrapper script (`treepl_wrapper_v1.sh`).
+#' @param ml_tree_file Character. Path to input maximum-likelihood reference tree file.
+#' @param bs_trees_file Character. Path to input temporal bootstrap trees file.
+#' @param results_dir Character. Directory path to save intermediate optimization results.
+#' @param treePL_out Character. Destination directory path for final output chronograms.
+#' @param num_bs Integer or NULL. Maximum number of temporal bootstrap trees to evaluate. If `NULL`, processes all available trees.
+#' @return Invisible NULL upon completion.
+#' @references
+#' Sanderson, M. J. (2002). Estimating absolute rates of molecular evolution and divergence times:
+#' a penalized likelihood approach. *Molecular Biology and Evolution*, 19(1), 101-109. \doi{10.1093/oxfordjournals.molbev.a003974}
+#'
+#' Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
+#' for large phylogenies. *Bioinformatics*, 28(20), 2689-2690. \doi{10.1093/bioinformatics/bts492}
+#'
+#' Maurin, K. J. (2020). An empirical guide for producing a dated phylogeny with treePL in a maximum likelihood framework.
+#' *arXiv preprint arXiv:2008.07054*. \doi{10.48550/arXiv.2008.07054}
+#' @examples
+#' \dontrun{
+#' automate_treePL(
+#'   cfg_file = "calibrations.cfg",
+#'   wrapper_sh = "treepl_wrapper_v1.sh",
+#'   ml_tree_file = "bestTree.tree",
+#'   bs_trees_file = "temporal_bootstraps.tree",
+#'   results_dir = "auto_results",
+#'   treePL_out = "8_Dating",
+#'   num_bs = 100
+#' )
+#' }
 #' @export
 automate_treePL <- function(cfg_file, wrapper_sh, ml_tree_file, bs_trees_file, results_dir, treePL_out, num_bs = NULL) {
   

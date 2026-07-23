@@ -2,7 +2,7 @@
 % Please edit documentation in R/screening.R
 \name{run_marker_screening}
 \alias{run_marker_screening}
-\title{Run Ingroup Marker Screening Pipeline}
+\title{Screen Locus Alignments for Substitution Saturation and Informativeness}
 \usage{
 run_marker_screening(
   fasta_folder,
@@ -17,27 +17,39 @@ run_marker_screening(
 )
 }
 \arguments{
-\item{fasta_folder}{Character. Directory containing aligned FASTAs.}
+\item{fasta_folder}{Character. Directory path containing aligned locus FASTA files.}
 
-\item{out_base}{Character. Base directory for output files.}
+\item{out_base}{Character. Base destination directory for diagnostic plots and screened FASTA outputs (`filtered_markers/`).}
 
-\item{min_cols_to_evaluate}{Integer. Minimum columns to evaluate.}
+\item{min_cols_to_evaluate}{Integer. Minimum number of alignment columns required to compute saturation metrics. Defaults to `50L`.}
 
-\item{min_aln_len_to_retain}{Integer. Minimum alignment length to retain.}
+\item{min_aln_len_to_retain}{Integer. Minimum alignment length in base pairs required to retain a locus. Defaults to `200L`.}
 
-\item{min_nseq_to_retain}{Integer. Minimum sequences to retain.}
+\item{min_nseq_to_retain}{Integer. Minimum number of sequences required per locus alignment. Defaults to `100L`.}
 
-\item{max_marker_missing}{Numeric. Maximum missing fraction for a marker.}
+\item{max_marker_missing}{Numeric. Maximum allowable missing data fraction per locus. Defaults to `0.7`.}
 
-\item{saturation_flag_cutoff}{Numeric.}
+\item{saturation_flag_cutoff}{Numeric. Uncorrected p-distance vs. raw distance slope threshold to flag substitution saturation. Defaults to `0.3`.}
 
-\item{saturation_keep_cutoff}{Numeric. Retention threshold for the saturation slope.}
+\item{saturation_keep_cutoff}{Numeric. Saturation slope cutoff threshold below which saturated loci are excluded. Defaults to `0.5`.}
 
-\item{iqr_multiplier}{Numeric. Scale factor for IQR outlier bounds detection.}
+\item{iqr_multiplier}{Numeric. Interquartile range (IQR) multiplier for identifying site-length outlier bounds. Defaults to `1.5`.}
 }
 \value{
-Summarized table.
+A data frame summarizing saturation statistics, alignment dimensions, and retention decisions across screened loci.
 }
 \description{
-Run Ingroup Marker Screening Pipeline
+Evaluates phylogenetic informativeness, sequence coverage, alignment length, and substitution saturation across individual locus alignments.
+Filtering out loci exhibiting high substitution saturation or severe site length anomalies prevents systematic noise
+and long-branch attraction (LBA) artifacts from distorting maximum-likelihood supermatrix inference.
+}
+\examples{
+\dontrun{
+run_marker_screening(
+  fasta_folder = "2_MAFFT_Cactaceae/alignments",
+  out_base = "3_Screening_Ingroup",
+  min_aln_len_to_retain = 200L,
+  min_nseq_to_retain = 50L
+)
+}
 }

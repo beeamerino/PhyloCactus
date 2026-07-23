@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{generate_bootstrap_script}
 \alias{generate_bootstrap_script}
-\title{Generate Chunk Bootstrap Shell Script}
+\title{Generate HPC SLURM Batch Script for Parallel Bootstrapping}
 \usage{
 generate_bootstrap_script(
   alignment_file,
@@ -27,47 +27,48 @@ generate_bootstrap_script(
 )
 }
 \arguments{
-\item{alignment_file}{Character. Alignment file path.}
+\item{alignment_file}{Character. Path to input PHYLIP alignment file.}
 
-\item{partition_file}{Character. Partition model file path.}
+\item{partition_file}{Character. Path to partition file.}
 
-\item{constraint_file}{Character. Constraint tree file path.}
+\item{constraint_file}{Character. Path to constraint scaffold tree file.}
 
-\item{outgroup}{Character. Outgroup taxon. Defaults to NULL.}
+\item{outgroup}{Character. Optional outgroup taxon binomial. Defaults to `NULL`.}
 
-\item{bs_per_rep}{Integer. Bootstraps per replicate. Defaults to 500.}
+\item{bs_per_rep}{Integer. Number of bootstrap trees generated per chunk replicate. Defaults to `500`.}
 
-\item{max_reps}{Integer. Number of chunks. Defaults to 4.}
+\item{max_reps}{Integer. Total number of parallel chunk replicates to spawn. Defaults to `4`.}
 
-\item{base_seed}{Integer. Base seed. Defaults to 111.}
+\item{base_seed}{Integer. Base random seed. Defaults to `111`.}
 
-\item{seed_step}{Integer. Step in seed increments per chunk. Defaults to 1000.}
+\item{seed_step}{Integer. Seed increment value between consecutive chunks. Defaults to `1000`.}
 
-\item{threads}{Integer. Threads per task. Defaults to 120.}
+\item{threads}{Integer. Number of CPU cores requested per SLURM task. Defaults to `120`.}
 
-\item{workers}{Integer. Workers per task. Defaults to 20.}
+\item{workers}{Integer. Number of RAxML-NG worker processes. Defaults to `20`.}
 
-\item{output_dir}{Character. Where to output scripts and chunks.}
+\item{output_dir}{Character. Destination directory for script and chunk logs. Defaults to `getwd()`.}
 
-\item{script_name}{Character. The name of the bash file.}
+\item{script_name}{Character. Name of output Bash script file. Defaults to `"run_bs_chunks.sh"`.}
 
-\item{cluster_job_name}{Character. Job name for SLURM. Defaults to "C-raxml-bs".}
+\item{cluster_job_name}{Character. SLURM job name identifier. Defaults to `"C-raxml.bs"`.}
 
-\item{cluster_mem}{Character. Memory for SLURM. Defaults to "32G".}
+\item{cluster_mem}{Character. Memory allocation string for SLURM. Defaults to `"32G"`.}
 
-\item{cluster_time}{Character. Time limit for SLURM. Defaults to "7-00:00".}
+\item{cluster_time}{Character. Time limit allocation string for SLURM. Defaults to `"7-00:00"`.}
 
-\item{cluster_partition}{Character. Partition for SLURM. Defaults to "general".}
+\item{cluster_partition}{Character. SLURM partition name. Defaults to `"general"`.}
 
-\item{cluster_queue}{Character. Queue for SLURM. Defaults to "public".}
+\item{cluster_queue}{Character. SLURM queue name. Defaults to `"public"`.}
 
-\item{load_module}{Character. Module to load in SLURM script. Defaults to "raxml-ng-1.1.0-gcc-11.2.0".}
+\item{load_module}{Character. Environment module command to load prior to execution. Defaults to `"raxml-ng-1.1.0-gcc-11.2.0"`.}
 
-\item{raxml_exec}{Character. RAxML executable to use. Defaults to "raxml-ng-mpi".}
+\item{raxml_exec}{Character. Executable `RAxML-NG` binary name. Defaults to `"raxml-ng-mpi"`.}
 }
 \value{
-The path to the generated script.
+Character path to the generated SLURM batch script file.
 }
 \description{
-Generate Chunk Bootstrap Shell Script
+Generates an executable Bash script with SLURM scheduler directives to parallelize non-parametric bootstrapping across HPC compute nodes.
+Chunking bootstrap searches into parallel sub-jobs accelerates support estimation for large supermatrices.
 }

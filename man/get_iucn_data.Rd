@@ -2,16 +2,23 @@
 % Please edit documentation in R/iucn.R
 \name{get_iucn_data}
 \alias{get_iucn_data}
-\title{Extract IUCN Data from rredlist}
+\title{Fetch IUCN Red List Metadata via rredlist API}
 \usage{
 get_iucn_data(sp_name)
 }
 \arguments{
-\item{sp_name}{The scientific name of the species}
+\item{sp_name}{Character. Standardized binomial scientific name of the target species (e.g., `"Astrophytum asterias"`).}
 }
 \value{
-A tibble with extracted IUCN metadata
+A single-row `tibble` containing extracted IUCN conservation metadata fields.
 }
 \description{
-Extract IUCN Data from rredlist
+Queries the IUCN Red List API (`rredlist`) to retrieve verified macroevolutionary conservation threat categories (e.g., CR, EN, VU),
+population trends, habitat descriptions, and geographic endemism metrics for a focal species.
+Enriching phylogenetic datasets with IUCN conservation statuses enables evolutionary distinctness and extinction vulnerability analyses.
+}
+\examples{
+\dontrun{
+get_iucn_data("Astrophytum asterias")
+}
 }

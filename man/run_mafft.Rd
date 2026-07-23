@@ -2,7 +2,7 @@
 % Please edit documentation in R/alignment.R
 \name{run_mafft}
 \alias{run_mafft}
-\title{Run MAFFT Alignment}
+\title{Infer Positional Homology via MAFFT Alignment}
 \usage{
 run_mafft(
   input_fasta,
@@ -12,17 +12,34 @@ run_mafft(
 )
 }
 \arguments{
-\item{input_fasta}{Character. Input FASTA file path.}
+\item{input_fasta}{Character. Path to unaligned input FASTA file.}
 
-\item{output_fasta}{Character. Output aligned FASTA path.}
+\item{output_fasta}{Character. Path to destination aligned FASTA output file.}
 
-\item{mafft_exec}{Character. System MAFFT binary location.}
+\item{mafft_exec}{Character. System command or full path to the executable `MAFFT` binary. Defaults to `"mafft"`.}
 
-\item{mafft_opts}{Character. Parameters passed to MAFFT.}
+\item{mafft_opts}{Character. Command-line parameters passed directly to `MAFFT`. Defaults to `"--auto"`.}
 }
 \value{
-Numeric. Exit status code.
+Invisible numeric exit status code (0 for successful alignment completion).
 }
 \description{
-Run MAFFT Alignment
+Establishes hypotheses of positional homology across unaligned orthologous nucleotide sequence clusters.
+Positional homology alignment is a crucial prerequisite for maximum-likelihood phylogenetic inference,
+ensuring that corresponding nucleotide sites derived from common evolutionary ancestry are aligned
+prior to substitution model evaluation.
+}
+\examples{
+\dontrun{
+run_mafft(
+  input_fasta = "raw_cluster.fasta",
+  output_fasta = "aligned_cluster.fasta",
+  mafft_opts = "--auto"
+)
+}
+}
+\references{
+Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7:
+Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772–780.
+\doi{10.1093/molbev/mst010}
 }

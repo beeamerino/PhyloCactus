@@ -1,10 +1,27 @@
-#' Run MAFFT Alignment
+#' Infer Positional Homology via MAFFT Alignment
 #'
-#' @param input_fasta Character. Input FASTA file path.
-#' @param output_fasta Character. Output aligned FASTA path.
-#' @param mafft_exec Character. System MAFFT binary location.
-#' @param mafft_opts Character. Parameters passed to MAFFT.
-#' @return Numeric. Exit status code.
+#' Establishes hypotheses of positional homology across unaligned orthologous nucleotide sequence clusters.
+#' Positional homology alignment is a crucial prerequisite for maximum-likelihood phylogenetic inference,
+#' ensuring that corresponding nucleotide sites derived from common evolutionary ancestry are aligned
+#' prior to substitution model evaluation.
+#'
+#' @param input_fasta Character. Path to unaligned input FASTA file.
+#' @param output_fasta Character. Path to destination aligned FASTA output file.
+#' @param mafft_exec Character. System command or full path to the executable `MAFFT` binary. Defaults to `"mafft"`.
+#' @param mafft_opts Character. Command-line parameters passed directly to `MAFFT`. Defaults to `"--auto"`.
+#' @return Invisible numeric exit status code (0 for successful alignment completion).
+#' @references
+#' Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7:
+#' Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772–780.
+#' \doi{10.1093/molbev/mst010}
+#' @examples
+#' \dontrun{
+#' run_mafft(
+#'   input_fasta = "raw_cluster.fasta",
+#'   output_fasta = "aligned_cluster.fasta",
+#'   mafft_opts = "--auto"
+#' )
+#' }
 #' @export
 run_mafft <- function(input_fasta, output_fasta, mafft_exec = "mafft", mafft_opts = "--auto") {
   args <- c(strsplit(mafft_opts, "\\s+")[[1]], shQuote(input_fasta))
@@ -338,17 +355,38 @@ process_marker_file <- function(
   return(build_marker_consolidated_row(marker_id, summary_all, filter_info, final_written, TRUE, if (final_written) "OK" else "ZERO_RETAINED"))
 }
 
-#' Run Complete Alignment Pipeline
-#' 
-#' @param input_folder Character. Folder of raw FASTAs.
-#' @param output_dir Character. Directory to save all alignment outputs (will create alignments, tables, and logs subdirectories).
-#' @param fasta_pattern Character. Pattern to match fasta files.
-#' @param mask_alignment_regions Logical. Should DECIPHER masking be applied?
-#' @param min_non_gap_fraction Numeric. Minimum fractional non-gap width.
-#' @param max_missing_fraction Numeric. Maximum allowed missing states.
-#' @param mafft_exec Character. Path to MAFFT.
-#' @param mafft_opts Character. Options for MAFFT.
-#' @return A data frame containing processing and masking metrics for each marker.
+#' Execute Complete Alignment and Gap-Masking Pipeline
+#'
+#' Orchestrates multiple sequence alignment (MSA) and automated quality-control masking across orthologous sequence clusters.
+#' Primary alignment hypotheses are inferred using `MAFFT` (Katoh & Standley, 2013). Subsequently, ambiguous sites,
+#' poorly aligned terminal fragments, and non-homologous insertions are masked using the `DECIPHER` framework (Wright, 2024),
+#' eliminating systematic noise while retaining phylogenetically informative nucleotide positions for downstream supermatrix assembly.
+#'
+#' @param input_folder Character. Directory path containing raw unaligned orthologous FASTA files.
+#' @param output_dir Character. Root destination directory for output subfolders (`alignments/`, `tables/`, `logs/`).
+#' @param fasta_pattern Character. Regular expression pattern matching target FASTA files. Defaults to `"\\.fasta$"`.
+#' @param mask_alignment_regions Logical. Apply automated alignment masking via `DECIPHER`? Defaults to `TRUE`.
+#' @param min_non_gap_fraction Numeric. Minimum allowable proportion of non-gap characters required to retain a site column. Defaults to `0.30`.
+#' @param max_missing_fraction Numeric. Maximum allowable proportion of missing or ambiguous characters (`N`) allowed per sequence. Defaults to `0.30`.
+#' @param mafft_exec Character. System command or full path to the executable `MAFFT` binary. Defaults to `"mafft"`.
+#' @param mafft_opts Character. Command-line parameters passed directly to `MAFFT`. Defaults to `"--auto"`.
+#' @return A data frame containing site length, missingness, and sequence retention statistics across processed loci.
+#' @references
+#' Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7:
+#' Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772–780.
+#' \doi{10.1093/molbev/mst010}
+#'
+#' Wright, E. S. (2024). Fast and Flexible Search for Homologous Biological Sequences with DECIPHER v3.
+#' *The R Journal*, 16(2), 191-200. \doi{10.18129/B9.bioc.DECIPHER}
+#' @examples
+#' \dontrun{
+#' run_alignment_pipeline(
+#'   input_folder = "1_phylotaR_out_ingroup",
+#'   output_dir = "2_MAFFT_Cactaceae",
+#'   min_non_gap_fraction = 0.30,
+#'   max_missing_fraction = 0.30
+#' )
+#' }
 #' @export
 run_alignment_pipeline <- function(
     input_folder,
@@ -420,12 +458,25 @@ run_alignment_pipeline <- function(
   return(manifest)
 }
 
-#' Reconcile and Validate Taxonomic Names
+#' Reconcile and Validate Taxonomic Nomenclature
 #'
-#' @param raw_input_fasta Character path. Raw download coordinates folder.
-#' @param checklist_path Character. Excel Cactaceae accepted spelling table file.
-#' @param output_clean_dir Character. Folders for cleaned configurations.
-#' @param force_process Logical. Skip cache check.
+#' Reconciles sequence tip labels against authoritative botanical checklists (e.g., Caryophyllales.org checklist).
+#' Resolves taxonomic synonymies, infraspecific variants, and orthographic errors, guaranteeing nomenclatural stability
+#' across public GenBank sequence downloads.
+#'
+#' @param raw_input_fasta Character. Path to input FASTA file containing raw GenBank sequence accessions.
+#' @param checklist_path Character. Path to accepted taxonomic checklist CSV or Excel file.
+#' @param output_clean_dir Character. Directory path where standardized FASTA sequence output will be saved.
+#' @param force_process Logical. Force reprocessing if output cached file exists? Defaults to `FALSE`.
+#' @return Character string path to the generated FASTA file with standardized species binomials.
+#' @examples
+#' \dontrun{
+#' clean_taxonomic_names(
+#'   raw_input_fasta = "marker_rbcl.fasta",
+#'   checklist_path = "CactaceaeFullList_accepted.csv",
+#'   output_clean_dir = "cleaned_names"
+#' )
+#' }
 #' @export
 clean_taxonomic_names <- function(raw_input_fasta, checklist_path, output_clean_dir, force_process = FALSE) {
   
@@ -459,11 +510,27 @@ clean_taxonomic_names <- function(raw_input_fasta, checklist_path, output_clean_
   return(target_out)
 }
 
-#' Run Final Joint Realignment Pipeline
+#' Perform Joint Realignment Across Integrated Ingroup and Outgroup Sequences
 #'
-#' @param input_dir Character.
-#' @param output_fasta_dir Character.
-#' @param output_aln_dir Character.
+#' Re-estimates positional homology alignments (`MAFFT`) after aggregating ingroup and outgroup sequence markers.
+#' Joint realignment accommodates positional variations introduced when combining outgroup taxons with the focal ingroup clade.
+#'
+#' @param input_dir Character. Directory containing merged, taxonomically reconciled locus FASTA files.
+#' @param output_fasta_dir Character. Directory path to save output realigned FASTA sequence files.
+#' @param output_aln_dir Character. Directory path to store detailed realignment log reports.
+#' @return Invisible NULL upon successful execution.
+#' @references
+#' Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7:
+#' Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772–780.
+#' \doi{10.1093/molbev/mst010}
+#' @examples
+#' \dontrun{
+#' run_joint_realignment(
+#'   input_dir = "4_Cleaned/cleaned_markers",
+#'   output_fasta_dir = "5_MAFFT_Cleaned",
+#'   output_aln_dir = "5_MAFFT_Cleaned/aligned_markers"
+#' )
+#' }
 #' @export
 run_joint_realignment <- function(input_dir, output_fasta_dir, output_aln_dir) {
   dir.create(output_fasta_dir, recursive = TRUE, showWarnings = FALSE)

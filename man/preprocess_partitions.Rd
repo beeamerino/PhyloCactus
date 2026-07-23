@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{preprocess_partitions}
 \alias{preprocess_partitions}
-\title{Preprocess Partitions and Run Alignment Check}
+\title{Preprocess Partitions and Validate Alignment Syntax}
 \usage{
 preprocess_partitions(
   phy_matrix,
@@ -13,16 +13,25 @@ preprocess_partitions(
 )
 }
 \arguments{
-\item{phy_matrix}{Character. Input PHYLIP file path.}
+\item{phy_matrix}{Character. Path to input PHYLIP supermatrix file.}
 
-\item{part_file}{Character. Input partition mapping file.}
+\item{part_file}{Character. Path to input partition mapping text file.}
 
-\item{raxml_path}{Character. Location of the RAxML-NG executable.}
+\item{raxml_path}{Character. System command or full path to executable `RAxML-NG` binary.}
 
-\item{output_dir}{Character. Folders for validated partitions outputs. Defaults to dirname(phy_matrix).}
+\item{output_dir}{Character. Output directory for validated partition outputs. Defaults to `dirname(phy_matrix)`.}
 
-\item{force_check}{Logical. Bypass run checks if validation exists.}
+\item{force_check}{Logical. Bypass validation check if cleaned partition output file already exists? Defaults to `FALSE`.}
+}
+\value{
+Character path to the cleaned partition map file ready for model evaluation.
 }
 \description{
-Preprocess Partitions and Run Alignment Check
+Validates PHYLIP alignment syntax and partition file coordinates using `RAxML-NG` (Kozlov *et al.*, 2019).
+Verifies site ranges, formatting compatibility, and data integrity prior to substitution model evaluation.
+}
+\references{
+Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
+user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
+\doi{10.1093/bioinformatics/btz305}
 }

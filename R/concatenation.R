@@ -1,7 +1,20 @@
-#' Run Concatenation Pipeline
+#' Concatenate Locus Alignments and Build Partition Coordinate Maps
 #'
-#' @param input_dir Character.
-#' @param output_dir Character.
+#' Concatenates individual orthologous locus alignments end-to-end into a unified multilocus supermatrix.
+#' Combining independent genomic loci increases statistical power to resolve difficult ancestral nodes while
+#' allowing partitioned substitution modeling to account for mutational rate heterogeneity across genomic regions.
+#' Exports partition files compatible with `RAxML-NG`, `IQ-TREE`, `PartitionFinder2`, and `MrBayes`.
+#'
+#' @param input_dir Character. Path to directory containing curated, aligned locus FASTA files.
+#' @param output_dir Character. Path to destination root directory for concatenated alignments and partition maps.
+#' @return A data frame containing supermatrix dimensions, taxon coverage, and genomic partition bounds.
+#' @examples
+#' \dontrun{
+#' run_concatenation_pipeline(
+#'   input_dir = "5_MAFFT_Cleaned/aligned_markers",
+#'   output_dir = "6_Concatenated"
+#' )
+#' }
 #' @export
 run_concatenation_pipeline <- function(input_dir, output_dir) {
   ind_dir     <- file.path(output_dir, "individual_markers")

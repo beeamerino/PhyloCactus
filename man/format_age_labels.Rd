@@ -2,11 +2,19 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{format_age_labels}
 \alias{format_age_labels}
-\title{Format age labels}
+\title{Format Age Labels for Chronogram Axis Ticks}
 \usage{
 format_age_labels(x, digits = 1L)
 }
+\arguments{
+\item{x}{Numeric vector of geological age values in Ma.}
+
+\item{digits}{Integer. Decimal precision for rounding. Defaults to `1L`.}
+}
+\value{
+Character vector of formatted age labels.
+}
 \description{
-Format age labels
+Formats numerical node age breaks into clean text strings for timeline axes.
 }
 \keyword{internal}

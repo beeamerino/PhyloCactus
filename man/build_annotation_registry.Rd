@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{build_annotation_registry}
 \alias{build_annotation_registry}
-\title{Build annotation registry}
+\title{Build Taxonomic Annotation Registry across Tree Levels}
 \usage{
 build_annotation_registry(
   tree,
@@ -12,7 +12,21 @@ build_annotation_registry(
   require_monophyly = TRUE
 )
 }
+\arguments{
+\item{tree}{Object of class `phylo`.}
+
+\item{constraints_tbl}{Data frame containing taxonomic classifications.}
+
+\item{main_level4_values}{Character vector of main level 4 (genus) annotations. Defaults to `NULL`.}
+
+\item{supp_level4_min_tips}{Integer. Minimum tip threshold for secondary level 4 annotations. Defaults to `10L`.}
+
+\item{require_monophyly}{Logical. Enforce monophyly constraint? Defaults to `TRUE`.}
+}
+\value{
+A named list of annotation node data frames organized by taxonomic level.
+}
 \description{
-Build annotation registry
+Constructs a comprehensive registry mapping internal nodes to multi-level taxonomic annotations (subfamilies, tribes, subtribes, genera).
 }
 \keyword{internal}

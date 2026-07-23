@@ -2,11 +2,17 @@
 % Please edit documentation in R/visualization_helpers.R
 \name{assert_constraint_columns}
 \alias{assert_constraint_columns}
-\title{Assert constraint columns}
+\title{Assert Mandatory Constraint Table Columns}
 \usage{
 assert_constraint_columns(constraints_tbl)
 }
+\arguments{
+\item{constraints_tbl}{Data frame containing taxonomic classification hierarchy.}
+}
+\value{
+Invisible `TRUE` if validation passes; throws error otherwise.
+}
 \description{
-Assert constraint columns
+Verifies that the input taxonomic constraint data frame contains required classification columns.
 }
 \keyword{internal}

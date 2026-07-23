@@ -1,22 +1,40 @@
-#' Assemble Ingroup phylotaR Clusters
+#' Assemble Ingroup Sequence Clusters via phylotaR Similarity Mining
 #'
-#' @param wd_path Character. Path to the phylotaR workspace directory (where phylotaR cache and parameters are).
-#' @param target_genes_file Character. Path to the list of target markers. If NULL, defaults to package inst/extdata file.
-#' @param genes_map_file Character. Path to the locus mapping CSV file. If NULL, defaults to package inst/extdata file.
-#' @param manual_exclusions_file Character. Path to the manual exclusions CSV file. If NULL, defaults to package inst/extdata file.
-#' @param min_species Integer. Minimum species count per cluster to retain. Defaults to 50.
-#' @param preferred_parent Character. NCBI taxonomy ID of focal parent. Defaults to "3593" (Cactaceae).
-#' @param ncbi_dr Character. Path to the local BLAST+ binaries directory. If NULL, attempts to auto-detect.
-#' @param force_download Logical. If TRUE, executes fresh database calls; if FALSE (default) relies on local cache.
-#' @param out_dir Character. Directory to save all tables and fasta sequences.
+#' Retrieves orthologous sequence clusters for a focal taxonomic ingroup (e.g., family **Cactaceae**, NCBI Taxonomy ID: 3593)
+#' directly from GenBank using similarity clustering via `phylotaR` (Bennett *et al.*, 2018).
+#' Relying on sequence similarity rather than inconsistent locus annotations prevents missing orthologous sequence data
+#' caused by gene synonymy or mislabeling in public sequence repositories.
+#'
+#' @param wd_path Character. Path to the `phylotaR` workspace directory storing local parameters and database caches.
+#' @param target_genes_file Character. Path to the target locus list text file. If `NULL`, defaults to package `inst/extdata/target_genes.txt`.
+#' @param genes_map_file Character. Path to the gene synonymy mapping CSV file. If `NULL`, defaults to package `inst/extdata/genes_map.csv`.
+#' @param manual_exclusions_file Character. Path to the accession exclusion CSV file. If `NULL`, defaults to package `inst/extdata/manual_exclusions_ingroup.csv`.
+#' @param min_species Integer. Minimum number of distinct species required to retain an orthologous sequence cluster. Defaults to `50`.
+#' @param preferred_parent Character. NCBI Taxonomy ID of the focal ingroup parent node. Defaults to `"3593"` (Cactaceae).
+#' @param ncbi_dr Character. Path to local `BLAST+` binaries directory. If `NULL`, attempts system environment auto-detection.
+#' @param force_download Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.
+#' @param out_dir Character. Output directory path to save cluster summaries, FASTA sequence matrices, and log reports.
+#' @return A data frame summarizing sequence occupancy, taxon representation, and cluster characteristics across retained loci.
+#' @references
+#' Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. (2018).
+#' phylotaR: An automated pipeline for retrieving orthologous DNA sequences from GenBank in R.
+#' *Life*, 8(2), 20. \doi{10.3390/life8020020}
+#' @examples
+#' \dontrun{
+#' assemble_ingroup_phylotar(
+#'   wd_path = "0_phylotaR_raw_Ingroup",
+#'   min_species = 50,
+#'   preferred_parent = "3593"
+#' )
+#' }
 #' @export
 assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, min_species = 50, preferred_parent = "3593", ncbi_dr = NULL, force_download = FALSE, out_dir = "1_phylotaR_out_Ingroup") {
   
   
   # Resolve inputs
-  if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "CactusPhylo")
-  if (is.null(genes_map_file)) genes_map_file <- system.file("extdata", "genes_map.csv", package = "CactusPhylo")
-  if (is.null(manual_exclusions_file)) manual_exclusions_file <- system.file("extdata", "manual_exclusions_ingroup.csv", package = "CactusPhylo")
+  if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "PhyloCactus")
+  if (is.null(genes_map_file)) genes_map_file <- system.file("extdata", "genes_map.csv", package = "PhyloCactus")
+  if (is.null(manual_exclusions_file)) manual_exclusions_file <- system.file("extdata", "manual_exclusions_ingroup.csv", package = "PhyloCactus")
   
   if (!file.exists(target_genes_file)) stop("Target genes file not found at: ", target_genes_file)
   if (!file.exists(genes_map_file)) stop("Genes map file not found at: ", genes_map_file)
@@ -394,22 +412,38 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   return(res)
 }
 
-#' Assemble Outgroup phylotaR Clusters
+#' Assemble Outgroup Sequence Clusters via phylotaR
 #'
-#' @param wd_path Character. Path to the phylotaR workspace directory (where phylotaR cache and parameters are).
-#' @param target_genes_file Character. Path to the list of target markers. If NULL, defaults to package inst/extdata file.
-#' @param genes_map_file Character. Path to the locus mapping CSV file. If NULL, defaults to package inst/extdata file.
-#' @param manual_exclusions_file Character. Path to the manual exclusions CSV file. If NULL, defaults to package inst/extdata file.
-#' @param outgroups Character vector of outgroup SIDs to pull clusters for.
-#' @param force_download Logical. If TRUE, executes fresh database calls; if FALSE (default) relies on local cache.
-#' @param out_dir Character. Directory to save all tables and fasta sequences.
+#' Retrieves orthologous sequence clusters for specified outgroup lineages (e.g., *Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*)
+#' matching the locus target constraints defined for the focal ingroup. Outer reference sampling provides phylogenetically
+#' informative root positions necessary for maximum-likelihood tree search and divergence time estimation.
+#'
+#' @param wd_path Character. Path to the `phylotaR` workspace directory.
+#' @param target_genes_file Character. Path to the target locus list text file. If `NULL`, defaults to package `inst/extdata/target_genes.txt`.
+#' @param genes_map_file Character. Path to the gene synonymy mapping CSV file. If `NULL`, defaults to package `inst/extdata/genes_map.csv`.
+#' @param manual_exclusions_file Character. Path to outgroup exclusions CSV file. If `NULL`, defaults to package `inst/extdata/manual_exclusions_outgroup.csv`.
+#' @param outgroups Character vector of NCBI Taxonomy IDs for outgroup lineages. Defaults to `c("107598", "107617", "107583", "3582")`.
+#' @param force_download Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.
+#' @param out_dir Character. Output directory path to save outgroup cluster tables and FASTA sequence files.
+#' @return A list containing the processed outgroup cluster objects and retained cluster IDs.
+#' @references
+#' Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. (2018).
+#' phylotaR: An automated pipeline for retrieving orthologous DNA sequences from GenBank in R.
+#' *Life*, 8(2), 20. \doi{10.3390/life8020020}
+#' @examples
+#' \dontrun{
+#' assemble_outgroup_phylotar(
+#'   wd_path = "0_phylotaR_raw_Outgroup",
+#'   outgroups = c("3582", "107583")
+#' )
+#' }
 #' @export
 assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, outgroups = c("107598", "107617", "107583", "3582"), force_download = FALSE, out_dir = "1_phylotaR_out_Outgroup") {
   
   
-  if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "CactusPhylo")
-  if (is.null(genes_map_file)) genes_map_file <- system.file("extdata", "genes_map.csv", package = "CactusPhylo")
-  if (is.null(manual_exclusions_file)) manual_exclusions_file <- system.file("extdata", "manual_exclusions_outgroup.csv", package = "CactusPhylo")
+  if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "PhyloCactus")
+  if (is.null(genes_map_file)) genes_map_file <- system.file("extdata", "genes_map.csv", package = "PhyloCactus")
+  if (is.null(manual_exclusions_file)) manual_exclusions_file <- system.file("extdata", "manual_exclusions_outgroup.csv", package = "PhyloCactus")
   
   dir_out_base <- out_dir
   dir_out_cluster_fasta <- file.path(dir_out_base, "Cluster_raw_outgroup")
@@ -664,13 +698,25 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
   return(res)
 }
 
-#' Fetch Genbank Metadata
-#' @param sids A character vector of Sequence IDs to fetch.
-#' @param cache_file Character string specifying the cache file path.
-#' @param batch_size Integer for download batch size.
-#' @param sleep_time Numeric for delay between batches.
-#' @param max_retries Integer for maximum retry attempts.
-#' @param force_download Logical, if TRUE overrides existing cache.
+#' Fetch GenBank Sequence Metadata via NCBI Entrez Utilities
+#'
+#' Queries NCBI Entrez Utilities to retrieve sequence lengths, organism taxonomy, publication titles, and accession IDs
+#' for a collection of GenBank sequence identifiers (SIDs). Metadata retrieval enriches raw sequence clusters with verifiable audit data.
+#'
+#' @param sids Character vector of GenBank Sequence Identifiers (SIDs) to query.
+#' @param cache_file Character. File path to store and load cached metadata tables.
+#' @param batch_size Integer. Number of sequence IDs requested per HTTP batch query. Defaults to `200`.
+#' @param sleep_time Numeric. Pause duration in seconds between consecutive batch requests to respect NCBI rate limits. Defaults to `0.5`.
+#' @param max_retries Integer. Maximum retry attempts permitted per batch before failing. Defaults to `5`.
+#' @param force_download Logical. Force fresh Entrez queries instead of loading local cache? Defaults to `FALSE`.
+#' @return A data frame containing fetched GenBank metadata fields for each requested sequence ID.
+#' @examples
+#' \dontrun{
+#' fetch_genbank_metadata(
+#'   sids = c("AY123456", "AY123457"),
+#'   cache_file = "cache_metadata.csv"
+#' )
+#' }
 #' @export
 fetch_genbank_metadata <- function(sids, cache_file, batch_size = 200, sleep_time = 0.5, max_retries = 5, force_download = FALSE) {
   cp_download_all_metadata(sids, cache_file, batch_size, sleep_time, max_retries, log_message = message)

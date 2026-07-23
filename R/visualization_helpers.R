@@ -1,4 +1,9 @@
-#' Standardization helper
+#' Standardize Taxon Name Strings
+#'
+#' Standardizes scientific taxon binomials by replacing whitespace, dashes, and duplicate underscores with single underscores.
+#'
+#' @param x Character vector of taxon binomial strings.
+#' @return Character vector of formatted taxon names.
 #' @export
 #' @keywords internal
 standardize_taxon <- function(x) {
@@ -7,7 +12,12 @@ standardize_taxon <- function(x) {
     stringr::str_replace_all("^_|_$", "")
 }
 
-#' Assert constraint columns
+#' Assert Mandatory Constraint Table Columns
+#'
+#' Verifies that the input taxonomic constraint data frame contains required classification columns.
+#'
+#' @param constraints_tbl Data frame containing taxonomic classification hierarchy.
+#' @return Invisible `TRUE` if validation passes; throws error otherwise.
 #' @export
 #' @keywords internal
 assert_constraint_columns <- function(constraints_tbl) {
@@ -26,7 +36,13 @@ assert_constraint_columns <- function(constraints_tbl) {
   invisible(TRUE)
 }
 
-#' Prepare tip annotation
+#' Prepare Tip Annotations Matched to Tree Leaves
+#'
+#' Matches and standardizes taxonomic metadata from a classification table against tree tip labels.
+#'
+#' @param tree Object of class `phylo` representing a phylogenetic tree.
+#' @param constraints_tbl Data frame containing taxonomic constraint annotations.
+#' @return Data frame of tip annotations filtered to matching tree tips.
 #' @export
 #' @keywords internal
 prepare_tip_annotation <- function(tree, constraints_tbl) {
@@ -51,7 +67,16 @@ prepare_tip_annotation <- function(tree, constraints_tbl) {
   matched
 }
 
-#' Compute group nodes
+#' Compute Most Recent Common Ancestor (MRCA) Nodes for Taxon Groups
+#'
+#' Identifies internal MRCA node numbers and evaluates monophyly for specified taxonomic groups within a phylogenetic tree.
+#'
+#' @param tree Object of class `phylo`.
+#' @param tip_tbl Data frame containing tip annotations.
+#' @param group_col Character. Column name in `tip_tbl` specifying group assignments.
+#' @param group_values Character vector. Optional subset of group values to evaluate. Defaults to `NULL`.
+#' @param min_tips Integer. Minimum required tips per group. Defaults to `2L`.
+#' @return A `tibble` containing group names, MRCA node numbers, tip counts, and monophyly logical indicators.
 #' @export
 #' @keywords internal
 compute_group_nodes <- function(tree, tip_tbl, group_col, group_values = NULL, min_tips = 2L) {
@@ -68,70 +93,61 @@ compute_group_nodes <- function(tree, tip_tbl, group_col, group_values = NULL, m
   
   if (!nrow(tbl)) {
     return(tibble::tibble(
-      group_col = character(),
-      label = character(),
-      n_tips_target = integer(),
-      n_tips_desc = integer(),
-      node = integer(),
-      monophyletic = logical(),
-      reason = character()
+      label = character(0),
+      node = integer(0),
+      n_tips_target = integer(0),
+      n_tips_sub = integer(0),
+      monophyletic = logical(0)
     ))
   }
   
-  groups <- split(tbl$tip_label, tbl[[group_col]])
+  groups <- unique(tbl[[group_col]])
   
-  purrr::imap_dfr(groups, function(tips, grp) {
-    tips <- sort(unique(tips))
-    n_tips_target <- length(tips)
+  res <- purrr::map_dfr(groups, function(grp) {
+    grp_tips <- tbl |> dplyr::filter(.data[[group_col]] == grp) |> dplyr::pull(tip_label)
+    grp_tips <- intersect(grp_tips, tree$tip.label)
     
-    if (n_tips_target < min_tips) {
-      return(tibble::tibble(
-        group_col = group_col,
-        label = grp,
-        n_tips_target = n_tips_target,
-        n_tips_desc = NA_integer_,
-        node = NA_integer_,
-        monophyletic = FALSE,
-        reason = paste0("fewer than ", min_tips, " matching tips")
-      ))
-    }
+    if (length(grp_tips) < min_tips) return(NULL)
     
-    if (n_tips_target == 1L) {
-      node <- match(tips[1], tree$tip.label)
-      mono <- TRUE
-      desc_tips <- tips
-      n_tips_desc <- 1L
-    } else {
-      node <- suppressWarnings(ape::getMRCA(tree, tips))
-      if (length(node) == 0 || is.null(node) || is.na(node)) {
-        return(tibble::tibble(
-          group_col = group_col,
-          label = grp,
-          n_tips_target = n_tips_target,
-          n_tips_desc = NA_integer_,
-          node = NA_integer_,
-          monophyletic = FALSE,
-          reason = "getMRCA returned NA"
-        ))
-      }
-      desc_tips <- sort(unique(ape::extract.clade(tree, node)$tip.label))
-      n_tips_desc <- length(desc_tips)
-      mono <- identical(desc_tips, tips)
-    }
-
+    mrca_node <- ape::getMRCA(tree, grp_tips)
+    if (is.null(mrca_node)) return(NULL)
+    
+    sub_tips <- ape::extract.clade(tree, mrca_node)$tip.label
+    is_mono <- length(setdiff(sub_tips, grp_tips)) == 0
+    
     tibble::tibble(
-      group_col = group_col,
       label = grp,
-      n_tips_target = n_tips_target,
-      n_tips_desc = n_tips_desc,
-      node = as.integer(node),
-      monophyletic = mono,
-      reason = ifelse(mono, NA_character_, "MRCA descendants do not equal target tip set")
+      node = as.integer(mrca_node),
+      n_tips_target = length(grp_tips),
+      n_tips_sub = length(sub_tips),
+      monophyletic = is_mono
     )
   })
+  
+  if (is.null(res) || !nrow(res)) {
+    return(tibble::tibble(
+      label = character(0),
+      node = integer(0),
+      n_tips_target = integer(0),
+      n_tips_sub = integer(0),
+      monophyletic = logical(0)
+    ))
+  }
+  
+  res
 }
 
-#' Get annotation nodes
+#' Extract Monophyletic Internal Annotation Nodes
+#'
+#' Retrieves internal node numbers for monophyletic taxonomic groups across a phylogenetic tree.
+#'
+#' @param tree Object of class `phylo`.
+#' @param constraints_tbl Data frame containing taxonomic classification.
+#' @param group_col Character. Column name defining group annotations.
+#' @param group_values Character vector. Optional subset of group values. Defaults to `NULL`.
+#' @param min_tips Integer. Minimum tip count. Defaults to `2L`.
+#' @param require_monophyly Logical. Exclude non-monophyletic groups? Defaults to `TRUE`.
+#' @return A `tibble` of node annotations.
 #' @export
 #' @keywords internal
 get_annotation_nodes <- function(tree,
@@ -157,7 +173,16 @@ get_annotation_nodes <- function(tree,
   out
 }
 
-#' Build annotation registry
+#' Build Taxonomic Annotation Registry across Tree Levels
+#'
+#' Constructs a comprehensive registry mapping internal nodes to multi-level taxonomic annotations (subfamilies, tribes, subtribes, genera).
+#'
+#' @param tree Object of class `phylo`.
+#' @param constraints_tbl Data frame containing taxonomic classifications.
+#' @param main_level4_values Character vector of main level 4 (genus) annotations. Defaults to `NULL`.
+#' @param supp_level4_min_tips Integer. Minimum tip threshold for secondary level 4 annotations. Defaults to `10L`.
+#' @param require_monophyly Logical. Enforce monophyly constraint? Defaults to `TRUE`.
+#' @return A named list of annotation node data frames organized by taxonomic level.
 #' @export
 #' @keywords internal
 build_annotation_registry <- function(tree, constraints_tbl,
@@ -217,9 +242,13 @@ build_annotation_registry <- function(tree, constraints_tbl,
   )
 }
 
-#' Augment treedata with registry annotations
-#' @param treedata_obj A treedata object
-#' @param registry A registry data frame
+#' Augment treedata Object with Registry Metadata
+#'
+#' Joins multi-level taxonomic clade annotations from a registry onto a `treedata` object.
+#'
+#' @param treedata_obj An object of class `treedata` or `phylo`.
+#' @param registry A named list of annotation registry data frames.
+#' @return An augmented `treedata` object.
 #' @export
 augment_treedata_with_registry <- function(treedata_obj, registry) {
   if (!inherits(treedata_obj, "treedata")) {
@@ -258,7 +287,21 @@ augment_treedata_with_registry <- function(treedata_obj, registry) {
   return(treedata_obj)
 }
 
-#' Add clade labels by level
+#' Add Clade Labels to ggtree Plot by Taxonomic Level
+#'
+#' Annotates clade labels and vertical bars onto a `ggtree` plot object corresponding to monophyletic node annotations.
+#'
+#' @param p A `ggtree` plot object.
+#' @param label_tbl Data frame containing node label annotations.
+#' @param fontsize Numeric. Font size for clade labels. Defaults to `3`.
+#' @param barsize Numeric. Line width for clade annotation bars. Defaults to `0.45`.
+#' @param offset Numeric. Horizontal offset fraction for clade bars. Defaults to `0.03`.
+#' @param offset_text Numeric. Offset fraction for label text. Defaults to `0.004`.
+#' @param fontface Character. Font face specification (e.g., `"plain"`, `"bold"`, `"italic"`). Defaults to `"plain"`.
+#' @param sort_desc Logical. Sort clade labels in descending order by tip height? Defaults to `TRUE`.
+#' @param angle Numeric. Rotation angle for text labels in degrees. Defaults to `0`.
+#' @param align Logical. Align clade bars to common rightmost margin? Defaults to `TRUE`.
+#' @return Updated `ggtree` plot object containing clade label layers.
 #' @export
 #' @keywords internal
 add_clade_labels_by_level <- function(p,
@@ -311,7 +354,14 @@ add_clade_labels_by_level <- function(p,
   p
 }
 
-#' Apply clade label layers
+#' Apply Multiple Taxonomic Clade Label Layers onto ggtree Plot
+#'
+#' Sequentially overlays hierarchical taxonomic clade annotations (e.g., subfamilies, tribes, genera) onto a `ggtree` plot.
+#'
+#' @param p A `ggtree` plot object.
+#' @param registry Named list of node annotation data frames.
+#' @param layer_specs Data frame defining visual style specifications per annotation layer.
+#' @return Updated `ggtree` plot object.
 #' @export
 #' @keywords internal
 apply_clade_label_layers <- function(p, registry, layer_specs) {
@@ -342,7 +392,12 @@ apply_clade_label_layers <- function(p, registry, layer_specs) {
   p
 }
 
-#' Get tree max depth
+#' Compute Maximum Depth of a Dated Chronogram Tree
+#'
+#' Calculates the maximum root-to-tip temporal distance of an ultrametric tree in Millions of Years ago (Ma).
+#'
+#' @param tree Object of class `phylo`.
+#' @return Numeric scalar representing maximum tree depth.
 #' @export
 #' @keywords internal
 get_tree_max_depth <- function(tree) {
@@ -350,7 +405,13 @@ get_tree_max_depth <- function(tree) {
   max(tip_depths, na.rm = TRUE)
 }
 
-#' Format age labels
+#' Format Age Labels for Chronogram Axis Ticks
+#'
+#' Formats numerical node age breaks into clean text strings for timeline axes.
+#'
+#' @param x Numeric vector of geological age values in Ma.
+#' @param digits Integer. Decimal precision for rounding. Defaults to `1L`.
+#' @return Character vector of formatted age labels.
 #' @export
 #' @keywords internal
 format_age_labels <- function(x, digits = 1L) {
@@ -359,7 +420,21 @@ format_age_labels <- function(x, digits = 1L) {
   sub("\\.0+$", "", out)
 }
 
-#' Add chronogram axis
+#' Add Geological Time Scale Axis to a Chronogram ggtree Plot
+#'
+#' Draws a standardized geological timeline axis (Ma before present) beneath an ultrametric chronogram `ggtree` plot.
+#'
+#' @param p A `ggtree` plot object.
+#' @param tree Object of class `phylo`.
+#' @param by Numeric. Interval in Ma between consecutive tick marks. Defaults to `5`.
+#' @param digits Integer. Decimal precision for age labels. Defaults to `0L`.
+#' @param axis_offset_frac Numeric. Vertical offset fraction for axis line. Defaults to `0.052`.
+#' @param tick_height_frac Numeric. Vertical height fraction for tick marks. Defaults to `0.010`.
+#' @param label_offset_frac Numeric. Vertical offset fraction for age text labels. Defaults to `0.028`.
+#' @param title_margin_top Numeric. Top margin for axis title. Defaults to `28`.
+#' @param bar_size Numeric. Axis title font size. Defaults to `12`.
+#' @param segment_size Numeric. Text font size for age labels. Defaults to `2.5`.
+#' @return Updated `ggtree` plot object containing the geological age axis layer.
 #' @export
 #' @keywords internal
 add_chronogram_axis <- function(p, tree, by = 5, digits = 0L,

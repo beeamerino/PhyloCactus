@@ -21,11 +21,14 @@ integrate_publication_tree(
 
 \item{out_dir}{Character. Publication figures directory.}
 
-\item{collapse_cutoff}{Numeric. TBE threshold to collapse nodes (0.0 to 1.0).}
+\item{collapse_cutoff}{Numeric. TBE threshold to collapse weak nodes into soft polytomies (0.0 to 1.0; default 0.70).}
 }
 \value{
-A matrix listing exported items and verification parameters.
+A data frame listing exported figure files and threshold parameters.
 }
 \description{
-Render Final Publication Figures and Registry
+Maps statistical support values (e.g., Transfer Bootstrap Expectation, TBE) onto nodes of the
+final chronogram and maximum-likelihood phylogeny. Nodes failing to meet the minimum support threshold
+(`collapse_cutoff`) are systematically collapsed into soft polytomies (analytical uncertainty)
+to produce conservative, publication-ready figures.
 }

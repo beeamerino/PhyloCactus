@@ -1,5 +1,5 @@
 # -------------------------------------------------------------
-# CactusPhylo: Tutorial 3 - Phylogenetics Pipeline: Data Visualization and IUCN Summaries
+# PhyloCactus: Tutorial 3 - Phylogenetics Pipeline: Data Visualization and IUCN Summaries
 # -------------------------------------------------------------
 # This script covers Stages 11 and 12:
 # Data Visualization, IUCN Enrichment, and Manuscript Figures.
@@ -10,7 +10,7 @@
 # ============================================================
 # LIBRARIES
 # ============================================================
-library(CactusPhylo)
+library(PhyloCactus)
 library(dplyr)
 library(tidyr)
 library(stringr)
@@ -23,7 +23,7 @@ library(ggtree)
 library(ape)
 library(treeio)
 
-tutorial_dir <- "~/Desktop/CactusPhylo_Tutorial"
+tutorial_dir <- "~/Desktop/PhyloCactus_Tutorial"
 setwd(tutorial_dir)
 
 # ============================================================
@@ -44,7 +44,7 @@ species_file <- "6_Concatenated/final_tables/TABLE_final_species_alignment_summa
 output_file <- "9_Visualization/tables/TABLE_species_all_data.csv"
 marker_stats_file <- "6_Concatenated/final_tables/TABLE_marker_statistics.csv"
 marker_ranges_file <- "6_Concatenated/final_tables/TABLE_marker_ranges.tsv"
-accepted_list_file <- system.file("extdata", "CactaceaeFullList_accepted.csv", package = "CactusPhylo")
+accepted_list_file <- system.file("extdata", "CactaceaeFullList_accepted.csv", package = "PhyloCactus")
 supp_tree_file <- "7_Phylogenetics/cactus_support.raxml.support"
 dated_tree_file <- "8_Dating/BestTree_treePL.tree"
 chrono_file <- "8_Dating/dated_summary_hpd.tree"
@@ -100,7 +100,7 @@ species_summary <- species_summary %>%
 # Note: By default, it processes the first 20 species to avoid long waits in the tutorial.
 # Change [1:20] to use all species: species_summary$species_clean
 message("Extracting IUCN data...")
-iucn_data <- map_dfr(species_summary$species_clean[1:20], CactusPhylo::get_iucn_data)
+iucn_data <- map_dfr(species_summary$species_clean[1:20], PhyloCactus::get_iucn_data)
 
 message("Building final table...")
 species_summary_iucn <- species_summary %>%
@@ -286,7 +286,7 @@ if (file.exists(supp_tree_file)) {
   ml_tree <- ape::ladderize(ml_tree)
   
   # Load constraints table required for annotation
-  constraints_csv_path <- system.file("extdata", "cactus_constraints.csv", package = "CactusPhylo")
+  constraints_csv_path <- system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus")
   if (file.exists(constraints_csv_path) && nzchar(constraints_csv_path)) {
     constraints_tbl <- read_csv(constraints_csv_path, show_col_types = FALSE)
     
@@ -304,7 +304,7 @@ if (file.exists(supp_tree_file)) {
       "level_1", 4.5, 0.85, 0.270, 0.0100, "bold", TRUE, 270, TRUE
     )
     
-    registry <- CactusPhylo::build_annotation_registry(
+    registry <- PhyloCactus::build_annotation_registry(
       tree = ml_tree,
       constraints_tbl = constraints_tbl,
       main_level4_values = MAIN_LEVEL4_VALUES,
@@ -336,7 +336,7 @@ if (file.exists(supp_tree_file)) {
       theme(legend.position = "bottom")
 
     # Apply complex formatting using original script logic
-    p_ml <- CactusPhylo::apply_clade_label_layers(p_ml, registry, ML_MAIN_LAYER_SPECS)
+    p_ml <- PhyloCactus::apply_clade_label_layers(p_ml, registry, ML_MAIN_LAYER_SPECS)
     # Add expansion for large trees
     xmax <- max(p_ml$data$x, na.rm = TRUE)
     p_ml <- p_ml + coord_cartesian(xlim = c(0, xmax + xmax * 0.35), clip = "off") + theme(plot.margin = margin(12, 12, 12, 12))
@@ -357,12 +357,12 @@ if (file.exists(supp_tree_file)) {
       geom_tiplab(size = 0.70, align = FALSE, linetype = "solid", linesize = 0.15, colour = "grey20") +
       geom_nodelab(aes(label = support_label), size = 0.70, hjust = 0.7, colour = "black", na.rm = TRUE) +
       theme(legend.position = "none")
-    p_ml_supp <- CactusPhylo::apply_clade_label_layers(p_ml_supp, registry, ML_SUPP_LAYER_SPECS)
+    p_ml_supp <- PhyloCactus::apply_clade_label_layers(p_ml_supp, registry, ML_SUPP_LAYER_SPECS)
     xmax_supp <- max(p_ml_supp$data$x, na.rm = TRUE)
     p_ml_supp <- p_ml_supp + coord_cartesian(xlim = c(0, xmax_supp + xmax_supp * 0.30), clip = "off") + theme(plot.margin = margin(12, 12, 12, 12))
     ggsave("9_Visualization/figures/Figure_14_ML_Tree_Extended.pdf", p_ml_supp, width = 36, height = 48)
 
-    annotated_treedata <- CactusPhylo::augment_treedata_with_registry(ml_tree_plot, registry)
+    annotated_treedata <- PhyloCactus::augment_treedata_with_registry(ml_tree_plot, registry)
     treeio::write.beast(annotated_treedata, file = "9_Visualization/figures/annotated_ml_tree.tree")
 
   } else {
@@ -382,7 +382,7 @@ chrono_file <- "8_Dating/dated_summary_hpd.tree"
 if (file.exists(chrono_file)) {
   chrono_beast <- treeio::read.beast(chrono_file)
   
-  constraints_csv_path <- system.file("extdata", "cactus_constraints.csv", package = "CactusPhylo")
+  constraints_csv_path <- system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus")
   if (file.exists(constraints_csv_path) && nzchar(constraints_csv_path)) {
     constraints_tbl <- read_csv(constraints_csv_path, show_col_types = FALSE)
     tree_phy <- as.phylo(chrono_beast)
@@ -400,7 +400,7 @@ if (file.exists(chrono_file)) {
       "level_1", 4.5, 0.85, 0.270, 0.0100, "bold", TRUE, 270, TRUE
     )
     
-    registry_chrono <- CactusPhylo::build_annotation_registry(
+    registry_chrono <- PhyloCactus::build_annotation_registry(
       tree = tree_phy,
       constraints_tbl = constraints_tbl,
       main_level4_values = MAIN_LEVEL4_VALUES,
@@ -412,8 +412,8 @@ if (file.exists(chrono_file)) {
       geom_range(range = 'height_0.95_HPD', color = 'gray60', alpha = 0.4, linewidth = 1.5) +
       theme_tree()
     
-    p_chrono <- CactusPhylo::apply_clade_label_layers(p_chrono, registry_chrono, CHRONO_MAIN_LAYER_SPECS)
-    p_chrono <- CactusPhylo::add_chronogram_axis(p_chrono, tree_phy, by = 5, digits = 0L, segment_size = 3, title_margin_top = 30)
+    p_chrono <- PhyloCactus::apply_clade_label_layers(p_chrono, registry_chrono, CHRONO_MAIN_LAYER_SPECS)
+    p_chrono <- PhyloCactus::add_chronogram_axis(p_chrono, tree_phy, by = 5, digits = 0L, segment_size = 3, title_margin_top = 30)
     
     xmax <- max(p_chrono$data$x, na.rm = TRUE)
     p_chrono <- p_chrono + coord_cartesian(xlim = c(0, xmax + xmax * 0.35), clip = "off") + theme(plot.margin = margin(12, 12, 12, 12))
@@ -434,13 +434,13 @@ if (file.exists(chrono_file)) {
       geom_tiplab(size = 0.85, align = FALSE, linetype = "solid", linesize = 0.15, colour = "grey20") +
       geom_range(range = 'height_0.95_HPD', color = 'gray60', alpha = 0.4, linewidth = 0.8) +
       theme_tree()
-    p_chrono_supp <- CactusPhylo::apply_clade_label_layers(p_chrono_supp, registry_chrono, CHRONO_SUPP_LAYER_SPECS)
-    p_chrono_supp <- CactusPhylo::add_chronogram_axis(p_chrono_supp, tree_phy, by = 5, digits = 0L, segment_size = 10, title_margin_top = 28, bar_size = 30)
+    p_chrono_supp <- PhyloCactus::apply_clade_label_layers(p_chrono_supp, registry_chrono, CHRONO_SUPP_LAYER_SPECS)
+    p_chrono_supp <- PhyloCactus::add_chronogram_axis(p_chrono_supp, tree_phy, by = 5, digits = 0L, segment_size = 10, title_margin_top = 28, bar_size = 30)
     xmax_chrono_supp <- max(p_chrono_supp$data$x, na.rm = TRUE)
     p_chrono_supp <- p_chrono_supp + coord_cartesian(xlim = c(0, xmax_chrono_supp + xmax_chrono_supp * 0.30), clip = "off") + theme(plot.margin = margin(12, 12, 32, 12))
     ggsave("9_Visualization/figures/Figure_16_Chronogram_Extended.pdf", p_chrono_supp, width = 36, height = 48)
 
-    annotated_chrono <- CactusPhylo::augment_treedata_with_registry(chrono_beast, registry_chrono)
+    annotated_chrono <- PhyloCactus::augment_treedata_with_registry(chrono_beast, registry_chrono)
     treeio::write.beast(annotated_chrono, file = "9_Visualization/figures/annotated_chronogram.tree")
 
   }

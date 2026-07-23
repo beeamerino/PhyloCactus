@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{calculate_temporal_bootstraps}
 \alias{calculate_temporal_bootstraps}
-\title{Compute Temporal Best Maximum-Likelihood Tree Constrained Bootstrap Replicates}
+\title{Estimate Temporal Bootstrap Replicates Constrained to Best ML Topology}
 \usage{
 calculate_temporal_bootstraps(
   raxml_bin_path,
@@ -18,29 +18,31 @@ calculate_temporal_bootstraps(
 )
 }
 \arguments{
-\item{raxml_bin_path}{Character. System RAxML-NG path.}
+\item{raxml_bin_path}{Character. System command or full path to executable `RAxML-NG` binary.}
 
-\item{aln_file}{Character. Multiple sequence alignment path.}
+\item{aln_file}{Character. Path to input PHYLIP supermatrix alignment file.}
 
-\item{part_file}{Character. Partitions model path.}
+\item{part_file}{Character. Path to partition file specifying substitution models.}
 
-\item{best_tree_file}{Character. Best tree topology path (used as constraint).}
+\item{best_tree_file}{Character. Path to reference maximum-likelihood tree topology file (used as constraint).}
 
-\item{bs_trees}{Integer. Bootstrap replicates for temporal analysis. Defaults to 500.}
+\item{bs_trees}{Integer. Total number of temporal bootstrap trees to generate. Defaults to `500`.}
 
-\item{outgroup}{Character. Outgroup taxon. Defaults to NULL.}
+\item{outgroup}{Character. Optional outgroup taxon binomial. Defaults to `NULL`.}
 
-\item{seed}{Integer. Seed. Defaults to 111.}
+\item{seed}{Integer. Random seed for reproducible temporal bootstrap initialization. Defaults to `111`.}
 
-\item{threads}{Integer. Run threads.}
+\item{threads}{Integer. Number of CPU threads. Defaults to `4`.}
 
-\item{output_dir}{Character. Directory to write outputs.}
+\item{output_dir}{Character. Directory path to save output temporal bootstrap trees. Defaults to `dirname(aln_file)`.}
 
-\item{prefix}{Character. Output prefix. Defaults to "cactus_temporal".}
+\item{prefix}{Character. Output file prefix. Defaults to `"cactus_temporal"`.}
 }
 \value{
-Output bootstrap trees file.
+Character path to the resulting temporal bootstrap trees file (`.raxml.bootstraps`).
 }
 \description{
-Compute Temporal Best Maximum-Likelihood Tree Constrained Bootstrap Replicates
+Generates non-parametric bootstrap tree replicates where branch lengths are re-estimated while holding the focal maximum-likelihood topology constrained.
+Temporal bootstraps propagate branch length uncertainty into downstream penalized likelihood divergence time estimation (`treePL`),
+providing empirical confidence intervals for node ages without introducing topological variance.
 }

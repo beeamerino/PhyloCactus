@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{calculate_rf_distances}
 \alias{calculate_rf_distances}
-\title{Compute Robinson-Foulds Distances between Maximum-Likelihood Trees}
+\title{Compute Robinson-Foulds Distances Across Maximum-Likelihood Trees}
 \usage{
 calculate_rf_distances(
   raxml_bin_path,
@@ -12,17 +12,18 @@ calculate_rf_distances(
 )
 }
 \arguments{
-\item{raxml_bin_path}{Character. System RAxML-NG path.}
+\item{raxml_bin_path}{Character. System command or full path to executable `RAxML-NG` binary.}
 
-\item{ml_trees_file}{Character. Path to .raxml.mlTrees file.}
+\item{ml_trees_file}{Character. Path to input `.raxml.mlTrees` file containing multiple ML tree search replicates.}
 
-\item{output_dir}{Character. Directory for outputs. Defaults to ml_trees_file directory.}
+\item{output_dir}{Character. Output directory for RF distance calculations. Defaults to `dirname(ml_trees_file)`.}
 
-\item{prefix}{Character. Output prefix. Defaults to "cactus_RF".}
+\item{prefix}{Character. Output file prefix. Defaults to `"cactus_RF"`.}
 }
 \value{
-Output prefix distance path.
+Character path to the resulting RF distance output file (`.raxml.rfdist`).
 }
 \description{
-Compute Robinson-Foulds Distances between Maximum-Likelihood Trees
+Computes pairwise Robinson-Foulds (RF) topological distances across tree topologies generated during maximum-likelihood search in `RAxML-NG`.
+Quantifying topological variance evaluates whether independent search runs converged on identical tree topologies.
 }

@@ -2,17 +2,35 @@
 % Please edit documentation in R/alignment.R
 \name{run_joint_realignment}
 \alias{run_joint_realignment}
-\title{Run Final Joint Realignment Pipeline}
+\title{Perform Joint Realignment Across Integrated Ingroup and Outgroup Sequences}
 \usage{
 run_joint_realignment(input_dir, output_fasta_dir, output_aln_dir)
 }
 \arguments{
-\item{input_dir}{Character.}
+\item{input_dir}{Character. Directory containing merged, taxonomically reconciled locus FASTA files.}
 
-\item{output_fasta_dir}{Character.}
+\item{output_fasta_dir}{Character. Directory path to save output realigned FASTA sequence files.}
 
-\item{output_aln_dir}{Character.}
+\item{output_aln_dir}{Character. Directory path to store detailed realignment log reports.}
+}
+\value{
+Invisible NULL upon successful execution.
 }
 \description{
-Run Final Joint Realignment Pipeline
+Re-estimates positional homology alignments (`MAFFT`) after aggregating ingroup and outgroup sequence markers.
+Joint realignment accommodates positional variations introduced when combining outgroup taxons with the focal ingroup clade.
+}
+\examples{
+\dontrun{
+run_joint_realignment(
+  input_dir = "4_Cleaned/cleaned_markers",
+  output_fasta_dir = "5_MAFFT_Cleaned",
+  output_aln_dir = "5_MAFFT_Cleaned/aligned_markers"
+)
+}
+}
+\references{
+Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7:
+Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772–780.
+\doi{10.1093/molbev/mst010}
 }

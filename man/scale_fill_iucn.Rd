@@ -2,13 +2,25 @@
 % Please edit documentation in R/iucn.R
 \name{scale_fill_iucn}
 \alias{scale_fill_iucn}
-\title{IUCN Category Color Scale for ggplot2}
+\title{Standardized IUCN Category Color Scale for ggplot2}
 \usage{
 scale_fill_iucn(...)
 }
 \arguments{
-\item{...}{arguments passed to scale_fill_manual}
+\item{...}{Additional arguments passed directly to `ggplot2::scale_fill_manual`.}
+}
+\value{
+A `ggplot2` manual scale fill layer object.
 }
 \description{
-IUCN Category Color Scale for ggplot2
+Applies a standardized, publication-grade hex color palette representing official IUCN Red List threat categories
+(EX, EW, CR, EN, VU, NT, LC, DD, NE) onto `ggplot2` comparative phylogenetic graphics.
+}
+\examples{
+\dontrun{
+library(ggplot2)
+ggplot(df, aes(x = species, fill = iucn_category)) +
+  geom_bar() +
+  scale_fill_iucn()
+}
 }

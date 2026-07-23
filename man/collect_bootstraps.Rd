@@ -2,7 +2,7 @@
 % Please edit documentation in R/inference.R
 \name{collect_bootstraps}
 \alias{collect_bootstraps}
-\title{Collect Bootstrap Trees}
+\title{Collect and Concatenate Parallel Bootstrap Tree Outputs}
 \usage{
 collect_bootstraps(
   bs_dir,
@@ -11,15 +11,15 @@ collect_bootstraps(
 )
 }
 \arguments{
-\item{bs_dir}{Character. Directory where bootstraps chunks are stored.}
+\item{bs_dir}{Character. Directory path containing chunked bootstrap output files.}
 
-\item{output_dir}{Character. Directory to write concatenated bootstraps. Defaults to bs_dir.}
+\item{output_dir}{Character. Output directory path to save concatenated bootstrap file. Defaults to `bs_dir`.}
 
-\item{prefix}{Character. Prefix to use. Defaults to "cactus_ALL_bootstraps".}
+\item{prefix}{Character. File output prefix. Defaults to `"cactus_ALL_bootstraps"`.}
 }
 \value{
-Path to concatenated trees file.
+Character path to the concatenated bootstrap tree file (`.tree`).
 }
 \description{
-Collect Bootstrap Trees
+Scans a target directory for chunked bootstrap output files (`.raxml.bootstraps`) and concatenates them into a single Newick tree file.
 }
