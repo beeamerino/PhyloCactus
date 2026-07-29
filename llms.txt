@@ -1,42 +1,50 @@
 # PhyloCactus
 
-**Reproducible phylogenomic workflows for data assembly, evolutionary
+**Reproducible R workflows for multilocus data assembly, evolutionary
 modeling, maximum-likelihood inference, and divergence time estimation
 in plant radiations**
 
 ## Overview & Biological Motivation
 
-Reconstructing evolutionary relationships within plant clades
-characterized by recent adaptive radiations presents profound
-methodological challenges in systematic biology. The family
-**Cactaceae** represents one of the most prominent succulent plant
-radiations in the Neotropics (Arakaki *et al*. 2011; Hernández-Hernández
-*et al*. 2014; Guerrero *et al*. 2019). Evolutionary inference across
-this family is hindered by low plastid sequence divergence, persistent
-gene tree discordance driven by incomplete lineage sorting (ILS) and
-ancient reticulation, and pervasive nomenclatural synonymies in public
-sequence repositories.
+Constructing reliable multilocus molecular sequence matrices directly
+from public repositories such as GenBank presents a fundamental
+computational challenge in systematic biology. Sequence records
+deposited across decades frequently exhibit inconsistent locus
+annotations, duplicated accessions, unvouchered identifications,
+orthographic variants, and massive nomenclatural synonymies.
+Transforming these uncurated records into high-quality phylogenetic
+matrices requires intensive manual curation, taxonomic reconciliation
+against authoritative botanical checklists, and rigorous alignment
+quality control.
 
-When assembling multilocus datasets from public repositories such as
-GenBank, researchers frequently encounter inconsistent locus
-annotations, duplicated accessions, unvouchered identifications, and
-heterogeneous sequence quality. Transforming these uncurated sequence
-records into high-quality phylogenetic datasets requires systematic
-procedures to establish positional homology, evaluate mutational
-saturation, control rate heterogeneity across genomic partitions, and
-calibrate divergence times using penalized likelihood.
+This computational problem becomes exponentially more complex when
+targeting plant lineages with intricate evolutionary histories. Clades
+characterized by recent explosive adaptive radiations, low plastid
+sequence divergence, incomplete lineage sorting (ILS), and ancient
+reticulate evolution amplify the risk of misidentifying orthology,
+accumulating systematic alignment noise, and producing biased
+topological reconstructions.
 
-`PhyloCactus` provides an integrative, reproducible R framework designed
-to address these challenges. Rather than relying on manual ad hoc
-scripts, `PhyloCactus` orchestrates established bioinformatics software
-into a standardized 4-stage pipeline. The package automates
-orthology-based sequence retrieval (`phylotaR`), alignment of positional
-homology (`MAFFT`), objective quality control masking (`DECIPHER`),
-substitution model evaluation (`ModelTest-NG`), constrained
-maximum-likelihood topology inference (`RAxML-NG`), Transfer Bootstrap
-Expectation support mapping (`TBE`), penalized likelihood chronogram
-estimation (`treePL`), IUCN Red List metadata enrichment (`rredlist`),
-and multispecies coalescent tree-space validation (`ASTRAL-III`).
+The family **Cactaceae** serves as the prime empirical exemplar of these
+combined computational and biological hurdles. Comprising one of the
+largest succulent plant radiations in the Neotropics (Arakaki *et al*.
+2011; Hernández-Hernández *et al*. 2014; Guerrero *et al*. 2019), cactus
+phylogenetics requires extensive data curation to resolve persistent
+gene tree discordance and handle heterogeneous molecular datasets.
+
+`PhyloCactus` was developed to transform this complex data preparation
+and analytical process into a fully automated, transparent, and
+reproducible R workflow. Rather than relying on manual ad hoc scripts,
+`PhyloCactus` orchestrates established bioinformatics software into a
+standardized 4-stage pipeline. The package automates orthology-based
+sequence retrieval (`phylotaR`), alignment of positional homology
+(`MAFFT`), objective quality control masking (`DECIPHER`), mutational
+saturation screening, substitution model evaluation (`ModelTest-NG`),
+constrained maximum-likelihood topology inference (`RAxML-NG`), Transfer
+Bootstrap Expectation support mapping (`TBE`), penalized likelihood
+chronogram estimation (`treePL`), IUCN Red List metadata enrichment
+(`rredlist`), and multispecies coalescent tree-space validation
+(`ASTRAL-III`).
 
 ## Four-Stage Analytical Architecture
 
@@ -49,16 +57,16 @@ Architecture](reference/figures/Fig1_PhyloCactus_Workflow.png)
 PhyloCactus Workflow Architecture
 
 1.  **Stage 1: Data Assembly and Preparation (Modules 1 to 6)**  
-    Retrieves orthologous sequence clusters using BLAST-based similarity
-    clustering via `phylotaR`, avoiding GenBank annotation ambiguities.
+    Retrieves orthologous sequence clusters using similarity-based
+    clustering via `phylotaR`, bypassing GenBank annotation errors.
     Establishes positional homology with `MAFFT`, applies objective
-    quality control masking with `DECIPHER`, screens loci for mutational
-    saturation erosion (Xia test), reconciles species nomenclature
-    against the authoritative Caryophyllales.org checklist
+    quality control masking with `DECIPHER`, screens locus alignments
+    for mutational saturation slope erosion (Xia test), reconciles
+    species nomenclature against the Caryophyllales.org checklist
     (`CactaceaeFullList_accepted.csv`), executes joint alignment of
     ingroup (**Cactaceae**) and outgroup (*Portulaca*, *Anacampseros*,
-    *Talinopsis*, *Grahamia*) markers, and concatenates loci into
-    partitioned supermatrices with explicit coordinate boundaries.
+    *Talinopsis*, *Grahamia*) markers, and concatenates locus alignments
+    into partitioned supermatrices with explicit coordinate boundaries.
 
 2.  **Stage 2: Phylogenetic Inference and Dating (Modules 7 to 10)**  
     Evaluates partition-specific nucleotide substitution models using
@@ -88,7 +96,7 @@ PhyloCactus Workflow Architecture
     and external published backbones (e.g., Amaral *et al*. 2022;
     Thompson *et al*. 2024; de Vos *et al*. 2025) using Robinson-Foulds
     distances and multidimensional scaling (MDS) tree-space projections
-    (`validate_phylogenies`). Infers coalescent species trees using
+    (`validate_phylogenies`). Infers summary species trees using
     `ASTRAL-III` under multispecies coalescent theory to evaluate
     biological gene tree discordance driven by incomplete lineage
     sorting.

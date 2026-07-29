@@ -20,7 +20,7 @@ conservation assessments from the **IUCN Red List**. This step generates
 a comprehensive evolutionary registry that links molecular sampling
 effort, taxonomic validation, distributional information, and
 conservation status. These integrated data provide the foundation for
-evaluating biases in genomic representation, identifying threatened
+evaluating biases in molecular representation, identifying threatened
 evolutionary lineages, and exploring patterns of conservation
 vulnerability across the cactus tree of life.
 
@@ -34,7 +34,7 @@ representations of both phylogenetic relationships and evolutionary
 timescales.
 
 Together, this tutorial completes the construction of a reproducible
-phylogenomic framework for **Cactaceae**, integrating evolutionary
+phylogenetic framework for **Cactaceae**, integrating evolutionary
 history, temporal diversification, and conservation information into a
 unified analytical resource suitable for macroevolutionary,
 biogeographic, and conservation studies.
@@ -88,7 +88,7 @@ Following the completion of maximum likelihood phylogenetic inference,
 branch support estimation, and divergence time reconstruction, this
 module focuses on enriching the resulting evolutionary framework with
 biological metadata and generating comprehensive visual summaries of the
-final phylogenomic dataset.
+final multilocus dataset.
 
 #### The Scientific Importance of an Integrative Evolutionary Registry
 
@@ -195,7 +195,7 @@ species_summary <- species_summary %>%
 #### IUCN Metadata Enrichment
 
 The integration of conservation information represents an essential step
-for connecting phylogenomic reconstruction with biological
+for connecting phylogenetic reconstruction with biological
 interpretation. In this module, `PhyloCactus` retrieves species-level
 conservation assessments from the **IUCN Red List database** through the
 `rredlist` API interface and integrates these records with the final
@@ -386,8 +386,8 @@ across species included in the final phylogenetic dataset, indicating
 the presence or absence of sequence information for each locus. The
 visualization provides a detailed overview of missing data patterns
 among taxa and markers, allowing researchers to evaluate whether
-incomplete sampling is concentrated in specific lineages or genomic
-regions.
+incomplete sampling is concentrated in specific lineages or locus
+partitions.
 
 ``` r
 

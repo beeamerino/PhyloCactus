@@ -3,42 +3,45 @@
 ## Welcome to PhyloCactus
 
 `PhyloCactus` is an R package for assembling, curating, and analysing
-multilocus phylogenetic datasets from publicly available DNA sequences.
-The package integrates sequence retrieval from GenBank, quality control,
-phylogenetic inference, divergence time estimation, visualization, and
-validation into a single reproducible, scientifically curated framework.
+multilocus molecular sequence datasets from publicly available DNA
+sequences. The package integrates sequence retrieval from GenBank,
+quality control, phylogenetic inference, divergence time estimation,
+visualization, and validation into a single reproducible, scientifically
+curated framework.
 
-Reconstructing evolutionary relationships within plant clades
-characterized by recent adaptive radiations presents profound
-methodological challenges. The family **Cactaceae** represents one of
-the most prominent succulent plant radiations in the Neotropics (Arakaki
-*et al*. 2011; Hernández-Hernández *et al*. 2014; Guerrero *et al*.
-2019). Evolutionary inference across this family is complicated by low
-plastid sequence divergence, persistent gene tree discordance driven by
-incomplete lineage sorting (ILS) and ancient hybridization, and
-pervasive nomenclatural synonymies in public sequence databases.
+Constructing reliable multilocus molecular sequence matrices directly
+from public repositories such as GenBank presents a fundamental
+computational challenge in systematic biology. Sequence records
+deposited across decades frequently exhibit inconsistent locus
+annotations, duplicated accessions, unvouchered identifications,
+orthographic variants, and massive nomenclatural synonymies.
+Transforming these uncurated records into high-quality phylogenetic
+matrices requires intensive manual curation, taxonomic reconciliation
+against authoritative botanical checklists, and rigorous alignment
+quality control.
 
-Rather than developing novel phylogenetic algorithms, `PhyloCactus`
-orchestrates established bioinformatics software into a coherent
-methodological pipeline. This approach standardizes complex phylogenetic
-analyses while preserving computational reproducibility, methodological
-transparency, and biological interpretability. Although optimized for
-Cactaceae, the modular architecture applies to any plant lineage
-requiring rigorous phylogenetic data preparation and macroevolutionary
-analysis.
+This computational problem becomes exponentially more complex when
+targeting plant lineages with intricate evolutionary histories. Clades
+characterized by recent explosive adaptive radiations, low plastid
+sequence divergence, incomplete lineage sorting (ILS), and ancient
+reticulate evolution amplify the risk of misidentifying orthology,
+accumulating systematic alignment noise, and producing biased
+topological reconstructions.
+
+The family **Cactaceae** serves as the prime empirical exemplar of these
+combined computational and biological hurdles (Arakaki *et al*. 2011;
+Hernández-Hernández *et al*. 2014; Guerrero *et al*. 2019). Comprising
+one of the largest succulent plant radiations in the Neotropics, cactus
+phylogenetics requires extensive data curation to resolve persistent
+gene tree discordance and handle heterogeneous molecular datasets.
+
+`PhyloCactus` was developed to transform this complex data preparation
+and analytical process into a fully automated, transparent, and
+reproducible R workflow. Rather than relying on manual ad hoc scripts,
+`PhyloCactus` orchestrates established bioinformatics software into a
+standardized 4-stage pipeline.
 
 ## Why PhyloCactus?
-
-Constructing reliable multilocus phylogenetic datasets from public
-sequence repositories presents a significant methodological challenge in
-evolutionary research. Sequence records deposited in repositories such
-as GenBank frequently exhibit inconsistent locus annotations, duplicated
-accessions, unvouchered identifications, and heterogeneous sequence
-quality. Transforming these heterogeneous records into high-quality
-datasets requires systematic procedures to establish positional
-homology, remove non-homologous segments, evaluate mutational
-saturation, and control mutational rate heterogeneity before estimating
-topological structure and divergence times.
 
 Although established external software exists for individual analytical
 steps, manual integration of these tools often requires ad hoc
@@ -106,7 +109,7 @@ penalized likelihood using `treePL`. Finally, the suite integrates
 macroevolutionary conservation categories from the IUCN Red List
 (`rredlist`), renders publication-ready tree visualizations, and
 quantifies comparative topological agreement across alternative
-phylogenomic hypotheses.
+phylogenetic hypotheses.
 
 ## Installation
 

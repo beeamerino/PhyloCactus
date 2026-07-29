@@ -24,7 +24,7 @@ the core R functions implemented in `PhyloCactus`.
   visualization utilities.
 - **What comes next?** Users can query individual function manual pages
   (`?function_name`) or incorporate specific functions into customized
-  plant phylogenomic pipelines.
+  plant phylogenetic pipelines.
 
 ## Function Reference Dictionary
 

@@ -17,17 +17,18 @@ partition specific substitution model selection, constrained maximum
 likelihood inference, assessment of topological uncertainty, and
 divergence time estimation using penalized likelihood.
 
-Large phylogenomic datasets often contain substantial uncertainty due to
-incomplete molecular sampling, uneven taxonomic representation, and
-heterogeneous sequence availability. However, relationships among major
-taxonomic lineages may already be supported by previous phylogenetic
-studies. To incorporate this available biological knowledge while
-allowing the placement of newly sampled species, `PhyloCactus` uses a
-taxonomic constraint scaffold defined in `cactus_constraints.csv`. This
-file assigns sampled species to established higher level clades and
-subfamilies, providing a biologically informed framework that reduces
-exploration of unsupported regions of tree space while preserving
-inference among unresolved relationships within major lineages.
+Large multilocus phylogenetic datasets often contain substantial
+uncertainty due to incomplete molecular sampling, uneven taxonomic
+representation, and heterogeneous sequence availability. However,
+relationships among major taxonomic lineages may already be supported by
+previous phylogenetic studies. To incorporate this available biological
+knowledge while allowing the placement of newly sampled species,
+`PhyloCactus` uses a taxonomic constraint scaffold defined in
+`cactus_constraints.csv`. This file assigns sampled species to
+established higher level clades and subfamilies, providing a
+biologically informed framework that reduces exploration of unsupported
+regions of tree space while preserving inference among unresolved
+relationships within major lineages.
 
 Divergence time estimation requires the integration of molecular branch
 lengths with temporal information derived from fossil evidence or
@@ -100,8 +101,8 @@ Therefore, before estimating the phylogenetic relationships, the
 concatenated supermatrix must be represented within a statistical
 framework that accounts for variation among molecular partitions.
 Partition specific substitution models provide a more realistic
-approximation of sequence evolution by allowing each genomic region to
-be analyzed according to its own evolutionary characteristics.
+approximation of sequence evolution by allowing each locus region to be
+analyzed according to its own evolutionary characteristics.
 
 The
 **[`preprocess_partitions()`](https://beeamerino.github.io/PhyloCactus/reference/preprocess_partitions.md)**

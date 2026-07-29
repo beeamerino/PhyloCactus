@@ -2,44 +2,49 @@
 
 ## Abstract
 
-The assembly of multilocus phylogenetic datasets from public sequence
-repositories remains one of the most time consuming stages of
-comparative evolutionary research. Although GenBank contains an
-extensive collection of molecular data spanning thousands of taxa,
-sequence records frequently exhibit inconsistent gene annotations,
-duplicated accessions, incomplete taxonomic synonymies, uneven sequence
-quality, and heterogeneous taxonomic coverage. These issues complicate
-the construction of reproducible phylogenetic datasets and often require
-extensive manual curation.
+Constructing reliable multilocus molecular sequence matrices directly
+from public repositories such as GenBank presents a fundamental
+computational challenge in systematic biology. Sequence records
+deposited across decades frequently exhibit inconsistent locus
+annotations, duplicated accessions, unvouchered identifications,
+orthographic variants, and massive nomenclatural synonymies.
+Transforming these uncurated records into high-quality phylogenetic
+matrices requires intensive manual curation, taxonomic reconciliation
+against authoritative botanical checklists, and rigorous alignment
+quality control.
 
-The family **Cactaceae** represents one of the largest radiations of
-succulent dicots within the order Caryophyllales (Guerrero *et al*.
-2019) and provides an ideal system for illustrating these challenges.
-Recent phylogenetic studies increasingly rely on multilocus datasets
-assembled from publicly available DNA sequences, making reproducible
-data acquisition and quality control essential components of
-evolutionary analyses.
+This computational problem becomes exponentially more complex when
+targeting plant lineages with intricate evolutionary histories. Clades
+characterized by recent explosive adaptive radiations, low plastid
+sequence divergence, incomplete lineage sorting (ILS), and ancient
+reticulate evolution amplify the risk of misidentifying orthology,
+accumulating systematic alignment noise, and producing biased
+topological reconstructions.
+
+The family **Cactaceae** serves as the prime empirical exemplar of these
+combined computational and biological hurdles (Guerrero *et al*. 2019).
+Comprising one of the largest succulent plant radiations in the
+Neotropics, cactus phylogenetics requires extensive data curation to
+resolve persistent gene tree discordance and handle heterogeneous
+molecular datasets.
 
 `PhyloCactus` is an R package designed to automate the assembly and
 curation of multilocus phylogenetic datasets. The workflow builds upon
-the orthology based sequence mining strategy implemented in `phylotaR`,
-extending it with comprehensive taxonomic reconciliation, automated
-quality control procedures, marker specific filtering, multiple sequence
-alignment to infer positional homology, and concatenation of curated
-loci into supermatrices. These datasets serve as the foundation for
-downstream analyses implemented throughout the package, including
-maximum-likelihood phylogenetic inference with `RAxML-NG`, divergence
-time estimation with `treePL`, historical biogeographic reconstruction,
-and diversification analyses.
+the orthology-based sequence mining strategy implemented in `phylotaR`,
+extending it with comprehensive taxonomic reconciliation against the
+Caryophyllales.org checklist, automated quality control procedures using
+`DECIPHER`, substitution saturation filtering, multiple sequence
+alignment using `MAFFT` to infer positional homology, and concatenation
+of curated loci into partitioned supermatrices.
 
 The complete `PhyloCactus` workflow is organized into thirteen
 interoperable modules distributed across four analytical stages. This
-vignette introduces the first stage of the pipeline, guiding users
-through orthology based sequence retrieval, taxonomic standardization,
-sequence quality assessment, alignment, and matrix assembly. The
-resulting curated multilocus datasets constitute the starting point for
-all subsequent phylogenetic, biogeographic, and macroevolutionary
-analyses performed within the `PhyloCactus` framework.
+vignette introduces the first stage of the pipeline (Modules 1 to 6),
+guiding users through orthology-based sequence retrieval, taxonomic
+standardization, sequence quality assessment, alignment, and matrix
+assembly. The resulting curated multilocus datasets constitute the
+starting point for all subsequent phylogenetic, biogeographic, and
+macroevolutionary analyses performed within the `PhyloCactus` framework.
 
 ## Complete Pipeline Execution Workflow
 

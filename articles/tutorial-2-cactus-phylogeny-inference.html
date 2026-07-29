@@ -89,12 +89,12 @@ hypotheses. The pipeline integrates partition specific substitution
 model selection, constrained maximum likelihood inference, assessment of
 topological uncertainty, and divergence time estimation using penalized
 likelihood.</p>
-<p>Large phylogenomic datasets often contain substantial uncertainty due
-to incomplete molecular sampling, uneven taxonomic representation, and
-heterogeneous sequence availability. However, relationships among major
-taxonomic lineages may already be supported by previous phylogenetic
-studies. To incorporate this available biological knowledge while
-allowing the placement of newly sampled species,
+<p>Large multilocus phylogenetic datasets often contain substantial
+uncertainty due to incomplete molecular sampling, uneven taxonomic
+representation, and heterogeneous sequence availability. However,
+relationships among major taxonomic lineages may already be supported by
+previous phylogenetic studies. To incorporate this available biological
+knowledge while allowing the placement of newly sampled species,
 <code>PhyloCactus</code> uses a taxonomic constraint scaffold defined in
 <code>cactus_constraints.csv</code>. This file assigns sampled species
 to established higher level clades and subfamilies, providing a
@@ -172,8 +172,8 @@ likelihood based phylogenetic inference.</p>
 concatenated supermatrix must be represented within a statistical
 framework that accounts for variation among molecular partitions.
 Partition specific substitution models provide a more realistic
-approximation of sequence evolution by allowing each genomic region to
-be analyzed according to its own evolutionary characteristics.</p>
+approximation of sequence evolution by allowing each locus region to be
+analyzed according to its own evolutionary characteristics.</p>
 <p>The <strong><code><a href="../reference/preprocess_partitions.html">preprocess_partitions()</a></code></strong> function
 prepares the concatenated supermatrix generated in Module 6 for
 downstream phylogenetic inference. It reads the alignment and partition
