@@ -82,37 +82,43 @@ DNA sequences. The package integrates sequence retrieval from GenBank,
 quality control, phylogenetic inference, divergence time estimation,
 visualization, and validation into a single reproducible, scientifically
 curated framework.</p>
-<p>Although originally developed for evolutionary studies of
-<strong>Cactaceae</strong>, a clade exhibiting recent evolutionary
-radiations, incomplete lineage sorting, and reticulate evolution
-(Arakaki <em>et al</em>. 2011; Hernández-Hernández <em>et al</em>. 2014;
-Guerrero <em>et al</em>. 2019), the analytical workflow is designed to
-be broadly applicable to plant evolutionary research involving
-heterogeneous GenBank datasets.</p>
+<p>Reconstructing evolutionary relationships within plant clades
+characterized by recent adaptive radiations presents profound
+methodological challenges. The family <strong>Cactaceae</strong>
+represents one of the most prominent succulent plant radiations in the
+Neotropics (Arakaki <em>et al</em>. 2011; Hernández-Hernández <em>et
+al</em>. 2014; Guerrero <em>et al</em>. 2019). Evolutionary inference
+across this family is complicated by low plastid sequence divergence,
+persistent gene tree discordance driven by incomplete lineage sorting
+(ILS) and ancient hybridization, and pervasive nomenclatural synonymies
+in public sequence databases.</p>
 <p>Rather than developing novel phylogenetic algorithms,
 <code>PhyloCactus</code> orchestrates established bioinformatics
 software into a coherent methodological pipeline. This approach
 standardizes complex phylogenetic analyses while preserving
 computational reproducibility, methodological transparency, and
-biological interpretability.</p>
+biological interpretability. Although optimized for Cactaceae, the
+modular architecture applies to any plant lineage requiring rigorous
+phylogenetic data preparation and macroevolutionary analysis.</p>
 </div>
 <div class="section level2">
 <h2 id="why-phylocactus">Why PhyloCactus?<a class="anchor" aria-label="anchor" href="#why-phylocactus"></a>
 </h2>
 <p>Constructing reliable multilocus phylogenetic datasets from public
 sequence repositories presents a significant methodological challenge in
-evolutionary research. Researchers typically encounter inconsistent
-annotations, pervasive taxonomic synonymy, duplicated accessions, and
-heterogeneous sequence quality. Transforming these records into
-high-quality datasets requires complex procedures to establish
-positional homology, remove non-homologous segments, and control
-mutational heterogeneity before estimating topological structure and
-divergence times.</p>
+evolutionary research. Sequence records deposited in repositories such
+as GenBank frequently exhibit inconsistent locus annotations, duplicated
+accessions, unvouchered identifications, and heterogeneous sequence
+quality. Transforming these heterogeneous records into high-quality
+datasets requires systematic procedures to establish positional
+homology, remove non-homologous segments, evaluate mutational
+saturation, and control mutational rate heterogeneity before estimating
+topological structure and divergence times.</p>
 <p>Although established external software exists for individual
-analytical components, integrating these tools into a scientifically
-defensible and reproducible workflow typically requires ad hoc
-computational intervention, which obscures methodological transparency
-and impedes reproducibility.</p>
+analytical steps, manual integration of these tools often requires ad
+hoc computational scripts. This fragmented approach obscures
+methodological transparency, reduces analytical rigor, and impedes
+scientific reproducibility across independent studies.</p>
 <p><code>PhyloCactus</code> addresses this challenge by providing a
 modular framework that strictly standardizes each analytical step
 according to accepted systematic practices. By organizing the workflow
@@ -133,7 +139,37 @@ Conceptual framework of the PhyloCactus pipeline
 </p>
 </div>
 <p>Each stage can be executed independently or combined into a fully
-reproducible phylogenetic workflow.</p>
+reproducible phylogenetic workflow:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Data Assembly and Preparation (Modules 1 to 6)</strong>:
+Mined sequence clusters via <code>phylotaR</code>, alignment of
+positional homology using <code>MAFFT</code>, automated quality control
+masking via <code>DECIPHER</code>, substitution saturation screening,
+taxonomic reconciliation against the Caryophyllales.org checklist, and
+concatenation into partitioned supermatrices.</li>
+<li>
+<strong>Phylogenetic Inference and Dating (Modules 7 to
+10)</strong>: Partition-specific substitution model selection using
+<code>ModelTest-NG</code> under AICc, constrained maximum-likelihood
+topology search using <code>RAxML-NG</code>, Transfer Bootstrap
+Expectation (<code>TBE</code>) support mapping, temporal bootstrap
+generation, and penalized likelihood chronogram estimation using
+<code>treePL</code>.</li>
+<li>
+<strong>Visualization and Metadata Integration (Modules 11 and
+12)</strong>: Metadata enrichment linking phylogenetic trees with IUCN
+Red List threat categories (<code>rredlist</code>), collapsing weakly
+supported nodes (TBE &lt; 0.70) into soft polytomies, and rendering
+manuscript-ready evolutionary figures.</li>
+<li>
+<strong>Validation and Sub-tree Comparisons (Module 13)</strong>:
+Quantitative tree comparison using Robinson-Foulds distances,
+multidimensional scaling (MDS) tree-space ordination
+(<code>validate_phylogenies</code>), and multispecies coalescent
+species-tree estimation using <code>ASTRAL-III</code> to evaluate
+biological gene tree discordance.</li>
+</ol>
 </div>
 <div class="section level2">
 <h2 id="main-capabilities">Main Capabilities<a class="anchor" aria-label="anchor" href="#main-capabilities"></a>

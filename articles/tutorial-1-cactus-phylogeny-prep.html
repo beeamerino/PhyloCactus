@@ -331,13 +331,13 @@ inference.</p>
 <div class="section level3">
 <h3 id="module-4-integrate-ingroup-and-outgroup-markers">Module 4: Integrate Ingroup and Outgroup Markers<a class="anchor" aria-label="anchor" href="#module-4-integrate-ingroup-and-outgroup-markers"></a>
 </h3>
-<p>Reconciling taxonomic nomenclature and assembling a unified
-collection of curated orthologous loci.</p>
 <p>The previous modules independently retrieve, align, and evaluate
 ingroup and outgroup sequences. Before phylogenetic inference, these
 datasets must be integrated into a consistent taxonomic framework to
 ensure that homologous loci are represented uniformly across all sampled
-taxa.</p>
+taxa. Inconsistent nomenclatural annotations deposited in GenBank across
+different decades can create false paralogs or split single evolutionary
+species into multiple tip taxa.</p>
 <p>The <code><a href="../reference/integrate_and_clean_markers.html">integrate_and_clean_markers()</a></code> function combines the
 curated ingroup and outgroup datasets while reconciling species names
 against the <strong>Caryophyllales.org</strong> taxonomic backbone
@@ -350,7 +350,7 @@ removing unsupported loci and retaining only orthologous markers shared
 across the final dataset.</p>
 <p>The resulting output is a curated repository of standardized
 orthologous sequence alignments that provides the definitive molecular
-dataset for downstream sequence concatenation, maximum likelihood
+dataset for downstream sequence concatenation, maximum-likelihood
 phylogenetic inference, and divergence time estimation.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/integrate_and_clean_markers.html">integrate_and_clean_markers</a></span><span class="op">(</span></span>
@@ -365,17 +365,19 @@ phylogenetic inference, and divergence time estimation.</p>
 <div class="section level3">
 <h3 id="module-5-joint-realignment-of-curated-markers">Module 5: Joint Realignment of Curated Markers<a class="anchor" aria-label="anchor" href="#module-5-joint-realignment-of-curated-markers"></a>
 </h3>
-<p>Refining positional homology after integrating ingroup and outgroup
-sequences.</p>
 <p>Although ingroup and outgroup markers were aligned independently
 during the previous stages, integrating both datasets introduces new
-homologous sequence variation that should be evaluated simultaneously. A
-final alignment step therefore refines the hypothesis of positional
-homology by considering all sequences within each orthologous locus in a
-single multiple sequence alignment.</p>
-<p>The <code><a href="../reference/run_joint_realignment.html">run_joint_realignment()</a></code> function performs a final
-multiple sequence alignment of the curated orthologous markers using
-<strong>MAFFT</strong>. This procedure re-estimates positional homology
+homologous sequence variation that must be evaluated simultaneously.
+Independent alignment of ingroups and outgroups often introduces
+insertion/deletion (indel) boundary shifts at the junction between
+divergent lineages, which can compromise downstream branch length
+estimation if concatenated directly.</p>
+<p>A final joint alignment step therefore refines the hypothesis of
+positional homology by considering all sequences within each orthologous
+locus in a single multiple sequence alignment. The
+<code><a href="../reference/run_joint_realignment.html">run_joint_realignment()</a></code> function performs a final multiple
+sequence alignment of the curated orthologous markers using
+<code>MAFFT</code>. This procedure re-estimates positional homology
 across the complete taxonomic sampling, ensuring that ingroup and
 outgroup sequences are aligned under a common evolutionary framework
 before matrix concatenation. The resulting alignments constitute the
@@ -391,8 +393,6 @@ supermatrix for downstream phylogenetic inference.</p>
 <div class="section level3">
 <h3 id="module-6-construct-the-multilocus-supermatrix">Module 6: Construct the Multilocus Supermatrix<a class="anchor" aria-label="anchor" href="#module-6-construct-the-multilocus-supermatrix"></a>
 </h3>
-<p>Concatenating curated orthologous loci and defining partition
-boundaries for phylogenetic inference.</p>
 <p>After each orthologous marker has been independently curated and
 realigned, the individual locus alignments are combined into a single
 multilocus dataset suitable for phylogenetic inference. Concatenation
@@ -406,7 +406,7 @@ matches taxa across loci, inserts gap characters (<code>-</code>) where
 sequences are absent, and preserves the positional integrity of each
 individual alignment. In addition, the pipeline calculates the exact
 nucleotide coordinates defining every gene partition, producing a
-partition scheme compatible with downstream maximum likelihood software
+partition scheme compatible with downstream maximum-likelihood software
 such as <code>RAxML-NG</code>.</p>
 <p>The module generates the concatenated alignment in PHYLIP format
 (<code>.phy</code>), a partition definition file (<code>.part</code>),

@@ -269,13 +269,13 @@ screening_summary <- run_marker_screening(
 
 ### Module 4: Integrate Ingroup and Outgroup Markers
 
-Reconciling taxonomic nomenclature and assembling a unified collection
-of curated orthologous loci.
-
 The previous modules independently retrieve, align, and evaluate ingroup
 and outgroup sequences. Before phylogenetic inference, these datasets
 must be integrated into a consistent taxonomic framework to ensure that
 homologous loci are represented uniformly across all sampled taxa.
+Inconsistent nomenclatural annotations deposited in GenBank across
+different decades can create false paralogs or split single evolutionary
+species into multiple tip taxa.
 
 The
 [`integrate_and_clean_markers()`](https://beeamerino.github.io/PhyloCactus/reference/integrate_and_clean_markers.md)
@@ -291,7 +291,7 @@ across the final dataset.
 
 The resulting output is a curated repository of standardized orthologous
 sequence alignments that provides the definitive molecular dataset for
-downstream sequence concatenation, maximum likelihood phylogenetic
+downstream sequence concatenation, maximum-likelihood phylogenetic
 inference, and divergence time estimation.
 
 ``` r
@@ -308,20 +308,20 @@ integrate_and_clean_markers(
 
 ### Module 5: Joint Realignment of Curated Markers
 
-Refining positional homology after integrating ingroup and outgroup
-sequences.
-
 Although ingroup and outgroup markers were aligned independently during
 the previous stages, integrating both datasets introduces new homologous
-sequence variation that should be evaluated simultaneously. A final
-alignment step therefore refines the hypothesis of positional homology
-by considering all sequences within each orthologous locus in a single
-multiple sequence alignment.
+sequence variation that must be evaluated simultaneously. Independent
+alignment of ingroups and outgroups often introduces insertion/deletion
+(indel) boundary shifts at the junction between divergent lineages,
+which can compromise downstream branch length estimation if concatenated
+directly.
 
-The
+A final joint alignment step therefore refines the hypothesis of
+positional homology by considering all sequences within each orthologous
+locus in a single multiple sequence alignment. The
 [`run_joint_realignment()`](https://beeamerino.github.io/PhyloCactus/reference/run_joint_realignment.md)
 function performs a final multiple sequence alignment of the curated
-orthologous markers using **MAFFT**. This procedure re-estimates
+orthologous markers using `MAFFT`. This procedure re-estimates
 positional homology across the complete taxonomic sampling, ensuring
 that ingroup and outgroup sequences are aligned under a common
 evolutionary framework before matrix concatenation. The resulting
@@ -339,9 +339,6 @@ run_joint_realignment(
 
 ### Module 6: Construct the Multilocus Supermatrix
 
-Concatenating curated orthologous loci and defining partition boundaries
-for phylogenetic inference.
-
 After each orthologous marker has been independently curated and
 realigned, the individual locus alignments are combined into a single
 multilocus dataset suitable for phylogenetic inference. Concatenation
@@ -357,7 +354,7 @@ process, the function matches taxa across loci, inserts gap characters
 (`-`) where sequences are absent, and preserves the positional integrity
 of each individual alignment. In addition, the pipeline calculates the
 exact nucleotide coordinates defining every gene partition, producing a
-partition scheme compatible with downstream maximum likelihood software
+partition scheme compatible with downstream maximum-likelihood software
 such as `RAxML-NG`.
 
 The module generates the concatenated alignment in PHYLIP format
