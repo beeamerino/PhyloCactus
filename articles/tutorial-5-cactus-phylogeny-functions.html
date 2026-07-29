@@ -65,7 +65,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-07-23</h4>
+            <h4 data-toc-skip class="date">2026-07-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-5-cactus-phylogeny-functions.Rmd" class="external-link"><code>vignettes/tutorial-5-cactus-phylogeny-functions.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-5-cactus-phylogeny-functions.Rmd</code></div>
@@ -105,7 +105,6 @@ calibration, and visualization utilities.</li>
 function manual pages (<code>?function_name</code>) or incorporate
 specific functions into customized plant phylogenomic pipelines.</li>
 </ul>
-<hr>
 </div>
 </div>
 <div class="section level2">
@@ -133,29 +132,27 @@ databases.</p>
 <tr class="odd">
 <td align="left"><code><a href="../reference/assemble_ingroup_phylotar.html">assemble_ingroup_phylotar()</a></code></td>
 <td align="left">Mines orthologous DNA sequence clusters for a focal
-ingroup clade (e.g., <strong>Cactaceae</strong>; Guerrero <em>et
-al.</em> 2019) from GenBank using <code>phylotaR</code>. Applies strict
-taxonomic filters, evaluates cluster occupancy, and resolves
-nomenclature inconsistencies.</td>
-<td align="left">Bennett <em>et al.</em> (2018)</td>
+ingroup clade (e.g., Cactaceae; Guerrero et al. 2019) from GenBank using
+<code>phylotaR</code>. Applies strict taxonomic filters, evaluates
+cluster occupancy, and resolves nomenclature inconsistencies.</td>
+<td align="left">Bennett et al. (2018)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/assemble_outgroup_phylotar.html">assemble_outgroup_phylotar()</a></code></td>
 <td align="left">Retrieves orthologous sequences for specified outgroup
 lineages to establish accurate root positions for downstream likelihood
 search and chronogram estimation.</td>
-<td align="left">Bennett <em>et al.</em> (2018)</td>
+<td align="left">Bennett et al. (2018)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/fetch_genbank_metadata.html">fetch_genbank_metadata()</a></code></td>
 <td align="left">Interrogates NCBI Entrez utilities to extract sequence
 lengths, organism taxonomy, publication titles, and accession IDs for
 downloaded sequence clusters.</td>
-<td align="left">Camacho <em>et al.</em> (2009)</td>
+<td align="left">Camacho et al. (2009)</td>
 </tr>
 </tbody>
 </table>
-<hr>
 </div>
 <div class="section level3">
 <h3 id="alignment-quality-control">Alignment &amp; Quality Control<a class="anchor" aria-label="anchor" href="#alignment-quality-control"></a>
@@ -189,14 +186,14 @@ retaining phylogenetically informative sites.</td>
 coverage, and substitution saturation across individual locus
 alignments, excluding loci exhibiting high saturation slope
 erosion.</td>
-<td align="left">Xia <em>et al.</em> (2003)</td>
+<td align="left">Xia et al. (2003)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/clean_taxonomic_names.html">clean_taxonomic_names()</a></code></td>
 <td align="left">Standardizes tip labels against authoritative botanical
 checklists (e.g., Caryophyllales.org checklist), resolving synonymies
 and orthographic variants.</td>
-<td align="left">Korotkova <em>et al.</em> (2021)</td>
+<td align="left">Korotkova et al. (2021)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/run_joint_realignment.html">run_joint_realignment()</a></code></td>
@@ -207,7 +204,6 @@ markers to refine alignment hypotheses.</td>
 </tr>
 </tbody>
 </table>
-<hr>
 </div>
 <div class="section level3">
 <h3 id="concatenation-supermatrix-assembly">Concatenation &amp; Supermatrix Assembly<a class="anchor" aria-label="anchor" href="#concatenation-supermatrix-assembly"></a>
@@ -229,10 +225,9 @@ markers to refine alignment hypotheses.</td>
 into a unified multilocus supermatrix and generates partition coordinate
 maps compatible with <code>RAxML-NG</code>, <code>IQ-TREE</code>, and
 <code>MrBayes</code>.</td>
-<td align="left">Kozlov <em>et al.</em> (2019)</td>
+<td align="left">Kozlov et al. (2019)</td>
 </tr></tbody>
 </table>
-<hr>
 </div>
 <div class="section level3">
 <h3 id="likelihood-inference-model-evaluation">Likelihood Inference &amp; Model Evaluation<a class="anchor" aria-label="anchor" href="#likelihood-inference-model-evaluation"></a>
@@ -257,7 +252,7 @@ topological constraints.</p>
 <td align="left">Validates structural integrity and syntax of the
 supermatrix and its corresponding partition definitions prior to
 likelihood evaluation using <code>RAxML-NG</code>.</td>
-<td align="left">Kozlov <em>et al.</em> (2019)</td>
+<td align="left">Kozlov et al. (2019)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/run_modeltest_ng.html">run_modeltest_ng()</a></code></td>
@@ -265,32 +260,31 @@ likelihood evaluation using <code>RAxML-NG</code>.</td>
 (<code>ModelTest-NG</code>) using AICc criteria, controlling for
 mutational rate heterogeneity and mitigating long-branch attraction
 (LBA).</td>
-<td align="left">Darriba <em>et al.</em> (2020)</td>
+<td align="left">Darriba et al. (2020)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/build_constraint_scaffold.html">build_constraint_scaffold()</a></code></td>
 <td align="left">Synthesizes a Newick multifurcating constraint scaffold
 enforcing monophyletic relationships of established higher taxonomic
 ranks.</td>
-<td align="left">Guerrero <em>et al.</em> (2019)</td>
+<td align="left">Guerrero et al. (2019)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/calculate_ml_tree.html">calculate_ml_tree()</a></code></td>
 <td align="left">Infers the maximum-likelihood evolutionary hypothesis
 explaining the supermatrix under selected partition models and
 constraint scaffolds (<code>RAxML-NG</code>).</td>
-<td align="left">Kozlov <em>et al.</em> (2019)</td>
+<td align="left">Kozlov et al. (2019)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/map_branch_supports.html">map_branch_supports()</a></code></td>
 <td align="left">Maps Transfer Bootstrap Expectation (TBE) support
 values onto the best maximum-likelihood tree, providing robust clade
 support for large phylogenies.</td>
-<td align="left">Lemoine <em>et al.</em> (2018)</td>
+<td align="left">Lemoine et al. (2018)</td>
 </tr>
 </tbody>
 </table>
-<hr>
 </div>
 <div class="section level3">
 <h3 id="divergence-time-estimation-treepl-automation">Divergence Time Estimation &amp; treePL Automation<a class="anchor" aria-label="anchor" href="#divergence-time-estimation-treepl-automation"></a>
@@ -330,7 +324,6 @@ replicates.</td>
 </tr>
 </tbody>
 </table>
-<hr>
 </div>
 <div class="section level3">
 <h3 id="comparative-validation-iucn-utilities">Comparative Validation &amp; IUCN Utilities<a class="anchor" aria-label="anchor" href="#comparative-validation-iucn-utilities"></a>
@@ -357,10 +350,9 @@ distances and multidimensional scaling (MDS).</td>
 <tr class="even">
 <td align="left"><code><a href="../reference/integrate_publication_tree.html">integrate_publication_tree()</a></code></td>
 <td align="left">Maps statistical support onto chronograms, collapsing
-weakly supported nodes (TBE &lt; 0.70) into <strong>soft
-polytomies</strong> (<em>soft polytomies</em>) to represent analytical
-uncertainty.</td>
-<td align="left">Lemoine <em>et al.</em> (2018)</td>
+weakly supported nodes (TBE &lt; 0.70) into soft polytomies to represent
+analytical uncertainty.</td>
+<td align="left">Lemoine et al. (2018)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/get_iucn_data.html">get_iucn_data()</a></code></td>
@@ -378,7 +370,6 @@ figures.</td>
 </tr>
 </tbody>
 </table>
-<hr>
 </div>
 <div class="section level3">
 <h3 id="reproducible-execution-example">Reproducible Execution Example<a class="anchor" aria-label="anchor" href="#reproducible-execution-example"></a>

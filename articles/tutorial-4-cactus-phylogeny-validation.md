@@ -1,6 +1,6 @@
 # Tutorial 4: Phylogenetic Validation and Sub-tree Comparisons
 
-### Module 13: Sub-trees and Phylogenetic Validation
+## Abstract
 
 The final stage of the `PhyloCactus` framework evaluates topological
 stability and comparative congruence between the inferred evolutionary
@@ -22,6 +22,10 @@ scaling (MDS) tree-space projections. These approaches establish an
 objective framework to identify congruent evolutionary clades, pinpoint
 conflicting topologies, and evaluate the placement of major cactus
 lineages across alternative phylogenomic datasets.
+
+## Complete Pipeline Execution Workflow
+
+### Module 13: Sub-trees and Phylogenetic Validation
 
 #### Sourcing External Trees and `ASTRAL-III`
 
@@ -49,12 +53,12 @@ concatenated supermatrix approaches can occasionally suffer from
 inconsistency under high ILS.
 
 To explicitly account for biological discordance, `PhyloCactus`
-incorporates the summary species-tree estimator **`ASTRAL-III`**.
-Operating under the multispecies coalescent (MSC) framework,
-`ASTRAL-III` infers a species tree topology from a collection of
-unrooted gene trees, minimizing deep coalescent events. This provides a
-coalescent-based reference hypothesis to compare directly against the
-concatenated maximum-likelihood reconstruction.
+incorporates the summary species-tree estimator `ASTRAL-III`. Operating
+under the multispecies coalescent (MSC) framework, `ASTRAL-III` infers a
+species tree topology from a collection of unrooted gene trees,
+minimizing deep coalescent events. This provides a coalescent-based
+reference hypothesis to compare directly against the concatenated
+maximum-likelihood reconstruction.
 
 The `ASTRAL-III` Java executable (`.jar`) is downloaded separately by
 the user before running the coalescent summary workflow.
@@ -91,7 +95,7 @@ must infer the species tree using `ASTRAL-III` to properly account for
 gene tree discordance (e.g., resulting from incomplete lineage sorting)
 prior to our comparative analyses.
 
-Using the gene trees and metadata (e.g., from de Vos et al., 2025), you
+Using the gene trees and metadata (e.g., from de Vos *et al.* 2025), you
 can map sample names and export renamed gene trees directly to
 `ASTRAL-III`.
 
@@ -105,9 +109,8 @@ map_sample <- setNames(gsub(" ", "_", meta$`Scientific name`), stringr::str_extr
 
 # Load and safely rename tips of gene_trees
 gene_trees <- ape::read.tree(Sys.getenv("DEVOS_GENETREES_PATH"))
-# ... (Iterate over the gene trees, apply mappings, and write to a new file) ...
 
-# Execute `ASTRAL` directly via system command
+# Execute `ASTRAL-III` directly via system command
 cmd <- paste("java -jar", Sys.getenv("ASTRAL_PATH"), 
              "-i", "renamed_gene_trees.tre", 
              "-o", "QC.Species_tree_astral.tree")
@@ -117,9 +120,9 @@ system(cmd)
 ### Evaluating Topological Congruence Across Alternative Hypotheses
 
 Once external phylogenetic hypotheses have been downloaded, and new
-`ASTRAL` species trees inferred, we evaluate topological congruence
-against our focal maximum likelihood tree (e.g., the treePL chronogram)
-and a set of external trees.
+`ASTRAL-III` species trees inferred, we evaluate topological congruence
+against our focal maximum likelihood tree (e.g., the `treePL`
+chronogram) and a set of external trees.
 
 Topological congruence is quantified using Robinson–Foulds (RF)
 distances and related tree comparison metrics. These analyses measure
@@ -140,7 +143,7 @@ without requiring external downloads during package installation,
 example reference trees are distributed within the `PhyloCactus`
 `extdata` directory. Users applying this workflow to their own datasets
 should replace these example files with independently downloaded
-published hypotheses or newly generated ASTRAL species trees.
+published hypotheses or newly generated `ASTRAL-III` species trees.
 
 ``` r
 
@@ -220,7 +223,7 @@ integrated conservation metadata from the IUCN Red List, generated
 publication-ready visualizations, and quantitatively validated your
 phylogenetic hypothesis against alternative published backbones.
 
-The resulting datasets including aligned supermatrices, maximum
+The resulting datasets—including aligned supermatrices, maximum
 likelihood trees, time calibrated chronograms, species metadata tables,
 conservation summaries, and comparative validation metrics—provide a
 reproducible foundation for downstream analyses in macroevolution,
@@ -231,3 +234,16 @@ inference, and transparent analytical workflows, `PhyloCactus` enables
 researchers to construct large scale evolutionary datasets that are
 readily reproducible, extensible, and suitable for publication quality
 comparative studies.
+
+## References
+
+- Amaral *et al*. 2022. Spatial patterns of evolutionary diversity in
+  Cactaceae show low ecological representation within protected areas.
+  *Biological Conservation*, 273, 109677.
+  <https://doi.org/10.1016/j.biocon.2022.109677>
+- de Vos *et al*. 2025. Phylogenomic insights into Cactaceae using
+  Angiosperms353 target capture data. *Plant Systematics and Evolution*,
+  311, 45-58. <https://doi.org/10.1007/s00606-025-01948-x>
+- Thompson *et al*. 2024. Identifying the multiple drivers of cactus
+  diversification. *Nature Communications*, 15(1), 7114.
+  <https://doi.org/10.1038/s41467-024-51666-2>

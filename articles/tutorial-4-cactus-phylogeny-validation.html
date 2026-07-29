@@ -65,7 +65,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-07-23</h4>
+            <h4 data-toc-skip class="date">2026-07-29</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-4-cactus-phylogeny-validation.Rmd" class="external-link"><code>vignettes/tutorial-4-cactus-phylogeny-validation.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-4-cactus-phylogeny-validation.Rmd</code></div>
@@ -73,9 +73,9 @@ Meriño</h4>
 
     
     
-<div class="section level3">
-<h3 id="module-13-sub-trees-and-phylogenetic-validation">Module 13: Sub-trees and Phylogenetic Validation<a class="anchor" aria-label="anchor" href="#module-13-sub-trees-and-phylogenetic-validation"></a>
-</h3>
+<div class="section level2">
+<h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
+</h2>
 <p>The final stage of the <code>PhyloCactus</code> framework evaluates
 topological stability and comparative congruence between the inferred
 evolutionary hypothesis and external reference backbones.</p>
@@ -95,6 +95,13 @@ These approaches establish an objective framework to identify congruent
 evolutionary clades, pinpoint conflicting topologies, and evaluate the
 placement of major cactus lineages across alternative phylogenomic
 datasets.</p>
+</div>
+<div class="section level2">
+<h2 id="complete-pipeline-execution-workflow">Complete Pipeline Execution Workflow<a class="anchor" aria-label="anchor" href="#complete-pipeline-execution-workflow"></a>
+</h2>
+<div class="section level3">
+<h3 id="module-13-sub-trees-and-phylogenetic-validation">Module 13: Sub-trees and Phylogenetic Validation<a class="anchor" aria-label="anchor" href="#module-13-sub-trees-and-phylogenetic-validation"></a>
+</h3>
 <div class="section level4">
 <h4 id="sourcing-external-trees-and-astral-iii">Sourcing External Trees and <code>ASTRAL-III</code><a class="anchor" aria-label="anchor" href="#sourcing-external-trees-and-astral-iii"></a>
 </h4>
@@ -125,12 +132,11 @@ concatenated supermatrix approaches can occasionally suffer from
 inconsistency under high ILS.</p>
 <p>To explicitly account for biological discordance,
 <code>PhyloCactus</code> incorporates the summary species-tree estimator
-<strong><code>ASTRAL-III</code></strong>. Operating under the
-multispecies coalescent (MSC) framework, <code>ASTRAL-III</code> infers
-a species tree topology from a collection of unrooted gene trees,
-minimizing deep coalescent events. This provides a coalescent-based
-reference hypothesis to compare directly against the concatenated
-maximum-likelihood reconstruction.</p>
+<code>ASTRAL-III</code>. Operating under the multispecies coalescent
+(MSC) framework, <code>ASTRAL-III</code> infers a species tree topology
+from a collection of unrooted gene trees, minimizing deep coalescent
+events. This provides a coalescent-based reference hypothesis to compare
+directly against the concatenated maximum-likelihood reconstruction.</p>
 <p>The <code>ASTRAL-III</code> Java executable (<code>.jar</code>) is
 downloaded separately by the user before running the coalescent summary
 workflow.</p>
@@ -166,9 +172,9 @@ rather than the final coalescent species tree, we must infer the species
 tree using <code>ASTRAL-III</code> to properly account for gene tree
 discordance (e.g., resulting from incomplete lineage sorting) prior to
 our comparative analyses.</p>
-<p>Using the gene trees and metadata (e.g., from de Vos et al., 2025),
-you can map sample names and export renamed gene trees directly to
-<code>ASTRAL-III</code>.</p>
+<p>Using the gene trees and metadata (e.g., from de Vos <em>et al.</em>
+2025), you can map sample names and export renamed gene trees directly
+to <code>ASTRAL-III</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load Metadata safely from where you downloaded it</span></span>
 <span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"DEVOS_METADATA_PATH"</span><span class="op">)</span>, check.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -178,9 +184,8 @@ you can map sample names and export renamed gene trees directly to
 <span></span>
 <span><span class="co"># Load and safely rename tips of gene_trees</span></span>
 <span><span class="va">gene_trees</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.tree.html" class="external-link">read.tree</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"DEVOS_GENETREES_PATH"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co"># ... (Iterate over the gene trees, apply mappings, and write to a new file) ...</span></span>
 <span></span>
-<span><span class="co"># Execute `ASTRAL` directly via system command</span></span>
+<span><span class="co"># Execute `ASTRAL-III` directly via system command</span></span>
 <span><span class="va">cmd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"java -jar"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"ASTRAL_PATH"</span><span class="op">)</span>, </span>
 <span>             <span class="st">"-i"</span>, <span class="st">"renamed_gene_trees.tre"</span>, </span>
 <span>             <span class="st">"-o"</span>, <span class="st">"QC.Species_tree_astral.tree"</span><span class="op">)</span></span>
@@ -191,9 +196,9 @@ you can map sample names and export renamed gene trees directly to
 <h3 id="evaluating-topological-congruence-across-alternative-hypotheses">Evaluating Topological Congruence Across Alternative Hypotheses<a class="anchor" aria-label="anchor" href="#evaluating-topological-congruence-across-alternative-hypotheses"></a>
 </h3>
 <p>Once external phylogenetic hypotheses have been downloaded, and new
-<code>ASTRAL</code> species trees inferred, we evaluate topological
-congruence against our focal maximum likelihood tree (e.g., the treePL
-chronogram) and a set of external trees.</p>
+<code>ASTRAL-III</code> species trees inferred, we evaluate topological
+congruence against our focal maximum likelihood tree (e.g., the
+<code>treePL</code> chronogram) and a set of external trees.</p>
 <p>Topological congruence is quantified using Robinson–Foulds (RF)
 distances and related tree comparison metrics. These analyses measure
 the number of shared and conflicting bipartitions among alternative
@@ -212,7 +217,7 @@ installation, example reference trees are distributed within the
 <code>PhyloCactus</code> <code>extdata</code> directory. Users applying
 this workflow to their own datasets should replace these example files
 with independently downloaded published hypotheses or newly generated
-ASTRAL species trees.</p>
+<code>ASTRAL-III</code> species trees.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span></span>
@@ -343,6 +348,7 @@ of confidence in the inferred evolutionary relationships before
 downstream macroevolutionary, biogeographic, or comparative
 analyses.</p>
 </div>
+</div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
@@ -355,7 +361,7 @@ intervals, integrated conservation metadata from the IUCN Red List,
 generated publication-ready visualizations, and quantitatively validated
 your phylogenetic hypothesis against alternative published
 backbones.</p>
-<p>The resulting datasets including aligned supermatrices, maximum
+<p>The resulting datasets—including aligned supermatrices, maximum
 likelihood trees, time calibrated chronograms, species metadata tables,
 conservation summaries, and comparative validation metrics—provide a
 reproducible foundation for downstream analyses in macroevolution,
@@ -366,6 +372,23 @@ inference, and transparent analytical workflows,
 <code>PhyloCactus</code> enables researchers to construct large scale
 evolutionary datasets that are readily reproducible, extensible, and
 suitable for publication quality comparative studies.</p>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<ul>
+<li>Amaral <em>et al</em>. 2022. Spatial patterns of evolutionary
+diversity in Cactaceae show low ecological representation within
+protected areas. <em>Biological Conservation</em>, 273, 109677. <a href="https://doi.org/10.1016/j.biocon.2022.109677" class="external-link uri">https://doi.org/10.1016/j.biocon.2022.109677</a>
+</li>
+<li>de Vos <em>et al</em>. 2025. Phylogenomic insights into Cactaceae
+using Angiosperms353 target capture data. <em>Plant Systematics and
+Evolution</em>, 311, 45-58. <a href="https://doi.org/10.1007/s00606-025-01948-x" class="external-link uri">https://doi.org/10.1007/s00606-025-01948-x</a>
+</li>
+<li>Thompson <em>et al</em>. 2024. Identifying the multiple drivers of
+cactus diversification. <em>Nature Communications</em>, 15(1), 7114. <a href="https://doi.org/10.1038/s41467-024-51666-2" class="external-link uri">https://doi.org/10.1038/s41467-024-51666-2</a>
+</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

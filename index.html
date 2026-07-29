@@ -67,17 +67,12 @@
 <!-- badges: start -->
 
 <!-- badges: end -->
-<div class="section level3">
-<h3 id="reproducible-phylogenetic-workflows-for-data-assembly-inference-and-divergence-time-estimation">Reproducible phylogenetic workflows for data assembly, inference, and divergence time estimation<a class="anchor" aria-label="anchor" href="#reproducible-phylogenetic-workflows-for-data-assembly-inference-and-divergence-time-estimation"></a>
-</h3>
+<p><strong>Reproducible phylogenetic workflows for data assembly, inference, and divergence time estimation</strong></p>
 <p>Reconstructing evolutionary relationships within plant clades characterized by rapid adaptive radiations—such as the family <strong>Cactaceae</strong>—presents major methodological challenges. Low plastid sequence divergence, persistent gene tree discordance driven by incomplete lineage sorting (ILS) and reticulate evolution, and pervasive taxonomic synonymies in public sequence repositories hinder computational reproducibility.</p>
 <p><code>PhyloCactus</code> provides a standardized, reproducible R workflow designed to address these biological challenges. By integrating sequence retrieval, taxonomic reconciliation, alignment quality control, substitution model evaluation, maximum-likelihood inference, divergence time estimation, and comparative tree validation into a unified pipeline, <code>PhyloCactus</code> transforms heterogeneous genomic sequence data into statistically evaluated phylogenetic hypotheses. While optimized for Cactaceae, the modular architecture applies to any plant lineage requiring rigorous phylogenetic data preparation and macroevolutionary analysis.</p>
-<hr>
-</div>
-</div>
-<div class="section level1">
-<h1 id="main-features">Main Features<a class="anchor" aria-label="anchor" href="#main-features"></a>
-</h1>
+<div class="section level2">
+<h2 id="main-features">Main Features<a class="anchor" aria-label="anchor" href="#main-features"></a>
+</h2>
 <p>The package provides tools for:</p>
 <ul>
 <li>Automating the retrieval of orthologous DNA sequence clusters from GenBank using similarity clustering via <code>phylotaR</code> (Bennett <em>et al.</em> 2018) and <code>BLAST+</code> (Camacho <em>et al.</em> 2009).</li>
@@ -93,11 +88,10 @@
 <li>Producing publication-quality phylogenetic figures and chronological cadastres.</li>
 <li>Quantifying topological congruence and validating alternative phylogenetic hypotheses via multidimensional tree-space projections.</li>
 </ul>
-<hr>
 </div>
-<div class="section level1">
-<h1 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
-</h1>
+<div class="section level2">
+<h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
+</h2>
 <p>The complete workflow is organized into four analytical stages comprising thirteen interoperable modules.</p>
 <div class="float">
 <img src="reference/figures/Fig1_PhyloCactus_Workflow.png" alt="PhyloCactus Workflow Architecture"><div class="figcaption">PhyloCactus Workflow Architecture</div>
@@ -105,23 +99,21 @@
 <blockquote>
 <p>Each stage can be executed independently or combined into a fully reproducible phylogenetic workflow.</p>
 </blockquote>
-<hr>
 </div>
-<div class="section level1">
-<h1 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
-</h1>
-<p>Install the development version directly from GitHub.</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>Install the development version directly from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"remotes"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"beeamerino/PhyloCactus"</span><span class="op">)</span></span></code></pre></div>
-<hr>
 </div>
-<div class="section level1">
-<h1 id="r-dependencies">R Dependencies<a class="anchor" aria-label="anchor" href="#r-dependencies"></a>
-</h1>
-<p><code>PhyloCactus</code> relies on packages available from both CRAN and Bioconductor.</p>
+<div class="section level2">
+<h2 id="r-dependencies">R Dependencies<a class="anchor" aria-label="anchor" href="#r-dependencies"></a>
+</h2>
+<p><code>PhyloCactus</code> relies on packages available from both CRAN and Bioconductor:</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -144,15 +136,17 @@
 </tr>
 <tr>
 <td align="left"><strong>CRAN</strong></td>
-<td align="left">ape, ggplot2, dplyr, tidyr, readr, stringr, purrr, rredlist, forcats, scales, RColorBrewer</td>
+<td align="left">
+<code>ape</code>, <code>ggplot2</code>, <code>dplyr</code>, <code>tidyr</code>, <code>readr</code>, <code>stringr</code>, <code>purrr</code>, <code>rredlist</code>, <code>forcats</code>, <code>scales</code>, <code>RColorBrewer</code>
+</td>
 </tr>
 </tbody>
 </table>
 </div>
-<div class="section level1">
-<h1 id="external-software">External Software<a class="anchor" aria-label="anchor" href="#external-software"></a>
-</h1>
-<p>Several analyses performed by <code>PhyloCactus</code> rely on external command-line software that must be installed separately and available from your system <code>PATH</code>.</p>
+<div class="section level2">
+<h2 id="external-software">External Software<a class="anchor" aria-label="anchor" href="#external-software"></a>
+</h2>
+<p>Several analyses performed by <code>PhyloCactus</code> rely on external command-line software that must be installed separately and available from your system <code>PATH</code>:</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -166,42 +160,42 @@
 </tr></thead>
 <tbody>
 <tr>
-<td align="left"><a href="https://www.ncbi.nlm.nih.gov/books/NBK279690/" class="external-link"><strong><code>BLAST+</code></strong></a></td>
+<td align="left"><a href="https://www.ncbi.nlm.nih.gov/books/NBK279690/" class="external-link"><code>BLAST+</code></a></td>
 <td align="left">Local sequence alignment and database searching</td>
-<td align="left">Camacho, C. <em>et al</em>. (2009). BLAST+: Architecture and applications. <em>BMC Bioinformatics</em>, <em>10</em>. <a href="https://doi.org/10.1186/1471-2105-10-421" class="external-link uri">https://doi.org/10.1186/1471-2105-10-421</a>
+<td align="left">Camacho, C. <em>et al</em>. (2009). BLAST+: Architecture and applications. <em>BMC Bioinformatics</em>, 10. <a href="https://doi.org/10.1186/1471-2105-10-421" class="external-link uri">https://doi.org/10.1186/1471-2105-10-421</a>
 </td>
 </tr>
 <tr>
-<td align="left"><a href="https://mafft.cbrc.jp/alignment/software/" class="external-link"><strong><code>MAFFT</code></strong></a></td>
+<td align="left"><a href="https://mafft.cbrc.jp/alignment/software/" class="external-link"><code>MAFFT</code></a></td>
 <td align="left">Multiple sequence alignment</td>
-<td align="left">Katoh, K., &amp; Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7: Improvements in performance and usability. Molecular Biology and Evolution, 30(4), 772–780. <a href="https://doi.org/10.1093/molbev/mst010" class="external-link uri">https://doi.org/10.1093/molbev/mst010</a>
+<td align="left">Katoh, K., &amp; Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7: Improvements in performance and usability. <em>Molecular Biology and Evolution</em>, 30(4), 772–780. <a href="https://doi.org/10.1093/molbev/mst010" class="external-link uri">https://doi.org/10.1093/molbev/mst010</a>
 </td>
 </tr>
 <tr>
-<td align="left"><a href="https://github.com/ddarriba/modeltest" class="external-link"><strong><code>ModelTest-NG</code></strong></a></td>
+<td align="left"><a href="https://github.com/ddarriba/modeltest" class="external-link"><code>ModelTest-NG</code></a></td>
 <td align="left">Model selection</td>
-<td align="left">Darriba, D. <em>et al</em>. (2020). ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. Molecular Biology and Evolution, 37(1), 291-294. doi.org/10.1093/molbev/msz189</td>
-</tr>
-<tr>
-<td align="left"><a href="https://github.com/amkozlov/raxml-ng" class="external-link"><strong><code>RAxML-NG</code></strong></a></td>
-<td align="left">Maximum-likelihood phylogenetic inference</td>
-<td align="left">Kozlov, A. M. <em>et al</em>. (2019). RAxML-NG: A fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. Bioinformatics, 35(21), 4453–4455. <a href="https://doi.org/10.1093/bioinformatics/btz305" class="external-link uri">https://doi.org/10.1093/bioinformatics/btz305</a>
+<td align="left">Darriba, D. <em>et al</em>. (2020). ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. <em>Molecular Biology and Evolution</em>, 37(1), 291-294. <a href="https://doi.org/10.1093/molbev/msz189" class="external-link uri">https://doi.org/10.1093/molbev/msz189</a>
 </td>
 </tr>
 <tr>
-<td align="left"><a href="https://github.com/blackrim/treePL" class="external-link"><strong><code>treePL</code></strong></a></td>
+<td align="left"><a href="https://github.com/amkozlov/raxml-ng" class="external-link"><code>RAxML-NG</code></a></td>
+<td align="left">Maximum-likelihood phylogenetic inference</td>
+<td align="left">Kozlov, A. M. <em>et al</em>. (2019). RAxML-NG: A fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. <em>Bioinformatics</em>, 35(21), 4453–4455. <a href="https://doi.org/10.1093/bioinformatics/btz305" class="external-link uri">https://doi.org/10.1093/bioinformatics/btz305</a>
+</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/blackrim/treePL" class="external-link"><code>treePL</code></a></td>
 <td align="left">Divergence time estimation</td>
-<td align="left">Smith, S. A., &amp; O’Meara, B. C. (2012). TreePL: Divergence time estimation using penalized likelihood for large phylogenies. Bioinformatics, 28(20), 2689–2690. <a href="https://doi.org/10.1093/bioinformatics/bts492" class="external-link uri">https://doi.org/10.1093/bioinformatics/bts492</a>
+<td align="left">Smith, S. A., &amp; O’Meara, B. C. (2012). TreePL: Divergence time estimation using penalized likelihood for large phylogenies. <em>Bioinformatics</em>, 28(20), 2689–2690. <a href="https://doi.org/10.1093/bioinformatics/bts492" class="external-link uri">https://doi.org/10.1093/bioinformatics/bts492</a>
 </td>
 </tr>
 </tbody>
 </table>
-<hr>
 </div>
-<div class="section level1">
-<h1 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
-</h1>
-<p>The recommended way to learn <code>PhyloCactus</code> is by following the tutorials in sequence.</p>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<p>The recommended way to learn <code>PhyloCactus</code> is by following the tutorials in sequence:</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -238,26 +232,24 @@
 </tr>
 </tbody>
 </table>
-<hr>
 </div>
-<div class="section level1">
-<h1 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
-</h1>
-<p>If you use <strong>PhyloCactus</strong> in your research, please cite the package:</p>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>If you use <code>PhyloCactus</code> in your research, please cite the package:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"PhyloCactus"</span><span class="op">)</span></span></code></pre></div>
 <p>If a software paper is available, please cite both the package and the associated publication.</p>
-<hr>
 </div>
-<div class="section level1">
-<h1 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
-</h1>
+<div class="section level2">
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
 <p><code>PhyloCactus</code> is released under the <strong>GPL-3 License</strong>.</p>
 <blockquote>
 <p>Bug reports, feature requests, and source code are available through the project’s GitHub repository.</p>
 </blockquote>
 </div>
-
+</div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">

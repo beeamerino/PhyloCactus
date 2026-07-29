@@ -373,25 +373,40 @@ run_concatenation_pipeline(
 )
 ```
 
-|  |
-|:---|
-| \## Next Steps |
-| At this stage, the molecular dataset has been fully assembled, curated, and prepared for phylogenetic analysis. Orthologous loci have been retrieved, taxonomic names standardized, multiple sequence alignments refined, phylogenetically informative markers selected, and the final multilocus supermatrix constructed together with its corresponding partition scheme. These outputs constitute the complete analytical dataset required for evolutionary inference. |
-| The next stage of the `PhyloCactus` workflow focuses on reconstructing evolutionary relationships and estimating the temporal framework of diversification. In the following tutorial, we will infer a maximum likelihood phylogeny using `RAxML-NG`, evaluate branch support, and estimate divergence times under a penalized likelihood framework using `treePL`. The resulting time calibrated phylogeny will serve as the foundation for the historical biogeographic and macroevolutionary analyses presented in the subsequent tutorials. |
-| [Continue to Tutorial 2: Inference and Divergence Time Estimation](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html) |
+## Next Steps
 
-### References
+At this stage, the molecular dataset has been fully assembled, curated,
+and prepared for phylogenetic analysis. Orthologous loci have been
+retrieved, taxonomic names standardized, multiple sequence alignments
+refined, phylogenetically informative markers selected, and the final
+multilocus supermatrix constructed together with its corresponding
+partition scheme. These outputs constitute the complete analytical
+dataset required for evolutionary inference.
+
+The next stage of the `PhyloCactus` workflow focuses on reconstructing
+evolutionary relationships and estimating the temporal framework of
+diversification. In the following tutorial, we will infer a maximum
+likelihood phylogeny using `RAxML-NG`, evaluate branch support, and
+estimate divergence times under a penalized likelihood framework using
+`treePL`. The resulting time calibrated phylogeny will serve as the
+foundation for the historical biogeographic and macroevolutionary
+analyses presented in the subsequent tutorials.
+
+[Continue to Tutorial 2: Inference and Divergence Time
+Estimation](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html)
+
+## References
 
 - Guerrero *et al*. 2019. Phylogenetic Relationships and Evolutionary
-  Trends in the Cactus Family. Journal of Heredity, 110(1), 4–21.
+  Trends in the Cactus Family. *Journal of Heredity*, 110(1), 4–21.
   <https://doi.org/10.1093/jhered/esy064>
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org- A dynamic
-  online species-level taxonomic backbone for the family. W*illdenowia*,
-  *51*(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 - Katoh, K., & Standley, D. M. 2013. MAFFT multiple sequence alignment
   software version 7: Improvements in performance and usability.
-  *Molecular Biology and Evolution*, *30*(4), 772–780.
+  *Molecular Biology and Evolution*, 30(4), 772–780.
   <https://doi.org/10.1093/molbev/mst010>
-- Wright E. 2024. Fast and Flexible Search for Homologous Biological
-  Sequences with DECIPHER v3. *The R Journal*, *16*(2), 191-200.
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic
+  online species-level taxonomic backbone for the family. *Willdenowia*,
+  51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
+- Wright, E. 2024. Fast and Flexible Search for Homologous Biological
+  Sequences with DECIPHER v3. *The R Journal*, 16(2), 191-200.
   <https://doi.org/10.18129/B9.bioc.DECIPHER>
