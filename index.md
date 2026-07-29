@@ -4,8 +4,8 @@
 divergence time estimation**
 
 Reconstructing evolutionary relationships within plant clades
-characterized by rapid adaptive radiations—such as the family
-**Cactaceae**—presents major methodological challenges. Low plastid
+characterized by rapid adaptive radiations, such as the family
+**Cactaceae**, presents major methodological challenges. Low plastid
 sequence divergence, persistent gene tree discordance driven by
 incomplete lineage sorting (ILS) and reticulate evolution, and pervasive
 taxonomic synonymies in public sequence repositories hinder

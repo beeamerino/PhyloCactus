@@ -223,9 +223,9 @@ integrated conservation metadata from the IUCN Red List, generated
 publication-ready visualizations, and quantitatively validated your
 phylogenetic hypothesis against alternative published backbones.
 
-The resulting datasets—including aligned supermatrices, maximum
+The resulting datasets (including aligned supermatrices, maximum
 likelihood trees, time calibrated chronograms, species metadata tables,
-conservation summaries, and comparative validation metrics—provide a
+conservation summaries, and comparative validation metrics) provide a
 reproducible foundation for downstream analyses in macroevolution,
 historical biogeography, conservation biology, community ecology, and
 comparative evolutionary research. By combining automated data

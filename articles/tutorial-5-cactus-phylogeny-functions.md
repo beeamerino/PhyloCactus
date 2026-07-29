@@ -15,7 +15,7 @@ the core R functions implemented in `PhyloCactus`.
   signatures and biological motivations.
 - **Why are we here?** Complex computational pipelines require explicit
   documentation linking software parameters directly to underlying
-  evolutionary mechanics—such as mitigating long-branch attraction
+  evolutionary mechanics, such as mitigating long-branch attraction
   (LBA), enforcing positional homology, and accounting for incomplete
   lineage sorting (ILS).
 - **What will we achieve?** A complete, reproducible function reference
