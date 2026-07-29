@@ -25,11 +25,11 @@ knitr::opts_chunk$set(
 
 This tutorial represents the final stage of the core phylogenetic reconstruction workflow implemented in **`PhyloCactus`**, focusing on the integration, visualization, and biological interpretation of the inferred evolutionary framework. Following the assembly of the multilocus supermatrix, maximum-likelihood inference, branch support assessment, and divergence time estimation described in [Tutorial 1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) and [Tutorial 2](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html), this module transforms the resulting phylogenetic outputs into an integrative evolutionary resource.
 
-In **Module 11**, phylogenetic results are enriched with external biological information by integrating species-level metadata and conservation assessments from the **IUCN Red List**. This step generates a comprehensive evolutionary registry that links molecular sampling effort, taxonomic validation, distributional information, and conservation status. These integrated data provide the foundation for evaluating biases in genomic representation, identifying threatened evolutionary lineages, and exploring patterns of conservation vulnerability across the cactus tree of life.
+In **Module 11**, phylogenetic results are enriched with external biological information by integrating species-level metadata and conservation assessments from the **IUCN Red List**. This step generates a comprehensive evolutionary registry that links molecular sampling effort, taxonomic validation, distributional information, and conservation status. These integrated data provide the foundation for evaluating biases in molecular representation, identifying threatened evolutionary lineages, and exploring patterns of conservation vulnerability across the cactus tree of life.
 
 In **Module 12**, the final phylogenetic products are visualized and prepared for downstream comparative analyses. The maximum likelihood topology is displayed together with branch support values, while the time calibrated chronogram derived from penalized likelihood analyses is visualized with node age uncertainty intervals obtained from dated temporal bootstrap replicates. These outputs provide publication ready representations of both phylogenetic relationships and evolutionary timescales.
 
-Together, this tutorial completes the construction of a reproducible phylogenomic framework for **Cactaceae**, integrating evolutionary history, temporal diversification, and conservation information into a unified analytical resource suitable for macroevolutionary, biogeographic, and conservation studies.
+Together, this tutorial completes the construction of a reproducible phylogenetic framework for **Cactaceae**, integrating evolutionary history, temporal diversification, and conservation information into a unified analytical resource suitable for macroevolutionary, biogeographic, and conservation studies.
 
 ## Complete Pipeline Execution Workflow
 
@@ -64,7 +64,7 @@ file.copy(
 
 ### Module 11: Data Visualization and IUCN Enrichment
 
-This vignette assumes that you have completed [Tutorial 2: Inference & Dating](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html). Following the completion of maximum likelihood phylogenetic inference, branch support estimation, and divergence time reconstruction, this module focuses on enriching the resulting evolutionary framework with biological metadata and generating comprehensive visual summaries of the final phylogenomic dataset.
+This vignette assumes that you have completed [Tutorial 2: Inference & Dating](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html). Following the completion of maximum likelihood phylogenetic inference, branch support estimation, and divergence time reconstruction, this module focuses on enriching the resulting evolutionary framework with biological metadata and generating comprehensive visual summaries of the final multilocus dataset.
 
 #### The Scientific Importance of an Integrative Evolutionary Registry
 
@@ -153,7 +153,7 @@ species_summary <- species_summary %>%
 
 #### IUCN Metadata Enrichment
 
-The integration of conservation information represents an essential step for connecting phylogenomic reconstruction with biological interpretation. In this module, `PhyloCactus` retrieves species-level conservation assessments from the **IUCN Red List database** through the `rredlist` API interface and integrates these records with the final phylogenetic dataset.
+The integration of conservation information represents an essential step for connecting phylogenetic reconstruction with biological interpretation. In this module, `PhyloCactus` retrieves species-level conservation assessments from the **IUCN Red List database** through the `rredlist` API interface and integrates these records with the final phylogenetic dataset.
 
 The enrichment process links each taxon included in the molecular framework with standardized conservation attributes, including IUCN category, assessment status, endemic distribution information, habitat associations, and documented threats. This approach allows researchers to evaluate whether evolutionary diversity is adequately represented within conservation assessments and to identify potential mismatches between phylogenetic distinctiveness and extinction risk.
 
@@ -276,7 +276,7 @@ if("retained_markers" %in% names(species_summary_iucn)){
 
 #### Figure 4: Marker Presence Heatmap
 
-This heatmap displays the distribution of molecular marker availability across species included in the final phylogenetic dataset, indicating the presence or absence of sequence information for each locus. The visualization provides a detailed overview of missing data patterns among taxa and markers, allowing researchers to evaluate whether incomplete sampling is concentrated in specific lineages or genomic regions.
+This heatmap displays the distribution of molecular marker availability across species included in the final phylogenetic dataset, indicating the presence or absence of sequence information for each locus. The visualization provides a detailed overview of missing data patterns among taxa and markers, allowing researchers to evaluate whether incomplete sampling is concentrated in specific lineages or locus partitions.
 
 ```{r marker_heatmap, eval = has_data, fig.height = 8}
 heatmap_data <- species_summary_iucn %>% filter(in_phylogeny == TRUE) %>% select(species, all_of(marker_cols)) %>%

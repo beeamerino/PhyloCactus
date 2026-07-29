@@ -25,7 +25,7 @@ Following the step-by-step analytical modules presented in Tutorials 1 through 4
 - **Where are we?** Having assembled supermatrices, inferred maximum-likelihood phylogenies, estimated divergence times with `treePL`, and validated topologies against external backbones, we require an organized reference dictionary detailing function signatures and biological motivations.
 - **Why are we here?** Complex computational pipelines require explicit documentation linking software parameters directly to underlying evolutionary mechanics, such as mitigating long-branch attraction (LBA), enforcing positional homology, and accounting for incomplete lineage sorting (ILS).
 - **What will we achieve?** A complete, reproducible function reference mapping sequence mining, alignment quality control, substitution model evaluation, maximum-likelihood search, temporal calibration, and visualization utilities.
-- **What comes next?** Users can query individual function manual pages (`?function_name`) or incorporate specific functions into customized plant phylogenomic pipelines.
+- **What comes next?** Users can query individual function manual pages (`?function_name`) or incorporate specific functions into customized plant phylogenetic pipelines.
 
 ## Function Reference Dictionary
 
