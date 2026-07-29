@@ -103,9 +103,10 @@ handle heterogeneous molecular datasets.</p>
 assembly and curation of multilocus phylogenetic datasets. The workflow
 builds upon the orthology-based sequence mining strategy implemented in
 <code>phylotaR</code>, extending it with comprehensive taxonomic
-reconciliation against the Caryophyllales.org checklist, automated
-quality control procedures using <code>DECIPHER</code>, substitution
-saturation filtering, multiple sequence alignment using
+reconciliation against the Caryophyllales.org checklist
+(<code>CactaceaeFullList_accepted.csv</code>; Korotkova <em>et al</em>.
+2021), automated quality control procedures using <code>DECIPHER</code>,
+substitution saturation filtering, multiple sequence alignment using
 <code>MAFFT</code> to infer positional homology, and concatenation of
 curated loci into partitioned supermatrices.</p>
 <p>The complete <code>PhyloCactus</code> workflow is organized into
@@ -345,13 +346,13 @@ species into multiple tip taxa.</p>
 <p>The <code><a href="../reference/integrate_and_clean_markers.html">integrate_and_clean_markers()</a></code> function combines the
 curated ingroup and outgroup datasets while reconciling species names
 against the <strong>Caryophyllales.org</strong> taxonomic backbone
-(<code>CactaceaeFullList_accepted.csv</code>). Taxonomic synonyms,
-obsolete names, infraspecific designations, and other inconsistent
-nomenclatural variants are standardized to their currently accepted
-species names, ensuring consistency throughout the dataset. The function
-also verifies marker correspondence between the ingroup and outgroup,
-removing unsupported loci and retaining only orthologous markers shared
-across the final dataset.</p>
+(<code>CactaceaeFullList_accepted.csv</code>; Korotkova <em>et al</em>.
+2021). Taxonomic synonyms, obsolete names, infraspecific designations,
+and other inconsistent nomenclatural variants are standardized to their
+currently accepted species names, ensuring consistency throughout the
+dataset. The function also verifies marker correspondence between the
+ingroup and outgroup, removing unsupported loci and retaining only
+orthologous markers shared across the final dataset.</p>
 <p>The resulting output is a curated repository of standardized
 orthologous sequence alignments that provides the definitive molecular
 dataset for downstream sequence concatenation, maximum-likelihood

@@ -74,7 +74,8 @@ reproducible phylogenetic workflow:
     clusters via `phylotaR`, alignment of positional homology using
     `MAFFT`, automated quality control masking via `DECIPHER`,
     substitution saturation screening, taxonomic reconciliation against
-    the Caryophyllales.org checklist, and concatenation into partitioned
+    the Caryophyllales.org checklist (`CactaceaeFullList_accepted.csv`;
+    Korotkova *et al*. 2021), and concatenation into partitioned
     supermatrices.
 2.  **Phylogenetic Inference and Dating (Modules 7 to 10)**:
     Partition-specific substitution model selection using `ModelTest-NG`
@@ -265,3 +266,6 @@ package.
 - Guerrero *et al*. 2019. Phylogenetic Relationships and Evolutionary
   Trends in the Cactus Family. *Journal of Heredity*, 110(1), 4–21.
   <https://doi.org/10.1093/jhered/esy064>
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic
+  online species-level taxonomic backbone for the family. *Willdenowia*,
+  51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>

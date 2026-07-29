@@ -32,7 +32,8 @@ molecular datasets.
 curation of multilocus phylogenetic datasets. The workflow builds upon
 the orthology-based sequence mining strategy implemented in `phylotaR`,
 extending it with comprehensive taxonomic reconciliation against the
-Caryophyllales.org checklist, automated quality control procedures using
+Caryophyllales.org checklist (`CactaceaeFullList_accepted.csv`;
+Korotkova *et al*. 2021), automated quality control procedures using
 `DECIPHER`, substitution saturation filtering, multiple sequence
 alignment using `MAFFT` to infer positional homology, and concatenation
 of curated loci into partitioned supermatrices.
@@ -286,13 +287,13 @@ The
 [`integrate_and_clean_markers()`](https://beeamerino.github.io/PhyloCactus/reference/integrate_and_clean_markers.md)
 function combines the curated ingroup and outgroup datasets while
 reconciling species names against the **Caryophyllales.org** taxonomic
-backbone (`CactaceaeFullList_accepted.csv`). Taxonomic synonyms,
-obsolete names, infraspecific designations, and other inconsistent
-nomenclatural variants are standardized to their currently accepted
-species names, ensuring consistency throughout the dataset. The function
-also verifies marker correspondence between the ingroup and outgroup,
-removing unsupported loci and retaining only orthologous markers shared
-across the final dataset.
+backbone (`CactaceaeFullList_accepted.csv`; Korotkova *et al*. 2021).
+Taxonomic synonyms, obsolete names, infraspecific designations, and
+other inconsistent nomenclatural variants are standardized to their
+currently accepted species names, ensuring consistency throughout the
+dataset. The function also verifies marker correspondence between the
+ingroup and outgroup, removing unsupported loci and retaining only
+orthologous markers shared across the final dataset.
 
 The resulting output is a curated repository of standardized orthologous
 sequence alignments that provides the definitive molecular dataset for

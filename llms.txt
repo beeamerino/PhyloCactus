@@ -63,10 +63,11 @@ PhyloCactus Workflow Architecture
     quality control masking with `DECIPHER`, screens locus alignments
     for mutational saturation slope erosion (Xia test), reconciles
     species nomenclature against the Caryophyllales.org checklist
-    (`CactaceaeFullList_accepted.csv`), executes joint alignment of
-    ingroup (**Cactaceae**) and outgroup (*Portulaca*, *Anacampseros*,
-    *Talinopsis*, *Grahamia*) markers, and concatenates locus alignments
-    into partitioned supermatrices with explicit coordinate boundaries.
+    (`CactaceaeFullList_accepted.csv`; Korotkova *et al*. 2021),
+    executes joint alignment of ingroup (**Cactaceae**) and outgroup
+    (*Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*) markers, and
+    concatenates locus alignments into partitioned supermatrices with
+    explicit coordinate boundaries.
 
 2.  **Stage 2: Phylogenetic Inference and Dating (Modules 7 to 10)**  
     Evaluates partition-specific nucleotide substitution models using
@@ -187,6 +188,9 @@ citation("PhyloCactus")
 - Hernández-Hernández *et al*. 2014. Beyond aridification: Multiple
   explanations for the elevated diversification of cacti in the New
   World Succulent Biome. *New Phytologist*, 202(4), 1382–1397.
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic
+  online species-level taxonomic backbone for the family. *Willdenowia*,
+  51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 
 ## License
 
