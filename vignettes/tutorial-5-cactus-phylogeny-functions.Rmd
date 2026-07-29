@@ -27,8 +27,6 @@ Following the step-by-step analytical modules presented in Tutorials 1 through 4
 - **What will we achieve?** A complete, reproducible function reference mapping sequence mining, alignment quality control, substitution model evaluation, maximum-likelihood search, temporal calibration, and visualization utilities.
 - **What comes next?** Users can query individual function manual pages (`?function_name`) or incorporate specific functions into customized plant phylogenomic pipelines.
 
----
-
 ## Function Reference Dictionary
 
 ### Sequence Assembly & Mining
@@ -37,11 +35,9 @@ Functions in this category retrieve orthologous sequence clusters from public re
 
 | Function | Biological & Methodological Application | Canonical Citation |
 |:---|:---|:---|
-| `assemble_ingroup_phylotar()` | Mines orthologous DNA sequence clusters for a focal ingroup clade (e.g., **Cactaceae**; Guerrero *et al.* 2019) from GenBank using `phylotaR`. Applies strict taxonomic filters, evaluates cluster occupancy, and resolves nomenclature inconsistencies. | Bennett *et al.* (2018) |
-| `assemble_outgroup_phylotar()` | Retrieves orthologous sequences for specified outgroup lineages to establish accurate root positions for downstream likelihood search and chronogram estimation. | Bennett *et al.* (2018) |
-| `fetch_genbank_metadata()` | Interrogates NCBI Entrez utilities to extract sequence lengths, organism taxonomy, publication titles, and accession IDs for downloaded sequence clusters. | Camacho *et al.* (2009) |
-
----
+| `assemble_ingroup_phylotar()` | Mines orthologous DNA sequence clusters for a focal ingroup clade (e.g., Cactaceae; Guerrero et al. 2019) from GenBank using `phylotaR`. Applies strict taxonomic filters, evaluates cluster occupancy, and resolves nomenclature inconsistencies. | Bennett et al. (2018) |
+| `assemble_outgroup_phylotar()` | Retrieves orthologous sequences for specified outgroup lineages to establish accurate root positions for downstream likelihood search and chronogram estimation. | Bennett et al. (2018) |
+| `fetch_genbank_metadata()` | Interrogates NCBI Entrez utilities to extract sequence lengths, organism taxonomy, publication titles, and accession IDs for downloaded sequence clusters. | Camacho et al. (2009) |
 
 ### Alignment & Quality Control
 
@@ -50,19 +46,15 @@ Functions in this category establish hypotheses of positional homology (`MAFFT`)
 | Function | Biological & Methodological Application | Canonical Citation |
 |:---|:---|:---|
 | `run_alignment_pipeline()` | Generates multiple sequence alignments using `MAFFT` and masks poorly aligned, ambiguous, or hypervariable regions using `DECIPHER`, eliminating systematic noise while retaining phylogenetically informative sites. | Katoh & Standley (2013); Wright (2024) |
-| `run_marker_screening()` | Evaluates phylogenetic informativeness, sequence coverage, and substitution saturation across individual locus alignments, excluding loci exhibiting high saturation slope erosion. | Xia *et al.* (2003) |
-| `clean_taxonomic_names()` | Standardizes tip labels against authoritative botanical checklists (e.g., Caryophyllales.org checklist), resolving synonymies and orthographic variants. | Korotkova *et al.* (2021) |
+| `run_marker_screening()` | Evaluates phylogenetic informativeness, sequence coverage, and substitution saturation across individual locus alignments, excluding loci exhibiting high saturation slope erosion. | Xia et al. (2003) |
+| `clean_taxonomic_names()` | Standardizes tip labels against authoritative botanical checklists (e.g., Caryophyllales.org checklist), resolving synonymies and orthographic variants. | Korotkova et al. (2021) |
 | `run_joint_realignment()` | Re-estimates positional homology alignments (`MAFFT`) after aggregating ingroup and outgroup sequence markers to refine alignment hypotheses. | Katoh & Standley (2013) |
-
----
 
 ### Concatenation & Supermatrix Assembly
 
 | Function | Biological & Methodological Application | Canonical Citation |
 |:---|:---|:---|
-| `run_concatenation_pipeline()` | Concatenates individual orthologous locus alignments into a unified multilocus supermatrix and generates partition coordinate maps compatible with `RAxML-NG`, `IQ-TREE`, and `MrBayes`. | Kozlov *et al.* (2019) |
-
----
+| `run_concatenation_pipeline()` | Concatenates individual orthologous locus alignments into a unified multilocus supermatrix and generates partition coordinate maps compatible with `RAxML-NG`, `IQ-TREE`, and `MrBayes`. | Kozlov et al. (2019) |
 
 ### Likelihood Inference & Model Evaluation
 
@@ -70,13 +62,11 @@ Functions in this category select optimal nucleotide substitution models per par
 
 | Function | Biological & Methodological Application | Canonical Citation |
 |:---|:---|:---|
-| `preprocess_partitions()` | Validates structural integrity and syntax of the supermatrix and its corresponding partition definitions prior to likelihood evaluation using `RAxML-NG`. | Kozlov *et al.* (2019) |
-| `run_modeltest_ng()` | Identifies the optimal substitution model per partition (`ModelTest-NG`) using AICc criteria, controlling for mutational rate heterogeneity and mitigating long-branch attraction (LBA). | Darriba *et al.* (2020) |
-| `build_constraint_scaffold()` | Synthesizes a Newick multifurcating constraint scaffold enforcing monophyletic relationships of established higher taxonomic ranks. | Guerrero *et al.* (2019) |
-| `calculate_ml_tree()` | Infers the maximum-likelihood evolutionary hypothesis explaining the supermatrix under selected partition models and constraint scaffolds (`RAxML-NG`). | Kozlov *et al.* (2019) |
-| `map_branch_supports()` | Maps Transfer Bootstrap Expectation (TBE) support values onto the best maximum-likelihood tree, providing robust clade support for large phylogenies. | Lemoine *et al.* (2018) |
-
----
+| `preprocess_partitions()` | Validates structural integrity and syntax of the supermatrix and its corresponding partition definitions prior to likelihood evaluation using `RAxML-NG`. | Kozlov et al. (2019) |
+| `run_modeltest_ng()` | Identifies the optimal substitution model per partition (`ModelTest-NG`) using AICc criteria, controlling for mutational rate heterogeneity and mitigating long-branch attraction (LBA). | Darriba et al. (2020) |
+| `build_constraint_scaffold()` | Synthesizes a Newick multifurcating constraint scaffold enforcing monophyletic relationships of established higher taxonomic ranks. | Guerrero et al. (2019) |
+| `calculate_ml_tree()` | Infers the maximum-likelihood evolutionary hypothesis explaining the supermatrix under selected partition models and constraint scaffolds (`RAxML-NG`). | Kozlov et al. (2019) |
+| `map_branch_supports()` | Maps Transfer Bootstrap Expectation (TBE) support values onto the best maximum-likelihood tree, providing robust clade support for large phylogenies. | Lemoine et al. (2018) |
 
 ### Divergence Time Estimation & treePL Automation
 
@@ -86,18 +76,14 @@ Functions in this category select optimal nucleotide substitution models per par
 | `run_treePL()` | Interfacing with `treePL` via a shell wrapper script to estimate ultrametric chronograms under penalized likelihood. | Smith & O’Meara (2012) |
 | `automate_treePL()` | Automates cross-validation parameter optimization, rate smoothing selection, and chronogram estimation across temporal bootstrap replicates. | Maurin (2020) |
 
----
-
 ### Comparative Validation & IUCN Utilities
 
 | Function | Biological & Methodological Application | Canonical Citation |
 |:---|:---|:---|
 | `validate_phylogenies()` | Quantifies topological congruence between the focal supermatrix tree and external published backbones using Robinson-Foulds distances and multidimensional scaling (MDS). | Robinson & Foulds (1981); Smith (2020) |
-| `integrate_publication_tree()` | Maps statistical support onto chronograms, collapsing weakly supported nodes (TBE < 0.70) into **soft polytomies** (*soft polytomies*) to represent analytical uncertainty. | Lemoine *et al.* (2018) |
+| `integrate_publication_tree()` | Maps statistical support onto chronograms, collapsing weakly supported nodes (TBE < 0.70) into soft polytomies to represent analytical uncertainty. | Lemoine et al. (2018) |
 | `get_iucn_data()` | Interrogates the IUCN Red List API via `rredlist` to retrieve extinction threat categories, population trends, and geographic endemism metrics. | IUCN (2024) |
 | `scale_fill_iucn()` | Provides a standardized `ggplot2` manual fill scale mapping official IUCN threat categories onto comparative figures. | IUCN (2024) |
-
----
 
 ### Reproducible Execution Example
 

@@ -372,8 +372,6 @@ if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
 cat("--------------------------------------------\n")
 ```
 
-------------------------------------------------------------------------
-
 ## Next Steps
 
 At this stage, phylogenetic inference and divergence time estimation have been completed. The resulting maximum likelihood topology, branch support estimates, and time calibrated chronogram provide the evolutionary framework required for downstream comparative analyses.
@@ -382,21 +380,20 @@ The next stage of the `PhyloCactus` workflow focuses on integrating phylogenetic
 
 [Continue to Tutorial 3: Data Visualization and IUCN Summaries](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html)
 
-------------------------------------------------------------------------
+## References
 
-#### References
-
-- Arakaki *et al*., 2011. Contemporaneous and recent radiations of the world’s major succulent plant lineages. *Proceedings of the National Academy of Sciences of the United States of America*, *108*(20), 8379–8384. <https://doi.org/10.1073/pnas.1100628108>
-- Hernández-Hernández *et al*., 2014. Beyond aridification: Multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. *New Phytologist*, *202*(4), 1382–1397. <https://doi.org/10.1111/nph.12752>
-- Ramírez-Barahona *et al*., *2020*. The delayed and geographically heterogeneous diversification of flowering plant families. *Nature Ecology and Evolution*, *4*(9), 1232–1238. <https://doi.org/10.1038/s41559-020-1241-3>
-- Darriba *et al.*, 2020. ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, *37*(1), 291-294. <https://doi.org/10.1093/molbev/msz189>
-- Flouri *et al.,* 2014. The Phylogenetic Likelihood Library. *Systematic Biology*, *64*(2): 356-362. <https://doi.org/10.1093/sysbio/syu084>
-- Akaike, H. 1974. A new look at the statistical model identification. *IEEE transactions on automatic control*, *19*(6), 716-723. <http://dx.doi.org/10.1109/TAC.1974.1100705>
-- Kozlov *et al*. 2019. RAxML-NG: A fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, *35*(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305>
-- Robinson, D. F., & Foulds, L. R. 1981. Comparison of phylogenetic trees. *Mathematical biosciences*, *53*(1-2), 131-147. [https://doi.org/10.1016/0025-5564(81)90043-2](https://doi.org/10.1016/0025-5564(81)90043-2){.uri}
-- Pattengale *et al*., 2010. How many bootstrap replicates are necessary?. *Journal of computational biology*, *17*(3), 337–354. <https://doi.org/10.1089/cmb.2009.0179>
-- Lemoine *et al*., 2018. Renewing Felsenstein’s phylogenetic bootstrap in the era of big data. *Nature*, *556*(7702), 452-456. <https://doi.org/10.1038/s41586-018-0043-0>
+- Akaike, H. 1974. A new look at the statistical model identification. *IEEE Transactions on Automatic Control*, 19(6), 716-723. <https://doi.org/10.1109/TAC.1974.1100705>
+- Arakaki *et al*. 2011. Contemporaneous and recent radiations of the world’s major succulent plant lineages. *Proceedings of the National Academy of Sciences of the United States of America*, 108(20), 8379–8384. <https://doi.org/10.1073/pnas.1100628108>
+- Darriba *et al*. 2020. ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291-294. <https://doi.org/10.1093/molbev/msz189>
+- Flouri *et al*. 2014. The Phylogenetic Likelihood Library. *Systematic Biology*, 64(2), 356-362. <https://doi.org/10.1093/sysbio/syu084>
+- Helfrich *et al*. 2018. TreeAnnotator: versatile visual annotation of hierarchical text relations. *Proceedings of the Eleventh International Conference on Language Resources and Evaluation*. <https://lrec.elra.info/lrec2018-main-308>
+- Hernández-Hernández *et al*. 2014. Beyond aridification: Multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. *New Phytologist*, 202(4), 1382–1397. <https://doi.org/10.1111/nph.12752>
+- Kozlov *et al*. 2019. RAxML-NG: A fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305>
+- Lemoine *et al*. 2018. Renewing Felsenstein’s phylogenetic bootstrap in the era of big data. *Nature*, 556(7702), 452-456. <https://doi.org/10.1038/s41586-018-0043-0>
 - Maurin, K. J. 2020. An empirical guide for producing a dated phylogeny with treePL in a maximum likelihood framework. *arXiv preprint arXiv:2008.07054*. <https://doi.org/10.48550/arXiv.2008.07054>
-- Smith, S. A., & O’Meara, B. C. 2012. TreePL: Divergence time estimation using penalized likelihood for large phylogenies. *Bioinformatics*, *28*(20), 2689–2690. <https://doi.org/10.1093/bioinformatics/bts492>
-- Sanderson, M. J. 2002. Estimating Absolute Rates of Molecular Evolution and Divergence Times: A Penalized Likelihood Approach. *Mol. Biol. Evol*, *19*(1), 101–109. <https://academic.oup.com/mbe/article/19/1/101/1066733>
-- Helfrich *et al*. (2018). TreeAnnotator: versatile visual annotation of hierarchical text relations. *Proceedings of the Eleventh International Conference on Language Resources and Evaluation*. <https://lrec.elra.info/lrec2018-main-308>
+- Pattengale *et al*. 2010. How many bootstrap replicates are necessary?. *Journal of Computational Biology*, 17(3), 337–354. <https://doi.org/10.1089/cmb.2009.0179>
+- Ramírez-Barahona *et al*. 2020. The delayed and geographically heterogeneous diversification of flowering plant families. *Nature Ecology and Evolution*, 4(9), 1232–1238. <https://doi.org/10.1038/s41559-020-1241-3>
+- Robinson, D. F., & Foulds, L. R. 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1-2), 131-147. <https://doi.org/10.1016/0025-5564(81)90043-2>
+- Sanderson, M. J. 2002. Estimating Absolute Rates of Molecular Evolution and Divergence Times: A Penalized Likelihood Approach. *Molecular Biology and Evolution*, 19(1), 101–109. <https://doi.org/10.1093/oxfordjournals.molbev.a003974>
+- Smith, S. A., & O’Meara, B. C. 2012. TreePL: Divergence time estimation using penalized likelihood for large phylogenies. *Bioinformatics*, 28(20), 2689–2690. <https://doi.org/10.1093/bioinformatics/bts492>
+

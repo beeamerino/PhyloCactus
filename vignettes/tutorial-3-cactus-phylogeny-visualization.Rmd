@@ -668,9 +668,8 @@ Using quantitative tree comparison approaches, including **Robinson-Foulds dista
 
 [Continue to Tutorial 4: Phylogenetic Validation and Comparative Analyses](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html)
 
-------------------------------------------------------------------------
+## References
 
-#### References
+- Amaral *et al*. 2022. Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. *Biological Conservation*, 273, 109677. <https://doi.org/10.1016/j.biocon.2022.109677>
+- Thompson *et al*. 2024. Identifying the multiple drivers of cactus diversification. *Nature Communications*, 15(1), 7114. <https://doi.org/10.1038/s41467-024-51666-2>
 
-- Amaral *et al*., 2022. Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. *Biological Conservation*, 273. <https://doi.org/10.1016/j.biocon.2022.109677>
-- Thompson, *et al*., 2024. Identifying the multiple drivers of cactus diversification. *Nature Communications*, *15*(1). <https://doi.org/10.1038/s41467-024-51666-2>
