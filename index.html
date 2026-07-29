@@ -67,53 +67,51 @@
 <!-- badges: start -->
 
 <!-- badges: end -->
-<p><strong>Reproducible phylogenetic workflows for data assembly, inference, and divergence time estimation</strong></p>
-<p>Reconstructing evolutionary relationships within plant clades characterized by rapid adaptive radiations, such as the family <strong>Cactaceae</strong>, presents major methodological challenges. Low plastid sequence divergence, persistent gene tree discordance driven by incomplete lineage sorting (ILS) and reticulate evolution, and pervasive taxonomic synonymies in public sequence repositories hinder computational reproducibility.</p>
-<p><code>PhyloCactus</code> provides a standardized, reproducible R workflow designed to address these biological challenges. By integrating sequence retrieval, taxonomic reconciliation, alignment quality control, substitution model evaluation, maximum-likelihood inference, divergence time estimation, and comparative tree validation into a unified pipeline, <code>PhyloCactus</code> transforms heterogeneous genomic sequence data into statistically evaluated phylogenetic hypotheses. While optimized for Cactaceae, the modular architecture applies to any plant lineage requiring rigorous phylogenetic data preparation and macroevolutionary analysis.</p>
+<p><strong>Reproducible phylogenomic workflows for data assembly, evolutionary modeling, maximum-likelihood inference, and divergence time estimation in plant radiations</strong></p>
 <div class="section level2">
-<h2 id="main-features">Main Features<a class="anchor" aria-label="anchor" href="#main-features"></a>
+<h2 id="overview--biological-motivation">Overview &amp; Biological Motivation<a class="anchor" aria-label="anchor" href="#overview--biological-motivation"></a>
 </h2>
-<p>The package provides tools for:</p>
-<ul>
-<li>Automating the retrieval of orthologous DNA sequence clusters from GenBank using similarity clustering via <code>phylotaR</code> (Bennett <em>et al.</em> 2018) and <code>BLAST+</code> (Camacho <em>et al.</em> 2009).</li>
-<li>Inferring positional homology alignments using <code>MAFFT</code> (Katoh &amp; Standley 2013).</li>
-<li>Mitigating systematic alignment errors through automated masking of non-homologous segments with <code>DECIPHER</code> (Wright 2024).</li>
-<li>Standardizing nomenclatural frameworks to assemble curated, unified multilocus datasets against dynamic taxonomic checklists.</li>
-<li>Synthesizing concatenated supermatrices and defining structural partition bounds for partitioned phylogenetic inference.</li>
-<li>Statistically controlling for mutational heterogeneity and long-branch attraction by evaluating nucleotide substitution models via <code>ModelTest-NG</code> (Darriba <em>et al.</em> 2020).</li>
-<li>Inferring maximum-likelihood evolutionary hypotheses using <code>RAxML-NG</code> (Kozlov <em>et al.</em> 2019).</li>
-<li>Mapping Transfer Bootstrap Expectation (<code>TBE</code>; Lemoine <em>et al.</em> 2018) onto maximum-likelihood topologies to evaluate clade support under missing data.</li>
-<li>Estimating ultrametric chronograms to accommodate evolutionary rate heterogeneity via penalized likelihood with <code>treePL</code> (Sanderson 2002; Smith &amp; O’Meara 2012).</li>
-<li>Integrating complex taxonomic and conservation metadata, including statuses from the <strong>IUCN Red List</strong>.</li>
-<li>Producing publication-quality phylogenetic figures and chronological cadastres.</li>
-<li>Quantifying topological congruence and validating alternative phylogenetic hypotheses via multidimensional tree-space projections.</li>
-</ul>
+<p>Reconstructing evolutionary relationships within plant clades characterized by recent adaptive radiations presents profound methodological challenges in systematic biology. The family <strong>Cactaceae</strong> represents one of the most prominent succulent plant radiations in the Neotropics (Arakaki <em>et al</em>. 2011; Hernández-Hernández <em>et al</em>. 2014; Guerrero <em>et al</em>. 2019). Evolutionary inference across this family is hindered by low plastid sequence divergence, persistent gene tree discordance driven by incomplete lineage sorting (ILS) and ancient reticulation, and pervasive nomenclatural synonymies in public sequence repositories.</p>
+<p>When assembling multilocus datasets from public repositories such as GenBank, researchers frequently encounter inconsistent locus annotations, duplicated accessions, unvouchered identifications, and heterogeneous sequence quality. Transforming these uncurated sequence records into high-quality phylogenetic datasets requires systematic procedures to establish positional homology, evaluate mutational saturation, control rate heterogeneity across genomic partitions, and calibrate divergence times using penalized likelihood.</p>
+<p><code>PhyloCactus</code> provides an integrative, reproducible R framework designed to address these challenges. Rather than relying on manual ad hoc scripts, <code>PhyloCactus</code> orchestrates established bioinformatics software into a standardized 4-stage pipeline. The package automates orthology-based sequence retrieval (<code>phylotaR</code>), alignment of positional homology (<code>MAFFT</code>), objective quality control masking (<code>DECIPHER</code>), substitution model evaluation (<code>ModelTest-NG</code>), constrained maximum-likelihood topology inference (<code>RAxML-NG</code>), Transfer Bootstrap Expectation support mapping (<code>TBE</code>), penalized likelihood chronogram estimation (<code>treePL</code>), IUCN Red List metadata enrichment (<code>rredlist</code>), and multispecies coalescent tree-space validation (<code>ASTRAL-III</code>).</p>
 </div>
 <div class="section level2">
-<h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
+<h2 id="four-stage-analytical-architecture">Four-Stage Analytical Architecture<a class="anchor" aria-label="anchor" href="#four-stage-analytical-architecture"></a>
 </h2>
-<p>The complete workflow is organized into four analytical stages comprising thirteen interoperable modules.</p>
+<p>The <code>PhyloCactus</code> pipeline is organized into <strong>four analytical stages</strong> comprising <strong>thirteen interoperable modules</strong>:</p>
 <div class="float">
 <img src="reference/figures/Fig1_PhyloCactus_Workflow.png" alt="PhyloCactus Workflow Architecture"><div class="figcaption">PhyloCactus Workflow Architecture</div>
 </div>
-<blockquote>
-<p>Each stage can be executed independently or combined into a fully reproducible phylogenetic workflow.</p>
-</blockquote>
+<ol style="list-style-type: decimal">
+<li><p><strong>Stage 1: Data Assembly and Preparation (Modules 1 to 6)</strong><br>
+Retrieves orthologous sequence clusters using BLAST-based similarity clustering via <code>phylotaR</code>, avoiding GenBank annotation ambiguities. Establishes positional homology with <code>MAFFT</code>, applies objective quality control masking with <code>DECIPHER</code>, screens loci for mutational saturation erosion (Xia test), reconciles species nomenclature against the authoritative Caryophyllales.org checklist (<code>CactaceaeFullList_accepted.csv</code>), executes joint alignment of ingroup (<strong>Cactaceae</strong>) and outgroup (<em>Portulaca</em>, <em>Anacampseros</em>, <em>Talinopsis</em>, <em>Grahamia</em>) markers, and concatenates loci into partitioned supermatrices with explicit coordinate boundaries.</p></li>
+<li><p><strong>Stage 2: Phylogenetic Inference and Dating (Modules 7 to 10)</strong><br>
+Evaluates partition-specific nucleotide substitution models using <code>ModelTest-NG</code> under corrected Akaike Information Criteria (AICc) to control mutational rate heterogeneity and mitigate Long-Branch Attraction (LBA). Infers maximum-likelihood topologies using <code>RAxML-NG</code> under topological constraint scaffolds (<code>cactus_constraints.csv</code>) enforcing higher-level clade monophyly (<strong>Cactoideae</strong>, <strong>Opuntioideae</strong>, <strong>Leuenbergeria</strong>, <strong>Pereskia</strong>). Maps clade support via Transfer Bootstrap Expectation (<code>TBE</code>) to handle missing data, generates topologically constrained temporal bootstrap alignments, and estimates ultrametric chronograms using penalized likelihood in <code>treePL</code> guided by secondary calibration boundaries (<code>calibrations_bounds.csv</code>).</p></li>
+<li><p><strong>Stage 3: Visualization and Metadata Integration (Modules 11 and 12)</strong><br>
+Enriches the phylogenetic framework with species-level conservation attributes retrieved automatically from the IUCN Red List database via <code>rredlist</code>. Collapses weakly supported internal nodes (TBE &lt; 0.70) into soft politomies to prevent over-interpreting unresolved rapid radiation nodes, and renders publication-ready phylogenetic figures, chronograms, and conservation cadastres using <code>ggplot2</code>.</p></li>
+<li><p><strong>Stage 4: Validation and Sub-tree Comparisons (Module 13)</strong><br>
+Quantifies topological congruence between the focal supermatrix tree and external published backbones (e.g., Amaral <em>et al</em>. 2022; Thompson <em>et al</em>. 2024; de Vos <em>et al</em>. 2025) using Robinson-Foulds distances and multidimensional scaling (MDS) tree-space projections (<code>validate_phylogenies</code>). Infers coalescent species trees using <code>ASTRAL-III</code> under multispecies coalescent theory to evaluate biological gene tree discordance driven by incomplete lineage sorting.</p></li>
+</ol>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>Install the development version directly from GitHub:</p>
+<p>Install the development version of <code>PhyloCactus</code> directly from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"remotes"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"beeamerino/PhyloCactus"</span><span class="op">)</span></span></code></pre></div>
+<p>Verify package installation:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/packageDescription.html" class="external-link">packageVersion</a></span><span class="op">(</span><span class="st">"PhyloCactus"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="r-dependencies">R Dependencies<a class="anchor" aria-label="anchor" href="#r-dependencies"></a>
 </h2>
-<p><code>PhyloCactus</code> relies on packages available from both CRAN and Bioconductor:</p>
+<p><code>PhyloCactus</code> integrates tools from CRAN, Bioconductor, and GitHub:</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -142,11 +140,17 @@
 </tr>
 </tbody>
 </table>
+<p>To install the Bioconductor dependencies:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu">install</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"DECIPHER"</span>, <span class="st">"Biostrings"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="external-software">External Software<a class="anchor" aria-label="anchor" href="#external-software"></a>
+<h2 id="external-software-binaries">External Software Binaries<a class="anchor" aria-label="anchor" href="#external-software-binaries"></a>
 </h2>
-<p>Several analyses performed by <code>PhyloCactus</code> rely on external command-line software that must be installed separately and available from your system <code>PATH</code>:</p>
+<p>Execution of <code>PhyloCactus</code> requires the following external command-line binaries, which must be installed and available in your system <code>$PATH</code>:</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -161,41 +165,42 @@
 <tbody>
 <tr>
 <td align="left"><a href="https://www.ncbi.nlm.nih.gov/books/NBK279690/" class="external-link"><code>BLAST+</code></a></td>
-<td align="left">Local sequence alignment and database searching</td>
-<td align="left">Camacho, C. <em>et al</em>. (2009). BLAST+: Architecture and applications. <em>BMC Bioinformatics</em>, 10. <a href="https://doi.org/10.1186/1471-2105-10-421" class="external-link uri">https://doi.org/10.1186/1471-2105-10-421</a>
+<td align="left">Local sequence similarity searching &amp; cluster identification</td>
+<td align="left">Camacho <em>et al</em>. (2009) <em>BMC Bioinformatics</em>
 </td>
 </tr>
 <tr>
 <td align="left"><a href="https://mafft.cbrc.jp/alignment/software/" class="external-link"><code>MAFFT</code></a></td>
-<td align="left">Multiple sequence alignment</td>
-<td align="left">Katoh, K., &amp; Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7: Improvements in performance and usability. <em>Molecular Biology and Evolution</em>, 30(4), 772–780. <a href="https://doi.org/10.1093/molbev/mst010" class="external-link uri">https://doi.org/10.1093/molbev/mst010</a>
+<td align="left">Multiple sequence alignment &amp; positional homology</td>
+<td align="left">Katoh &amp; Standley (2013) <em>Mol. Biol. Evol.</em>
 </td>
 </tr>
 <tr>
 <td align="left"><a href="https://github.com/ddarriba/modeltest" class="external-link"><code>ModelTest-NG</code></a></td>
-<td align="left">Model selection</td>
-<td align="left">Darriba, D. <em>et al</em>. (2020). ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. <em>Molecular Biology and Evolution</em>, 37(1), 291-294. <a href="https://doi.org/10.1093/molbev/msz189" class="external-link uri">https://doi.org/10.1093/molbev/msz189</a>
+<td align="left">Partitioned substitution model selection under AICc</td>
+<td align="left">Darriba <em>et al</em>. (2020) <em>Mol. Biol. Evol.</em>
 </td>
 </tr>
 <tr>
 <td align="left"><a href="https://github.com/amkozlov/raxml-ng" class="external-link"><code>RAxML-NG</code></a></td>
-<td align="left">Maximum-likelihood phylogenetic inference</td>
-<td align="left">Kozlov, A. M. <em>et al</em>. (2019). RAxML-NG: A fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. <em>Bioinformatics</em>, 35(21), 4453–4455. <a href="https://doi.org/10.1093/bioinformatics/btz305" class="external-link uri">https://doi.org/10.1093/bioinformatics/btz305</a>
+<td align="left">Constrained maximum-likelihood tree search &amp; TBE support</td>
+<td align="left">Kozlov <em>et al</em>. (2019) <em>Bioinformatics</em>
 </td>
 </tr>
 <tr>
 <td align="left"><a href="https://github.com/blackrim/treePL" class="external-link"><code>treePL</code></a></td>
-<td align="left">Divergence time estimation</td>
-<td align="left">Smith, S. A., &amp; O’Meara, B. C. (2012). TreePL: Divergence time estimation using penalized likelihood for large phylogenies. <em>Bioinformatics</em>, 28(20), 2689–2690. <a href="https://doi.org/10.1093/bioinformatics/bts492" class="external-link uri">https://doi.org/10.1093/bioinformatics/bts492</a>
+<td align="left">Penalized likelihood divergence time estimation</td>
+<td align="left">Smith &amp; O’Meara (2012) <em>Bioinformatics</em>
 </td>
 </tr>
 </tbody>
 </table>
+<p>Ensure these executables are accessible by adding their installation path to your <code>~/.Renviron</code> file (<code>usethis::edit_r_environ()</code>).</p>
 </div>
 <div class="section level2">
-<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+<h2 id="documentation--tutorials">Documentation &amp; Tutorials<a class="anchor" aria-label="anchor" href="#documentation--tutorials"></a>
 </h2>
-<p>The recommended way to learn <code>PhyloCactus</code> is by following the tutorials in sequence:</p>
+<p>Learn <code>PhyloCactus</code> through the sequential tutorial suite:</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -203,32 +208,32 @@
 </colgroup>
 <thead><tr>
 <th align="left">Tutorial</th>
-<th align="left">Description</th>
+<th align="left">Focus &amp; Scope</th>
 </tr></thead>
 <tbody>
 <tr>
 <td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/PhyloCactus.html"><strong>Get Started</strong></a></td>
-<td align="left">Package overview and installation</td>
+<td align="left">Package overview, design principles, and dependency configuration</td>
 </tr>
 <tr>
 <td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html"><strong>Tutorial 1</strong></a></td>
-<td align="left">Data Assembly and Preparation</td>
+<td align="left">Stage 1: Data Assembly, Alignment, Saturation Screening, &amp; Supermatrix Concatenation</td>
 </tr>
 <tr>
 <td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html"><strong>Tutorial 2</strong></a></td>
-<td align="left">Phylogenetic Inference and Divergence Time Estimation</td>
+<td align="left">Stage 2: Substitution Modeling, Constrained ML Search, TBE Support, &amp; treePL Dating</td>
 </tr>
 <tr>
 <td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html"><strong>Tutorial 3</strong></a></td>
-<td align="left">Visualization and Metadata Integration</td>
+<td align="left">Stage 3: IUCN Red List Enrichment, Soft Polytomy Collapsing, &amp; Figure Rendering</td>
 </tr>
 <tr>
 <td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html"><strong>Tutorial 4</strong></a></td>
-<td align="left">Phylogenetic Validation and Comparative Analyses</td>
+<td align="left">Stage 4: ASTRAL-III Coalescence, Robinson-Foulds Distances, &amp; MDS Tree-Space Validation</td>
 </tr>
 <tr>
 <td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-functions.html"><strong>Function Reference</strong></a></td>
-<td align="left">Complete reference of package functions</td>
+<td align="left">Comprehensive dictionary of package functions and analytical signatures</td>
 </tr>
 </tbody>
 </table>
@@ -236,18 +241,19 @@
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>If you use <code>PhyloCactus</code> in your research, please cite the package:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<p>If you use <code>PhyloCactus</code> in your research, please cite:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"PhyloCactus"</span><span class="op">)</span></span></code></pre></div>
-<p>If a software paper is available, please cite both the package and the associated publication.</p>
+<ul>
+<li>Arakaki <em>et al</em>. 2011. Contemporaneous and recent radiations of the world’s major succulent plant lineages. <em>PNAS</em>, 108(20), 8379–8384.</li>
+<li>Guerrero <em>et al</em>. 2019. Phylogenetic Relationships and Evolutionary Trends in the Cactus Family. <em>Journal of Heredity</em>, 110(1), 4–21.</li>
+<li>Hernández-Hernández <em>et al</em>. 2014. Beyond aridification: Multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. <em>New Phytologist</em>, 202(4), 1382–1397.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p><code>PhyloCactus</code> is released under the <strong>GPL-3 License</strong>.</p>
-<blockquote>
-<p>Bug reports, feature requests, and source code are available through the project’s GitHub repository.</p>
-</blockquote>
+<p><code>PhyloCactus</code> is licensed under the <strong>GNU General Public License v3.0 (GPL-3)</strong>.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
