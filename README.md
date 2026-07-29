@@ -25,7 +25,7 @@ The `PhyloCactus` pipeline is organized into **four analytical stages** comprisi
 ![PhyloCactus Workflow Architecture](man/figures/Fig1_PhyloCactus_Workflow.png)
 
 1. **Stage 1: Data Assembly and Preparation (Modules 1 to 6)**  
-   Retrieves orthologous sequence clusters using similarity-based clustering via `phylotaR`, bypassing GenBank annotation errors. Establishes positional homology with `MAFFT`, applies objective quality control masking with `DECIPHER`, screens locus alignments for mutational saturation slope erosion (Xia test), reconciles species nomenclature against the Caryophyllales.org checklist (`CactaceaeFullList_accepted.csv`), executes joint alignment of ingroup (**Cactaceae**) and outgroup (*Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*) markers, and concatenates locus alignments into partitioned supermatrices with explicit coordinate boundaries.
+   Retrieves orthologous sequence clusters using similarity-based clustering via `phylotaR`, bypassing GenBank annotation errors. Establishes positional homology with `MAFFT`, applies objective quality control masking with `DECIPHER`, screens locus alignments for mutational saturation slope erosion (Xia test), reconciles species nomenclature against the Caryophyllales.org checklist (`CactaceaeFullList_accepted.csv`; Korotkova *et al*. 2021), executes joint alignment of ingroup (**Cactaceae**) and outgroup (*Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*) markers, and concatenates locus alignments into partitioned supermatrices with explicit coordinate boundaries.
 
 2. **Stage 2: Phylogenetic Inference and Dating (Modules 7 to 10)**  
    Evaluates partition-specific nucleotide substitution models using `ModelTest-NG` under corrected Akaike Information Criteria (AICc) to control mutational rate heterogeneity and mitigate Long-Branch Attraction (LBA). Infers maximum-likelihood topologies using `RAxML-NG` under topological constraint scaffolds (`cactus_constraints.csv`) enforcing higher-level clade monophyly (**Cactoideae**, **Opuntioideae**, **Leuenbergeria**, **Pereskia**). Maps clade support via Transfer Bootstrap Expectation (`TBE`) to handle missing data, generates topologically constrained temporal bootstrap alignments, and estimates ultrametric chronograms using penalized likelihood in `treePL` guided by secondary calibration boundaries (`calibrations_bounds.csv`).
@@ -112,6 +112,7 @@ citation("PhyloCactus")
 - Arakaki *et al*. 2011. Contemporaneous and recent radiations of the world’s major succulent plant lineages. *PNAS*, 108(20), 8379–8384.
 - Guerrero *et al*. 2019. Phylogenetic Relationships and Evolutionary Trends in the Cactus Family. *Journal of Heredity*, 110(1), 4–21.
 - Hernández-Hernández *et al*. 2014. Beyond aridification: Multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. *New Phytologist*, 202(4), 1382–1397.
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 
 ## License
 

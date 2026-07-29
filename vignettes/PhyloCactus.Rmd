@@ -43,7 +43,7 @@ knitr::include_graphics("figures/Fig1_PhyloCactus_Workflow.png")
 
 Each stage can be executed independently or combined into a fully reproducible phylogenetic workflow:
 
-1. **Data Assembly and Preparation (Modules 1 to 6)**: Mined sequence clusters via `phylotaR`, alignment of positional homology using `MAFFT`, automated quality control masking via `DECIPHER`, substitution saturation screening, taxonomic reconciliation against the Caryophyllales.org checklist, and concatenation into partitioned supermatrices.
+1. **Data Assembly and Preparation (Modules 1 to 6)**: Mined sequence clusters via `phylotaR`, alignment of positional homology using `MAFFT`, automated quality control masking via `DECIPHER`, substitution saturation screening, taxonomic reconciliation against the Caryophyllales.org checklist (`CactaceaeFullList_accepted.csv`; Korotkova *et al*. 2021), and concatenation into partitioned supermatrices.
 2. **Phylogenetic Inference and Dating (Modules 7 to 10)**: Partition-specific substitution model selection using `ModelTest-NG` under AICc, constrained maximum-likelihood topology search using `RAxML-NG`, Transfer Bootstrap Expectation (`TBE`) support mapping, temporal bootstrap generation, and penalized likelihood chronogram estimation using `treePL`.
 3. **Visualization and Metadata Integration (Modules 11 and 12)**: Metadata enrichment linking phylogenetic trees with IUCN Red List threat categories (`rredlist`), collapsing weakly supported nodes (TBE < 0.70) into soft polytomies, and rendering manuscript-ready evolutionary figures.
 4. **Validation and Sub-tree Comparisons (Module 13)**: Quantitative tree comparison using Robinson-Foulds distances, multidimensional scaling (MDS) tree-space ordination (`validate_phylogenies`), and multispecies coalescent species-tree estimation using `ASTRAL-III` to evaluate biological gene tree discordance.
@@ -161,5 +161,6 @@ Once `PhyloCactus` and its external dependencies have been successfully installe
 - Bennett *et al*. 2018. Phylotar: An automated pipeline for retrieving orthologous DNA sequences from GenBank in R. *Life*, 8(2), 20. <https://doi.org/10.3390/life8020020>
 - Hernández-Hernández *et al*. 2014. Beyond aridification: Multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. *New Phytologist*, 202(4), 1382–1397. <https://doi.org/10.1111/nph.12752>
 - Guerrero *et al*. 2019. Phylogenetic Relationships and Evolutionary Trends in the Cactus Family. *Journal of Heredity*, 110(1), 4–21. <https://doi.org/10.1093/jhered/esy064>
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 
 
