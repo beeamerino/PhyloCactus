@@ -430,7 +430,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
 
 #' Assemble Outgroup Sequence Clusters via phylotaR
 #'
-#' Retrieves orthologous sequence clusters for specified outgroup lineages (e.g., *Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*)
+#' Retrieves orthologous sequence clusters for specified outgroup lineages (e.g., *Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*, *Talinum*, *Talinella*)
 #' matching the locus target constraints defined for the focal ingroup. Outer reference sampling provides phylogenetically
 #' informative root positions necessary for maximum-likelihood tree search and divergence time estimation.
 #'
@@ -439,7 +439,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
 #' @param genes_map_file Character. Path to the gene synonymy mapping CSV file. If `NULL`, defaults to package `inst/extdata/genes_map.csv`.
 #' @param manual_exclusions_file Character. Path to outgroup exclusions CSV file. If `NULL`, defaults to package `inst/extdata/manual_exclusions_outgroup.csv`.
 #' @param apply_manual_exclusions Logical. Apply the curated accession exclusion list? Defaults to `TRUE`; see [assemble_ingroup_phylotar()] for the provenance of these lists and for what setting it to `FALSE` is useful for.
-#' @param outgroups Character vector of NCBI Taxonomy IDs for outgroup lineages. Defaults to `c("107598", "107617", "107583", "3582")`.
+#' @param outgroups Character vector of NCBI Taxonomy IDs for outgroup lineages. Defaults to `c("107598", "107617", "107583", "3582", "107600", "108056")`.
 #' @param force_download Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.
 #' @param out_dir Character. Output directory path to save outgroup cluster tables and FASTA sequence files.
 #' @return A list containing the processed outgroup cluster objects and retained cluster IDs.
@@ -455,7 +455,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
 #' )
 #' }
 #' @export
-assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, outgroups = c("107598", "107617", "107583", "3582"), force_download = FALSE, out_dir = "1_phylotaR_out_Outgroup") {
+assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"), force_download = FALSE, out_dir = "1_phylotaR_out_Outgroup") {
   
   
   if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "PhyloCactus")

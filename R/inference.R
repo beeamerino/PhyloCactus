@@ -671,12 +671,11 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
 #' count per worker. Running 50 starting trees on one worker executes 50 rounds; the same 50 trees
 #' across 25 workers execute 2.
 #'
-#' Reference timing for this workload, measured on an Apple M2 Pro (8 threads, `--workers 1`,
-#' `RAxML-NG` 1.2.2, SSE3 kernels) over a supermatrix of 986 terminals, 12700 sites, 5732 patterns
-#' and 11 partitions: 50 starting trees in 47115 s, approximately 938 s per tree. That figure is a
-#' per-worker baseline for one tree at 8 threads and does not transfer directly to a different
-#' architecture or SIMD kernel; treat it as an order of magnitude and confirm with a short trial run
-#' (`n_init_trees = "rand{2}"`) before committing a full allocation.
+#' Reference timing illustrating worker parallelization: on an Apple M2 Pro (8 threads, `--workers 1`,
+#' `RAxML-NG` 1.2.2, SSE3 kernels), searching 50 starting trees sequentially required 47115 s (~938 s per tree).
+#' In contrast, the production run on an HPC cluster node (AMD EPYC 9754, 75 threads, `--workers 25`) over the
+#' full supermatrix (1023 terminals, 12806 sites, 5954 patterns, 11 partitions) completed 50 starting trees in
+#' 2393 s (~40 minutes), executing two parallel rounds.
 #'
 #' `workers` is derived automatically and constrained to a divisor of the starting tree
 #' count, so that no worker sits idle in the final round.
@@ -687,10 +686,10 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
 #' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()` rather than naming a terminal by hand.
 #' @param n_init_trees Character. Starting tree specification passed to `--tree`. Defaults to \verb{"rand{25},pars{25}"}.
 #' @param seed Integer. Random seed for reproducible tree search initialization. Defaults to `NULL` (random).
-#' @param threads Integer. CPU cores requested per SLURM task (`--cpus-per-task`). Defaults to `120`.
+#' @param threads Integer. CPU cores requested per SLURM task (`--cpus-per-task`). Defaults to `75`.
 #' @param workers Integer. Worker process count. If `NULL` (default), derived from `threads`,
 #'   `n_init_trees` and `min_threads_per_worker` so that workers divide the starting tree count evenly.
-#' @param min_threads_per_worker Integer. Lower bound on threads per worker when `workers` is derived. Defaults to `4L`.
+#' @param min_threads_per_worker Integer. Lower bound on threads per worker when `workers` is derived. Defaults to `3L`.
 #' @param preparse Logical. Pre-parse the alignment into compressed binary `.rba` format before the search? Defaults to `TRUE`.
 #' @param output_dir Character. Destination directory for the script and its outputs. Defaults to `getwd()`.
 #' @param script_name Character. Name of the generated Bash script. Defaults to `"run_ml_search.sh"`.
@@ -698,8 +697,8 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
 #' @param cluster_job_name Character. SLURM job name. Defaults to `"cactus_ml"`.
 #' @param cluster_partition Character. SLURM partition. Defaults to `"main"`.
 #' @param cluster_nodes Integer. Number of compute nodes requested (\verb{--nodes}). Defaults to \code{1L}.
-#' @param cluster_mem Character. Memory allocation (`--mem`). Defaults to `"64G"`.
-#' @param cluster_time Character. Time limit (`--time`). Defaults to `"12:00:00"`.
+#' @param cluster_mem Character. Memory allocation (`--mem`). Defaults to `"16G"`.
+#' @param cluster_time Character. Time limit (`--time`). Defaults to `"02:00:00"`.
 #' @param cluster_queue Character. Optional SLURM queue / QoS. Defaults to `NULL`.
 #' @param cluster_mail_user Character. Notification recipient email address for SLURM (\verb{--mail-user}). Defaults to \code{Sys.getenv("MY_EMAIL", "")}.
 #' @param load_module Character vector. Environment modules to load. Defaults to the NLHPC Leftraru
@@ -886,7 +885,7 @@ generate_ml_search_script <- function(alignment_file, partition_file, constraint
 #' Defaults to Felsenstein's Bootstrap Percentage (FBP; Felsenstein, 1985), which is the metric the
 #' Cactaceae and Caryophyllales dating literature reports and the only one against which this tree can
 #' be compared. Transfer Bootstrap Expectation (TBE; Lemoine *et al.*, 2018) is available through
-#' `metric = "fbp"` and belongs in a clearly labelled secondary column.
+#' `metric = "tbe"` and belongs in a clearly labelled secondary column.
 #'
 #' The two are not on a common scale and TBE must never be reported as though it were a bootstrap
 #' percentage. TBE is bounded below by FBP and its inflation grows with clade size. Measured on the
@@ -1017,7 +1016,7 @@ calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = d
 #' Generate Non-Parametric Bootstrap Trees Locally
 #'
 #' Performs non-parametric bootstrap resampling over supermatrix site columns to infer a distribution of bootstrap tree topologies (`RAxML-NG`).
-#' Evaluates topological variation under non-parametric resampling to quantify node support via Transfer Bootstrap Expectation (TBE).
+#' Evaluates topological variation under non-parametric resampling to quantify node support via Felsenstein Bootstrap Proportions (FBP) or Transfer Bootstrap Expectation (TBE).
 #' Optimizes multi-threading for local workstations (e.g., Apple Silicon) by allocating threads to Performance cores (P-cores)
 #' and configuring parallel workers according to a configurable thread-to-worker ratio, avoiding thread contention with
 #' Efficiency cores (E-cores).
@@ -1101,7 +1100,7 @@ run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, con
   # settings, reports `run mode: Bootstrapping` rather than naming a metric, and wrote no support
   # file. Removed because it reads as though the replicates were committed to one metric, which
   # cost a round of confusion on 2026-09-06. The replicates support any metric; choose it at
-  # `calculate_branch_support()`.
+  # `map_branch_supports()`.
   args <- c(
     args,
     "--tree-constraint", shQuote(constraint_file),
@@ -1129,10 +1128,9 @@ run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, con
 #' Uses coarse-grained parallelization via Slurm Job Arrays (`#SBATCH --array=1-N`), pre-parsing to compressed binary `.rba` format
 #' to optimize disk I/O, dynamic per-task seed multiplication for statistical independence, and a configurable thread-to-worker ratio.
 #'
-#' The default `threads_per_worker = 6L` is empirically calibrated from a successful production run of this exact
-#' bootstrap workload (400 TBE bootstrap replicates, 986 taxa, 11 partitions) on a 128-core AMD EPYC node using
-#' `--threads 120 --workers 20` (6 threads per worker), completed in ~5.8 h. This ratio is dataset- and
-#' hardware-dependent (it trades per-worker single-tree search speed against the number of trees searched in
+#' The default `threads_per_worker = 4L` is configured to optimize throughput on multi-core compute nodes. In a production run of this workload
+#' (1023 taxa, 11 partitions), using `--threads 40 --workers 10` (4 threads per worker) on an AMD EPYC node provided efficient per-worker
+#' memory and CPU allocation. This ratio is dataset- and hardware-dependent (it trades per-worker single-tree search speed against the number of trees searched in
 #' parallel); if you migrate to different node hardware or a markedly different supermatrix size, re-validate it
 #' empirically with a short trial run before committing a full job array to it.
 #'
@@ -1140,25 +1138,25 @@ run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, con
 #' @param partition_file Character. Path to partition file.
 #' @param constraint_file Character. Path to constraint scaffold tree file.
 #' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()` rather than naming a terminal by hand.
-#' @param bs_per_rep Integer. Number of bootstrap trees generated per chunk replicate. Defaults to `250`.
-#' @param max_reps Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (`1-max_reps`). Defaults to `4`,
+#' @param bs_per_rep Integer. Number of bootstrap trees generated per chunk replicate. Defaults to `500`.
+#' @param max_reps Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (`1-max_reps`). Defaults to `2`,
 #'   giving a total array target of `bs_per_rep * max_reps = 1000` bootstrap trees. This provides a safety margin over the autoMRE
-#'   convergence point observed in a production run of this exact dataset (986 taxa, 11 partitions), which converged (`bs-cutoff = 0.03`,
-#'   TBE) after 650 of 1200 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
+#'   convergence point observed in a production run of this exact dataset (1023 taxa, 11 partitions), which converged (`bs-cutoff = 0.03`,
+#'   FBP) after 600 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
 #'   sampling scheme. Always confirm convergence with `check_bs_convergence()` on the collected trees (via `collect_bootstraps()`) rather
 #'   than assuming `bs_per_rep * max_reps` is sufficient; increase `max_reps` and re-run `collect_bootstraps()` if it is not.
 #' @param base_seed Integer. Base random seed for dynamic seed calculation (`SEED=$(( SLURM_ARRAY_TASK_ID * base_seed ))`). Defaults to `NULL` (random).
-#' @param threads Integer. Number of CPU cores requested per SLURM task (`--cpus-per-task`). Defaults to `64` (Leftraru Epu standard allocation).
+#' @param threads Integer. Number of CPU cores requested per SLURM task (`--cpus-per-task`). Defaults to `40`.
 #' @param workers Integer. Number of RAxML-NG worker processes. If `NULL` (default), calculated dynamically as `max(1L, as.integer(threads / threads_per_worker))`.
-#' @param threads_per_worker Integer. Thread-to-worker ratio used to derive `workers` when `workers = NULL`. Defaults to `6L`
-#'   (empirically validated for this workload on a 128-core AMD EPYC node; see Details). Ignored if `workers` is set explicitly.
+#' @param threads_per_worker Integer. Thread-to-worker ratio used to derive `workers` when `workers = NULL`. Defaults to `4L`
+#'   (empirically validated for this workload on an AMD EPYC node; see Details). Ignored if `workers` is set explicitly.
 #' @param preparse Logical. Generate compressed binary `.rba` format with `raxml-ng --parse` prior to array execution to minimize disk I/O contention? Defaults to `TRUE`.
 #' @param output_dir Character. Destination directory for script and chunk logs. Defaults to `getwd()`.
 #' @param script_name Character. Name of output Bash script file. Defaults to `"run_bs_chunks.sh"`.
 #' @param cluster_job_name Character. SLURM job name identifier. Defaults to `"cactus_bs"`.
 #' @param cluster_partition Character. SLURM partition name. Defaults to `"main"` (Leftraru Epu AMD EPYC 9754 partition).
 #' @param cluster_nodes Integer. Number of compute nodes requested (\verb{--nodes}). Defaults to \code{1L}.
-#' @param cluster_mem Character. Memory allocation string for SLURM (`--mem`). Defaults to `"64G"`.
+#' @param cluster_mem Character. Memory allocation string for SLURM (`--mem`). Defaults to `"10G"`.
 #' @param cluster_time Character. Time limit allocation string for SLURM (`--time`). Defaults to `"24:00:00"`.
 #' @param cluster_queue Character. Optional SLURM queue / QoS name. Defaults to `NULL`.
 #' @param cluster_mail_user Character. Notification recipient email address for SLURM (\verb{--mail-user}). Defaults to \code{Sys.getenv("MY_EMAIL", "")}.
@@ -1912,14 +1910,14 @@ infer_gene_trees <- function(
     }
   }
   
-  selected_engine <- if (method == "nj") {
+  base_engine <- if (method == "nj") {
     "nj"
   } else if (method == "phangorn" || (!raxml_available && method %in% c("auto", "raxml"))) {
     "phangorn"
   } else {
     "raxml"
   }
-  message("Inference engine selected: ", selected_engine)
+  message("Inference engine selected: ", base_engine)
   
   outgroup_genera <- c("Portulaca", "Anacampseros", "Talinopsis", "Grahamia", "Talinum", "Talinella")
   
@@ -1930,6 +1928,7 @@ infer_gene_trees <- function(
   for (f in fasta_files) {
     marker_name <- tools::file_path_sans_ext(basename(f))
     message("Inferring gene tree for marker: ", marker_name)
+    current_engine <- base_engine
     
     dna_in <- Biostrings::readDNAStringSet(f)
     if (length(dna_in) < 4) {
@@ -1958,7 +1957,7 @@ infer_gene_trees <- function(
     tree_out_file <- file.path(trees_dir, paste0(marker_name, ".tree"))
     tr <- NULL
     
-    if (selected_engine == "raxml") {
+    if (current_engine == "raxml") {
       temp_phy <- file.path(output_dir, paste0("TEMP_", marker_name, ".phy"))
       
       # Convert to PHYLIP
@@ -1984,7 +1983,7 @@ infer_gene_trees <- function(
         ape::write.tree(tr, file = tree_out_file)
       } else {
         message("RAxML-NG failed for ", marker_name, ". Falling back to phangorn.")
-        selected_engine <- "phangorn"
+        current_engine <- "phangorn"
       }
       
       # Clean temp files
@@ -1992,7 +1991,7 @@ infer_gene_trees <- function(
       unlink(temp_files)
     }
     
-    if (selected_engine == "phangorn" || (is.null(tr) && selected_engine != "nj")) {
+    if (current_engine == "phangorn" || (is.null(tr) && current_engine != "nj")) {
       dna_char <- as.character(dna_in)
       split_dna <- strsplit(toupper(dna_char), "", fixed = TRUE)
       dna_mat <- do.call(rbind, split_dna)
@@ -2011,7 +2010,7 @@ infer_gene_trees <- function(
         tr_nj
       })
       ape::write.tree(tr, file = tree_out_file)
-    } else if (selected_engine == "nj" && is.null(tr)) {
+    } else if (current_engine == "nj" && is.null(tr)) {
       dna_char <- as.character(dna_in)
       split_dna <- strsplit(toupper(dna_char), "", fixed = TRUE)
       dna_mat <- do.call(rbind, split_dna)
@@ -2055,6 +2054,7 @@ infer_gene_trees <- function(
       
       monophyly_rows[[marker_name]] <- dplyr::tibble(
         marker = marker_name,
+        engine = current_engine,
         n_tips = length(tr$tip.label),
         n_species_total = length(unique(base_species)),
         n_multi_accession_species = length(multi_species),

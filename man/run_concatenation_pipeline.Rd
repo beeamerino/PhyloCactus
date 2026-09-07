@@ -17,7 +17,7 @@ run_concatenation_pipeline(
 
 \item{output_dir}{Character. Path to destination root directory for concatenated alignments and partition maps.}
 
-\item{outgroup_pattern}{Character or \code{NULL}. Regular expression identifying outgroup terminals. When supplied, \code{\link[=report_marker_group_coverage]{report_marker_group_coverage()}} runs before concatenation and its table is written to \code{logs_and_qc/SUPP_TABLE_marker_group_coverage.csv}. Defaults to \code{NULL}.}
+\item{outgroup_pattern}{Character, named character vector, or \code{NULL}. Regular expression identifying outgroup terminals, or a named character vector of expressions (e.g. \code{c(Anacampserotaceae = "...", Portulacaceae = "...", Talinaceae = "...")}) to additionally compute per-group coverage columns. When supplied, \code{\link[=report_marker_group_coverage]{report_marker_group_coverage()}} runs before concatenation and its table is written to \code{logs_and_qc/SUPP_TABLE_marker_group_coverage.csv}. Defaults to \code{NULL}.}
 
 \item{min_coverage}{Numeric. Fraction of non-gap, non-missing characters at which a terminal counts as covered by a marker, passed to \code{\link[=report_marker_group_coverage]{report_marker_group_coverage()}}. Defaults to \code{0.2}.}
 

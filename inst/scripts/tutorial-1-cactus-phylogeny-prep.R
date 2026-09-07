@@ -68,7 +68,7 @@ outgroup_assembly <- assemble_outgroup_phylotar(
   # Amphipetalum (1835425) is deliberately excluded: GenBank held no nucleotide records for it when
   # checked on 2026-09-04, so requesting it only produces an empty download.
   outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"),
-  force_download = TRUE
+  force_download = FALSE
 )
 
 # -------------------------------------------------------------
@@ -209,10 +209,9 @@ integrate_and_clean_markers(
 # individual terminals from a locus without dropping the locus itself. Removed terminals
 # are listed in 5_MAFFT_Cleaned/LOG_SEQ_FILTER_<marker>.csv with Retained = FALSE.
 #
-# protect_pattern exempts matching terminals from the occupancy filter. Leave it commented:
-# use it only if, after deferring masking above, a biologically necessary rooting terminal
-# is still lost. Forcing retention of very short sequences raises the gap fraction of the
-# supermatrix and can destabilise those terminals during inference.
+# protect_pattern retains matching terminals regardless of occupancy. protect_markers
+# restricts that exemption to named loci ("trnL_trnF"), safeguarding the short Portulaca
+# amplicons necessary for root estimation without globally inflating missing data.
 run_joint_realignment(
   input_dir = "4_Cleaned/cleaned_markers_joint",
   output_fasta_dir = "5_MAFFT_Cleaned",

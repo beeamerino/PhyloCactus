@@ -87,7 +87,7 @@ compute_pairwise_metric <- function(tree_list, FUN, min_tips = 4L) {
 #' @param constraints_map Character. Path to taxonomy mapping CSV file.
 #' @param out_dir Character. Destination directory path to save validation output tables, tree-space plots, and logs.
 #' @param min_tips Integer. Minimum number of tips for comparisons. Defaults to 4L.
-#' @param pruning_strategy Character. Strategy for pruning trees before metric computation. Defaults to `"common_set"`.
+#' @param pruning_strategy Character. Strategy for pruning trees before metric computation. Under `"common_set"`, the shared intersection across all trees is used for the multidimensional scaling (MDS) projection, whereas pairwise tables retain all shared tips between each pair. Defaults to `"common_set"`.
 #' @param rooting_genus Character. Genus whose terminals root every tree after the family filter. Defaults to `"Leuenbergeria"`.
 #'
 #'   This differs deliberately from the rooting used elsewhere in `PhyloCactus`. The comparison here is
@@ -97,7 +97,7 @@ compute_pairwise_metric <- function(tree_list, FUN, min_tips = 4L) {
 #'   root position the full tree would impose. All terminals of the genus are used, not one, for the reasons
 #'   given in `resolve_rooting_outgroup()`. Trees lacking the genus are left unrooted and flagged in
 #'   `SUPP_rooting_summary`.
-#' @return A data frame containing pairwise tree distances, RF metrics, and MDS coordinates across evaluated trees.
+#' @return A named list containing file paths for generated tables (`tables`), figures (`figures`), trees (`trees`), and the combined ggplot object (`plot`).
 #' @references
 #' Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M.,
 #' Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D., Nyffeler, R., Sánchez, D., Schlumpberger, B. O.,

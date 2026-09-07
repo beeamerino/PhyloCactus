@@ -423,8 +423,8 @@ run_marker_screening <- function(
 #' @return A data frame containing the comprehensive marker summary with decoupled ingroup and joint metrics.
 #' @references
 #' Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C.,
-#' Hernández, H. M., Kohlbecker, A., Köhler, M., Luna, R., Machado, M., Merclinger, M., Nyffeler, R.,
-#' Salvador-Montiel, S., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G. (2021). Cactaceae at
+#' Hernández, H. M., Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,
+#' Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G. (2021). Cactaceae at
 #' Caryophyllales.org - a dynamic online species-level taxonomic backbone for the family.
 #' *Willdenowia*, 51(2), 251–270. \doi{10.3372/wi.51.51208}
 #' @export
@@ -1337,7 +1337,7 @@ integrate_and_clean_markers <- function(
     sprintf("Total accepted species in Anacampserotaceae checklist: %d", n_checklist_anacampserotaceae),
     sprintf("Unique Cactaceae ingroup species (raw): %d | Accepted: %d | Rejected: %d", n_raw_ingroup_species, n_accepted_ingroup_species, n_rejected_ingroup_species),
     sprintf("Cactaceae checklist recovery rate: %.2f%%", pct_cactaceae_recovered),
-    sprintf("Unique outgroup species retained (Anacampserotaceae: %d, Portulacaceae: %d, Total: %d)", n_selected_anacampserotaceae, n_selected_portulacaceae, n_selected_outgroup_species),
+    sprintf("Unique outgroup species retained (Anacampserotaceae: %d, Portulacaceae: %d, Talinaceae: %d, Total: %d)", n_selected_anacampserotaceae, n_selected_portulacaceae, n_selected_talinaceae, n_selected_outgroup_species),
     sprintf("Total unique species in final joint dataset: %d", n_final_joint_species),
     sprintf("Rows in raw integration table: %d", nrow(tabla_raw)),
     sprintf("Unmatched metadata rows: %d", nrow(unmatched_metadata)),

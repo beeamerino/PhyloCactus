@@ -30,7 +30,7 @@ navbar:
         href: articles/tutorial-4-cactus-phylogeny-validation.html
       - text: '5. DNA Barcoding: Section Manifest'
         href: articles/tutorial-5-cactus-phylogeny-barcoding.html
-      - text: 6. Internal Functions Guide
+      - text: 6. Core Functions Dictionary
         href: articles/tutorial-6-cactus-phylogeny-functions.html
 reference:
 - title: Sequence Assemblies & phylotaR Import

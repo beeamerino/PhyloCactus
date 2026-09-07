@@ -300,16 +300,13 @@ if (!has_data) {
 
 Following the completion of maximum-likelihood inference, divergence time estimation, and biological metadata integration, this module presents the complete analytical synthesis of `PhyloCactus`.
 
-To establish a clear scientific progression, the visualizations are structured into five consecutive analytical parts: 1.
-**Molecular Dataset and Alignment Properties (Figures 1 to 3)**: Taxonomic marker representation, locus completeness per species, and locus occupancy heatmaps.
-2.
-**Supermatrix Concatenation Structure (Figures 4 to 5)**: Partition architecture, boundary coordinates, and parsimony-informative site contributions.
-3.
-**Inferred Phylogeny and Divergence Timescale (Figures 6 to 9)**: Maximum-likelihood topology with Felsenstein's Bootstrap Proportions (FBP), high-resolution uncollapsed A0 poster, time-calibrated chronogram with 95% HPD intervals, and extended chronogram poster.
-4.
-**Taxonomic Reconciliation and Species Cadastre (Figure 10)**: Global species accounting comparing the taxonomic checklist, supermatrix sampling, collapsed duplicates, and phylogenetic placement.
-5.
-**IUCN Conservation and Macroevolutionary Syntheses (Figures 11 to 17)**: Extinction risk distributions, molecular sampling completeness across threat categories, conservation prioritization of unsampled gaps, national endemism rankings, threat profiles, and ecological habitat associations.
+To establish a clear scientific progression, the visualizations are structured into five consecutive analytical parts:
+
+1. **Molecular Dataset and Alignment Properties (Figures 1 to 3)**: Taxonomic marker representation, locus completeness per species, and locus occupancy heatmaps.
+2. **Supermatrix Concatenation Structure (Figures 4 to 5)**: Partition architecture, boundary coordinates, and parsimony-informative site contributions.
+3. **Inferred Phylogeny and Divergence Timescale (Figures 6 to 9)**: Maximum-likelihood topology with Felsenstein's Bootstrap Proportions (FBP), high-resolution uncollapsed A0 poster, time-calibrated chronogram with 95% HPD intervals, and extended chronogram poster.
+4. **Taxonomic Reconciliation and Species Cadastre (Figure 10)**: Global species accounting comparing the taxonomic checklist, supermatrix sampling, collapsed duplicates, and phylogenetic placement.
+5. **IUCN Conservation and Macroevolutionary Syntheses (Figures 11 to 17)**: Extinction risk distributions, molecular sampling completeness across threat categories, conservation prioritization of unsampled gaps, national endemism rankings, threat profiles, and ecological habitat associations.
 
 ```{r, eval = has_data}
 library(PhyloCactus)
@@ -980,5 +977,5 @@ Using quantitative tree comparison approaches, including **Robinson-Foulds dista
 ## References
 
 - Amaral *et al*. 2022. Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. *Biological Conservation*, 273, 109677. <https://doi.org/10.1016/j.biocon.2022.109677>
-- Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D., Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G. 2021. Cactaceae at Caryophyllales.org - a dynamic online species checklist. *PhytoKeys*, 186, 7-134. <https://doi.org/10.3897/phytokeys.186.73233>
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 - Thompson *et al*. 2024. Identifying the multiple drivers of cactus diversification. *Nature Communications*, 15(1), 7114. <https://doi.org/10.1038/s41467-024-51666-2>

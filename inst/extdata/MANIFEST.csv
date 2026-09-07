@@ -1,6 +1,6 @@
 canonical,legacy_name,role,produced_by,source_path,validator,loaded_by_code,description
-MANIFEST.csv,,manifest,publish_run_outputs.R,,none,TRUE,Declares every file distributed in inst/extdata and where it comes from
-PROVENANCE.csv,,manifest,publish_run_outputs.R,,none,FALSE,Run identity of the last publication: tool versions seeds sizes and checksums
+MANIFEST.csv,,manifest,plantlab-core/scripts/publish_run_outputs.R,,none,TRUE,Declares every file distributed in inst/extdata and where it comes from
+PROVENANCE.csv,,manifest,plantlab-core/scripts/publish_run_outputs.R,,none,FALSE,Run identity of the last publication: tool versions seeds sizes and checksums
 CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx,,input,curated,,none,TRUE,Caryophyllales.org accepted-name backbone (Korotkova et al. 2021)
 cactus_constraints.csv,,input,curated,,none,TRUE,Taxonomic scaffold mapping species to clades subfamilies and families
 calibrations_bounds.csv,,input,curated,,none,TRUE,Secondary calibration bounds with node_type and provenance per row

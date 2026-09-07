@@ -174,3 +174,12 @@ test_that("resolve_rooting_outgroup() honours an alternative pattern for other d
     c("Talinum_fruticosum", "Talinum_paniculatum")
   )
 })
+
+test_that("resolve_rooting_outgroup() matches Talinaceae terminals by default", {
+  tips <- c("Portulaca_oleracea", "Talinum_paniculatum", "Talinella_microphylla", "Opuntia_ficus-indica")
+
+  expect_equal(
+    resolve_rooting_outgroup(tips),
+    c("Portulaca_oleracea", "Talinella_microphylla", "Talinum_paniculatum")
+  )
+})

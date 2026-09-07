@@ -184,7 +184,7 @@ stopifnot(all(!outgroup_alignment_manifest$masking_applied))
 
 Although orthologous loci can be accurately aligned, not all markers contribute equally to phylogenetic inference. Differences in evolutionary rate, substitution saturation, sequence completeness, and structural anomalies may reduce the phylogenetic information contained within individual loci or introduce systematic bias into concatenated analyses. Consequently, each marker should be evaluated before inclusion in the final multilocus dataset.
 
-The `run_marker_screening()` function performs an automated assessment of the ingroup alignments generated in Module 2. Passing `outgroup_folder` makes the sequence-count criterion joint: a locus is retained when the ingroup and outgroup counts together reach `min_nseq_to_retain`, provided the ingroup alone reaches `min_nseq_ingroup`. Every other criterion stays on the ingroup, because a distant outgroup shifts the saturation regression and those diagnostics would then describe a different quantity. Without the joint count, `trnT-psbD` was rejected at 52 ingroup sequences while the outgroup held 49 more, all *Portulaca*, and the locus carrying the deepest outgroup coverage of the dataset was discarded by a threshold that could not see it. First, substitution saturation is evaluated using regression based statistics to identify loci in which multiple substitutions may have eroded the underlying phylogenetic signal. The function then detects sequence length outliers using the interquartile range (IQR), identifying sequences that may represent incomplete assemblies, sequencing artifacts, or annotation errors.
+The `run_marker_screening()` function performs an automated quality assessment of the ingroup alignments generated in Module 2. Passing `outgroup_folder` records `n_outgroup` and `n_total` in the summary table for diagnostic visibility, though retention decisions remain strictly based on ingroup thresholds to prevent distant outgroup divergence from distorting saturation regressions. For example, `trnT-psbD` possessed 50 ingroup sequences and was filtered out by `min_nseq_to_retain = 100`, despite carrying extensive outgroup representation. First, substitution saturation is evaluated using regression-based statistics to identify loci in which multiple substitutions may have eroded the underlying phylogenetic signal. The function then detects sequence length outliers using the interquartile range (IQR), identifying sequences that may represent incomplete assemblies, sequencing artifacts, or annotation errors.
 
 Based on user defined thresholds, loci and sequences that fail these quality criteria are excluded from subsequent analyses. The function produces a curated collection of phylogenetically informative markers together with a comprehensive diagnostic table summarizing saturation statistics, sequence length distributions, outlier detection, and filtering decisions for each locus. These curated markers constitute the final set of ingroup loci that will be combined with the corresponding outgroup sequences for downstream concatenation and phylogenetic inference.
 
@@ -211,17 +211,17 @@ The previous modules independently retrieve, align, and evaluate ingroup and out
 
 To prevent outgroup divergence from inflating molecular informativeness metrics (such as parsimony informative sites and alignment lengths) of the focal radiation, the `integrate_and_clean_markers()` function organizes all curated outputs into structured subdirectories:
 
-1. `4_Cleaned/cleaned_markers_ingroup`: Contains curated sequences exclusively for accepted **Cactaceae** taxa, preserved for single-locus analyses. These are the inputs the molecular diagnostic section will consume once its strategy is defined; see the section manifest in Tutorial 5.
-2. `4_Cleaned/cleaned_markers_outgroup`: Contains corresponding outgroup sequences (*Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*, *Talinum*, *Talinella*).
-3. `4_Cleaned/cleaned_markers_joint`: Contains the integrated ingroup and outgroup sequences prepared for joint realignment in Module 5.
-4. `4_Cleaned/tables`: Contains the complete taxonomic synthesis and curation table suite:
-   - `TABLE_taxonomic_backbone_molecular_matrix.csv`: Master taxonomic matrix anchored to all accepted species in the checklist (**Cactaceae** and **Anacampserotaceae**) plus outgroups. Features dynamic GenBank accession columns (`sid_<marker>`), Caryophyllales.org UUIDs, and standardized placeholder columns for phylogenetic inclusion (`retained_in_phylogeny`) and conservation status (`iucn_redlist_category`).
-   - `TABLE_dataset_species_summary.csv`: Global dataset-level synthesis reporting total species in the checklist, raw GenBank species recovered, accepted vs. rejected species counts, outgroups retained, total unique taxa in the joint dataset, and overall checklist recovery percentage, plus the number of standardized loci mined per taxonomic group (**Cactaceae**, **Anacampserotaceae**, **Portulacaceae**, **Talinaceae**) at Stage 1. Every row that depends on what survives the joint realignment, both the "Final loci retained" counts and the outgroup and joint **species** counts, is written here as a provisional (pre-realignment) value and overwritten in place by `run_concatenation_pipeline()` (Module 6) once the true post-realignment supermatrix exists. This single file therefore holds the definitive counts after Module 6 runs, and any row still labelled "Provisional" in its `details` column indicates that Module 6 has not been executed against it. Do not quote figures from this table before Module 6 has run.
-   - `TABLE_species_curation_status.csv`: Taxon-level master registry detailing acceptance status, source classification (`accepted_ingroup`, `rejected_ingroup`, `accepted_outgroup`), and retained multi-marker occupancy for every species retrieved.
-   - `TABLE_marker_metrics_ingroup.csv`, `TABLE_marker_metrics_outgroup.csv`, `TABLE_marker_metrics_joint.csv`: Decoupled molecular alignment metrics (length, gaps, GC content, variable sites, parsimony informative sites) calculated independently for the accepted ingroup, outgroups, and joint datasets.
-   - `TABLE_marker_summary.csv`: Per-marker comparative summary calculating the parsimony informative site inflation ratio (`pis_inflation_ratio = pis_joint / pis_ingroup`) and taxon retention percentages.
-   - `TABLE_species_marker_sid_matrix.csv`, `TABLE_sequence_registry_with_acceptance.csv`, `TABLE_duplicate_resolution_species_marker.csv`: Full sequence-level traceability and deduplication audit registries.
-5. `4_Cleaned/logs`: Contains the comprehensive integration and curation audit log (`LOG_clean_integration_summary.txt`).
+1.  `4_Cleaned/cleaned_markers_ingroup`: Contains curated sequences exclusively for accepted **Cactaceae** taxa, preserved for single-locus analyses. These are the inputs the molecular diagnostic section will consume once its strategy is defined; see the section manifest in Tutorial 5.
+2.  `4_Cleaned/cleaned_markers_outgroup`: Contains corresponding outgroup sequences (*Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*, *Talinum*, *Talinella*).
+3.  `4_Cleaned/cleaned_markers_joint`: Contains the integrated ingroup and outgroup sequences prepared for joint realignment in Module 5.
+4.  `4_Cleaned/tables`: Contains the complete taxonomic synthesis and curation table suite:
+    - `TABLE_taxonomic_backbone_molecular_matrix.csv`: Master taxonomic matrix anchored to all accepted species in the checklist (**Cactaceae** and **Anacampserotaceae**) plus outgroups. Features dynamic GenBank accession columns (`sid_<marker>`), Caryophyllales.org UUIDs, and standardized placeholder columns for phylogenetic inclusion (`retained_in_phylogeny`) and conservation status (`iucn_redlist_category`).
+    - `TABLE_dataset_species_summary.csv`: Global dataset-level synthesis reporting total species in the checklist, raw GenBank species recovered, accepted vs. rejected species counts, outgroups retained, total unique taxa in the joint dataset, and overall checklist recovery percentage, plus the number of standardized loci mined per taxonomic group (**Cactaceae**, **Anacampserotaceae**, **Portulacaceae**, **Talinaceae**) at Stage 1. Every row that depends on what survives the joint realignment, both the "Final loci retained" counts and the outgroup and joint **species** counts, is written here as a provisional (pre-realignment) value and overwritten in place by `run_concatenation_pipeline()` (Module 6) once the true post-realignment supermatrix exists. This single file therefore holds the definitive counts after Module 6 runs, and any row still labelled "Provisional" in its `details` column indicates that Module 6 has not been executed against it. Do not quote figures from this table before Module 6 has run.
+    - `TABLE_species_curation_status.csv`: Taxon-level master registry detailing acceptance status, source classification (`accepted_ingroup`, `rejected_ingroup`, `accepted_outgroup`), and retained multi-marker occupancy for every species retrieved.
+    - `TABLE_marker_metrics_ingroup.csv`, `TABLE_marker_metrics_outgroup.csv`, `TABLE_marker_metrics_joint.csv`: Decoupled molecular alignment metrics (length, gaps, GC content, variable sites, parsimony informative sites) calculated independently for the accepted ingroup, outgroups, and joint datasets.
+    - `TABLE_marker_summary.csv`: Per-marker comparative summary calculating the parsimony informative site inflation ratio (`pis_inflation_ratio = pis_joint / pis_ingroup`) and taxon retention percentages.
+    - `TABLE_species_marker_sid_matrix.csv`, `TABLE_sequence_registry_with_acceptance.csv`, `TABLE_duplicate_resolution_species_marker.csv`: Full sequence-level traceability and deduplication audit registries.
+5.  `4_Cleaned/logs`: Contains the comprehensive integration and curation audit log (`LOG_clean_integration_summary.txt`).
 
 ```{r, eval = FALSE}
 # Integrate datasets, resolve botanical synonymies, and export decoupled directories
@@ -292,7 +292,7 @@ run_concatenation_pipeline(
   input_dir = "5_MAFFT_Cleaned/aligned_markers",
   output_dir = "6_Concatenated",
   outgroup_pattern = "^(Anacampseros|Grahamia|Talinopsis|Portulaca|Talinum|Talinella)_",
-  exclude_markers = "phyC"   # NULL para conservar todos los loci
+  exclude_markers = "phyC"   # NULL to retain all loci
 )
 ```
 
@@ -304,11 +304,9 @@ The next stage of the `PhyloCactus` workflow focuses on reconstructing evolution
 
 [Continue to Tutorial 2: Inference and Divergence Time Estimation](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html)
 
-
 ## References
 
 - Guerrero *et al*. 2019. Phylogenetic Relationships and Evolutionary Trends in the Cactus Family. *Journal of Heredity*, 110(1), 4–21. <https://doi.org/10.1093/jhered/esy064>
 - Katoh, K., & Standley, D. M. 2013. MAFFT multiple sequence alignment software version 7: Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772–780. <https://doi.org/10.1093/molbev/mst010>
 - Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 - Wright, E. 2024. Fast and Flexible Search for Homologous Biological Sequences with DECIPHER v3. *The R Journal*, 16(2), 191-200. <https://doi.org/10.18129/B9.bioc.DECIPHER>
-

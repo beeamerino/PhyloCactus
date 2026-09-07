@@ -10,7 +10,7 @@
 #'
 #' @param input_dir Character. Path to directory containing curated, aligned locus FASTA files.
 #' @param output_dir Character. Path to destination root directory for concatenated alignments and partition maps.
-#' @param outgroup_pattern Character or `NULL`. Regular expression identifying outgroup terminals. When supplied, [report_marker_group_coverage()] runs before concatenation and its table is written to `logs_and_qc/SUPP_TABLE_marker_group_coverage.csv`. Defaults to `NULL`.
+#' @param outgroup_pattern Character, named character vector, or `NULL`. Regular expression identifying outgroup terminals, or a named character vector of expressions (e.g. `c(Anacampserotaceae = "...", Portulacaceae = "...", Talinaceae = "...")`) to additionally compute per-group coverage columns. When supplied, [report_marker_group_coverage()] runs before concatenation and its table is written to `logs_and_qc/SUPP_TABLE_marker_group_coverage.csv`. Defaults to `NULL`.
 #' @param min_coverage Numeric. Fraction of non-gap, non-missing characters at which a terminal counts as covered by a marker, passed to [report_marker_group_coverage()]. Defaults to `0.2`.
 #' @param exclude_markers Character vector or `NULL`. Markers to leave out of the supermatrix, named
 #'   as they appear in the alignment file names without the `Masked_` prefix and without the

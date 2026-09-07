@@ -4,14 +4,14 @@
 \alias{resolve_rooting_outgroup}
 \title{Resolve the Set of Rooting Terminals from a Tip Label Vector}
 \usage{
-resolve_rooting_outgroup(tip_labels, pattern = "^Portulaca_")
+resolve_rooting_outgroup(tip_labels, pattern = "^(Portulaca|Talinum|Talinella)_")
 }
 \arguments{
 \item{tip_labels}{Character vector of terminal labels, typically \code{phylo$tip.label} or the row
 names of the supermatrix.}
 
 \item{pattern}{Character. Regular expression matched against \code{tip_labels}. Defaults to
-\code{"^Portulaca_"}, the Portulacaceae sample of the reference Cactaceae dataset.}
+\code{"^(Portulaca|Talinum|Talinella)_"}, matching the outgroup lineages that carry the root in the reference Cactaceae dataset.}
 }
 \value{
 Character vector of matching terminals, sorted. Errors when no terminal matches, since a

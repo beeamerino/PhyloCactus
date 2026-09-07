@@ -154,7 +154,7 @@ get_alignment_stats <- function(x) {
 write_run_log <- function(log_file, input_folder, output_root, mafft_exec, mafft_opts,
                           mask_alignment_regions = NA, min_non_gap_fraction = NA_real_,
                           max_missing_fraction = NA_real_, min_masked_alignment_length = NA_integer_,
-                          preserve_iupac = NA) {
+                          preserve_iupac = NA, fix_strand = NA) {
   mafft_version <- tryCatch(
     paste(check_mafft_available(mafft_exec), collapse = " "),
     error = function(e) paste("Unavailable:", conditionMessage(e))
@@ -179,6 +179,7 @@ write_run_log <- function(log_file, input_folder, output_root, mafft_exec, mafft
     paste("  max_missing_fraction:", max_missing_fraction),
     paste("  min_masked_alignment_length:", min_masked_alignment_length),
     paste("  preserve_iupac:", preserve_iupac),
+    paste("  fix_strand:", fix_strand),
     if (isFALSE(mask_alignment_regions)) {
       paste("  NOTE: masking disabled, so min_non_gap_fraction, max_missing_fraction and",
             "min_masked_alignment_length are NOT applied in this stage; occupancy filtering",
@@ -694,7 +695,8 @@ run_alignment_pipeline <- function(
                 min_non_gap_fraction = min_non_gap_fraction,
                 max_missing_fraction = max_missing_fraction,
                 min_masked_alignment_length = min_masked_alignment_length,
-                preserve_iupac = preserve_iupac)
+                preserve_iupac = preserve_iupac,
+                fix_strand = fix_strand)
 
 
   fasta_files <- sort(list.files(input_folder, pattern = fasta_pattern, full.names = TRUE))

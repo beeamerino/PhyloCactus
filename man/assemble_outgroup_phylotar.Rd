@@ -10,7 +10,7 @@ assemble_outgroup_phylotar(
   genes_map_file = NULL,
   manual_exclusions_file = NULL,
   apply_manual_exclusions = TRUE,
-  outgroups = c("107598", "107617", "107583", "3582"),
+  outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"),
   force_download = FALSE,
   out_dir = "1_phylotaR_out_Outgroup"
 )
@@ -26,7 +26,7 @@ assemble_outgroup_phylotar(
 
 \item{apply_manual_exclusions}{Logical. Apply the curated accession exclusion list? Defaults to \code{TRUE}; see \code{\link[=assemble_ingroup_phylotar]{assemble_ingroup_phylotar()}} for the provenance of these lists and for what setting it to \code{FALSE} is useful for.}
 
-\item{outgroups}{Character vector of NCBI Taxonomy IDs for outgroup lineages. Defaults to \code{c("107598", "107617", "107583", "3582")}.}
+\item{outgroups}{Character vector of NCBI Taxonomy IDs for outgroup lineages. Defaults to \code{c("107598", "107617", "107583", "3582", "107600", "108056")}.}
 
 \item{force_download}{Logical. Force fresh database retrieval instead of using local cache? Defaults to \code{FALSE}.}
 
@@ -36,7 +36,7 @@ assemble_outgroup_phylotar(
 A list containing the processed outgroup cluster objects and retained cluster IDs.
 }
 \description{
-Retrieves orthologous sequence clusters for specified outgroup lineages (e.g., \emph{Portulaca}, \emph{Anacampseros}, \emph{Talinopsis}, \emph{Grahamia})
+Retrieves orthologous sequence clusters for specified outgroup lineages (e.g., \emph{Portulaca}, \emph{Anacampseros}, \emph{Talinopsis}, \emph{Grahamia}, \emph{Talinum}, \emph{Talinella})
 matching the locus target constraints defined for the focal ingroup. Outer reference sampling provides phylogenetically
 informative root positions necessary for maximum-likelihood tree search and divergence time estimation.
 }

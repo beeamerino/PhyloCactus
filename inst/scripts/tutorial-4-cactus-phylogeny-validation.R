@@ -24,14 +24,14 @@ dir.create("10_Validation/trees", recursive = TRUE, showWarnings = FALSE)
 dir.create("10_Validation/logs", recursive = TRUE, showWarnings = FALSE)
 
 # -------------------------------------------------------------
-# Downloading External Resources
+# Reference Phylogenies and Optional ASTRAL-III Re-inference
 # -------------------------------------------------------------
-# The reference trees and ASTRAL-III are not bundled due to size limits.
-# You must download them manually and provide their paths.
-# See vignette 4 for the DOIs and download instructions:
-# - Amaral et al. (2022) DOI: 10.1016/j.biocon.2022.109677 (Tree_80MD.tre)
-# - Thompson et al. (2024) DOI: 10.1038/s41467-024-51666-2 (ultra_cacti_JT.tre)
-# - de Vos et al. (2025) DOI: 10.1007/s00606-025-01948-z (QC.bestTreeCollapsed.trees & metadata)
+# Precalculated reference trees (Amaral et al. 2022, Thompson et al. 2024, 
+# Zuntini et al. 2024, and de Vos et al. 2025) are bundled in the package inst/extdata/.
+# Optional local re-inference of the de Vos et al. (2025) species tree from its 317 raw
+# nuclear gene trees requires ASTRAL-III and Java:
+# - Set ASTRAL_PATH in ~/.Renviron (e.g., ASTRAL_PATH="/path/to/astral.5.7.8.jar")
+# - Set DEVOS_GENETREES_PATH and DEVOS_METADATA_PATH for the raw de Vos inputs
 
 cat("\n=======================================================\n")
 cat("Stage 13: Quantifying Topological Congruence and Validating Evolutionary Hypotheses\n")
@@ -39,8 +39,6 @@ cat("=======================================================\n")
 
 # To keep your local paths secure, it is recommended to set these in ~/.Renviron
 # e.g., ASTRAL_PATH="/path/to/astral.5.7.8.jar"
-# Here, we will assume you have placed the files in the package's extdata folder 
-# for ease of execution during this tutorial.
 
 # -------------------------------------------------------------
 # Stage 13a: Coalescent Species Tree Inference with ASTRAL-III
@@ -54,22 +52,10 @@ cat("\n--- Running ASTRAL-III Pipeline ---\n")
 # gene trees, accounting for gene tree discordance driven by incomplete lineage sorting (ILS).
 
 astral_jar <- Sys.getenv("ASTRAL_PATH")
-if (!nzchar(astral_jar) || !file.exists(astral_jar)) {
-  cand <- file.path(dirname(normalizePath(tutorial_dir, mustWork = FALSE)), "PlantLab", "projects", "cactus-biogeography", "1_data_raw", "Astral", "astral.5.7.8.jar")
-  if (file.exists(cand)) astral_jar <- cand
-}
 
 devos_gene_trees <- Sys.getenv("DEVOS_GENETREES_PATH")
-if (!nzchar(devos_gene_trees) || !file.exists(devos_gene_trees)) {
-  cand <- file.path(dirname(normalizePath(tutorial_dir, mustWork = FALSE)), "PlantLab", "projects", "cactus-biogeography", "1_data_raw", "Phylogeny", "de_Vos_et_al_2025", "ESM_data_genetrees", "QC.bestTreeCollapsed.trees")
-  if (file.exists(cand)) devos_gene_trees <- cand
-}
 
 devos_metadata <- Sys.getenv("DEVOS_METADATA_PATH")
-if (!nzchar(devos_metadata) || !file.exists(devos_metadata)) {
-  cand <- file.path(dirname(normalizePath(tutorial_dir, mustWork = FALSE)), "PlantLab", "projects", "cactus-biogeography", "1_data_raw", "Phylogeny", "de_Vos_et_al_2025", "606_2025_1948_MOESM1_ESM.csv")
-  if (file.exists(cand)) devos_metadata <- cand
-}
 
 java_bin <- Sys.which("java")
 if (!nzchar(java_bin) && file.exists("/opt/homebrew/opt/openjdk/bin/java")) {

@@ -20,9 +20,8 @@ unrooted topology.
 \code{ape::root()} decides monophyly against the tree's \emph{current} root. \code{RAxML-NG} writes unrooted
 Newick with a basal trifurcation, and the terminals of the rooting clade routinely fall on more
 than one branch of that trifurcation, so \code{ape::root()} does not see them as a clade and does not
-place the root where it was asked to. The reference \code{cactus_support.raxml.support} is exactly
-this case: \code{{Portulaca | rest}} is a valid bipartition of the unrooted topology, yet three
-\emph{Portulaca} terminals sit outside the largest basal branch.
+place the root where it was asked to. For example, \code{{outgroup | ingroup}} is a valid bipartition
+of the unrooted topology, yet several outgroup terminals may sit outside the largest basal branch.
 }
 \details{
 Rooting first on an ingroup terminal moves the current root into the ingroup, which makes the

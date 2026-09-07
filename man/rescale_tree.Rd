@@ -21,7 +21,7 @@ Multiplies all edge lengths of a \code{phylo} tree object by a constant scaling 
 The factor does not change which branches \code{treePL} clamps. \code{treePL} refuses to let a branch
 carry less than one expected substitution and rewrites any shorter branch to \code{1/numsites},
 so the clamp acts on the substitution count, not on the raw length. Measured on the Cactaceae
-supermatrix, 492 of 2088 branches are clamped, identically at factor 100 and at factor 1, once
+supermatrix, 477 of 2044 branches are clamped, identically at factor 100 and at factor 1, once
 \code{numsites} is divided by the same factor as \code{automate_treePL()} does. What the factor does
 change is the scale of the rate parameters and therefore the numerical conditioning of the
 optimisation.

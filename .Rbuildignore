@@ -26,4 +26,3 @@
 ^tests/testthat/Rplots\.pdf$
 ^tests/testthat/.*\.log$
 ^extended_trees($|/)
-^\.claude$

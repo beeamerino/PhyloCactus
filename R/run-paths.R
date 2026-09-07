@@ -204,13 +204,13 @@ print.cactus_run_paths <- function(x, ...) {
 #' @param tip_labels Character vector of terminal labels, typically `phylo$tip.label` or the row
 #'   names of the supermatrix.
 #' @param pattern Character. Regular expression matched against `tip_labels`. Defaults to
-#'   `"^Portulaca_"`, the Portulacaceae sample of the reference Cactaceae dataset.
+#'   `"^(Portulaca|Talinum|Talinella)_"`, matching the outgroup lineages that carry the root in the reference Cactaceae dataset.
 #' @return Character vector of matching terminals, sorted. Errors when no terminal matches, since a
 #'   silently empty rooting set would leave every downstream tree unrooted.
 #' @examples
 #' resolve_rooting_outgroup(c("Portulaca_oleracea", "Portulacaria_afra", "Opuntia_ficus-indica"))
 #' @export
-resolve_rooting_outgroup <- function(tip_labels, pattern = "^Portulaca_") {
+resolve_rooting_outgroup <- function(tip_labels, pattern = "^(Portulaca|Talinum|Talinella)_") {
   if (!is.character(tip_labels) || length(tip_labels) == 0L) {
     stop("`tip_labels` must be a non-empty character vector.", call. = FALSE)
   }

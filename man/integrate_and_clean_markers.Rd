@@ -59,8 +59,8 @@ GC content, and missingness) for the focal ingroup radiation to avoid outgroup-d
 }
 \references{
 Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C.,
-Hernández, H. M., Kohlbecker, A., Köhler, M., Luna, R., Machado, M., Merclinger, M., Nyffeler, R.,
-Salvador-Montiel, S., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G. (2021). Cactaceae at
+Hernández, H. M., Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,
+Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G. (2021). Cactaceae at
 Caryophyllales.org - a dynamic online species-level taxonomic backbone for the family.
 \emph{Willdenowia}, 51(2), 251–270. \doi{10.3372/wi.51.51208}
 }

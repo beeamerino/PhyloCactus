@@ -1,6 +1,11 @@
 # -------------------------------------------------------------
 # PhyloCactus: sensitivity of the chronogram to the choice of anchor on the ACP node
+# [OPTIONAL / EXPLORATORY SENSITIVITY TEMPLATE]
 # -------------------------------------------------------------
+# NOTE: This script is an optional exploratory analysis for methodological research into
+# secondary calibration anchor sensitivity. It is NOT executed during standard package
+# builds or required for main manuscript production.
+#
 # Every published age for any node inside Cactaceae is a secondary calibration. This analysis makes
 # that dependence explicit instead of hiding it behind a single number: it dates the same tree, with
 # the same seed and the same replicates, under each defensible choice of anchor for the crown of the
@@ -154,19 +159,20 @@ for (tag in names(schemes)) {
   # single terminal is what keeps ACP_root an internal node instead of collapsing the anchor onto
   # the deepest split. Omitting it here would have made every scheme in the sweep incomparable with
   # the main run for a reason unrelated to the anchor being tested.
+  dating_out_dir <- file.path(scheme_dir, "dating_outputs")
   automate_treePL(
     cfg_file      = cfg_file,
     ml_tree_file  = ml_tree_file,
     bs_trees_file = bs_trees_file,
     results_dir   = file.path(scheme_dir, "auto_results"),
-    treePL_out    = paste0("treepl_", tag, ".tre"),
+    treePL_out    = dating_out_dir,
     numsites      = num_sites,
     outgroup      = rooting_outgroup,
     seed          = SEED
   )
 
-  chrono <- ape::read.tree(file.path(scheme_dir, "auto_results", "BestTree_treePL.tree"))
-  reps   <- ape::read.tree(file.path(scheme_dir, "auto_results", "bsTree_treePL.tree"))
+  chrono <- ape::read.tree(file.path(dating_out_dir, "BestTree_treePL.tree"))
+  reps   <- ape::read.tree(file.path(dating_out_dir, "bsTree_treePL.tree"))
 
   adherence <- report_bound_adherence(chrono, scheme_calibs, constraints, bootstraps = reps)
   adherence$scheme <- tag
@@ -194,13 +200,14 @@ age_of <- function(tree, column, value) {
   tips <- calibration_tips(constraints, column, value, tree$tip.label)
   if (length(tips) < 2L) return(NA_real_)
   node <- ape::getMRCA(tree, tips)
-  unname(ape::branching.times(tree)[as.character(node - ape::Ntip(tree))])
+  unname(ape::branching.times(tree)[as.character(node)])
 }
 
 age_rows <- list()
 for (tag in names(schemes)) {
-  chrono <- ape::read.tree(file.path(sweep_dir, tag, "auto_results", "BestTree_treePL.tree"))
-  reps   <- ape::read.tree(file.path(sweep_dir, tag, "auto_results", "bsTree_treePL.tree"))
+  dating_out_dir <- file.path(sweep_dir, tag, "dating_outputs")
+  chrono <- ape::read.tree(file.path(dating_out_dir, "BestTree_treePL.tree"))
+  reps   <- ape::read.tree(file.path(dating_out_dir, "bsTree_treePL.tree"))
   for (nm in names(clades)) {
     spec <- clades[[nm]]
     point <- age_of(chrono, spec$column, spec$value)
