@@ -1,0 +1,76 @@
+# Report How Each Marker Covers the Ingroup and the Outgroup
+
+Counts, per locus, how many ingroup and how many outgroup terminals
+carry real sequence, and warns when either side is empty.
+
+## Usage
+
+``` r
+report_marker_group_coverage(
+  input_dir,
+  outgroup_pattern,
+  min_coverage = 0.2,
+  out_csv = NULL
+)
+```
+
+## Arguments
+
+- input_dir:
+
+  Character. Directory of aligned locus FASTA files, one per marker.
+
+- outgroup_pattern:
+
+  Character. Regular expression matched against terminal names, or a
+  named character vector of regular expressions (e.g.
+  `c(Anacampserotaceae = "...", Portulacaceae = "...", Talinaceae = "...")`)
+  to additionally compute per-group coverage columns.
+
+- min_coverage:
+
+  Numeric. Fraction of non-gap, non-missing characters at which a
+  terminal counts as covered by that marker. Defaults to `0.2`.
+
+- out_csv:
+
+  Character or `NULL`. Path to write the table to. Defaults to `NULL`.
+
+## Value
+
+Invisibly, a data frame with one row per marker: alignment length,
+terminals and covered terminals on each side, and the median coverage of
+each side.
+
+## Details
+
+Concatenation assumes that the loci being joined describe the same
+terminals. A locus sampled almost entirely on one side of the root
+breaks that assumption without breaking anything visible: it adds
+columns the other side cannot share, and the branch lengths spanning the
+bipartition are then estimated from the loci that remain. In the August
+2026 supermatrix, `phyC` covered 15 of 24 Anacampserotaceae terminals at
+99.3% and no Portulacaceae terminal at all; the branch subtending the
+outgroup fell from roughly 600 expected substitutions to 0.03, and the
+two deepest calibrated nodes returned their own bounds rather than an
+estimate.
+
+The function reports and does not block. Whether a locus of that kind
+belongs in a given matrix depends on which analysis the matrix is for: a
+nuclear locus with no outgroup coverage is unusable for dating and
+valuable for species discrimination.
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+report_marker_group_coverage(
+  input_dir = "5_MAFFT_Cleaned/aligned_markers",
+  outgroup_pattern = c(
+    Anacampserotaceae = "^(Anacampseros|Grahamia|Talinopsis)_",
+    Portulacaceae     = "^Portulaca_",
+    Talinaceae        = "^(Talinum|Talinella)_"
+  )
+)
+} # }
+```

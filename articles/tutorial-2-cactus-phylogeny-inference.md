@@ -1,0 +1,1119 @@
+# Tutorial 2: Phylogenetics Pipeline: Inference & Dating
+
+## Abstract
+
+Phylogenetic inference represents the transition from a curated
+molecular dataset to an explicit evolutionary hypothesis. After
+assembling and preparing multilocus sequence matrices in [Tutorial
+1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html),
+the next challenge is to estimate evolutionary relationships while
+accounting for the heterogeneous processes that shape molecular
+evolution.
+
+This tutorial describes the second stage of the `PhyloCactus` workflow,
+where concatenated multilocus datasets are transformed into
+statistically evaluated phylogenetic hypotheses. The pipeline integrates
+partition specific substitution model selection, constrained maximum
+likelihood inference, assessment of topological uncertainty, and
+divergence time estimation using penalized likelihood.
+
+Large multilocus phylogenetic datasets often contain substantial
+uncertainty due to incomplete molecular sampling, uneven taxonomic
+representation, and heterogeneous sequence availability. However,
+relationships among major taxonomic lineages may already be supported by
+previous phylogenetic studies. To incorporate this available biological
+knowledge while allowing the placement of newly sampled species,
+`PhyloCactus` uses a taxonomic constraint scaffold defined in
+`cactus_constraints.csv`. This file assigns sampled species to
+established higher level clades and subfamilies, providing a
+biologically informed framework that reduces exploration of unsupported
+regions of tree space while preserving inference among unresolved
+relationships within major lineages.
+
+Divergence time estimation requires the integration of molecular branch
+lengths with temporal information derived from fossil evidence or
+previously estimated evolutionary frameworks. Because **Cactaceae**
+lacks reliable direct fossil calibrations suitable for dating the entire
+family, `PhyloCactus` implements temporal constraints through the
+`calibrations_bounds.csv` file. These bounds incorporate lineage
+specific temporal estimates from Hernández-Hernández *et al*. (2014) for
+major cactus clades and subfamilies, together with secondary calibration
+information for **Cactaceae** based on the broader flowering plant
+framework proposed by Ramírez-Barahona *et al*. (2020). This strategy
+allows the estimation of a temporal framework while acknowledging the
+limitations imposed by the fossil record.
+
+Because evolutionary history cannot be directly observed, phylogenetic
+reconstruction relies on statistical models that approximate the
+processes generating molecular variation. Therefore, the resulting
+phylogeny should be interpreted as the evolutionary hypothesis that best
+explains the observed molecular data under the selected models and
+assumptions, rather than as an absolute representation of historical
+relationships.
+
+The workflow combines `ModelTest-NG`, `RAxML-NG`, and `treePL` to
+estimate a time calibrated phylogeny from the curated supermatrices
+generated in the previous tutorial. The resulting evolutionary framework
+provides the foundation for downstream comparative analyses, including
+historical biogeography, diversification dynamics, and trait evolution.
+
+## Complete Pipeline Execution Workflow
+
+### Setup: Creating a Clean Workspace
+
+Before proceeding with **Module 7**, ensure that the required external
+phylogenetic binaries (`ModelTest-NG`, `RAxML-NG`, and `treePL`) are
+installed on your machine and accessible via your system’s `$PATH`.
+
+*If you are using macOS, many of these can be installed via Homebrew
+(`brew install raxml-ng`, etc.). On Linux/Windows, ensure they are
+compiled and mapped correctly to your `$PATH`. Alternatively, if you
+receive a “command not found” error, you can provide the absolute path
+to the executable file (e.g., `raxml_path = "/usr/local/bin/raxml-ng"`)
+directly in the function arguments.*
+
+To quickly run the analyses in this module, you can copy the entire
+executable script to your tutorial directory:
+
+``` r
+
+tutorial_dir <- "~/Desktop/PhyloCactus_Tutorial"
+setwd(tutorial_dir)
+
+# Copy the entire tutorial script for easy execution
+file.copy(
+  system.file("scripts", "tutorial-2-cactus-phylogeny-inference.R", package = "PhyloCactus"),
+  file.path(tutorial_dir, "tutorial-2-cactus-phylogeny-inference.R")
+)
+```
+
+### Module 7: Preprocess and Substitution Models
+
+Phylogenetic datasets derived from multiple molecular markers often
+contain substantial evolutionary heterogeneity. Different loci may
+evolve under distinct substitution patterns, nucleotide compositions,
+and selective constraints. If these differences are ignored, a single
+evolutionary model applied across the entire dataset may inadequately
+describe the observed sequence variation and introduce biases during
+likelihood based phylogenetic inference.
+
+Therefore, before estimating the phylogenetic relationships, the
+concatenated supermatrix must be represented within a statistical
+framework that accounts for variation among molecular partitions.
+Partition specific substitution models provide a more realistic
+approximation of sequence evolution by allowing each locus region to be
+analyzed according to its own evolutionary characteristics.
+
+The
+**[`preprocess_partitions()`](https://beeamerino.github.io/PhyloCactus/reference/preprocess_partitions.md)**
+function prepares the concatenated supermatrix generated in Module 6 for
+downstream phylogenetic inference. It reads the alignment and partition
+files, verifies their structural compatibility using the `RAxML-NG`
+parser, and generates standardized input files required for substitution
+model evaluation and maximum likelihood analysis.
+
+The stages of this tutorial run for hours and a complete analysis spans
+several sessions, so each one must be executable on its own rather than
+only as part of a single pass from top to bottom. A script that passes
+results between stages in variables cannot do that: restarting R and
+resuming at Module 8 clears `analysed_phy` and the stage fails on a
+missing object rather than on a missing file. Hard-coding the filenames
+instead removes the dependency on session state but reintroduces the
+problem the naming convention exists to solve, since the same literal
+name is then retyped at a dozen call sites and drifts out of step with
+the run prefix.
+
+The
+**[`resolve_run_paths()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_run_paths.md)**
+function reconstructs the absolute path of every file of the run from
+the output directory, the run prefix and the supermatrix location. Each
+module below opens by calling it, so every filename has a single
+definition while every stage remains independently runnable. Two of its
+entries are resolved by inspecting the run rather than by convention
+alone, because they record what happened rather than what was chosen:
+`analysed_phy` points at the reduced matrix when `RAxML-NG` collapsed
+identical terminals during validation and at the supermatrix when it did
+not, and `best_tree` points into `ml_search/` when the maximum
+likelihood search was submitted to a cluster and into the run root when
+it was executed locally. Passing `require` names the entries a stage
+depends on, turning a missing input into an error that identifies the
+module responsible for producing it.
+
+The
+**[`run_modeltest_ng()`](https://beeamerino.github.io/PhyloCactus/reference/run_modeltest_ng.md)**
+function performs automated substitution model evaluation for each
+predefined molecular partition. By interfacing with `ModelTest-NG`
+(Darriba *et al*., 2020; Flouri *et al*., 2015), the function compares
+alternative models of nucleotide evolution and identifies the model that
+provides the best statistical explanation of the observed sequence
+variation according to information criteria such as AICc (Akaike, 1974;
+Hurvich & Tsai, 1989). Selecting optimal partition-specific substitution
+models is crucial for controlling mutational rate heterogeneity across
+loci and mitigating systematic artifacts such as Long-Branch Attraction
+(LBA), where rapidly evolving non-homologous lineages false-group
+together. The resulting model scheme provides the statistical foundation
+for maximum-likelihood tree inference.
+
+``` r
+
+library(PhyloCactus)
+
+# --- SETUP: run this block first, in every session -----------------------------------------
+output_dir <- "7_Phylogenetics"
+dir.create(output_dir, showWarnings = FALSE)
+
+# Get model test path. Note: Configure these in your .Renviron file
+modeltest_path <- Sys.getenv("PATH_MODELTEST_NG", "modeltest-ng")
+raxml_path     <- Sys.getenv("PATH_RAXML_NG", "raxml-ng")
+treepl_path    <- Sys.getenv("PATH_TREEPL", "treePL")
+
+# Every file of the run carries this prefix, so the run is renamed by changing one value.
+run_prefix <- "cactus"
+
+# Where Module 6 left the concatenated supermatrix.
+supermatrix_file <- "6_Concatenated/concatenated_alignments/ALIGNMENT_supermatrix.phy"
+partition_file   <- "6_Concatenated/concatenated_alignments/PARTITION_raxml_style.txt"
+
+# Rooting terminals, declared once and reused by every step that needs them. The whole Talinaceae
+# sample is used, not one terminal of it; see the note below for why. Taxon names are read from the
+# first field of each PHYLIP record. Adapt `pattern` to the outgroup lineage sampled in your dataset.
+supermatrix_taxa <- sub("\\s.*$", "", readLines(supermatrix_file)[-1])
+rooting_outgroup <- resolve_rooting_outgroup(supermatrix_taxa[nzchar(supermatrix_taxa)],
+                                             pattern = "^(Talinum|Talinella)_")
+cat("Rooting on", length(rooting_outgroup), "terminals:",
+    paste(rooting_outgroup, collapse = ", "), "\n")
+# --- end of SETUP --------------------------------------------------------------------------
+
+# model_handling = "force_dna" writes the datatype token DNA into the model field. RAxML-NG
+# expands a bare DNA token into its own default (GTR+FC+G4m+B) and writes that expansion into the
+# reduced partition file; handing that to ModelTest-NG would both pre-empt the model selection and
+# crash its partition parser.
+preprocess_partitions(
+  phy_matrix = supermatrix_file,
+  part_file = partition_file,
+  raxml_path = raxml_path,
+  output_dir = output_dir,
+  prefix = run_prefix,
+  force_check = FALSE,
+  model_handling = "force_dna"
+)
+
+# Resolve every path of the run from the naming convention. RAxML-NG --check collapses terminals
+# whose concatenated sequences are identical and writes a reduced matrix; those terminals are
+# absent from the tree, so `paths$analysed_phy` points at the reduced matrix when one was written
+# and at the supermatrix when it was not.
+paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file)
+print(paths)
+
+dup_groups_file <- "6_Concatenated/logs_and_qc/SUPP_TABLE_identical_sequence_groups.csv"
+if (file.exists(dup_groups_file)) {
+  dup_groups <- utils::read.csv(dup_groups_file)
+  cat("Identical-sequence groups exported by Module 6:", length(unique(dup_groups$group)),
+      "covering", nrow(dup_groups), "terminals;",
+      nrow(dup_groups) - length(unique(dup_groups$group)), "will be collapsed.\n")
+}
+if (isTRUE(paths$was_reduced)) {
+  cat("Reduced matrix header (taxa sites):", readLines(paths$analysed_phy, n = 1), "\n")
+} else {
+  cat("No reduced matrix written: RAxML-NG kept every terminal of the supermatrix.\n")
+}
+
+# Run `ModelTest-NG` to select substitution models for each partition.
+# ModelTest-NG resolves its output prefix relative to the working directory, so the call is made
+# from inside output_dir. resolve_run_paths() already returns absolute paths, which matters because
+# when RAxML-NG applied no reduction the analysed matrix still lives in 6_Concatenated.
+setwd(output_dir)
+run_modeltest_ng(
+  modeltest_exec_path = modeltest_path,
+  aln_file = paths$analysed_phy,
+  part_file = paths$validated_part,
+  prefix = paste0(run_prefix, "_modeltest"),
+  threads = 8
+)
+setwd("..")
+```
+
+### Module 8: Constraint Trees and Maximum Likelihood Search
+
+Maximum likelihood inference estimates the evolutionary hypothesis that
+provides the best explanation of the observed molecular data under a
+defined substitution model. The resulting phylogeny should not be
+interpreted as an absolute representation of biological history, but
+rather as the topology that maximizes the likelihood of observing the
+molecular alignment given the evolutionary models, constraints, and
+available molecular evidence.
+
+Large phylogenetic datasets frequently include incomplete taxonomic
+sampling, uneven sequence availability, and uncertainty associated with
+the placement of newly incorporated species. These challenges become
+particularly relevant when expanding datasets to include a large number
+of taxa from highly diverse evolutionary radiations. In such cases,
+previously established phylogenetic knowledge can be incorporated to
+reduce uncertainty and improve the efficiency of tree space exploration.
+
+The
+**[`build_constraint_scaffold()`](https://beeamerino.github.io/PhyloCactus/reference/build_constraint_scaffold.md)**
+function generates a topological constraint scaffold from the taxonomic
+framework provided in `cactus_constraints.csv`. This file assigns
+sampled species to major evolutionary groups within **Cactaceae**,
+including recognized subfamilies and internal clades. These assignments
+are based on previously published phylogenetic evidence and current
+evolutionary consensus regarding relationships among major cactus
+lineages, particularly the framework established by Guerrero *et al*.
+(2019).
+
+The constraint scaffold is not intended to replace molecular inference
+or impose a complete predefined phylogeny. Instead, it incorporates well
+supported relationships among higher level lineages while allowing
+unresolved relationships, particularly among newly incorporated species,
+to be inferred directly from the molecular dataset. By constraining only
+relationships supported by previous evidence, the approach reduces
+uncertainty during maximum likelihood inference and focuses the analysis
+on the evolutionary relationships that remain to be resolved.
+
+The
+**[`calculate_ml_tree()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_ml_tree.md)**
+function interfaces with `RAxML-NG` (Kozlov *et al*., 2019) to estimate
+the maximum likelihood topology from the concatenated molecular matrix
+using the partition specific substitution models identified in **Module
+7**. The analysis searches for the tree configuration that maximizes the
+likelihood of observing the sequence data under the selected
+evolutionary framework while incorporating the constraint scaffold
+defined for **Cactaceae**.
+
+The resulting maximum likelihood tree represents the best supported
+evolutionary hypothesis under the available molecular evidence,
+substitution models, and prior phylogenetic framework. This topology
+serves as the reference tree for subsequent branch support estimation
+and divergence time analyses.
+
+The search runs either on a local workstation through
+[`calculate_ml_tree()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_ml_tree.md)
+or on an HPC allocation through
+**[`generate_ml_search_script()`](https://beeamerino.github.io/PhyloCactus/reference/generate_ml_search_script.md)**,
+which writes a SLURM batch script performing the identical constrained
+search. The choice is made with the `run_local_ml` flag below, mirroring
+the `run_local_bs` switch used for bootstrap replicates in Module 9.
+Unlike the bootstrap step, the maximum likelihood search is submitted as
+a single job rather than a job array: `RAxML-NG` distributes the
+independent starting tree searches across workers within one job and
+writes a single best tree, so no collection step is required to compare
+log-likelihoods across tasks.
+
+The parameter that governs wall-clock in this stage is `n_workers`, not
+the thread count. `RAxML-NG` assigns each worker `threads / workers`
+threads and gives it one starting tree at a time, so the search
+completes in `ceiling(n_init_trees / workers)` sequential rounds. Total
+core-work is fixed: adding threads to a single worker shortens each
+individual tree, while adding workers reduces the number of rounds, and
+the second lever dominates once each worker already holds an efficient
+thread count. A search of 50 starting trees on one worker executes 50
+rounds; the same 50 trees across 25 workers execute two. In a reference
+run of this dataset on an Apple M2 Pro (8 threads, `n_workers = 1`, 1023
+terminals, 12806 sites, 5732 patterns), the 50 starting trees required
+47115 s, approximately 938 s per tree, essentially all of it
+attributable to sequential rounds rather than to per-tree cost.
+
+Passing `n_workers = NULL` derives the worker count automatically,
+constrained to a divisor of the starting tree count so that no worker
+sits idle in the final round. A worker count that does not divide the
+tree count wastes the tail of the search: 16 workers over 50 trees run
+four rounds with only two workers occupied in the last one, reaching the
+same wall-clock as 25 workers over two full rounds while holding more
+cores to do it. Per-worker thread allocation should keep several hundred
+site patterns per thread, since parallel efficiency within a worker
+saturates below that; `min_threads_per_worker` sets that floor and
+warrants re-validation on unfamiliar node hardware with a short trial
+search (`n_init_trees = "rand{2}"`) before committing a full allocation.
+
+The
+**[`calculate_rf_distances()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_rf_distances.md)**
+function evaluates topological variability among independently inferred
+trees by calculating pairwise Robinson Foulds distances (Robinson &
+Foulds, 1981). These comparisons provide an additional measure of
+consistency among alternative tree searches and allow the assessment of
+whether independent analyses converge toward similar evolutionary
+hypotheses.
+
+Rooting is imposed after the search, not during it, and it cannot be
+delegated to `RAxML-NG`. Under time-reversible substitution models the
+likelihood of a topology is identical for every one of its possible
+rootings (Felsenstein, 1981), so the data carry no information about
+where the root sits and no constraint tree can supply it: constraint
+trees, like the search itself, are unrooted. `--outgroup` only places
+the named terminals first in the output. The root is an outgroup
+decision, applied afterwards by
+[`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)
+through
+[`root_on_clade()`](https://beeamerino.github.io/PhyloCactus/reference/root_on_clade.md).
+What that argument does control is which edge the root sits on, and the
+choice governs which groups come out monophyletic, which nodes exist,
+and where each calibration lands, since `treePL` addresses nodes by the
+MRCA of the terminals declared for them.
+
+Root on the whole outgroup clade rather than on one of its terminals.
+Naming a single terminal places the root *inside* the clade: the
+remaining terminals of that lineage fall on the ingroup side, the
+lineage is left paraphyletic in the final tree, and its crown node
+collapses onto the root. Any calibration addressed by the MRCA of that
+lineage then lands on the root instead of on the node it was written
+for.
+[`resolve_rooting_outgroup()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_rooting_outgroup.md)
+returns the full set and
+[`root_on_clade()`](https://beeamerino.github.io/PhyloCactus/reference/root_on_clade.md)
+places the root on its stem edge, erroring when the terminals are not a
+clade of the unrooted topology. Use
+[`root_on_clade()`](https://beeamerino.github.io/PhyloCactus/reference/root_on_clade.md)
+rather than [`ape::root()`](https://rdrr.io/pkg/ape/man/root.html)
+directly: `RAxML-NG` writes the topology as an unrooted trifurcation,
+and when the rooting terminals fall on more than one of its basal
+branches, as they do in the reference dataset,
+[`ape::root()`](https://rdrr.io/pkg/ape/man/root.html) does not
+recognise them as a clade and leaves the root elsewhere.
+
+For the reference Cactaceae dataset, the rooting set comprises the 8
+sampled **Talinaceae** terminals (*Talinum* and *Talinella*). Occupancy
+across that set is reported per terminal in
+`6_Concatenated/final_tables/TABLE_final_species_alignment_summary.csv`.
+Rooting on Talinaceae places the root on the stem of the ACP clade
+(Anacampserotaceae, Cactaceae, Portulacaceae), avoiding the topological
+artifact of forcing an unverified sister relationship between Cactaceae
+and Anacampserotaceae that occurs when rooting on Portulacaceae in the
+absence of an external fourth lineage.
+
+With the root placed on the stem of Talinaceae, the crown of the ACP
+clade is an internal node with an estimable stem branch length, allowing
+maximum-likelihood inference to test alternative topological resolutions
+among the three core families (Ramírez-Barahona *et al.*, 2020; Zuntini
+*et al.*, 2024; de Vos *et al.*, 2025). Interfamilial relationships
+within this rapid radiation represent a zone of topological conflict,
+and the recovered tree reflects empirical preference under the
+multilocus supermatrix rather than an assumption imposed by outgroup
+choice.
+
+``` r
+
+# Module 8 needs the outputs of Module 7. Asking for them by name turns a missing input into an
+# error that says which module has not run yet, instead of a missing object after a restart.
+paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file,
+                           require = c("analysed_phy", "best_models"))
+
+# Assembles taxonomic classifications into a constraint scaffold
+build_constraint_scaffold(
+  alignment_path = paths$analysed_phy,
+  constraints_csv_path = system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"),
+  output_dir = output_dir,
+  prefix = run_prefix
+)
+
+# Execute the constrained maximum-likelihood search with `RAxML-NG`, either on this machine or as a
+# SLURM job on an HPC allocation. Set run_local_ml to TRUE to search now, or FALSE to write a batch
+# script to submit on the cluster.
+run_local_ml <- FALSE
+
+# Starting trees, declared once so that the local run and the cluster script search the same space.
+ml_start_trees <- "rand{25},pars{25}"
+
+if (run_local_ml) {
+  # n_workers = NULL derives the worker count from threads and the starting tree count. Leaving it
+  # at 1 puts every starting tree in its own sequential round, which is the single largest avoidable
+  # cost in this stage.
+  calculate_ml_tree(
+    raxml_bin_path = raxml_path,
+    aln_file = paths$analysed_phy,
+    part_file = paths$best_models,
+    constraint_file = paths$constraint_tree,
+    outgroup = rooting_outgroup,
+    n_init_trees = ml_start_trees,
+    seed = 1111,
+    n_workers = NULL,
+    min_threads_per_worker = 4L,
+    threads = 8,
+    output_dir = output_dir,
+    prefix = paste0(run_prefix, "_search")
+  )
+} else {
+  ml_script <- generate_ml_search_script(
+    alignment_file = paths$analysed_phy,
+    partition_file = paths$best_models,
+    constraint_file = paths$constraint_tree,
+    outgroup = rooting_outgroup,
+    n_init_trees = ml_start_trees,
+    seed = 1111,
+    # --- SLURM & HPC Resource Configuration ---
+    cluster_job_name = "cactus_ml",
+    cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
+    cluster_nodes = 1L,                               # Number of compute nodes requested
+    threads = 75,                                     # CPU cores requested (--cpus-per-task)
+    cluster_mem = "16G",                              # RAM memory allocation (--mem, ~11 GB max used)
+    cluster_time = "02:00:00",                        # Walltime limit (--time HH:MM:SS, ~41 min real runtime)
+    cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
+    load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
+    raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
+    # --- Search Tuning ---
+    workers = NULL,
+    min_threads_per_worker = 3L,
+    preparse = TRUE,
+    output_dir = output_dir,
+    prefix = paste0(run_prefix, "_search")
+  )
+  cat("Submit on cluster with: cd ml_search && sbatch run_ml_search.sh\n")
+  cat("When the job finishes, sync results back and resume from the Module 9 block below.\n")
+}
+
+# Re-resolve now that Module 8 has written its outputs. `resolve_run_paths()` finds the best tree in
+# `ml_search/` when the search ran on the cluster and in the run root when it ran locally, so every
+# step below is identical either way.
+paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file)
+
+# Calculate Robinson-Foulds distance among maximum-likelihood trees
+cat("Calculating distances among maximum-likelihood trees...\n")
+rf_dist <- calculate_rf_distances(
+  raxml_bin_path = raxml_path,
+  ml_trees_file = paths$ml_trees,
+  output_dir = output_dir
+)
+```
+
+### Module 9: Topological Validation via Bootstrap Support
+
+Once the maximum likelihood topology has been inferred, the statistical
+support of recovered clades must be evaluated by quantifying topological
+stability associated with each internal node. Bootstrap analyses provide
+an empirical measure of topological stability by assessing how
+consistently specific relationships are recovered under resampling of
+the original sequence alignment.
+
+The
+**[`generate_bootstrap_script()`](https://beeamerino.github.io/PhyloCactus/reference/generate_bootstrap_script.md)**
+and
+**[`run_local_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/run_local_bootstraps.md)**
+functions configure and execute bootstrap searches using `RAxML-NG`.
+These procedures generate independent resampled datasets while
+maintaining the same substitution model, constraint tree and partition
+scheme defined during the maximum likelihood inference. The resulting
+bootstrap trees represent alternative evolutionary hypotheses derived
+from the molecular dataset and allow the assessment of uncertainty
+across the inferred topology.
+
+The
+**[`collect_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/collect_bootstraps.md)**
+function gathers the independent bootstrap searches, while
+**[`check_bs_convergence()`](https://beeamerino.github.io/PhyloCactus/reference/check_bs_convergence.md)**
+evaluates whether a sufficient number of replicates has been generated
+using the bootstopping criterion (Pattengale *et al*., 2010).
+Convergence is evaluated under Felsenstein’s Bootstrap Proportions
+(`FBP`), testing whether the autoMRE threshold (cutoff \<= 0.03) is
+satisfied across resampled replicates.
+
+The
+**[`map_branch_supports()`](https://beeamerino.github.io/PhyloCactus/reference/map_branch_supports.md)**
+function summarizes bootstrap information and transfers support values
+onto the best maximum likelihood topology. `PhyloCactus` adopts
+Felsenstein’s Bootstrap Proportions (`FBP`) as its primary canonical
+metric. Published phylogenetic studies in Cactaceae (Hernández-Hernández
+*et al*., 2014; Arakaki *et al*., 2011) report standard FBP bipartition
+frequencies or Bayesian posterior probabilities. Transfer Bootstrap
+Expectation (`TBE`; Lemoine *et al*., 2018) is computed as a secondary,
+complementary metric. While TBE mitigates the penalization caused by
+unstable wildcard taxa in large supermatrices with missing data, it
+systematically inflates support values in large clades compared to
+standard bipartition frequencies (for example, free clades of 51 to 200
+tips exhibit a median FBP of 0.265 alongside a median TBE of 0.969).
+Reporting FBP as the primary metric ensures direct comparability with
+published botanical benchmarks, while retaining TBE provides diagnostic
+insight into local taxon placement stability.
+
+When interpreting support values, internal nodes enforced by the
+taxonomic constraint scaffold (`cactus_constraints.tree`) return support
+values of 1.000 by algorithmic definition across all bootstrap
+replicates. These values represent the topological constraint itself
+rather than empirical evidence from the molecular supermatrix, and must
+be designated as constrained rather than estimated in publication
+tables.
+
+#### Temporal Bootstrap Replicates for Divergence Time Estimation
+
+Divergence time estimation requires an additional assessment of
+uncertainty because branch lengths inferred during maximum likelihood
+analysis are influenced by sampling variation in the molecular data.
+Following the empirical protocol proposed by Maurin (2020) for dating
+large phylogenies with `treePL`, `PhyloCactus` generates a second set of
+bootstrap replicates specifically designed for temporal analyses.
+
+The
+**[`calculate_temporal_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_temporal_bootstraps.md)**
+function generates bootstrap alignments and performs maximum likelihood
+searches while constraining the topology to the previously inferred
+maximum likelihood tree. This constraint does not force branch lengths
+to be identical; instead, it preserves the supported evolutionary
+relationships while allowing each bootstrap replicate to independently
+estimate branch length variation from the resampled molecular data.
+
+This strategy is particularly important for large phylogenetic datasets
+where many relationships are already strongly supported at higher
+taxonomic levels, but uncertainty remains associated with branch length
+estimation and the placement of newly incorporated taxa. By maintaining
+a common topological framework, temporal bootstrap replicates provide a
+distribution of alternative branch length estimates that can be
+propagated into downstream divergence time analyses.
+
+The resulting bootstrap trees are subsequently used by the dating module
+with `treePL` (Smith & O’Meara, 2012). Following the protocol described
+by Maurin (2020), the best maximum likelihood topology is first
+optimized to determine the appropriate penalized likelihood parameters
+and smoothing value. These parameters are then applied to the temporal
+bootstrap replicates to estimate a distribution of dated trees, from
+which confidence intervals for node ages can be obtained.
+
+Therefore, `PhyloCactus` distinguishes between two complementary
+bootstrap procedures: standard bootstrap analyses evaluate the
+topological stability of inferred relationships, whereas temporal
+bootstrap replicates quantify uncertainty in molecular branch length
+estimates required for divergence time estimation.
+
+``` r
+
+# -------------------------------------------------------------
+# Estimate Bootstrap Replicates
+# -------------------------------------------------------------
+# Resuming here after a restart: run the SETUP block of Module 7, then continue from this line.
+paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file,
+                           require = c("analysed_phy", "best_models",
+                                       "constraint_tree"))
+
+# `RAxML-NG` supports running Bootstraps either locally or via HPC array chunks.
+# You can set run_local_bs to TRUE to run them now on your machine, 
+# or FALSE to generate an HPC bash script to run them remotely.
+run_local_bs <- FALSE
+
+if (run_local_bs) {
+  cat("\n1. Estimating bootstraps locally...\n")
+  bs_dir <- file.path(output_dir, "local_bs")
+  local_bs <- run_local_bootstraps(
+    raxml_bin_path = raxml_path,
+    aln_file = paths$analysed_phy,
+    part_file = paths$best_models,
+    constraint_file = paths$constraint_tree,
+    bs_trees = 500,
+    outgroup = rooting_outgroup,
+    threads = 8,
+    workers = 1,
+    output_dir = bs_dir
+  )
+} else {
+  cat("\n1. Generating BS script for HPC chunks...\n")
+  bs_dir <- file.path(output_dir, "bs_chunks")
+  bs_script <- generate_bootstrap_script(
+    alignment_file = paths$analysed_phy,
+    partition_file = paths$best_models,
+    constraint_file = paths$constraint_tree,
+    outgroup = rooting_outgroup,
+    # --- SLURM & HPC Resource Configuration ---
+    cluster_job_name = "cactus_bs",
+    cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
+    cluster_nodes = 1L,                               # Number of compute nodes requested
+    threads = 40,                                     # CPU cores per array task (--cpus-per-task)
+    cluster_mem = "10G",                              # RAM memory allocation per task (--mem, ~5.3 GB max used)
+    cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS, ~17 h real runtime)
+    cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
+    load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
+    raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
+    # --- Bootstrap Array Settings ---
+    bs_per_rep = 500,                                 # Bootstrap replicates per array task
+    max_reps = 2,                                     # Number of array tasks (2 x 500 = 1000 total replicates)
+    workers = 10,
+    output_dir = file.path(output_dir)
+  )
+  cat("Submit on cluster with: cd bs_chunks && sbatch run_bs_chunks.sh\n")
+  cat("When all array tasks finish, sync results back and continue with collect_bootstraps().\n")
+}
+
+# -------------------------------------------------------------
+# Collect Bootstrap Replicates
+# -------------------------------------------------------------
+# Before running this step, ensure that your bootstrap replicates have finished.
+# If you ran them on HPC, make sure all chunks completed successfully and
+# optionally sync the files back to your local repository.
+
+cat("\n2. Collecting bootstrap replicates...\n")
+# bs_dir was defined in Step 1 depending on whether you ran locally or via HPC chunks
+bs_concat_file <- collect_bootstraps(
+  bs_dir = bs_dir,
+  output_dir = output_dir,
+  prefix = paste0(run_prefix, "_ALL_bootstraps")
+)
+cat("   Bootstraps concatenated to:", bs_concat_file, "\n")
+
+# Pick up the file collect_bootstraps() just wrote.
+paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file,
+                           require = c("all_bootstraps", "best_tree"))
+
+# -------------------------------------------------------------
+# Check Bootstrap Convergence
+# -------------------------------------------------------------
+# autoMRE bootstopping criterion evaluated under FBP (Felsenstein's Bootstrap Proportions)
+cat("\n3. Checking bootstrap convergence (FBP autoMRE)...\n")
+converge_log <- check_bs_convergence(
+  raxml_bin_path = raxml_path,
+  bs_trees_file = paths$all_bootstraps,
+  bs_metric = "fbp",
+  bs_cutoff = 0.03,
+  seed = 111,
+  threads = 8,
+  output_dir = output_dir,
+  prefix = paste0(run_prefix, "_bs_convergence")
+)
+print(converge_log)
+
+# -------------------------------------------------------------
+# Map Bootstrap Supports onto Best Tree (FBP Primary, TBE Secondary)
+# -------------------------------------------------------------
+cat("\nMapping bootstrap supports onto the best tree...\n")
+
+# Primary metric: FBP support (comparable with published literature)
+support_tree <- map_branch_supports(
+  raxml_bin = raxml_path,
+  best_tree = paths$best_tree,
+  bootstraps_file = paths$all_bootstraps,
+  metric = "fbp",
+  output_dir = output_dir,
+  prefix = paste0(run_prefix, "_support")
+)
+cat("   Primary FBP support tree generated at:", support_tree, "\n")
+
+# Secondary metric: TBE support (complementary missing-data assessment)
+support_tree_tbe <- map_branch_supports(
+  raxml_bin = raxml_path,
+  best_tree = paths$best_tree,
+  bootstraps_file = paths$all_bootstraps,
+  metric = "tbe",
+  output_dir = output_dir,
+  prefix = paste0(run_prefix, "_support_tbe")
+)
+cat("   Secondary TBE support tree generated at:", support_tree_tbe, "\n")
+
+# Note: for Dating, run sequential temporal bootstraps constrained over the best tree.
+run_local_temporal_bs <- FALSE  # Set to TRUE to execute locally on your machine
+
+if (run_local_temporal_bs) {
+  cat("Running temporal bootstraps locally on machine...\n")
+  temporal_bs <- calculate_temporal_bootstraps(
+    raxml_bin_path = raxml_path,
+    aln_file = paths$analysed_phy,
+    part_file = paths$best_models,
+    best_tree_file = paths$best_tree,
+    outgroup = rooting_outgroup,
+    bs_trees = 100, # Adjust to 500 or 1000 for production.
+    threads = 8,
+    workers = 2,
+    output_dir = paths$temporal_bs_dir,
+    prefix = paths$temporal_bs_prefix
+  )
+} else {
+  cat("Generating HPC SLURM submission script for temporal bootstraps...\n")
+  hpc_temp_bs_script <- generate_temporal_bootstrap_script(
+    alignment_file = paths$analysed_phy,
+    partition_file = paths$best_models,
+    best_tree_file = paths$best_tree,
+    outgroup = rooting_outgroup,
+    bs_trees = 500,
+    threads = 40,
+    workers = 10,
+    threads_per_worker = 4L,
+    preparse = TRUE,
+    output_dir = output_dir,
+    script_name = "run_temporal_bs.sh",
+    cluster_job_name = "cactus_temp_bs",
+    cluster_partition = "main",
+    cluster_nodes = 1L,
+    cluster_mem = "16G",
+    cluster_time = "04:00:00",
+    cluster_mail_user = Sys.getenv("MY_EMAIL", "")
+  )
+  cat("   Temporal bootstrap HPC script generated at:", hpc_temp_bs_script, "\n")
+  cat("   Submit on cluster: cd cactus_temporal_bs && sbatch run_temporal_bs.sh\n")
+}
+```
+
+### Module 10: Estimating Divergence Times via Penalized Likelihood
+
+The inferred maximum likelihood topology provides a robust hypothesis of
+evolutionary relationships; however, branch lengths estimated from
+molecular data represent substitutions per site rather than geological
+time. To reconstruct the temporal history of **Cactaceae**
+diversification, the phylogenetic tree must therefore be transformed
+into an ultrametric chronogram by integrating molecular branch length
+information with temporal constraints derived from previous evolutionary
+studies.
+
+`PhyloCactus` estimates divergence times using the penalized likelihood
+framework implemented in `treePL` (Sanderson, 2002; Smith & O’Meara,
+2012). This approach is particularly suitable for large phylogenetic
+datasets because it accommodates lineage specific variation in
+evolutionary rates while remaining computationally feasible for analyses
+involving hundreds or thousands of taxa.
+
+Temporal constraints are provided through the `calibrations_bounds.csv`
+reference file distributed with the package. Each row declares the node
+it constrains as a set of taxa (`column` and `value`), the kind of node
+it represents (`node_type`, either `stem` or `crown`), the minimum and
+maximum age bounds, and the study the bounds were taken from. `treePL`
+addresses nodes by the MRCA of the terminals listed for them, so the
+taxon set, not the row label, is what determines where a bound lands.
+
+The distinction between stem and crown nodes governs which bound may be
+assigned to which node. A crown node is the first divergence within a
+clade; a stem node is the divergence separating that clade from its
+sister, and is therefore always older. Assigning a stem age to a crown
+node inflates the node by construction, and propagates that inflation to
+every node below it.
+
+Internal calibrations for major cactus lineages are derived from
+Hernández-Hernández *et al.* (2014), which estimated divergence times
+among the principal evolutionary groups of the family. These are crown
+ages of densely sampled clades (**Opuntioideae**, **Cactoideae**,
+Cacteae) and are applied to the corresponding crown nodes.
+
+Because **Cactaceae** lacks an unequivocal macrofossil record suitable
+for direct internal node calibration, the root of the ingroup is
+constrained by secondary calibration from the angiosperm-wide chronogram
+of Ramírez-Barahona *et al.* (2020) under the `RC_complete` scheme. With
+Talinaceae (*Talinum* and *Talinella*) explicitly sampled to root the
+tree, the calibrated node is:
+
+- `ACP_root`: Constrains the crown divergence of the Anacampserotaceae +
+  Portulacaceae + **Cactaceae** clade (corresponding to the stem node of
+  Portulacaceae in Ramírez-Barahona *et al.*, 2020). The primary
+  calibration scheme (Scheme S1) applies a fixed point of 41.82 Ma (the
+  median stem age under BEAST relaxed clock), with alternative
+  sensitivity schemes available in `calibrations_bounds.csv` (Scheme S2:
+  95% HPD interval \[27.81, 53.37\] Ma; Scheme S4: 53.22 Ma from Zuntini
+  *et al.*, 2024 young tree).
+- `Cactaceae_Anacampserotaceae_stem` (\[21.95, 48.51\] Ma) is retained
+  in `calibrations_bounds.csv` with `used_in_analysis = FALSE` because
+  it assumes a sister relationship between **Cactaceae** and
+  Anacampserotaceae; our unconstrained likelihood inference and
+  phylogenomic evidence (Zuntini *et al.*, 2024 Kew Tree of Life Release
+  4.0) instead recover (Anacampserotaceae + Portulacaceae) sister to
+  **Cactaceae**.
+
+The crown intervals reported by Ramírez-Barahona *et al.* (2020) for
+these families are also retained with `used_in_analysis = FALSE`, for
+provenance rather than for use. That study samples two terminals per
+family, so its crown estimate is the divergence between the two sampled
+species rather than the crown of the family, and systematically
+underestimates it. Its stem nodes are well defined regardless of
+within-family sampling, which is why the stem bounds are the ones
+carried forward.
+
+Secondary calibration inherits the uncertainty of the study it comes
+from without propagating it, so the resulting node ages are conditional
+on that framework rather than independent estimates. Bounds drawn from
+Hernández-Hernández *et al.* (2014) and from Ramírez-Barahona *et al.*
+(2020) also come from analyses calibrated under different schemes. Both
+limitations should be stated in Methods.
+
+The
+**[`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)**
+function performs the complete divergence time estimation workflow.
+First, it prepares the maximum likelihood topology, branch length
+information, and calibration constraints required by `treePL`. The
+function then performs the optimization procedure required to estimate
+appropriate penalized likelihood parameters, including the smoothing
+parameter selected through cross validation.
+
+Following the empirical protocol described by Maurin (2020), the
+optimization and cross validation steps are performed using the best
+scoring maximum likelihood tree without bootstrap annotations. This
+approach ensures that the dating parameters are optimized using the
+primary evolutionary hypothesis before being propagated to replicate
+datasets. Specifically, the smoothing value selected by cross validation
+on the maximum likelihood tree is reused, unmodified, for every temporal
+bootstrap replicate, rather than re-optimized independently for each
+one. Repeating full cross validation for every replicate is
+computationally prohibitive at typical bootstrap replicate counts, and
+reusing a single, well-supported smoothing value is standard practice in
+`treePL`-based dating pipelines; the trade-off is that per-replicate
+variation in optimal rate heterogeneity smoothing is not itself
+propagated into the reported confidence intervals, which instead capture
+uncertainty arising from branch length resampling alone.
+
+After the optimal `treePL` parameters have been identified, the dating
+procedure is applied to the temporal bootstrap replicates generated in
+**Module 9**. These replicates were obtained by resampling the original
+alignment while maintaining the maximum likelihood topology as a
+constraint. This strategy preserves the inferred relationships among
+taxa while allowing branch lengths to vary according to molecular
+sampling uncertainty.
+
+Propagating temporal uncertainty through these bootstrap replicates
+allows divergence time estimates to incorporate variation in branch
+length estimation. The resulting collection of dated bootstrap trees
+represents uncertainty associated with the temporal reconstruction under
+a maximum likelihood framework and provides the basis for estimating
+confidence intervals around divergence times.
+
+#### Summarizing Dated Temporal Bootstrap Replicates
+
+After all temporal bootstrap replicates have been independently dated,
+the resulting chronograms must be summarized into a single
+representative time calibrated tree. Following the empirical workflow
+proposed by Maurin (2020), `PhyloCactus` uses `TreeAnnotator` (Helfrich
+*et al.*, 2018) to summarize the dated bootstrap distribution.
+
+Because temporal bootstrap replicates are generated under the maximum
+likelihood topology constraint, all replicate trees share identical
+branching relationships. Therefore, the summary procedure does not
+evaluate alternative topologies, but instead estimates the distribution
+of node ages across independently dated replicate trees.
+
+The recommended `TreeAnnotator` configuration specifies a maximum sum of
+clade credibility target tree type, mean height node age estimates, and
+0% burn-in.
+
+Under this framework, `TreeAnnotator` calculates the mean age of each
+node and summarizes the uncertainty associated with divergence time
+estimation across the dated temporal bootstrap replicates.
+
+TreeAnnotator reports these uncertainty intervals as highest posterior
+density (HPD) values due to compatibility with Bayesian phylogenetic
+workflows. However, these values should not be interpreted as Bayesian
+posterior distributions. Within the `PhyloCactus` framework, they
+represent confidence intervals derived from variation among
+independently dated temporal bootstrap replicates generated through
+penalized likelihood optimization.
+
+Here is how you execute, print, and visualize these chronological
+calculations:
+
+``` r
+
+# Resuming here after a restart: run the SETUP block of Module 7, then continue from this line.
+paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file,
+                           require = c("analysed_phy", "best_tree", "temporal_bs"))
+
+dating_dir <- "8_Dating"
+dir.create(dating_dir, showWarnings = FALSE)
+
+# 1. Prepare Calibrations
+cat("Creating `treePL` calibrations configurations...\n")
+calibs_all <- read.csv(system.file("extdata", "calibrations_bounds.csv", package = "PhyloCactus"))
+calibs <- calibs_all[calibs_all$used_in_analysis == TRUE, ]
+
+constraints <- read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
+ml_tree <- ape::read.tree(paths$best_tree)
+tip_labels <- ml_tree$tip.label
+
+# `numsites` must be the length of the matrix RAxML-NG actually analysed, not a rounded figure.
+# treePL uses it to convert branch lengths into expected substitution counts, so it is read from
+# the header of the matrix Module 7 reported as analysed. `paths$analysed_phy` already resolves to the
+# reduced PHYLIP when terminals were collapsed and to the supermatrix when they were not, so no
+# second guess at the filename is needed here.
+phy_header <- strsplit(trimws(readLines(paths$analysed_phy, n = 1)), "\\s+")[[1]]
+num_sites <- as.integer(phy_header[2])
+cat("   Matrix analysed:", paths$analysed_phy, "-", phy_header[1], "taxa x", num_sites, "sites\n")
+
+# Rooting terminals, declared once in Module 8 and re-derived here so this block also runs
+# standalone after a restart.
+if (!exists("rooting_outgroup")) rooting_outgroup <- resolve_rooting_outgroup(tip_labels, pattern = "^(Talinum|Talinella)_")
+
+# `treePL` resolves every `mrca` entry by the MRCA of the listed terminals, so a correct
+# label is no guarantee of a correct node. The rooted topology is reconstructed here to
+# verify node identity before any bound is written.
+rooted_ml <- root_on_clade(ml_tree, rooting_outgroup)
+root_node <- ape::Ntip(rooted_ml) + 1L
+
+# `value` accepts a semicolon-separated list, which is required by the two stem
+# calibrations: a stem node is shared by the families it subtends and cannot be addressed
+# by a single family name.
+tips_for <- function(column, value) calibration_tips(constraints, column, value, tip_labels)
+
+# Bounds are declared per node, but the nodes are nested and an ultrametric tree forces every
+# ancestor to be older than each of its descendants. A set that is defensible row by row can still
+# describe a tree that cannot exist, and treePL does not report the violation: it pins the
+# offending node to a bound and returns a chronogram that reads like an estimate.
+check_calibration_consistency(calibs, rooted_ml, constraints)
+
+cfg_lines <- c()
+for (i in seq_len(nrow(calibs))) {
+  row <- calibs[i, ]
+  tips_in_tree <- tips_for(row$column, row$value)
+
+  if (length(tips_in_tree) < 2) next
+
+  mrca_line <- paste("mrca =", row$mrca, paste(tips_in_tree, collapse = " "))
+  min_line  <- sprintf("min = %s %f", row$mrca, row$min)
+  max_line  <- sprintf("max = %s %f", row$mrca, row$max)
+
+  cfg_lines <- c(cfg_lines, mrca_line, min_line, max_line)
+}
+
+# Node-identity assertions, rewritten when Talinaceae entered the sampling.
+#
+# With Talinaceae rooting the tree, the root is the crown of the ACPT clade and ACP_root is an
+# internal node with a parent branch, which is what makes it identifiable rather than a parameter
+# parked at the end of the tree. The earlier assertion required ACP_root to BE the root and would
+# now fail, correctly: it encoded the previous sampling.
+#
+# What still has to hold, and what these lines check:
+#   1. The rooting clade is monophyletic. Rooting on a single terminal instead of the clade leaves
+#      the lineage paraphyletic and collapses its crown onto the root, which silently reassigns
+#      every bound addressed by that lineage.
+#   2. ACP_root resolves to a node that is NOT the root, so the anchor is placed on an internal
+#      node rather than on the deepest split of the tree.
+#   3. ACP_root is monophyletic. If the likelihood placed Talinaceae inside the ACP clade, the
+#      anchor would be addressing something other than the node it was written for.
+stopifnot(ape::is.monophyletic(rooted_ml, grep("^(Talinum|Talinella)_", tip_labels, value = TRUE)))
+acp_tips <- tips_for("Family", "Cactaceae;Anacampserotaceae;Portulacaceae")
+stopifnot(ape::getMRCA(rooted_ml, acp_tips) != root_node)
+stopifnot(ape::is.monophyletic(rooted_ml, acp_tips))
+
+# The resolution of the ACPT quartet is a result of this run, not an assumption, so it is reported
+# rather than asserted. Whether Cactaceae_Anacampserotaceae_stem can be reactivated in
+# calibrations_bounds.csv depends on what this prints.
+cact_anac <- tips_for("Family", "Cactaceae;Anacampserotaceae")
+anac_por  <- tips_for("Family", "Anacampserotaceae;Portulacaceae")
+cact_por  <- tips_for("Family", "Cactaceae;Portulacaceae")
+cat("ACPT quartet resolution recovered by this run:\n")
+cat("   Cactaceae + Anacampserotaceae monophyletic: ",
+    ape::is.monophyletic(rooted_ml, cact_anac), "\n")
+cat("   Anacampserotaceae + Portulacaceae monophyletic: ",
+    ape::is.monophyletic(rooted_ml, anac_por), "\n")
+cat("   Cactaceae + Portulacaceae monophyletic: ",
+    ape::is.monophyletic(rooted_ml, cact_por), "\n")
+
+# `num_sites` here is the true length of the analysed matrix, which is what belongs in a file
+# meant to document the analysis. `automate_treePL()` rescales branch lengths and divides this
+# value by the same factor before handing a copy to `treePL`, so the substitution count per
+# branch stays correct. The copy it actually runs is written to `auto_results/ML_tree/`.
+treepl_cfg <- c(
+  paste0("numsites = ", num_sites),
+  cfg_lines,
+  "nthreads = 8",
+  "thorough"
+)
+
+calibrations_cfg_path <- file.path(dating_dir, "calibrations_treePL_fulltips.cfg")
+writeLines(treepl_cfg, calibrations_cfg_path)
+cat("   Calibrations compiled successfully to:", calibrations_cfg_path, "\n")
+
+# 2. Run Fast Automated `treePL` Dating Pipeline
+cat("\nRunning automated `treePL` wrapper script over maximum-likelihood tree and bootstrap replicates...\n")
+
+# Priming, cross-validation and dating follow the empirical protocol of Maurin (2020,
+# arXiv:2008.07054, CC BY 4.0) and run through run_treePL_cv(), in R. Until 2026-09-02 they were
+# driven by a copy of the shell script at https://github.com/tongjial/treepl_wrapper, which was an
+# earlier implementation of the same protocol; that script carries no licence, so it could not be
+# redistributed inside this GPL-3 package, and it wrote `smoothing = ` where treePL reads
+# `smooth = `, silently dating every chronogram at the built-in default of 10.
+#
+# Three defaults follow Maurin where the shell script did not: the priming parameters are the
+# lowest rather than the most frequent, cross-validation uses `randomcv` rather than leave-one-out
+# `cv`, and the smoothing grid reaches 1e-08 rather than stopping at 1e-04. Maurin reports optimal
+# smoothing between 1e-06 and 1e-08 for a tree whose branch lengths were rescaled as they are here.
+
+# Note: For tutorial purposes, you can limit the number of bootstrap trees to process
+# by setting `num_bs = 100` (or any other number). If not provided, it will process all
+# available bootstrap trees. Here we set it to 100 for faster tutorial execution.
+automate_treePL(
+  cfg_file = calibrations_cfg_path,
+  ml_tree_file = paths$best_tree,
+  bs_trees_file = paths$temporal_bs,
+  numsites = num_sites,
+  outgroup = rooting_outgroup,
+  results_dir = file.path(dating_dir, "auto_results"),
+  treePL_out = dating_dir,
+  num_bs = 100
+)
+
+# 3. View and evaluate dating metrics cleanly in R
+cat("\n--- Chronological Dating Results Summary ---\n")
+if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
+  ml_chronogram <- ape::read.tree(file.path(dating_dir, "BestTree_treePL.tree"))
+  cat("   Best ML Chronogram:\n")
+  cat("     - File path:", file.path(dating_dir, "BestTree_treePL.tree"), "\n")
+  cat("     - Root age:", max(ape::node.depth.edgelength(ml_chronogram)), "Mya\n")
+  cat("     - Number of tips:", length(ml_chronogram$tip.label), "\n")
+
+  # A node whose age equals one of its own bounds was not estimated: penalized likelihood returned
+  # the constraint. In the August 2026 run all five calibrated nodes came back on a bound and the
+  # chronogram gave no sign of it.
+  adherence <- report_bound_adherence(ml_chronogram, calibs, constraints)
+  cat("\n   Calibrated node ages against their bounds:\n")
+  print(adherence)
+}
+cat("--------------------------------------------\n")
+```
+
+## Conclusion
+
+At this stage, phylogenetic inference and divergence time estimation
+have been completed. The resulting maximum likelihood topology, branch
+support estimates, and time calibrated chronogram provide the
+evolutionary framework required for downstream comparative analyses.
+
+The next stage of the `PhyloCactus` workflow focuses on integrating
+phylogenetic outputs with biological metadata and generating publication
+quality visualizations. In the following tutorial, users will learn how
+to visualize the maximum likelihood phylogeny with branch support
+values, display the dated chronogram with temporal uncertainty
+estimates, and integrate external biodiversity information, including
+IUCN Red List conservation categories.
+
+[Continue to Tutorial 3: Data Visualization and IUCN
+Summaries](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html)
+
+## References
+
+- Akaike, H. 1974. A new look at the statistical model identification.
+  *IEEE Transactions on Automatic Control*, 19(6), 716-723.
+  <https://doi.org/10.1109/TAC.1974.1100705>
+- Arakaki *et al*. 2011. Contemporaneous and recent radiations of the
+  world’s major succulent plant lineages. *Proceedings of the National
+  Academy of Sciences of the United States of America*, 108(20),
+  8379–8384. <https://doi.org/10.1073/pnas.1100628108>
+- Darriba *et al*. 2020. ModelTest-NG: a new and scalable tool for the
+  selection of DNA and protein evolutionary models. *Molecular Biology
+  and Evolution*, 37(1), 291-294.
+  <https://doi.org/10.1093/molbev/msz189>
+- Felsenstein, J. 1981. Evolutionary trees from DNA sequences: A maximum
+  likelihood approach. *Journal of Molecular Evolution*, 17(6), 368–376.
+  <https://doi.org/10.1007/BF01734359>
+- Flouri *et al*. 2014. The Phylogenetic Likelihood Library. *Systematic
+  Biology*, 64(2), 356-362. <https://doi.org/10.1093/sysbio/syu084>
+- Helfrich *et al*. 2018. TreeAnnotator: versatile visual annotation of
+  hierarchical text relations. *Proceedings of the Eleventh
+  International Conference on Language Resources and Evaluation*.
+  <https://lrec.elra.info/lrec2018-main-308>
+- Hernández-Hernández *et al*. 2014. Beyond aridification: Multiple
+  explanations for the elevated diversification of cacti in the New
+  World Succulent Biome. *New Phytologist*, 202(4), 1382–1397.
+  <https://doi.org/10.1111/nph.12752>
+- Kozlov *et al*. 2019. RAxML-NG: A fast, scalable and user-friendly
+  tool for maximum likelihood phylogenetic inference. *Bioinformatics*,
+  35(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305>
+- Lemoine *et al*. 2018. Renewing Felsenstein’s phylogenetic bootstrap
+  in the era of big data. *Nature*, 556(7702), 452-456.
+  <https://doi.org/10.1038/s41586-018-0043-0>
+- Maurin, K. J. 2020. An empirical guide for producing a dated phylogeny
+  with treePL in a maximum likelihood framework. *arXiv preprint
+  arXiv:2008.07054*. <https://doi.org/10.48550/arXiv.2008.07054>
+- Pattengale *et al*. 2010. How many bootstrap replicates are
+  necessary?. *Journal of Computational Biology*, 17(3), 337–354.
+  <https://doi.org/10.1089/cmb.2009.0179>
+- Ramírez-Barahona *et al*. 2020. The delayed and geographically
+  heterogeneous diversification of flowering plant families. *Nature
+  Ecology and Evolution*, 4(9), 1232–1238.
+  <https://doi.org/10.1038/s41559-020-1241-3>
+- Robinson, D. F., & Foulds, L. R. 1981. Comparison of phylogenetic
+  trees. *Mathematical Biosciences*, 53(1-2), 131-147.
+  <https://doi.org/10.1016/0025-5564(81)90043-2>
+- Sanderson, M. J. 2002. Estimating Absolute Rates of Molecular
+  Evolution and Divergence Times: A Penalized Likelihood Approach.
+  *Molecular Biology and Evolution*, 19(1), 101–109.
+  <https://doi.org/10.1093/oxfordjournals.molbev.a003974>
+- Smith, S. A., & O’Meara, B. C. 2012. TreePL: Divergence time
+  estimation using penalized likelihood for large phylogenies.
+  *Bioinformatics*, 28(20), 2689–2690.
+  <https://doi.org/10.1093/bioinformatics/bts492>
