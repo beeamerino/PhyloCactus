@@ -1,0 +1,136 @@
+url: https://beeamerino.github.io/PhyloCactus/
+template:
+  bootstrap: 5
+  bootswatch: yeti
+navbar:
+  structure:
+    left:
+    - intro
+    - reference
+    - articles
+    - news
+    right: github
+  components:
+    intro:
+      text: Get Started
+      href: articles/PhyloCactus.html
+    reference:
+      text: Reference Manual
+      href: reference/index.html
+    articles:
+      text: Vignettes
+      menu:
+      - text: 1. Data Assembly & Preparation
+        href: articles/tutorial-1-cactus-phylogeny-prep.html
+      - text: 2. Inference & Dating
+        href: articles/tutorial-2-cactus-phylogeny-inference.html
+      - text: 3. Visualization & IUCN Summary
+        href: articles/tutorial-3-cactus-phylogeny-visualization.html
+      - text: 4. Phylogenetic Validation
+        href: articles/tutorial-4-cactus-phylogeny-validation.html
+      - text: '5. DNA Barcoding: Section Manifest'
+        href: articles/tutorial-5-cactus-phylogeny-barcoding.html
+      - text: 6. Internal Functions Guide
+        href: articles/tutorial-6-cactus-phylogeny-functions.html
+reference:
+- title: Sequence Assemblies & phylotaR Import
+  desc: Setup local taxonomic databases, pull orthologous sequence clusters via `phylotaR`,
+    and retrieve GenBank metadata.
+  contents:
+  - assemble_ingroup_phylotar
+  - assemble_outgroup_phylotar
+  - fetch_genbank_metadata
+- title: Taxonomic Cleaning & Reconciliations
+  desc: Verify nomenclatural spelling, audit duplicates, and reconcile species names
+    against accepted botanical checklists.
+  contents:
+  - clean_taxonomic_names
+  - integrate_and_clean_markers
+- title: DNA Barcoding (section under construction)
+  desc: Molecular diagnostic section. No implementation is shipped while its analytical
+    strategy is being defined; see the section manifest in Tutorial 5.
+  contents:
+  - barcoding
+  - evaluate_dna_barcoding
+- title: Multiple Alignment, DECIPHER Cleaners, & Masking
+  desc: Infer positional homology using `MAFFT` and refine nucleotide alignments with
+    `DECIPHER` automated masking.
+  contents:
+  - run_mafft
+  - run_alignment_pipeline
+  - run_joint_realignment
+- title: Locus Quality Control & Saturation Screening
+  desc: Detect sequence length outliers and evaluate substitution saturation regressions
+    across orthologous markers.
+  contents: run_marker_screening
+- title: Concatenation and Partitioning Maps
+  desc: Concatenate locus alignments end-to-end into a multilocus supermatrix and
+    define partition coordinates.
+  contents:
+  - run_concatenation_pipeline
+  - report_marker_group_coverage
+- title: Phylogenetic Inference & Constrained Search
+  desc: Evaluate nucleotide substitution models (`ModelTest-NG`) and infer maximum-likelihood
+    phylogenies (`RAxML-NG`) guided by constraint scaffolds.
+  contents:
+  - preprocess_partitions
+  - run_modeltest_ng
+  - build_constraint_scaffold
+  - generate_ml_search_script
+  - calculate_ml_tree
+  - calculate_rf_distances
+  - generate_bootstrap_script
+  - run_local_bootstraps
+  - collect_bootstraps
+  - check_bs_convergence
+  - generate_temporal_bootstrap_script
+  - calculate_temporal_bootstraps
+  - map_branch_supports
+  - classify_constrained_nodes
+  - infer_gene_trees
+- title: Divergence Time Estimation & treePL Automation
+  desc: Automate `treePL` penalized-likelihood cross-validation and estimate divergence
+    time chronograms over temporal bootstrap cohorts.
+  contents:
+  - rescale_tree
+  - run_treePL_direct
+  - run_treePL_cv
+  - automate_treePL
+  - report_smoothing_sensitivity
+  - check_calibration_consistency
+  - audit_calibration_support
+  - calibration_tips
+  - report_bound_adherence
+- title: Topological Validation & Tree Space Projections
+  desc: Quantify topological congruence across comparative trees using Robinson-Foulds
+    distances and multidimensional tree-space projections.
+  contents: validate_phylogenies
+- title: Publication Integration & Clade Summaries
+  desc: Map branch support values, collapse poorly supported nodes into soft polytomies
+    (`integrate_publication_tree`), and export figures.
+  contents: integrate_publication_tree
+- title: IUCN Conservation Metadata Integration
+  desc: Extract threat metrics and habitats via `rredlist` and apply standardized
+    IUCN color scales to phylogenetic trees.
+  contents:
+  - get_iucn_data
+  - scale_fill_iucn
+- title: Internal Tools and Visualization Helpers
+  desc: Internal functions for phylogenetic visualization and data preparation.
+  contents:
+  - resolve_run_paths
+  - resolve_rooting_outgroup
+  - root_on_clade
+  - add_clade_labels_by_level
+  - apply_clade_label_layers
+  - assert_constraint_columns
+  - augment_treedata_with_registry
+  - build_annotation_registry
+  - compute_group_nodes
+  - get_annotation_nodes
+  - prepare_tip_annotation
+  - standardize_taxon
+  - get_tree_max_depth
+  - format_age_labels
+  - add_chronogram_axis
+

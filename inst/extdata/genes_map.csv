@@ -1,0 +1,77 @@
+search,replace
+"internal transcribed spacer 1, internal transcribed spacer 2",ITS
+"18S ribosomal RNA, internal transcribed spacer 1, internal transcribed spacer 2",ITS
+"maturase K, matK",matK
+"matK, maturase K",matK
+maturase K,matK
+"trnK, matK",matK-trnK
+"trnK, maturase K, matK",matK-trnK
+"ribulose-1,5-bisphosphate carboxylase",rbcL
+"ribulose-1,5-bisphosphate carboxylase, rbcL",rbcL
+"atpB, rbcL, ribulose-1,5-bisphosphate carboxylase",atpB-rbcL
+"phytochrome C, phyC",phyC
+phytochrome C,phyC
+"phyC, phytochrome C",phyC
+phosphoenolpyruvate carboxylase,pepC_like
+trnS(GCU)-trnG(UUC),trnS-trnG
+trnS-trnG,trnS-trnG
+trnS,trnS-trnG
+trnG,trnS-trnG
+"psbA, psbA-trnH",psbA-trnH
+trnH-psbA,psbA-trnH
+pbsA-trnH,psbA-trnH
+"trnH-psbA, psbA",psbA-trnH
+"psbJ, psbJ-petA",psbJ-petA
+"ndhF, ndhF-rpl32",ndhF-rpl32
+"trnL, trnF",trnL-trnF
+"trnL, trnL-trnF",trnL-trnF
+"trnT, trnL-trnF",trnL-trnF
+"trnL-trnF, phosphoenolpyruvate carboxylase",trnL-trnF
+"trnL, trnL-trnF, trnF",trnL-trnF
+"trnL-trnF, trnF",trnL-trnF
+"trnT, trnF",trnT-trnF
+"trnT, trnL",trnT-trnL
+"trnL, trnT",trnT-trnL
+"psbD, trnT",trnT-psbD
+psbD-trnT,trnT-psbD
+"trnT, trnT-psbD, psbD",trnT-psbD
+petL-psbE,psbE-petL
+internal transcribed spacer 1,ITS
+internal transcribed spacer 2,ITS
+"18S rRNA, 5.8S rRNA, 26S rRNA, ITS1, ITS2",ITS
+"18S rRNA, ITS1, 5.8S rRNA, ITS2, 26S rRNA",ITS
+"18S rRNA, ITS1, 5.8S rRNA, ITS2",ITS
+"18S ribosomal RNA, internal transcribed spacer 1",ITS
+rpl16,rpL16
+"rps3, rpL16",rps3-rpL16
+"rps3, rpl16",rps3-rpL16
+"rps3-rpl16, rpl16",rps3-rpL16
+"rps3-rpl16, rpL16",rps3-rpL16
+rpS16,rps16
+nhx1,NHX
+"rpl14, rpl14-rps8, rps8",rps8-rpl14
+"atpI-atpH, atpI",atpI-atpH
+"atpI, atpI-atpH",atpI-atpH
+"4,5-dioxygenase-like",DODA
+cytochrome P450 76AD1,CYP76AD1
+phosphoenolpyruvate carboxylase-like,pepC_like
+ppc-2,ppc2
+"phosphoenolpyruvate carboxylase, ppc-2",ppc2
+"ppc-2, phosphoenolpyruvate carboxylase",ppc2
+"phosphoenolpyruvate carboxylase, phosphoenolpyruvate carboxylase-like",pepC_like
+"phosphoenolpyruvate carboxylase-like, phosphoenolpyruvate carboxylase",pepC_like
+rbcL,rbcL
+atpB,atpB
+"atpB, rbcL",atpB-rbcL
+"rbcL, atpB",atpB-rbcL
+ppc-1E1a,ppc1E1a
+ppc-1E1d,ppc1E1d
+ppc-1E2,ppc1E2
+"phosphoenolpyruvate carboxylase, ppc-1E1a",ppc1E1a
+"phosphoenolpyruvate carboxylase, ppc-1E1d",ppc1E1d
+"phosphoenolpyruvate carboxylase, ppc-1E2",ppc1E2
+"ppc-1E1a, phosphoenolpyruvate carboxylase",ppc1E1a
+"ppc-1E1d, phosphoenolpyruvate carboxylase",ppc1E1d
+"ppc-1E2, phosphoenolpyruvate carboxylase",ppc1E2
+rpoB,rpoB
+psbB,psbB

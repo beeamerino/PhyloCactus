@@ -1,0 +1,15 @@
+# Override GitHub Linguist language detection for R package
+*.Rd linguist-language=R
+*.bib linguist-documentation
+inst/extdata/* linguist-vendored
+docs/* linguist-vendored
+*.csv linguist-generated
+*.tsv linguist-generated
+*.tree linguist-generated
+*.tre linguist-generated
+*.support linguist-generated
+*.pdf linguist-generated
+*.jpg linguist-generated
+*.png linguist-generated
+*.svg linguist-generated
+

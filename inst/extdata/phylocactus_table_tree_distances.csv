@@ -1,0 +1,43 @@
+analysis_id,analysis_label,metric,tree_1,tree_2,n_common_tips,distance
+A1_species_all4,A1. Shared species across all four trees,RF,Thompson,FocalTree,66,0.42857142857142855
+A1_species_all4,A1. Shared species across all four trees,RF,Amaral,FocalTree,66,0.3492063492063492
+A1_species_all4,A1. Shared species across all four trees,RF,deVos,FocalTree,66,0.2698412698412698
+A1_species_all4,A1. Shared species across all four trees,RF,Amaral,Thompson,66,0.5238095238095238
+A1_species_all4,A1. Shared species across all four trees,RF,deVos,Thompson,66,0.4603174603174603
+A1_species_all4,A1. Shared species across all four trees,RF,deVos,Amaral,66,0.42857142857142855
+A1_species_all4,A1. Shared species across all four trees,DPI,Thompson,FocalTree,66,0.26364465163480133
+A1_species_all4,A1. Shared species across all four trees,DPI,Amaral,FocalTree,66,0.20704486425406493
+A1_species_all4,A1. Shared species across all four trees,DPI,deVos,FocalTree,66,0.15173374708795317
+A1_species_all4,A1. Shared species across all four trees,DPI,Amaral,Thompson,66,0.31588157661530997
+A1_species_all4,A1. Shared species across all four trees,DPI,deVos,Thompson,66,0.3011809427822154
+A1_species_all4,A1. Shared species across all four trees,DPI,deVos,Amaral,66,0.26075730406594033
+A2_species_3,"A2. Shared species across Focal Tree, Thompson, and Amaral",RF,Thompson,FocalTree,551,0.6295620437956204
+A2_species_3,"A2. Shared species across Focal Tree, Thompson, and Amaral",RF,Amaral,FocalTree,551,0.6076642335766423
+A2_species_3,"A2. Shared species across Focal Tree, Thompson, and Amaral",RF,Amaral,Thompson,551,0.6551094890510949
+A2_species_3,"A2. Shared species across Focal Tree, Thompson, and Amaral",DPI,Thompson,FocalTree,551,0.3187950712093938
+A2_species_3,"A2. Shared species across Focal Tree, Thompson, and Amaral",DPI,Amaral,FocalTree,551,0.31239361679978334
+A2_species_3,"A2. Shared species across Focal Tree, Thompson, and Amaral",DPI,Amaral,Thompson,551,0.36500312409271485
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,RF,Thompson,FocalTree,611,0.6776315789473685
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,RF,Amaral,FocalTree,558,0.6486486486486487
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,RF,deVos,FocalTree,81,0.2948717948717949
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,RF,Amaral,Thompson,584,0.7091222030981067
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,RF,deVos,Thompson,87,0.5119047619047619
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,RF,deVos,Amaral,79,0.4342105263157895
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,DPI,Thompson,FocalTree,611,0.35877992670943343
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,DPI,Amaral,FocalTree,558,0.2960371924172929
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,DPI,deVos,FocalTree,81,0.14769698878729584
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,DPI,Amaral,Thompson,584,0.3879466960628798
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,DPI,deVos,Thompson,87,0.3141136025009176
+A3_all_species_in_shared_genera,A3. All species within genera shared across all four trees,DPI,deVos,Amaral,79,0.2521927034368931
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,RF,Thompson,FocalTree,79,0.4473684210526316
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,RF,Amaral,FocalTree,79,0.40789473684210525
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,RF,deVos,FocalTree,79,0.39473684210526316
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,RF,Amaral,Thompson,79,0.5
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,RF,deVos,Thompson,79,0.5131578947368421
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,RF,deVos,Amaral,79,0.4473684210526316
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,DPI,Thompson,FocalTree,79,0.290427109117882
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,DPI,Amaral,FocalTree,79,0.2291832266218456
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,DPI,deVos,FocalTree,79,0.1868093263379343
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,DPI,Amaral,Thompson,79,0.3306046974074549
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,DPI,deVos,Thompson,79,0.3280104959306872
+A4_representative_shared_genera,A4. One representative per shared genus across all four trees,DPI,deVos,Amaral,79,0.2584498570588928

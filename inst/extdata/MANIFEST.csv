@@ -1,0 +1,23 @@
+canonical,legacy_name,role,produced_by,source_path,validator,loaded_by_code,description
+MANIFEST.csv,,manifest,publish_run_outputs.R,,none,TRUE,Declares every file distributed in inst/extdata and where it comes from
+PROVENANCE.csv,,manifest,publish_run_outputs.R,,none,FALSE,Run identity of the last publication: tool versions seeds sizes and checksums
+CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx,,input,curated,,none,TRUE,Caryophyllales.org accepted-name backbone (Korotkova et al. 2021)
+cactus_constraints.csv,,input,curated,,none,TRUE,Taxonomic scaffold mapping species to clades subfamilies and families
+calibrations_bounds.csv,,input,curated,,none,TRUE,Secondary calibration bounds with node_type and provenance per row
+genes_map.csv,,input,curated,,none,TRUE,Locus name harmonisation map for GenBank annotations
+target_genes.txt,,input,curated,,none,TRUE,Target locus list mined by the assembly modules
+manual_exclusions_ingroup.csv,,input,curated,,none,TRUE,Expert-curated ingroup accessions removed before alignment
+manual_exclusions_outgroup.csv,,input,curated,,none,TRUE,Expert-curated outgroup accessions removed before alignment
+reference_amaral_2022.tree,Tree_80MD.tre,input,external,,none,TRUE,Published reference topology (Amaral et al. 2022) for Tutorial 4
+reference_thompson_2024.tree,ultra_cacti_JT.tre,input,external,,none,TRUE,Published reference chronogram (Thompson et al. 2024) for Tutorial 4
+reference_devos_2025_astral.tree,QC.Species_tree_astral.tree,input,external,,none,TRUE,Published ASTRAL-III species tree (de Vos et al. 2025) for Tutorial 4
+reference_zuntini_2024.tree,,input,external,,none,TRUE,Published phylogenomic tree of Cactaceae (Zuntini et al. 2024 Nature) pruned from Kew ToL 4.0 for Tutorial 4
+phylocactus_ml_tree.tree,cactus_support.raxml.support,run_output,Module 9 (map_branch_supports),7_Phylogenetics/cactus_support.raxml.support,tree_unrooted_clade,TRUE,Maximum-likelihood topology with FBP branch support
+phylocactus_chronogram_ml.tree,BestTree_treePL.tree,run_output,Module 10 (automate_treePL),8_Dating/BestTree_treePL.tree,tree_rooted_clade,FALSE,treePL chronogram of the maximum-likelihood tree
+phylocactus_chronogram_hpd.tree,dated_summary_hpd.tree,run_output,Module 10 (TreeAnnotator),8_Dating/dated_summary_hpd.tree,tree_rooted_clade,TRUE,Summary chronogram with 95 percent HPD node ages across dated temporal bootstraps
+phylocactus_table_species.csv,TABLE_species_all_data.csv,run_output,Module 11 (Tutorial 3),9_Visualization/tables/TABLE_species_all_data.csv,table,FALSE,Integrated species registry with sampling taxonomy and IUCN attributes
+phylocactus_table_markers.csv,TABLE_marker_statistics.csv,run_output,Module 6 (run_concatenation_pipeline),6_Concatenated/final_tables/TABLE_marker_statistics.csv,table,TRUE,Per-locus statistics of the final supermatrix
+phylocactus_table_marker_ranges.tsv,TABLE_marker_ranges.tsv,run_output,Module 6 (run_concatenation_pipeline),6_Concatenated/final_tables/TABLE_marker_ranges.tsv,table,TRUE,Partition coordinate boundaries of the final supermatrix
+phylocactus_table_tree_distances.csv,TABLE_pairwise_tree_distances_main.csv,run_output,Module 13 (validate_phylogenies),10_Validation/tables/TABLE_pairwise_tree_distances_main.csv,table,FALSE,Pairwise Robinson-Foulds distances among comparative topologies
+phylocactus_figure_ml_phylogeny.pdf,Extended_ML_Phylogeny.pdf,download_only,Module 11 (Tutorial 3),9_Visualization/figures/Extended_ML_Phylogeny.pdf,none,FALSE,Annotated maximum-likelihood phylogeny offered as a download from the vignettes
+phylocactus_figure_chronogram.pdf,Extended_Chronogram.pdf,download_only,Module 11 (Tutorial 3),9_Visualization/figures/Extended_Chronogram.pdf,none,FALSE,Annotated chronogram offered as a download from the vignettes

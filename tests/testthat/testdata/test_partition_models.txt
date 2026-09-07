@@ -1,0 +1,2 @@
+GTR+G, part1 = 1-10
+HKY+I, part2 = 11-20

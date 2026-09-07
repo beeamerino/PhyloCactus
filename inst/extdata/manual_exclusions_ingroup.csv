@@ -1,0 +1,55 @@
+cluster_id,sid,reason
+2,HO058709.1,manual conflict resolution
+3,HO058696.1,manual conflict resolution
+6,OK206451.1,manual conflict resolution
+6,OK206462.1,manual conflict resolution
+6,OK206463.1,manual conflict resolution
+6,OK206464.1,manual conflict resolution
+3,AF267935.1,manual conflict resolution
+4,AF267935.1,manual conflict resolution
+24,AF267935.1,manual conflict resolution
+3,AF267974.1,manual conflict resolution
+4,AF267974.1,manual conflict resolution
+9,AY545345.1,manual conflict resolution
+13,AY545345.1,manual conflict resolution
+24,AF267974.1,manual conflict resolution
+0,MK284146.1,manual conflict resolution
+1,MK284146.1,manual conflict resolution
+3,MK449178.1,manual conflict resolution
+4,MK449178.1,manual conflict resolution
+6,MK449024.1,manual conflict resolution
+7,KC777010.1,manual conflict resolution
+10,MK284146.1,manual conflict resolution
+11,KC777010.1,manual conflict resolution
+19,MK449024.1,manual conflict resolution
+24,MK449178.1,manual conflict resolution
+45,KC777010.1,manual conflict resolution
+83,MK449024.1,manual conflict resolution
+2,PV916037.1,manual conflict resolution
+5,PV916037.1,manual conflict resolution
+2,JX289547.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289551.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289557.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289572.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289581.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289588.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289591.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289599.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289604.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289605.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289609.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289628.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289666.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289762.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289763.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,JX289800.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,AJ829732.2,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,AJ845125.2,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,AJ973640.2,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,AM050550.2,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,AM050552.2,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,AM050553.2,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,AF328665.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,AF328666.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+2,AY181576.1,ITS not homologous to the cactus locus (2026-09-01 audit)
+6,MT370606.1,chimeric matK: only the 3' 150 bp are matK (2026-09-01 audit)

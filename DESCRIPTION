@@ -1,0 +1,61 @@
+Package: PhyloCactus
+Type: Package
+Title: Phylogenetic Inference and Divergence Time Estimation Pipeline for Cactaceae
+Version: 0.4.4
+Authors@R: c(
+    person("Beatriz M.", "Meriño", email = "b.vergara.m@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9518-2331")),
+    person("Tania", "Hernández-Hernández", role = "ctb"),
+    person("M.", "Pillet", role = "ctb"),
+    person("Pablo C.", "Guerrero", email = "pabloguerrero@udec.cl", role = "aut")
+  )
+Description: Provides a reproducible workflow for reconstructing Cactaceae phylogenies from DNA sequence data. The pipeline automates GenBank sequence retrieval, multiple-sequence alignment, substitution model selection, saturation assessment, supermatrix construction, maximum-likelihood phylogenetic inference using RAxML-NG, divergence time estimation with treePL, and tree-space analyses for assessing phylogenetic stability across bootstrap replicates.
+URL: https://github.com/beeamerino/PhyloCactus, https://beeamerino.github.io/PhyloCactus, https://beeamerino.github.io/PhyloCactus/
+BugReports: https://github.com/beeamerino/PhyloCactus/issues
+License: GPL (>= 3)
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports:
+    tidytree,
+    grDevices,
+    grid,
+    stats,
+    tools,
+    utils,
+    methods,
+    ape,
+    phangorn,
+    DECIPHER,
+    Biostrings,
+    dplyr,
+    tidyr,
+    stringr,
+    purrr,
+    readr,
+    readxl,
+    ggplot2,
+    ggtree,
+    patchwork,
+    TreeDist,
+    ggrepel,
+    cowplot,
+    tibble,
+    seqinr,
+    phylotaR
+Suggests:
+    testthat (>= 3.0.0),
+    withr,
+    phytools,
+    forcats,
+    scales,
+    taxize,
+    rredlist,
+    knitr,
+    rmarkdown,
+    openxlsx,
+    pkgdown,
+    treeio
+VignetteBuilder: knitr
+Remotes: ropensci/phylotaR
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.0
