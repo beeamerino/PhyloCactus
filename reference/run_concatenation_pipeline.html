@@ -36,7 +36,7 @@ PartitionFinder2 and MrBayes are exported separately under their program names."
     <li><a class="dropdown-item" href="../articles/tutorial-3-cactus-phylogeny-visualization.html">3. Visualization &amp; IUCN Summary</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-4-cactus-phylogeny-validation.html">4. Phylogenetic Validation</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding: Section Manifest</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Internal Functions Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Core Functions Dictionary</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><a class="external-link nav-link" href="https://github.com/beeamerino/PhyloCactus/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
@@ -86,7 +86,7 @@ and a NEXUS SETS block (<code>PARTITION_nexus_charset.nex</code>). Configuration
 
 
 <dt id="arg-outgroup-pattern">outgroup_pattern<a class="anchor" aria-label="anchor" href="#arg-outgroup-pattern"></a></dt>
-<dd><p>Character or <code>NULL</code>. Regular expression identifying outgroup terminals. When supplied, <code><a href="report_marker_group_coverage.html">report_marker_group_coverage()</a></code> runs before concatenation and its table is written to <code>logs_and_qc/SUPP_TABLE_marker_group_coverage.csv</code>. Defaults to <code>NULL</code>.</p></dd>
+<dd><p>Character, named character vector, or <code>NULL</code>. Regular expression identifying outgroup terminals, or a named character vector of expressions (e.g. <code>c(Anacampserotaceae = "...", Portulacaceae = "...", Talinaceae = "...")</code>) to additionally compute per-group coverage columns. When supplied, <code><a href="report_marker_group_coverage.html">report_marker_group_coverage()</a></code> runs before concatenation and its table is written to <code>logs_and_qc/SUPP_TABLE_marker_group_coverage.csv</code>. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-min-coverage">min_coverage<a class="anchor" aria-label="anchor" href="#arg-min-coverage"></a></dt>

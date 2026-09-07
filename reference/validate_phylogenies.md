@@ -51,8 +51,10 @@ validate_phylogenies(
 
 - pruning_strategy:
 
-  Character. Strategy for pruning trees before metric computation.
-  Defaults to `"common_set"`.
+  Character. Strategy for pruning trees before metric computation. Under
+  `"common_set"`, the shared intersection across all trees is used for
+  the multidimensional scaling (MDS) projection, whereas pairwise tables
+  retain all shared tips between each pair. Defaults to `"common_set"`.
 
 - rooting_genus:
 
@@ -73,8 +75,9 @@ validate_phylogenies(
 
 ## Value
 
-A data frame containing pairwise tree distances, RF metrics, and MDS
-coordinates across evaluated trees.
+A named list containing file paths for generated tables (`tables`),
+figures (`figures`), trees (`trees`), and the combined ggplot object
+(`plot`).
 
 ## References
 

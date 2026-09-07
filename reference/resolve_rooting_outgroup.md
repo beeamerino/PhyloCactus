@@ -8,7 +8,7 @@ the root, returning them as a vector suitable for
 ## Usage
 
 ``` r
-resolve_rooting_outgroup(tip_labels, pattern = "^Portulaca_")
+resolve_rooting_outgroup(tip_labels, pattern = "^(Portulaca|Talinum|Talinella)_")
 ```
 
 ## Arguments
@@ -21,8 +21,8 @@ resolve_rooting_outgroup(tip_labels, pattern = "^Portulaca_")
 - pattern:
 
   Character. Regular expression matched against `tip_labels`. Defaults
-  to `"^Portulaca_"`, the Portulacaceae sample of the reference
-  Cactaceae dataset.
+  to `"^(Portulaca|Talinum|Talinella)_"`, matching the outgroup lineages
+  that carry the root in the reference Cactaceae dataset.
 
 ## Value
 

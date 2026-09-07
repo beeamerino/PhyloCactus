@@ -144,7 +144,7 @@ Bioconductor:
 |:---|:---|
 | **remotes** | `phylotaR` |
 | **Bioconductor** | `DECIPHER`, `Biostrings` |
-| **CRAN** | `ape`, `ggplot2`, `dplyr`, `tidyr`, `readr`, `stringr`, `purrr`, `rredlist`, `forcats`, `scales`, `RColorBrewer` |
+| **CRAN** | `ape`, `ggplot2`, `dplyr`, `tidyr`, `readr`, `stringr`, `purrr`, `rredlist`, `forcats`, `scales` |
 
 Install the required **Bioconductor** packages using:
 

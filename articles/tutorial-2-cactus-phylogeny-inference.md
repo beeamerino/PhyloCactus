@@ -309,10 +309,14 @@ individual tree, while adding workers reduces the number of rounds, and
 the second lever dominates once each worker already holds an efficient
 thread count. A search of 50 starting trees on one worker executes 50
 rounds; the same 50 trees across 25 workers execute two. In a reference
-run of this dataset on an Apple M2 Pro (8 threads, `n_workers = 1`, 1023
-terminals, 12806 sites, 5732 patterns), the 50 starting trees required
-47115 s, approximately 938 s per tree, essentially all of it
-attributable to sequential rounds rather than to per-tree cost.
+single-worker benchmark run on an Apple M2 Pro (8 threads,
+`n_workers = 1`), 50 starting trees required 47115 s, approximately 938
+s per tree, essentially all of it attributable to sequential rounds
+rather than to per-tree cost. In contrast, running across 25 parallel
+workers on an AMD EPYC 9754 server (75 threads, 3 threads per worker) on
+the full production supermatrix (1023 taxa, 12806 sites, 5954 patterns,
+11 partitions) completed 50 starting trees in two rounds in only 2393 s
+(~40 minutes).
 
 Passing `n_workers = NULL` derives the worker count automatically,
 constrained to a divisor of the starting tree count so that no worker

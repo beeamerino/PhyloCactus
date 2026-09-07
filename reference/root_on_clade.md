@@ -5,10 +5,10 @@ against the tree's *current* root. `RAxML-NG` writes unrooted Newick
 with a basal trifurcation, and the terminals of the rooting clade
 routinely fall on more than one branch of that trifurcation, so
 [`ape::root()`](https://rdrr.io/pkg/ape/man/root.html) does not see them
-as a clade and does not place the root where it was asked to. The
-reference `cactus_support.raxml.support` is exactly this case:
-`{Portulaca | rest}` is a valid bipartition of the unrooted topology,
-yet three *Portulaca* terminals sit outside the largest basal branch.
+as a clade and does not place the root where it was asked to. For
+example, `{outgroup | ingroup}` is a valid bipartition of the unrooted
+topology, yet several outgroup terminals may sit outside the largest
+basal branch.
 
 ## Usage
 

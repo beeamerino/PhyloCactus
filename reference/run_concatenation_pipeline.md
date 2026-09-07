@@ -38,8 +38,11 @@ run_concatenation_pipeline(
 
 - outgroup_pattern:
 
-  Character or `NULL`. Regular expression identifying outgroup
-  terminals. When supplied,
+  Character, named character vector, or `NULL`. Regular expression
+  identifying outgroup terminals, or a named character vector of
+  expressions (e.g.
+  `c(Anacampserotaceae = "...", Portulacaceae = "...", Talinaceae = "...")`)
+  to additionally compute per-group coverage columns. When supplied,
   [`report_marker_group_coverage()`](https://beeamerino.github.io/PhyloCactus/reference/report_marker_group_coverage.md)
   runs before concatenation and its table is written to
   `logs_and_qc/SUPP_TABLE_marker_group_coverage.csv`. Defaults to

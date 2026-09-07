@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Tutorial 6: Function Reference &amp; Dictionary • PhyloCactus</title>
+<title>Tutorial 6: Core Pipeline Functions &amp; Methodological Dictionary • PhyloCactus</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tutorial 6: Function Reference &amp; Dictionary">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tutorial 6: Core Pipeline Functions &amp; Methodological Dictionary">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -44,7 +44,7 @@
     <li><a class="dropdown-item" href="../articles/tutorial-3-cactus-phylogeny-visualization.html">3. Visualization &amp; IUCN Summary</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-4-cactus-phylogeny-validation.html">4. Phylogenetic Validation</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding: Section Manifest</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Internal Functions Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Core Functions Dictionary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -63,7 +63,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Tutorial 6: Function Reference &amp; Dictionary</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Tutorial 6: Core Pipeline Functions &amp; Methodological Dictionary</h1>
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
@@ -78,34 +78,41 @@ Meriño</h4>
 <div class="section level2">
 <h2 id="overview-and-methodological-dictionary">Overview and Methodological Dictionary<a class="anchor" aria-label="anchor" href="#overview-and-methodological-dictionary"></a>
 </h2>
-<p>Following the step-by-step analytical modules presented in Tutorials
-1 through 5, this reference vignette establishes a complete dictionary
-of the core R functions implemented in <code>PhyloCactus</code>.</p>
+<p>Following the step-by-step analytical workflows presented in
+Tutorials 1 through 5, this reference guide synthesizes the core
+pipeline functions and methodological principles implemented in
+<code>PhyloCactus</code>. While the complete technical documentation of
+all exported functions, parameters, and input/output signatures is
+provided in the standard R package manual pages (<code>pkgdown</code>
+reference section), this dictionary highlights the primary high-level
+modules that drive the sequential workflow, explaining their biological
+motivation and methodological rationale.</p>
 <div class="section level3">
 <h3 id="narrative-framework-of-the-reference-suite">Narrative Framework of the Reference Suite<a class="anchor" aria-label="anchor" href="#narrative-framework-of-the-reference-suite"></a>
 </h3>
 <ul>
 <li>
-<strong>Where are we?</strong> Having assembled supermatrices,
-inferred maximum-likelihood phylogenies, estimated divergence times with
-<code>treePL</code>, and validated topologies against external
-backbones, we require an organized reference dictionary detailing
-function signatures and biological motivations.</li>
+<strong>Where are we?</strong> Having assembled multilocus
+supermatrices, inferred maximum-likelihood phylogenies, estimated
+divergence times with <code>treePL</code>, and validated topologies
+against external backbones, we provide a unified dictionary detailing
+core pipeline functions and their evolutionary context.</li>
 <li>
-<strong>Why are we here?</strong> Complex computational pipelines
-require explicit documentation linking software parameters directly to
-underlying evolutionary mechanics, such as mitigating long-branch
-attraction (LBA), enforcing positional homology, and accounting for
-incomplete lineage sorting (ILS).</li>
+<strong>Why are we here?</strong> Complex plant phylogenetic
+pipelines require explicit documentation linking software parameters
+directly to underlying evolutionary mechanics, such as mitigating
+long-branch attraction (LBA), enforcing positional homology, and
+accounting for incomplete lineage sorting (ILS).</li>
 <li>
-<strong>What will we achieve?</strong> A complete, reproducible
-function reference mapping sequence mining, alignment quality control,
+<strong>What will we achieve?</strong> A structured methodological
+dictionary mapping sequence mining, alignment quality control,
 substitution model evaluation, maximum-likelihood search, temporal
-calibration, and visualization utilities.</li>
+calibration, and comparative validation modules.</li>
 <li>
 <strong>What comes next?</strong> Users can query individual
-function manual pages (<code>?function_name</code>) or incorporate
-specific functions into customized plant phylogenetic pipelines.</li>
+function manual pages (e.g., <code><a href="../reference/run_concatenation_pipeline.html">?run_concatenation_pipeline</a></code>)
+or consult the <code>pkgdown</code> reference index for detailed
+parameter definitions and audit safeguards.</li>
 </ul>
 </div>
 </div>
@@ -306,8 +313,8 @@ maximum-likelihood tree.</td>
 <tr class="odd">
 <td align="left"><code><a href="../reference/rescale_tree.html">rescale_tree()</a></code></td>
 <td align="left">Multiplies tree edge lengths by a scaling factor prior
-to penalized likelihood dating (<code>treePL</code>) to prevent
-numerical underflow.</td>
+to penalized likelihood dating (<code>treePL</code>) to improve
+numerical conditioning of rate parameter optimization.</td>
 <td align="left">Sanderson (2002)</td>
 </tr>
 <tr class="even">

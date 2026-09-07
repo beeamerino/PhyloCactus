@@ -197,17 +197,18 @@ disagreement.
 **Rooting note:**
 [`validate_phylogenies()`](https://beeamerino.github.io/PhyloCactus/reference/validate_phylogenies.md)
 roots every tree on *Leuenbergeria*, which differs deliberately from the
-Portulacaceae rooting used in Module 10. Comparison requires a shared
-taxon set, so the function first restricts every tree to **Cactaceae**,
-and that filter removes the Portulacaceae and Anacampserotaceae
-terminals that carry the root in the dating pipeline. *Leuenbergeria* is
-the earliest-diverging lineage retained, which makes it the closest
-available approximation to the root position the full tree imposes. The
-genus is exposed as `rooting_genus` for datasets sampled differently,
-and trees lacking it are left unrooted and flagged in
-`SUPP_rooting_summary`. Robinson-Foulds distances are computed on
-unrooted bipartitions, so this choice affects the tree-space projection
-and the reported rooting summary rather than the distances themselves.
+outgroup rooting (Talinaceae and Portulacaceae) used in Module 10.
+Comparison requires a shared taxon set, so the function first restricts
+every tree to **Cactaceae**, and that filter removes the Talinaceae,
+Portulacaceae, and Anacampserotaceae terminals that carry the root in
+the dating pipeline. *Leuenbergeria* is the earliest-diverging lineage
+retained, which makes it the closest available approximation to the root
+position the full tree imposes. The genus is exposed as `rooting_genus`
+for datasets sampled differently, and trees lacking it are left unrooted
+and flagged in `SUPP_rooting_summary`. Robinson-Foulds distances are
+computed on unrooted bipartitions, so this choice affects the tree-space
+projection and the reported rooting summary rather than the distances
+themselves.
 
 **Standardized benchmark comparison:** To conduct an objective,
 standardized, and honest comparative validation across alternative

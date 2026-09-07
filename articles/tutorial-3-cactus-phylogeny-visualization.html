@@ -44,7 +44,7 @@
     <li><a class="dropdown-item" href="../articles/tutorial-3-cactus-phylogeny-visualization.html">3. Visualization &amp; IUCN Summary</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-4-cactus-phylogeny-validation.html">4. Phylogenetic Validation</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding: Section Manifest</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Internal Functions Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Core Functions Dictionary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -405,24 +405,34 @@ time estimation, and biological metadata integration, this module
 presents the complete analytical synthesis of
 <code>PhyloCactus</code>.</p>
 <p>To establish a clear scientific progression, the visualizations are
-structured into five consecutive analytical parts: 1. <strong>Molecular
-Dataset and Alignment Properties (Figures 1 to 3)</strong>: Taxonomic
-marker representation, locus completeness per species, and locus
-occupancy heatmaps. 2. <strong>Supermatrix Concatenation Structure
-(Figures 4 to 5)</strong>: Partition architecture, boundary coordinates,
-and parsimony-informative site contributions. 3. <strong>Inferred
-Phylogeny and Divergence Timescale (Figures 6 to 9)</strong>:
-Maximum-likelihood topology with Felsenstein’s Bootstrap Proportions
-(FBP), high-resolution uncollapsed A0 poster, time-calibrated chronogram
-with 95% HPD intervals, and extended chronogram poster. 4.
+structured into five consecutive analytical parts:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Molecular Dataset and Alignment Properties (Figures 1 to
+3)</strong>: Taxonomic marker representation, locus completeness per
+species, and locus occupancy heatmaps.</li>
+<li>
+<strong>Supermatrix Concatenation Structure (Figures 4 to
+5)</strong>: Partition architecture, boundary coordinates, and
+parsimony-informative site contributions.</li>
+<li>
+<strong>Inferred Phylogeny and Divergence Timescale (Figures 6 to
+9)</strong>: Maximum-likelihood topology with Felsenstein’s Bootstrap
+Proportions (FBP), high-resolution uncollapsed A0 poster,
+time-calibrated chronogram with 95% HPD intervals, and extended
+chronogram poster.</li>
+<li>
 <strong>Taxonomic Reconciliation and Species Cadastre (Figure
 10)</strong>: Global species accounting comparing the taxonomic
 checklist, supermatrix sampling, collapsed duplicates, and phylogenetic
-placement. 5. <strong>IUCN Conservation and Macroevolutionary Syntheses
-(Figures 11 to 17)</strong>: Extinction risk distributions, molecular
-sampling completeness across threat categories, conservation
-prioritization of unsampled gaps, national endemism rankings, threat
-profiles, and ecological habitat associations.</p>
+placement.</li>
+<li>
+<strong>IUCN Conservation and Macroevolutionary Syntheses (Figures
+11 to 17)</strong>: Extinction risk distributions, molecular sampling
+completeness across threat categories, conservation prioritization of
+unsampled gaps, national endemism rankings, threat profiles, and
+ecological habitat associations.</li>
+</ol>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
@@ -1150,12 +1160,9 @@ to Tutorial 4: Phylogenetic Validation and Comparative Analyses</a></p>
 diversity in Cactaceae show low ecological representation within
 protected areas. <em>Biological Conservation</em>, 273, 109677. <a href="https://doi.org/10.1016/j.biocon.2022.109677" class="external-link uri">https://doi.org/10.1016/j.biocon.2022.109677</a>
 </li>
-<li>Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A.,
-Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker, A.,
-Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,
-Nyffeler, R., Sánchez, D., Schlumpberger, B. O., &amp; Berendsohn, W. G.
-2021. Cactaceae at Caryophyllales.org - a dynamic online species
-checklist. <em>PhytoKeys</em>, 186, 7-134. <a href="https://doi.org/10.3897/phytokeys.186.73233" class="external-link uri">https://doi.org/10.3897/phytokeys.186.73233</a>
+<li>Korotkova <em>et al</em>. 2021. Cactaceae at Caryophyllales.org - A
+dynamic online species-level taxonomic backbone for the family.
+<em>Willdenowia</em>, 51(2), 251–270. <a href="https://doi.org/10.3372/wi.51.51208" class="external-link uri">https://doi.org/10.3372/wi.51.51208</a>
 </li>
 <li>Thompson <em>et al</em>. 2024. Identifying the multiple drivers of
 cactus diversification. <em>Nature Communications</em>, 15(1), 7114. <a href="https://doi.org/10.1038/s41467-024-51666-2" class="external-link uri">https://doi.org/10.1038/s41467-024-51666-2</a>

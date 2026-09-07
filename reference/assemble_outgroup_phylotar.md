@@ -1,11 +1,11 @@
 # Assemble Outgroup Sequence Clusters via phylotaR
 
 Retrieves orthologous sequence clusters for specified outgroup lineages
-(e.g., *Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*) matching
-the locus target constraints defined for the focal ingroup. Outer
-reference sampling provides phylogenetically informative root positions
-necessary for maximum-likelihood tree search and divergence time
-estimation.
+(e.g., *Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*, *Talinum*,
+*Talinella*) matching the locus target constraints defined for the focal
+ingroup. Outer reference sampling provides phylogenetically informative
+root positions necessary for maximum-likelihood tree search and
+divergence time estimation.
 
 ## Usage
 
@@ -16,7 +16,7 @@ assemble_outgroup_phylotar(
   genes_map_file = NULL,
   manual_exclusions_file = NULL,
   apply_manual_exclusions = TRUE,
-  outgroups = c("107598", "107617", "107583", "3582"),
+  outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"),
   force_download = FALSE,
   out_dir = "1_phylotaR_out_Outgroup"
 )
@@ -54,7 +54,7 @@ assemble_outgroup_phylotar(
 - outgroups:
 
   Character vector of NCBI Taxonomy IDs for outgroup lineages. Defaults
-  to `c("107598", "107617", "107583", "3582")`.
+  to `c("107598", "107617", "107583", "3582", "107600", "108056")`.
 
 - force_download:
 

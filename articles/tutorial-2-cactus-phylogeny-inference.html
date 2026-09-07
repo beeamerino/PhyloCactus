@@ -44,7 +44,7 @@
     <li><a class="dropdown-item" href="../articles/tutorial-3-cactus-phylogeny-visualization.html">3. Visualization &amp; IUCN Summary</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-4-cactus-phylogeny-validation.html">4. Phylogenetic Validation</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding: Section Manifest</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Internal Functions Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Core Functions Dictionary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -369,11 +369,14 @@ individual tree, while adding workers reduces the number of rounds, and
 the second lever dominates once each worker already holds an efficient
 thread count. A search of 50 starting trees on one worker executes 50
 rounds; the same 50 trees across 25 workers execute two. In a reference
-run of this dataset on an Apple M2 Pro (8 threads,
-<code>n_workers = 1</code>, 1023 terminals, 12806 sites, 5732 patterns),
-the 50 starting trees required 47115 s, approximately 938 s per tree,
-essentially all of it attributable to sequential rounds rather than to
-per-tree cost.</p>
+single-worker benchmark run on an Apple M2 Pro (8 threads,
+<code>n_workers = 1</code>), 50 starting trees required 47115 s,
+approximately 938 s per tree, essentially all of it attributable to
+sequential rounds rather than to per-tree cost. In contrast, running
+across 25 parallel workers on an AMD EPYC 9754 server (75 threads, 3
+threads per worker) on the full production supermatrix (1023 taxa, 12806
+sites, 5954 patterns, 11 partitions) completed 50 starting trees in two
+rounds in only 2393 s (~40 minutes).</p>
 <p>Passing <code>n_workers = NULL</code> derives the worker count
 automatically, constrained to a divisor of the starting tree count so
 that no worker sits idle in the final round. A worker count that does

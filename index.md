@@ -40,11 +40,11 @@ standardized 4-stage pipeline. The package automates orthology-based
 sequence retrieval (`phylotaR`), alignment of positional homology
 (`MAFFT`), objective quality control masking (`DECIPHER`), mutational
 saturation screening, substitution model evaluation (`ModelTest-NG`),
-constrained maximum-likelihood topology inference (`RAxML-NG`), Transfer
-Bootstrap Expectation support mapping (`TBE`), penalized likelihood
-chronogram estimation (`treePL`), IUCN Red List metadata enrichment
-(`rredlist`), and multispecies coalescent tree-space validation
-(`ASTRAL-III`).
+constrained maximum-likelihood topology inference (`RAxML-NG`),
+Felsenstein Bootstrap Proportions support mapping (`FBP`), penalized
+likelihood chronogram estimation (`treePL`), IUCN Red List metadata
+enrichment (`rredlist`), and multispecies coalescent tree-space
+validation (`ASTRAL-III`).
 
 ## Four-Stage Analytical Architecture
 
@@ -65,9 +65,9 @@ PhyloCactus Workflow Architecture
     species nomenclature against the Caryophyllales.org checklist
     (`CactaceaeFullList_accepted.csv`; Korotkova *et al*. 2021),
     executes joint alignment of ingroup (**Cactaceae**) and outgroup
-    (*Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*) markers, and
-    concatenates locus alignments into partitioned supermatrices with
-    explicit coordinate boundaries.
+    (*Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*, *Talinum*,
+    *Talinella*) markers, and concatenates locus alignments into
+    partitioned supermatrices with explicit coordinate boundaries.
 
 2.  **Stage 2: Phylogenetic Inference and Dating (Modules 7 to 10)**  
     Evaluates partition-specific nucleotide substitution models using
@@ -77,18 +77,19 @@ PhyloCactus Workflow Architecture
     `RAxML-NG` under topological constraint scaffolds
     (`cactus_constraints.csv`) enforcing higher-level clade monophyly
     (**Cactoideae**, **Opuntioideae**, **Leuenbergeria**, **Pereskia**).
-    Maps clade support via Transfer Bootstrap Expectation (`TBE`) to
-    handle missing data, generates topologically constrained temporal
-    bootstrap alignments, and estimates ultrametric chronograms using
-    penalized likelihood in `treePL` guided by secondary calibration
-    boundaries (`calibrations_bounds.csv`).
+    Maps primary clade support via Felsenstein Bootstrap Proportions
+    (`FBP`), evaluates Transfer Bootstrap Expectation (`TBE`) as a
+    complementary diagnostic metric, generates topologically constrained
+    temporal bootstrap alignments, and estimates ultrametric chronograms
+    using penalized likelihood in `treePL` guided by secondary
+    calibration boundaries (`calibrations_bounds.csv`).
 
 3.  **Stage 3: Visualization and Metadata Integration (Modules 11 and
     12)**  
     Enriches the phylogenetic framework with species-level conservation
     attributes retrieved automatically from the IUCN Red List database
-    via `rredlist`. Collapses weakly supported internal nodes (TBE \<
-    0.70) into soft politomies to prevent over-interpreting unresolved
+    via `rredlist`. Collapses weakly supported internal nodes (FBP
+    \< 70) into soft polytomies to prevent over-interpreting unresolved
     rapid radiation nodes, and renders publication-ready phylogenetic
     figures, chronograms, and conservation cadastres using `ggplot2`.
 
@@ -153,7 +154,7 @@ binaries, which must be installed and available in your system `$PATH`:
 | [`BLAST+`](https://www.ncbi.nlm.nih.gov/books/NBK279690/) | Local sequence similarity searching & cluster identification | Camacho *et al*. (2009) *BMC Bioinformatics* |
 | [`MAFFT`](https://mafft.cbrc.jp/alignment/software/) | Multiple sequence alignment & positional homology | Katoh & Standley (2013) *Mol. Biol. Evol.* |
 | [`ModelTest-NG`](https://github.com/ddarriba/modeltest) | Partitioned substitution model selection under AICc | Darriba *et al*. (2020) *Mol. Biol. Evol.* |
-| [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | Constrained maximum-likelihood tree search & TBE support | Kozlov *et al*. (2019) *Bioinformatics* |
+| [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | Constrained maximum-likelihood tree search & FBP/TBE support | Kozlov *et al*. (2019) *Bioinformatics* |
 | [`treePL`](https://github.com/blackrim/treePL) | Penalized likelihood divergence time estimation | Smith & O’Meara (2012) *Bioinformatics* |
 
 Ensure these executables are accessible by adding their installation
@@ -167,10 +168,10 @@ Learn `PhyloCactus` through the sequential tutorial suite:
 |:---|:---|
 | [**Get Started**](https://beeamerino.github.io/PhyloCactus/articles/PhyloCactus.html) | Package overview, design principles, and dependency configuration |
 | [**Tutorial 1**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) | Stage 1: Data Assembly, Alignment, Saturation Screening, & Supermatrix Concatenation |
-| [**Tutorial 2**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html) | Stage 2: Substitution Modeling, Constrained ML Search, TBE Support, & treePL Dating |
+| [**Tutorial 2**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html) | Stage 2: Substitution Modeling, Constrained ML Search, FBP Support, & treePL Dating |
 | [**Tutorial 3**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html) | Stage 3: IUCN Red List Enrichment, Soft Polytomy Collapsing, & Figure Rendering |
 | [**Tutorial 4**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html) | Stage 4: ASTRAL-III Coalescence, Robinson-Foulds Distances, & MDS Tree-Space Validation |
-| [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html) | Comprehensive dictionary of package functions and analytical signatures |
+| [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html) | Core dictionary of package functions and analytical signatures |
 
 ## Citation
 

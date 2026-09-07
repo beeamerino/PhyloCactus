@@ -147,11 +147,11 @@ Dictionary](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-
 
 Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A.,
 Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker, A.,
-Köhler, M., Luna, R., Machado, M., Merclinger, M., Nyffeler, R.,
-Salvador-Montiel, S., Sánchez, D., Schlumpberger, B. O., & Berendsohn,
-W. G. (2021). Cactaceae at Caryophyllales.org, a dynamic online
-species-level taxonomic backbone for the family. *Willdenowia*, 51(2),
-251-270. <https://doi.org/10.3372/wi.51.51208>
+Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,
+Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G.
+(2021). Cactaceae at Caryophyllales.org, a dynamic online species-level
+taxonomic backbone for the family. *Willdenowia*, 51(2), 251-270.
+<https://doi.org/10.3372/wi.51.51208>
 
 Wright, E. S. (2016). Using DECIPHER v2.0 to analyze big biological
 sequence data in R. *The R Journal*, 8(1), 352-359.

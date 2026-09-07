@@ -415,22 +415,20 @@ in the final multilocus dataset.
 
 The
 [`run_marker_screening()`](https://beeamerino.github.io/PhyloCactus/reference/run_marker_screening.md)
-function performs an automated assessment of the ingroup alignments
-generated in Module 2. Passing `outgroup_folder` makes the
-sequence-count criterion joint: a locus is retained when the ingroup and
-outgroup counts together reach `min_nseq_to_retain`, provided the
-ingroup alone reaches `min_nseq_ingroup`. Every other criterion stays on
-the ingroup, because a distant outgroup shifts the saturation regression
-and those diagnostics would then describe a different quantity. Without
-the joint count, `trnT-psbD` was rejected at 52 ingroup sequences while
-the outgroup held 49 more, all *Portulaca*, and the locus carrying the
-deepest outgroup coverage of the dataset was discarded by a threshold
-that could not see it. First, substitution saturation is evaluated using
-regression based statistics to identify loci in which multiple
-substitutions may have eroded the underlying phylogenetic signal. The
-function then detects sequence length outliers using the interquartile
-range (IQR), identifying sequences that may represent incomplete
-assemblies, sequencing artifacts, or annotation errors.
+function performs an automated quality assessment of the ingroup
+alignments generated in Module 2. Passing `outgroup_folder` records
+`n_outgroup` and `n_total` in the summary table for diagnostic
+visibility, though retention decisions remain strictly based on ingroup
+thresholds to prevent distant outgroup divergence from distorting
+saturation regressions. For example, `trnT-psbD` possessed 50 ingroup
+sequences and was filtered out by `min_nseq_to_retain = 100`, despite
+carrying extensive outgroup representation. First, substitution
+saturation is evaluated using regression-based statistics to identify
+loci in which multiple substitutions may have eroded the underlying
+phylogenetic signal. The function then detects sequence length outliers
+using the interquartile range (IQR), identifying sequences that may
+represent incomplete assemblies, sequencing artifacts, or annotation
+errors.
 
 Based on user defined thresholds, loci and sequences that fail these
 quality criteria are excluded from subsequent analyses. The function
@@ -700,7 +698,7 @@ run_concatenation_pipeline(
   input_dir = "5_MAFFT_Cleaned/aligned_markers",
   output_dir = "6_Concatenated",
   outgroup_pattern = "^(Anacampseros|Grahamia|Talinopsis|Portulaca|Talinum|Talinella)_",
-  exclude_markers = "phyC"   # NULL para conservar todos los loci
+  exclude_markers = "phyC"   # NULL to retain all loci
 )
 ```
 

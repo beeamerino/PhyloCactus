@@ -14,5 +14,5 @@
   Comparisons](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.md):
 - [Tutorial 5: DNA Barcoding, Section
   Manifest](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.md):
-- [Tutorial 6: Function Reference &
+- [Tutorial 6: Core Pipeline Functions & Methodological
   Dictionary](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.md):

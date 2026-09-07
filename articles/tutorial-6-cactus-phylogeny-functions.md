@@ -1,30 +1,37 @@
-# Tutorial 6: Function Reference & Dictionary
+# Tutorial 6: Core Pipeline Functions & Methodological Dictionary
 
 ## Overview and Methodological Dictionary
 
-Following the step-by-step analytical modules presented in Tutorials 1
-through 5, this reference vignette establishes a complete dictionary of
-the core R functions implemented in `PhyloCactus`.
+Following the step-by-step analytical workflows presented in Tutorials 1
+through 5, this reference guide synthesizes the core pipeline functions
+and methodological principles implemented in `PhyloCactus`. While the
+complete technical documentation of all exported functions, parameters,
+and input/output signatures is provided in the standard R package manual
+pages (`pkgdown` reference section), this dictionary highlights the
+primary high-level modules that drive the sequential workflow,
+explaining their biological motivation and methodological rationale.
 
 ### Narrative Framework of the Reference Suite
 
-- **Where are we?** Having assembled supermatrices, inferred
+- **Where are we?** Having assembled multilocus supermatrices, inferred
   maximum-likelihood phylogenies, estimated divergence times with
   `treePL`, and validated topologies against external backbones, we
-  require an organized reference dictionary detailing function
-  signatures and biological motivations.
-- **Why are we here?** Complex computational pipelines require explicit
-  documentation linking software parameters directly to underlying
-  evolutionary mechanics, such as mitigating long-branch attraction
-  (LBA), enforcing positional homology, and accounting for incomplete
-  lineage sorting (ILS).
-- **What will we achieve?** A complete, reproducible function reference
+  provide a unified dictionary detailing core pipeline functions and
+  their evolutionary context.
+- **Why are we here?** Complex plant phylogenetic pipelines require
+  explicit documentation linking software parameters directly to
+  underlying evolutionary mechanics, such as mitigating long-branch
+  attraction (LBA), enforcing positional homology, and accounting for
+  incomplete lineage sorting (ILS).
+- **What will we achieve?** A structured methodological dictionary
   mapping sequence mining, alignment quality control, substitution model
   evaluation, maximum-likelihood search, temporal calibration, and
-  visualization utilities.
+  comparative validation modules.
 - **What comes next?** Users can query individual function manual pages
-  (`?function_name`) or incorporate specific functions into customized
-  plant phylogenetic pipelines.
+  (e.g.,
+  [`?run_concatenation_pipeline`](https://beeamerino.github.io/PhyloCactus/reference/run_concatenation_pipeline.md))
+  or consult the `pkgdown` reference index for detailed parameter
+  definitions and audit safeguards.
 
 ## Function Reference Dictionary
 
@@ -77,7 +84,7 @@ constraints.
 
 | Function | Biological & Methodological Application | Canonical Citation |
 |:---|:---|:---|
-| [`rescale_tree()`](https://beeamerino.github.io/PhyloCactus/reference/rescale_tree.md) | Multiplies tree edge lengths by a scaling factor prior to penalized likelihood dating (`treePL`) to prevent numerical underflow. | Sanderson (2002) |
+| [`rescale_tree()`](https://beeamerino.github.io/PhyloCactus/reference/rescale_tree.md) | Multiplies tree edge lengths by a scaling factor prior to penalized likelihood dating (`treePL`) to improve numerical conditioning of rate parameter optimization. | Sanderson (2002) |
 | [`run_treePL_direct()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_direct.md) | Executes `treePL` natively via system calls to estimate ultrametric chronograms under penalized likelihood. | Smith & O’Meara (2012) |
 | [`run_treePL_cv()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_cv.md) | Executes cross-validation parameter optimization, rate smoothing selection, and dating stages from R. | Maurin (2020) |
 | [`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md) | Automates cross-validation parameter optimization, rate smoothing selection, and chronogram estimation across temporal bootstrap replicates. | Maurin (2020) |

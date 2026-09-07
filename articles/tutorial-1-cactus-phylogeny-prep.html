@@ -44,7 +44,7 @@
     <li><a class="dropdown-item" href="../articles/tutorial-3-cactus-phylogeny-visualization.html">3. Visualization &amp; IUCN Summary</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-4-cactus-phylogeny-validation.html">4. Phylogenetic Validation</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding: Section Manifest</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Internal Functions Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Core Functions Dictionary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -486,23 +486,20 @@ within individual loci or introduce systematic bias into concatenated
 analyses. Consequently, each marker should be evaluated before inclusion
 in the final multilocus dataset.</p>
 <p>The <code><a href="../reference/run_marker_screening.html">run_marker_screening()</a></code> function performs an
-automated assessment of the ingroup alignments generated in Module 2.
-Passing <code>outgroup_folder</code> makes the sequence-count criterion
-joint: a locus is retained when the ingroup and outgroup counts together
-reach <code>min_nseq_to_retain</code>, provided the ingroup alone
-reaches <code>min_nseq_ingroup</code>. Every other criterion stays on
-the ingroup, because a distant outgroup shifts the saturation regression
-and those diagnostics would then describe a different quantity. Without
-the joint count, <code>trnT-psbD</code> was rejected at 52 ingroup
-sequences while the outgroup held 49 more, all <em>Portulaca</em>, and
-the locus carrying the deepest outgroup coverage of the dataset was
-discarded by a threshold that could not see it. First, substitution
-saturation is evaluated using regression based statistics to identify
-loci in which multiple substitutions may have eroded the underlying
-phylogenetic signal. The function then detects sequence length outliers
-using the interquartile range (IQR), identifying sequences that may
-represent incomplete assemblies, sequencing artifacts, or annotation
-errors.</p>
+automated quality assessment of the ingroup alignments generated in
+Module 2. Passing <code>outgroup_folder</code> records
+<code>n_outgroup</code> and <code>n_total</code> in the summary table
+for diagnostic visibility, though retention decisions remain strictly
+based on ingroup thresholds to prevent distant outgroup divergence from
+distorting saturation regressions. For example, <code>trnT-psbD</code>
+possessed 50 ingroup sequences and was filtered out by
+<code>min_nseq_to_retain = 100</code>, despite carrying extensive
+outgroup representation. First, substitution saturation is evaluated
+using regression-based statistics to identify loci in which multiple
+substitutions may have eroded the underlying phylogenetic signal. The
+function then detects sequence length outliers using the interquartile
+range (IQR), identifying sequences that may represent incomplete
+assemblies, sequencing artifacts, or annotation errors.</p>
 <p>Based on user defined thresholds, loci and sequences that fail these
 quality criteria are excluded from subsequent analyses. The function
 produces a curated collection of phylogenetically informative markers
@@ -777,7 +774,7 @@ discriminating of the two nuclear markers for barcoding.</p>
 <span>  input_dir <span class="op">=</span> <span class="st">"5_MAFFT_Cleaned/aligned_markers"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="st">"6_Concatenated"</span>,</span>
 <span>  outgroup_pattern <span class="op">=</span> <span class="st">"^(Anacampseros|Grahamia|Talinopsis|Portulaca|Talinum|Talinella)_"</span>,</span>
-<span>  exclude_markers <span class="op">=</span> <span class="st">"phyC"</span>   <span class="co"># NULL para conservar todos los loci</span></span>
+<span>  exclude_markers <span class="op">=</span> <span class="st">"phyC"</span>   <span class="co"># NULL to retain all loci</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>

@@ -44,7 +44,7 @@
     <li><a class="dropdown-item" href="../articles/tutorial-3-cactus-phylogeny-visualization.html">3. Visualization &amp; IUCN Summary</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-4-cactus-phylogeny-validation.html">4. Phylogenetic Validation</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding: Section Manifest</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Internal Functions Guide</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Core Functions Dictionary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -272,15 +272,15 @@ topological similarity and larger distances indicate stronger
 disagreement.</p>
 <p><strong>Rooting note:</strong> <code><a href="../reference/validate_phylogenies.html">validate_phylogenies()</a></code>
 roots every tree on <em>Leuenbergeria</em>, which differs deliberately
-from the Portulacaceae rooting used in Module 10. Comparison requires a
-shared taxon set, so the function first restricts every tree to
-<strong>Cactaceae</strong>, and that filter removes the Portulacaceae
-and Anacampserotaceae terminals that carry the root in the dating
-pipeline. <em>Leuenbergeria</em> is the earliest-diverging lineage
-retained, which makes it the closest available approximation to the root
-position the full tree imposes. The genus is exposed as
-<code>rooting_genus</code> for datasets sampled differently, and trees
-lacking it are left unrooted and flagged in
+from the outgroup rooting (Talinaceae and Portulacaceae) used in Module
+10. Comparison requires a shared taxon set, so the function first
+restricts every tree to <strong>Cactaceae</strong>, and that filter
+removes the Talinaceae, Portulacaceae, and Anacampserotaceae terminals
+that carry the root in the dating pipeline. <em>Leuenbergeria</em> is
+the earliest-diverging lineage retained, which makes it the closest
+available approximation to the root position the full tree imposes. The
+genus is exposed as <code>rooting_genus</code> for datasets sampled
+differently, and trees lacking it are left unrooted and flagged in
 <code>SUPP_rooting_summary</code>. Robinson-Foulds distances are
 computed on unrooted bipartitions, so this choice affects the tree-space
 projection and the reported rooting summary rather than the distances
