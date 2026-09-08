@@ -113,7 +113,7 @@ needed to compare log-likelihoods across tasks.</p>
 
 
 <dt id="arg-threads">threads<a class="anchor" aria-label="anchor" href="#arg-threads"></a></dt>
-<dd><p>Integer. CPU cores requested per SLURM task (<code>--cpus-per-task</code>). Defaults to <code>120</code>.</p></dd>
+<dd><p>Integer. CPU cores requested per SLURM task (<code>--cpus-per-task</code>). Defaults to <code>75</code>.</p></dd>
 
 
 <dt id="arg-workers">workers<a class="anchor" aria-label="anchor" href="#arg-workers"></a></dt>
@@ -122,7 +122,7 @@ needed to compare log-likelihoods across tasks.</p>
 
 
 <dt id="arg-min-threads-per-worker">min_threads_per_worker<a class="anchor" aria-label="anchor" href="#arg-min-threads-per-worker"></a></dt>
-<dd><p>Integer. Lower bound on threads per worker when <code>workers</code> is derived. Defaults to <code>4L</code>.</p></dd>
+<dd><p>Integer. Lower bound on threads per worker when <code>workers</code> is derived. Defaults to <code>3L</code>.</p></dd>
 
 
 <dt id="arg-preparse">preparse<a class="anchor" aria-label="anchor" href="#arg-preparse"></a></dt>
@@ -154,11 +154,11 @@ needed to compare log-likelihoods across tasks.</p>
 
 
 <dt id="arg-cluster-mem">cluster_mem<a class="anchor" aria-label="anchor" href="#arg-cluster-mem"></a></dt>
-<dd><p>Character. Memory allocation (<code>--mem</code>). Defaults to <code>"64G"</code>.</p></dd>
+<dd><p>Character. Memory allocation (<code>--mem</code>). Defaults to <code>"16G"</code>.</p></dd>
 
 
 <dt id="arg-cluster-time">cluster_time<a class="anchor" aria-label="anchor" href="#arg-cluster-time"></a></dt>
-<dd><p>Character. Time limit (<code>--time</code>). Defaults to <code>"12:00:00"</code>.</p></dd>
+<dd><p>Character. Time limit (<code>--time</code>). Defaults to <code>"02:00:00"</code>.</p></dd>
 
 
 <dt id="arg-cluster-queue">cluster_queue<a class="anchor" aria-label="anchor" href="#arg-cluster-queue"></a></dt>
@@ -191,12 +191,11 @@ threads to a single worker shortens each tree while adding workers shortens the 
 and the second lever is the one that matters once a search is already using an efficient thread
 count per worker. Running 50 starting trees on one worker executes 50 rounds; the same 50 trees
 across 25 workers execute 2.</p>
-<p>Reference timing for this workload, measured on an Apple M2 Pro (8 threads, <code>--workers 1</code>,
-<code>RAxML-NG</code> 1.2.2, SSE3 kernels) over a supermatrix of 986 terminals, 12700 sites, 5732 patterns
-and 11 partitions: 50 starting trees in 47115 s, approximately 938 s per tree. That figure is a
-per-worker baseline for one tree at 8 threads and does not transfer directly to a different
-architecture or SIMD kernel; treat it as an order of magnitude and confirm with a short trial run
-(<code>n_init_trees = "rand{2}"</code>) before committing a full allocation.</p>
+<p>Reference timing illustrating worker parallelization: on an Apple M2 Pro (8 threads, <code>--workers 1</code>,
+<code>RAxML-NG</code> 1.2.2, SSE3 kernels), searching 50 starting trees sequentially required 47115 s (~938 s per tree).
+In contrast, the production run on an HPC cluster node (AMD EPYC 9754, 75 threads, <code>--workers 25</code>) over the
+full supermatrix (1023 terminals, 12806 sites, 5954 patterns, 11 partitions) completed 50 starting trees in
+2393 s (~40 minutes), executing two parallel rounds.</p>
 <p><code>workers</code> is derived automatically and constrained to a divisor of the starting tree
 count, so that no worker sits idle in the final round.</p>
     </div>

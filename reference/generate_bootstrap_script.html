@@ -102,14 +102,14 @@ to optimize disk I/O, dynamic per-task seed multiplication for statistical indep
 
 
 <dt id="arg-bs-per-rep">bs_per_rep<a class="anchor" aria-label="anchor" href="#arg-bs-per-rep"></a></dt>
-<dd><p>Integer. Number of bootstrap trees generated per chunk replicate. Defaults to <code>250</code>.</p></dd>
+<dd><p>Integer. Number of bootstrap trees generated per chunk replicate. Defaults to <code>500</code>.</p></dd>
 
 
 <dt id="arg-max-reps">max_reps<a class="anchor" aria-label="anchor" href="#arg-max-reps"></a></dt>
-<dd><p>Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (<code>1-max_reps</code>). Defaults to <code>4</code>,
+<dd><p>Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (<code>1-max_reps</code>). Defaults to <code>2</code>,
 giving a total array target of <code>bs_per_rep * max_reps = 1000</code> bootstrap trees. This provides a safety margin over the autoMRE
-convergence point observed in a production run of this exact dataset (986 taxa, 11 partitions), which converged (<code>bs-cutoff = 0.03</code>,
-TBE) after 650 of 1200 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
+convergence point observed in a production run of this exact dataset (1023 taxa, 11 partitions), which converged (<code>bs-cutoff = 0.03</code>,
+FBP) after 600 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
 sampling scheme. Always confirm convergence with <code><a href="check_bs_convergence.html">check_bs_convergence()</a></code> on the collected trees (via <code><a href="collect_bootstraps.html">collect_bootstraps()</a></code>) rather
 than assuming <code>bs_per_rep * max_reps</code> is sufficient; increase <code>max_reps</code> and re-run <code><a href="collect_bootstraps.html">collect_bootstraps()</a></code> if it is not.</p></dd>
 
@@ -119,7 +119,7 @@ than assuming <code>bs_per_rep * max_reps</code> is sufficient; increase <code>m
 
 
 <dt id="arg-threads">threads<a class="anchor" aria-label="anchor" href="#arg-threads"></a></dt>
-<dd><p>Integer. Number of CPU cores requested per SLURM task (<code>--cpus-per-task</code>). Defaults to <code>64</code> (Leftraru Epu standard allocation).</p></dd>
+<dd><p>Integer. Number of CPU cores requested per SLURM task (<code>--cpus-per-task</code>). Defaults to <code>40</code>.</p></dd>
 
 
 <dt id="arg-workers">workers<a class="anchor" aria-label="anchor" href="#arg-workers"></a></dt>
@@ -127,8 +127,8 @@ than assuming <code>bs_per_rep * max_reps</code> is sufficient; increase <code>m
 
 
 <dt id="arg-threads-per-worker">threads_per_worker<a class="anchor" aria-label="anchor" href="#arg-threads-per-worker"></a></dt>
-<dd><p>Integer. Thread-to-worker ratio used to derive <code>workers</code> when <code>workers = NULL</code>. Defaults to <code>6L</code>
-(empirically validated for this workload on a 128-core AMD EPYC node; see Details). Ignored if <code>workers</code> is set explicitly.</p></dd>
+<dd><p>Integer. Thread-to-worker ratio used to derive <code>workers</code> when <code>workers = NULL</code>. Defaults to <code>4L</code>
+(empirically validated for this workload on an AMD EPYC node; see Details). Ignored if <code>workers</code> is set explicitly.</p></dd>
 
 
 <dt id="arg-preparse">preparse<a class="anchor" aria-label="anchor" href="#arg-preparse"></a></dt>
@@ -156,7 +156,7 @@ than assuming <code>bs_per_rep * max_reps</code> is sufficient; increase <code>m
 
 
 <dt id="arg-cluster-mem">cluster_mem<a class="anchor" aria-label="anchor" href="#arg-cluster-mem"></a></dt>
-<dd><p>Character. Memory allocation string for SLURM (<code>--mem</code>). Defaults to <code>"64G"</code>.</p></dd>
+<dd><p>Character. Memory allocation string for SLURM (<code>--mem</code>). Defaults to <code>"10G"</code>.</p></dd>
 
 
 <dt id="arg-cluster-time">cluster_time<a class="anchor" aria-label="anchor" href="#arg-cluster-time"></a></dt>
@@ -185,10 +185,9 @@ than assuming <code>bs_per_rep * max_reps</code> is sufficient; increase <code>m
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The default <code>threads_per_worker = 6L</code> is empirically calibrated from a successful production run of this exact
-bootstrap workload (400 TBE bootstrap replicates, 986 taxa, 11 partitions) on a 128-core AMD EPYC node using
-<code>--threads 120 --workers 20</code> (6 threads per worker), completed in ~5.8 h. This ratio is dataset- and
-hardware-dependent (it trades per-worker single-tree search speed against the number of trees searched in
+    <p>The default <code>threads_per_worker = 4L</code> is configured to optimize throughput on multi-core compute nodes. In a production run of this workload
+(1023 taxa, 11 partitions), using <code>--threads 40 --workers 10</code> (4 threads per worker) on an AMD EPYC node provided efficient per-worker
+memory and CPU allocation. This ratio is dataset- and hardware-dependent (it trades per-worker single-tree search speed against the number of trees searched in
 parallel); if you migrate to different node hardware or a markedly different supermatrix size, re-validate it
 empirically with a short trial run before committing a full job array to it.</p>
     </div>

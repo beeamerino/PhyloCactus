@@ -65,7 +65,7 @@ Defaults to Felsenstein's Bootstrap Percentage (FBP; Felsenstein, 1985),
 which is the metric the Cactaceae and Caryophyllales dating literature
 reports and the only one against which this tree can be compared.
 Transfer Bootstrap Expectation (TBE; Lemoine *et al.*, 2018) is
-available through `metric = "fbp"` and belongs in a clearly labelled
+available through `metric = "tbe"` and belongs in a clearly labelled
 secondary column.
 
 The two are not on a common scale and TBE must never be reported as

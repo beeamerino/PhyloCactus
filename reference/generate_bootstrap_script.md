@@ -69,16 +69,16 @@ generate_bootstrap_script(
 - bs_per_rep:
 
   Integer. Number of bootstrap trees generated per chunk replicate.
-  Defaults to `250`.
+  Defaults to `500`.
 
 - max_reps:
 
   Integer. Total number of parallel chunk replicates (tasks) to spawn in
-  the SLURM array (`1-max_reps`). Defaults to `4`, giving a total array
+  the SLURM array (`1-max_reps`). Defaults to `2`, giving a total array
   target of `bs_per_rep * max_reps = 1000` bootstrap trees. This
   provides a safety margin over the autoMRE convergence point observed
-  in a production run of this exact dataset (986 taxa, 11 partitions),
-  which converged (`bs-cutoff = 0.03`, TBE) after 650 of 1200 collected
+  in a production run of this exact dataset (1023 taxa, 11 partitions),
+  which converged (`bs-cutoff = 0.03`, FBP) after 600 of 1000 collected
   trees, i.e. convergence is not guaranteed at a fixed replicate count
   for every dataset or taxon sampling scheme. Always confirm convergence
   with
@@ -99,8 +99,7 @@ generate_bootstrap_script(
 - threads:
 
   Integer. Number of CPU cores requested per SLURM task
-  (`--cpus-per-task`). Defaults to `64` (Leftraru Epu standard
-  allocation).
+  (`--cpus-per-task`). Defaults to `40`.
 
 - workers:
 
@@ -111,9 +110,9 @@ generate_bootstrap_script(
 - threads_per_worker:
 
   Integer. Thread-to-worker ratio used to derive `workers` when
-  `workers = NULL`. Defaults to `6L` (empirically validated for this
-  workload on a 128-core AMD EPYC node; see Details). Ignored if
-  `workers` is set explicitly.
+  `workers = NULL`. Defaults to `4L` (empirically validated for this
+  workload on an AMD EPYC node; see Details). Ignored if `workers` is
+  set explicitly.
 
 - preparse:
 
@@ -148,7 +147,7 @@ generate_bootstrap_script(
 - cluster_mem:
 
   Character. Memory allocation string for SLURM (`--mem`). Defaults to
-  `"64G"`.
+  `"10G"`.
 
 - cluster_time:
 
@@ -181,12 +180,12 @@ Character path to the generated SLURM batch script file.
 
 ## Details
 
-The default `threads_per_worker = 6L` is empirically calibrated from a
-successful production run of this exact bootstrap workload (400 TBE
-bootstrap replicates, 986 taxa, 11 partitions) on a 128-core AMD EPYC
-node using `--threads 120 --workers 20` (6 threads per worker),
-completed in ~5.8 h. This ratio is dataset- and hardware-dependent (it
-trades per-worker single-tree search speed against the number of trees
-searched in parallel); if you migrate to different node hardware or a
-markedly different supermatrix size, re-validate it empirically with a
-short trial run before committing a full job array to it.
+The default `threads_per_worker = 4L` is configured to optimize
+throughput on multi-core compute nodes. In a production run of this
+workload (1023 taxa, 11 partitions), using `--threads 40 --workers 10`
+(4 threads per worker) on an AMD EPYC node provided efficient per-worker
+memory and CPU allocation. This ratio is dataset- and hardware-dependent
+(it trades per-worker single-tree search speed against the number of
+trees searched in parallel); if you migrate to different node hardware
+or a markedly different supermatrix size, re-validate it empirically
+with a short trial run before committing a full job array to it.

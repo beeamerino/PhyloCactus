@@ -67,7 +67,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-09-07</h4>
+            <h4 data-toc-skip class="date">2026-09-08</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-3-cactus-phylogeny-visualization.Rmd" class="external-link"><code>vignettes/tutorial-3-cactus-phylogeny-visualization.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-3-cactus-phylogeny-visualization.Rmd</code></div>
@@ -717,8 +717,8 @@ internal nodes, alongside major clade demarcation layers.</p>
 <span>      <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/theme_tree.html" class="external-link">theme_tree</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_nodepoint.html" class="external-link">geom_nodepoint</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">support_class</span><span class="op">)</span>, shape <span class="op">=</span> <span class="fl">21</span>, size <span class="op">=</span> <span class="fl">2</span>, stroke <span class="op">=</span> <span class="fl">0.2</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span></span>
-<span>        values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"&gt;= 90"</span> <span class="op">=</span> <span class="st">"white"</span>, <span class="st">"70-89"</span> <span class="op">=</span> <span class="st">"grey"</span>, <span class="st">"&lt; 70"</span> <span class="op">=</span> <span class="st">"black"</span>, <span class="st">"Constrained"</span> <span class="op">=</span> <span class="st">"skyblue"</span><span class="op">)</span>,</span>
-<span>        name <span class="op">=</span> <span class="st">"Support (FBP) / Constraint"</span>,</span>
+<span>        values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"&gt;= 90"</span> <span class="op">=</span> <span class="st">"white"</span>, <span class="st">"70-89"</span> <span class="op">=</span> <span class="st">"grey"</span>, <span class="st">"&lt; 70"</span> <span class="op">=</span> <span class="st">"black"</span>, <span class="st">"Constrained"</span> <span class="op">=</span> <span class="st">"steelblue"</span><span class="op">)</span>,</span>
+<span>        name <span class="op">=</span> <span class="st">"Support (FBP)"</span>,</span>
 <span>        na.translate <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>      <span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span>
@@ -896,8 +896,7 @@ directory: - Direct PDF Download: <a href="https://raw.githubusercontent.com/bee
 </blockquote>
 </div>
 <div class="section level4">
-<h4 id="figure-10-species-composition-phylogeny-vs--checklist-by-pipeline-status">Figure 10: Species Composition (Phylogeny vs. Checklist by Pipeline
-Status)<a class="anchor" aria-label="anchor" href="#figure-10-species-composition-phylogeny-vs--checklist-by-pipeline-status"></a>
+<h4 id="figure-10-species-composition">Figure 10: Species Composition<a class="anchor" aria-label="anchor" href="#figure-10-species-composition"></a>
 </h4>
 <p>This figure summarizes the methodological composition of the
 taxonomic universe across pipeline stages, distinguishing taxa that were
@@ -912,7 +911,7 @@ and outgroup reference species (38).</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>expand <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span>mult <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.15</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Species Composition (Phylogeny vs Checklist)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Species Composition"</span>,</span>
 <span>    subtitle <span class="op">=</span> <span class="st">"Methodological status across checklist, supermatrix, and tree"</span>,</span>
 <span>    x <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Number of species"</span></span>
@@ -920,7 +919,7 @@ and outgroup reference species (38).</p>
 <span><span class="va">p10</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="figure-11-iucn-categories-in-the-ingroup-phylogeny">Figure 11: IUCN Categories in the Ingroup Phylogeny<a class="anchor" aria-label="anchor" href="#figure-11-iucn-categories-in-the-ingroup-phylogeny"></a>
+<h4 id="figure-11-iucn-categories">Figure 11: IUCN Categories<a class="anchor" aria-label="anchor" href="#figure-11-iucn-categories"></a>
 </h4>
 <p>This bar chart summarizes the distribution of IUCN Red List
 conservation categories among the ingroup species resolved in the final
@@ -936,7 +935,7 @@ phylogenetic reconstruction.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>      title <span class="op">=</span> <span class="st">"IUCN Categories (Ingroup Phylogeny)"</span>,</span>
+<span>      title <span class="op">=</span> <span class="st">"IUCN Categories"</span>,</span>
 <span>      x <span class="op">=</span> <span class="st">"Category"</span>,</span>
 <span>      y <span class="op">=</span> <span class="st">"Number of species"</span></span>
 <span>    <span class="op">)</span></span>
@@ -944,19 +943,17 @@ phylogenetic reconstruction.</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="figure-12-molecular-completeness-vs--iucn-category-by-pipeline-status">Figure 12: Molecular Completeness vs. IUCN Category by Pipeline
-Status<a class="anchor" aria-label="anchor" href="#figure-12-molecular-completeness-vs--iucn-category-by-pipeline-status"></a>
+<h4 id="figure-12-molecular-completeness-vs--iucn-category">Figure 12: Molecular Completeness vs. IUCN Category<a class="anchor" aria-label="anchor" href="#figure-12-molecular-completeness-vs--iucn-category"></a>
 </h4>
-<p>This plot compares molecular marker completeness against IUCN threat
-categories, faceted by pipeline status (<code>sampled_and_dated</code>
-vs <code>sequenced_collapsed_duplicate</code>), to test whether
-extinction risk correlates with missing molecular data or sequence
-collapse during phylogenetic inference.</p>
+<p>This plot compares molecular marker completeness across IUCN threat
+categories for sampled ingroup taxa resolved in the time-calibrated
+phylogeny, evaluating whether extinction risk correlates with missing
+molecular data.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">iucn_found</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">p12</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
 <span>    <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">status_pipeline</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sampled_and_dated"</span>, <span class="st">"sequenced_collapsed_duplicate"</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">status_pipeline</span> <span class="op">==</span> <span class="st">"sampled_and_dated"</span>,</span>
 <span>             <span class="va">iucn_found</span> <span class="op">==</span> <span class="cn">TRUE</span>,</span>
 <span>             <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">iucn_category</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">iucn_category</span>, y <span class="op">=</span> <span class="va">pct_markers</span>, fill <span class="op">=</span> <span class="va">iucn_category</span><span class="op">)</span></span>
@@ -964,14 +961,10 @@ collapse during phylogenetic inference.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_violin.html" class="external-link">geom_violin</a></span><span class="op">(</span>trim <span class="op">=</span> <span class="cn">FALSE</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.2</span>, outlier.size <span class="op">=</span> <span class="fl">0.6</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">PhyloCactus</span><span class="fu">::</span><span class="fu"><a href="../reference/scale_fill_iucn.html">scale_fill_iucn</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"IUCN Category"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">status_pipeline</span>, labeller <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/as_labeller.html" class="external-link">as_labeller</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>      <span class="st">"sampled_and_dated"</span> <span class="op">=</span> <span class="st">"Sampled &amp; Dated in Tree (N = 985)"</span>,</span>
-<span>      <span class="st">"sequenced_collapsed_duplicate"</span> <span class="op">=</span> <span class="st">"Sequenced Collapsed Duplicates (N = 37)"</span></span>
-<span>    <span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>      title <span class="op">=</span> <span class="st">"Molecular Completeness vs IUCN Category by Pipeline Status"</span>,</span>
-<span>      subtitle <span class="op">=</span> <span class="st">"Comparison of marker occupancy between retained tips and collapsed identical sequences"</span>,</span>
+<span>      title <span class="op">=</span> <span class="st">"Molecular Completeness vs IUCN Category"</span>,</span>
+<span>      subtitle <span class="op">=</span> <span class="st">"Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 985)"</span>,</span>
 <span>      x <span class="op">=</span> <span class="st">"IUCN Category"</span>,</span>
 <span>      y <span class="op">=</span> <span class="st">"Marker completeness (%)"</span></span>
 <span>    <span class="op">)</span></span>
@@ -1007,7 +1000,7 @@ and sequencing.</p>
 <span>  <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"italic"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    title <span class="op">=</span> <span class="st">"Threatened Unsampled Species by Genus (Sampling Gaps)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Threatened Unsampled Species by Genus"</span>,</span>
 <span>    subtitle <span class="op">=</span> <span class="st">"Priority Cactaceae taxa (CR, EN, VU) lacking molecular sequences"</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">"Genus"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Number of threatened unsequenced species"</span></span>
@@ -1033,7 +1026,7 @@ resolved in the molecular framework.</p>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>      title <span class="op">=</span> <span class="st">"Endemic Species by Country (Ingroup Phylogeny)"</span>,</span>
+<span>      title <span class="op">=</span> <span class="st">"Endemic Species by Country"</span>,</span>
 <span>      x <span class="op">=</span> <span class="st">"Country"</span>,</span>
 <span>      y <span class="op">=</span> <span class="st">"Number of endemic species"</span></span>
 <span>    <span class="op">)</span></span>
@@ -1091,7 +1084,7 @@ ingroup phylogeny, based on IUCN Red List threat classifications.</p>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>        title <span class="op">=</span> <span class="st">"Most Common Threats (Ingroup Phylogeny)"</span>,</span>
+<span>        title <span class="op">=</span> <span class="st">"Most Common Threats"</span>,</span>
 <span>        x <span class="op">=</span> <span class="st">"Threat"</span>,</span>
 <span>        y <span class="op">=</span> <span class="st">"Number of species"</span></span>
 <span>      <span class="op">)</span></span>
@@ -1119,7 +1112,7 @@ supporting cactus diversification.</p>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>        title <span class="op">=</span> <span class="st">"Most Common Habitats (Ingroup Phylogeny)"</span>,</span>
+<span>        title <span class="op">=</span> <span class="st">"Most Common Habitats"</span>,</span>
 <span>        x <span class="op">=</span> <span class="st">"Habitat"</span>,</span>
 <span>        y <span class="op">=</span> <span class="st">"Number of species"</span></span>
 <span>      <span class="op">)</span></span>

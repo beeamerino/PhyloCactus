@@ -8,7 +8,10 @@ the root, returning them as a vector suitable for
 ## Usage
 
 ``` r
-resolve_rooting_outgroup(tip_labels, pattern = "^(Portulaca|Talinum|Talinella)_")
+resolve_rooting_outgroup(
+  tip_labels,
+  pattern = "^(Portulaca|Talinum|Talinella)_"
+)
 ```
 
 ## Arguments

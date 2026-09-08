@@ -81,7 +81,7 @@ generate_ml_search_script(
 - threads:
 
   Integer. CPU cores requested per SLURM task (`--cpus-per-task`).
-  Defaults to `120`.
+  Defaults to `75`.
 
 - workers:
 
@@ -92,7 +92,7 @@ generate_ml_search_script(
 - min_threads_per_worker:
 
   Integer. Lower bound on threads per worker when `workers` is derived.
-  Defaults to `4L`.
+  Defaults to `3L`.
 
 - preparse:
 
@@ -129,11 +129,11 @@ generate_ml_search_script(
 
 - cluster_mem:
 
-  Character. Memory allocation (`--mem`). Defaults to `"64G"`.
+  Character. Memory allocation (`--mem`). Defaults to `"16G"`.
 
 - cluster_time:
 
-  Character. Time limit (`--time`). Defaults to `"12:00:00"`.
+  Character. Time limit (`--time`). Defaults to `"02:00:00"`.
 
 - cluster_queue:
 
@@ -170,14 +170,13 @@ efficient thread count per worker. Running 50 starting trees on one
 worker executes 50 rounds; the same 50 trees across 25 workers execute
 2.
 
-Reference timing for this workload, measured on an Apple M2 Pro (8
-threads, `--workers 1`, `RAxML-NG` 1.2.2, SSE3 kernels) over a
-supermatrix of 986 terminals, 12700 sites, 5732 patterns and 11
-partitions: 50 starting trees in 47115 s, approximately 938 s per tree.
-That figure is a per-worker baseline for one tree at 8 threads and does
-not transfer directly to a different architecture or SIMD kernel; treat
-it as an order of magnitude and confirm with a short trial run
-(`n_init_trees = "rand{2}"`) before committing a full allocation.
+Reference timing illustrating worker parallelization: on an Apple M2 Pro
+(8 threads, `--workers 1`, `RAxML-NG` 1.2.2, SSE3 kernels), searching 50
+starting trees sequentially required 47115 s (~938 s per tree). In
+contrast, the production run on an HPC cluster node (AMD EPYC 9754, 75
+threads, `--workers 25`) over the full supermatrix (1023 terminals,
+12806 sites, 5954 patterns, 11 partitions) completed 50 starting trees
+in 2393 s (~40 minutes), executing two parallel rounds.
 
 `workers` is derived automatically and constrained to a divisor of the
 starting tree count, so that no worker sits idle in the final round.
