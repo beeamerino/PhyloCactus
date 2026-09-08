@@ -921,16 +921,15 @@ check_calibration_consistency <- function(calibs, tree, constraints, strict = TR
 #' invisible in the output chronogram, which looks like any other, so it has to be checked
 #' explicitly before a date is reported or interpreted.
 #'
-#' In the August 2026 run every one of the five calibrated nodes came back on a bound, the root at
-#' its maximum and the rest at their minimum, and the chronogram gave no sign of it.
+#' A node fixed by `min = max` sits on its bound by construction and is not a finding. Every other
+#' calibrated node is expected to be estimated, and one that returns its bound instead is reporting
+#' the constraint.
 #'
-#' **A single chronogram is not enough to answer this.** On 2026-09-02 the maximum-likelihood tree
-#' placed `ACP_root` at 52.96 Ma, 0.41 Ma inside its upper bound of 53.37, and this function
-#' reported it as interior. Across the 100 bootstrap replicates the interval was 53.29 to 53.37
-#' and 96 of them returned the bound exactly. The point estimate was one realisation of a node
-#' whose age the data cannot identify, and it happened to land just inside. Supplying
-#' `bootstraps` is what distinguishes a node that was estimated from one that is unidentifiable
-#' and collapsed onto its nearest constraint.
+#' **A single chronogram is not enough to answer this.** A point estimate can land just inside a
+#' bound while the underlying age is unidentifiable, in which case this function calls the node
+#' interior and the constraint goes unreported. Supplying `bootstraps` takes the verdict from the
+#' fraction of replicates sitting on a bound, which is what distinguishes a node that was estimated
+#' from one that is unidentifiable and collapsed onto its nearest constraint.
 #'
 #' @param chronogram An ultrametric, rooted `phylo` object, typically `BestTree_treePL.tree`.
 #' @param calibs Data frame read from `calibrations_bounds.csv`.
@@ -1043,9 +1042,9 @@ report_bound_adherence <- function(chronogram, calibs, constraints, tol = 0.05,
               "divergence times.", call. = FALSE)
     }
     message("No bootstrap chronograms supplied, so this verdict rests on a single point ",
-            "estimate. On 2026-09-02 the maximum-likelihood tree placed ACP_root at 52.96 Ma, ",
-            "0.41 Ma inside its upper bound and therefore reported as interior, while 96 of 100 ",
-            "bootstrap replicates returned the bound exactly. Pass `bootstraps` to see that.")
+            "estimate. An age that lands just inside a bound is reported as interior even when ",
+            "the node is unidentifiable and pinned to that bound across replicates. Pass ",
+            "`bootstraps` to see that.")
   } else {
     # The replicates decide, not the point. A node whose age is not identifiable from the data
     # collapses onto whatever constraint is nearest, and one realisation of that can land a

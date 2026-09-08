@@ -1,10 +1,10 @@
 ---
-title: "Tutorial 4: Phylogenetic Validation and Sub-tree Comparisons"
+title: "Tutorial 4: Phylogenetic Validation and Comparative Analyses"
 author: "Beatriz M. Meriño"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Tutorial 4: Phylogenetic Validation and Sub-tree Comparisons}
+  %\VignetteIndexEntry{Tutorial 4: Phylogenetic Validation and Comparative Analyses}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

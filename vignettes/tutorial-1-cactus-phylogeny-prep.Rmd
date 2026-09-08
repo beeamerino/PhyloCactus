@@ -1,10 +1,10 @@
 ---
-title: "Tutorial 1: Phylogenetic Pipeline: Data Assembly and Preparation"
+title: "Tutorial 1: Data Assembly and Preparation"
 author: "Beatriz M. Meriño"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Tutorial 1: Phylogenetic Pipeline: Data Assembly and Preparation}
+  %\VignetteIndexEntry{Tutorial 1: Data Assembly and Preparation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -216,7 +216,7 @@ To prevent outgroup divergence from inflating molecular informativeness metrics 
 3.  `4_Cleaned/cleaned_markers_joint`: Contains the integrated ingroup and outgroup sequences prepared for joint realignment in Module 5.
 4.  `4_Cleaned/tables`: Contains the complete taxonomic synthesis and curation table suite:
     - `TABLE_taxonomic_backbone_molecular_matrix.csv`: Master taxonomic matrix anchored to all accepted species in the checklist (**Cactaceae** and **Anacampserotaceae**) plus outgroups. Features dynamic GenBank accession columns (`sid_<marker>`), Caryophyllales.org UUIDs, and standardized placeholder columns for phylogenetic inclusion (`retained_in_phylogeny`) and conservation status (`iucn_redlist_category`).
-    - `TABLE_dataset_species_summary.csv`: Global dataset-level synthesis reporting total species in the checklist, raw GenBank species recovered, accepted vs. rejected species counts, outgroups retained, total unique taxa in the joint dataset, and overall checklist recovery percentage, plus the number of standardized loci mined per taxonomic group (**Cactaceae**, **Anacampserotaceae**, **Portulacaceae**, **Talinaceae**) at Stage 1. Every row that depends on what survives the joint realignment, both the "Final loci retained" counts and the outgroup and joint **species** counts, is written here as a provisional (pre-realignment) value and overwritten in place by `run_concatenation_pipeline()` (Module 6) once the true post-realignment supermatrix exists. This single file therefore holds the definitive counts after Module 6 runs, and any row still labelled "Provisional" in its `details` column indicates that Module 6 has not been executed against it. Do not quote figures from this table before Module 6 has run.
+    - `TABLE_dataset_species_summary.csv`: Global dataset-level synthesis reporting total species in the checklist, raw GenBank species recovered, accepted vs. rejected species counts, outgroups retained, total unique taxa in the joint dataset, and overall checklist recovery percentage, plus the number of standardized loci mined per taxonomic group (**Cactaceae**, **Anacampserotaceae**, **Portulacaceae**, **Talinaceae**) at Stage 1. Every row that depends on what survives the joint realignment, both the "Final loci retained" counts and the ingroup, outgroup and joint **species** counts, is written here as a provisional (pre-realignment) value and overwritten in place by `run_concatenation_pipeline()` (Module 6) once the true post-realignment supermatrix exists. This single file therefore holds the definitive counts after Module 6 runs, and any row still labelled "Provisional" in its `details` column indicates that Module 6 has not been executed against it. Do not quote figures from this table before Module 6 has run.
     - `TABLE_species_curation_status.csv`: Taxon-level master registry detailing acceptance status, source classification (`accepted_ingroup`, `rejected_ingroup`, `accepted_outgroup`), and retained multi-marker occupancy for every species retrieved.
     - `TABLE_marker_metrics_ingroup.csv`, `TABLE_marker_metrics_outgroup.csv`, `TABLE_marker_metrics_joint.csv`: Decoupled molecular alignment metrics (length, gaps, GC content, variable sites, parsimony informative sites) calculated independently for the accepted ingroup, outgroups, and joint datasets.
     - `TABLE_marker_summary.csv`: Per-marker comparative summary calculating the parsimony informative site inflation ratio (`pis_inflation_ratio = pis_joint / pis_ingroup`) and taxon retention percentages.
@@ -281,6 +281,8 @@ After individual locus alignments have been curated, realigned, and evaluated, t
 
 Passing `outgroup_pattern` runs [report_marker_group_coverage()] first, which counts how many ingroup and how many outgroup terminals carry real sequence in each locus and warns when either side is empty. A locus sampled almost entirely on one side of the root contributes columns the other side cannot share, and the branch lengths spanning that bipartition are then estimated from the loci that remain. The report does not block: whether such a locus belongs in a matrix depends on the analysis the matrix is for, and a nuclear locus with no outgroup coverage is unusable for dating and valuable for species discrimination.
 
+Passing a **named** vector rather than a single expression resolves the outgroup by family, adding `n_<family>`, `n_<family>_covered` and `median_cov_<family>` to `logs_and_qc/SUPP_TABLE_marker_group_coverage.csv`. That distinction matters here because the three outgroup families are not sampled alike: a combined count can look adequate while one family, and in particular the one that carries the root, is absent from the locus entirely.
+
 The `run_concatenation_pipeline()` function combines the aligned markers, matches taxa across loci, inserts missing data characters (`-`) where accessions are absent, and calculates the exact nucleotide coordinates defining every gene partition. The module generates concatenated alignments in FASTA, PHYLIP (`.phy`), and NEXUS (`.nex`) formats, exports partition schemes formatted for `RAxML-NG` and `IQ-TREE`, and writes `TABLE_partition_informativeness_comparison.csv` comparing ingroup versus joint parsimony informative sites across all partitions. It also updates the "Final loci retained" rows of `4_Cleaned/tables/TABLE_dataset_species_summary.csv` (written provisionally by Module 4) in place, replacing them with the true post-realignment counts now that Module 5's joint realignment may have dropped individual taxa from a locus.
 
 `exclude_markers` names the loci to leave out of this particular supermatrix. The alignments are neither modified nor removed, so a locus excluded here remains available to every other analysis; only this matrix is built without it. The excluded names are echoed to the run log and written to `logs_and_qc/TABLE_markers_excluded.csv`, and a name matching no alignment raises a warning rather than passing silently, so a typo cannot leave a locus in the matrix while the script reads as though it had been dropped.
@@ -291,7 +293,11 @@ Set `exclude_markers = NULL` to build the full matrix. `phyC` is excluded below 
 run_concatenation_pipeline(
   input_dir = "5_MAFFT_Cleaned/aligned_markers",
   output_dir = "6_Concatenated",
-  outgroup_pattern = "^(Anacampseros|Grahamia|Talinopsis|Portulaca|Talinum|Talinella)_",
+  outgroup_pattern = c(
+    Anacampserotaceae = "^(Anacampseros|Grahamia|Talinopsis)_",
+    Portulacaceae     = "^Portulaca_",
+    Talinaceae        = "^(Talinum|Talinella)_"
+  ),
   exclude_markers = "phyC"   # NULL to retain all loci
 )
 ```

@@ -556,12 +556,10 @@ if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
   cat("     - Number of tips:", length(ml_chronogram$tip.label), "\n")
 
   # A node whose age equals one of its own bounds was not estimated: penalized likelihood returned
-  # the constraint. In the August 2026 run all five calibrated nodes came back on a bound and the
-  # chronogram gave no sign of it.
-  # The bootstrap chronograms are passed deliberately. A single tree cannot tell a node that was
-  # estimated from one whose age the data cannot identify: on 2026-09-02 the maximum-likelihood
-  # tree put ACP_root at 52.96 Ma, 0.41 Ma inside its upper bound, and this check called it
-  # interior, while 96 of the 100 replicates returned the bound exactly.
+  # the constraint, and the chronogram gives no sign of it. ACP_root is fixed (min = max), so it
+  # sits on its bound by construction; the other three calibrations are expected to be estimated.
+  # The bootstrap chronograms are passed deliberately: a single point estimate can land just inside
+  # a bound while the underlying age is unidentifiable, and only the replicates separate the two.
   bs_chronograms <- file.path(dating_dir, "bsTree_treePL.tree")
   adherence <- report_bound_adherence(
     ml_chronogram, calibs, constraints,

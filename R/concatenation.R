@@ -356,11 +356,14 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
 
   # Species counts must be patched for the same reason as the locus counts: Stage 4 writes them
   # before run_joint_realignment() (Stage 5) drops individual terminals, so its values overcount
-  # the outgroup. taxa_all is exactly the set of terminals present in the final supermatrix.
+  # both sides. taxa_all is exactly the set of terminals present in the final supermatrix, so the
+  # per-family counts, the ingroup count and the joint total are all derived from it and are
+  # guaranteed to add up.
   n_final_sp_anacampserotaceae <- length(intersect(taxa_all, anacampserotaceae_taxa_vec))
   n_final_sp_portulacaceae     <- length(intersect(taxa_all, portulacaceae_taxa_vec))
   n_final_sp_talinaceae        <- length(intersect(taxa_all, talinaceae_taxa_vec))
   n_final_sp_outgroup          <- length(intersect(taxa_all, outgroup_taxa_vec))
+  n_final_sp_ingroup           <- length(setdiff(taxa_all, outgroup_taxa_vec))
   n_final_sp_joint             <- length(taxa_all)
 
   species_summary_file_tables <- file.path(dirname(dirname(input_dir)), "4_Cleaned", "tables", "TABLE_dataset_species_summary.csv")
@@ -376,6 +379,7 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
       "Final loci retained (Portulacaceae Outgroup)", as.character(n_final_loci_portulacaceae), "Loci with real (non-gap) sequence for Portulacaceae in the final, realigned supermatrix (Stage 6)",
       "Final loci retained (Talinaceae Outgroup)", as.character(n_final_loci_talinaceae), "Loci with real (non-gap) sequence for Talinaceae in the final, realigned supermatrix (Stage 6)",
       "Total unique loci in final joint dataset", as.character(n_final_loci_total), "Total partitions in the final concatenated supermatrix (Stage 6)",
+      "Accepted unique ingroup species retained (Cactaceae)", as.character(n_final_sp_ingroup), "Cactaceae terminals present in the final, realigned supermatrix (Stage 6)",
       "Unique Anacampserotaceae outgroup species retained", as.character(n_final_sp_anacampserotaceae), "Anacampserotaceae terminals present in the final, realigned supermatrix (Stage 6)",
       "Unique Portulacaceae outgroup species retained", as.character(n_final_sp_portulacaceae), "Portulaca terminals present in the final, realigned supermatrix (Stage 6)",
       "Unique Talinaceae outgroup species retained", as.character(n_final_sp_talinaceae), "Talinaceae terminals present in the final, realigned supermatrix (Stage 6)",
@@ -391,6 +395,42 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
         species_summary_df <- dplyr::bind_rows(species_summary_df, final_values[i, ])
       }
     }
+
+    # A row this stage adds for the first time would otherwise land at the bottom, away from the
+    # rows it belongs with, and the table is read as a supplementary table. Ordering is imposed
+    # here rather than left to the order of first writing, so the file reads the same whichever
+    # stage created which row: checklist, then ingroup, then outgroup by family, then joint totals,
+    # then sequence records, then loci mined and loci retained. Any metric not named below keeps
+    # its relative position at the end, so adding a row elsewhere in the pipeline never drops it.
+    canonical_order <- c(
+      "Total accepted species in Cactaceae checklist (Focal Ingroup)",
+      "Total accepted species in Anacampserotaceae checklist (Outgroup)",
+      "Total unique ingroup species with raw sequences (Cactaceae)",
+      "Accepted unique ingroup species retained (Cactaceae)",
+      "Rejected unique ingroup species excluded (Cactaceae)",
+      "Cactaceae focal species recovery rate (%)",
+      "Unique Anacampserotaceae outgroup species retained",
+      "Unique Portulacaceae outgroup species retained",
+      "Unique Talinaceae outgroup species retained",
+      "Total unique outgroup species retained",
+      "Total unique species in final dataset (Joint)",
+      "Total curated sequence records (Cactaceae Ingroup)",
+      "Total curated sequence records (Outgroups)",
+      "Total curated sequence records (Joint)",
+      "Initial loci mined (Cactaceae Ingroup, Stage 1)",
+      "Initial loci mined (Anacampserotaceae Outgroup, Stage 1)",
+      "Initial loci mined (Portulacaceae Outgroup, Stage 1)",
+      "Initial loci mined (Talinaceae Outgroup, Stage 1)",
+      "Final loci retained (Cactaceae Ingroup)",
+      "Final loci retained (Anacampserotaceae Outgroup)",
+      "Final loci retained (Portulacaceae Outgroup)",
+      "Final loci retained (Talinaceae Outgroup)",
+      "Total unique loci in final joint dataset"
+    )
+    rank <- match(species_summary_df$metric, canonical_order)
+    rank[is.na(rank)] <- length(canonical_order) + seq_len(sum(is.na(rank)))
+    species_summary_df <- species_summary_df[order(rank), , drop = FALSE]
+
     readr::write_csv(species_summary_df, species_summary_file)
   } else {
     warning(sprintf("Could not find %s to update with final locus counts; run integrate_and_clean_markers() (Stage 4) first.", species_summary_file), call. = FALSE)

@@ -1,10 +1,10 @@
 ---
-title: "Tutorial 6: Core Pipeline Functions & Methodological Dictionary"
+title: "Tutorial 6: Core Pipeline Functions and Methodological Dictionary"
 author: "Beatriz M. Meriño"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Tutorial 6: Core Pipeline Functions & Methodological Dictionary}
+  %\VignetteIndexEntry{Tutorial 6: Core Pipeline Functions and Methodological Dictionary}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

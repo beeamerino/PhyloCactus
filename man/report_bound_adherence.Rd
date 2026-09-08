@@ -41,16 +41,15 @@ invisible in the output chronogram, which looks like any other, so it has to be 
 explicitly before a date is reported or interpreted.
 }
 \details{
-In the August 2026 run every one of the five calibrated nodes came back on a bound, the root at
-its maximum and the rest at their minimum, and the chronogram gave no sign of it.
+A node fixed by \code{min = max} sits on its bound by construction and is not a finding. Every other
+calibrated node is expected to be estimated, and one that returns its bound instead is reporting
+the constraint.
 
-\strong{A single chronogram is not enough to answer this.} On 2026-09-02 the maximum-likelihood tree
-placed \code{ACP_root} at 52.96 Ma, 0.41 Ma inside its upper bound of 53.37, and this function
-reported it as interior. Across the 100 bootstrap replicates the interval was 53.29 to 53.37
-and 96 of them returned the bound exactly. The point estimate was one realisation of a node
-whose age the data cannot identify, and it happened to land just inside. Supplying
-\code{bootstraps} is what distinguishes a node that was estimated from one that is unidentifiable
-and collapsed onto its nearest constraint.
+\strong{A single chronogram is not enough to answer this.} A point estimate can land just inside a
+bound while the underlying age is unidentifiable, in which case this function calls the node
+interior and the constraint goes unreported. Supplying \code{bootstraps} takes the verdict from the
+fraction of replicates sitting on a bound, which is what distinguishes a node that was estimated
+from one that is unidentifiable and collapsed onto its nearest constraint.
 }
 \examples{
 \dontrun{

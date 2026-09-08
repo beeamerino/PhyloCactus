@@ -236,10 +236,18 @@ run_joint_realignment(
 # those families it supplies columns only one side of the root can occupy. That is a property of
 # this matrix, not of the locus, and phyC remains the more discriminating nuclear marker for
 # barcoding. Set exclude_markers = NULL to build the full matrix.
+#
+# outgroup_pattern is a named vector, not a single expression, so the coverage report resolves the
+# outgroup by family and writes n_<family>, n_<family>_covered and median_cov_<family>. A combined
+# count can look adequate while the family carrying the root is absent from the locus entirely.
 run_concatenation_pipeline(
   input_dir = "5_MAFFT_Cleaned/aligned_markers",
   output_dir = "6_Concatenated",
-  outgroup_pattern = "^(Anacampseros|Grahamia|Talinopsis|Portulaca|Talinum|Talinella)_",
+  outgroup_pattern = c(
+    Anacampserotaceae = "^(Anacampseros|Grahamia|Talinopsis)_",
+    Portulacaceae     = "^Portulaca_",
+    Talinaceae        = "^(Talinum|Talinella)_"
+  ),
   exclude_markers = "phyC"
 )
 
