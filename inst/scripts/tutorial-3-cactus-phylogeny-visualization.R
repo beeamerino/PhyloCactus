@@ -404,8 +404,8 @@ if (file.exists(supp_tree_file)) {
       theme_tree() +
       geom_nodepoint(aes(fill = support_class), shape = 21, size = 2, stroke = 0.2, na.rm = TRUE) +
       scale_fill_manual(
-        values = c(">= 90" = "white", "70-89" = "grey", "< 70" = "black", "Constrained" = "skyblue"),
-        name = "Support (FBP) / Constraint",
+        values = c(">= 90" = "white", "70-89" = "grey", "< 70" = "black", "Constrained" = "steelblue"),
+        name = "Support (FBP)",
         na.translate = FALSE
       ) +
       theme(legend.position = "bottom")
@@ -517,7 +517,7 @@ p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(s
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
   theme_phylocactus(base_size = 12) +
   labs(
-    title = "Species Composition (Phylogeny vs Checklist)",
+    title = "Species Composition",
     subtitle = "Methodological status across checklist, supermatrix, and tree",
     x = NULL,
     y = "Number of species"
@@ -533,20 +533,20 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     count(iucn_category, iucn_category_name, sort = TRUE)
   write_csv(TABLE_iucn_categories, "9_Visualization/tables/TABLE_iucn_categories.csv")
     
-  # FIGURE 11: IUCN Categories (Ingroup Phylogeny)
+  # FIGURE 11: IUCN Categories
   message("Rendering Figure 11 (IUCN Categories)...")
   p11 <- ggplot(TABLE_iucn_categories, aes(x = reorder(iucn_category, n), y = n, fill = iucn_category)) +
     PhyloCactus::scale_fill_iucn(name = "IUCN Category") +
     geom_col(width = 0.7) +
     theme_phylocactus(base_size = 12) +
-    labs(title = "IUCN Categories (Ingroup Phylogeny)", x = "Category", y = "Number of species")
+    labs(title = "IUCN Categories", x = "Category", y = "Number of species")
   ggsave("9_Visualization/figures/Figure_11_iucn_categories.pdf", p11, width = 6, height = 4)
     
-  # FIGURE 12: Completeness vs IUCN by Pipeline Status
-  message("Rendering Figure 12 (Completeness vs IUCN by Status)...")
+  # FIGURE 12: Completeness vs IUCN
+  message("Rendering Figure 12 (Completeness vs IUCN)...")
   p12 <- ggplot(
     species_summary_iucn %>%
-      filter(status_pipeline %in% c("sampled_and_dated", "sequenced_collapsed_duplicate"),
+      filter(status_pipeline == "sampled_and_dated",
              iucn_found == TRUE,
              !is.na(iucn_category)),
     aes(x = iucn_category, y = pct_markers, fill = iucn_category)
@@ -554,18 +554,14 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     geom_violin(trim = FALSE, alpha = 0.5) +
     geom_boxplot(width = 0.2, outlier.size = 0.6, alpha = 0.8) +
     PhyloCactus::scale_fill_iucn(name = "IUCN Category") +
-    facet_wrap(~ status_pipeline, labeller = as_labeller(c(
-      "sampled_and_dated" = "Sampled & Dated in Tree (N = 985)",
-      "sequenced_collapsed_duplicate" = "Sequenced Collapsed Duplicates (N = 37)"
-    ))) +
     theme_phylocactus(base_size = 12) +
     labs(
-      title = "Molecular Completeness vs IUCN Category by Pipeline Status",
-      subtitle = "Comparison of marker occupancy between retained tips and collapsed identical sequences",
+      title = "Molecular Completeness vs IUCN Category",
+      subtitle = "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 985)",
       x = "IUCN Category",
       y = "Marker completeness (%)"
     )
-  suppressWarnings(ggsave("9_Visualization/figures/Figure_12_completeness_vs_iucn.pdf", p12, width = 8.5, height = 5))
+  suppressWarnings(ggsave("9_Visualization/figures/Figure_12_completeness_vs_iucn.pdf", p12, width = 7, height = 5))
 
   # FIGURE 13: Conservation Prioritization of Unsampled Gaps by Genus
   message("Rendering Figure 13 (Conservation Prioritization Gaps)...")
@@ -586,7 +582,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     theme_phylocactus(base_size = 12) +
     theme(axis.text.y = element_text(face = "italic")) +
     labs(
-      title = "Threatened Unsampled Species by Genus (Sampling Gaps)",
+      title = "Threatened Unsampled Species by Genus",
       subtitle = "Priority Cactaceae taxa (CR, EN, VU) lacking molecular sequences",
       x = "Genus",
       y = "Number of threatened unsequenced species"
@@ -610,7 +606,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     geom_col(fill = "grey35", width = 0.7) +
     coord_flip() +
     theme_phylocactus(base_size = 12) +
-    labs(title = "Endemic Species by Country (Ingroup Phylogeny)", x = "Country", y = "Number of endemic species")
+    labs(title = "Endemic Species by Country", x = "Country", y = "Number of endemic species")
   ggsave("9_Visualization/figures/Figure_14_endemism_by_country.pdf", p14, width = 8, height = 6)
   
   # FIGURE 15: IUCN Categories by Country (Endemic)
@@ -643,7 +639,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
       geom_col(fill = "grey35", width = 0.7) +
       coord_flip() +
       theme_phylocactus(base_size = 12) +
-      labs(title = "Most Common Threats (Ingroup Phylogeny)", x = "Threat", y = "Number of species")
+      labs(title = "Most Common Threats", x = "Threat", y = "Number of species")
     ggsave("9_Visualization/figures/Figure_16_common_threats.pdf", p16, width = 9, height = 6)
   }
     
@@ -659,7 +655,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
       geom_col(fill = "grey35", width = 0.7) +
       coord_flip() +
       theme_phylocactus(base_size = 12) +
-      labs(title = "Most Common Habitats (Ingroup Phylogeny)", x = "Habitat", y = "Number of species")
+      labs(title = "Most Common Habitats", x = "Habitat", y = "Number of species")
     ggsave("9_Visualization/figures/Figure_17_common_habitats.pdf", p17, width = 9, height = 6)
   }
 }

@@ -42,12 +42,12 @@ generate_ml_search_script(
 
 \item{seed}{Integer. Random seed for reproducible tree search initialization. Defaults to \code{NULL} (random).}
 
-\item{threads}{Integer. CPU cores requested per SLURM task (\code{--cpus-per-task}). Defaults to \code{120}.}
+\item{threads}{Integer. CPU cores requested per SLURM task (\code{--cpus-per-task}). Defaults to \code{75}.}
 
 \item{workers}{Integer. Worker process count. If \code{NULL} (default), derived from \code{threads},
 \code{n_init_trees} and \code{min_threads_per_worker} so that workers divide the starting tree count evenly.}
 
-\item{min_threads_per_worker}{Integer. Lower bound on threads per worker when \code{workers} is derived. Defaults to \code{4L}.}
+\item{min_threads_per_worker}{Integer. Lower bound on threads per worker when \code{workers} is derived. Defaults to \code{3L}.}
 
 \item{preparse}{Logical. Pre-parse the alignment into compressed binary \code{.rba} format before the search? Defaults to \code{TRUE}.}
 
@@ -63,9 +63,9 @@ generate_ml_search_script(
 
 \item{cluster_nodes}{Integer. Number of compute nodes requested (\verb{--nodes}). Defaults to \code{1L}.}
 
-\item{cluster_mem}{Character. Memory allocation (\code{--mem}). Defaults to \code{"64G"}.}
+\item{cluster_mem}{Character. Memory allocation (\code{--mem}). Defaults to \code{"16G"}.}
 
-\item{cluster_time}{Character. Time limit (\code{--time}). Defaults to \code{"12:00:00"}.}
+\item{cluster_time}{Character. Time limit (\code{--time}). Defaults to \code{"02:00:00"}.}
 
 \item{cluster_queue}{Character. Optional SLURM queue / QoS. Defaults to \code{NULL}.}
 
@@ -95,12 +95,11 @@ and the second lever is the one that matters once a search is already using an e
 count per worker. Running 50 starting trees on one worker executes 50 rounds; the same 50 trees
 across 25 workers execute 2.
 
-Reference timing for this workload, measured on an Apple M2 Pro (8 threads, \verb{--workers 1},
-\code{RAxML-NG} 1.2.2, SSE3 kernels) over a supermatrix of 986 terminals, 12700 sites, 5732 patterns
-and 11 partitions: 50 starting trees in 47115 s, approximately 938 s per tree. That figure is a
-per-worker baseline for one tree at 8 threads and does not transfer directly to a different
-architecture or SIMD kernel; treat it as an order of magnitude and confirm with a short trial run
-(\code{n_init_trees = "rand{2}"}) before committing a full allocation.
+Reference timing illustrating worker parallelization: on an Apple M2 Pro (8 threads, \verb{--workers 1},
+\code{RAxML-NG} 1.2.2, SSE3 kernels), searching 50 starting trees sequentially required 47115 s (~938 s per tree).
+In contrast, the production run on an HPC cluster node (AMD EPYC 9754, 75 threads, \verb{--workers 25}) over the
+full supermatrix (1023 terminals, 12806 sites, 5954 patterns, 11 partitions) completed 50 starting trees in
+2393 s (~40 minutes), executing two parallel rounds.
 
 \code{workers} is derived automatically and constrained to a divisor of the starting tree
 count, so that no worker sits idle in the final round.

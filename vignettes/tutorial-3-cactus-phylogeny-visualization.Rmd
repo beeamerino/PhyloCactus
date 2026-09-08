@@ -586,8 +586,8 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
       theme_tree() +
       geom_nodepoint(aes(fill = support_class), shape = 21, size = 2, stroke = 0.2, na.rm = TRUE) +
       scale_fill_manual(
-        values = c(">= 90" = "white", "70-89" = "grey", "< 70" = "black", "Constrained" = "skyblue"),
-        name = "Support (FBP) / Constraint",
+        values = c(">= 90" = "white", "70-89" = "grey", "< 70" = "black", "Constrained" = "steelblue"),
+        name = "Support (FBP)",
         na.translate = FALSE
       ) +
       theme(legend.position = "bottom")
@@ -749,7 +749,7 @@ treeio::write.beast(annotated_chrono, file = "9_Visualization/figures/annotated_
 > - Direct PDF Download: [`Figure_9_Chronogram_Extended.pdf`](https://raw.githubusercontent.com/beeamerino/PhyloCactus/main/extended_trees/Figure_9_Chronogram_Extended.pdf)
 > - Direct Tree Download: [`annotated_chronogram.tree`](https://raw.githubusercontent.com/beeamerino/PhyloCactus/main/extended_trees/annotated_chronogram.tree)
 
-#### Figure 10: Species Composition (Phylogeny vs. Checklist by Pipeline Status)
+#### Figure 10: Species Composition
 
 This figure summarizes the methodological composition of the taxonomic universe across pipeline stages, distinguishing taxa that were sampled and dated in the tree (985), sequenced identical duplicates collapsed by `RAxML-NG` (37), unsampled checklist gaps (943), and outgroup reference species (38).
 
@@ -761,7 +761,7 @@ p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(s
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
   theme_phylocactus(base_size = 12) +
   labs(
-    title = "Species Composition (Phylogeny vs Checklist)",
+    title = "Species Composition",
     subtitle = "Methodological status across checklist, supermatrix, and tree",
     x = NULL,
     y = "Number of species"
@@ -769,7 +769,7 @@ p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(s
 p10
 ```
 
-#### Figure 11: IUCN Categories in the Ingroup Phylogeny
+#### Figure 11: IUCN Categories
 
 This bar chart summarizes the distribution of IUCN Red List conservation categories among the ingroup species resolved in the final phylogenetic reconstruction.
 
@@ -784,7 +784,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     geom_col(width = 0.7) +
     theme_phylocactus(base_size = 12) +
     labs(
-      title = "IUCN Categories (Ingroup Phylogeny)",
+      title = "IUCN Categories",
       x = "Category",
       y = "Number of species"
     )
@@ -792,15 +792,15 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 }
 ```
 
-#### Figure 12: Molecular Completeness vs. IUCN Category by Pipeline Status
+#### Figure 12: Molecular Completeness vs. IUCN Category
 
-This plot compares molecular marker completeness against IUCN threat categories, faceted by pipeline status (`sampled_and_dated` vs `sequenced_collapsed_duplicate`), to test whether extinction risk correlates with missing molecular data or sequence collapse during phylogenetic inference.
+This plot compares molecular marker completeness across IUCN threat categories for sampled ingroup taxa resolved in the time-calibrated phylogeny, evaluating whether extinction risk correlates with missing molecular data.
 
-```{r figure_12_completeness_vs_iucn, eval = has_data, fig.width = 8.5}
+```{r figure_12_completeness_vs_iucn, eval = has_data, fig.width = 7, fig.height = 5}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   p12 <- ggplot(
     species_summary_iucn %>%
-      filter(status_pipeline %in% c("sampled_and_dated", "sequenced_collapsed_duplicate"),
+      filter(status_pipeline == "sampled_and_dated",
              iucn_found == TRUE,
              !is.na(iucn_category)),
     aes(x = iucn_category, y = pct_markers, fill = iucn_category)
@@ -808,14 +808,10 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     geom_violin(trim = FALSE, alpha = 0.5) +
     geom_boxplot(width = 0.2, outlier.size = 0.6, alpha = 0.8) +
     PhyloCactus::scale_fill_iucn(name = "IUCN Category") +
-    facet_wrap(~ status_pipeline, labeller = as_labeller(c(
-      "sampled_and_dated" = "Sampled & Dated in Tree (N = 985)",
-      "sequenced_collapsed_duplicate" = "Sequenced Collapsed Duplicates (N = 37)"
-    ))) +
     theme_phylocactus(base_size = 12) +
     labs(
-      title = "Molecular Completeness vs IUCN Category by Pipeline Status",
-      subtitle = "Comparison of marker occupancy between retained tips and collapsed identical sequences",
+      title = "Molecular Completeness vs IUCN Category",
+      subtitle = "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 985)",
       x = "IUCN Category",
       y = "Marker completeness (%)"
     )
@@ -846,7 +842,7 @@ p13 <- ggplot(plot_gaps_genus %>% filter(genus %in% top_gap_genera),
   theme_phylocactus(base_size = 12) +
   theme(axis.text.y = element_text(face = "italic")) +
   labs(
-    title = "Threatened Unsampled Species by Genus (Sampling Gaps)",
+    title = "Threatened Unsampled Species by Genus",
     subtitle = "Priority Cactaceae taxa (CR, EN, VU) lacking molecular sequences",
     x = "Genus",
     y = "Number of threatened unsequenced species"
@@ -871,7 +867,7 @@ if (any(species_summary_iucn$iucn_is_endemic, na.rm = TRUE)) {
     coord_flip() +
     theme_phylocactus(base_size = 12) +
     labs(
-      title = "Endemic Species by Country (Ingroup Phylogeny)",
+      title = "Endemic Species by Country",
       x = "Country",
       y = "Number of endemic species"
     )
@@ -927,7 +923,7 @@ if (any(!is.na(species_summary_iucn$iucn_threat_names))) {
       coord_flip() +
       theme_phylocactus(base_size = 12) +
       labs(
-        title = "Most Common Threats (Ingroup Phylogeny)",
+        title = "Most Common Threats",
         x = "Threat",
         y = "Number of species"
       )
@@ -954,7 +950,7 @@ if (any(!is.na(species_summary_iucn$iucn_habitat_names))) {
       coord_flip() +
       theme_phylocactus(base_size = 12) +
       labs(
-        title = "Most Common Habitats (Ingroup Phylogeny)",
+        title = "Most Common Habitats",
         x = "Habitat",
         y = "Number of species"
       )

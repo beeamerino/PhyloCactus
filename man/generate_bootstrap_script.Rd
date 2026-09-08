@@ -38,23 +38,23 @@ generate_bootstrap_script(
 
 \item{outgroup}{Character vector of terminals passed to \code{RAxML-NG --outgroup}, or \code{NULL} (default); multiple terminals are joined with commas. \code{RAxML-NG} writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by \code{automate_treePL()} via \code{ape::root(..., resolve.root = TRUE)}. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with \code{resolve_rooting_outgroup()} rather than naming a terminal by hand.}
 
-\item{bs_per_rep}{Integer. Number of bootstrap trees generated per chunk replicate. Defaults to \code{250}.}
+\item{bs_per_rep}{Integer. Number of bootstrap trees generated per chunk replicate. Defaults to \code{500}.}
 
-\item{max_reps}{Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (\code{1-max_reps}). Defaults to \code{4},
+\item{max_reps}{Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (\code{1-max_reps}). Defaults to \code{2},
 giving a total array target of \code{bs_per_rep * max_reps = 1000} bootstrap trees. This provides a safety margin over the autoMRE
-convergence point observed in a production run of this exact dataset (986 taxa, 11 partitions), which converged (\code{bs-cutoff = 0.03},
-TBE) after 650 of 1200 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
+convergence point observed in a production run of this exact dataset (1023 taxa, 11 partitions), which converged (\code{bs-cutoff = 0.03},
+FBP) after 600 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
 sampling scheme. Always confirm convergence with \code{check_bs_convergence()} on the collected trees (via \code{collect_bootstraps()}) rather
 than assuming \code{bs_per_rep * max_reps} is sufficient; increase \code{max_reps} and re-run \code{collect_bootstraps()} if it is not.}
 
 \item{base_seed}{Integer. Base random seed for dynamic seed calculation (\verb{SEED=$(( SLURM_ARRAY_TASK_ID * base_seed ))}). Defaults to \code{NULL} (random).}
 
-\item{threads}{Integer. Number of CPU cores requested per SLURM task (\code{--cpus-per-task}). Defaults to \code{64} (Leftraru Epu standard allocation).}
+\item{threads}{Integer. Number of CPU cores requested per SLURM task (\code{--cpus-per-task}). Defaults to \code{40}.}
 
 \item{workers}{Integer. Number of RAxML-NG worker processes. If \code{NULL} (default), calculated dynamically as \code{max(1L, as.integer(threads / threads_per_worker))}.}
 
-\item{threads_per_worker}{Integer. Thread-to-worker ratio used to derive \code{workers} when \code{workers = NULL}. Defaults to \code{6L}
-(empirically validated for this workload on a 128-core AMD EPYC node; see Details). Ignored if \code{workers} is set explicitly.}
+\item{threads_per_worker}{Integer. Thread-to-worker ratio used to derive \code{workers} when \code{workers = NULL}. Defaults to \code{4L}
+(empirically validated for this workload on an AMD EPYC node; see Details). Ignored if \code{workers} is set explicitly.}
 
 \item{preparse}{Logical. Generate compressed binary \code{.rba} format with \code{raxml-ng --parse} prior to array execution to minimize disk I/O contention? Defaults to \code{TRUE}.}
 
@@ -68,7 +68,7 @@ than assuming \code{bs_per_rep * max_reps} is sufficient; increase \code{max_rep
 
 \item{cluster_nodes}{Integer. Number of compute nodes requested (\verb{--nodes}). Defaults to \code{1L}.}
 
-\item{cluster_mem}{Character. Memory allocation string for SLURM (\code{--mem}). Defaults to \code{"64G"}.}
+\item{cluster_mem}{Character. Memory allocation string for SLURM (\code{--mem}). Defaults to \code{"10G"}.}
 
 \item{cluster_time}{Character. Time limit allocation string for SLURM (\code{--time}). Defaults to \code{"24:00:00"}.}
 
@@ -90,10 +90,9 @@ Uses coarse-grained parallelization via Slurm Job Arrays (\verb{#SBATCH --array=
 to optimize disk I/O, dynamic per-task seed multiplication for statistical independence, and a configurable thread-to-worker ratio.
 }
 \details{
-The default \code{threads_per_worker = 6L} is empirically calibrated from a successful production run of this exact
-bootstrap workload (400 TBE bootstrap replicates, 986 taxa, 11 partitions) on a 128-core AMD EPYC node using
-\verb{--threads 120 --workers 20} (6 threads per worker), completed in ~5.8 h. This ratio is dataset- and
-hardware-dependent (it trades per-worker single-tree search speed against the number of trees searched in
+The default \code{threads_per_worker = 4L} is configured to optimize throughput on multi-core compute nodes. In a production run of this workload
+(1023 taxa, 11 partitions), using \verb{--threads 40 --workers 10} (4 threads per worker) on an AMD EPYC node provided efficient per-worker
+memory and CPU allocation. This ratio is dataset- and hardware-dependent (it trades per-worker single-tree search speed against the number of trees searched in
 parallel); if you migrate to different node hardware or a markedly different supermatrix size, re-validate it
 empirically with a short trial run before committing a full job array to it.
 }

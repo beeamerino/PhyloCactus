@@ -4,7 +4,10 @@
 \alias{resolve_rooting_outgroup}
 \title{Resolve the Set of Rooting Terminals from a Tip Label Vector}
 \usage{
-resolve_rooting_outgroup(tip_labels, pattern = "^(Portulaca|Talinum|Talinella)_")
+resolve_rooting_outgroup(
+  tip_labels,
+  pattern = "^(Portulaca|Talinum|Talinella)_"
+)
 }
 \arguments{
 \item{tip_labels}{Character vector of terminal labels, typically \code{phylo$tip.label} or the row

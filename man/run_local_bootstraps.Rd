@@ -50,7 +50,7 @@ Character path to the output bootstrap trees file (\code{.raxml.bootstraps}).
 }
 \description{
 Performs non-parametric bootstrap resampling over supermatrix site columns to infer a distribution of bootstrap tree topologies (\code{RAxML-NG}).
-Evaluates topological variation under non-parametric resampling to quantify node support via Transfer Bootstrap Expectation (TBE).
+Evaluates topological variation under non-parametric resampling to quantify node support via Felsenstein Bootstrap Proportions (FBP) or Transfer Bootstrap Expectation (TBE).
 Optimizes multi-threading for local workstations (e.g., Apple Silicon) by allocating threads to Performance cores (P-cores)
 and configuring parallel workers according to a configurable thread-to-worker ratio, avoiding thread contention with
 Efficiency cores (E-cores).
