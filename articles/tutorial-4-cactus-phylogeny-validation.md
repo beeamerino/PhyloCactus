@@ -1,4 +1,4 @@
-# Tutorial 4: Phylogenetic Validation and Sub-tree Comparisons
+# Tutorial 4: Phylogenetic Validation and Comparative Analyses
 
 ## Abstract
 

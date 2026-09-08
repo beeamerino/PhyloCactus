@@ -88,10 +88,11 @@ PhyloCactus Workflow Architecture
     12)**  
     Enriches the phylogenetic framework with species-level conservation
     attributes retrieved automatically from the IUCN Red List database
-    via `rredlist`. Collapses weakly supported internal nodes (FBP
-    \< 70) into soft polytomies to prevent over-interpreting unresolved
-    rapid radiation nodes, and renders publication-ready phylogenetic
-    figures, chronograms, and conservation cadastres using `ggplot2`.
+    via `rredlist`. Collapses weakly supported internal nodes (FBP \<
+    0.70, `collapse_cutoff`) into soft polytomies to prevent
+    over-interpreting unresolved rapid radiation nodes, and renders
+    publication-ready phylogenetic figures, chronograms, and
+    conservation cadastres using `ggplot2`.
 
 4.  **Stage 4: Validation and Sub-tree Comparisons (Module 13)**  
     Quantifies topological congruence between the focal supermatrix tree

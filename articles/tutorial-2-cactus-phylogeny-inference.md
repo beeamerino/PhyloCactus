@@ -1,4 +1,4 @@
-# Tutorial 2: Phylogenetics Pipeline: Inference & Dating
+# Tutorial 2: Phylogenetic Inference and Divergence Time Estimation
 
 ## Abstract
 
@@ -1041,9 +1041,15 @@ if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
   cat("     - Number of tips:", length(ml_chronogram$tip.label), "\n")
 
   # A node whose age equals one of its own bounds was not estimated: penalized likelihood returned
-  # the constraint. In the August 2026 run all five calibrated nodes came back on a bound and the
-  # chronogram gave no sign of it.
-  adherence <- report_bound_adherence(ml_chronogram, calibs, constraints)
+  # the constraint, and the chronogram gives no sign of it. ACP_root is fixed (min = max), so it
+  # sits on its bound by construction; the other three calibrations are expected to be estimated.
+  # The bootstrap chronograms are passed deliberately: a single point estimate can land just inside
+  # a bound while the underlying age is unidentifiable, and only the replicates separate the two.
+  bs_chronograms <- file.path(dating_dir, "bsTree_treePL.tree")
+  adherence <- report_bound_adherence(
+    ml_chronogram, calibs, constraints,
+    bootstraps = if (file.exists(bs_chronograms)) bs_chronograms else NULL
+  )
   cat("\n   Calibrated node ages against their bounds:\n")
   print(adherence)
 }

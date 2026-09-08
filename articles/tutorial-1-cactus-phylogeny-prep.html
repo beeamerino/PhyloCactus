@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Tutorial 1: Phylogenetic Pipeline: Data Assembly and Preparation • PhyloCactus</title>
+<title>Tutorial 1: Data Assembly and Preparation • PhyloCactus</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tutorial 1: Phylogenetic Pipeline: Data Assembly and Preparation">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tutorial 1: Data Assembly and Preparation">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -63,7 +63,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Tutorial 1: Phylogenetic Pipeline: Data Assembly and Preparation</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Tutorial 1: Data Assembly and Preparation</h1>
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
@@ -583,7 +583,7 @@ percentage, plus the number of standardized loci mined per taxonomic
 group (<strong>Cactaceae</strong>, <strong>Anacampserotaceae</strong>,
 <strong>Portulacaceae</strong>, <strong>Talinaceae</strong>) at Stage 1.
 Every row that depends on what survives the joint realignment, both the
-“Final loci retained” counts and the outgroup and joint
+“Final loci retained” counts and the ingroup, outgroup and joint
 <strong>species</strong> counts, is written here as a provisional
 (pre-realignment) value and overwritten in place by
 <code><a href="../reference/run_concatenation_pipeline.html">run_concatenation_pipeline()</a></code> (Module 6) once the true
@@ -737,6 +737,15 @@ loci that remain. The report does not block: whether such a locus
 belongs in a matrix depends on the analysis the matrix is for, and a
 nuclear locus with no outgroup coverage is unusable for dating and
 valuable for species discrimination.</p>
+<p>Passing a <strong>named</strong> vector rather than a single
+expression resolves the outgroup by family, adding
+<code>n_&lt;family&gt;</code>, <code>n_&lt;family&gt;_covered</code> and
+<code>median_cov_&lt;family&gt;</code> to
+<code>logs_and_qc/SUPP_TABLE_marker_group_coverage.csv</code>. That
+distinction matters here because the three outgroup families are not
+sampled alike: a combined count can look adequate while one family, and
+in particular the one that carries the root, is absent from the locus
+entirely.</p>
 <p>The <code><a href="../reference/run_concatenation_pipeline.html">run_concatenation_pipeline()</a></code> function combines the
 aligned markers, matches taxa across loci, inserts missing data
 characters (<code>-</code>) where accessions are absent, and calculates
@@ -773,7 +782,11 @@ discriminating of the two nuclear markers for barcoding.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/run_concatenation_pipeline.html">run_concatenation_pipeline</a></span><span class="op">(</span></span>
 <span>  input_dir <span class="op">=</span> <span class="st">"5_MAFFT_Cleaned/aligned_markers"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="st">"6_Concatenated"</span>,</span>
-<span>  outgroup_pattern <span class="op">=</span> <span class="st">"^(Anacampseros|Grahamia|Talinopsis|Portulaca|Talinum|Talinella)_"</span>,</span>
+<span>  outgroup_pattern <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>    Anacampserotaceae <span class="op">=</span> <span class="st">"^(Anacampseros|Grahamia|Talinopsis)_"</span>,</span>
+<span>    Portulacaceae     <span class="op">=</span> <span class="st">"^Portulaca_"</span>,</span>
+<span>    Talinaceae        <span class="op">=</span> <span class="st">"^(Talinum|Talinella)_"</span></span>
+<span>  <span class="op">)</span>,</span>
 <span>  exclude_markers <span class="op">=</span> <span class="st">"phyC"</span>   <span class="co"># NULL to retain all loci</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>

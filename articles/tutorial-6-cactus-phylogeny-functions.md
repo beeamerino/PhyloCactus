@@ -1,4 +1,4 @@
-# Tutorial 6: Core Pipeline Functions & Methodological Dictionary
+# Tutorial 6: Core Pipeline Functions and Methodological Dictionary
 
 ## Overview and Methodological Dictionary
 

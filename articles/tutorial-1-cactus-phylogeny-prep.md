@@ -1,4 +1,4 @@
-# Tutorial 1: Phylogenetic Pipeline: Data Assembly and Preparation
+# Tutorial 1: Data Assembly and Preparation
 
 ## Abstract
 
@@ -506,8 +506,8 @@ function organizes all curated outputs into structured subdirectories:
       **Anacampserotaceae**, **Portulacaceae**, **Talinaceae**) at
       Stage 1. Every row that depends on what survives the joint
       realignment, both the “Final loci retained” counts and the
-      outgroup and joint **species** counts, is written here as a
-      provisional (pre-realignment) value and overwritten in place by
+      ingroup, outgroup and joint **species** counts, is written here as
+      a provisional (pre-realignment) value and overwritten in place by
       [`run_concatenation_pipeline()`](https://beeamerino.github.io/PhyloCactus/reference/run_concatenation_pipeline.md)
       (Module 6) once the true post-realignment supermatrix exists. This
       single file therefore holds the definitive counts after Module 6
@@ -658,6 +658,14 @@ report does not block: whether such a locus belongs in a matrix depends
 on the analysis the matrix is for, and a nuclear locus with no outgroup
 coverage is unusable for dating and valuable for species discrimination.
 
+Passing a **named** vector rather than a single expression resolves the
+outgroup by family, adding `n_<family>`, `n_<family>_covered` and
+`median_cov_<family>` to
+`logs_and_qc/SUPP_TABLE_marker_group_coverage.csv`. That distinction
+matters here because the three outgroup families are not sampled alike:
+a combined count can look adequate while one family, and in particular
+the one that carries the root, is absent from the locus entirely.
+
 The
 [`run_concatenation_pipeline()`](https://beeamerino.github.io/PhyloCactus/reference/run_concatenation_pipeline.md)
 function combines the aligned markers, matches taxa across loci, inserts
@@ -697,7 +705,11 @@ nuclear markers for barcoding.
 run_concatenation_pipeline(
   input_dir = "5_MAFFT_Cleaned/aligned_markers",
   output_dir = "6_Concatenated",
-  outgroup_pattern = "^(Anacampseros|Grahamia|Talinopsis|Portulaca|Talinum|Talinella)_",
+  outgroup_pattern = c(
+    Anacampserotaceae = "^(Anacampseros|Grahamia|Talinopsis)_",
+    Portulacaceae     = "^Portulaca_",
+    Talinaceae        = "^(Talinum|Talinella)_"
+  ),
   exclude_markers = "phyC"   # NULL to retain all loci
 )
 ```
