@@ -1,3 +1,69 @@
+#' Check the Internal Arithmetic of TABLE_dataset_species_summary.csv
+#'
+#' Internal helper used by `run_concatenation_pipeline()`. The species summary is written by Stage 4
+#' and revised by Stage 6, metric by metric. A revision that reaches one row and not the rows derived
+#' from it leaves the published table contradicting itself, which is what happened to the recovery
+#' rate: the retained count was revised to 1022 and the rate stayed at 53.59 %, which is 1053/1965.
+#' Three identities have to hold whatever stage wrote which row, and they are checked here rather
+#' than left to a reader recomputing them.
+#'
+#' The function reports and does not block. A summary table that does not add up is a defect in the
+#' reporting, not a reason to discard a supermatrix that is already built.
+#'
+#' @param df Data frame with `metric` and `value` columns, as read from the summary CSV.
+#' @param tol Numeric. Tolerance on the recovery rate, in percentage points, to absorb the rounding
+#'   of the published figure. Defaults to `0.01`.
+#' @return Invisibly `TRUE` when the three identities hold, `FALSE` otherwise.
+#' @noRd
+.check_species_summary_arithmetic <- function(df, tol = 0.01) {
+  # The recovery rate is written with a trailing per cent sign by Stage 4. Read through a bare
+  # as.numeric() it comes back NA, and every identity that involves it is then skipped in silence,
+  # which is the opposite of what this function is for.
+  get_num <- function(metric) {
+    row <- which(df$metric == metric)
+    if (length(row) != 1L) return(NA_real_)
+    suppressWarnings(as.numeric(trimws(sub("%\\s*$", "", df$value[row]))))
+  }
+
+  problems <- character(0)
+
+  n_anacampserotaceae <- get_num("Unique Anacampserotaceae outgroup species retained")
+  n_portulacaceae     <- get_num("Unique Portulacaceae outgroup species retained")
+  n_talinaceae        <- get_num("Unique Talinaceae outgroup species retained")
+  n_outgroup          <- get_num("Total unique outgroup species retained")
+  n_ingroup           <- get_num("Accepted unique ingroup species retained (Cactaceae)")
+  n_joint             <- get_num("Total unique species in final dataset (Joint)")
+  n_checklist         <- get_num("Total accepted species in Cactaceae checklist (Focal Ingroup)")
+  rate                <- get_num("Cactaceae focal species recovery rate (%)")
+
+  families <- c(n_anacampserotaceae, n_portulacaceae, n_talinaceae)
+  if (all(is.finite(c(families, n_outgroup))) && sum(families) != n_outgroup) {
+    problems <- c(problems, sprintf(
+      "the three outgroup families sum to %g and the outgroup total reads %g",
+      sum(families), n_outgroup))
+  }
+
+  if (all(is.finite(c(n_ingroup, n_outgroup, n_joint))) && n_ingroup + n_outgroup != n_joint) {
+    problems <- c(problems, sprintf(
+      "ingroup plus outgroup is %g and the joint total reads %g",
+      n_ingroup + n_outgroup, n_joint))
+  }
+
+  if (all(is.finite(c(n_ingroup, n_checklist, rate))) && n_checklist > 0 &&
+      abs(rate - 100 * n_ingroup / n_checklist) > tol) {
+    problems <- c(problems, sprintf(
+      "the recovery rate reads %g %% and the retained count implies %.2f %%",
+      rate, 100 * n_ingroup / n_checklist))
+  }
+
+  if (length(problems) > 0L) {
+    warning("TABLE_dataset_species_summary.csv does not add up: ",
+            paste(problems, collapse = "; "), ".", call. = FALSE)
+    return(invisible(FALSE))
+  }
+  invisible(TRUE)
+}
+
 #' Concatenate Locus Alignments and Build Partition Coordinate Maps
 #'
 #' Concatenates individual orthologous locus alignments end-to-end into a unified multilocus supermatrix.
@@ -81,19 +147,6 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
     write(msg, file = file_log, append = TRUE)
   }
 
-  # A marker whose coverage sits entirely on one side of the root contributes columns that the
-  # other side cannot share, and concatenation then assigns branch length where no character is
-  # held in common. Reported, never blocking: whether such a marker belongs in the matrix is a
-  # decision about the analysis, not something a concatenation routine should settle.
-  if (!is.null(outgroup_pattern)) {
-    report_marker_group_coverage(
-      input_dir       = input_dir,
-      outgroup_pattern = outgroup_pattern,
-      min_coverage    = min_coverage,
-      out_csv         = file.path(logs_dir, "SUPP_TABLE_marker_group_coverage.csv")
-    )
-  }
-
   clean_name <- function(x) {
     x <- sapply(strsplit(x, "\\|"), `[`, 1)
     x <- tolower(x); x <- gsub("[^a-z0-9 ]", " ", x); x <- gsub("\\s+", " ", x); x <- trimws(x)
@@ -168,6 +221,25 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
       stop("`exclude_markers` removed every alignment in `input_dir`; nothing left to concatenate.",
            call. = FALSE)
     }
+  }
+
+  # A marker whose coverage sits entirely on one side of the root contributes columns that the
+  # other side cannot share, and concatenation then assigns branch length where no character is
+  # held in common. Reported, never blocking: whether such a marker belongs in the matrix is a
+  # decision about the analysis, not something a concatenation routine should settle.
+  #
+  # The call sits after the `exclude_markers` filter, and is passed the same exclusion, so that the
+  # table describes the partitions the supermatrix actually has. Run before the filter it reported
+  # on every alignment present in `input_dir`, including the ones the run had just been told to
+  # leave out, and a reader comparing it against the partition file found rows with no partition.
+  if (!is.null(outgroup_pattern)) {
+    report_marker_group_coverage(
+      input_dir        = input_dir,
+      outgroup_pattern = outgroup_pattern,
+      min_coverage     = min_coverage,
+      out_csv          = file.path(logs_dir, "SUPP_TABLE_marker_group_coverage.csv"),
+      exclude_markers  = exclude_markers
+    )
   }
 
   all_alignments <- list()
@@ -281,6 +353,21 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
     aln_len <- ncol(aln_char)
     stats_list[[marker]] <- compute_marker_stats(aln_char, marker)
     
+    # Matrix assignment by name takes the first match. With a duplicated terminal name the second
+    # record is discarded, no error is raised and nothing records which of the two entered the
+    # supermatrix: in the published run this silently kept the 274-site copy of two Portulaca
+    # terminals and dropped the 463 and 314-site ones, because the file they came from sorted
+    # second. The duplication has a cause upstream and has to be resolved there, so it is refused
+    # here rather than arbitrated.
+    dup <- rownames(aln_char)[duplicated(rownames(aln_char))]
+    if (length(dup) > 0L) {
+      stop("Marker '", marker, "' carries duplicated terminal names: ",
+           paste(unique(dup), collapse = ", "),
+           ". Matrix assembly would keep whichever row comes first and discard the rest without ",
+           "reporting it. Resolve the duplication upstream, in integrate_and_clean_markers().",
+           call. = FALSE)
+    }
+
     aln_full <- matrix("-", nrow = length(taxa_all), ncol = aln_len, dimnames = list(taxa_all, NULL))
     common_taxa <- intersect(rownames(aln_char), taxa_all)
     aln_full[common_taxa, ] <- aln_char[common_taxa, , drop = FALSE]
@@ -372,6 +459,20 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
 
   if (file.exists(species_summary_file)) {
     species_summary_df <- readr::read_csv(species_summary_file, show_col_types = FALSE)
+
+    # The recovery rate is a quotient of two rows of this same table. Stage 6 revised the numerator
+    # and left the rate at its Stage 4 value, so the published table asserted 1022 species retained
+    # and a rate of 53.59 %, which is 1053/1965. The denominator is read back from the checklist row,
+    # which no stage after Stage 4 revises, so the two figures are derived from one another here and
+    # cannot drift apart again.
+    checklist_row <- which(species_summary_df$metric ==
+                             "Total accepted species in Cactaceae checklist (Focal Ingroup)")
+    n_checklist_ingroup <- if (length(checklist_row) == 1L) {
+      suppressWarnings(as.numeric(species_summary_df$value[checklist_row]))
+    } else {
+      NA_real_
+    }
+
     final_values <- dplyr::tribble(
       ~metric, ~value, ~details,
       "Final loci retained (Cactaceae Ingroup)", as.character(n_final_loci_cactaceae), "Loci with real (non-gap) sequence for Cactaceae in the final, realigned supermatrix (Stage 6)",
@@ -386,6 +487,24 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
       "Total unique outgroup species retained", as.character(n_final_sp_outgroup), "Total outgroup terminals in the final, realigned supermatrix (Anacampserotaceae + Portulacaceae + Talinaceae, Stage 6)",
       "Total unique species in final dataset (Joint)", as.character(n_final_sp_joint), "Total terminals in the final concatenated supermatrix (Stage 6)"
     )
+
+    if (is.finite(n_checklist_ingroup) && n_checklist_ingroup > 0) {
+      final_values <- dplyr::add_row(
+        final_values,
+        metric  = "Cactaceae focal species recovery rate (%)",
+        # Written with the per cent sign, as Stage 4 writes it in R/screening.R. One row must not
+        # change format depending on which stage last touched it.
+        value   = paste0(formatC(round(100 * n_final_sp_ingroup / n_checklist_ingroup, 2),
+                                 format = "f", digits = 2), "%"),
+        details = "Cactaceae terminals in the final, realigned supermatrix divided by the accepted Cactaceae checklist (Stage 6)"
+      )
+    } else {
+      warning("Could not update 'Cactaceae focal species recovery rate (%)': the Cactaceae ",
+              "checklist row of TABLE_dataset_species_summary.csv is missing or not numeric. The ",
+              "rate still carries its Stage 4 value and does not match the retained count.",
+              call. = FALSE)
+    }
+
     for (i in seq_len(nrow(final_values))) {
       row_match <- species_summary_df$metric == final_values$metric[i]
       if (any(row_match)) {
@@ -430,6 +549,8 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
     rank <- match(species_summary_df$metric, canonical_order)
     rank[is.na(rank)] <- length(canonical_order) + seq_len(sum(is.na(rank)))
     species_summary_df <- species_summary_df[order(rank), , drop = FALSE]
+
+    .check_species_summary_arithmetic(species_summary_df)
 
     readr::write_csv(species_summary_df, species_summary_file)
   } else {
@@ -563,6 +684,10 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
 #' @param min_coverage Numeric. Fraction of non-gap, non-missing characters at which a terminal
 #'   counts as covered by that marker. Defaults to `0.2`.
 #' @param out_csv Character or `NULL`. Path to write the table to. Defaults to `NULL`.
+#' @param exclude_markers Character vector or `NULL`. Markers to leave out of the report, named as
+#'   they appear in `input_dir` without the file extension and without any `Masked_` prefix. Passed
+#'   through by [run_concatenation_pipeline()] so that the coverage table describes the partitions
+#'   the supermatrix has, not every alignment the folder holds. Defaults to `NULL`.
 #' @return Invisibly, a data frame with one row per marker: alignment length, terminals and
 #'   covered terminals on each side, and the median coverage of each side.
 #' @examples
@@ -578,10 +703,19 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
 #' }
 #' @export
 report_marker_group_coverage <- function(input_dir, outgroup_pattern, min_coverage = 0.2,
-                                         out_csv = NULL) {
+                                         out_csv = NULL, exclude_markers = NULL) {
   files <- list.files(input_dir, pattern = "\\.fasta$", full.names = TRUE)
   if (length(files) == 0L) {
     stop("No FASTA files found in '", input_dir, "'.", call. = FALSE)
+  }
+
+  if (!is.null(exclude_markers) && length(exclude_markers) > 0L) {
+    marker_names <- sub("^Masked_", "", tools::file_path_sans_ext(basename(files)))
+    files <- files[!marker_names %in% as.character(exclude_markers)]
+    if (length(files) == 0L) {
+      stop("`exclude_markers` removed every alignment in '", input_dir, "'; nothing left to report.",
+           call. = FALSE)
+    }
   }
 
   combined_pattern <- if (length(outgroup_pattern) > 1L) {

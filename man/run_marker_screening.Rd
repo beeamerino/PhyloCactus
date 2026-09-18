@@ -36,7 +36,7 @@ This module asks whether a locus resolves the ingroup radiation, and the answer 
 
 \item{max_marker_missing}{Numeric. Maximum allowable missing data fraction per locus. Defaults to \code{0.7}.}
 
-\item{saturation_flag_cutoff}{Numeric. Uncorrected p-distance vs. raw distance slope threshold to flag substitution saturation. Defaults to \code{0.3}.}
+\item{saturation_flag_cutoff}{Numeric. Slope threshold below which the locus is flagged. The regression is uncorrected p-distance against a Gamma-corrected K80 distance, as documented in \code{saturation_method}. Defaults to \code{0.3}.}
 
 \item{saturation_keep_cutoff}{Numeric. Saturation slope cutoff threshold below which saturated loci are excluded. Defaults to \code{0.5}.}
 

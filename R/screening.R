@@ -13,7 +13,8 @@
 #'   toward >= 1.0). Defaults to `"corrected"`.
 #' @param saturation_flag_cutoff Numeric. Slope threshold below which the locus is flagged as saturated. Defaults to `0.3`.
 #' @return A list with `slope` (numeric regression slope or `NA`), `saturated` (logical or `NA`), and
-#'   `reason` (character diagnostic code: `"ok"`, `"insufficient_data"`, `"variance_na"`, or `"regression_failed"`).
+#'   `reason` (character diagnostic code: `"ok"`, `"insufficient_data"`, `"variance_na"`,
+#'   `"regression_failed"`, or `"degenerate_fit"`).
 #' @noRd
 .test_saturation_proxy <- function(dna_bin, saturation_method = c("corrected", "legacy"), saturation_flag_cutoff = 0.3) {
   saturation_method <- match.arg(saturation_method)
@@ -36,7 +37,73 @@
   fit <- tryCatch(stats::lm(y ~ x, data = df), error = function(e) NULL)
   if (is.null(fit)) return(list(slope = NA_real_, saturated = NA, reason = "regression_failed"))
   slope <- unname(stats::coef(fit)[2])
+  # A slope indistinguishable from zero is not an eroded slope, it is a regression that carries no
+  # information: the two distance vectors were effectively constant, or one of them collapsed. Read
+  # through `isTRUE(slope < saturation_flag_cutoff)` such a fit is flagged as saturated on the
+  # strength of a coefficient of the order of 1e-17, which is what put `trnL-trnF` in the published
+  # screening table as the only saturated locus of the seventeen. The cause of the degenerate fit is
+  # not diagnosed here; what is asserted is that the flag cannot be derived from it.
+  if (!is.finite(slope) || abs(slope) < 1e-8) {
+    return(list(slope = slope, saturated = NA, reason = "degenerate_fit"))
+  }
   list(slope = slope, saturated = isTRUE(slope < saturation_flag_cutoff), reason = "ok")
+}
+
+#' Resolve Duplicated FASTA Headers Produced by Marker Aliasing
+#'
+#' Internal helper used by `integrate_and_clean_markers()`. `marker_aliases` can point two source
+#' files at the same `marker_key`; when both carry a record for the same species, that species enters
+#' the exported marker twice under one header. Nothing downstream refuses such a set. Matrix assembly
+#' assigns rows by name and takes the first match, so the second record is discarded silently and by
+#' file order, which is how the published supermatrix came to carry the 274-site copy of two
+#' *Portulaca* rooting terminals and not the 463 and 314-site ones.
+#'
+#' The rule applied here is declared rather than incidental: retain the record with the greatest
+#' number of non-gap sites, break ties on the source file name so that the result does not depend on
+#' the order in which the directory was listed, and report every competing record. Extracted as a
+#' standalone, independently testable package-internal function.
+#'
+#' @param aln A `DNAStringSet` for one marker, names being the FASTA headers.
+#' @param source_file Character vector, parallel to `aln`, naming the file each record came from.
+#' @param marker_key Character. The marker the set belongs to, carried into the report.
+#' @param species_fn Function mapping a header to a species binomial.
+#' @return A list with `aln` (the deduplicated `DNAStringSet`) and `collisions` (a tibble with one
+#'   row per competing record: `marker_key`, `species`, `fasta_name`, `source_file`, `n_non_gap` and
+#'   `retained`). Emits a `warning()` naming the affected headers when there is anything to resolve.
+#' @noRd
+.resolve_alias_collisions <- function(aln, source_file, marker_key,
+                                      species_fn = extract_species_binomial) {
+  empty <- dplyr::tibble(marker_key = character(0), species = character(0),
+                         fasta_name = character(0), source_file = character(0),
+                         n_non_gap = integer(0), retained = logical(0))
+  dup_names <- unique(names(aln)[duplicated(names(aln))])
+  if (length(dup_names) == 0L) return(list(aln = aln, collisions = empty))
+
+  n_non_gap <- as.integer(Biostrings::width(aln) -
+                            Biostrings::letterFrequency(aln, letters = "-"))
+  ord <- order(names(aln), -n_non_gap, source_file)
+  aln <- aln[ord]
+  source_file <- source_file[ord]
+  n_non_gap <- n_non_gap[ord]
+  is_dropped <- duplicated(names(aln))
+
+  collisions <- dplyr::filter(
+    dplyr::tibble(
+      marker_key  = marker_key,
+      species     = unname(vapply(names(aln), species_fn, character(1))),
+      fasta_name  = names(aln),
+      source_file = source_file,
+      n_non_gap   = n_non_gap,
+      retained    = !is_dropped
+    ),
+    fasta_name %in% dup_names
+  )
+
+  warning(sprintf(
+    "Marker '%s': %d duplicated FASTA header(s) contributed by aliased source files (%s). The record with the most non-gap sites was retained for each; see tables/TABLE_alias_collisions_resolved.csv.",
+    marker_key, length(dup_names), paste(dup_names, collapse = ", ")), call. = FALSE)
+
+  list(aln = aln[!is_dropped], collisions = collisions)
 }
 
 #' Fraction of outgroup k-mers present in the ingroup sequences of the same marker
@@ -126,7 +193,7 @@
 #'
 #'   This module asks whether a locus resolves the ingroup radiation, and the answer cannot depend on how many outgroup accessions exist. `trnT-psbD` is the case that forced the distinction: 50 ingroup sequences against a threshold of 100, correctly rejected as an ingroup marker, while carrying 49 Portulaca accessions of 1347 bp that are the best outgroup coverage in the dataset. Bringing it back is a decision about connecting the two groups, which belongs to [integrate_and_clean_markers()] and its `readmit_markers` argument, not to a sequence count here.
 #' @param max_marker_missing Numeric. Maximum allowable missing data fraction per locus. Defaults to `0.7`.
-#' @param saturation_flag_cutoff Numeric. Uncorrected p-distance vs. raw distance slope threshold to flag substitution saturation. Defaults to `0.3`.
+#' @param saturation_flag_cutoff Numeric. Slope threshold below which the locus is flagged. The regression is uncorrected p-distance against a Gamma-corrected K80 distance, as documented in `saturation_method`. Defaults to `0.3`.
 #' @param saturation_keep_cutoff Numeric. Saturation slope cutoff threshold below which saturated loci are excluded. Defaults to `0.5`.
 #' @param iqr_multiplier Numeric. Interquartile range (IQR) multiplier for identifying site-length outlier bounds. Defaults to `1.5`.
 #' @param saturation_method Character. Method for saturation test distance calculation. Defaults to `"corrected"`.
@@ -421,6 +488,16 @@ run_marker_screening <- function(
 #' @param homology_check Logical. For every marker present on both sides, measure the fraction of outgroup k-mers that occur in the ingroup sequences of the same name, write `tables/TABLE_marker_homology_check.csv`, and warn about the markers that share almost none. The measure is alignment-free, so it distinguishes sequences that are hard to align from sequences that are not the same region. Reported, never blocking. Defaults to `TRUE`.
 #' @param homology_k20_min,homology_k10_min Numeric. A marker is flagged `no_detectable_homology` when it falls below **both**, at `k = 20` and `k = 10` respectively. Genuine counterparts in this dataset return 0.28 to 0.60 at `k = 20`; the two false pairs found on 2026-09-01 returned 0.000 (`pepC`, two PEPC paralogues) and 0.039 (`trnT-psbD`, ingroup median 598 bp against outgroup 1347 bp). Default to `0.05` and `0.15`.
 #' @return A data frame containing the comprehensive marker summary with decoupled ingroup and joint metrics.
+#' @section Alias collisions:
+#' `marker_aliases` can point two source files at the same `marker_key`. When both carry a record for
+#' the same species, that species appears twice under one FASTA header in the exported marker, and the
+#' downstream matrix assembly resolves the duplication by file order, silently and in favour of
+#' whichever record sorts first, which is not necessarily the more informative one. The duplicates are
+#' therefore resolved here, by a rule that is declared rather than incidental: the record with the
+#' greatest number of non-gap sites is retained, ties are broken on the source file name so that the
+#' outcome does not depend on the order in which the directory was listed, every competing record is
+#' written to `tables/TABLE_alias_collisions_resolved.csv` with its source file, its length and
+#' whether it was retained, and a warning names the affected headers.
 #' @references
 #' Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C.,
 #' Hernández, H. M., Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,
@@ -986,10 +1063,31 @@ integrate_and_clean_markers <- function(
     write_clean_table(missing_map, "TABLE_missing_sid_header_map.csv")
   }
 
+  # read_fasta_safe() concatenates a marker's files and loses which file each record came from, so a
+  # collision could be reported by header but not by source. This variant keeps the provenance, which
+  # is what makes TABLE_alias_collisions_resolved.csv actionable.
+  read_fasta_sourced <- function(paths) {
+    empty <- list(seq = Biostrings::DNAStringSet(), source = character(0))
+    if (length(paths) == 0) return(empty)
+    parts <- lapply(paths, function(pth) {
+      tryCatch(Biostrings::readDNAStringSet(pth), error = function(e) {
+        warning(sprintf("Could not read FASTA: %s -> %s", pth, e$message), call. = FALSE)
+        Biostrings::DNAStringSet()
+      })
+    })
+    keep <- lengths(parts) > 0
+    parts <- parts[keep]
+    kept_paths <- paths[keep]
+    if (length(parts) == 0) return(empty)
+    list(seq = do.call(c, parts),
+         source = rep(basename(kept_paths), vapply(parts, length, integer(1))))
+  }
+
   message("Exporting decoupled cleaned FASTAs (Ingroup, Outgroup, Joint)...")
   exported_markers <- character(0)
   markers_without_sequences <- character(0)
   exported_registry_list <- vector("list", length(markers_to_process))
+  collision_rows_list <- vector("list", length(markers_to_process))
   
   metrics_ingroup_list  <- vector("list", length(markers_to_process))
   metrics_outgroup_list <- vector("list", length(markers_to_process))
@@ -1000,9 +1098,10 @@ integrate_and_clean_markers <- function(
     ingroup_paths <- dplyr::pull(dplyr::filter(ingroup_index, marker_key == mk), path)
     outgroup_paths <- dplyr::pull(dplyr::filter(outgroup_index, marker_key == mk), path)
     
-    ingroup_seq <- read_fasta_safe(ingroup_paths)
-    outgroup_seq <- read_fasta_safe(outgroup_paths)
-    combined <- c(ingroup_seq, outgroup_seq)
+    ingroup_read <- read_fasta_sourced(ingroup_paths)
+    outgroup_read <- read_fasta_sourced(outgroup_paths)
+    combined <- c(ingroup_read$seq, outgroup_read$seq)
+    combined_source <- c(ingroup_read$source, outgroup_read$source)
     
     if (length(combined) == 0) {
       markers_without_sequences <- c(markers_without_sequences, mk)
@@ -1016,6 +1115,14 @@ integrate_and_clean_markers <- function(
     if (length(keep_idx) == 0) { warning(sprintf("No matching FASTA headers found for marker %s", mk), call. = FALSE); next }
     
     aln_out <- combined[keep_idx]
+    aln_source <- combined_source[keep_idx]
+    
+    # Alias collision resolution. See the "Alias collisions" section of this function's help and
+    # .resolve_alias_collisions(), which holds the rule and is tested on its own.
+    resolved <- .resolve_alias_collisions(aln_out, aln_source, mk, species_fn = extract_species)
+    aln_out <- resolved$aln
+    if (nrow(resolved$collisions) > 0L) collision_rows_list[[i]] <- resolved$collisions
+    
     sp_order <- vapply(names(aln_out), extract_species, character(1))
     aln_out <- aln_out[order(sp_order, names(aln_out))]
     
@@ -1059,6 +1166,17 @@ integrate_and_clean_markers <- function(
   }
 
   exported_registry <- dplyr::bind_rows(exported_registry_list)
+  
+  # Written on every run, including the runs with nothing to report: an empty table is the positive
+  # statement that the aliases produced no collision, which a missing file does not make.
+  alias_collisions <- dplyr::bind_rows(collision_rows_list)
+  if (nrow(alias_collisions) == 0L) {
+    alias_collisions <- dplyr::tibble(marker_key = character(0), species = character(0),
+                                      fasta_name = character(0), source_file = character(0),
+                                      n_non_gap = integer(0), retained = logical(0))
+  }
+  message("Exporting TABLE_alias_collisions_resolved.csv ...")
+  write_clean_table(alias_collisions, "TABLE_alias_collisions_resolved.csv")
   
   # Export decoupled metrics tables
   table_metrics_ingroup  <- dplyr::bind_rows(metrics_ingroup_list)

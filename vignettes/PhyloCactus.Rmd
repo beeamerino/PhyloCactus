@@ -103,6 +103,36 @@ if (!requireNamespace("remotes", quietly = TRUE))
 remotes::install_github('ropensci/phylotaR')
 ```
 
+#### blastula (optional)
+
+[`blastula`](https://github.com/rstudio/blastula) is used for one purpose only: to email you when a
+long analysis that runs on your own machine has ended. `automate_treePL()` accepts `notify = TRUE`
+for that, and `send_run_notification()` can be called from any script. It is a suggested
+dependency, not a required one, so `PhyloCactus` installs and runs without it; the only difference
+is that the notification reports on the console that it is sending nothing. Install it from CRAN if
+you want it:
+
+``` r
+install.packages("blastula")
+```
+
+Two things are configured outside the package, and neither is ever read by `PhyloCactus`:
+
+``` r
+usethis::edit_r_environ()   # add: MY_EMAIL=you@example.org
+
+blastula::create_smtp_creds_file(
+  file = "~/.blastula_gmail",
+  user = "you@example.org",
+  provider = "gmail"
+)
+```
+
+Use an application password rather than your account password if the account is Gmail. The
+credentials file belongs outside any repository, and `PhyloCactus` only hands its path to
+`blastula`. Set `PHYLOCACTUS_SMTP_CREDS` in your `.Renviron` to keep it somewhere other than
+`~/.blastula_gmail`.
+
 ## External Software
 
 Several analyses implemented in `PhyloCactus` rely on external command-line software. These programs must be installed separately and be available from your system `PATH`:
@@ -149,7 +179,7 @@ The recommended way to learn `PhyloCactus` is by completing the tutorials in seq
 | [**Tutorial 2**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html) | Phylogenetic Inference and Divergence Time Estimation |
 | [**Tutorial 3**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html) | Visualization and Metadata Integration |
 | [**Tutorial 4**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html) | Phylogenetic Validation and Comparative Analyses |
-| [**Tutorial 5**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html) | DNA Barcoding and Single-Locus Analysis |
+| [**Tutorial 5**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html) | DNA Barcoding, Section Manifest |
 | [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html) | Core pipeline functions and methodological dictionary |
 
 ## Next Steps

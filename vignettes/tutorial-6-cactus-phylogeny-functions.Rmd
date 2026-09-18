@@ -46,7 +46,7 @@ Functions in this category establish hypotheses of positional homology (`MAFFT`)
 | Function | Biological & Methodological Application | Canonical Citation |
 |:---|:---|:---|
 | `run_alignment_pipeline()` | Generates multiple sequence alignments using `MAFFT` and masks poorly aligned, ambiguous, or hypervariable regions using `DECIPHER`, eliminating systematic noise while retaining phylogenetically informative sites. | Katoh & Standley (2013); Wright (2024) |
-| `run_marker_screening()` | Evaluates phylogenetic informativeness, sequence coverage, and substitution saturation across individual locus alignments, excluding loci exhibiting high saturation slope erosion. | Xia et al. (2003) |
+| `run_marker_screening()` | Evaluates phylogenetic informativeness, sequence coverage, and locus quality across individual alignments, regressing uncorrected p-distance against a Gamma-corrected K80 distance. The slope threshold below which a locus is rejected is a `PhyloCactus` cleaning criterion, not a published saturation test; the citation covers the distance model only. | Kimura (1980); Jin & Nei (1990) |
 | `clean_taxonomic_names()` | Standardizes tip labels against authoritative botanical checklists (e.g., Caryophyllales.org checklist), resolving synonymies and orthographic variants. | Korotkova et al. (2021) |
 | `run_joint_realignment()` | Re-estimates positional homology alignments (`MAFFT`) after aggregating ingroup and outgroup sequence markers to refine alignment hypotheses. | Katoh & Standley (2013) |
 
@@ -76,6 +76,7 @@ Functions in this category select optimal nucleotide substitution models per par
 | `run_treePL_direct()` | Executes `treePL` natively via system calls to estimate ultrametric chronograms under penalized likelihood. | Smith & O'Meara (2012) |
 | `run_treePL_cv()` | Executes cross-validation parameter optimization, rate smoothing selection, and dating stages from R. | Maurin (2020) |
 | `automate_treePL()` | Automates cross-validation parameter optimization, rate smoothing selection, and chronogram estimation across temporal bootstrap replicates. | Maurin (2020) |
+| `send_run_notification()` | Sends an email when a long local analysis ends, reporting status, timings and output paths. Never fails the run it reports on. | `blastula` R package, <https://github.com/rstudio/blastula> |
 
 ### Comparative Validation & IUCN Utilities
 
@@ -96,3 +97,29 @@ library(PhyloCactus)
 ?calculate_ml_tree
 ?automate_treePL
 ```
+
+## Conclusion
+
+This dictionary covers the functions that drive the sequential workflow. The audit and verification functions that the tutorials call at each gate, including `check_calibration_consistency()`, `report_bound_adherence()`, `classify_constrained_nodes()`, `audit_calibration_support()` and `report_smoothing_sensitivity()`, are documented in their own manual pages and in the tutorials where they are used. Consult the `pkgdown` reference index for the complete list of exported functions and their signatures.
+
+## References
+
+- Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. 2018. phylotaR: An automated pipeline for retrieving orthologous DNA sequences from GenBank in R. *Life*, 8(2), 20. <https://doi.org/10.3390/life8020020>
+- Camacho, C., Coulouris, G., Avagyan, V., Ma, N., Papadopoulos, J., Bealer, K., & Madden, T. L. 2009. BLAST+: architecture and applications. *BMC Bioinformatics*, 10, 421. <https://doi.org/10.1186/1471-2105-10-421>
+- Darriba, D., Posada, D., Kozlov, A. M., Stamatakis, A., Morel, B., & Flouri, T. 2020. ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291-294. <https://doi.org/10.1093/molbev/msz189>
+- Felsenstein, J. 1985. Confidence limits on phylogenies: an approach using the bootstrap. *Evolution*, 39(4), 783-791. <https://doi.org/10.1111/j.1558-5646.1985.tb00420.x>
+- Guerrero, P. C., Majure, L. C., Cornejo-Romero, A., & Hernández-Hernández, T. 2019. Phylogenetic Relationships and Evolutionary Trends in the Cactus Family. *Journal of Heredity*, 110(1), 4-21. <https://doi.org/10.1093/jhered/esy064>
+- Hillis, D. M., & Bull, J. J. 1993. An empirical test of bootstrapping as a method for assessing confidence in phylogenetic analysis. *Systematic Biology*, 42(2), 182-192. <https://doi.org/10.1093/sysbio/42.2.182>
+- IUCN. 2024. *The IUCN Red List of Threatened Species*. <https://www.iucnredlist.org>
+- Jin, L., & Nei, M. 1990. Limitations of the evolutionary parsimony method of phylogenetic analysis. *Molecular Biology and Evolution*, 7(1), 82-102. <https://doi.org/10.1093/oxfordjournals.molbev.a040588>
+- Katoh, K., & Standley, D. M. 2013. MAFFT multiple sequence alignment software version 7: Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772-780. <https://doi.org/10.1093/molbev/mst010>
+- Kimura, M. 1980. A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. *Journal of Molecular Evolution*, 16(2), 111-120. <https://doi.org/10.1007/BF01731581>
+- Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D., Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G. 2021. Cactaceae at Caryophyllales.org, a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251-270. <https://doi.org/10.3372/wi.51.51208>
+- Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. 2019. RAxML-NG: a fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455. <https://doi.org/10.1093/bioinformatics/btz305>
+- Lemoine, F., Domelevo Entfellner, J. B., Wilkinson, E., Correia, D., Dávila Felipe, M., De Oliveira, T., & Gascuel, O. 2018. Renewing Felsenstein's phylogenetic bootstrap in the era of big data. *Nature*, 556(7702), 452-456. <https://doi.org/10.1038/s41586-018-0043-0>
+- Maurin, K. J. L. 2020. An empirical guide for producing a dated phylogeny with treePL in a maximum likelihood framework. *arXiv*:2008.07054. <https://doi.org/10.48550/arXiv.2008.07054>
+- Robinson, D. F., & Foulds, L. R. 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1-2), 131-147. <https://doi.org/10.1016/0025-5564(81)90043-2>
+- Sanderson, M. J. 2002. Estimating absolute rates of molecular evolution and divergence times: a penalized likelihood approach. *Molecular Biology and Evolution*, 19(1), 101-109. <https://doi.org/10.1093/oxfordjournals.molbev.a003974>
+- Smith, M. R. 2020. Information theoretic measures of phylogenetic tree distance. *Systematic Biology*, 69(6), 1168-1182. <https://doi.org/10.1093/sysbio/syaa016>
+- Smith, S. A., & O'Meara, B. C. 2012. treePL: divergence time estimation using penalized likelihood for large phylogenies. *Bioinformatics*, 28(20), 2689-2690. <https://doi.org/10.1093/bioinformatics/bts492>
+- Wright, E. S. 2024. Fast and Flexible Search for Homologous Biological Sequences with DECIPHER v3. *The R Journal*, 16(2), 191-200. <https://doi.org/10.18129/B9.bioc.DECIPHER>

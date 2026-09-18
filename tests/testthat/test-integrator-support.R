@@ -66,3 +66,28 @@ test_that("a weakly supported root is not collapsed, because it has no incident 
 
   expect_equal(collapsed$Nnode, tree$Nnode)
 })
+
+test_that(".read_tree_any() reads the distributed chronogram, which TreeAnnotator writes in NEXUS", {
+  skip_if_not_installed("ape")
+
+  # integrate_publication_tree() read the chronogram with ape::read.tree(), which does not read
+  # NEXUS, so it failed on the very artifact the pipeline produces and distributes. The same
+  # fall-through already existed in publish_run_outputs.R.
+  nexus <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")
+  skip_if(nexus == "", "requires the distributed chronogram")
+
+  tr <- .read_tree_any(nexus)
+  expect_s3_class(tr, "phylo")
+  expect_gt(length(tr$tip.label), 100L)
+})
+
+test_that(".read_tree_any() still reads a Newick tree", {
+  skip_if_not_installed("ape")
+
+  newick <- system.file("extdata", "phylocactus_ml_tree.tree", package = "PhyloCactus")
+  skip_if(newick == "", "requires the distributed ML tree")
+
+  tr <- .read_tree_any(newick)
+  expect_s3_class(tr, "phylo")
+  expect_gt(length(tr$tip.label), 100L)
+})

@@ -1,7 +1,7 @@
 Package: PhyloCactus
 Type: Package
 Title: Phylogenetic Inference and Divergence Time Estimation Pipeline for Cactaceae
-Version: 0.4.4
+Version: 0.4.5
 Authors@R: c(
     person("Beatriz M.", "Meriño", email = "b.vergara.m@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9518-2331")),
@@ -44,6 +44,7 @@ Imports:
     phylotaR
 Suggests:
     testthat (>= 3.0.0),
+    blastula,
     withr,
     phytools,
     forcats,

@@ -139,21 +139,23 @@ test_that("require passes once the files exist", {
 # ---------------------------------------------------------------------------------------------
 
 test_that("resolve_rooting_outgroup() returns the whole matching clade, sorted and deduplicated", {
-  tips <- c("Portulaca_oleracea", "Opuntia_ficus-indica", "Portulaca_grandiflora",
-            "Portulaca_oleracea", "Anacampseros_kurtzii")
+  tips <- c("Talinum_paniculatum", "Opuntia_ficus-indica", "Talinum_fruticosum",
+            "Talinum_paniculatum", "Anacampseros_kurtzii")
 
   expect_equal(
     resolve_rooting_outgroup(tips),
-    c("Portulaca_grandiflora", "Portulaca_oleracea")
+    c("Talinum_fruticosum", "Talinum_paniculatum")
   )
 })
 
-test_that("resolve_rooting_outgroup() excludes Portulacaria, which the trailing underscore guards against", {
+test_that("the trailing underscore excludes Portulacaria from a Portulaca pattern", {
   # Portulacaria (Didiereaceae) is neither Portulacaceae nor part of the rooting sample. A bare
-  # "^Portulaca" pattern would pull it in and place the root on an unrelated family.
+  # "^Portulaca" pattern would pull it in and place the root on an unrelated family. Portulacaceae
+  # is not in the default pattern because it is not a clade in the distributed tree, so the guard
+  # is exercised here with an explicit pattern.
   tips <- c("Portulaca_oleracea", "Portulacaria_afra", "Portulacaria_armiana")
 
-  expect_equal(resolve_rooting_outgroup(tips), "Portulaca_oleracea")
+  expect_equal(resolve_rooting_outgroup(tips, pattern = "^Portulaca_"), "Portulaca_oleracea")
 })
 
 test_that("resolve_rooting_outgroup() errors rather than returning an empty set", {
@@ -180,6 +182,28 @@ test_that("resolve_rooting_outgroup() matches Talinaceae terminals by default", 
 
   expect_equal(
     resolve_rooting_outgroup(tips),
-    c("Portulaca_oleracea", "Talinella_microphylla", "Talinum_paniculatum")
+    c("Talinella_microphylla", "Talinum_paniculatum")
   )
+})
+
+test_that("the default rooting set is a clade of the distributed tree", {
+  skip_if_not_installed("ape")
+
+  # This is what the old default failed to be. Portulacaceae, Anacampserotaceae and Talinaceae do
+  # not form a clade in this topology: Portulaca sits with Anacampserotaceae, and the union of the
+  # three is the whole outgroup, so root_on_clade() had no monophyletic group to place the root on.
+  # Talinaceae does form one, and it is the family that subtends the root.
+  tree_path <- system.file("extdata", "phylocactus_ml_tree.tree", package = "PhyloCactus")
+  skip_if(tree_path == "", "requires the distributed ML tree")
+
+  tr <- ape::read.tree(tree_path)
+  tips <- resolve_rooting_outgroup(tr$tip.label)
+
+  expect_gt(length(tips), 1L)
+  expect_true(all(tips %in% tr$tip.label))
+  expect_true(ape::is.monophyletic(tr, tips))
+
+  # And the whole family is taken, not a subset of it: a partial clade roots the tree in the
+  # middle of Talinaceae.
+  expect_setequal(tips, grep("^(Talinum|Talinella)_", tr$tip.label, value = TRUE))
 })

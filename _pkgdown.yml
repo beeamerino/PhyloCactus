@@ -96,6 +96,7 @@ reference:
   - run_treePL_direct
   - run_treePL_cv
   - automate_treePL
+  - send_run_notification
   - report_smoothing_sensitivity
   - check_calibration_consistency
   - audit_calibration_support
@@ -127,6 +128,7 @@ reference:
   - augment_treedata_with_registry
   - build_annotation_registry
   - compute_group_nodes
+  - extract_species_binomial
   - get_annotation_nodes
   - prepare_tip_annotation
   - standardize_taxon

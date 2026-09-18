@@ -4,17 +4,19 @@
 \alias{resolve_rooting_outgroup}
 \title{Resolve the Set of Rooting Terminals from a Tip Label Vector}
 \usage{
-resolve_rooting_outgroup(
-  tip_labels,
-  pattern = "^(Portulaca|Talinum|Talinella)_"
-)
+resolve_rooting_outgroup(tip_labels, pattern = "^(Talinum|Talinella)_")
 }
 \arguments{
 \item{tip_labels}{Character vector of terminal labels, typically \code{phylo$tip.label} or the row
 names of the supermatrix.}
 
 \item{pattern}{Character. Regular expression matched against \code{tip_labels}. Defaults to
-\code{"^(Portulaca|Talinum|Talinella)_"}, matching the outgroup lineages that carry the root in the reference Cactaceae dataset.}
+\code{"^(Talinum|Talinella)_"}, the Talinaceae terminals that carry the root in the reference
+Cactaceae dataset. The default names a clade of that topology, which is what \code{root_on_clade()}
+requires: the reference tree recovers Portulacaceae as sister to Anacampserotaceae and the two
+together as sister to Cactaceae, so a pattern spanning Portulacaceae and Talinaceae names a set
+that is not a clade of the tree and cannot place the root. Set \code{pattern} to the outgroup lineage
+sampled in your own dataset.}
 }
 \value{
 Character vector of matching terminals, sorted. Errors when no terminal matches, since a
@@ -39,5 +41,10 @@ the underscore as binomial separator, so a bare \code{"^Portulaca"} also matches
 reasoning is applied in \code{run_marker_screening()} and \code{run_concatenation_pipeline()}.
 }
 \examples{
-resolve_rooting_outgroup(c("Portulaca_oleracea", "Portulacaria_afra", "Opuntia_ficus-indica"))
+# The default matches the Talinaceae terminals that carry the root in the reference dataset.
+resolve_rooting_outgroup(c("Talinum_paniculatum", "Talinella_pachypoda", "Opuntia_ficus-indica"))
+
+# The trailing underscore is required: a bare "^Portulaca" also matches Portulacaria
+# (Didiereaceae), which is not Portulacaceae.
+resolve_rooting_outgroup(c("Portulaca_oleracea", "Portulacaria_afra"), pattern = "^Portulaca_")
 }

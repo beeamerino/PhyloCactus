@@ -27,7 +27,7 @@ infer_gene_trees(
 
 \item{threads}{Integer. Number of computational threads. Defaults to \code{2L}.}
 
-\item{checklist_path}{Character. Path to accepted botanical checklist CSV (e.g., \code{CactaceaeFullList_accepted.csv}).}
+\item{checklist_path}{Character. Path to the accepted botanical checklist (e.g., \code{CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx}).}
 }
 \value{
 A list containing the species monophyly summary table and the per-marker tree paths.

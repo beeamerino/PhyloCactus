@@ -444,3 +444,67 @@ test_that("a marker named in exclude_markers but absent is a warning, not a sile
   ranges <- utils::read.delim(file.path(tmp, "concat", "final_tables", "TABLE_marker_ranges.tsv"))
   expect_equal(ranges$marker, "shared")
 })
+
+test_that("report_marker_group_coverage() leaves out the markers the run was told to exclude", {
+  skip_if_not_installed("Biostrings")
+
+  # The report ran before the exclude_markers filter, so it described alignments the supermatrix
+  # does not contain, and a reader comparing it against the partition file found rows with no
+  # partition. The exclusion is now passed through.
+  tmp <- withr::local_tempdir()
+  real <- paste(rep("A", 200), collapse = "")
+  gapped <- paste(rep("-", 200), collapse = "")
+
+  write_fasta(stats::setNames(c(real, real, real, real),
+                              c("Opuntia_a", "Opuntia_b", "Portulaca_a", "Portulaca_b")),
+              file.path(tmp, "shared.fasta"))
+  write_fasta(stats::setNames(c(real, real, gapped, gapped),
+                              c("Opuntia_a", "Opuntia_b", "Portulaca_a", "Portulaca_b")),
+              file.path(tmp, "phyC.fasta"))
+
+  cov <- report_marker_group_coverage(tmp, outgroup_pattern = "^Portulaca_",
+                                      exclude_markers = "phyC")
+
+  expect_equal(cov$marker, "shared")
+  expect_false("phyC" %in% cov$marker)
+
+  expect_error(
+    report_marker_group_coverage(tmp, outgroup_pattern = "^Portulaca_",
+                                 exclude_markers = c("shared", "phyC")),
+    "nothing left to report"
+  )
+})
+
+test_that("run_concatenation_pipeline() refuses a marker with duplicated terminal names", {
+  skip_if_not_installed("Biostrings")
+
+  # aln_full[common_taxa, ] <- aln_char[common_taxa, ] assigns by name and takes the first match,
+  # so a duplicated terminal lost its second record without an error and without a record of which
+  # copy entered the matrix. The duplication has a cause upstream, in the alias handling of
+  # integrate_and_clean_markers(), and that is where it has to be resolved; here it is refused.
+  tmp <- withr::local_tempdir()
+  ind <- file.path(tmp, "aligned_markers"); dir.create(ind)
+
+  set.seed(7L)
+  aln <- function(n) vapply(seq_len(n), function(i)
+    paste(sample(c("A", "C", "G", "T"), 300L, replace = TRUE), collapse = ""), character(1))
+
+  write_fasta(stats::setNames(aln(4L),
+                              c("Opuntia_a", "Opuntia_b", "Portulaca_a", "Portulaca_b")),
+              file.path(ind, "clean.fasta"))
+  # The same terminal twice, as an aliased pair of source files would have produced it.
+  write_fasta(stats::setNames(aln(4L),
+                              c("Opuntia_a", "Opuntia_b", "Portulaca_a", "Portulaca_a")),
+              file.path(ind, "collided.fasta"))
+
+  expect_error(
+    suppressMessages(suppressWarnings(run_concatenation_pipeline(
+      input_dir = ind, output_dir = file.path(tmp, "concat")
+    ))),
+    "duplicated terminal names"
+  )
+
+  # And no supermatrix is left behind for someone to pick up as though it were complete.
+  expect_false(file.exists(file.path(tmp, "concat", "concatenated_alignments",
+                                     "ALIGNMENT_supermatrix.phy")))
+})

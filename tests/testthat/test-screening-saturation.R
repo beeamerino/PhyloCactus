@@ -61,3 +61,23 @@ test_that(".test_saturation_proxy() reports insufficient_data for fewer than 5 p
   expect_true(is.na(res$slope))
   expect_true(is.na(res$saturated))
 })
+
+test_that(".test_saturation_proxy() reports degenerate_fit instead of flagging a slope of machine zero", {
+  skip_if_not_installed("ape")
+
+  # The published screening table gave trnL-trnF as the only saturated locus of seventeen, on a
+  # slope of -6.19e-17. That is not an eroded slope, it is a regression with no information in it,
+  # read through isTRUE(slope < 0.3) as though it were one. Identical sequences reproduce the
+  # condition: every pairwise distance is zero, so the fitted slope is zero to machine precision.
+  n_sites <- 300
+  one <- sample(c("a", "c", "g", "t"), n_sites, replace = TRUE)
+  seqs <- rep(list(one), 8)
+  names(seqs) <- paste0("sp_", seq_len(8))
+  dna <- ape::as.DNAbin(seqs)
+
+  res <- .test_saturation_proxy(dna, saturation_method = "corrected", saturation_flag_cutoff = 0.3)
+
+  expect_equal(res$reason, "degenerate_fit")
+  expect_true(is.na(res$saturated))
+  expect_false(isTRUE(res$saturated))
+})

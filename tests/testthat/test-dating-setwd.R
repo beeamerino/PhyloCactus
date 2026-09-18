@@ -25,6 +25,11 @@ test_that("run_treePL_direct leaves the working directory untouched when cwd is 
   cfg <- file.path(tmp_dir, "configure_broken")
   writeLines("this is not a valid treePL configuration", cfg)
 
+  # With cwd = NULL the run writes treepl_run_<label>.log into the working directory, which for the
+  # test suite is tests/testthat. Moving into the temporary directory first keeps the run's output
+  # with the run instead of leaving it in the repository for someone to delete by hand.
+  withr::local_dir(tmp_dir)
+
   before <- normalizePath(getwd())
 
   expect_error(
@@ -42,6 +47,8 @@ test_that("run_treePL_direct reports a non-zero exit status as an error (real fu
   tmp_dir <- withr::local_tempdir()
   cfg <- file.path(tmp_dir, "configure_broken")
   writeLines("this is not a valid treePL configuration", cfg)
+
+  withr::local_dir(tmp_dir)
 
   expect_error(
     suppressWarnings(run_treePL_direct(cfg_file = cfg, label = "labelled_run", cwd = NULL)),

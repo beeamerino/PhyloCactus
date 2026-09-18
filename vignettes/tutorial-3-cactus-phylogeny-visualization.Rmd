@@ -74,7 +74,7 @@ file.copy(
 
 ### Module 11: Taxonomic Reconciliation and IUCN Metadata Enrichment
 
-This vignette assumes that you have completed [Tutorial 2: Inference & Dating](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
+This vignette assumes that you have completed [Tutorial 2: Phylogenetic Inference and Divergence Time Estimation](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
 Following the completion of maximum-likelihood phylogenetic inference, branch support estimation, and divergence time reconstruction, this module focuses on enriching the resulting evolutionary framework with biological metadata and generating comprehensive visual summaries of the final multilocus dataset.
 
 #### The Scientific Importance of an Integrative Evolutionary Registry
@@ -87,8 +87,8 @@ By integrating conservation assessments directly with phylogenetic relationships
 
 Taxonomic reconciliation is conducted against the dynamic Cactaceae species checklist published by the Caryophyllales.org initiative (Korotkova *et al*. 2021), comprising 1,965 accepted species.
 When combined with 38 outgroup species from Anacampserotaceae, Portulacaceae, and Talinaceae, the total taxonomic evaluation universe encompasses 2,003 taxa.
-Across the pipeline, 1,060 species possess sequence data in the multilocus supermatrix (1,022 ingroup and 38 outgroup), while the inferred maximum-likelihood tree and dated chronogram resolve 1,023 terminal tips (985 ingroup and 38 outgroup).
-Exactly 37 ingroup species were collapsed by `RAxML-NG` due to identical sequence profiles across their sampled loci.
+Across the pipeline, 1,060 species possess sequence data in the multilocus supermatrix (1,022 ingroup and 38 outgroup), while the inferred maximum-likelihood tree and dated chronogram resolve 1,024 terminal tips (986 ingroup and 38 outgroup).
+Exactly 36 ingroup species were collapsed by `RAxML-NG` due to identical sequence profiles across their sampled loci.
 Crucially, the 943 accepted Cactaceae species lacking sequence data represent critical gaps for biodiversity inventory, among which 134 are categorized as threatened (CR, EN, VU) by the IUCN Red List.
 
 Because reconciling taxonomic identities, molecular datasets, and conservation metadata requires extensive data harmonization, `PhyloCactus` provides dedicated API wrappers (`get_iucn_data(sp_name)`) to facilitate reproducible retrieval and integration of species-level information from the IUCN Red List database.
@@ -603,7 +603,7 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
 
 #### Figure 7: Extended Constrained ML Phylogeny (A0 Poster)
 
-To examine all 1,023 terminal tips without node compression, this visualization formats the complete topology as an A0-dimension poster, displaying individual species binomials and node-level bootstrap support.
+To examine all 1,024 terminal tips without node compression, this visualization formats the complete topology as an A0-dimension poster, displaying individual species binomials and node-level bootstrap support.
 
 ```{r figure_7_ml_tree_extended, eval = FALSE}
 if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
@@ -637,7 +637,7 @@ treeio::write.beast(annotated_treedata, file = "9_Visualization/figures/annotate
 ```
 
 > **Note on Extended Tree Poster & Direct Downloads:**
-> Due to its large format dimensions (A0 poster: 36 × 48 inches / 91.4 × 121.9 cm) and 1,023 terminal tips, this extended tree is not rendered inline within this document to maintain browser responsiveness and prevent visual overcrowding.
+> Due to its large format dimensions (A0 poster: 36 × 48 inches / 91.4 × 121.9 cm) and 1,024 terminal tips, this extended tree is not rendered inline within this document to maintain browser responsiveness and prevent visual overcrowding.
 > 
 > When executing this workflow locally, the full vector PDF and annotated BEAST tree file are generated directly in your workspace:
 > - Local PDF: `9_Visualization/figures/Figure_7_ML_Tree_Extended.pdf`
@@ -704,7 +704,7 @@ if (file.exists(chrono_file) && nzchar(chrono_file)) {
 
 #### Figure 9: Extended Time-Calibrated Chronogram (A0 Poster)
 
-This A0-dimension poster presents the uncollapsed temporal chronogram with all 1,023 tip names, divergence time confidence intervals, and geological period boundaries.
+This A0-dimension poster presents the uncollapsed temporal chronogram with all 1,024 tip names, divergence time confidence intervals, and geological period boundaries.
 
 ```{r figure_9_chronogram_extended, eval = FALSE}
 if (file.exists(chrono_file) && nzchar(chrono_file)) {
@@ -739,7 +739,7 @@ treeio::write.beast(annotated_chrono, file = "9_Visualization/figures/annotated_
 ```
 
 > **Note on Extended Chronogram Poster & Direct Downloads:**
-> Due to its large format dimensions (A0 poster: 36 × 48 inches / 91.4 × 121.9 cm), 1,023 terminal tips, and node age uncertainty intervals (95% HPD), this extended chronogram is not rendered inline within this document to maintain browser responsiveness.
+> Due to its large format dimensions (A0 poster: 36 × 48 inches / 91.4 × 121.9 cm), 1,024 terminal tips, and node age uncertainty intervals (95% HPD), this extended chronogram is not rendered inline within this document to maintain browser responsiveness.
 > 
 > When executing this workflow locally, the full vector PDF and annotated BEAST chronogram file are generated directly in your workspace:
 > - Local PDF: `9_Visualization/figures/Figure_9_Chronogram_Extended.pdf`
@@ -751,7 +751,7 @@ treeio::write.beast(annotated_chrono, file = "9_Visualization/figures/annotated_
 
 #### Figure 10: Species Composition
 
-This figure summarizes the methodological composition of the taxonomic universe across pipeline stages, distinguishing taxa that were sampled and dated in the tree (985), sequenced identical duplicates collapsed by `RAxML-NG` (37), unsampled checklist gaps (943), and outgroup reference species (38).
+This figure summarizes the methodological composition of the taxonomic universe across pipeline stages, distinguishing taxa that were sampled and dated in the tree (986), sequenced identical duplicates collapsed by `RAxML-NG` (36), unsampled checklist gaps (943), and outgroup reference species (38).
 
 ```{r figure_10_species_composition, eval = has_data}
 p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(status_pipeline, n), y = n)) +
@@ -811,7 +811,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     theme_phylocactus(base_size = 12) +
     labs(
       title = "Molecular Completeness vs IUCN Category",
-      subtitle = "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 985)",
+      subtitle = "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 986)",
       x = "IUCN Category",
       y = "Marker completeness (%)"
     )

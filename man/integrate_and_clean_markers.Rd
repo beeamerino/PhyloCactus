@@ -57,6 +57,19 @@ FASTA sequence directories (\verb{cleaned_markers_ingroup/}, \verb{cleaned_marke
 Computes isolated molecular informativeness metrics (tips, length, variable sites, parsimony informative sites,
 GC content, and missingness) for the focal ingroup radiation to avoid outgroup-driven inflation artifacts.
 }
+\section{Alias collisions}{
+
+\code{marker_aliases} can point two source files at the same \code{marker_key}. When both carry a record for
+the same species, that species appears twice under one FASTA header in the exported marker, and the
+downstream matrix assembly resolves the duplication by file order, silently and in favour of
+whichever record sorts first, which is not necessarily the more informative one. The duplicates are
+therefore resolved here, by a rule that is declared rather than incidental: the record with the
+greatest number of non-gap sites is retained, ties are broken on the source file name so that the
+outcome does not depend on the order in which the directory was listed, every competing record is
+written to \code{tables/TABLE_alias_collisions_resolved.csv} with its source file, its length and
+whether it was retained, and a warning names the affected headers.
+}
+
 \references{
 Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C.,
 Hernández, H. M., Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,

@@ -153,13 +153,10 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
       panel.grid.minor = ggplot2::element_blank()
     )
   
-  standardize_taxon <- function(x) {
-    x |>
-      stringr::str_replace_all("[[:space:]-]+", "_") |>
-      stringr::str_replace_all("_+", "_") |>
-      stringr::str_replace_all("^_|_$", "")
-  }
-  
+  # standardize_taxon() is defined at package level in R/visualization_helpers.R and resolved here
+  # by normal lexical scoping. The local copy that used to sit here was character for character the
+  # same function; two definitions of one normalisation rule is one more than can be kept in step.
+
   extract_genus <- function(x) sub("_.*", "", x)
 
   # safe_drop_tip(), safe_keep_tip() are defined at package level above (outside this function)

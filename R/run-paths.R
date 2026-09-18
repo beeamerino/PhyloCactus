@@ -204,13 +204,23 @@ print.cactus_run_paths <- function(x, ...) {
 #' @param tip_labels Character vector of terminal labels, typically `phylo$tip.label` or the row
 #'   names of the supermatrix.
 #' @param pattern Character. Regular expression matched against `tip_labels`. Defaults to
-#'   `"^(Portulaca|Talinum|Talinella)_"`, matching the outgroup lineages that carry the root in the reference Cactaceae dataset.
+#'   `"^(Talinum|Talinella)_"`, the Talinaceae terminals that carry the root in the reference
+#'   Cactaceae dataset. The default names a clade of that topology, which is what `root_on_clade()`
+#'   requires: the reference tree recovers Portulacaceae as sister to Anacampserotaceae and the two
+#'   together as sister to Cactaceae, so a pattern spanning Portulacaceae and Talinaceae names a set
+#'   that is not a clade of the tree and cannot place the root. Set `pattern` to the outgroup lineage
+#'   sampled in your own dataset.
 #' @return Character vector of matching terminals, sorted. Errors when no terminal matches, since a
 #'   silently empty rooting set would leave every downstream tree unrooted.
 #' @examples
-#' resolve_rooting_outgroup(c("Portulaca_oleracea", "Portulacaria_afra", "Opuntia_ficus-indica"))
+#' # The default matches the Talinaceae terminals that carry the root in the reference dataset.
+#' resolve_rooting_outgroup(c("Talinum_paniculatum", "Talinella_pachypoda", "Opuntia_ficus-indica"))
+#'
+#' # The trailing underscore is required: a bare "^Portulaca" also matches Portulacaria
+#' # (Didiereaceae), which is not Portulacaceae.
+#' resolve_rooting_outgroup(c("Portulaca_oleracea", "Portulacaria_afra"), pattern = "^Portulaca_")
 #' @export
-resolve_rooting_outgroup <- function(tip_labels, pattern = "^(Portulaca|Talinum|Talinella)_") {
+resolve_rooting_outgroup <- function(tip_labels, pattern = "^(Talinum|Talinella)_") {
   if (!is.character(tip_labels) || length(tip_labels) == 0L) {
     stop("`tip_labels` must be a non-empty character vector.", call. = FALSE)
   }

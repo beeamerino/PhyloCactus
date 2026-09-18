@@ -355,16 +355,33 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL){
 #'
 #'   **Why a clade rather than a terminal.** Rooting is imposed after the search: `RAxML-NG` returns an unrooted topology and the root is placed on a chosen edge. Naming a single terminal of a sampled outgroup clade places the root *inside* that clade, leaving it paraphyletic in the final tree and collapsing its crown node onto the root. Any calibration addressed by the MRCA of that clade then lands on the root instead of on the node it was written for. Supplying the whole clade places the root on its stem edge, which is the intended edge. Rooting is performed by `root_on_clade()`, which also handles the basal polytomy `RAxML-NG` writes.
 #'
-#'   Bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error.
+#'   bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error.
 #'
 #'   **Topological assumption.** Placing the root on the outgroup lineage (Talinaceae or Portulacaceae) establishes the basal split for dating. In the reference dataset, Talinaceae roots the tree, placing the root on the stem of the ACP clade (Anacampserotaceae, Cactaceae, Portulacaceae) and allowing maximum-likelihood inference to test alternative topological resolutions among the three core families (Ramirez-Barahona et al., 2020; Zuntini et al., 2024). State this assumption in Methods, and treat the root age as conditional on it.
 #' @param seed Integer or NULL. Seed for every stochastic step of the run: R's choice of which
 #'   bootstrap replicates to date, and `treePL`'s own `seed` keyword, which is written into the
 #'   maximum-likelihood configuration and, offset by the replicate index, into each replicate's.
-#'   `treePL` seeds itself from the clock when the keyword is absent, which leaves both the
-#'   cross-validation and the simulated annealing unreproducible. Defaults to `NULL`, which draws
-#'   one and reports it; record the reported value, as it is required to reproduce the run.
-#' @return Invisible NULL upon completion.
+#'   `treePL` seeds itself from the clock when the keyword is absent. Note that while setting `seed`
+#'   is necessary, it is only sufficient for reproducible cross-validation when `cv_nthreads = 1L`:
+#'   `treePL`'s simulated annealing routine invokes the non-reentrant standard C `rand()` across
+#'   OpenMP threads when `nthreads > 1`, leaving multi-threaded cross-validation non-reproducible.
+#'   Defaults to `NULL`, which draws one and reports it; record the reported value, as it is
+#'   required to reproduce the run.
+#' @param cv_nthreads Integer. Number of threads for the cross-validation stage. Defaults to `1L`
+#'   to guarantee deterministic, bit-for-bit reproducible cross-validation curves. See [run_treePL_cv()].
+#' @param notify Logical. Send an email when the run ends, whether it finished or failed. The
+#'   message carries the status, the start and end times, the elapsed time, the host and the paths
+#'   of the outputs. Intended for this step in particular, which runs on a local machine for hours
+#'   and has no scheduler to mail on its behalf. A notification that cannot be sent is reported and
+#'   ignored: it never fails the run. See [send_run_notification()] for what has to be configured.
+#'   Defaults to `FALSE`.
+#' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and
+#'   `credentials`. Both default to `NULL`, which reads the `MY_EMAIL` and `PHYLOCACTUS_SMTP_CREDS`
+#'   environment variables.
+#' @return Invisibly, the path of the dated maximum-likelihood chronogram written into
+#'   `treePL_out`. Until 2026-09-18 this field read "Invisible NULL upon completion", which the
+#'   function has never done: the value is what `resolve_run_paths()` and the publication step
+#'   downstream expect to receive from it.
 #' @references
 #' Sanderson, M. J. (2002). Estimating absolute rates of molecular evolution and divergence times:
 #' a penalized likelihood approach. *Molecular Biology and Evolution*, 19(1), 101-109. \doi{10.1093/oxfordjournals.molbev.a003974}
@@ -391,7 +408,68 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             rescale_factor = 100, n_prime = 10L,
                             prime_rule = c("lowest", "modal"),
                             cv_method = c("randomcv", "cv"),
-                            cvstart = 1e3, cvstop = 1e-8, wrapper_sh = NULL) {
+                            cvstart = 1e3, cvstop = 1e-8, cv_nthreads = 1L, wrapper_sh = NULL,
+                            notify = FALSE, notify_to = NULL, notify_credentials = NULL) {
+
+  # The work itself is unchanged and lives in .automate_treePL_run(). This wrapper exists only to
+  # time the run and to report its outcome, and it is deliberately thin: a notification is a
+  # convenience, and no part of it may alter what the dating does or what it returns.
+  started <- Sys.time()
+
+  call_run <- function() {
+    .automate_treePL_run(
+      cfg_file = cfg_file, ml_tree_file = ml_tree_file, bs_trees_file = bs_trees_file,
+      results_dir = results_dir, treePL_out = treePL_out, num_bs = num_bs,
+      numsites = numsites, outgroup = outgroup, seed = seed,
+      rescale_factor = rescale_factor, n_prime = n_prime, prime_rule = prime_rule,
+      cv_method = cv_method, cvstart = cvstart, cvstop = cvstop, cv_nthreads = cv_nthreads,
+      wrapper_sh = wrapper_sh
+    )
+  }
+
+  if (!isTRUE(notify)) return(call_run())
+
+  result <- tryCatch(call_run(), error = function(e) e)
+
+  if (inherits(result, "error")) {
+    note <- .compose_run_notification(
+      analysis = "treePL divergence time estimation",
+      status = "failed",
+      started = started,
+      outputs = c("Dating output directory" = treePL_out),
+      error_message = conditionMessage(result)
+    )
+    send_run_notification(note$subject, note$body,
+                          to = notify_to, credentials = notify_credentials)
+    # Re-raised as the original condition, so the caller sees the same error it would have seen
+    # with notify = FALSE, with its class and its call intact.
+    stop(result)
+  }
+
+  note <- .compose_run_notification(
+    analysis = "treePL divergence time estimation",
+    status = "finished",
+    started = started,
+    outputs = c("Best maximum-likelihood chronogram" = as.character(result),
+                "Dating output directory" = treePL_out)
+  )
+  send_run_notification(note$subject, note$body,
+                        to = notify_to, credentials = notify_credentials)
+
+  invisible(result)
+}
+
+#' Body of automate_treePL(), unchanged
+#'
+#' Separated from the exported function so that the notification wrapper can time the run and catch
+#' its failure without wrapping three hundred lines of dating logic in a new block.
+#' @noRd
+.automate_treePL_run <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, treePL_out,
+                            num_bs = NULL, numsites = NULL, outgroup = NULL, seed = NULL,
+                            rescale_factor = 100, n_prime = 10L,
+                            prime_rule = c("lowest", "modal"),
+                            cv_method = c("randomcv", "cv"),
+                            cvstart = 1e3, cvstop = 1e-8, cv_nthreads = 1L, wrapper_sh = NULL) {
 
   prime_rule <- match.arg(prime_rule)
   cv_method <- match.arg(cv_method)
@@ -536,6 +614,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                   cv_method = cv_method,
                   cvstart = cvstart,
                   cvstop = cvstop,
+                  cv_nthreads = cv_nthreads,
                   work_dir = ml_dir)
   } else {
     cat("treePL results for the maximum-likelihood tree already exist! Skipping treePL run.\n")

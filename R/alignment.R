@@ -790,13 +790,37 @@ clean_taxonomic_names <- function(raw_input_fasta, checklist_path, output_clean_
     checklist_df <- utils::read.csv(checklist_path, stringsAsFactors = FALSE)
   }
   
-  accepted_names <- unique(trimws(checklist_df$pureName))
-  
+  # The two sides are written in different conventions and have to be reduced to a common key before
+  # they can be compared. Headers written by this package are ">Genus_species" or
+  # ">Genus_species|accession|sid"; the checklist's `pureName` column is "Genus species". Compared as
+  # they stand, `keep_idx` is empty for every header the package itself writes, which is what the
+  # greedy `^([^ ]+_[^ ]+).*` pattern used to hand over: on "Opuntia_ficus-indica|AY015284.1" it
+  # captured the whole field rather than the binomial.
+  #
+  # The key collapses spaces, hyphens and underscores alike, because the separator inside a
+  # hyphenated epithet is written all three ways across the checklist, the GenBank headers and the
+  # names this pipeline standardises. It does not split the name into two tokens: "ficus-indica" is
+  # one epithet, and keeping only the first fragment would merge every "Opuntia ficus-*" into a
+  # single species.
+  norm_key <- function(x) {
+    x <- sub("\\|.*$", "", as.character(x))
+    x <- gsub("[[:space:]_-]+", "_", trimws(x))
+    gsub("^_+|_+$", "", x)
+  }
+
+  # The retained sequences are renamed to the checklist's own spelling rather than to a
+  # reconstruction of it. That is what reconciling against an authoritative backbone means, and it
+  # keeps hyphenated epithets intact.
+  checklist_names <- unique(trimws(as.character(stats::na.omit(checklist_df$pureName))))
+  accepted_lookup <- stats::setNames(checklist_names, norm_key(checklist_names))
+  # Two spellings of one accepted name would otherwise resolve by row order.
+  accepted_lookup <- accepted_lookup[!duplicated(names(accepted_lookup))]
+
   names_seqs <- names(dna_in)
-  binomial_leaves <- sub("^([^ ]+_[^ ]+).*", "\\1", names_seqs)
-  keep_idx <- binomial_leaves %in% accepted_names
+  leaf_keys <- norm_key(names_seqs)
+  keep_idx <- leaf_keys %in% names(accepted_lookup)
   dna_clean <- dna_in[keep_idx]
-  names(dna_clean) <- sub("_", " ", binomial_leaves[keep_idx])
+  names(dna_clean) <- unname(accepted_lookup[leaf_keys[keep_idx]])
   
   dna_final <- dna_clean[!duplicated(names(dna_clean))]
   Biostrings::writeXStringSet(dna_final, target_out)
@@ -820,6 +844,7 @@ clean_taxonomic_names <- function(raw_input_fasta, checklist_path, output_clean_
 #' @param rooting_pattern Character or `NULL`. Regular expression identifying the terminals the tree will be rooted on. It exempts nothing. Any matching terminal removed by the occupancy filters is named in a warning and flagged in `LOG_SEQ_FILTER_<marker>.csv`. A filter that deletes the rooting outgroup must say so at the moment it does it, not four modules downstream: the five *Portulaca* sequences of `trnL_trnF`, 297 bp against a threshold of about 353, were removed silently and the branch subtending the outgroup collapsed from roughly 600 expected substitutions to 0.03. Defaults to `NULL`.
 #' @param protect_pattern Character or `NULL`. Regular expression matched against sequence names; matching terminals that carry at least one non-gap character are retained regardless of the occupancy filters. Intended as a last-resort safeguard for rooting terminals whose sequences are legitimately short (for example `"^(Anacampseros|Grahamia|Talinopsis|Portulaca)_"`). Defaults to `NULL` (no exemption).
 #' @param protect_markers Character vector or `NULL`. Names of the markers, as they appear in `input_dir` without the file extension, in which `protect_pattern` is honoured. `NULL`, the default, applies the exemption to every marker. Naming markers restricts it to the loci where a short outgroup sequence is worth its gap cost, instead of retaining every fragment of every terminal across the whole matrix: in the August 2026 dataset only `trnL_trnF` lost rooting terminals, and only there does the exemption buy anything.
+#' @param mafft_exec Character. System command or full path to the executable `MAFFT` binary, as in [run_alignment_pipeline()]. A binary configured for Stage 2 has to be configurable for Stage 5 as well, or the two stages of one run align with different versions. Defaults to `"mafft"`.
 #' @return A data frame containing compiled alignment summary statistics across all processed markers.
 #' @details
 #' This is the step that removes individual taxa from a locus without removing the locus itself.
@@ -850,7 +875,8 @@ run_joint_realignment <- function(input_dir,
                                   preserve_iupac = TRUE,
                                   protect_pattern = NULL,
                                   protect_markers = NULL,
-                                  rooting_pattern = NULL) {
+                                  rooting_pattern = NULL,
+                                  mafft_exec = "mafft") {
   dir.create(output_fasta_dir, recursive = TRUE, showWarnings = FALSE)
   dir.create(output_aln_dir, recursive = TRUE, showWarnings = FALSE)
   
@@ -872,6 +898,7 @@ run_joint_realignment <- function(input_dir,
   log_write(paste("protect_pattern:", if (is.null(protect_pattern)) "NULL" else protect_pattern))
   log_write(paste("protect_markers:", if (is.null(protect_markers)) "ALL" else paste(protect_markers, collapse = ", ")))
   log_write(paste("rooting_pattern:", if (is.null(rooting_pattern)) "NULL" else rooting_pattern))
+  log_write(paste("mafft_exec:", mafft_exec))
 
   collapsed_markers <- character()
   summary_list <- list()
@@ -893,7 +920,7 @@ run_joint_realignment <- function(input_dir,
       Biostrings::writeXStringSet(raw_clean, temp_clean)
       
       status <- system2(
-        command = "mafft",
+        command = mafft_exec,
         args = c("--auto", temp_clean),
         stdout = raw_out,
         stderr = raw_err

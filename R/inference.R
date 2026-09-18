@@ -858,12 +858,8 @@ generate_ml_search_script <- function(alignment_file, partition_file, constraint
   )
   L(cmd)
 
-  if (.Platform$OS.type == "unix") {
-    chmod_status <- system(paste("chmod +x", shQuote(bash_script)))
-    .check_cli_exit(chmod_status, "chmod")
-  } else {
-    Sys.chmod(bash_script, mode = "0755")
-  }
+  # Sys.chmod() is portable and needs no shell, so the two branches collapse into one call.
+  Sys.chmod(bash_script, mode = "0755")
 
   message("SLURM ML search script generated: ", bash_script)
   message("  Starting trees : ", n_trees)
@@ -889,9 +885,10 @@ generate_ml_search_script <- function(alignment_file, partition_file, constraint
 #'
 #' The two are not on a common scale and TBE must never be reported as though it were a bootstrap
 #' percentage. TBE is bounded below by FBP and its inflation grows with clade size. Measured on the
-#' 986 unconstrained nodes of the 1023 terminal supermatrix tree (2026-09-06): median TBE 0.783
-#' against median FBP 0.468, with the gap reaching 0.704 for clades of 51 to 200 terminals. Reporting
-#' TBE would place 61 percent of nodes above 0.70; FBP places 29 percent.
+#' 987 unconstrained nodes of the 1024 terminal supermatrix tree (2026-09-17): median TBE 0.783
+#' against median FBP 0.470, with the gap reaching 0.732 for clades of 51 to 200 terminals (median FBP 0.220,
+#' median TBE 0.952). Reporting TBE places 61 percent of nodes above 0.70; FBP places 29 percent (703 nodes
+#' collapsing below 0.70).
 #'
 #' Support values are meaningless for any bipartition imposed through `--tree-constraint`, because
 #' every replicate reproduces it by construction. Those nodes must be reported as constrained rather
@@ -1311,12 +1308,8 @@ generate_bootstrap_script <- function(alignment_file, partition_file, constraint
   )
   cat(cmd, file = bash_script, append = TRUE)
   
-  if (.Platform$OS.type == "unix") {
-    chmod_status <- system(paste("chmod +x", shQuote(bash_script)))
-    .check_cli_exit(chmod_status, "chmod")
-  } else {
-    Sys.chmod(bash_script, mode = "0755")
-  }
+  # Sys.chmod() is portable and needs no shell, so the two branches collapse into one call.
+  Sys.chmod(bash_script, mode = "0755")
   message("Bash SLURM array script generated: ", bash_script)
   return(bash_script)
 }
@@ -1857,7 +1850,7 @@ extract_species_binomial <- function(header) {
 #' @param method Character. Phylogenetic inference method (`"auto"`, `"raxml"`, `"phangorn"`, or `"nj"`). Defaults to `"auto"`.
 #' @param model Character. Nucleotide substitution model for maximum-likelihood search. Defaults to `"GTR+G"`.
 #' @param threads Integer. Number of computational threads. Defaults to `2L`.
-#' @param checklist_path Character. Path to accepted botanical checklist CSV (e.g., `CactaceaeFullList_accepted.csv`).
+#' @param checklist_path Character. Path to the accepted botanical checklist (e.g., `CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`).
 #' @return A list containing the species monophyly summary table and the per-marker tree paths.
 #' @references
 #' Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019).

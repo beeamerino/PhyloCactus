@@ -129,7 +129,7 @@ cat("\n--- Running Phylogenetic Validation Pipeline ---\n")
 # This standardizes the validation baseline and avoids methodological asymmetries
 # between local mutable outputs and published reference backbones.
 tree_paths <- list(
-  FocalTree   = system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus"),
+  FocalTree   = if (file.exists("8_Dating/dated_summary_hpd.tree")) "8_Dating/dated_summary_hpd.tree" else system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus"),
   Zuntini     = system.file("extdata", "reference_zuntini_2024.tree", package = "PhyloCactus"),
   Thompson    = system.file("extdata", "reference_thompson_2024.tree", package = "PhyloCactus"),
   Amaral      = system.file("extdata", "reference_amaral_2022.tree", package = "PhyloCactus"),

@@ -557,7 +557,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     theme_phylocactus(base_size = 12) +
     labs(
       title = "Molecular Completeness vs IUCN Category",
-      subtitle = "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 985)",
+      subtitle = "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 986)",
       x = "IUCN Category",
       y = "Marker completeness (%)"
     )

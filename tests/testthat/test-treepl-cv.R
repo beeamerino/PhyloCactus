@@ -204,3 +204,128 @@ test_that("automate_treePL() warns that wrapper_sh is retired instead of failing
       wrapper_sh = "anything_at_all.sh")), silent = TRUE),
     "retired and ignored")
 })
+
+# ---------------------------------------------------------------------------
+# Cross-validation threading and determinism (cv_nthreads)
+# ---------------------------------------------------------------------------
+
+test_that("run_treePL_cv() enforces cv_nthreads = 1 by default, overriding base nthreads = 8", {
+  skip_if_not_installed("ape")
+  tmp <- withr::local_tempdir()
+
+  tr <- ape::read.tree(text = "((A:0.1,B:0.1):0.1,(C:0.1,D:0.1):0.1);")
+  tree_path <- file.path(tmp, "test.tree")
+  ape::write.tree(tr, tree_path)
+
+  cfg_path <- file.path(tmp, "test.cfg")
+  writeLines(c("numsites = 1000", "mrca = root A D", "min = root 1", "max = root 5",
+               "nthreads = 8"), cfg_path)
+
+  # Call run_treePL_cv with a mock treePL binary that writes prime and cv outputs
+  mock_treepl <- file.path(tmp, "mock_treepl.sh")
+  writeLines(c(
+    "#!/bin/sh",
+    "cfg=\"$1\"",
+    "if grep -q 'prime' \"$cfg\"; then",
+    "  echo 'PLACE THE LINES BELOW IN THE CONFIGURATION FILE'",
+    "  echo 'opt = 1'",
+    "  echo 'optad = 1'",
+    "  echo 'optcvad = 1'",
+    "elif grep -q 'cvoutfile' \"$cfg\"; then",
+    "  cvout=$(grep 'cvoutfile' \"$cfg\" | sed 's/.*= *//')",
+    "  echo 'chisq: (10.0) 500' > \"$cvout\"",
+    "  echo 'chisq: (1.0) 400' >> \"$cvout\"",
+    "  echo 'chisq: (0.1) 450' >> \"$cvout\"",
+    "elif grep -q 'smooth' \"$cfg\"; then",
+    "  out=$(grep 'outfile' \"$cfg\" | sed 's/.*= *//')",
+    "  echo 'smoothing : 1' > final_ML_tree.log",
+    "  echo '((A:1,B:1):1,(C:1,D:1):1);' > \"$out\"",
+    "fi",
+    "exit 0"
+  ), mock_treepl)
+  Sys.chmod(mock_treepl, mode = "0755")
+
+  res <- run_treePL_cv(
+    cfg_file = cfg_path,
+    tree_file = tree_path,
+    label = "test_run",
+    n_prime = 1L,
+    cvstart = 10,
+    cvstop = 0.1,
+    treepl_bin = mock_treepl,
+    work_dir = tmp,
+    quiet = TRUE
+  )
+
+  # Verify the cv configuration file: it must carry nthreads = 1, NOT nthreads = 8
+  cv_cfg_lines <- readLines(file.path(tmp, "configure_cv_test_run"))
+  thread_lines <- grep("^\\s*nthreads\\s*=", cv_cfg_lines, value = TRUE)
+  expect_length(thread_lines, 1L)
+  expect_equal(trimws(thread_lines), "nthreads = 1")
+})
+
+test_that("run_treePL_cv() warns when cv_nthreads > 1", {
+  skip_if_not_installed("ape")
+  tmp <- withr::local_tempdir()
+
+  tr <- ape::read.tree(text = "((A:0.1,B:0.1):0.1,(C:0.1,D:0.1):0.1);")
+  tree_path <- file.path(tmp, "test.tree")
+  ape::write.tree(tr, tree_path)
+
+  cfg_path <- file.path(tmp, "test.cfg")
+  writeLines(c("numsites = 1000", "mrca = root A D", "min = root 1", "max = root 5"), cfg_path)
+
+  mock_treepl <- file.path(tmp, "mock_treepl.sh")
+  writeLines(c(
+    "#!/bin/sh",
+    "cfg=\"$1\"",
+    "if grep -q 'prime' \"$cfg\"; then",
+    "  echo 'PLACE THE LINES BELOW IN THE CONFIGURATION FILE'",
+    "  echo 'opt = 1'",
+    "  echo 'optad = 1'",
+    "  echo 'optcvad = 1'",
+    "elif grep -q 'cvoutfile' \"$cfg\"; then",
+    "  cvout=$(grep 'cvoutfile' \"$cfg\" | sed 's/.*= *//')",
+    "  echo 'chisq: (1.0) 400' > \"$cvout\"",
+    "fi",
+    "exit 0"
+  ), mock_treepl)
+  Sys.chmod(mock_treepl, mode = "0755")
+
+  expect_warning(
+    run_treePL_cv(
+      cfg_file = cfg_path,
+      tree_file = tree_path,
+      label = "test_warn",
+      n_prime = 1L,
+      cvstart = 10,
+      cvstop = 1,
+      cv_nthreads = 4L,
+      treepl_bin = mock_treepl,
+      work_dir = tmp,
+      quiet = TRUE
+    ),
+    "treePL's cross-validation evaluates replicates across OpenMP threads"
+  )
+
+  # Check that nthreads = 4 was written into the cv configuration
+  cv_cfg_lines <- readLines(file.path(tmp, "configure_cv_test_warn"))
+  thread_lines <- grep("^\\s*nthreads\\s*=", cv_cfg_lines, value = TRUE)
+  expect_equal(trimws(thread_lines), "nthreads = 4")
+})
+
+test_that("run_treePL_cv() errors on invalid cv_nthreads", {
+  skip_if_not_installed("ape")
+  tmp <- withr::local_tempdir()
+  tr <- ape::read.tree(text = "((A:0.1,B:0.1):0.1,(C:0.1,D:0.1):0.1);")
+  tree_path <- file.path(tmp, "test.tree")
+  ape::write.tree(tr, tree_path)
+  cfg_path <- file.path(tmp, "test.cfg")
+  writeLines(c("numsites = 1000", "min = root 1", "max = root 5"), cfg_path)
+
+  expect_error(
+    run_treePL_cv(cfg_path, tree_path, "invalid", cv_nthreads = 0L, work_dir = tmp),
+    "positive integer"
+  )
+})
+

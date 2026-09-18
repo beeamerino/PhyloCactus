@@ -80,6 +80,17 @@ modeltest_path <- Sys.getenv("PATH_MODELTEST_NG", "modeltest-ng")
 raxml_path     <- Sys.getenv("PATH_RAXML_NG", "raxml-ng")
 treepl_path    <- Sys.getenv("PATH_TREEPL", "treePL")
 
+# Email notification for the long steps that run on this machine. Module 10 dates the tree and its
+# bootstrap replicates locally, for hours, with no scheduler to mail on its behalf. Declared here,
+# once, so the whole script is switched from one line.
+#
+# FALSE sends nothing and needs no configuration. TRUE needs two things, both outside this
+# repository: MY_EMAIL in your .Renviron, and a blastula credentials file created once with
+# blastula::create_smtp_creds_file() (use an application password if the account is Gmail). The
+# package reads neither: it hands the path to blastula. A notification that cannot be sent is
+# reported and ignored, so it never fails a run. See ?send_run_notification.
+notify_email <- FALSE
+
 # Every file of the run carries this prefix, so the run is renamed by changing one value.
 run_prefix <- "cactus"
 
@@ -162,7 +173,7 @@ The resulting maximum likelihood tree represents the best supported evolutionary
 
 The search runs either on a local workstation through `calculate_ml_tree()` or on an HPC allocation through **`generate_ml_search_script()`**, which writes a SLURM batch script performing the identical constrained search. The choice is made with the `run_local_ml` flag below, mirroring the `run_local_bs` switch used for bootstrap replicates in Module 9. Unlike the bootstrap step, the maximum likelihood search is submitted as a single job rather than a job array: `RAxML-NG` distributes the independent starting tree searches across workers within one job and writes a single best tree, so no collection step is required to compare log-likelihoods across tasks.
 
-The parameter that governs wall-clock in this stage is `n_workers`, not the thread count. `RAxML-NG` assigns each worker `threads / workers` threads and gives it one starting tree at a time, so the search completes in `ceiling(n_init_trees / workers)` sequential rounds. Total core-work is fixed: adding threads to a single worker shortens each individual tree, while adding workers reduces the number of rounds, and the second lever dominates once each worker already holds an efficient thread count. A search of 50 starting trees on one worker executes 50 rounds; the same 50 trees across 25 workers execute two. In a reference single-worker benchmark run on an Apple M2 Pro (8 threads, `n_workers = 1`), 50 starting trees required 47115 s, approximately 938 s per tree, essentially all of it attributable to sequential rounds rather than to per-tree cost. In contrast, running across 25 parallel workers on an AMD EPYC 9754 server (75 threads, 3 threads per worker) on the full production supermatrix (1023 taxa, 12806 sites, 5954 patterns, 11 partitions) completed 50 starting trees in two rounds in only 2393 s (~40 minutes).
+The parameter that governs wall-clock in this stage is `n_workers`, not the thread count. `RAxML-NG` assigns each worker `threads / workers` threads and gives it one starting tree at a time, so the search completes in `ceiling(n_init_trees / workers)` sequential rounds. Total core-work is fixed: adding threads to a single worker shortens each individual tree, while adding workers reduces the number of rounds, and the second lever dominates once each worker already holds an efficient thread count. A search of 50 starting trees on one worker executes 50 rounds; the same 50 trees across 25 workers execute two. In a reference single-worker benchmark run on an Apple M2 Pro (8 threads, `n_workers = 1`), 50 starting trees required 47115 s, approximately 938 s per tree, essentially all of it attributable to sequential rounds rather than to per-tree cost. In contrast, running across 25 parallel workers on an AMD EPYC 9754 server (75 threads, 3 threads per worker) on the full production supermatrix (1024 taxa, 12809 sites, 5959 patterns, 11 partitions) completed 50 starting trees in two rounds in only 2393 s (~40 minutes).
 
 Passing `n_workers = NULL` derives the worker count automatically, constrained to a divisor of the starting tree count so that no worker sits idle in the final round. A worker count that does not divide the tree count wastes the tail of the search: 16 workers over 50 trees run four rounds with only two workers occupied in the last one, reaching the same wall-clock as 25 workers over two full rounds while holding more cores to do it. Per-worker thread allocation should keep several hundred site patterns per thread, since parallel efficiency within a worker saturates below that; `min_threads_per_worker` sets that floor and warrants re-validation on unfamiliar node hardware with a short trial search (`n_init_trees = "rand{2}"`) before committing a full allocation.
 
@@ -267,7 +278,7 @@ The **`generate_bootstrap_script()`** and **`run_local_bootstraps()`** functions
 
 The **`collect_bootstraps()`** function gathers the independent bootstrap searches, while **`check_bs_convergence()`** evaluates whether a sufficient number of replicates has been generated using the bootstopping criterion (Pattengale *et al*., 2010). Convergence is evaluated under Felsenstein's Bootstrap Proportions (`FBP`), testing whether the autoMRE threshold (cutoff <= 0.03) is satisfied across resampled replicates.
 
-The **`map_branch_supports()`** function summarizes bootstrap information and transfers support values onto the best maximum likelihood topology. `PhyloCactus` adopts Felsenstein's Bootstrap Proportions (`FBP`) as its primary canonical metric. Published phylogenetic studies in Cactaceae (Hernández-Hernández *et al*., 2014; Arakaki *et al*., 2011) report standard FBP bipartition frequencies or Bayesian posterior probabilities. Transfer Bootstrap Expectation (`TBE`; Lemoine *et al*., 2018) is computed as a secondary, complementary metric. While TBE mitigates the penalization caused by unstable wildcard taxa in large supermatrices with missing data, it systematically inflates support values in large clades compared to standard bipartition frequencies (for example, free clades of 51 to 200 tips exhibit a median FBP of 0.265 alongside a median TBE of 0.969). Reporting FBP as the primary metric ensures direct comparability with published botanical benchmarks, while retaining TBE provides diagnostic insight into local taxon placement stability.
+The **`map_branch_supports()`** function summarizes bootstrap information and transfers support values onto the best maximum likelihood topology. `PhyloCactus` adopts Felsenstein's Bootstrap Proportions (`FBP`) as its primary canonical metric. Published phylogenetic studies in Cactaceae (Hernández-Hernández *et al*., 2014; Arakaki *et al*., 2011) report standard FBP bipartition frequencies or Bayesian posterior probabilities. Transfer Bootstrap Expectation (`TBE`; Lemoine *et al*., 2018) is computed as a secondary, complementary metric. While TBE mitigates the penalization caused by unstable wildcard taxa in large supermatrices with missing data, it systematically inflates support values in large clades compared to standard bipartition frequencies (for example, free clades of 51 to 200 tips exhibit a median FBP of 0.220 alongside a median TBE of 0.952). Reporting FBP as the primary metric ensures direct comparability with published botanical benchmarks, while retaining TBE provides diagnostic insight into local taxon placement stability.
 
 When interpreting support values, internal nodes enforced by the taxonomic constraint scaffold (`cactus_constraints.tree`) return support values of 1.000 by algorithmic definition across all bootstrap replicates. These values represent the topological constraint itself rather than empirical evidence from the molecular supermatrix, and must be designated as constrained rather than estimated in publication tables.
 
@@ -462,6 +473,7 @@ Because **Cactaceae** lacks an unequivocal macrofossil record suitable for direc
 
 - `ACP_root`: Constrains the crown divergence of the Anacampserotaceae + Portulacaceae + **Cactaceae** clade (corresponding to the stem node of Portulacaceae in Ramírez-Barahona *et al.*, 2020). The primary calibration scheme (Scheme S1) applies a fixed point of 41.82 Ma (the median stem age under BEAST relaxed clock), with alternative sensitivity schemes available in `calibrations_bounds.csv` (Scheme S2: 95% HPD interval [27.81, 53.37] Ma; Scheme S4: 53.22 Ma from Zuntini *et al.*, 2024 young tree).
 - `Cactaceae_Anacampserotaceae_stem` ([21.95, 48.51] Ma) is retained in `calibrations_bounds.csv` with `used_in_analysis = FALSE` because it assumes a sister relationship between **Cactaceae** and Anacampserotaceae; our unconstrained likelihood inference and phylogenomic evidence (Zuntini *et al.*, 2024 Kew Tree of Life Release 4.0) instead recover (Anacampserotaceae + Portulacaceae) sister to **Cactaceae**.
+- `ACPT_root` ([33.28, 59.86] Ma, Ramírez-Barahona *et al.*, 2020) is retained with `used_in_analysis = FALSE`. The root of the chronogram is the crown of the ACPT clade, so the deepest node of the tree carries no calibration: its estimated age of 45.61 Ma is an extrapolation above the single fixed anchor and is conditional on the smoothing value selected by cross-validation. That estimate falls inside the published interval, which is a consistency check and not a constraint. Activating the bound would place a second anchor on the deepest node and is a change of analysis rather than a refinement. Report the root age as uncalibrated in Methods.
 
 The crown intervals reported by Ramírez-Barahona *et al.* (2020) for these families are also retained with `used_in_analysis = FALSE`, for provenance rather than for use. That study samples two terminals per family, so its crown estimate is the divergence between the two sampled species rather than the crown of the family, and systematically underestimates it. Its stem nodes are well defined regardless of within-family sampling, which is why the stem bounds are the ones carried forward.
 
@@ -475,6 +487,17 @@ After the optimal `treePL` parameters have been identified, the dating procedure
 
 Propagating temporal uncertainty through these bootstrap replicates allows divergence time estimates to incorporate variation in branch length estimation. The resulting collection of dated bootstrap trees represents uncertainty associated with the temporal reconstruction under a maximum likelihood framework and provides the basis for estimating confidence intervals around divergence times.
 
+This is the longest step that runs on your own machine rather than on a cluster, and unlike the
+maximum-likelihood search and the bootstraps it has no scheduler to mail a notification on its
+behalf. Setting `notify_email <- TRUE` in the SETUP block makes `automate_treePL()` send one when
+the run ends, whether it finished or failed, carrying the status, the start and end times, the
+elapsed time, the host and the paths of the outputs, and the R error when there is one. Two things
+have to be configured, both outside the package: `MY_EMAIL` in your `.Renviron`, and a `blastula`
+credentials file, created once with `blastula::create_smtp_creds_file()`. `PhyloCactus` reads
+neither the account nor the credentials file: it passes the path to `blastula`. A notification that
+cannot be sent is reported and ignored, so it never fails a run that has already completed. See
+`?send_run_notification`, which can also be called directly from any script.
+
 #### Summarizing Dated Temporal Bootstrap Replicates
 
 After all temporal bootstrap replicates have been independently dated, the resulting chronograms must be summarized into a single representative time calibrated tree. Following the empirical workflow proposed by Maurin (2020), `PhyloCactus` uses `TreeAnnotator` (Helfrich *et al.*, 2018) to summarize the dated bootstrap distribution.
@@ -487,7 +510,20 @@ Under this framework, `TreeAnnotator` calculates the mean age of each node and s
 
 TreeAnnotator reports these uncertainty intervals as highest posterior density (HPD) values due to compatibility with Bayesian phylogenetic workflows. However, these values should not be interpreted as Bayesian posterior distributions. Within the `PhyloCactus` framework, they represent confidence intervals derived from variation among independently dated temporal bootstrap replicates generated through penalized likelihood optimization.
 
-Here is how you execute, print, and visualize these chronological calculations:
+#### Rate Smoothing Parameter Identifiability and Deterministic Cross-Validation
+
+In penalized likelihood dating, the rate-smoothing parameter ($\lambda$) governs the roughness penalty that balances adherence to observed branch lengths against the enforcement of rate autocorrelation across ancestral-descendant lineages (Sanderson, 2002). When $\lambda$ approaches zero, each branch is permitted its own independent substitution rate (approaching a clockless model); as $\lambda$ increases toward infinity, rate variation across lineages is penalized until rates become identical across the entire tree (enforcing a strict molecular clock).
+
+Cross-validation (`randomcv`) assesses model fit by iteratively removing subsets of sequence data or nodes and evaluating prediction error measured as chi-square ($\chi^2$). However, the native `treePL` implementation parallelizes cross-validation across threads with OpenMP while invoking the non-reentrant standard C function `rand()` during simulated annealing (`siman_calc_par.cpp`). When executed with multiple threads (`cv_nthreads > 1`), thread scheduling allocates pseudo-random draws unpredictably across threads, causing simulated annealing trajectories to diverge and cross-validation scores to fluctuate by hundreds of $\chi^2$ units across identical runs with the same seed. To eliminate this concurrency flaw, `PhyloCactus` enforces `cv_nthreads = 1L` by default during cross-validation, restoring bit-for-bit reproducibility at a negligible computational cost (~4% difference in wall-clock time).
+
+To prevent truncating the search at an artificial grid boundary, `automate_treePL()` is configured to evaluate cross-validation directly across the extended grid from $10^3$ down to $10^{-14}$ using a single deterministic thread (`cv_nthreads = 1L`). Evaluating this comprehensive span in a single execution yields two possible outcomes:
+
+1. **Interior Minimum (Identifiable Smoothing):** The $\chi^2$ profile turns upward, defining a local minimum. In this case, `automate_treePL()` selects this interior minimum and dates both the maximum likelihood tree and all temporal bootstrap replicates with the statistically optimal rate-smoothing parameter.
+2. **Data-Limited Regime (Non-Identifiable Smoothing):** The $\chi^2$ profile continues to decrease monotonically toward the floor ($10^{-14}$) or fluctuates erratically without establishing an optimum. Biologically and mathematically, this demonstrates that the multilocus sequence supermatrix lacks sufficient information to uniquely decouple evolutionary substitution rates from absolute divergence times without additional temporal constraints.
+
+When rate smoothing is data-limited, divergence time estimates cannot be justified by an ostensible cross-validation optimum. Instead, the validity of the chronogram must be established through sensitivity analysis across the low-smoothing bracket ($10^{-14}$ to $10^{-4}$). As demonstrated below with `report_smoothing_sensitivity()`, divergence times across major cactus clades vary by less than 0.6 Ma across these ten orders of magnitude and remain strictly interior to calibration bounds, confirming that chronological reconstruction is robust to smoothing choice.
+
+Here is how you execute, print, and visualize these chronological calculations and complementary diagnostics:
 
 ```{r, eval = FALSE}
 # Resuming here after a restart: run the SETUP block of Module 7, then continue from this line.
@@ -611,8 +647,13 @@ cat("\nRunning automated `treePL` wrapper script over maximum-likelihood tree an
 #
 # Three defaults follow Maurin where the shell script did not: the priming parameters are the
 # lowest rather than the most frequent, cross-validation uses `randomcv` rather than leave-one-out
-# `cv`, and the smoothing grid reaches 1e-08 rather than stopping at 1e-04. Maurin reports optimal
-# smoothing between 1e-06 and 1e-08 for a tree whose branch lengths were rescaled as they are here.
+# `cv`, and the smoothing grid reaches 1e-14 rather than stopping at 1e-04. Maurin reports optimal
+# smoothing between 1e-06 and 1e-08 for a tree whose branch lengths were rescaled as they are here,
+# and extending the grid down to 1e-14 allows testing whether an interior minimum exists or whether
+# rate smoothing is data-limited.
+# In addition, cross-validation is evaluated on a single thread (`cv_nthreads = 1L`) to guarantee
+# bit-for-bit reproducibility, preventing the race conditions on C `rand()` that occur when treePL
+# evaluates simulated annealing across OpenMP threads.
 
 # Note: For tutorial purposes, you can limit the number of bootstrap trees to process
 # by setting `num_bs = 100` (or any other number). If not provided, it will process all
@@ -625,7 +666,12 @@ automate_treePL(
   outgroup = rooting_outgroup,
   results_dir = file.path(dating_dir, "auto_results"),
   treePL_out = dating_dir,
-  num_bs = 100
+  num_bs = 100,
+  cvstart = 1e3,
+  cvstop = 1e-14,
+  cv_nthreads = 1L,
+  # Declared in the SETUP block. Reports the outcome, the timings and the output paths by email.
+  notify = notify_email
 )
 
 # 3. View and evaluate dating metrics cleanly in R
@@ -651,6 +697,66 @@ if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
   print(adherence)
 }
 cat("--------------------------------------------\n")
+
+# 4. Rate Smoothing Cross-Validation Diagnostics (1e3 to 1e-14)
+# automate_treePL() evaluated cross-validation across 18 orders of magnitude (1e3 down to 1e-14)
+# on a single deterministic thread (cv_nthreads = 1L).
+# Here we inspect the complete chi-square curve to determine whether an interior minimum was
+# discovered or whether rate smoothing is data-limited.
+
+cv_file <- file.path(dating_dir, "auto_results", "ML_tree", "cv_ML_tree")
+if (file.exists(cv_file)) {
+  lines_cv <- grep("chisq", readLines(cv_file, warn = FALSE), value = TRUE)
+  cv_tab <- data.frame(
+    smoothing = as.numeric(gsub(".*\\(([^)]*)\\).*", "\\1", lines_cv)),
+    chisq = as.numeric(sub(".*\\)\\s*", "", lines_cv))
+  )
+  cv_tab <- cv_tab[order(cv_tab$smoothing), ]
+
+  cat("\n--- treePL Rate Smoothing Cross-Validation Profile (1e3 to 1e-14) ---\n")
+  print(cv_tab)
+
+  best_smooth <- cv_tab$smoothing[which.min(cv_tab$chisq)]
+  cat("\nSelected smoothing parameter:", format(best_smooth, scientific = FALSE),
+      "with lowest chi-square:", min(cv_tab$chisq), "\n")
+
+  if (best_smooth <= 1e-14) {
+    cat("\nDiagnostic Result: Cross-validation error decreases monotonically down to the grid floor (1e-14).\n",
+        "Methodological Conclusion: Rate smoothing is data-limited (not identifiable from the sequence data).\n",
+        "The multilocus supermatrix lacks sufficient information to decouple rates and times without\n",
+        "additional internal constraints. In this regime, divergence times cannot rest on an optimum,\n",
+        "and must instead be justified via sensitivity analysis across the low-smoothing bracket.\n")
+  } else {
+    cat("\nDiagnostic Result: Statistically optimal interior minimum identified at smoothing =",
+        format(best_smooth, scientific = FALSE), "\n")
+  }
+}
+
+# 5. Smoothing Sensitivity Analysis Across Orders of Magnitude (1e-14 to 100)
+# When rate smoothing cannot be uniquely identified by cross-validation, the validity of the
+# inferred chronogram depends on demonstrating that divergence times are stable across the
+# relevant parameter range rather than sensitive to arbitrary boundary choices.
+#
+# We evaluate node ages across 16 orders of magnitude, covering the ultra-low and low smoothing
+# bracket (1e-14, 1e-12, 1e-10, 1e-08, 1e-06, 1e-04) where cross-validation operates, as well
+# as moderate and high values (1e-02, 1, 10, 100).
+# In the low bracket (1e-14 to 1e-04), divergence times across major cactus clades vary by less than
+# 0.6 Ma and remain strictly interior to their calibration bounds.
+# Conversely, at high smoothing (lambda >= 1), excessive penalty forces calibrated nodes against
+# their upper bounds, demonstrating why lower smoothing values are biologically appropriate.
+
+sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")
+if (file.exists(sensitivity_cfg)) {
+  cat("\nRunning smoothing sensitivity analysis across 1e-14 to 100...\n")
+  sensitivity <- report_smoothing_sensitivity(
+    cfg_file = sensitivity_cfg,
+    smoothing_values = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1, 10, 100),
+    treepl_bin = treepl_path
+  )
+  cat("\n--- Calibrated Node Age Sensitivity Table ---\n")
+  print(sensitivity)
+  cat("--------------------------------------------\n")
+}
 ```
 
 ## Conclusion
@@ -659,7 +765,7 @@ At this stage, phylogenetic inference and divergence time estimation have been c
 
 The next stage of the `PhyloCactus` workflow focuses on integrating phylogenetic outputs with biological metadata and generating publication quality visualizations. In the following tutorial, users will learn how to visualize the maximum likelihood phylogeny with branch support values, display the dated chronogram with temporal uncertainty estimates, and integrate external biodiversity information, including IUCN Red List conservation categories.
 
-[Continue to Tutorial 3: Data Visualization and IUCN Summaries](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html)
+[Continue to Tutorial 3: Visualization and Metadata Integration](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html)
 
 ## References
 

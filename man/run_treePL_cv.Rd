@@ -13,6 +13,7 @@ run_treePL_cv(
   cv_method = c("randomcv", "cv"),
   cvstart = 1000,
   cvstop = 1e-08,
+  cv_nthreads = 1L,
   treepl_bin = "treePL",
   work_dir = NULL,
   quiet = FALSE
@@ -46,6 +47,14 @@ on \code{n_prime} above before changing either.}
 \item{cvstart, cvstop}{Ends of the smoothing grid. The defaults span 1e+03 down to 1e-08, low
 enough to contain the 1e-06 to 1e-08 range Maurin reports for a tree with rescaled branch
 lengths, which the shell script's floor of 1e-04 was not.}
+
+\item{cv_nthreads}{Integer. Number of threads for the cross-validation stage. Defaults to \code{1L}.
+Evaluating cross-validation replicates across OpenMP threads (\code{nthreads > 1}) introduces race
+conditions because \code{treePL}'s simulated annealing routine calls the non-reentrant C \code{rand()}
+concurrently and combines chi-square sums with non-associative floating-point reduction. This
+causes cross-validation curves and selected smoothing values to vary widely between identical
+runs even when \code{seed} is fixed. Setting \code{cv_nthreads = 1L} restores bit-for-bit determinism
+at a negligible computational cost (~4\% difference in wall-clock time).}
 
 \item{treepl_bin}{Name or path of the \code{treePL} binary.}
 

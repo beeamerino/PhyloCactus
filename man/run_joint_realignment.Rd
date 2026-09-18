@@ -13,7 +13,8 @@ run_joint_realignment(
   preserve_iupac = TRUE,
   protect_pattern = NULL,
   protect_markers = NULL,
-  rooting_pattern = NULL
+  rooting_pattern = NULL,
+  mafft_exec = "mafft"
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ run_joint_realignment(
 \item{protect_markers}{Character vector or \code{NULL}. Names of the markers, as they appear in \code{input_dir} without the file extension, in which \code{protect_pattern} is honoured. \code{NULL}, the default, applies the exemption to every marker. Naming markers restricts it to the loci where a short outgroup sequence is worth its gap cost, instead of retaining every fragment of every terminal across the whole matrix: in the August 2026 dataset only \code{trnL_trnF} lost rooting terminals, and only there does the exemption buy anything.}
 
 \item{rooting_pattern}{Character or \code{NULL}. Regular expression identifying the terminals the tree will be rooted on. It exempts nothing. Any matching terminal removed by the occupancy filters is named in a warning and flagged in \verb{LOG_SEQ_FILTER_<marker>.csv}. A filter that deletes the rooting outgroup must say so at the moment it does it, not four modules downstream: the five \emph{Portulaca} sequences of \code{trnL_trnF}, 297 bp against a threshold of about 353, were removed silently and the branch subtending the outgroup collapsed from roughly 600 expected substitutions to 0.03. Defaults to \code{NULL}.}
+
+\item{mafft_exec}{Character. System command or full path to the executable \code{MAFFT} binary, as in \code{\link[=run_alignment_pipeline]{run_alignment_pipeline()}}. A binary configured for Stage 2 has to be configurable for Stage 5 as well, or the two stages of one run align with different versions. Defaults to \code{"mafft"}.}
 }
 \value{
 A data frame containing compiled alignment summary statistics across all processed markers.

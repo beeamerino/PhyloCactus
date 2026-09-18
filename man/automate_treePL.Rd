@@ -20,7 +20,11 @@ automate_treePL(
   cv_method = c("randomcv", "cv"),
   cvstart = 1000,
   cvstop = 1e-08,
-  wrapper_sh = NULL
+  cv_nthreads = 1L,
+  wrapper_sh = NULL,
+  notify = FALSE,
+  notify_to = NULL,
+  notify_credentials = NULL
 )
 }
 \arguments{
@@ -42,16 +46,19 @@ automate_treePL(
 
 \strong{Why a clade rather than a terminal.} Rooting is imposed after the search: \code{RAxML-NG} returns an unrooted topology and the root is placed on a chosen edge. Naming a single terminal of a sampled outgroup clade places the root \emph{inside} that clade, leaving it paraphyletic in the final tree and collapsing its crown node onto the root. Any calibration addressed by the MRCA of that clade then lands on the root instead of on the node it was written for. Supplying the whole clade places the root on its stem edge, which is the intended edge. Rooting is performed by \code{root_on_clade()}, which also handles the basal polytomy \code{RAxML-NG} writes.
 
-Bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error.
+bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error.
 
 \strong{Topological assumption.} Placing the root on the outgroup lineage (Talinaceae or Portulacaceae) establishes the basal split for dating. In the reference dataset, Talinaceae roots the tree, placing the root on the stem of the ACP clade (Anacampserotaceae, Cactaceae, Portulacaceae) and allowing maximum-likelihood inference to test alternative topological resolutions among the three core families (Ramirez-Barahona et al., 2020; Zuntini et al., 2024). State this assumption in Methods, and treat the root age as conditional on it.}
 
 \item{seed}{Integer or NULL. Seed for every stochastic step of the run: R's choice of which
 bootstrap replicates to date, and \code{treePL}'s own \code{seed} keyword, which is written into the
 maximum-likelihood configuration and, offset by the replicate index, into each replicate's.
-\code{treePL} seeds itself from the clock when the keyword is absent, which leaves both the
-cross-validation and the simulated annealing unreproducible. Defaults to \code{NULL}, which draws
-one and reports it; record the reported value, as it is required to reproduce the run.}
+\code{treePL} seeds itself from the clock when the keyword is absent. Note that while setting \code{seed}
+is necessary, it is only sufficient for reproducible cross-validation when \code{cv_nthreads = 1L}:
+\code{treePL}'s simulated annealing routine invokes the non-reentrant standard C \code{rand()} across
+OpenMP threads when \code{nthreads > 1}, leaving multi-threaded cross-validation non-reproducible.
+Defaults to \code{NULL}, which draws one and reports it; record the reported value, as it is
+required to reproduce the run.}
 
 \item{rescale_factor}{Numeric. Multiplier applied to every branch length before dating, and the divisor applied to \code{numsites} in the configurations written for \code{treePL}. Defaults to \code{100}.
 
@@ -68,14 +75,31 @@ for leave-one-out, which is what the retired shell script used.}
 the shell script's fixed floor of 1e-04, which the August 2026 run of this project hit without
 the chi-square curve ever turning.}
 
+\item{cv_nthreads}{Integer. Number of threads for the cross-validation stage. Defaults to \code{1L}
+to guarantee deterministic, bit-for-bit reproducible cross-validation curves. See \code{\link[=run_treePL_cv]{run_treePL_cv()}}.}
+
 \item{wrapper_sh}{Retired on 2026-09-02 and ignored, with a warning. Priming, cross-validation
 and dating of the maximum-likelihood tree now run through \code{\link[=run_treePL_cv]{run_treePL_cv()}}, which implements
 the protocol of Maurin (2020) in R. The shell script this argument used to point at carried no
 licence and wrote \verb{smoothing = }, a keyword \code{treePL} discards without a message, so every
 chronogram produced before that date was dated at the built-in default of 10.}
+
+\item{notify}{Logical. Send an email when the run ends, whether it finished or failed. The
+message carries the status, the start and end times, the elapsed time, the host and the paths
+of the outputs. Intended for this step in particular, which runs on a local machine for hours
+and has no scheduler to mail on its behalf. A notification that cannot be sent is reported and
+ignored: it never fails the run. See \code{\link[=send_run_notification]{send_run_notification()}} for what has to be configured.
+Defaults to \code{FALSE}.}
+
+\item{notify_to, notify_credentials}{Passed to \code{\link[=send_run_notification]{send_run_notification()}} as \code{to} and
+\code{credentials}. Both default to \code{NULL}, which reads the \code{MY_EMAIL} and \code{PHYLOCACTUS_SMTP_CREDS}
+environment variables.}
 }
 \value{
-Invisible NULL upon completion.
+Invisibly, the path of the dated maximum-likelihood chronogram written into
+\code{treePL_out}. Until 2026-09-18 this field read "Invisible NULL upon completion", which the
+function has never done: the value is what \code{resolve_run_paths()} and the publication step
+downstream expect to receive from it.
 }
 \description{
 Automates cross-validation parameter optimization, rate smoothing selection, and chronogram estimation

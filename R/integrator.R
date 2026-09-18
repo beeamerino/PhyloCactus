@@ -55,6 +55,22 @@
   collapsed_ml
 }
 
+#' Read a Tree Written Either in Newick or in NEXUS
+#'
+#' `TreeAnnotator` writes the summary chronogram in NEXUS, and `ape::read.tree()` does not read
+#' NEXUS. The same fall-through already exists in `publish_run_outputs.R`; it is kept here so that
+#' any function reading a pipeline tree accepts both formats rather than failing on the artifact
+#' the pipeline itself distributes.
+#'
+#' @param path Character. Path to a tree file in either format.
+#' @return An object of class `phylo`.
+#' @noRd
+.read_tree_any <- function(path) {
+  tr <- tryCatch(ape::read.tree(path), error = function(e) NULL)
+  if (is.null(tr) || !inherits(tr, "phylo")) tr <- ape::read.nexus(path)
+  tr
+}
+
 #' Render Final Publication Figures and Registry
 #'
 #' Maps statistical support values (e.g., Felsenstein Bootstrap Proportions, FBP) onto nodes of the
@@ -71,8 +87,8 @@
 #' @export
 integrate_publication_tree <- function(ml_support_tree_path, summary_chronogram_path, constraints_path = NULL, out_dir, collapse_cutoff = 0.70) {
 
-  ml_tree <- ape::read.tree(ml_support_tree_path)
-  chrono_tree <- ape::read.tree(summary_chronogram_path)
+  ml_tree <- .read_tree_any(ml_support_tree_path)
+  chrono_tree <- .read_tree_any(summary_chronogram_path)
 
   collapsed_ml <- .collapse_weak_support_nodes(ml_tree, collapse_cutoff = collapse_cutoff)
 

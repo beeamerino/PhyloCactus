@@ -8,7 +8,8 @@ report_marker_group_coverage(
   input_dir,
   outgroup_pattern,
   min_coverage = 0.2,
-  out_csv = NULL
+  out_csv = NULL,
+  exclude_markers = NULL
 )
 }
 \arguments{
@@ -22,6 +23,11 @@ to additionally compute per-group coverage columns.}
 counts as covered by that marker. Defaults to \code{0.2}.}
 
 \item{out_csv}{Character or \code{NULL}. Path to write the table to. Defaults to \code{NULL}.}
+
+\item{exclude_markers}{Character vector or \code{NULL}. Markers to leave out of the report, named as
+they appear in \code{input_dir} without the file extension and without any \code{Masked_} prefix. Passed
+through by \code{\link[=run_concatenation_pipeline]{run_concatenation_pipeline()}} so that the coverage table describes the partitions
+the supermatrix has, not every alignment the folder holds. Defaults to \code{NULL}.}
 }
 \value{
 Invisibly, a data frame with one row per marker: alignment length, terminals and

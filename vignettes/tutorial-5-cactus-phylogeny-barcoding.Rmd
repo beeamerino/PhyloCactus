@@ -132,7 +132,7 @@ point, the documentation and the tutorial slot are retained so that the structur
 package reflects the intended workflow, and so that a user who reaches this stage is told
 what is missing rather than handed an unvalidated result.
 
-[Continue to Tutorial 6: Function Reference & Dictionary](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html)
+[Continue to Tutorial 6: Core Pipeline Functions and Methodological Dictionary](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html)
 
 ## References
 
