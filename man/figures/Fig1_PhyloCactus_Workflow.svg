@@ -19,7 +19,7 @@
     }
   ]]></style>
 </defs>
-<rect width='100%' height='100%' style='stroke: none; fill: none;'/>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
 <defs>
   <clipPath id='cpMC4wMHw3OTAuODd8MC4wMHw2MTIuMjg='>
     <rect x='0.00' y='0.00' width='790.87' height='612.28' />
@@ -106,15 +106,15 @@
 <text x='256.61' y='241.77' style='font-size: 9.10px; font-family: "Arial";' textLength='29.33px' lengthAdjust='spacingAndGlyphs'>models</text>
 <text x='288.47' y='241.77' style='font-size: 9.10px; font-family: "Arial";' textLength='13.16px' lengthAdjust='spacingAndGlyphs'>per</text>
 <text x='304.16' y='241.77' style='font-size: 9.10px; font-family: "Arial";' textLength='32.38px' lengthAdjust='spacingAndGlyphs'>partition</text>
-<text x='251.32' y='350.62' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='90.52px' lengthAdjust='spacingAndGlyphs'>Maximum-Likelihood</text>
-<text x='273.33' y='369.67' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='46.48px' lengthAdjust='spacingAndGlyphs'>RAxML-NG</text>
-<text x='241.69' y='379.19' style='font-size: 9.10px; font-family: "Arial";' textLength='49.06px' lengthAdjust='spacingAndGlyphs'>Constrained</text>
-<text x='293.29' y='379.19' style='font-size: 9.10px; font-family: "Arial";' textLength='12.64px' lengthAdjust='spacingAndGlyphs'>ML</text>
-<text x='308.46' y='379.19' style='font-size: 9.10px; font-family: "Arial";' textLength='34.41px' lengthAdjust='spacingAndGlyphs'>topology</text>
-<text x='345.40' y='379.19' style='font-size: 9.10px; font-family: "Arial";' textLength='6.06px' lengthAdjust='spacingAndGlyphs'>&amp;</text>
-<text x='245.92' y='388.72' style='font-size: 9.10px; font-family: "Arial";' textLength='33.55px' lengthAdjust='spacingAndGlyphs'>Transfer</text>
-<text x='282.00' y='388.72' style='font-size: 9.10px; font-family: "Arial";' textLength='38.95px' lengthAdjust='spacingAndGlyphs'>Bootstrap</text>
-<text x='323.48' y='388.72' style='font-size: 9.10px; font-family: "Arial";' textLength='23.75px' lengthAdjust='spacingAndGlyphs'>(TBE)</text>
+<text x='251.32' y='345.86' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='90.52px' lengthAdjust='spacingAndGlyphs'>Maximum-Likelihood</text>
+<text x='273.33' y='364.90' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='46.48px' lengthAdjust='spacingAndGlyphs'>RAxML-NG</text>
+<text x='241.69' y='374.43' style='font-size: 9.10px; font-family: "Arial";' textLength='49.06px' lengthAdjust='spacingAndGlyphs'>Constrained</text>
+<text x='293.29' y='374.43' style='font-size: 9.10px; font-family: "Arial";' textLength='12.64px' lengthAdjust='spacingAndGlyphs'>ML</text>
+<text x='308.46' y='374.43' style='font-size: 9.10px; font-family: "Arial";' textLength='34.41px' lengthAdjust='spacingAndGlyphs'>topology</text>
+<text x='345.40' y='374.43' style='font-size: 9.10px; font-family: "Arial";' textLength='6.06px' lengthAdjust='spacingAndGlyphs'>&amp;</text>
+<text x='252.57' y='383.95' style='font-size: 9.10px; font-family: "Arial";' textLength='46.53px' lengthAdjust='spacingAndGlyphs'>Felsenstein</text>
+<text x='301.63' y='383.95' style='font-size: 9.10px; font-family: "Arial";' textLength='38.95px' lengthAdjust='spacingAndGlyphs'>Bootstrap</text>
+<text x='284.70' y='393.48' style='font-size: 9.10px; font-family: "Arial";' textLength='23.75px' lengthAdjust='spacingAndGlyphs'>(FBP)</text>
 <text x='256.62' y='492.80' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='49.06px' lengthAdjust='spacingAndGlyphs'>Divergence</text>
 <text x='308.22' y='492.80' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='28.31px' lengthAdjust='spacingAndGlyphs'>Dating</text>
 <text x='283.17' y='511.85' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='26.81px' lengthAdjust='spacingAndGlyphs'>treePL</text>
@@ -171,19 +171,19 @@
 <text x='652.29' y='241.77' style='font-size: 9.10px; font-family: "Arial";' textLength='15.19px' lengthAdjust='spacingAndGlyphs'>and</text>
 <text x='670.01' y='241.77' style='font-size: 9.10px; font-family: "Arial";' textLength='38.95px' lengthAdjust='spacingAndGlyphs'>published</text>
 <text x='711.49' y='241.77' style='font-size: 9.10px; font-family: "Arial";' textLength='20.23px' lengthAdjust='spacingAndGlyphs'>trees</text>
-<text x='644.03' y='345.86' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='50.42px' lengthAdjust='spacingAndGlyphs'>Topological</text>
-<text x='696.98' y='345.86' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='43.00px' lengthAdjust='spacingAndGlyphs'>Distances</text>
-<text x='661.38' y='364.90' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='15.19px' lengthAdjust='spacingAndGlyphs'>ape</text>
-<text x='679.10' y='364.90' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='2.53px' lengthAdjust='spacingAndGlyphs'>/</text>
-<text x='684.16' y='364.90' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='38.47px' lengthAdjust='spacingAndGlyphs'>phangorn</text>
-<text x='643.97' y='374.43' style='font-size: 9.10px; font-family: "Arial";' textLength='68.78px' lengthAdjust='spacingAndGlyphs'>Robinson-Foulds</text>
-<text x='715.28' y='374.43' style='font-size: 9.10px; font-family: "Arial";' textLength='24.77px' lengthAdjust='spacingAndGlyphs'>matrix</text>
-<text x='661.16' y='383.95' style='font-size: 9.10px; font-family: "Arial";' textLength='26.80px' lengthAdjust='spacingAndGlyphs'>across</text>
-<text x='690.48' y='383.95' style='font-size: 9.10px; font-family: "Arial";' textLength='32.38px' lengthAdjust='spacingAndGlyphs'>external</text>
-<text x='668.73' y='393.48' style='font-size: 9.10px; font-family: "Arial";' textLength='46.55px' lengthAdjust='spacingAndGlyphs'>hypotheses</text>
+<text x='644.03' y='341.09' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='50.42px' lengthAdjust='spacingAndGlyphs'>Topological</text>
+<text x='696.98' y='341.09' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='43.00px' lengthAdjust='spacingAndGlyphs'>Distances</text>
+<text x='668.48' y='360.14' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='38.47px' lengthAdjust='spacingAndGlyphs'>phangorn</text>
+<text x='709.48' y='360.14' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='6.06px' lengthAdjust='spacingAndGlyphs'>&amp;</text>
+<text x='675.16' y='369.67' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='33.70px' lengthAdjust='spacingAndGlyphs'>TreeDist</text>
+<text x='648.76' y='379.19' style='font-size: 9.10px; font-family: "Arial";' textLength='68.78px' lengthAdjust='spacingAndGlyphs'>Robinson-Foulds</text>
+<text x='720.07' y='379.19' style='font-size: 9.10px; font-family: "Arial";' textLength='15.19px' lengthAdjust='spacingAndGlyphs'>and</text>
+<text x='642.69' y='388.72' style='font-size: 9.10px; font-family: "Arial";' textLength='51.09px' lengthAdjust='spacingAndGlyphs'>phylogenetic</text>
+<text x='696.31' y='388.72' style='font-size: 9.10px; font-family: "Arial";' textLength='45.02px' lengthAdjust='spacingAndGlyphs'>information</text>
+<text x='672.79' y='398.24' style='font-size: 9.10px; font-family: "Arial";' textLength='38.44px' lengthAdjust='spacingAndGlyphs'>distances</text>
 <text x='656.36' y='492.80' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='48.56px' lengthAdjust='spacingAndGlyphs'>Tree-Space</text>
 <text x='707.45' y='492.80' style='font-size: 9.10px; font-weight: bold; font-family: "Arial";' textLength='20.20px' lengthAdjust='spacingAndGlyphs'>MDS</text>
-<text x='679.61' y='511.85' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='24.80px' lengthAdjust='spacingAndGlyphs'>vegan</text>
+<text x='660.66' y='511.85' style='font-size: 9.10px; font-style: italic; font-family: "Arial";' textLength='62.70px' lengthAdjust='spacingAndGlyphs'>stats::cmdscale</text>
 <text x='642.71' y='521.38' style='font-size: 9.10px; font-family: "Arial";' textLength='67.75px' lengthAdjust='spacingAndGlyphs'>Multidimensional</text>
 <text x='712.99' y='521.38' style='font-size: 9.10px; font-family: "Arial";' textLength='28.31px' lengthAdjust='spacingAndGlyphs'>scaling</text>
 <text x='661.40' y='530.90' style='font-size: 9.10px; font-family: "Arial";' textLength='7.59px' lengthAdjust='spacingAndGlyphs'>of</text>
