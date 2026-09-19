@@ -22,7 +22,6 @@ knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE
 )
-tutorial_dir <- path.expand("~/Desktop/PhyloCactus_Tutorial")
 ```
 
 ## Abstract
@@ -267,21 +266,8 @@ write_csv(TABLE_conservation_prioritization_gaps, prioritization_file)
 ```
 
 ```{r, eval = TRUE, echo = FALSE}
-# Check if tutorial root analysis files exist to conditionally evaluate plotting chunks
-has_data <- dir.exists(tutorial_dir) &&
-  file.exists(file.path(tutorial_dir, "9_Visualization/tables/TABLE_species_all_data.csv")) &&
-  file.exists(file.path(tutorial_dir, "6_Concatenated/final_tables/TABLE_marker_statistics.csv"))
-
-if (!has_data) {
-  message(
-    "Note: Plotting chunks in Module 12 require analytical outputs from earlier pipeline stages.\n",
-    "Expected outputs were not found under '", tutorial_dir, "':\n",
-    "  - 9_Visualization/tables/TABLE_species_all_data.csv\n",
-    "  - 6_Concatenated/final_tables/TABLE_marker_statistics.csv\n",
-    "To generate these outputs, execute the pipeline sequentially via Tutorials 1 and 2, ",
-    "or run the companion script: inst/scripts/tutorial-3-cactus-phylogeny-visualization.R."
-  )
-}
+# The figures on this page are drawn from the reference outputs distributed in inst/extdata.
+has_data <- nzchar(system.file("extdata", "phylocactus_table_species.csv", package = "PhyloCactus"))
 ```
 
 ### Module 12: Figures and Summary Tables
@@ -293,6 +279,8 @@ Module 12 produces seventeen figures in five groups:
 3. **Tree and chronogram (Figures 6 to 9):** maximum-likelihood tree with Felsenstein bootstrap proportions (FBP), full-size tree, chronogram with 95% HPD intervals, and full-size chronogram.
 4. **Species accounting (Figure 10):** status of every species in the registry across pipeline stages.
 5. **Conservation (Figures 11 to 17):** IUCN categories, molecular completeness by category, threatened species without sequences, national endemism, threats and habitats.
+
+The figures on this page are drawn from the reference outputs distributed with the package in `inst/extdata`. The script `tutorial-3-cactus-phylogeny-visualization.R` draws the same figures from the outputs of your own run.
 
 ```{r, eval = has_data}
 library(PhyloCactus)
@@ -328,20 +316,18 @@ theme_phylocactus <- function(base_size = 12, base_family = "") {
     )
 }
 
-# Load previously written analysis files directly from the tutorial workspace
-species_summary_iucn <- read_csv(file.path(tutorial_dir, "9_Visualization/tables/TABLE_species_all_data.csv"), show_col_types = FALSE)
+# Reference outputs distributed with the package. The script in inst/scripts reads the same
+# tables from the run directory.
+species_summary_iucn <- read_csv(system.file("extdata", "phylocactus_table_species.csv", package = "PhyloCactus"),
+                                 show_col_types = FALSE)
 
-marker_stats <- read_csv(file.path(tutorial_dir, "6_Concatenated/final_tables/TABLE_marker_statistics.csv"), show_col_types = FALSE)
+marker_stats <- read_csv(system.file("extdata", "phylocactus_table_markers.csv", package = "PhyloCactus"),
+                         show_col_types = FALSE)
 marker_cols <- intersect(marker_stats$marker, names(species_summary_iucn))
 
-prioritization_file <- file.path(tutorial_dir, "9_Visualization/tables/TABLE_conservation_prioritization_gaps.csv")
-TABLE_conservation_prioritization_gaps <- if (file.exists(prioritization_file)) {
-  read_csv(prioritization_file, show_col_types = FALSE)
-} else {
-  species_summary_iucn %>%
-    filter(status_pipeline == "unsampled_checklist_gap", iucn_category %in% c("CR", "EN", "VU")) %>%
-    mutate(genus = stringr::str_extract(species, "^[A-Za-z]+"))
-}
+TABLE_conservation_prioritization_gaps <- species_summary_iucn %>%
+  filter(status_pipeline == "unsampled_checklist_gap", iucn_category %in% c("CR", "EN", "VU")) %>%
+  mutate(genus = stringr::str_extract(species, "^[A-Za-z]+"))
 
 # Data Summary Table Generation
 TABLE_dataset_summary <- tibble(
@@ -453,7 +439,7 @@ p3
 Start and end coordinates of each partition in the concatenated supermatrix.
 
 ```{r supermatrix_structure, eval = has_data}
-ranges_file <- file.path(tutorial_dir, "6_Concatenated/final_tables/TABLE_marker_ranges.tsv")
+ranges_file <- system.file("extdata", "phylocactus_table_marker_ranges.tsv", package = "PhyloCactus")
 if (file.exists(ranges_file)) {
   TABLE_marker_ranges <- read_tsv(ranges_file, show_col_types = FALSE)
   if ("marker" %in% names(TABLE_marker_ranges)) {
@@ -502,10 +488,7 @@ library(ape)
 library(tidytree)
 
 # Load support tree from Module 9
-supp_tree_file <- file.path(tutorial_dir, "7_Phylogenetics/cactus_support.raxml.support")
-if (!file.exists(supp_tree_file)) {
-  supp_tree_file <- file.path(tutorial_dir, "7_Phylogenetics/cactus.raxml.bestTree")
-}
+supp_tree_file <- system.file("extdata", "phylocactus_ml_tree.tree", package = "PhyloCactus")
 
 if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
   ml_tree <- ape::read.tree(supp_tree_file)
@@ -541,7 +524,7 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
 
     # Identify topologically constrained nodes (cactus_constraints.tree)
     # to avoid presenting algorithmic constraints as empirical bootstrap support
-    constraint_tree_file <- file.path(tutorial_dir, "7_Phylogenetics/cactus_constraints.tree")
+    constraint_tree_file <- system.file("extdata", "phylocactus_constraint_tree.tree", package = "PhyloCactus")
     constrained_nodes_vec <- integer(0)
     if (file.exists(constraint_tree_file) && nzchar(constraint_tree_file)) {
       constrained_df <- tryCatch(
@@ -638,10 +621,7 @@ Node bars are 95% HPD intervals summarized from the 100 bootstrap chronograms, a
 
 ```{r figure_8_chronogram, eval = has_data, fig.width = 8.5, fig.height = 11, message = FALSE, warning = FALSE}
 # Load summary chronogram from Module 10
-chrono_file <- file.path(tutorial_dir, "8_Dating/dated_summary_hpd.tree")
-if (!file.exists(chrono_file)) {
-  chrono_file <- file.path(tutorial_dir, "8_Dating/BestTree_treePL.tree")
-}
+chrono_file <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")
 
 if (file.exists(chrono_file) && nzchar(chrono_file)) {
   chrono_beast <- treeio::read.beast(chrono_file)
