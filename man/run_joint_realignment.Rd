@@ -32,7 +32,7 @@ run_joint_realignment(
 
 \item{protect_pattern}{Character or \code{NULL}. Regular expression matched against sequence names; matching terminals that carry at least one non-gap character are retained regardless of the occupancy filters. Intended as a last-resort safeguard for rooting terminals whose sequences are legitimately short (for example \code{"^(Anacampseros|Grahamia|Talinopsis|Portulaca)_"}). Defaults to \code{NULL} (no exemption).}
 
-\item{protect_markers}{Character vector or \code{NULL}. Names of the markers, as they appear in \code{input_dir} without the file extension, in which \code{protect_pattern} is honoured. \code{NULL}, the default, applies the exemption to every marker. Naming markers restricts it to the loci where a short outgroup sequence is worth its gap cost, instead of retaining every fragment of every terminal across the whole matrix: in the August 2026 dataset only \code{trnL_trnF} lost rooting terminals, and only there does the exemption buy anything.}
+\item{protect_markers}{Character vector or \code{NULL}. Names of the markers, as they appear in \code{input_dir} without the file extension, in which \code{protect_pattern} is honored. \code{NULL}, the default, applies the exemption to every marker. Naming markers restricts it to the loci where a short outgroup sequence is worth its gap cost, instead of retaining every fragment of every terminal across the whole matrix: in the August 2026 dataset only \code{trnL_trnF} lost rooting terminals, and only there does the exemption buy anything.}
 
 \item{rooting_pattern}{Character or \code{NULL}. Regular expression identifying the terminals the tree will be rooted on. It exempts nothing. Any matching terminal removed by the occupancy filters is named in a warning and flagged in \verb{LOG_SEQ_FILTER_<marker>.csv}. A filter that deletes the rooting outgroup must say so at the moment it does it, not four modules downstream: the five \emph{Portulaca} sequences of \code{trnL_trnF}, 297 bp against a threshold of about 353, were removed silently and the branch subtending the outgroup collapsed from roughly 600 expected substitutions to 0.03. Defaults to \code{NULL}.}
 
@@ -47,7 +47,7 @@ Perform Positional Homology Realignment Across Locus Sequence Alignments
 \details{
 Re-estimates positional homology alignments (\code{MAFFT}) across curated locus FASTA files,
 performs alignment quality masking with \code{DECIPHER}, filters low-occupancy sequences,
-and generates comprehensive alignment statistics.
+and writes alignment statistics.
 
 This is the step that removes individual taxa from a locus without removing the locus itself.
 Sequences that entered Stage 4 as short fragments, typically outgroup accessions that were
@@ -55,7 +55,7 @@ masked separately from the ingroup in \code{run_alignment_pipeline()}, fail the 
 and disappear from the supermatrix. Passing \code{mask_alignment_regions = FALSE} for the outgroup in
 Stage 2 so that masking happens only once, jointly, at this stage, is preferable to relaxing
 these thresholds or resorting to \code{protect_pattern}, because retaining very short sequences
-inflates the gap fraction of the final supermatrix and can destabilise the affected terminals.
+inflates the gap fraction of the final supermatrix and can destabilize the affected terminals.
 }
 \examples{
 \dontrun{

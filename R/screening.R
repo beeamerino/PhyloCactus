@@ -58,7 +58,7 @@
 #' file order, which is how the published supermatrix came to carry the 274-site copy of two
 #' *Portulaca* rooting terminals and not the 463 and 314-site ones.
 #'
-#' The rule applied here is declared rather than incidental: retain the record with the greatest
+#' The rule is explicit: retain the record with the greatest
 #' number of non-gap sites, break ties on the source file name so that the result does not depend on
 #' the order in which the directory was listed, and report every competing record. Extracted as a
 #' standalone, independently testable package-internal function.
@@ -112,13 +112,12 @@
 #' of one family, a gene against the spacer beside it, or an amplicon that a second study placed
 #' elsewhere. Aligners do not refuse such a pair. MAFFT will return a block, the block will look
 #' like a marker with coverage on both sides of the root, and its columns will carry no positional
-#' homology. The 2026-09-01 audit found this twice: `pepC` (0.000 of 20-mers shared) and
-#' `trnT-psbD` (0.039), the second in a locus readmitted specifically to connect the outgroup.
+#' homology. In the reference dataset this occurs in `trnT-psbD` (0.040 of 20-mers shared).
 #'
 #' The measure is alignment-free, which is the point: it cannot be rescued by a better alignment,
 #' so it separates "these sequences are hard to align" from "these sequences are not the same
-#' region". Genuine counterparts in this dataset return 0.28 to 0.60 at `k = 20`; the two false
-#' ones returned 0.000 and 0.039.
+#' region". In the reference dataset, `trnL_trnF`, `matK`, `phyC` and `rbcL` return 0.26 to 0.59 at
+#' `k = 20`, and `trnT-psbD` returns 0.040.
 #'
 #' Orientation is not guaranteed to agree between two independent phylotaR runs, so an outgroup
 #' k-mer counts as shared when either it or its reverse complement occurs in the ingroup pool.
@@ -128,7 +127,7 @@
 #' @param k Integer. k-mer length. 20 is strict enough that unrelated sequences share nothing;
 #'   10 is permissive enough that a genuinely divergent homologue still registers.
 #' @param max_seqs Integer. Sequences kept per side, to bound the cost on the large loci. The
-#'   subsample is evenly spaced rather than random, so the figure is reproducible without a seed
+#'   subsample is evenly spaced, not random, so the figure is reproducible without a seed
 #'   and without disturbing the caller's RNG state.
 #' @return A list with `share` (the better of the two orientations, or `NA` if either side is
 #'   empty), `share_forward`, `share_revcomp` and `n_kmers_outgroup`. The two directions are
@@ -181,8 +180,7 @@
 #' Screen Locus Alignments for Substitution Saturation and Informativeness
 #'
 #' Evaluates phylogenetic informativeness, sequence coverage, alignment length, and substitution saturation across individual locus alignments.
-#' Filtering out loci exhibiting high substitution saturation or severe site length anomalies prevents systematic noise
-#' and long-branch attraction (LBA) artifacts from distorting maximum-likelihood supermatrix inference.
+#' Loci with strong saturation or anomalous sequence lengths are excluded from the supermatrix.
 #'
 #' @param fasta_folder Character. Directory path containing aligned locus FASTA files.
 #' @param out_base Character. Base destination directory for diagnostic plots and screened FASTA outputs (`filtered_markers/`).
@@ -191,7 +189,7 @@
 #' @param min_nseq_to_retain Integer. Minimum number of ingroup sequences required per locus, counted after outlier filtering. Defaults to `100L`.
 #' @param outgroup_folder Character or `NULL`. Directory of aligned outgroup locus FASTA files, matched to the ingroup files by marker name. Used for **reporting only**: the summary table gains `n_outgroup` and `n_total` so a locus rejected here can be seen to carry outgroup data, but no retention decision depends on them. Outgroup markers with no ingroup counterpart simply leave those two columns empty; which ones they are, and what becomes of them, is reported by [integrate_and_clean_markers()], which owns that decision and applies `marker_aliases` before comparing the two sets. Defaults to `NULL`.
 #'
-#'   This module asks whether a locus resolves the ingroup radiation, and the answer cannot depend on how many outgroup accessions exist. `trnT-psbD` is the case that forced the distinction: 50 ingroup sequences against a threshold of 100, correctly rejected as an ingroup marker, while carrying 49 Portulaca accessions of 1347 bp that are the best outgroup coverage in the dataset. Bringing it back is a decision about connecting the two groups, which belongs to [integrate_and_clean_markers()] and its `readmit_markers` argument, not to a sequence count here.
+#'   This module asks whether a locus resolves the ingroup radiation, and the answer cannot depend on how many outgroup accessions exist. `trnT-psbD` is the case that forced the distinction: 50 ingroup sequences against a threshold of 100, rejected as an ingroup marker, while carrying 52 *Portulaca* sequences of about 1347 bp, more outgroup sequences than any other marker. Bringing it back is a decision about connecting the two groups, which belongs to [integrate_and_clean_markers()] and its `readmit_markers` argument, not to a sequence count here.
 #' @param max_marker_missing Numeric. Maximum allowable missing data fraction per locus. Defaults to `0.7`.
 #' @param saturation_flag_cutoff Numeric. Slope threshold below which the locus is flagged. The regression is uncorrected p-distance against a Gamma-corrected K80 distance, as documented in `saturation_method`. Defaults to `0.3`.
 #' @param saturation_keep_cutoff Numeric. Saturation slope cutoff threshold below which saturated loci are excluded. Defaults to `0.5`.
@@ -468,7 +466,7 @@ run_marker_screening <- function(
 #' Final Marker Integration, Taxonomic Cleaning, and Ingroup-Outgroup Partitioning
 #'
 #' Integrates independently curated ingroup and outgroup sequence datasets, standardizes species binomials
-#' against the authoritative taxonomic checklist (Korotkova et al. 2021), and exports decoupled
+#' against the accepted checklist (Korotkova et al. 2021), and exports decoupled
 #' FASTA sequence directories (`cleaned_markers_ingroup/`, `cleaned_markers_outgroup/`, `cleaned_markers_joint/`).
 #' Computes isolated molecular informativeness metrics (tips, length, variable sites, parsimony informative sites,
 #' GC content, and missingness) for the focal ingroup radiation to avoid outgroup-driven inflation artifacts.
@@ -479,21 +477,21 @@ run_marker_screening <- function(
 #' @param accepted_list_file Character. Path to accepted botanical checklist CSV or Excel file (e.g., `CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`).
 #' @param metadata_in_file Character. Path to ingroup accession occupancy metadata CSV file.
 #' @param metadata_out_file Character. Path to outgroup accession occupancy metadata CSV file.
-#' @param marker_aliases Named character vector or `NULL`. Renames outgroup markers onto their ingroup counterpart before the two sets are joined, as `c(trnL = "trnL_trnF")`. Names and values are normalised the same way the filenames are, so either spelling works.
+#' @param marker_aliases Named character vector or `NULL`. Renames outgroup markers onto their ingroup counterpart before the two sets are joined, as `c(trnL = "trnL_trnF")`. Names and values are normalized the same way the filenames are, so either spelling works.
 #'
 #'   The two `phylotaR` runs cluster independently, so the same region can be named differently in each: the outgroup carries two `trnL` accessions of the trnL intron, which is the first half of the ingroup `trnL-trnF` amplicon, and they share 63% of their 20-mers with it. Aliasing is a homology claim and has to be evidenced, not assumed from the name: outgroup `ndhF` shares no 20-mer with ingroup `ndhF-rpl32` despite the obvious resemblance, because the two datasets cover different parts of the gene. Defaults to `NULL`.
-#' @param readmit_markers Character vector or `NULL`. Markers that [run_marker_screening()] rejected and that are brought back into the joint dataset because they connect the outgroup to the ingroup, read from `readmit_dir`. This is a different question from the one Module 3 answers, and it is stated as such: `trnT-psbD` resolves the ingroup poorly, with 50 sequences over 1008 Cactaceae terminals, and carries the best outgroup coverage of the dataset, 49 *Portulaca* accessions of 1347 bp against the five or six terminals of overlap the retained loci provide. Retaining it for ingroup resolution would be wrong; retaining it for rooting is the point. Defaults to `NULL`.
+#' @param readmit_markers Character vector or `NULL`. Markers that [run_marker_screening()] rejected and that are brought back into the joint dataset because they connect the outgroup to the ingroup, read from `readmit_dir`. This is a different question from the one Module 3 answers. A marker brought back for this reason must be homologous on both sides; check `TABLE_marker_homology_check.csv` (`homology_check = TRUE`) before readmitting it. Defaults to `NULL`.
 #' @param readmit_dir Character or `NULL`. Directory holding the pre-screening ingroup alignments, normally `2_MAFFT_Cactaceae/alignments`. Required when `readmit_markers` is supplied. Defaults to `NULL`.
 #' @param drop_report Logical. Write `tables/TABLE_outgroup_markers_dropped.csv` listing the outgroup markers that have no ingroup counterpart, with their sequence counts, and warn about them. The joint marker set is the ingroup's, so those markers leave the analysis at this point; a run takes hours and a console warning alone scrolls away. Defaults to `TRUE`.
 #' @param homology_check Logical. For every marker present on both sides, measure the fraction of outgroup k-mers that occur in the ingroup sequences of the same name, write `tables/TABLE_marker_homology_check.csv`, and warn about the markers that share almost none. The measure is alignment-free, so it distinguishes sequences that are hard to align from sequences that are not the same region. Reported, never blocking. Defaults to `TRUE`.
-#' @param homology_k20_min,homology_k10_min Numeric. A marker is flagged `no_detectable_homology` when it falls below **both**, at `k = 20` and `k = 10` respectively. Genuine counterparts in this dataset return 0.28 to 0.60 at `k = 20`; the two false pairs found on 2026-09-01 returned 0.000 (`pepC`, two PEPC paralogues) and 0.039 (`trnT-psbD`, ingroup median 598 bp against outgroup 1347 bp). Default to `0.05` and `0.15`.
-#' @return A data frame containing the comprehensive marker summary with decoupled ingroup and joint metrics.
+#' @param homology_k20_min,homology_k10_min Numeric. A marker is flagged `no_detectable_homology` when it falls below **both**, at `k = 20` and `k = 10` respectively. In the reference dataset `trnL_trnF`, `matK`, `phyC` and `rbcL` return 0.26 to 0.59 at `k = 20`; `trnT-psbD` returns 0.040 (ingroup median 605 bp against outgroup 1347 bp). Default to `0.05` and `0.15`.
+#' @return A data frame with the marker summary, with separate ingroup and joint metrics.
 #' @section Alias collisions:
 #' `marker_aliases` can point two source files at the same `marker_key`. When both carry a record for
 #' the same species, that species appears twice under one FASTA header in the exported marker, and the
-#' downstream matrix assembly resolves the duplication by file order, silently and in favour of
+#' downstream matrix assembly resolves the duplication by file order, silently and in favor of
 #' whichever record sorts first, which is not necessarily the more informative one. The duplicates are
-#' therefore resolved here, by a rule that is declared rather than incidental: the record with the
+#' therefore resolved here by an explicit rule: the record with the
 #' greatest number of non-gap sites is retained, ties are broken on the source file name so that the
 #' outcome does not depend on the order in which the directory was listed, every competing record is
 #' written to `tables/TABLE_alias_collisions_resolved.csv` with its source file, its length and

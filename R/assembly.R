@@ -2,8 +2,8 @@
 #'
 #' Retrieves orthologous sequence clusters for a focal taxonomic ingroup (e.g., family **Cactaceae**, NCBI Taxonomy ID: 3593)
 #' directly from GenBank using similarity clustering via `phylotaR` (Bennett *et al.*, 2018).
-#' Relying on sequence similarity rather than inconsistent locus annotations prevents missing orthologous sequence data
-#' caused by gene synonymy or mislabeling in public sequence repositories.
+#' Clusters are formed by sequence similarity, not by GenBank locus annotations, so sequences are
+#' not lost to gene-name synonyms or mislabeled records.
 #'
 #' @param wd_path Character. Path to the `phylotaR` workspace directory storing local parameters and database caches.
 #' @param target_genes_file Character. Path to the target locus list text file. If `NULL`, defaults to package `inst/extdata/target_genes.txt`.
@@ -766,16 +766,16 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
 
 #' Fetch GenBank Sequence Metadata via NCBI Entrez Utilities
 #'
-#' Queries NCBI Entrez Utilities to retrieve sequence lengths, organism taxonomy, publication titles, and accession IDs
-#' for a collection of GenBank sequence identifiers (SIDs). Metadata retrieval enriches raw sequence clusters with verifiable audit data.
+#' Retrieves the organism name and the definition line of each GenBank sequence identifier (SID)
+#' with `ape::read.GenBank()`, in batches with retries, and caches the result.
 #'
 #' @param sids Character vector of GenBank Sequence Identifiers (SIDs) to query.
 #' @param cache_file Character. File path to store and load cached metadata tables.
 #' @param batch_size Integer. Number of sequence IDs requested per HTTP batch query. Defaults to `200`.
 #' @param sleep_time Numeric. Pause duration in seconds between consecutive batch requests to respect NCBI rate limits. Defaults to `0.5`.
 #' @param max_retries Integer. Maximum retry attempts permitted per batch before failing. Defaults to `5`.
-#' @param force_download Logical. Force fresh Entrez queries instead of loading local cache? Defaults to `FALSE`.
-#' @return A data frame containing fetched GenBank metadata fields for each requested sequence ID.
+#' @param force_download Logical. Not used in this version: records already in `cache_file` are always reused. Defaults to `FALSE`.
+#' @return A data frame with columns `sid`, `Species_gb` and `Description_gb`.
 #' @examples
 #' \dontrun{
 #' fetch_genbank_metadata(

@@ -17,9 +17,9 @@ infer_gene_trees(
 \arguments{
 \item{fasta_dir}{Character. Directory containing curated aligned FASTA sequence files (e.g., \verb{4_Cleaned/cleaned_markers_ingroup} or \verb{5_MAFFT_Cleaned/aligned_markers}).}
 
-\item{output_dir}{Character. Root destination directory path to store Newick tree files and monophyly audit tables.}
+\item{output_dir}{Character. Root destination directory path to store Newick tree files and monophyly tables.}
 
-\item{include_outgroup}{Logical. Include outgroup taxa in single-locus gene tree reconstruction? Defaults to \code{FALSE} to avoid Long-Branch Attraction (LBA) artifacts when evaluating species monophyly within the ingroup radiation. Set to \code{TRUE} when preparing unrooted gene trees for \code{ASTRAL-III}.}
+\item{include_outgroup}{Logical. Include outgroup taxa in single-locus gene tree reconstruction? Defaults to \code{FALSE}, so that species monophyly is assessed within the ingroup. Set to \code{TRUE} when preparing unrooted gene trees for \code{ASTRAL-III}.}
 
 \item{method}{Character. Phylogenetic inference method (\code{"auto"}, \code{"raxml"}, \code{"phangorn"}, or \code{"nj"}). Defaults to \code{"auto"}.}
 

@@ -28,7 +28,7 @@ calculate_ml_tree(
 
 \item{constraint_file}{Character. Path to Newick topological constraint scaffold file.}
 
-\item{outgroup}{Character vector of terminals passed to \code{RAxML-NG --outgroup}, or \code{NULL} (default); multiple terminals are joined with commas. \code{RAxML-NG} writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by \code{automate_treePL()} via \code{ape::root(..., resolve.root = TRUE)}. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with \code{resolve_rooting_outgroup()} rather than naming a terminal by hand.}
+\item{outgroup}{Character vector of terminals passed to \code{RAxML-NG --outgroup}, or \code{NULL} (default); multiple terminals are joined with commas. \code{RAxML-NG} writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by \code{automate_treePL()} via \code{ape::root(..., resolve.root = TRUE)}. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with \code{resolve_rooting_outgroup()}; do not name a terminal by hand.}
 
 \item{n_init_trees}{Character. Initial starting tree specifications. Defaults to \verb{"rand{25},pars{25}"} (25 random + 25 parsimony trees).}
 

@@ -21,14 +21,13 @@ integrate_publication_tree(
 
 \item{out_dir}{Character. Publication figures directory.}
 
-\item{collapse_cutoff}{Numeric. Felsenstein Bootstrap Proportion (FBP) threshold below which weakly supported nodes are collapsed into soft polytomies (0.0 to 1.0; default 0.70; collapsing 700 of 986 free nodes in the empirical dataset).}
+\item{collapse_cutoff}{Numeric. Felsenstein Bootstrap Proportion (FBP) threshold below which weakly supported nodes are collapsed into soft polytomies (0.0 to 1.0; default 0.70; collapsing 703 of 987 free nodes in the reference dataset).}
 }
 \value{
 A data frame listing exported figure files and threshold parameters.
 }
 \description{
 Maps statistical support values (e.g., Felsenstein Bootstrap Proportions, FBP) onto nodes of the
-final chronogram and maximum-likelihood phylogeny. Nodes failing to meet the minimum support threshold
-(\code{collapse_cutoff}) are systematically collapsed into soft polytomies (analytical uncertainty)
-to produce conservative, publication-ready figures.
+final chronogram and maximum-likelihood phylogeny. Nodes with support below \code{collapse_cutoff} are
+collapsed into soft polytomies in the figures.
 }

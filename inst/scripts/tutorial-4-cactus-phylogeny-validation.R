@@ -1,8 +1,7 @@
 # -------------------------------------------------------------
-# PhyloCactus: Tutorial 4 - Phylogenetic Validation and Sub-tree Comparisons
+# PhyloCactus: Tutorial 4. Phylogenetic Validation and Comparative Analyses
 # -------------------------------------------------------------
-# This script covers Stage 13 of the phylogenetic pipeline:
-# Sub-trees, ASTRAL-III integration, and Phylogenetic Validation.
+# Module 13: comparison of the focal tree with published phylogenies of Cactaceae.
 # -------------------------------------------------------------
 library(PhyloCactus)
 library(ape)
@@ -26,30 +25,27 @@ dir.create("10_Validation/logs", recursive = TRUE, showWarnings = FALSE)
 # -------------------------------------------------------------
 # Reference Phylogenies and Optional ASTRAL-III Re-inference
 # -------------------------------------------------------------
-# Precalculated reference trees (Amaral et al. 2022, Thompson et al. 2024, 
-# Zuntini et al. 2024, and de Vos et al. 2025) are bundled in the package inst/extdata/.
-# Optional local re-inference of the de Vos et al. (2025) species tree from its 317 raw
-# nuclear gene trees requires ASTRAL-III and Java:
+# The reference trees (Amaral et al. 2022, Thompson et al. 2024, Zuntini et al. 2024,
+# and de Vos et al. 2025) are distributed in inst/extdata/. Re-estimating the
+# de Vos et al. (2025) species tree from its gene trees requires ASTRAL-III and Java:
 # - Set ASTRAL_PATH in ~/.Renviron (e.g., ASTRAL_PATH="/path/to/astral.5.7.8.jar")
 # - Set DEVOS_GENETREES_PATH and DEVOS_METADATA_PATH for the raw de Vos inputs
 
 cat("\n=======================================================\n")
-cat("Stage 13: Quantifying Topological Congruence and Validating Evolutionary Hypotheses\n")
+cat("Module 13: Comparison with published phylogenies\n")
 cat("=======================================================\n")
 
-# To keep your local paths secure, it is recommended to set these in ~/.Renviron
+# Set these paths in ~/.Renviron so that the script contains no local paths
 # e.g., ASTRAL_PATH="/path/to/astral.5.7.8.jar"
 
 # -------------------------------------------------------------
-# Stage 13a: Coalescent Species Tree Inference with ASTRAL-III
+# Module 13a: Species tree of de Vos et al. (2025) with ASTRAL-III
 # -------------------------------------------------------------
 cat("\n--- Running ASTRAL-III Pipeline ---\n")
 
-# Context: Why use ASTRAL-III?
-# de Vos et al. (2025) is a phylogenomic study using Angiosperms353 to reconstruct 
-# the family phylogeny at the genus level, making it a valuable benchmark for comparison. 
-# We use ASTRAL-III here to infer the summary species tree directly from their 317 nuclear 
-# gene trees, accounting for gene tree discordance driven by incomplete lineage sorting (ILS).
+# de Vos et al. (2025) sequenced the Angiosperms353 loci. ASTRAL-III estimates the
+# species tree from their gene trees under the multispecies coalescent, which
+# accounts for gene tree discordance caused by incomplete lineage sorting.
 
 astral_jar <- Sys.getenv("ASTRAL_PATH")
 
@@ -62,9 +58,7 @@ if (!nzchar(java_bin) && file.exists("/opt/homebrew/opt/openjdk/bin/java")) {
   java_bin <- "/opt/homebrew/opt/openjdk/bin/java"
 }
 
-# Flag controlling live ASTRAL-III execution. Default is FALSE to ensure fast,
-# immediate execution during tutorials. Set to TRUE to re-estimate the coalescent
-# species tree from the 317 raw gene trees with ASTRAL-III.
+# Set to TRUE to run ASTRAL-III; FALSE (default) copies the precomputed tree.
 run_astral_locally <- FALSE
 
 output_tree <- "10_Validation/QC.Species_tree_astral.tree"
@@ -120,16 +114,19 @@ if (run_astral_locally && nzchar(astral_jar) && file.exists(astral_jar) &&
 }
 
 # -------------------------------------------------------------
-# Stage 13b: Standardized Topological Validation across External Frameworks
+# Module 13b: Topological comparison
 # -------------------------------------------------------------
 cat("\n--- Running Phylogenetic Validation Pipeline ---\n")
 
-# To guarantee an objective, honest, and reproducible comparative validation,
-# all comparative trees are loaded directly from the package benchmark dataset (inst/extdata/).
-# This standardizes the validation baseline and avoids methodological asymmetries
-# between local mutable outputs and published reference backbones.
+# The focal tree is the chronogram of this run (Module 10); the reference trees are distributed
+# with the package. When 8_Dating/ is absent, the reference chronogram distributed with the package
+# is used as the focal tree.
+focal_tree <- file.path("8_Dating", "dated_summary_hpd.tree")
+if (!file.exists(focal_tree)) {
+  focal_tree <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")
+}
 tree_paths <- list(
-  FocalTree   = if (file.exists("8_Dating/dated_summary_hpd.tree")) "8_Dating/dated_summary_hpd.tree" else system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus"),
+  FocalTree   = focal_tree,
   Zuntini     = system.file("extdata", "reference_zuntini_2024.tree", package = "PhyloCactus"),
   Thompson    = system.file("extdata", "reference_thompson_2024.tree", package = "PhyloCactus"),
   Amaral      = system.file("extdata", "reference_amaral_2022.tree", package = "PhyloCactus"),

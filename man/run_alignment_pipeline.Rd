@@ -31,13 +31,13 @@ run_alignment_pipeline(
 
 \item{max_missing_fraction}{Numeric. Maximum allowable proportion of missing or ambiguous characters (\code{N}) allowed per sequence. Defaults to \code{0.30}.}
 
-\item{min_masked_alignment_length}{Integer. Absolute minimum number of alignment columns that must survive masking for the locus to be retained. Loci falling below this floor are reported as \code{ZERO_RETAINED} rather than exported as near-empty alignments. \strong{Defaults to \code{100L}.} The floor exists to catch alignments that masking has degraded to the point of being uninformative, not to arbitrate between loci of different lengths: no marker in the reference Cactaceae dataset is shorter than 100 columns, so any masked alignment falling below that value is degenerate rather than merely short. Raising the floor can only reject markers, never admit them; a marker rejected by it is reported with \code{decision_reason} naming the threshold, so the effect is always visible in the screening table.
+\item{min_masked_alignment_length}{Integer. Absolute minimum number of alignment columns that must survive masking for the locus to be retained. Loci falling below this floor are reported as \code{ZERO_RETAINED} and are not exported. \strong{Defaults to \code{100L}.} The floor exists to catch alignments that masking has degraded to the point of being uninformative, not to arbitrate between loci of different lengths: no marker in the reference Cactaceae dataset is shorter than 100 columns, so any masked alignment below that value is degenerate, not merely short. Raising the floor can only reject markers, never admit them; a marker rejected by it is reported with \code{decision_reason} naming the threshold, so the effect is always visible in the screening table.
 
-\strong{Scope.} This floor is evaluated only in the masking branch, that is when \code{mask_alignment_regions = TRUE}. With masking deferred (\code{FALSE}, the configuration used for the outgroup) it is deliberately not applied, because it is defined against a post-masking column set that does not exist in that branch. Outgroup terminals are filtered instead by per-sequence occupancy in \code{run_joint_realignment()} (Module 5). Do not assume this parameter protects both branches.}
+\strong{Scope.} This floor is evaluated only in the masking branch, that is when \code{mask_alignment_regions = TRUE}. With masking deferred (\code{FALSE}, the configuration used for the outgroup) it is not applied, because it is defined against a post-masking column set that does not exist in that branch. Outgroup terminals are filtered instead by per-sequence occupancy in \code{run_joint_realignment()} (Module 5). Do not assume this parameter protects both branches.}
 
 \item{preserve_iupac}{Logical. Retain IUPAC ambiguity codes (\code{R}, \code{Y}, \code{S}, \code{W}, \code{K}, \code{M}, \code{B}, \code{D}, \code{H}, \code{V}) instead of collapsing them to \code{N} before alignment. \strong{Defaults to \code{TRUE}.} \code{RAxML-NG} and \code{ModelTest-NG} incorporate ambiguity into the likelihood as a partial constraint, so an \code{R} site restricts the state to A or G whereas an \code{N} restricts nothing: collapsing the codes discards real information for no analytical gain. Set to \code{FALSE} only when an alignment free of ambiguity is explicitly required. The amount of ambiguity present at every stage is reported in the \verb{mean_fraction_ambiguous_*} and \verb{n_sites_ambiguous_*} columns of the marker summary, so the decision can be revisited per locus with data. See \verb{@details}.}
 
-\item{fix_strand}{Logical. Put every sequence of a marker on the same strand before alignment, deciding orientation against the marker's own majority. GenBank stores each record on whichever strand the submitter deposited, and \code{MAFFT} compares only the orientation it is given: a reverse-complemented accession is aligned anyway and contributes columns with no positional homology. Found on 2026-09-01 in the \code{rbcL} and \code{matK} accessions of \verb{Portulaca oleracea} and \verb{P. pilosa}, which sat at 0.51 and 0.40 observed divergence from Cactaceae where \verb{P. grandiflora} sits at 0.030 and 0.066. Each sequence is logged with its match in both directions in \verb{tables/LOG_STRAND_<marker>.csv}. Defaults to \code{TRUE}.}
+\item{fix_strand}{Logical. Put every sequence of a marker on the same strand before alignment, deciding orientation against the marker's own majority. GenBank stores each record on whichever strand the submitter deposited, and \code{MAFFT} compares only the orientation it is given: a reverse-complemented accession is aligned anyway and contributes columns with no positional homology. Each sequence is logged with its match in both directions in \verb{tables/LOG_STRAND_<marker>.csv}. Defaults to \code{TRUE}.}
 
 \item{mafft_exec}{Character. System command or full path to the executable \code{MAFFT} binary. Defaults to \code{"mafft"}.}
 
@@ -78,13 +78,12 @@ The downstream tools all accept them, and they carry information that \code{N} d
 site constrains the state to A or G, an \code{N} constrains nothing. There is no analytical reason
 to discard that constraint, so the pipeline does not.
 
-Ambiguity is nevertheless measured rather than assumed away. The marker summary reports
+Ambiguity is nevertheless measured. The marker summary reports
 \verb{mean_fraction_ambiguous_*} for each of the five processing stages, and \verb{n_sites_ambiguous_*}
 for the raw input and the final alignment. The \code{raw_input} figures are computed before
 \code{clean_ambiguous()} is applied, so they record what the source records actually contained
-regardless of the policy in force. That is what makes a per-locus decision possible: a marker
-whose ambiguity is concentrated rather than diffuse can be examined on its own evidence
-instead of being subjected to a global rule.
+regardless of the policy in force. A marker whose ambiguity is concentrated in a few sequences or
+sites can therefore be examined on its own evidence, without a global rule.
 }
 \examples{
 \dontrun{

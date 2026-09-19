@@ -36,7 +36,7 @@ generate_ml_search_script(
 
 \item{constraint_file}{Character. Path to Newick topological constraint scaffold file.}
 
-\item{outgroup}{Character vector of terminals passed to \code{RAxML-NG --outgroup}, or \code{NULL} (default); multiple terminals are joined with commas. \code{RAxML-NG} writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by \code{automate_treePL()} via \code{ape::root(..., resolve.root = TRUE)}. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with \code{resolve_rooting_outgroup()} rather than naming a terminal by hand.}
+\item{outgroup}{Character vector of terminals passed to \code{RAxML-NG --outgroup}, or \code{NULL} (default); multiple terminals are joined with commas. \code{RAxML-NG} writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by \code{automate_treePL()} via \code{ape::root(..., resolve.root = TRUE)}. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with \code{resolve_rooting_outgroup()}; do not name a terminal by hand.}
 
 \item{n_init_trees}{Character. Starting tree specification passed to \code{--tree}. Defaults to \verb{"rand{25},pars{25}"}.}
 
@@ -82,8 +82,8 @@ as the \code{ml_plan} attribute.
 }
 \description{
 Writes a single SLURM batch script running the same constrained \code{RAxML-NG} search as
-\code{\link[=calculate_ml_tree]{calculate_ml_tree()}}, sized for a compute node instead of a workstation. The search is one job
-rather than a job array: independent starting-tree searches are distributed across \code{--workers}
+\code{\link[=calculate_ml_tree]{calculate_ml_tree()}}, sized for a compute node instead of a workstation. The search is a single
+job, not a job array: independent starting-tree searches are distributed across \code{--workers}
 inside the job, and RAxML-NG writes one \code{.raxml.bestTree} directly, so no collection step is
 needed to compare log-likelihoods across tasks.
 }
@@ -96,10 +96,10 @@ count per worker. Running 50 starting trees on one worker executes 50 rounds; th
 across 25 workers execute 2.
 
 Reference timing illustrating worker parallelization: on an Apple M2 Pro (8 threads, \verb{--workers 1},
-\code{RAxML-NG} 1.2.2, SSE3 kernels), searching 50 starting trees sequentially required 47115 s (~938 s per tree).
-In contrast, the production run on an HPC cluster node (AMD EPYC 9754, 75 threads, \verb{--workers 25}) over the
-full supermatrix (1023 terminals, 12806 sites, 5954 patterns, 11 partitions) completed 50 starting trees in
-2393 s (~40 minutes), executing two parallel rounds.
+\code{RAxML-NG} 1.2.2, SSE3 kernels), searching 50 starting trees sequentially on an earlier version of the
+supermatrix required 47115 s (~938 s per tree). The production run on an HPC cluster node (AMD EPYC 9754, 75 threads, \verb{--workers 25}) over the
+full supermatrix (1024 terminals, 12809 sites, 5959 patterns, 11 partitions) completed 50 starting trees in
+2739 s (~46 minutes), executing two parallel rounds.
 
 \code{workers} is derived automatically and constrained to a divisor of the starting tree
 count, so that no worker sits idle in the final round.

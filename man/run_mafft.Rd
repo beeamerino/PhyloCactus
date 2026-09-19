@@ -25,9 +25,8 @@ Invisible numeric exit status code (0 for successful alignment completion).
 }
 \description{
 Establishes hypotheses of positional homology across unaligned orthologous nucleotide sequence clusters.
-Positional homology alignment is a crucial prerequisite for maximum-likelihood phylogenetic inference,
-ensuring that corresponding nucleotide sites derived from common evolutionary ancestry are aligned
-prior to substitution model evaluation.
+Maximum-likelihood inference assumes that the sites in each column of the alignment share
+common ancestry.
 }
 \examples{
 \dontrun{

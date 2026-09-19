@@ -24,8 +24,8 @@ sitting on a bound. Defaults to \code{0.05}.}
 
 \item{bootstraps}{Optional. The bootstrap chronograms, as a \code{multiPhylo}, a list of \code{phylo}, or
 a path to a Newick file with one tree per line (\code{bsTree_treePL.tree}). When supplied, the
-verdict is taken from the fraction of replicates sitting on a bound rather than from the
-single point estimate, and a node pinned in most replicates is reported even when the
+verdict is taken from the fraction of replicates sitting on a bound, not from the single
+point estimate, and a node pinned in most replicates is reported even when the
 maximum-likelihood tree alone would have called it interior. Defaults to \code{NULL}.}
 }
 \value{
@@ -36,7 +36,7 @@ median and 95\% interval, and the percentage of them sitting on a bound.
 }
 \description{
 A node whose estimated age equals one of its own bounds was not estimated. Penalized likelihood
-returned the constraint, and the number carries the prior rather than the data. This is
+returned the constraint, and the number reflects the prior, not the data. This is
 invisible in the output chronogram, which looks like any other, so it has to be checked
 explicitly before a date is reported or interpreted.
 }

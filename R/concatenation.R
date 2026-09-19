@@ -66,10 +66,9 @@
 
 #' Concatenate Locus Alignments and Build Partition Coordinate Maps
 #'
-#' Concatenates individual orthologous locus alignments end-to-end into a unified multilocus supermatrix.
-#' Combining independent molecular loci increases statistical power to resolve difficult ancestral nodes while
-#' allowing partitioned substitution modeling to account for mutational rate heterogeneity across molecular locus alignments.
-#' Exports one coordinate map per partition format rather than one per downstream program: a
+#' Concatenates individual orthologous locus alignments end to end into a multilocus supermatrix.
+#' Each locus is a partition, so substitution models can differ among loci.
+#' Exports one coordinate map per partition format: a
 #' RAxML-style map (`PARTITION_raxml_style.txt`) read by `RAxML-NG`, `ModelTest-NG` and `IQ-TREE`,
 #' and a NEXUS SETS block (`PARTITION_nexus_charset.nex`). Configuration scripts for
 #' `PartitionFinder2` and `MrBayes` are exported separately under their program names.
@@ -83,7 +82,7 @@
 #'   extension. The files are not modified or removed, so an excluded locus remains available for
 #'   other analyses; only this supermatrix is built without it. The excluded markers are named in
 #'   the run log and listed in `logs_and_qc/TABLE_markers_excluded.csv`. A name that matches no
-#'   alignment raises a warning rather than failing, so a typo is visible instead of silent.
+#'   alignment raises a warning, not an error, so a typo is visible.
 #'   Defaults to `NULL`.
 #' @return A data frame containing supermatrix dimensions, taxon coverage, and locus partition bounds.
 #' @examples
@@ -668,10 +667,9 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
 #' Concatenation assumes that the loci being joined describe the same terminals. A locus sampled
 #' almost entirely on one side of the root breaks that assumption without breaking anything
 #' visible: it adds columns the other side cannot share, and the branch lengths spanning the
-#' bipartition are then estimated from the loci that remain. In the August 2026 supermatrix,
-#' `phyC` covered 15 of 24 Anacampserotaceae terminals at 99.3% and no Portulacaceae terminal at
-#' all; the branch subtending the outgroup fell from roughly 600 expected substitutions to 0.03,
-#' and the two deepest calibrated nodes returned their own bounds rather than an estimate.
+#' bipartition are then estimated from the loci that remain. The branch subtending the outgroup
+#' can then be badly underestimated, and the deepest calibrated nodes can return their own
+#' bounds instead of an estimate.
 #'
 #' The function reports and does not block. Whether a locus of that kind belongs in a given matrix
 #' depends on which analysis the matrix is for: a nuclear locus with no outgroup coverage is

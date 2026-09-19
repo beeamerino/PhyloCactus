@@ -44,8 +44,8 @@ A data frame summarizing sequence occupancy, taxon representation, and cluster c
 \description{
 Retrieves orthologous sequence clusters for a focal taxonomic ingroup (e.g., family \strong{Cactaceae}, NCBI Taxonomy ID: 3593)
 directly from GenBank using similarity clustering via \code{phylotaR} (Bennett \emph{et al.}, 2018).
-Relying on sequence similarity rather than inconsistent locus annotations prevents missing orthologous sequence data
-caused by gene synonymy or mislabeling in public sequence repositories.
+Clusters are formed by sequence similarity, not by GenBank locus annotations, so sequences are
+not lost to gene-name synonyms or mislabeled records.
 }
 \examples{
 \dontrun{

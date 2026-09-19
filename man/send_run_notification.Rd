@@ -32,7 +32,7 @@ Invisibly \code{TRUE} when the message was handed to the SMTP server, \code{FALS
 }
 \description{
 Sends a short message when a long analysis ends, so that a run measured in hours does not have to
-be watched. Intended for the steps this package runs on a local machine rather than on a cluster,
+be watched. Intended for the steps this package runs on a local machine, not on a cluster,
 where the scheduler already mails its own notifications.
 }
 \details{

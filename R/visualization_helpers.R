@@ -175,7 +175,7 @@ get_annotation_nodes <- function(tree,
 
 #' Build Taxonomic Annotation Registry across Tree Levels
 #'
-#' Constructs a comprehensive registry mapping internal nodes to multi-level taxonomic annotations (subfamilies, tribes, subtribes, genera).
+#' Builds a registry mapping internal nodes to multi-level taxonomic annotations (subfamilies, tribes, subtribes, genera).
 #'
 #' @param tree Object of class `phylo`.
 #' @param constraints_tbl Data frame containing taxonomic classifications.

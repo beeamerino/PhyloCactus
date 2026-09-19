@@ -16,101 +16,85 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Overview and Methodological Dictionary
+## Overview
 
-Following the step-by-step analytical workflows presented in Tutorials 1 through 5, this reference guide synthesizes the core pipeline functions and methodological principles implemented in `PhyloCactus`. While the complete technical documentation of all exported functions, parameters, and input/output signatures is provided in the standard R package manual pages (`pkgdown` reference section), this dictionary highlights the primary high-level modules that drive the sequential workflow, explaining their biological motivation and methodological rationale.
+This page lists the main functions of the `PhyloCactus` workflow, grouped by stage, with the method each one implements and its primary reference.
+Arguments and return values are documented in the manual pages and in the `pkgdown` reference index.
 
-### Narrative Framework of the Reference Suite
+## Functions by Stage
 
-- **Where are we?** Having assembled multilocus supermatrices, inferred maximum-likelihood phylogenies, estimated divergence times with `treePL`, and validated topologies against external backbones, we provide a unified dictionary detailing core pipeline functions and their evolutionary context.
-- **Why are we here?** Complex plant phylogenetic pipelines require explicit documentation linking software parameters directly to underlying evolutionary mechanics, such as mitigating long-branch attraction (LBA), enforcing positional homology, and accounting for incomplete lineage sorting (ILS).
-- **What will we achieve?** A structured methodological dictionary mapping sequence mining, alignment quality control, substitution model evaluation, maximum-likelihood search, temporal calibration, and comparative validation modules.
-- **What comes next?** Users can query individual function manual pages (e.g., `?run_concatenation_pipeline`) or consult the `pkgdown` reference index for detailed parameter definitions and audit safeguards.
+### Sequence Assembly
 
-## Function Reference Dictionary
-
-### Sequence Assembly & Mining
-
-Functions in this category retrieve orthologous sequence clusters from public repositories using sequence similarity clustering (`phylotaR`), avoiding nomenclature ambiguities across public databases.
-
-| Function | Biological & Methodological Application | Canonical Citation |
+| Function | Description | Reference |
 |:---|:---|:---|
-| `assemble_ingroup_phylotar()` | Mines orthologous DNA sequence clusters for a focal ingroup clade (e.g., Cactaceae; Guerrero et al. 2019) from GenBank using `phylotaR`. Applies strict taxonomic filters, evaluates cluster occupancy, and resolves nomenclature inconsistencies. | Bennett et al. (2018) |
-| `assemble_outgroup_phylotar()` | Retrieves orthologous sequences for specified outgroup lineages to establish accurate root positions for downstream likelihood search and chronogram estimation. | Bennett et al. (2018) |
-| `fetch_genbank_metadata()` | Interrogates NCBI Entrez utilities to extract sequence lengths, organism taxonomy, publication titles, and accession IDs for downloaded sequence clusters. | Camacho et al. (2009) |
+| `assemble_ingroup_phylotar()` | Retrieves sequence clusters for the ingroup (Cactaceae, NCBI Taxonomy ID 3593) from GenBank with `phylotaR`. Clusters are formed by sequence similarity, not by GenBank locus annotations; gene-name synonyms are mapped with `genes_map.csv`, clusters with more than `min_species` species are retained, and a curated list of excluded accessions is applied. | Bennett et al. (2018) |
+| `assemble_outgroup_phylotar()` | Retrieves sequence clusters for the outgroup genera of Anacampserotaceae, Portulacaceae and Talinaceae, for the loci selected in the ingroup. | Bennett et al. (2018) |
+| `fetch_genbank_metadata()` | Retrieves the organism name and definition line of each GenBank accession through `ape::read.GenBank()`, in batches with retries, and caches them. | Paradis & Schliep (2019) |
 
-### Alignment & Quality Control
+### Alignment and Quality Control
 
-Functions in this category establish hypotheses of positional homology (`MAFFT`) and apply automated masking of non-homologous or ambiguous regions (`DECIPHER`).
-
-| Function | Biological & Methodological Application | Canonical Citation |
+| Function | Description | Reference |
 |:---|:---|:---|
-| `run_alignment_pipeline()` | Generates multiple sequence alignments using `MAFFT` and masks poorly aligned, ambiguous, or hypervariable regions using `DECIPHER`, eliminating systematic noise while retaining phylogenetically informative sites. | Katoh & Standley (2013); Wright (2024) |
-| `run_marker_screening()` | Evaluates phylogenetic informativeness, sequence coverage, and locus quality across individual alignments, regressing uncorrected p-distance against a Gamma-corrected K80 distance. The slope threshold below which a locus is rejected is a `PhyloCactus` cleaning criterion, not a published saturation test; the citation covers the distance model only. | Kimura (1980); Jin & Nei (1990) |
-| `clean_taxonomic_names()` | Standardizes tip labels against authoritative botanical checklists (e.g., Caryophyllales.org checklist), resolving synonymies and orthographic variants. | Korotkova et al. (2021) |
-| `run_joint_realignment()` | Re-estimates positional homology alignments (`MAFFT`) after aggregating ingroup and outgroup sequence markers to refine alignment hypotheses. | Katoh & Standley (2013) |
+| `run_alignment_pipeline()` | Aligns each locus with `MAFFT` and masks poorly aligned columns with `DECIPHER::MaskAlignment()`. | Katoh & Standley (2013); Wright (2024) |
+| `run_marker_screening()` | Screens each locus alignment for coverage, length and substitution saturation, by regressing uncorrected p-distance against the gamma-corrected K80 distance. The slope threshold below which a locus is rejected is a `PhyloCactus` criterion, not a published saturation test; the references cover the distance model only. | Kimura (1980); Jin & Nei (1990) |
+| `clean_taxonomic_names()` | Keeps the sequences whose name is in the checklist of Cactaceae, ignoring differences in spaces, hyphens and underscores, and renames them to the spelling of the checklist. | Korotkova et al. (2021) |
+| `run_joint_realignment()` | Realigns each locus with `MAFFT` after the ingroup and outgroup sequences are combined. | Katoh & Standley (2013) |
 
-### Concatenation & Supermatrix Assembly
+### Supermatrix
 
-| Function | Biological & Methodological Application | Canonical Citation |
+| Function | Description | Reference |
 |:---|:---|:---|
-| `run_concatenation_pipeline()` | Concatenates individual orthologous locus alignments into a unified multilocus supermatrix and generates partition coordinate maps compatible with `RAxML-NG`, `IQ-TREE`, and `MrBayes`. | Kozlov et al. (2019) |
+| `run_concatenation_pipeline()` | Concatenates the locus alignments into a supermatrix and writes partition maps in RAxML format (read by `RAxML-NG`, `ModelTest-NG` and `IQ-TREE`) and NEXUS format, with configuration files for `PartitionFinder2` and `MrBayes`. | Not applicable |
 
-### Likelihood Inference & Model Evaluation
+### Model Selection and Maximum-Likelihood Inference
 
-Functions in this category select optimal nucleotide substitution models per partition and infer maximum-likelihood phylogenies under topological constraints.
-
-| Function | Biological & Methodological Application | Canonical Citation |
+| Function | Description | Reference |
 |:---|:---|:---|
-| `preprocess_partitions()` | Validates structural integrity and syntax of the supermatrix and its corresponding partition definitions prior to likelihood evaluation using `RAxML-NG`. | Kozlov et al. (2019) |
-| `run_modeltest_ng()` | Identifies the optimal substitution model per partition (`ModelTest-NG`) using AICc criteria, controlling for mutational rate heterogeneity and mitigating long-branch attraction (LBA). | Darriba et al. (2020) |
-| `build_constraint_scaffold()` | Synthesizes a Newick multifurcating constraint scaffold enforcing monophyletic relationships of established higher taxonomic ranks. | Guerrero et al. (2019) |
-| `calculate_ml_tree()` | Infers the maximum-likelihood evolutionary hypothesis explaining the supermatrix under selected partition models and constraint scaffolds (`RAxML-NG`). | Kozlov et al. (2019) |
-| `map_branch_supports()` | Maps Felsenstein's Bootstrap Proportions (FBP) and Transfer Bootstrap Expectation (TBE) support values onto the best maximum-likelihood tree. | Felsenstein (1985); Lemoine et al. (2018) |
+| `preprocess_partitions()` | Checks the supermatrix and partition map with `RAxML-NG` before model selection. | Kozlov et al. (2019) |
+| `run_modeltest_ng()` | Selects a substitution model for each partition with `ModelTest-NG` under the AICc. | Darriba et al. (2020) |
+| `build_constraint_scaffold()` | Builds a multifurcating constraint tree that enforces the monophyly of subfamilies and major clades of Cactaceae established in published phylogenies. | Guerrero et al. (2019) |
+| `calculate_ml_tree()` | Estimates the maximum-likelihood tree with `RAxML-NG` under the partition models and the constraint tree, from 25 random and 25 parsimony starting trees by default. | Kozlov et al. (2019) |
+| `map_branch_supports()` | Maps Felsenstein bootstrap proportions (FBP) or transfer bootstrap expectation (TBE) from the bootstrap replicates onto the maximum-likelihood tree. | Felsenstein (1985); Lemoine et al. (2018) |
 
-### Divergence Time Estimation & treePL Automation
+### Divergence Time Estimation
 
-| Function | Biological & Methodological Application | Canonical Citation |
+| Function | Description | Reference |
 |:---|:---|:---|
-| `rescale_tree()` | Multiplies tree edge lengths by a scaling factor prior to penalized likelihood dating (`treePL`) to improve numerical conditioning of rate parameter optimization. | Sanderson (2002) |
-| `run_treePL_direct()` | Executes `treePL` natively via system calls to estimate ultrametric chronograms under penalized likelihood. | Smith & O'Meara (2012) |
-| `run_treePL_cv()` | Executes cross-validation parameter optimization, rate smoothing selection, and dating stages from R. | Maurin (2020) |
-| `automate_treePL()` | Automates cross-validation parameter optimization, rate smoothing selection, and chronogram estimation across temporal bootstrap replicates. | Maurin (2020) |
-| `send_run_notification()` | Sends an email when a long local analysis ends, reporting status, timings and output paths. Never fails the run it reports on. | `blastula` R package, <https://github.com/rstudio/blastula> |
+| `rescale_tree()` | Multiplies all branch lengths by a constant before dating with `treePL`. The factor changes the scale of the rate parameters and the numerical conditioning of the optimization; it does not change which branches `treePL` treats as too short. | Smith & O'Meara (2012) |
+| `run_treePL_direct()` | Runs the `treePL` binary on a configuration file, after checking that the tree is rooted. | Smith & O'Meara (2012) |
+| `run_treePL_cv()` | Selects the rate-smoothing parameter by cross-validation, classifies the shape of the cross-validation curve, and dates the tree. | Sanderson (2002); Maurin (2020) |
+| `automate_treePL()` | Runs cross-validation, smoothing selection and dating on the maximum-likelihood tree and on each bootstrap replicate. | Smith & O'Meara (2012); Maurin (2020) |
+| `send_run_notification()` | Sends an email when a long analysis ends, reporting status, timings and output paths. A failure to send does not stop the analysis. | `blastula` R package, <https://github.com/rstudio/blastula> |
 
-### Comparative Validation & IUCN Utilities
+### Comparison, Figures and IUCN Data
 
-| Function | Biological & Methodological Application | Canonical Citation |
+| Function | Description | Reference |
 |:---|:---|:---|
-| `validate_phylogenies()` | Quantifies topological congruence between the focal supermatrix tree and external published backbones using Robinson-Foulds distances and multidimensional scaling (MDS). | Robinson & Foulds (1981); Smith (2020) |
-| `integrate_publication_tree()` | Maps statistical support onto chronograms, collapsing weakly supported nodes (FBP < 0.70) into soft polytomies to represent analytical uncertainty. | Hillis & Bull (1993) |
-| `get_iucn_data()` | Interrogates the IUCN Red List API via `rredlist` to retrieve extinction threat categories, population trends, and geographic endemism metrics. | IUCN (2024) |
-| `scale_fill_iucn()` | Provides a standardized `ggplot2` manual fill scale mapping official IUCN threat categories onto comparative figures. | IUCN (2024) |
+| `validate_phylogenies()` | Compares the focal tree with published trees using the Robinson-Foulds and Different Phylogenetic Information distances, and projects the distances into tree space by multidimensional scaling. | Robinson & Foulds (1981); Smith (2020) |
+| `integrate_publication_tree()` | Maps support values onto the chronogram and the maximum-likelihood tree and collapses nodes with FBP below 70 into polytomies for the publication figures. | Hillis & Bull (1993) |
+| `get_iucn_data()` | Retrieves the IUCN Red List assessment of a species through `rredlist`: category, criteria, population trend, countries of occurrence, endemism, habitats and threats. | IUCN (2026) |
+| `scale_fill_iucn()` | `ggplot2` fill scale with the standard IUCN Red List category colors. | IUCN (2026) |
 
-### Reproducible Execution Example
+### Help Pages
 
 ```{r, eval = FALSE}
 library(PhyloCactus)
 
-# Query help documentation for any pipeline function
 ?run_alignment_pipeline
 ?calculate_ml_tree
 ?automate_treePL
 ```
 
-## Conclusion
-
-This dictionary covers the functions that drive the sequential workflow. The audit and verification functions that the tutorials call at each gate, including `check_calibration_consistency()`, `report_bound_adherence()`, `classify_constrained_nodes()`, `audit_calibration_support()` and `report_smoothing_sensitivity()`, are documented in their own manual pages and in the tutorials where they are used. Consult the `pkgdown` reference index for the complete list of exported functions and their signatures.
+The functions used for checks within the tutorials, such as `check_calibration_consistency()`, `report_bound_adherence()`, `classify_constrained_nodes()`, `audit_calibration_support()` and `report_smoothing_sensitivity()`, are documented in their manual pages and in the tutorials where they are used.
 
 ## References
 
 - Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. 2018. phylotaR: An automated pipeline for retrieving orthologous DNA sequences from GenBank in R. *Life*, 8(2), 20. <https://doi.org/10.3390/life8020020>
-- Camacho, C., Coulouris, G., Avagyan, V., Ma, N., Papadopoulos, J., Bealer, K., & Madden, T. L. 2009. BLAST+: architecture and applications. *BMC Bioinformatics*, 10, 421. <https://doi.org/10.1186/1471-2105-10-421>
 - Darriba, D., Posada, D., Kozlov, A. M., Stamatakis, A., Morel, B., & Flouri, T. 2020. ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291-294. <https://doi.org/10.1093/molbev/msz189>
 - Felsenstein, J. 1985. Confidence limits on phylogenies: an approach using the bootstrap. *Evolution*, 39(4), 783-791. <https://doi.org/10.1111/j.1558-5646.1985.tb00420.x>
 - Guerrero, P. C., Majure, L. C., Cornejo-Romero, A., & Hernández-Hernández, T. 2019. Phylogenetic Relationships and Evolutionary Trends in the Cactus Family. *Journal of Heredity*, 110(1), 4-21. <https://doi.org/10.1093/jhered/esy064>
 - Hillis, D. M., & Bull, J. J. 1993. An empirical test of bootstrapping as a method for assessing confidence in phylogenetic analysis. *Systematic Biology*, 42(2), 182-192. <https://doi.org/10.1093/sysbio/42.2.182>
-- IUCN. 2024. *The IUCN Red List of Threatened Species*. <https://www.iucnredlist.org>
+- IUCN. 2026. *The IUCN Red List of Threatened Species*. Version 2026-1. Accessed 2026-09-19. <https://www.iucnredlist.org>
 - Jin, L., & Nei, M. 1990. Limitations of the evolutionary parsimony method of phylogenetic analysis. *Molecular Biology and Evolution*, 7(1), 82-102. <https://doi.org/10.1093/oxfordjournals.molbev.a040588>
 - Katoh, K., & Standley, D. M. 2013. MAFFT multiple sequence alignment software version 7: Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772-780. <https://doi.org/10.1093/molbev/mst010>
 - Kimura, M. 1980. A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. *Journal of Molecular Evolution*, 16(2), 111-120. <https://doi.org/10.1007/BF01731581>
@@ -118,8 +102,9 @@ This dictionary covers the functions that drive the sequential workflow. The aud
 - Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. 2019. RAxML-NG: a fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455. <https://doi.org/10.1093/bioinformatics/btz305>
 - Lemoine, F., Domelevo Entfellner, J. B., Wilkinson, E., Correia, D., Dávila Felipe, M., De Oliveira, T., & Gascuel, O. 2018. Renewing Felsenstein's phylogenetic bootstrap in the era of big data. *Nature*, 556(7702), 452-456. <https://doi.org/10.1038/s41586-018-0043-0>
 - Maurin, K. J. L. 2020. An empirical guide for producing a dated phylogeny with treePL in a maximum likelihood framework. *arXiv*:2008.07054. <https://doi.org/10.48550/arXiv.2008.07054>
+- Paradis, E., & Schliep, K. 2019. ape 5.0: an environment for modern phylogenetics and evolutionary analyses in R. *Bioinformatics*, 35(3), 526-528. <https://doi.org/10.1093/bioinformatics/bty633>
 - Robinson, D. F., & Foulds, L. R. 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1-2), 131-147. <https://doi.org/10.1016/0025-5564(81)90043-2>
 - Sanderson, M. J. 2002. Estimating absolute rates of molecular evolution and divergence times: a penalized likelihood approach. *Molecular Biology and Evolution*, 19(1), 101-109. <https://doi.org/10.1093/oxfordjournals.molbev.a003974>
-- Smith, M. R. 2020. Information theoretic measures of phylogenetic tree distance. *Systematic Biology*, 69(6), 1168-1182. <https://doi.org/10.1093/sysbio/syaa016>
+- Smith, M. R. 2020. Information theoretic generalized Robinson–Foulds metrics for comparing phylogenetic trees. *Bioinformatics*, 36(20), 5007-5013. <https://doi.org/10.1093/bioinformatics/btaa614>
 - Smith, S. A., & O'Meara, B. C. 2012. treePL: divergence time estimation using penalized likelihood for large phylogenies. *Bioinformatics*, 28(20), 2689-2690. <https://doi.org/10.1093/bioinformatics/bts492>
-- Wright, E. S. 2024. Fast and Flexible Search for Homologous Biological Sequences with DECIPHER v3. *The R Journal*, 16(2), 191-200. <https://doi.org/10.18129/B9.bioc.DECIPHER>
+- Wright, E. S. 2024. Fast and Flexible Search for Homologous Biological Sequences with DECIPHER v3. *The R Journal*, 16(2), 191-200. <https://doi.org/10.32614/RJ-2024-022>

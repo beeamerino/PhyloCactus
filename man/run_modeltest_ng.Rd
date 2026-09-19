@@ -30,8 +30,7 @@ Character path to the resulting partition file containing selected model paramet
 }
 \description{
 Evaluates nucleotide substitution model fit per predefined supermatrix partition using \code{ModelTest-NG} (Darriba \emph{et al.}, 2020).
-Selecting optimal substitution models under the AICc criterion controls for mutational rate heterogeneity across molecular locus alignments,
-mitigating systematic long-branch attraction (LBA) bias during maximum-likelihood inference.
+The model of each partition is selected under the AICc, so substitution models can differ among loci.
 }
 \examples{
 \dontrun{

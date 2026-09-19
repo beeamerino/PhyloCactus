@@ -41,10 +41,9 @@ warns when either side is empty.
 Concatenation assumes that the loci being joined describe the same terminals. A locus sampled
 almost entirely on one side of the root breaks that assumption without breaking anything
 visible: it adds columns the other side cannot share, and the branch lengths spanning the
-bipartition are then estimated from the loci that remain. In the August 2026 supermatrix,
-\code{phyC} covered 15 of 24 Anacampserotaceae terminals at 99.3\% and no Portulacaceae terminal at
-all; the branch subtending the outgroup fell from roughly 600 expected substitutions to 0.03,
-and the two deepest calibrated nodes returned their own bounds rather than an estimate.
+bipartition are then estimated from the loci that remain. The branch subtending the outgroup
+can then be badly underestimated, and the deepest calibrated nodes can return their own
+bounds instead of an estimate.
 
 The function reports and does not block. Whether a locus of that kind belongs in a given matrix
 depends on which analysis the matrix is for: a nuclear locus with no outgroup coverage is

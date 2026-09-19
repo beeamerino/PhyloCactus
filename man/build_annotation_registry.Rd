@@ -27,6 +27,6 @@ build_annotation_registry(
 A named list of annotation node data frames organized by taxonomic level.
 }
 \description{
-Constructs a comprehensive registry mapping internal nodes to multi-level taxonomic annotations (subfamilies, tribes, subtribes, genera).
+Builds a registry mapping internal nodes to multi-level taxonomic annotations (subfamilies, tribes, subtribes, genera).
 }
 \keyword{internal}

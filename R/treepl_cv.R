@@ -13,13 +13,11 @@
 # recommendations into effect that the shell script did not follow.
 # -------------------------------------------------------------------------------------------------
 
-#' Parse the optimisation parameters treePL suggests after a priming run
+#' Parse the optimization parameters treePL suggests after a priming run
 #'
 #' `treePL` ends a priming run with the line `PLACE THE LINES BELOW IN THE CONFIGURATION FILE`,
 #' followed by an `opt`, `optad` and `optcvad` assignment and, for each, an optional `moredetail`
-#' flag. The shell wrapper this replaces read those lines by taking the *last character* of each
-#' and reassembling them positionally, which breaks whenever an optional flag is absent and the
-#' lines shift. This reads the assignments by name instead.
+#' flag. The assignments are read by name, so an absent optional flag does not shift the values.
 #'
 #' @param lines Character vector: the captured output of one priming run.
 #' @return A one-row data frame with integer `opt`, `optad`, `optcvad` and logical `moredetail`,
@@ -60,9 +58,7 @@
 #'
 #' @param primes A data frame of parsed priming runs, one row each.
 #' @param rule `"lowest"` follows Maurin (2020), who instructs the user to repeat priming and take
-#'   the lines with the lowest `opt` and `optad`. `"modal"` reproduces the behaviour of the shell
-#'   wrapper this replaces, which took the most frequent combination; it is kept so that a run made
-#'   before 2026-09-02 can be reproduced.
+#'   the lines with the lowest `opt` and `optad`. `"modal"` takes the most frequent combination.
 #' @return Character vector of configuration lines.
 #' @keywords internal
 #' @noRd
@@ -86,24 +82,27 @@
     if (isTRUE(chosen$moredetailcvad)) "moredetailcvad")
 }
 
-#' Read a treePL cross-validation output file and pick the smoothing value
+#' Read a treePL cross-validation output file, pick the smoothing value and classify the curve
 #'
 #' The file holds one `chisq: (smoothing) value` line per smoothing value evaluated. The selected
-#' value is the one with the lowest chi-square, which is the criterion Maurin (2020) states.
+#' value is the one with the lowest chi-square, which is the criterion of Maurin (2020). What the
+#' selected value means depends on the shape of the curve, which is classified as one of three:
 #'
-#' When that value is the smallest or largest evaluated, the curve never turned: the minimum lies
-#' at the edge of the grid, not inside it, and the true optimum is most likely beyond it. Maurin
-#' gives this exact instruction (lower `cvstop` when the lowest chi-square falls on it) and this
-#' is what happened to this project on 2026-09-02, when a grid running from 1e+04 down to 1e-04
-#' returned 1e-04, its own floor, with the curve still descending. Maurin's own example settled at
-#' 1e-06 to 1e-08 on a tree whose branch lengths had been rescaled the way this pipeline rescales
-#' them, so a floor of 1e-04 was never low enough.
+#' * `"interior"`: the curve turns upward inside the grid, and the selected value is an optimum.
+#' * `"edge"`: the minimum is the first or last value of the grid and the curve is still changing
+#'   there. The optimum most likely lies beyond the grid; Maurin (2020) instructs extending it.
+#' * `"plateau"`: the three values at one end of the grid, that end being the one where the minimum
+#'   lies or the low-smoothing end, differ by less than `plateau_tol` of their chi-square and lie
+#'   within `plateau_tol` of the minimum. Smoothing values on the plateau fit the data about equally
+#'   well, so the selected value is a nominal choice among them and not an optimum.
 #'
 #' @param cv_file Path to the `cvoutfile` treePL wrote.
-#' @return A list with `smoothing`, the full `table`, and `at_edge`.
+#' @param plateau_tol Relative tolerance for the plateau criterion. Defaults to `0.01`.
+#' @return A list with `smoothing`, the full `table` in ascending order of smoothing, `at_edge`
+#'   and `shape`.
 #' @keywords internal
 #' @noRd
-.select_cv_smoothing <- function(cv_file) {
+.select_cv_smoothing <- function(cv_file, plateau_tol = 0.01) {
   if (!file.exists(cv_file) || file.info(cv_file)$size == 0) {
     stop("The cross-validation produced no output at '", cv_file,
          "'. treePL writes this file only when the cross-validation completes.", call. = FALSE)
@@ -118,69 +117,74 @@
   sm <- sm[keep]; ch <- ch[keep]
   tab <- data.frame(smoothing = sm, chisq = ch)[order(sm), ]
   best <- sm[which.min(ch)]
-  at_edge <- isTRUE(all.equal(best, min(sm))) || isTRUE(all.equal(best, max(sm)))
+  best_chisq <- min(ch)
+  # Position in the sorted grid, not all.equal(): all.equal() switches to an absolute tolerance of
+  # 1.5e-8 when the values compared are that small, so on a grid reaching 1e-14 every smoothing value
+  # below about 1e-8 would compare equal to the floor and be read as the edge of the grid.
+  best_pos <- which.min(tab$chisq)
+  at_low <- best_pos == 1L
+  at_high <- best_pos == nrow(tab)
+  at_edge <- at_low || at_high
 
-  # A minimum on the edge can mean two different things, and treating them alike is misleading.
-  # Either the curve was still falling steeply when the grid ran out, which is the case Maurin
-  # describes and which calls for extending it; or it has flattened onto a plateau and the edge is
-  # simply where a curve that had already converged happened to stop. The second is not a problem
-  # to fix. Measured here as the relative change across the last three grid points at that end: on
-  # 2026-09-02 the run went 301.77, 301.08, 301.06, 300.61 over four orders of magnitude, a change
-  # of 0.4%, while the ages moved by at most 1.25 Ma across those same four orders.
-  plateau <- NA
-  if (at_edge && nrow(tab) >= 4L) {
-    edge <- if (isTRUE(all.equal(best, min(sm)))) utils::head(tab, 3L) else utils::tail(tab, 3L)
-    span <- max(edge$chisq) - min(edge$chisq)
-    plateau <- is.finite(span) && span / abs(min(edge$chisq)) < 0.01
+  # Three values at one end of the grid that differ by less than `plateau_tol` and sit within
+  # `plateau_tol` of the minimum. The second condition keeps a flat tail lying above an interior
+  # optimum from being read as a plateau.
+  flat_at <- function(end) {
+    if (nrow(tab) < 4L) return(FALSE)
+    x <- if (end == "low") utils::head(tab, 3L) else utils::tail(tab, 3L)
+    span <- max(x$chisq) - min(x$chisq)
+    is.finite(span) &&
+      span / abs(min(x$chisq)) < plateau_tol &&
+      (min(x$chisq) - best_chisq) / abs(best_chisq) < plateau_tol
   }
 
-  if (isTRUE(at_edge) && isTRUE(plateau)) {
-    message("The cross-validation minimum sits at the edge of the grid (smoothing ",
-            format(best, scientific = FALSE), "), but the chi-square curve is flat there: it ",
-            "changes by less than 1% across the last three values tested. That is a plateau ",
-            "reached, not a search cut short, so extending the grid would move the selected value ",
-            "without moving the result. Confirm by dating at two smoothing values inside the flat ",
-            "region and comparing the ages: see report_smoothing_sensitivity().")
-  } else if (at_edge) {
+  shape <- if (at_high) {
+    if (flat_at("high")) "plateau" else "edge"
+  } else if (flat_at("low")) {
+    "plateau"
+  } else if (at_low) {
+    "edge"
+  } else {
+    "interior"
+  }
+
+  if (shape == "plateau") {
+    message("The cross-validation curve reaches a plateau: the three smoothing values at the ",
+            if (at_high) "upper" else "lower", " end of the grid differ by less than ",
+            100 * plateau_tol, "% in chi-square and lie within ", 100 * plateau_tol,
+            "% of the minimum. The selected value, ", format(best, scientific = FALSE),
+            ", is the lowest chi-square among values that fit the data about equally well, not an ",
+            "optimum. Report node ages across the plateau: see report_smoothing_sensitivity().")
+  } else if (shape == "edge") {
     warning("The cross-validation minimum falls on the edge of its own grid: smoothing ",
             format(best, scientific = FALSE), " with the grid running from ",
             format(min(sm), scientific = FALSE), " to ", format(max(sm), scientific = FALSE),
-            ", and the chi-square curve was still changing there. This is where the search ",
-            "stopped and not where the optimum lies; Maurin (2020) instructs extending the grid ",
-            "past it and repeating. Widen `cvstart`/`cvstop` and rerun before reporting ages ",
-            "dated at this value.", call. = FALSE)
+            ", and the chi-square curve was still changing there. The optimum most likely lies ",
+            "beyond the grid; Maurin (2020) instructs extending the grid past it and repeating. ",
+            "Widen `cvstart`/`cvstop` and rerun before reporting ages dated at this value.",
+            call. = FALSE)
   }
-  list(smoothing = best, table = tab, at_edge = at_edge, at_plateau = plateau)
+  list(smoothing = best, table = tab, at_edge = at_edge, shape = shape)
 }
 
 #' Prime, Cross-Validate and Date a Tree with treePL
 #'
 #' Runs the three stages of the `treePL` protocol of Maurin (2020) (priming, cross-validation and
-#' dating) from R, and returns what each stage chose. It replaces the shell wrapper this package
-#' shipped until 2026-09-02.
+#' dating) from R, and returns what each stage chose.
 #'
-#' @section Why this exists in R:
-#' The shell script this replaces (github.com/tongjial/treepl_wrapper) carries no licence, so it
-#' could not be redistributed inside a GPL-3 package. It also wrote `smoothing = ` into the final
-#' configuration, a keyword `treePL` does not recognise: the line was discarded without a message
-#' and every chronogram produced by this project before 2026-09-02 was dated at the built-in
-#' default of 10, with the cross-validation that precedes it having no effect on any result.
-#' Writing the configuration here puts that keyword under `.verify_treepl_smoothing()`, which
-#' compares what was asked against what `treePL`'s own log reports it used.
-#'
-#' @section Where this follows the protocol and the wrapper did not:
+#' @section Choices relative to the protocol:
 #' * **Priming selection.** Maurin instructs repeating the priming analysis and taking the lines
-#'   with the *lowest* `opt` and `optad`. The shell script took the *most frequent* combination
-#'   across repeats. `prime_rule` defaults to Maurin's rule; `"modal"` reproduces the old behaviour.
+#'   with the *lowest* `opt` and `optad`. `prime_rule` defaults to this rule; `"modal"` takes the
+#'   most frequent combination across repeats instead.
 #' * **Cross-validation method.** Maurin recommends `randomcv`, random subsample and replicate
 #'   cross-validation, over the leave-one-out `cv`, as "much faster and may give more stable
-#'   results". The shell script hard-coded `cv`. `cv_method` defaults to `randomcv`.
-#' * **The grid.** The shell script hard-coded a grid from 1e-04 to 1e+04. Both ends are arguments
-#'   here, and a minimum landing on either end is reported rather than returned as if it were an
-#'   optimum. See `.select_cv_smoothing()`.
-#' * **Parsing.** The priming block is read by keyword rather than by taking the last character of
-#'   each line and reassembling positionally, which misaligns whenever an optional `moredetail`
-#'   flag is absent.
+#'   results". `cv_method` defaults to `randomcv`.
+#' * **The grid.** Both ends of the smoothing grid are arguments, and a minimum on either end is
+#'   reported as such, not returned as an optimum. See the section on curve shapes below.
+#' * **Parsing.** The priming block is read by keyword, so an absent optional `moredetail` flag
+#'   does not shift the values.
+#' * **Smoothing check.** The smoothing that `treePL` reports in its log is compared with the value
+#'   written to the configuration, and the run stops if they differ.
 #'
 #' @param cfg_file Path to the configuration carrying `numsites`, the calibrations and any
 #'   `nthreads`/`seed` lines. The `treefile` line is written by this function.
@@ -193,29 +197,42 @@
 #'   Under `"lowest"` it is not, because the minimum of a sample can only fall as the sample grows,
 #'   so a hundred repeats will select lower parameters than ten of the same runs would. Maurin's
 #'   instruction is to repeat the priming analysis a few times and take the lowest, which is what
-#'   the default pairs with;
-#'   the shell script's 100 was chosen for a rule that was stable under it. Raising `n_prime` while
+#'   the default pairs with. Raising `n_prime` while
 #'   keeping `"lowest"` is a change of analysis, not a refinement of one, and it should be recorded
 #'   as such.
-#' @param prime_rule `"lowest"` (Maurin) or `"modal"` (the shell script's behaviour). See the note
+#' @param prime_rule `"lowest"` (Maurin) or `"modal"` (most frequent combination). See the note
 #'   on `n_prime` above before changing either.
 #' @param cv_method `"randomcv"` (Maurin's recommendation) or `"cv"` (leave-one-out).
-#' @param cvstart,cvstop Ends of the smoothing grid. The defaults span 1e+03 down to 1e-08, low
-#'   enough to contain the 1e-06 to 1e-08 range Maurin reports for a tree with rescaled branch
-#'   lengths, which the shell script's floor of 1e-04 was not.
+#' @param cvstart,cvstop Ends of the smoothing grid, evaluated at one value per order of magnitude.
+#'   The defaults span 1e+03 down to 1e-14. Maurin (2020) reports optima between 1e-06 and 1e-08
+#'   for trees whose branch lengths are rescaled as this package rescales them; the reference
+#'   Cactaceae dataset reaches a plateau below 1e-06, which only a grid extending well below that
+#'   range can show. See the section on curve shapes below.
 #' @param cv_nthreads Integer. Number of threads for the cross-validation stage. Defaults to `1L`.
-#'   Evaluating cross-validation replicates across OpenMP threads (`nthreads > 1`) introduces race
-#'   conditions because `treePL`'s simulated annealing routine calls the non-reentrant C `rand()`
-#'   concurrently and combines chi-square sums with non-associative floating-point reduction. This
-#'   causes cross-validation curves and selected smoothing values to vary widely between identical
-#'   runs even when `seed` is fixed. Setting `cv_nthreads = 1L` restores bit-for-bit determinism
-#'   at a negligible computational cost (~4% difference in wall-clock time).
+#'   `treePL` evaluates cross-validation replicates in an OpenMP loop, inside which simulated
+#'   annealing calls the non-reentrant C `rand()`; the chi-square sum is also accumulated through an
+#'   OpenMP reduction, whose order may vary between runs. With more than one thread, two runs with
+#'   the same `seed` return different cross-validation curves and can select different smoothing
+#'   values. With one thread the curve is reproducible for a given `seed`, at a cost of about 4% in
+#'   wall-clock time on the reference dataset.
 #' @param treepl_bin Name or path of the `treePL` binary.
 #' @param work_dir Directory to run in. Defaults to the current one. `treePL` writes beside its
 #'   configuration, so every intermediate lands here.
 #' @param quiet Suppress the per-stage progress messages.
-#' @return Invisibly, a list with `smoothing`, `cv_table`, `prime_lines`, `primes`, `tree_file`
-#'   (the chronogram written) and the paths of the three configurations.
+#' @return Invisibly, a list with `smoothing`, `cv_table`, `cv_at_edge`, `cv_shape`,
+#'   `prime_lines`, `primes`, `tree_file` (the chronogram written) and the paths of the three
+#'   configurations.
+#' @section Shape of the cross-validation curve:
+#' The selected smoothing value is the one with the lowest chi-square. `cv_shape` reports what that
+#' value means, and a message or warning states it when the function runs:
+#' * `"interior"`: the curve turns upward inside the grid; the selected value is an optimum.
+#' * `"edge"`: the minimum is the first or last value of the grid and the curve is still changing
+#'   there. The optimum most likely lies beyond the grid: extend `cvstart` or `cvstop` and repeat
+#'   before interpreting any age (Maurin, 2020). Reported as a warning.
+#' * `"plateau"`: the three values at the end of the grid where the curve flattens differ by less
+#'   than 1% in chi-square and lie within 1% of the minimum. Values on the plateau fit the data about
+#'   equally well, so the selected value is a nominal choice among them; report node ages across the
+#'   plateau with [report_smoothing_sensitivity()]. Reported as a message.
 #' @references
 #' Maurin, K. J. L. (2020). An empirical guide for producing a dated phylogeny with treePL in a
 #' maximum likelihood framework. *arXiv*:2008.07054. \doi{10.48550/arXiv.2008.07054}
@@ -232,7 +249,7 @@ run_treePL_cv <- function(cfg_file, tree_file, label,
                           n_prime = 10L,
                           prime_rule = c("lowest", "modal"),
                           cv_method = c("randomcv", "cv"),
-                          cvstart = 1e3, cvstop = 1e-8,
+                          cvstart = 1e3, cvstop = 1e-14,
                           cv_nthreads = 1L,
                           treepl_bin = "treePL",
                           work_dir = NULL,
@@ -290,11 +307,11 @@ run_treePL_cv <- function(cfg_file, tree_file, label,
 
   # ---- Stage 2: cross-validation ----------------------------------------------------------------
   if (cv_nthreads > 1L) {
-    warning("`cv_nthreads` is set to ", cv_nthreads, ". treePL's cross-validation evaluates replicates ",
-            "across OpenMP threads, inside of which simulated annealing calls the non-reentrant C `rand()` ",
-            "concurrently and accumulates chi-square values with non-associative float reduction. This makes ",
-            "cross-validation non-reproducible across runs even when `seed` is fixed. Use `cv_nthreads = 1L` ",
-            "for deterministic, bit-for-bit reproducible cross-validation.", call. = FALSE)
+    warning("`cv_nthreads` is set to ", cv_nthreads, ". treePL evaluates cross-validation replicates ",
+            "in an OpenMP loop in which simulated annealing calls the non-reentrant C `rand()`, so two ",
+            "runs with the same `seed` can return different curves and select different smoothing ",
+            "values. Use `cv_nthreads = 1L` for a curve that is reproducible for a given `seed`.",
+            call. = FALSE)
   }
 
   # Strip any inherited nthreads directive for the cross-validation configuration to ensure cv_nthreads governs
@@ -317,7 +334,7 @@ run_treePL_cv <- function(cfg_file, tree_file, label,
   }
   sel <- .select_cv_smoothing(cv_out)
   say("  Smoothing selected: ", format(sel$smoothing, scientific = FALSE),
-      " (lowest chi-square of ", nrow(sel$table), " values)")
+      " (lowest chi-square of ", nrow(sel$table), " values; curve shape: ", sel$shape, ")")
 
   # ---- Stage 3: dating --------------------------------------------------------------------------
   # `smooth`, never `smoothing`. run_treePL_direct() confirms against treePL's own log that the
@@ -333,6 +350,7 @@ run_treePL_cv <- function(cfg_file, tree_file, label,
   .validate_treepl_output(out_tree, label)
 
   invisible(list(smoothing = sel$smoothing, cv_table = sel$table, cv_at_edge = sel$at_edge,
+                 cv_shape = sel$shape,
                  prime_lines = prime_lines, primes = primes,
                  tree_file = normalizePath(out_tree, mustWork = TRUE),
                  prime_cfg = prime_cfg, cv_cfg = cv_cfg, smooth_cfg = smooth_cfg))

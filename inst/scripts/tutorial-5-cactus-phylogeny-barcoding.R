@@ -1,21 +1,15 @@
 # -------------------------------------------------------------
-# PhyloCactus: Tutorial 5 - DNA Barcoding (section under construction)
+# PhyloCactus: Tutorial 5. DNA Barcoding (section under construction)
 # -------------------------------------------------------------
-# This section ships no implementation. Its analytical strategy has not been
-# defined, so no runnable script is provided rather than one whose output could
-# be mistaken for a validated result.
-#
-# Scope of the section, decisions already taken, open questions and the criteria
-# for reopening it are documented in the manifest:
+# This section contains no implementation, so no runnable script is provided.
+# Scope, decisions taken, open questions and conditions for implementation:
 #
 #   vignette("tutorial-5-cactus-phylogeny-barcoding", package = "PhyloCactus")
 #
-# Calling evaluate_dna_barcoding() signals an error pointing to that manifest.
+# evaluate_dna_barcoding() signals an error that points to that page.
 #
-# Single-locus gene tree inference is NOT part of the withdrawal. It was
-# relocated to the phylogenetic inference module because its products feed the
-# gene tree / species tree discordance analyses of Module 13 (ASTRAL-III), which
-# do not depend on the barcoding strategy. It remains available:
+# Single-locus gene trees can still be estimated with infer_gene_trees(). Its
+# gene trees can be used as input to ASTRAL-III (Module 13):
 #
 #   library(PhyloCactus)
 #

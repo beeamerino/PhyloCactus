@@ -26,17 +26,16 @@ as they appear in the alignment file names without the \code{Masked_} prefix and
 extension. The files are not modified or removed, so an excluded locus remains available for
 other analyses; only this supermatrix is built without it. The excluded markers are named in
 the run log and listed in \code{logs_and_qc/TABLE_markers_excluded.csv}. A name that matches no
-alignment raises a warning rather than failing, so a typo is visible instead of silent.
+alignment raises a warning, not an error, so a typo is visible.
 Defaults to \code{NULL}.}
 }
 \value{
 A data frame containing supermatrix dimensions, taxon coverage, and locus partition bounds.
 }
 \description{
-Concatenates individual orthologous locus alignments end-to-end into a unified multilocus supermatrix.
-Combining independent molecular loci increases statistical power to resolve difficult ancestral nodes while
-allowing partitioned substitution modeling to account for mutational rate heterogeneity across molecular locus alignments.
-Exports one coordinate map per partition format rather than one per downstream program: a
+Concatenates individual orthologous locus alignments end to end into a multilocus supermatrix.
+Each locus is a partition, so substitution models can differ among loci.
+Exports one coordinate map per partition format: a
 RAxML-style map (\code{PARTITION_raxml_style.txt}) read by \code{RAxML-NG}, \code{ModelTest-NG} and \code{IQ-TREE},
 and a NEXUS SETS block (\code{PARTITION_nexus_charset.nex}). Configuration scripts for
 \code{PartitionFinder2} and \code{MrBayes} are exported separately under their program names.

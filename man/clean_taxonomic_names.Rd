@@ -24,9 +24,10 @@ clean_taxonomic_names(
 Character string path to the generated FASTA file with standardized species binomials.
 }
 \description{
-Reconciles sequence tip labels against authoritative botanical checklists (e.g., Caryophyllales.org checklist; Korotkova et al., 2021).
-Resolves taxonomic synonymies, infraspecific variants, and orthographic errors, guaranteeing nomenclatural stability
-across public GenBank sequence downloads.
+Reconciles sequence names with an accepted checklist (e.g., the Caryophyllales.org checklist; Korotkova et al., 2021).
+Keeps the sequences whose name matches a name in the checklist, ignoring differences in spaces,
+hyphens and underscores, renames them to the spelling of the checklist, and keeps one sequence
+per name. Sequences whose name is not in the checklist are dropped.
 }
 \examples{
 \dontrun{

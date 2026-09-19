@@ -19,7 +19,7 @@ automate_treePL(
   prime_rule = c("lowest", "modal"),
   cv_method = c("randomcv", "cv"),
   cvstart = 1000,
-  cvstop = 1e-08,
+  cvstop = 1e-14,
   cv_nthreads = 1L,
   wrapper_sh = NULL,
   notify = FALSE,
@@ -40,25 +40,23 @@ automate_treePL(
 
 \item{num_bs}{Integer or NULL. Maximum number of temporal bootstrap trees to evaluate. If \code{NULL}, processes all available trees.}
 
-\item{numsites}{Integer or NULL. Alignment length, in sites, of the supermatrix actually analysed. If \code{NULL}, the \code{numsites} line already present in \code{cfg_file} is used. This must be the length of the matrix \code{RAxML-NG} analysed (typically the \verb{*.raxml.reduced.phy} produced by \code{preprocess_partitions()}), not a rounded figure: \code{treePL} uses it to convert branch lengths into expected substitution counts, so an incorrect value biases the rate smoothing. Declare the true alignment length here; the division by \code{rescale_factor} is applied internally.}
+\item{numsites}{Integer or NULL. Alignment length, in sites, of the supermatrix actually analyzed. If \code{NULL}, the \code{numsites} line already present in \code{cfg_file} is used. This must be the length of the matrix \code{RAxML-NG} analyzed (typically the \verb{*.raxml.reduced.phy} produced by \code{preprocess_partitions()}), not a rounded figure: \code{treePL} uses it to convert branch lengths into expected substitution counts, so an incorrect value biases the rate smoothing. Declare the true alignment length here; the division by \code{rescale_factor} is applied internally.}
 
 \item{outgroup}{Character vector of terminals used to root the maximum-likelihood tree and every bootstrap replicate before penalized-likelihood dating, or \code{NULL}. Defaults to \code{NULL}, in which case the set is derived from the maximum-likelihood tree with \code{resolve_rooting_outgroup()}. Adapt \code{outgroup} or specify \code{resolve_rooting_outgroup(pattern = ...)} to the outgroup lineage sampled in your dataset (for example \code{"^(Talinum|Talinella)_"} when Talinaceae roots the tree). No fixed default is offered because a clade-level rooting set depends on what the supermatrix sampled and cannot be a package constant.
 
-\strong{Why a clade rather than a terminal.} Rooting is imposed after the search: \code{RAxML-NG} returns an unrooted topology and the root is placed on a chosen edge. Naming a single terminal of a sampled outgroup clade places the root \emph{inside} that clade, leaving it paraphyletic in the final tree and collapsing its crown node onto the root. Any calibration addressed by the MRCA of that clade then lands on the root instead of on the node it was written for. Supplying the whole clade places the root on its stem edge, which is the intended edge. Rooting is performed by \code{root_on_clade()}, which also handles the basal polytomy \code{RAxML-NG} writes.
+\strong{Why a clade and not a terminal.} Rooting is imposed after the search: \code{RAxML-NG} returns an unrooted topology and the root is placed on a chosen edge. Naming a single terminal of a sampled outgroup clade places the root \emph{inside} that clade, leaving it paraphyletic in the final tree and collapsing its crown node onto the root. Any calibration addressed by the MRCA of that clade then lands on the root instead of on the node it was written for. Supplying the whole clade places the root on its stem edge, which is the intended edge. Rooting is performed by \code{root_on_clade()}, which also handles the basal polytomy \code{RAxML-NG} writes.
 
-bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error.
+Bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error.
 
 \strong{Topological assumption.} Placing the root on the outgroup lineage (Talinaceae or Portulacaceae) establishes the basal split for dating. In the reference dataset, Talinaceae roots the tree, placing the root on the stem of the ACP clade (Anacampserotaceae, Cactaceae, Portulacaceae) and allowing maximum-likelihood inference to test alternative topological resolutions among the three core families (Ramirez-Barahona et al., 2020; Zuntini et al., 2024). State this assumption in Methods, and treat the root age as conditional on it.}
 
 \item{seed}{Integer or NULL. Seed for every stochastic step of the run: R's choice of which
 bootstrap replicates to date, and \code{treePL}'s own \code{seed} keyword, which is written into the
 maximum-likelihood configuration and, offset by the replicate index, into each replicate's.
-\code{treePL} seeds itself from the clock when the keyword is absent. Note that while setting \code{seed}
-is necessary, it is only sufficient for reproducible cross-validation when \code{cv_nthreads = 1L}:
-\code{treePL}'s simulated annealing routine invokes the non-reentrant standard C \code{rand()} across
-OpenMP threads when \code{nthreads > 1}, leaving multi-threaded cross-validation non-reproducible.
-Defaults to \code{NULL}, which draws one and reports it; record the reported value, as it is
-required to reproduce the run.}
+\code{treePL} seeds itself from the clock when the keyword is absent. A fixed \code{seed} reproduces the
+run when cross-validation uses one thread, which is the default of \code{cv_nthreads}. Defaults to
+\code{NULL}, which draws one and reports it; record the reported value, as it is required to
+reproduce the run.}
 
 \item{rescale_factor}{Numeric. Multiplier applied to every branch length before dating, and the divisor applied to \code{numsites} in the configurations written for \code{treePL}. Defaults to \code{100}.
 
@@ -66,23 +64,20 @@ required to reproduce the run.}
 
 \item{n_prime}{Integer. Priming repeats on the maximum-likelihood tree. See \code{\link[=run_treePL_cv]{run_treePL_cv()}}.}
 
-\item{prime_rule}{\code{"lowest"} (Maurin 2020) or \code{"modal"} (the retired shell script's rule).}
+\item{prime_rule}{\code{"lowest"} (Maurin 2020) or \code{"modal"}. See \code{\link[=run_treePL_cv]{run_treePL_cv()}}.}
 
 \item{cv_method}{\code{"randomcv"}, recommended by Maurin (2020) as faster and more stable, or \code{"cv"}
-for leave-one-out, which is what the retired shell script used.}
+for leave-one-out.}
 
-\item{cvstart, cvstop}{Ends of the cross-validation smoothing grid. The defaults reach lower than
-the shell script's fixed floor of 1e-04, which the August 2026 run of this project hit without
-the chi-square curve ever turning.}
+\item{cvstart, cvstop}{Ends of the cross-validation smoothing grid, 1e+03 and 1e-14 by default.
+See \code{\link[=run_treePL_cv]{run_treePL_cv()}} for how the shape of the resulting curve is classified and reported.}
 
-\item{cv_nthreads}{Integer. Number of threads for the cross-validation stage. Defaults to \code{1L}
-to guarantee deterministic, bit-for-bit reproducible cross-validation curves. See \code{\link[=run_treePL_cv]{run_treePL_cv()}}.}
+\item{cv_nthreads}{Integer. Number of threads for the cross-validation stage. Defaults to \code{1L},
+which makes the cross-validation curve reproducible for a given \code{seed}. See \code{\link[=run_treePL_cv]{run_treePL_cv()}}.}
 
-\item{wrapper_sh}{Retired on 2026-09-02 and ignored, with a warning. Priming, cross-validation
-and dating of the maximum-likelihood tree now run through \code{\link[=run_treePL_cv]{run_treePL_cv()}}, which implements
-the protocol of Maurin (2020) in R. The shell script this argument used to point at carried no
-licence and wrote \verb{smoothing = }, a keyword \code{treePL} discards without a message, so every
-chronogram produced before that date was dated at the built-in default of 10.}
+\item{wrapper_sh}{Ignored, with a warning. Priming, cross-validation and dating of the
+maximum-likelihood tree run through \code{\link[=run_treePL_cv]{run_treePL_cv()}}, which implements the protocol of
+Maurin (2020) in R.}
 
 \item{notify}{Logical. Send an email when the run ends, whether it finished or failed. The
 message carries the status, the start and end times, the elapsed time, the host and the paths
@@ -97,21 +92,19 @@ environment variables.}
 }
 \value{
 Invisibly, the path of the dated maximum-likelihood chronogram written into
-\code{treePL_out}. Until 2026-09-18 this field read "Invisible NULL upon completion", which the
-function has never done: the value is what \code{resolve_run_paths()} and the publication step
-downstream expect to receive from it.
+\code{treePL_out}.
 }
 \description{
 Automates cross-validation parameter optimization, rate smoothing selection, and chronogram estimation
 across temporal bootstrap replicates using \code{treePL} (Sanderson, 2002; Smith & O'Meara, 2012).
-Propagating temporal uncertainty across branch-length resampled bootstrap trees yields empirical confidence intervals
-for node age estimates. Every treePL output (maximum-likelihood chronogram and each bootstrap chronogram) is validated
+Dating the bootstrap trees, which share the maximum-likelihood topology, gives confidence intervals on node
+ages that reflect branch-length uncertainty. Every treePL output (maximum-likelihood chronogram and each bootstrap chronogram) is validated
 after execution: the resulting tree must exist, be non-empty, parse as a valid Newick topology, and be ultrametric.
 A run that fails silently (e.g., because the underlying \code{treePL} binary did not converge) is therefore reported as an
-explicit error rather than propagated downstream as a corrupted chronogram. Note that the optimal rate-smoothing
-parameter is cross-validated once on the maximum-likelihood tree and reused, unmodified, across all bootstrap
-replicates; this is a standard computational shortcut for treePL-based dating pipelines (per-replicate cross-validation
-is prohibitively expensive at typical bootstrap replicate counts), following the empirical protocol of Maurin (2020).
+explicit error. The rate-smoothing parameter is selected once, by cross-validation on the maximum-likelihood tree,
+and reused for all bootstrap replicates, as in the protocol of Maurin (2020); cross-validating each replicate would
+multiply the run time by the number of replicates. The confidence intervals therefore do not include uncertainty
+in the smoothing value.
 }
 \examples{
 \dontrun{

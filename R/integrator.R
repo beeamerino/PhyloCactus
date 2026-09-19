@@ -59,8 +59,8 @@
 #'
 #' `TreeAnnotator` writes the summary chronogram in NEXUS, and `ape::read.tree()` does not read
 #' NEXUS. The same fall-through already exists in `publish_run_outputs.R`; it is kept here so that
-#' any function reading a pipeline tree accepts both formats rather than failing on the artifact
-#' the pipeline itself distributes.
+#' any function reading a pipeline tree accepts both formats, including the one the pipeline itself
+#' distributes.
 #'
 #' @param path Character. Path to a tree file in either format.
 #' @return An object of class `phylo`.
@@ -74,15 +74,14 @@
 #' Render Final Publication Figures and Registry
 #'
 #' Maps statistical support values (e.g., Felsenstein Bootstrap Proportions, FBP) onto nodes of the
-#' final chronogram and maximum-likelihood phylogeny. Nodes failing to meet the minimum support threshold
-#' (`collapse_cutoff`) are systematically collapsed into soft polytomies (analytical uncertainty)
-#' to produce conservative, publication-ready figures.
+#' final chronogram and maximum-likelihood phylogeny. Nodes with support below `collapse_cutoff` are
+#' collapsed into soft polytomies in the figures.
 #'
 #' @param ml_support_tree_path Character. Best ML support tree path.
 #' @param summary_chronogram_path Character. Chronogram path with HPD annotations.
 #' @param constraints_path Character. Taxonomy constraints CSV path.
 #' @param out_dir Character. Publication figures directory.
-#' @param collapse_cutoff Numeric. Felsenstein Bootstrap Proportion (FBP) threshold below which weakly supported nodes are collapsed into soft polytomies (0.0 to 1.0; default 0.70; collapsing 700 of 986 free nodes in the empirical dataset).
+#' @param collapse_cutoff Numeric. Felsenstein Bootstrap Proportion (FBP) threshold below which weakly supported nodes are collapsed into soft polytomies (0.0 to 1.0; default 0.70; collapsing 703 of 987 free nodes in the reference dataset).
 #' @return A data frame listing exported figure files and threshold parameters.
 #' @export
 integrate_publication_tree <- function(ml_support_tree_path, summary_chronogram_path, constraints_path = NULL, out_dir, collapse_cutoff = 0.70) {

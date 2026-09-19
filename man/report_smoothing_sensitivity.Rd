@@ -15,7 +15,7 @@ report_smoothing_sensitivity(
 }
 \arguments{
 \item{cfg_file}{Character. A treePL configuration carrying the tree, \code{numsites}, the
-optimisation parameters and the calibrations. The configuration written for the
+optimization parameters and the calibrations. The configuration written for the
 maximum-likelihood chronogram is the natural input.}
 
 \item{out_csv}{Character or \code{NULL}. Where to write the table. Defaults to
@@ -40,10 +40,10 @@ Invisibly, a data frame with one row per smoothing value and calibrated node:
 }
 \description{
 Penalized likelihood requires a rate-smoothing parameter, and treePL selects one by
-cross-validation. When the cross-validated minimum falls on the edge of the tested grid, as it
-does for this dataset, the selection is the boundary of the search rather than an optimum, and
-a reader is entitled to ask whether the reported ages are an artefact of that choice. This
-function answers the question directly: it dates the same tree, under the same calibrations, at
+cross-validation. When the cross-validation curve has no interior minimum, because the minimum
+falls on the edge of the grid or on a plateau where several values fit about equally well, the
+selected value is not an optimum, and the reported ages may depend on that choice. This
+function tests that dependence: it dates the same tree, under the same calibrations, at
 each smoothing value given, and reports the age of every calibrated node in each run.
 }
 \details{
@@ -51,11 +51,8 @@ The nodes come from the \code{mrca} lines of the configuration itself, so the ta
 the nodes the analysis makes claims about and cannot drift out of step with them.
 
 Each run is checked with the same verification applied everywhere else: the smoothing treePL
-reports in its log must match the smoothing requested. Until 2026-09-02 the pipeline wrote the
-keyword \code{smoothing}, which treePL does not recognise and discards without a message, so every
-chronogram was produced at the built-in default of 10 and a table like this one would have
-shown five identical rows. A run whose smoothing cannot be confirmed is reported as such
-rather than tabulated as a result.
+reports in its log must match the smoothing requested. A run whose smoothing cannot be confirmed
+is reported as such and not tabulated as a result.
 }
 \examples{
 \dontrun{

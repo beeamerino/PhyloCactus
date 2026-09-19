@@ -1,9 +1,8 @@
 #' Infer Positional Homology via MAFFT Alignment
 #'
 #' Establishes hypotheses of positional homology across unaligned orthologous nucleotide sequence clusters.
-#' Positional homology alignment is a crucial prerequisite for maximum-likelihood phylogenetic inference,
-#' ensuring that corresponding nucleotide sites derived from common evolutionary ancestry are aligned
-#' prior to substitution model evaluation.
+#' Maximum-likelihood inference assumes that the sites in each column of the alignment share
+#' common ancestry.
 #'
 #' @param input_fasta Character. Path to unaligned input FASTA file.
 #' @param output_fasta Character. Path to destination aligned FASTA output file.
@@ -339,17 +338,12 @@ cached_params_match <- function(cached_summary, stamp) {
 #' orientation it is given, will align them anyway: it returns a block, the block looks like a
 #' marker, and the reversed rows carry no positional homology to the rest.
 #'
-#' Found on 2026-09-01 in `Portulaca oleracea` and `P. pilosa`, whose `rbcL` and `matK` accessions
-#' are deposited reversed. Their aligned `rbcL` sat at 0.51 observed divergence from Cactaceae
-#' where `P. grandiflora`, the same genus, sits at 0.030. `P. oleracea` was at that moment the
-#' terminal the acceptance table nominated for rooting the tree.
-#'
 #' Orientation is decided against the marker's own majority, not against an external reference,
-#' because the pipeline mines whatever GenBank holds and no reference is guaranteed. The seed is
+#' because the pipeline uses whatever GenBank holds and no external reference is available for every marker. The seed is
 #' the longest sequence; every sequence agreeing with the seed extends the reference pool; each
 #' remaining sequence is then compared in both directions and flipped when the reverse complement
 #' matches better. A sequence matching neither direction is left untouched and reported, since it
-#' is a homology problem rather than an orientation one.
+#' is a homology problem, not an orientation problem.
 #'
 #' `mafft --adjustdirection` solves the same problem, and is not used here because it renames the
 #' sequences it flips with an `_R_` prefix, which would then have to be undone in the sequence
@@ -606,11 +600,11 @@ process_marker_file <- function(
 #' @param mask_alignment_regions Logical. Apply automated alignment masking via `DECIPHER`? Defaults to `TRUE`.
 #' @param min_non_gap_fraction Numeric. Minimum allowable proportion of non-gap characters required to retain a site column. Defaults to `0.30`. Applied after masking and relative to the post-masking alignment width.
 #' @param max_missing_fraction Numeric. Maximum allowable proportion of missing or ambiguous characters (`N`) allowed per sequence. Defaults to `0.30`.
-#' @param min_masked_alignment_length Integer. Absolute minimum number of alignment columns that must survive masking for the locus to be retained. Loci falling below this floor are reported as `ZERO_RETAINED` rather than exported as near-empty alignments. **Defaults to `100L`.** The floor exists to catch alignments that masking has degraded to the point of being uninformative, not to arbitrate between loci of different lengths: no marker in the reference Cactaceae dataset is shorter than 100 columns, so any masked alignment falling below that value is degenerate rather than merely short. Raising the floor can only reject markers, never admit them; a marker rejected by it is reported with `decision_reason` naming the threshold, so the effect is always visible in the screening table.
+#' @param min_masked_alignment_length Integer. Absolute minimum number of alignment columns that must survive masking for the locus to be retained. Loci falling below this floor are reported as `ZERO_RETAINED` and are not exported. **Defaults to `100L`.** The floor exists to catch alignments that masking has degraded to the point of being uninformative, not to arbitrate between loci of different lengths: no marker in the reference Cactaceae dataset is shorter than 100 columns, so any masked alignment below that value is degenerate, not merely short. Raising the floor can only reject markers, never admit them; a marker rejected by it is reported with `decision_reason` naming the threshold, so the effect is always visible in the screening table.
 #'
-#'   **Scope.** This floor is evaluated only in the masking branch, that is when `mask_alignment_regions = TRUE`. With masking deferred (`FALSE`, the configuration used for the outgroup) it is deliberately not applied, because it is defined against a post-masking column set that does not exist in that branch. Outgroup terminals are filtered instead by per-sequence occupancy in `run_joint_realignment()` (Module 5). Do not assume this parameter protects both branches.
+#'   **Scope.** This floor is evaluated only in the masking branch, that is when `mask_alignment_regions = TRUE`. With masking deferred (`FALSE`, the configuration used for the outgroup) it is not applied, because it is defined against a post-masking column set that does not exist in that branch. Outgroup terminals are filtered instead by per-sequence occupancy in `run_joint_realignment()` (Module 5). Do not assume this parameter protects both branches.
 #' @param preserve_iupac Logical. Retain IUPAC ambiguity codes (`R`, `Y`, `S`, `W`, `K`, `M`, `B`, `D`, `H`, `V`) instead of collapsing them to `N` before alignment. **Defaults to `TRUE`.** `RAxML-NG` and `ModelTest-NG` incorporate ambiguity into the likelihood as a partial constraint, so an `R` site restricts the state to A or G whereas an `N` restricts nothing: collapsing the codes discards real information for no analytical gain. Set to `FALSE` only when an alignment free of ambiguity is explicitly required. The amount of ambiguity present at every stage is reported in the `mean_fraction_ambiguous_*` and `n_sites_ambiguous_*` columns of the marker summary, so the decision can be revisited per locus with data. See `@details`.
-#' @param fix_strand Logical. Put every sequence of a marker on the same strand before alignment, deciding orientation against the marker's own majority. GenBank stores each record on whichever strand the submitter deposited, and `MAFFT` compares only the orientation it is given: a reverse-complemented accession is aligned anyway and contributes columns with no positional homology. Found on 2026-09-01 in the `rbcL` and `matK` accessions of `Portulaca oleracea` and `P. pilosa`, which sat at 0.51 and 0.40 observed divergence from Cactaceae where `P. grandiflora` sits at 0.030 and 0.066. Each sequence is logged with its match in both directions in `tables/LOG_STRAND_<marker>.csv`. Defaults to `TRUE`.
+#' @param fix_strand Logical. Put every sequence of a marker on the same strand before alignment, deciding orientation against the marker's own majority. GenBank stores each record on whichever strand the submitter deposited, and `MAFFT` compares only the orientation it is given: a reverse-complemented accession is aligned anyway and contributes columns with no positional homology. Each sequence is logged with its match in both directions in `tables/LOG_STRAND_<marker>.csv`. Defaults to `TRUE`.
 #' @param mafft_exec Character. System command or full path to the executable `MAFFT` binary. Defaults to `"mafft"`.
 #' @param mafft_opts Character. Command-line parameters passed directly to `MAFFT`. Defaults to `"--auto"`.
 #' @return A data frame containing site length, missingness, and sequence retention statistics across processed loci.
@@ -640,13 +634,12 @@ process_marker_file <- function(
 #' site constrains the state to A or G, an `N` constrains nothing. There is no analytical reason
 #' to discard that constraint, so the pipeline does not.
 #'
-#' Ambiguity is nevertheless measured rather than assumed away. The marker summary reports
+#' Ambiguity is nevertheless measured. The marker summary reports
 #' `mean_fraction_ambiguous_*` for each of the five processing stages, and `n_sites_ambiguous_*`
 #' for the raw input and the final alignment. The `raw_input` figures are computed before
 #' `clean_ambiguous()` is applied, so they record what the source records actually contained
-#' regardless of the policy in force. That is what makes a per-locus decision possible: a marker
-#' whose ambiguity is concentrated rather than diffuse can be examined on its own evidence
-#' instead of being subjected to a global rule.
+#' regardless of the policy in force. A marker whose ambiguity is concentrated in a few sequences or
+#' sites can therefore be examined on its own evidence, without a global rule.
 #' @references
 #' Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7:
 #' Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772–780.
@@ -748,9 +741,10 @@ run_alignment_pipeline <- function(
 
 #' Reconcile and Validate Taxonomic Nomenclature
 #'
-#' Reconciles sequence tip labels against authoritative botanical checklists (e.g., Caryophyllales.org checklist; Korotkova et al., 2021).
-#' Resolves taxonomic synonymies, infraspecific variants, and orthographic errors, guaranteeing nomenclatural stability
-#' across public GenBank sequence downloads.
+#' Reconciles sequence names with an accepted checklist (e.g., the Caryophyllales.org checklist; Korotkova et al., 2021).
+#' Keeps the sequences whose name matches a name in the checklist, ignoring differences in spaces,
+#' hyphens and underscores, renames them to the spelling of the checklist, and keeps one sequence
+#' per name. Sequences whose name is not in the checklist are dropped.
 #'
 #' @param raw_input_fasta Character. Path to input FASTA file containing raw GenBank sequence accessions.
 #' @param checklist_path Character. Path to accepted taxonomic checklist CSV or Excel file.
@@ -833,7 +827,7 @@ clean_taxonomic_names <- function(raw_input_fasta, checklist_path, output_clean_
 #'
 #' Re-estimates positional homology alignments (`MAFFT`) across curated locus FASTA files,
 #' performs alignment quality masking with `DECIPHER`, filters low-occupancy sequences,
-#' and generates comprehensive alignment statistics.
+#' and writes alignment statistics.
 #'
 #' @param input_dir Character. Directory containing curated locus FASTA files (e.g., `4_Cleaned/cleaned_markers_joint` or `4_Cleaned/cleaned_markers_ingroup`).
 #' @param output_fasta_dir Character. Directory path to save output realigned FASTA sequence files and QC logs.
@@ -843,7 +837,7 @@ clean_taxonomic_names <- function(raw_input_fasta, checklist_path, output_clean_
 #' @param preserve_iupac Logical. Retain IUPAC ambiguity codes instead of collapsing them to `N` before realignment. Defaults to `TRUE`, matching `run_alignment_pipeline()`; see that function for the rationale.
 #' @param rooting_pattern Character or `NULL`. Regular expression identifying the terminals the tree will be rooted on. It exempts nothing. Any matching terminal removed by the occupancy filters is named in a warning and flagged in `LOG_SEQ_FILTER_<marker>.csv`. A filter that deletes the rooting outgroup must say so at the moment it does it, not four modules downstream: the five *Portulaca* sequences of `trnL_trnF`, 297 bp against a threshold of about 353, were removed silently and the branch subtending the outgroup collapsed from roughly 600 expected substitutions to 0.03. Defaults to `NULL`.
 #' @param protect_pattern Character or `NULL`. Regular expression matched against sequence names; matching terminals that carry at least one non-gap character are retained regardless of the occupancy filters. Intended as a last-resort safeguard for rooting terminals whose sequences are legitimately short (for example `"^(Anacampseros|Grahamia|Talinopsis|Portulaca)_"`). Defaults to `NULL` (no exemption).
-#' @param protect_markers Character vector or `NULL`. Names of the markers, as they appear in `input_dir` without the file extension, in which `protect_pattern` is honoured. `NULL`, the default, applies the exemption to every marker. Naming markers restricts it to the loci where a short outgroup sequence is worth its gap cost, instead of retaining every fragment of every terminal across the whole matrix: in the August 2026 dataset only `trnL_trnF` lost rooting terminals, and only there does the exemption buy anything.
+#' @param protect_markers Character vector or `NULL`. Names of the markers, as they appear in `input_dir` without the file extension, in which `protect_pattern` is honored. `NULL`, the default, applies the exemption to every marker. Naming markers restricts it to the loci where a short outgroup sequence is worth its gap cost, instead of retaining every fragment of every terminal across the whole matrix: in the August 2026 dataset only `trnL_trnF` lost rooting terminals, and only there does the exemption buy anything.
 #' @param mafft_exec Character. System command or full path to the executable `MAFFT` binary, as in [run_alignment_pipeline()]. A binary configured for Stage 2 has to be configurable for Stage 5 as well, or the two stages of one run align with different versions. Defaults to `"mafft"`.
 #' @return A data frame containing compiled alignment summary statistics across all processed markers.
 #' @details
@@ -853,7 +847,7 @@ clean_taxonomic_names <- function(raw_input_fasta, checklist_path, output_clean_
 #' and disappear from the supermatrix. Passing `mask_alignment_regions = FALSE` for the outgroup in
 #' Stage 2 so that masking happens only once, jointly, at this stage, is preferable to relaxing
 #' these thresholds or resorting to `protect_pattern`, because retaining very short sequences
-#' inflates the gap fraction of the final supermatrix and can destabilise the affected terminals.
+#' inflates the gap fraction of the final supermatrix and can destabilize the affected terminals.
 #' @references
 #' Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7:
 #' Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772–780.

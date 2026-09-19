@@ -30,7 +30,7 @@ calculate_temporal_bootstraps(
 
 \item{bs_trees}{Integer. Total number of temporal bootstrap trees to generate. Defaults to \code{500}.}
 
-\item{outgroup}{Character vector of terminals passed to \code{RAxML-NG --outgroup}, or \code{NULL} (default); multiple terminals are joined with commas. \code{RAxML-NG} writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by \code{automate_treePL()} via \code{ape::root(..., resolve.root = TRUE)}. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with \code{resolve_rooting_outgroup()} rather than naming a terminal by hand.}
+\item{outgroup}{Character vector of terminals passed to \code{RAxML-NG --outgroup}, or \code{NULL} (default); multiple terminals are joined with commas. \code{RAxML-NG} writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by \code{automate_treePL()} via \code{ape::root(..., resolve.root = TRUE)}. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with \code{resolve_rooting_outgroup()}; do not name a terminal by hand.}
 
 \item{seed}{Integer. Random seed for reproducible temporal bootstrap initialization. Defaults to \code{NULL} (random).}
 
@@ -38,7 +38,7 @@ calculate_temporal_bootstraps(
 
 \item{workers}{Integer or NULL. Number of parallel tree search workers. If \code{NULL}, auto-configured. Defaults to \code{NULL}.}
 
-\item{blopt}{Character. Branch length optimization method (\code{"nr_safe"} or \code{"nr_fast"}). Defaults to \code{"nr_safe"} for robust numerical convergence across partitioned alignments.}
+\item{blopt}{Character. Branch length optimization method (\code{"nr_safe"} or \code{"nr_fast"}). Defaults to \code{"nr_safe"}, the more conservative of the two.}
 
 \item{output_dir}{Character. Directory path to save output temporal bootstrap trees. Defaults to \code{dirname(aln_file)}.}
 

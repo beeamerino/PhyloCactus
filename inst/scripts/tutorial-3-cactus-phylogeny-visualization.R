@@ -1,10 +1,9 @@
 # -------------------------------------------------------------
-# PhyloCactus: Tutorial 3 - Phylogenetics Pipeline: Data Visualization and IUCN Summaries
+# PhyloCactus: Tutorial 3. Visualization and Metadata Integration
 # -------------------------------------------------------------
-# This script covers Stages 11 and 12:
-# Data Visualization, IUCN Enrichment, and Manuscript Figures.
-# It assumes you have already run Tutorial 1 and Tutorial 2 (up to Stage 10) and
-# your working directory is set to the tutorial folder.
+# Modules 11 and 12: taxonomic reconciliation, IUCN metadata, and figures.
+# Requires the outputs of Tutorials 1 and 2 (Modules 1 to 10). The working
+# directory must be the tutorial folder.
 # -------------------------------------------------------------
 
 # ============================================================
@@ -27,10 +26,10 @@ tutorial_dir <- "~/Desktop/PhyloCactus_Tutorial"
 setwd(tutorial_dir)
 
 # ============================================================
-# Stage 11: Integrating Biological Metadata and Evaluating Hypothesis Visualization
+# Module 11: Taxonomic Reconciliation and IUCN Metadata
 # ============================================================
 cat("\n=======================================================\n")
-cat("Stage 11: Integrating Biological Metadata and Evaluating Hypothesis Visualization\n")
+cat("Module 11: Taxonomic Reconciliation and IUCN Metadata\n")
 cat("=======================================================\n")
 
 # Create Output Directory
@@ -50,7 +49,7 @@ marker_ranges_file <- "6_Concatenated/final_tables/TABLE_marker_ranges.tsv"
 accepted_list_file <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
 constraints_csv_path <- system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus")
 
-# Tree outputs from Stages 9 and 10
+# Tree outputs from Modules 9 and 10
 supp_tree_file <- if (file.exists("7_Phylogenetics/cactus_support.raxml.support")) {
   "7_Phylogenetics/cactus_support.raxml.support"
 } else {
@@ -81,7 +80,7 @@ if (grepl("\\.xlsx?$", accepted_list_file, ignore.case = TRUE)) {
   if (!"family_sheet" %in% names(accepted_list)) accepted_list$family_sheet <- "Cactaceae"
 }
 
-# Normalization helper ensuring perfect match with molecular alignment keys
+# Normalize names to the format of the alignment keys
 normalize_species <- function(x) {
   x |>
     stringr::str_replace_all("\u00d7", "") |>
@@ -262,11 +261,11 @@ theme_phylocactus <- function(base_size = 12, base_family = "") {
 }
 
 # ============================================================
-# FIGURES: SEQUENTIAL SCIENTIFIC PRESENTATION (Figures 1 to 17)
+# Module 12: FIGURES 1 TO 17
 # ============================================================
 
 # -------------------------------------------------------------
-# Part 1: Molecular Dataset and Alignment Properties (Figures 1 - 3)
+# Part 1: Molecular dataset (Figures 1 to 3)
 # -------------------------------------------------------------
 # FIGURE 1: Marker Coverage Across Species
 message("Rendering Figure 1 (Marker Coverage)...")
@@ -311,7 +310,7 @@ p3 <- ggplot(heatmap_data, aes(x = marker, y = fct_rev(species), fill = present)
 ggsave("9_Visualization/figures/Figure_3_marker_heatmap.pdf", p3, width = 8, height = 14)
 
 # -------------------------------------------------------------
-# Part 2: Supermatrix Concatenation Structure (Figures 4 - 5)
+# Part 2: Supermatrix (Figures 4 and 5)
 # -------------------------------------------------------------
 # FIGURE 4: Supermatrix Structure
 message("Rendering Figure 4 (Supermatrix Structure)...")
@@ -337,7 +336,7 @@ if ("parsimony_informative" %in% names(marker_stats)) {
 }
 
 # -------------------------------------------------------------
-# Part 3: Inferred Phylogeny and Divergence Timescale (Figures 6 - 9)
+# Part 3: Tree and chronogram (Figures 6 to 9)
 # -------------------------------------------------------------
 # FIGURE 6: Maximum-Likelihood Tree with Bootstrap Support (FBP)
 message("Rendering Figure 6 (maximum-likelihood tree with FBP bootstrap support)...")
@@ -370,8 +369,8 @@ if (file.exists(supp_tree_file)) {
     max_raw <- max(suppressWarnings(as.numeric(ml_tree$node.label)), na.rm = TRUE)
     is_proportion <- !is.na(max_raw) && max_raw <= 1.0
 
-    # Identify topologically constrained nodes (cactus_constraints.tree)
-    # to avoid presenting algorithmic constraints as empirical bootstrap support
+    # Nodes fixed by the constraint tree (cactus_constraints.tree) carry no
+    # FBP value and are labeled as constrained
     constraint_tree_file <- file.path(tutorial_dir, "7_Phylogenetics/cactus_constraints.tree")
     constrained_nodes_vec <- integer(0)
     if (file.exists(constraint_tree_file) && nzchar(constraint_tree_file)) {
@@ -416,7 +415,7 @@ if (file.exists(supp_tree_file)) {
 
     ggsave("9_Visualization/figures/Figure_6_ML_Tree.pdf", p6, width = 8.5, height = 11)
 
-    # FIGURE 7: Extended Constrained ML Phylogeny (A0 Poster)
+    # FIGURE 7: Full-size maximum-likelihood tree (36 x 48 in)
     ML_SUPP_LAYER_SPECS <- tibble::tribble(
       ~reg_name, ~fontsize, ~barsize, ~offset, ~offset_text, ~fontface, ~sort_desc, ~angle, ~align,
       "level_4_supp", 6, 0.60, 0.030, 0.0038, "plain", TRUE, 0, TRUE,
@@ -481,7 +480,7 @@ if (file.exists(chrono_file)) {
       
     ggsave("9_Visualization/figures/Figure_8_Chronogram.pdf", p8, width = 8.5, height = 11)
 
-    # FIGURE 9: Extended Time-Calibrated Chronogram (A0 Poster)
+    # FIGURE 9: Full-size chronogram (36 x 48 in)
     CHRONO_SUPP_LAYER_SPECS <- tibble::tribble(
       ~reg_name, ~fontsize, ~barsize, ~offset, ~offset_text, ~fontface, ~sort_desc, ~angle, ~align,
       "level_4_supp", 6, 0.60, 0.030, 0.0038, "plain", TRUE, 0, TRUE,
@@ -506,7 +505,7 @@ if (file.exists(chrono_file)) {
 }
 
 # -------------------------------------------------------------
-# Part 4: Taxonomic Reconciliation and Species Cadastre (Figure 10)
+# Part 4: Species accounting (Figure 10)
 # -------------------------------------------------------------
 # FIGURE 10: Species Composition by Pipeline Status
 message("Rendering Figure 10 (Species Composition across Pipeline)...")
@@ -525,7 +524,7 @@ p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(s
 ggsave("9_Visualization/figures/Figure_10_species_composition.pdf", p10, width = 7, height = 4.5)
 
 # -------------------------------------------------------------
-# Part 5: IUCN Conservation and Macroevolutionary Syntheses (Figures 11 - 17)
+# Part 5: Conservation (Figures 11 to 17)
 # -------------------------------------------------------------
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   TABLE_iucn_categories <- species_summary_iucn %>%
@@ -563,7 +562,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     )
   suppressWarnings(ggsave("9_Visualization/figures/Figure_12_completeness_vs_iucn.pdf", p12, width = 7, height = 5))
 
-  # FIGURE 13: Conservation Prioritization of Unsampled Gaps by Genus
+  # FIGURE 13: Threatened species without sequence data by genus
   message("Rendering Figure 13 (Conservation Prioritization Gaps)...")
   plot_gaps_genus <- TABLE_conservation_prioritization_gaps %>%
     count(genus, iucn_category) %>%

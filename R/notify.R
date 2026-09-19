@@ -76,7 +76,7 @@
 #' Send a Run Notification by Email
 #'
 #' Sends a short message when a long analysis ends, so that a run measured in hours does not have to
-#' be watched. Intended for the steps this package runs on a local machine rather than on a cluster,
+#' be watched. Intended for the steps this package runs on a local machine, not on a cluster,
 #' where the scheduler already mails its own notifications.
 #'
 #' **This function never fails a run.** Every reason it might not send, a missing address, a missing

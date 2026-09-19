@@ -189,10 +189,10 @@ test_that("resolve_rooting_outgroup() matches Talinaceae terminals by default", 
 test_that("the default rooting set is a clade of the distributed tree", {
   skip_if_not_installed("ape")
 
-  # This is what the old default failed to be. Portulacaceae, Anacampserotaceae and Talinaceae do
-  # not form a clade in this topology: Portulaca sits with Anacampserotaceae, and the union of the
-  # three is the whole outgroup, so root_on_clade() had no monophyletic group to place the root on.
-  # Talinaceae does form one, and it is the family that subtends the root.
+  # This is what the old default failed to be. It spanned Portulaca and Talinaceae, which Cactaceae
+  # separates in this topology (Portulaca is sister to Anacampserotaceae), so root_on_clade() had no
+  # monophyletic group to place the root on. Talinaceae does form one, and it is the family that
+  # subtends the root.
   tree_path <- system.file("extdata", "phylocactus_ml_tree.tree", package = "PhyloCactus")
   skip_if(tree_path == "", "requires the distributed ML tree")
 

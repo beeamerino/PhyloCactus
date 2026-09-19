@@ -5,16 +5,13 @@
 \title{DNA Barcoding Evaluation (Section Under Construction)}
 \description{
 Placeholder for the molecular diagnostic section of \code{PhyloCactus}. The analytical
-strategy for DNA barcoding in Cactaceae has not been settled, so no implementation is
-shipped: the previous routines were withdrawn in v0.4.2 rather than left in place as
-working code whose results could be mistaken for validated output.
+strategy for DNA barcoding in Cactaceae has not been defined, so the section contains no
+implementation.
 }
 \details{
 The scope of the section, the decisions already taken, and the questions that remain
 open are set out in the manifest, \code{vignette("tutorial-5-cactus-phylogeny-barcoding")}.
-Single-locus gene tree inference is unaffected and remains available through
-\code{\link[=infer_gene_trees]{infer_gene_trees()}}, which is documented with the phylogenetic inference module.
 }
 \seealso{
-\code{\link[=evaluate_dna_barcoding]{evaluate_dna_barcoding()}}, \code{\link[=infer_gene_trees]{infer_gene_trees()}}
+\code{\link[=evaluate_dna_barcoding]{evaluate_dna_barcoding()}}
 }

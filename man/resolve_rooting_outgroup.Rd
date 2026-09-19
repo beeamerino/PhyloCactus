@@ -35,7 +35,7 @@ clade paraphyletic in the final tree and collapses its crown node onto the root.
 addressed by the MRCA of that clade then silently lands on the root instead. Passing the whole
 clade places the root on its stem edge and avoids both consequences.
 
-The trailing underscore in the default pattern is required rather than stylistic. Terminals use
+The trailing underscore in the default pattern is required. Terminals use
 the underscore as binomial separator, so a bare \code{"^Portulaca"} also matches \emph{Portulacaria}
 (Didiereaceae), which is neither Portulacaceae nor part of the intended rooting sample. The same
 reasoning is applied in \code{run_marker_screening()} and \code{run_concatenation_pipeline()}.

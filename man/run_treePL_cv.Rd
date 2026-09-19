@@ -12,7 +12,7 @@ run_treePL_cv(
   prime_rule = c("lowest", "modal"),
   cv_method = c("randomcv", "cv"),
   cvstart = 1000,
-  cvstop = 1e-08,
+  cvstop = 1e-14,
   cv_nthreads = 1L,
   treepl_bin = "treePL",
   work_dir = NULL,
@@ -34,27 +34,28 @@ is stable in \code{n_prime}: more repeats sharpen an estimate of the most freque
 Under \code{"lowest"} it is not, because the minimum of a sample can only fall as the sample grows,
 so a hundred repeats will select lower parameters than ten of the same runs would. Maurin's
 instruction is to repeat the priming analysis a few times and take the lowest, which is what
-the default pairs with;
-the shell script's 100 was chosen for a rule that was stable under it. Raising \code{n_prime} while
+the default pairs with. Raising \code{n_prime} while
 keeping \code{"lowest"} is a change of analysis, not a refinement of one, and it should be recorded
 as such.}
 
-\item{prime_rule}{\code{"lowest"} (Maurin) or \code{"modal"} (the shell script's behaviour). See the note
+\item{prime_rule}{\code{"lowest"} (Maurin) or \code{"modal"} (most frequent combination). See the note
 on \code{n_prime} above before changing either.}
 
 \item{cv_method}{\code{"randomcv"} (Maurin's recommendation) or \code{"cv"} (leave-one-out).}
 
-\item{cvstart, cvstop}{Ends of the smoothing grid. The defaults span 1e+03 down to 1e-08, low
-enough to contain the 1e-06 to 1e-08 range Maurin reports for a tree with rescaled branch
-lengths, which the shell script's floor of 1e-04 was not.}
+\item{cvstart, cvstop}{Ends of the smoothing grid, evaluated at one value per order of magnitude.
+The defaults span 1e+03 down to 1e-14. Maurin (2020) reports optima between 1e-06 and 1e-08
+for trees whose branch lengths are rescaled as this package rescales them; the reference
+Cactaceae dataset reaches a plateau below 1e-06, which only a grid extending well below that
+range can show. See the section on curve shapes below.}
 
 \item{cv_nthreads}{Integer. Number of threads for the cross-validation stage. Defaults to \code{1L}.
-Evaluating cross-validation replicates across OpenMP threads (\code{nthreads > 1}) introduces race
-conditions because \code{treePL}'s simulated annealing routine calls the non-reentrant C \code{rand()}
-concurrently and combines chi-square sums with non-associative floating-point reduction. This
-causes cross-validation curves and selected smoothing values to vary widely between identical
-runs even when \code{seed} is fixed. Setting \code{cv_nthreads = 1L} restores bit-for-bit determinism
-at a negligible computational cost (~4\% difference in wall-clock time).}
+\code{treePL} evaluates cross-validation replicates in an OpenMP loop, inside which simulated
+annealing calls the non-reentrant C \code{rand()}; the chi-square sum is also accumulated through an
+OpenMP reduction, whose order may vary between runs. With more than one thread, two runs with
+the same \code{seed} return different cross-validation curves and can select different smoothing
+values. With one thread the curve is reproducible for a given \code{seed}, at a cost of about 4\% in
+wall-clock time on the reference dataset.}
 
 \item{treepl_bin}{Name or path of the \code{treePL} binary.}
 
@@ -64,40 +65,45 @@ configuration, so every intermediate lands here.}
 \item{quiet}{Suppress the per-stage progress messages.}
 }
 \value{
-Invisibly, a list with \code{smoothing}, \code{cv_table}, \code{prime_lines}, \code{primes}, \code{tree_file}
-(the chronogram written) and the paths of the three configurations.
+Invisibly, a list with \code{smoothing}, \code{cv_table}, \code{cv_at_edge}, \code{cv_shape},
+\code{prime_lines}, \code{primes}, \code{tree_file} (the chronogram written) and the paths of the three
+configurations.
 }
 \description{
 Runs the three stages of the \code{treePL} protocol of Maurin (2020) (priming, cross-validation and
-dating) from R, and returns what each stage chose. It replaces the shell wrapper this package
-shipped until 2026-09-02.
+dating) from R, and returns what each stage chose.
 }
-\section{Why this exists in R}{
-
-The shell script this replaces (github.com/tongjial/treepl_wrapper) carries no licence, so it
-could not be redistributed inside a GPL-3 package. It also wrote \verb{smoothing = } into the final
-configuration, a keyword \code{treePL} does not recognise: the line was discarded without a message
-and every chronogram produced by this project before 2026-09-02 was dated at the built-in
-default of 10, with the cross-validation that precedes it having no effect on any result.
-Writing the configuration here puts that keyword under \code{.verify_treepl_smoothing()}, which
-compares what was asked against what \code{treePL}'s own log reports it used.
-}
-
-\section{Where this follows the protocol and the wrapper did not}{
+\section{Choices relative to the protocol}{
 
 \itemize{
 \item \strong{Priming selection.} Maurin instructs repeating the priming analysis and taking the lines
-with the \emph{lowest} \code{opt} and \code{optad}. The shell script took the \emph{most frequent} combination
-across repeats. \code{prime_rule} defaults to Maurin's rule; \code{"modal"} reproduces the old behaviour.
+with the \emph{lowest} \code{opt} and \code{optad}. \code{prime_rule} defaults to this rule; \code{"modal"} takes the
+most frequent combination across repeats instead.
 \item \strong{Cross-validation method.} Maurin recommends \code{randomcv}, random subsample and replicate
 cross-validation, over the leave-one-out \code{cv}, as "much faster and may give more stable
-results". The shell script hard-coded \code{cv}. \code{cv_method} defaults to \code{randomcv}.
-\item \strong{The grid.} The shell script hard-coded a grid from 1e-04 to 1e+04. Both ends are arguments
-here, and a minimum landing on either end is reported rather than returned as if it were an
-optimum. See \code{.select_cv_smoothing()}.
-\item \strong{Parsing.} The priming block is read by keyword rather than by taking the last character of
-each line and reassembling positionally, which misaligns whenever an optional \code{moredetail}
-flag is absent.
+results". \code{cv_method} defaults to \code{randomcv}.
+\item \strong{The grid.} Both ends of the smoothing grid are arguments, and a minimum on either end is
+reported as such, not returned as an optimum. See the section on curve shapes below.
+\item \strong{Parsing.} The priming block is read by keyword, so an absent optional \code{moredetail} flag
+does not shift the values.
+\item \strong{Smoothing check.} The smoothing that \code{treePL} reports in its log is compared with the value
+written to the configuration, and the run stops if they differ.
+}
+}
+
+\section{Shape of the cross-validation curve}{
+
+The selected smoothing value is the one with the lowest chi-square. \code{cv_shape} reports what that
+value means, and a message or warning states it when the function runs:
+\itemize{
+\item \code{"interior"}: the curve turns upward inside the grid; the selected value is an optimum.
+\item \code{"edge"}: the minimum is the first or last value of the grid and the curve is still changing
+there. The optimum most likely lies beyond the grid: extend \code{cvstart} or \code{cvstop} and repeat
+before interpreting any age (Maurin, 2020). Reported as a warning.
+\item \code{"plateau"}: the three values at the end of the grid where the curve flattens differ by less
+than 1\% in chi-square and lie within 1\% of the minimum. Values on the plateau fit the data about
+equally well, so the selected value is a nominal choice among them; report node ages across the
+plateau with \code{\link[=report_smoothing_sensitivity]{report_smoothing_sensitivity()}}. Reported as a message.
 }
 }
 

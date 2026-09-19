@@ -27,25 +27,20 @@ tutorial_dir <- path.expand("~/Desktop/PhyloCactus_Tutorial")
 
 ## Abstract
 
-This tutorial represents the final stage of the core phylogenetic reconstruction workflow implemented in **`PhyloCactus`**, focusing on the integration, visualization, and biological interpretation of the inferred evolutionary framework.
-Following the assembly of the multilocus supermatrix, maximum-likelihood inference, branch support assessment, and divergence time estimation described in [Tutorial 1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) and [Tutorial 2](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html), this module transforms the resulting phylogenetic outputs into an integrative evolutionary resource.
+This tutorial covers the last stage of the core workflow: integration of species metadata, figures of the phylogenetic products, and summaries of conservation status.
+It uses the supermatrix, maximum-likelihood tree, bootstrap support values and chronogram produced in [Tutorial 1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) and [Tutorial 2](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
 
-In **Module 11**, phylogenetic results are enriched with external biological information by integrating species-level metadata and conservation assessments from the **IUCN Red List**.
-This step generates a comprehensive evolutionary registry that links molecular sampling effort, taxonomic validation, distributional information, and conservation status.
-These integrated data provide the foundation for evaluating biases in molecular representation, identifying threatened evolutionary lineages, and exploring patterns of conservation vulnerability across the cactus tree of life.
+**Module 11** reconciles the species in the supermatrix with the accepted checklist of Cactaceae and retrieves species-level assessments from the IUCN Red List.
+The result is one table that records, for each species, its taxonomic status, molecular sampling, placement in the tree, distribution and conservation category.
 
-In **Module 12**, the final phylogenetic products and molecular datasets are visualized and synthesized for downstream comparative analyses.
-The sequence dataset and concatenated supermatrix are evaluated for locus coverage and informativeness, while the maximum-likelihood topology and time-calibrated chronogram are displayed with branch support values (FBP) and divergence time uncertainty intervals.
-Finally, taxonomic reconciliation and macroevolutionary patterns across IUCN conservation categories, endemism, and ecological threats are synthesized into publication-ready visual summaries.
-
-Together, this tutorial completes the construction of a reproducible phylogenetic framework for **Cactaceae**, integrating evolutionary history, temporal diversification, and conservation information into a unified analytical resource suitable for macroevolutionary, biogeographic, and conservation studies.
+**Module 12** produces seventeen figures in five groups: coverage of the molecular dataset, structure of the supermatrix, the tree and the chronogram, the species accounting across pipeline stages, and summaries of IUCN categories, endemism, threats and habitats.
 
 ## Complete Pipeline Execution Workflow
 
 ### Setup: Creating a Clean Workspace
 
-Before proceeding, ensure you have the required packages installed and set up.
-We rely on the `rredlist` package to interact securely with the IUCN Red List API.
+Install the required packages before running this module.
+IUCN queries use the `rredlist` package.
 
 To install the required dependencies:
 
@@ -55,11 +50,11 @@ new_pkgs <- required_pkgs[!(required_pkgs %in% installed.packages()[,"Package"])
 if(length(new_pkgs)) install.packages(new_pkgs)
 ```
 
-**IUCN Red List API Access:** To retrieve threat categories automatically, generate a free API token from the [IUCN Red List API Token Generation Page](https://apiv3.iucnredlist.org/api/v3/token), submit the request form, and store the resulting key in your `.Renviron` file using `usethis::edit_r_environ()` under the variable `IUCN_REDLIST_KEY="your_api_key"`.
+**IUCN Red List API token.** The IUCN queries require a personal API token. Run `rredlist::rl_use_iucn()` to open the registration page, store the token in `.Renviron` (opened with `usethis::edit_r_environ()`) as `IUCN_REDLIST_KEY="your_api_key"`, and restart R.
 
 ### Data Setup & Pre-processing
 
-To quickly run the analyses in this module, you can copy the entire executable script to your tutorial directory:
+To run the module as a script, copy the executable script to the tutorial directory:
 
 ``` r
 tutorial_dir <- path.expand("~/Desktop/PhyloCactus_Tutorial")
@@ -74,26 +69,21 @@ file.copy(
 
 ### Module 11: Taxonomic Reconciliation and IUCN Metadata Enrichment
 
-This vignette assumes that you have completed [Tutorial 2: Phylogenetic Inference and Divergence Time Estimation](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
-Following the completion of maximum-likelihood phylogenetic inference, branch support estimation, and divergence time reconstruction, this module focuses on enriching the resulting evolutionary framework with biological metadata and generating comprehensive visual summaries of the final multilocus dataset.
+This module requires the outputs of [Tutorial 2: Phylogenetic Inference and Divergence Time Estimation](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
 
-#### The Scientific Importance of an Integrative Evolutionary Registry
+#### Species Registry
 
-At this stage, `PhyloCactus` generates an integrative phylogenetic and conservation registry that links evolutionary relationships with complementary biological information, including taxonomic validation, geographic distribution, habitat associations, IUCN conservation assessments, and molecular sampling coverage.
+The species registry links each accepted species to its molecular sampling, its placement in the tree and its IUCN assessment.
+With these data, threatened species without sequence data can be listed, and the molecular sampling of threatened and non-threatened species can be compared.
+The registry can also serve as input for phylogeny-based conservation metrics such as EDGE scores (Isaac *et al*. 2007), which are not computed in this tutorial.
 
-The family **Cactaceae** contains numerous geographically restricted endemics and highly vulnerable evolutionary lineages affected by habitat loss, anthropogenic disturbance, and climate-driven environmental change.
+Names are reconciled against the Cactaceae checklist of Caryophyllales.org (Korotkova *et al*. 2021; export of 1 July 2026), which lists 1,965 accepted species.
+With 38 outgroup species from Anacampserotaceae, Portulacaceae and Talinaceae, the registry contains 2,003 species.
+The supermatrix includes 1,060 of them (1,022 ingroup, 38 outgroup).
+The maximum-likelihood tree and the chronogram have 1,024 tips (986 ingroup, 38 outgroup), because `RAxML-NG` removed 36 ingroup species whose sequences were identical to those of another species.
+The other 943 accepted species have no sequence data, and 134 of them are listed as threatened (CR, EN or VU) by the IUCN Red List.
 
-By integrating conservation assessments directly with phylogenetic relationships, this framework enables the identification of **Evolutionarily Distinct and Globally Endangered (EDGE)** lineages, the evaluation of conservation gaps across evolutionary history, and the detection of biases in current molecular sampling efforts.
-
-Taxonomic reconciliation is conducted against the dynamic Cactaceae species checklist published by the Caryophyllales.org initiative (Korotkova *et al*. 2021), comprising 1,965 accepted species.
-When combined with 38 outgroup species from Anacampserotaceae, Portulacaceae, and Talinaceae, the total taxonomic evaluation universe encompasses 2,003 taxa.
-Across the pipeline, 1,060 species possess sequence data in the multilocus supermatrix (1,022 ingroup and 38 outgroup), while the inferred maximum-likelihood tree and dated chronogram resolve 1,024 terminal tips (986 ingroup and 38 outgroup).
-Exactly 36 ingroup species were collapsed by `RAxML-NG` due to identical sequence profiles across their sampled loci.
-Crucially, the 943 accepted Cactaceae species lacking sequence data represent critical gaps for biodiversity inventory, among which 134 are categorized as threatened (CR, EN, VU) by the IUCN Red List.
-
-Because reconciling taxonomic identities, molecular datasets, and conservation metadata requires extensive data harmonization, `PhyloCactus` provides dedicated API wrappers (`get_iucn_data(sp_name)`) to facilitate reproducible retrieval and integration of species-level information from the IUCN Red List database.
-
-Now, let's load our libraries and prepare the dataset outputs from previous **Modules**.
+Load the libraries and the outputs of the previous modules:
 
 ```{r, eval = FALSE}
 # ============================================================
@@ -125,7 +115,7 @@ marker_ranges_file <- "6_Concatenated/final_tables/TABLE_marker_ranges.tsv"
 accepted_list_file <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
 constraints_csv_path <- system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus")
 
-# Tree outputs from Stages 9 and 10
+# Tree outputs from Modules 9 and 10
 supp_tree_file <- if (file.exists("7_Phylogenetics/cactus_support.raxml.support")) {
   "7_Phylogenetics/cactus_support.raxml.support"
 } else {
@@ -156,7 +146,7 @@ if (grepl("\\.xlsx?$", accepted_list_file, ignore.case = TRUE)) {
   if (!"family_sheet" %in% names(accepted_list)) accepted_list$family_sheet <- "Cactaceae"
 }
 
-# Normalization helper ensuring perfect match with molecular alignment keys
+# Normalize names to the format of the alignment keys
 normalize_species <- function(x) {
   x |>
     stringr::str_replace_all("\u00d7", "") |>
@@ -239,17 +229,15 @@ species_summary <- species_summary %>%
 
 #### IUCN Metadata Enrichment
 
-The integration of conservation information represents an essential step for connecting phylogenetic reconstruction with biological interpretation.
-In this module, `PhyloCactus` retrieves species-level conservation assessments from the **IUCN Red List database** through the `rredlist` API interface and integrates these records with the final phylogenetic dataset.
+`get_iucn_data()` retrieves the latest IUCN assessment of one species through the `rredlist` interface to the IUCN Red List API.
+It returns the category, criteria, population trend, countries of occurrence, endemism, habitats, threats, and use and trade.
+The query covers the 1,965 checklist species and the 38 outgroups.
+All ingroup names in the supermatrix match the checklist, so every query uses an accepted name.
 
-The enrichment process links each taxon included in the molecular framework with standardized conservation attributes, including IUCN category, assessment status, endemic distribution information, habitat associations, and documented threats.
-This approach allows researchers to evaluate whether evolutionary diversity is adequately represented within conservation assessments and to identify potential mismatches between phylogenetic distinctiveness and extinction risk.
-
-Because taxonomic discrepancies frequently occur between molecular datasets and external biodiversity databases, the workflow first performs taxonomic reconciliation against the accepted species checklist (Korotkova *et al*. 2021) before retrieving conservation information.
-Only validated species-level names are queried against the IUCN API, reducing false matches and ensuring that conservation metadata are associated with the appropriate evolutionary units.
-
-The resulting enriched table (`TABLE_species_all_data.csv`) represents the integrated species registry used throughout the visualization section.
-This resource combines phylogenetic placement, molecular sampling information, taxonomic validation, and conservation attributes into a single reproducible dataset for downstream comparative analyses.
+The output table (`TABLE_species_all_data.csv`) is used by all figures in Module 12.
+The chunk also writes `TABLE_conservation_prioritization_gaps.csv`, which lists the threatened species without sequence data.
+If the table already exists, it is read from disk and the API is not queried.
+IUCN assessments change between Red List versions; record the version used with `rredlist::rl_version()`.
 
 ```{r, eval = FALSE}
 # ============================================================
@@ -296,17 +284,15 @@ if (!has_data) {
 }
 ```
 
-### Module 12: Comprehensive Data Visualization and Macroevolutionary Summaries
+### Module 12: Figures and Summary Tables
 
-Following the completion of maximum-likelihood inference, divergence time estimation, and biological metadata integration, this module presents the complete analytical synthesis of `PhyloCactus`.
+Module 12 produces seventeen figures in five groups:
 
-To establish a clear scientific progression, the visualizations are structured into five consecutive analytical parts:
-
-1. **Molecular Dataset and Alignment Properties (Figures 1 to 3)**: Taxonomic marker representation, locus completeness per species, and locus occupancy heatmaps.
-2. **Supermatrix Concatenation Structure (Figures 4 to 5)**: Partition architecture, boundary coordinates, and parsimony-informative site contributions.
-3. **Inferred Phylogeny and Divergence Timescale (Figures 6 to 9)**: Maximum-likelihood topology with Felsenstein's Bootstrap Proportions (FBP), high-resolution uncollapsed A0 poster, time-calibrated chronogram with 95% HPD intervals, and extended chronogram poster.
-4. **Taxonomic Reconciliation and Species Cadastre (Figure 10)**: Global species accounting comparing the taxonomic checklist, supermatrix sampling, collapsed duplicates, and phylogenetic placement.
-5. **IUCN Conservation and Macroevolutionary Syntheses (Figures 11 to 17)**: Extinction risk distributions, molecular sampling completeness across threat categories, conservation prioritization of unsampled gaps, national endemism rankings, threat profiles, and ecological habitat associations.
+1. **Molecular dataset (Figures 1 to 3):** species per locus, loci per species, and locus occupancy.
+2. **Supermatrix (Figures 4 and 5):** partition coordinates and parsimony-informative sites per locus.
+3. **Tree and chronogram (Figures 6 to 9):** maximum-likelihood tree with Felsenstein bootstrap proportions (FBP), full-size tree, chronogram with 95% HPD intervals, and full-size chronogram.
+4. **Species accounting (Figure 10):** status of every species in the registry across pipeline stages.
+5. **Conservation (Figures 11 to 17):** IUCN categories, molecular completeness by category, threatened species without sequences, national endemism, threats and habitats.
 
 ```{r, eval = has_data}
 library(PhyloCactus)
@@ -397,7 +383,7 @@ knitr::kable(TABLE_dataset_summary)
 
 #### Figure 1: Marker Coverage Across Species
 
-This figure summarizes the taxonomic representation of each molecular marker retained in the final dataset by quantifying the number of species with available sequence data across locus partitions.
+Number of species with sequence data for each locus in the final dataset.
 
 ```{r marker_coverage, eval = has_data}
 p1 <- ggplot(marker_stats, aes(x = reorder(marker, n_taxa), y = n_taxa)) +
@@ -415,7 +401,7 @@ p1
 
 #### Figure 2: Distribution of Marker Completeness
 
-This histogram illustrates the distribution of molecular marker completeness across taxa resolved in the maximum-likelihood tree, indicating the number of retained loci per species following sequence filtering and quality control.
+Number of loci per species for the tips of the maximum-likelihood tree.
 
 ```{r marker_completeness, eval = has_data}
 if ("retained_markers" %in% names(species_summary_iucn)) {
@@ -434,7 +420,7 @@ if ("retained_markers" %in% names(species_summary_iucn)) {
 
 #### Figure 3: Marker Presence Heatmap
 
-This heatmap provides an overview of locus occupancy across all species resolved in the phylogeny, illustrating patterns of data presence and missingness across individual marker partitions.
+Presence or absence of each locus for every species in the tree.
 
 ```{r marker_heatmap, eval = has_data, fig.width = 8, fig.height = 8}
 heatmap_data <- species_summary_iucn %>%
@@ -464,7 +450,7 @@ p3
 
 #### Figure 4: Supermatrix Structure
 
-This figure depicts the linear architecture of the concatenated supermatrix, displaying the start and end nucleotide coordinates for each locus partition.
+Start and end coordinates of each partition in the concatenated supermatrix.
 
 ```{r supermatrix_structure, eval = has_data}
 ranges_file <- file.path(tutorial_dir, "6_Concatenated/final_tables/TABLE_marker_ranges.tsv")
@@ -488,7 +474,7 @@ if (file.exists(ranges_file)) {
 
 #### Figure 5: Marker Informativeness
 
-We evaluate the phylogenetic utility of each partition by plotting the number of parsimony-informative sites against total alignment length.
+Number of parsimony-informative sites against alignment length for each partition.
 
 ```{r marker_informativeness, eval = has_data}
 if ("parsimony_informative" %in% names(marker_stats)) {
@@ -507,14 +493,15 @@ if ("parsimony_informative" %in% names(marker_stats)) {
 
 #### Figure 6: Maximum-Likelihood Tree with Bootstrap Support (FBP)
 
-This plot renders the inferred maximum-likelihood topology annotated with Felsenstein's Bootstrap Proportions (FBP) mapped directly onto internal nodes, alongside major clade demarcation layers.
+Maximum-likelihood tree with FBP values on internal nodes and the major clades marked.
+Nodes fixed by the topological constraint are shown as constrained and carry no FBP value.
 
 ```{r figure_6_ml_tree, eval = has_data, fig.width = 8.5, fig.height = 11, message = FALSE, warning = FALSE}
 library(ggtree)
 library(ape)
 library(tidytree)
 
-# Load support tree from Stage 9
+# Load support tree from Module 9
 supp_tree_file <- file.path(tutorial_dir, "7_Phylogenetics/cactus_support.raxml.support")
 if (!file.exists(supp_tree_file)) {
   supp_tree_file <- file.path(tutorial_dir, "7_Phylogenetics/cactus.raxml.bestTree")
@@ -601,9 +588,9 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
 }
 ```
 
-#### Figure 7: Extended Constrained ML Phylogeny (A0 Poster)
+#### Figure 7: Full-Size Maximum-Likelihood Tree
 
-To examine all 1,024 terminal tips without node compression, this visualization formats the complete topology as an A0-dimension poster, displaying individual species binomials and node-level bootstrap support.
+All 1,024 tips with species names and FBP values, on a 36 × 48 in (91.4 × 121.9 cm) page.
 
 ```{r figure_7_ml_tree_extended, eval = FALSE}
 if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
@@ -629,30 +616,28 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
 }
 ```
 
-For interactive exploration in external phylogenetic software (such as FigTree), the annotated `treedata` object can be exported into Nexus/BEAST format:
+The annotated `treedata` object can be exported in NEXUS format for FigTree or similar programs:
 
 ```{r export_beast_ml, eval = FALSE}
 annotated_treedata <- PhyloCactus::augment_treedata_with_registry(ml_tree_plot, registry)
 treeio::write.beast(annotated_treedata, file = "9_Visualization/figures/annotated_ml_tree.tree")
 ```
 
-> **Note on Extended Tree Poster & Direct Downloads:**
-> Due to its large format dimensions (A0 poster: 36 × 48 inches / 91.4 × 121.9 cm) and 1,024 terminal tips, this extended tree is not rendered inline within this document to maintain browser responsiveness and prevent visual overcrowding.
-> 
-> When executing this workflow locally, the full vector PDF and annotated BEAST tree file are generated directly in your workspace:
-> - Local PDF: `9_Visualization/figures/Figure_7_ML_Tree_Extended.pdf`
-> - Local Tree: `9_Visualization/figures/annotated_ml_tree.tree`
-> 
-> Once the online repository is published on GitHub, these high-resolution assets can be downloaded directly from the repository [`extended_trees/`](https://github.com/beeamerino/PhyloCactus/tree/main/extended_trees) directory:
-> - Direct PDF Download: [`Figure_7_ML_Tree_Extended.pdf`](https://raw.githubusercontent.com/beeamerino/PhyloCactus/main/extended_trees/Figure_7_ML_Tree_Extended.pdf)
-> - Direct Tree Download: [`annotated_ml_tree.tree`](https://raw.githubusercontent.com/beeamerino/PhyloCactus/main/extended_trees/annotated_ml_tree.tree)
+> **Full-size tree files.**
+> Figure 7 is not rendered on this page because of its size.
+> Running the chunk writes two files to the workspace:
+> - `9_Visualization/figures/Figure_7_ML_Tree_Extended.pdf`
+> - `9_Visualization/figures/annotated_ml_tree.tree`
+>
+> The same files are in the [`extended_trees/`](https://github.com/beeamerino/PhyloCactus/tree/master/extended_trees) directory of the repository: [Figure_7_ML_Tree_Extended.pdf](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/Figure_7_ML_Tree_Extended.pdf) and [annotated_ml_tree.tree](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/annotated_ml_tree.tree).
 
 #### Figure 8: Time-Calibrated Chronogram with HPD Intervals
 
-This chronogram displays absolute divergence times estimated via penalized likelihood (`treePL`) and summarized across temporal bootstrap replicates, with node age uncertainty intervals (95% HPD) and a calibrated geological timescale axis.
+Chronogram estimated with penalized likelihood in `treePL`.
+Node bars are 95% HPD intervals summarized from the 100 bootstrap chronograms, and the axis shows geological periods.
 
 ```{r figure_8_chronogram, eval = has_data, fig.width = 8.5, fig.height = 11, message = FALSE, warning = FALSE}
-# Load summary chronogram from Stage 10
+# Load summary chronogram from Module 10
 chrono_file <- file.path(tutorial_dir, "8_Dating/dated_summary_hpd.tree")
 if (!file.exists(chrono_file)) {
   chrono_file <- file.path(tutorial_dir, "8_Dating/BestTree_treePL.tree")
@@ -702,9 +687,9 @@ if (file.exists(chrono_file) && nzchar(chrono_file)) {
 }
 ```
 
-#### Figure 9: Extended Time-Calibrated Chronogram (A0 Poster)
+#### Figure 9: Full-Size Chronogram
 
-This A0-dimension poster presents the uncollapsed temporal chronogram with all 1,024 tip names, divergence time confidence intervals, and geological period boundaries.
+All 1,024 tips with 95% HPD intervals and period boundaries, on a 36 × 48 in (91.4 × 121.9 cm) page.
 
 ```{r figure_9_chronogram_extended, eval = FALSE}
 if (file.exists(chrono_file) && nzchar(chrono_file)) {
@@ -731,27 +716,24 @@ if (file.exists(chrono_file) && nzchar(chrono_file)) {
 }
 ```
 
-For interactive exploration in external phylogenetic software (such as FigTree), the annotated `treedata` object can be exported into Nexus/BEAST format:
+The annotated `treedata` object can be exported in NEXUS format for FigTree or similar programs:
 
 ```{r export_beast_chrono, eval = FALSE}
 annotated_chrono <- PhyloCactus::augment_treedata_with_registry(chrono_beast, registry_chrono)
 treeio::write.beast(annotated_chrono, file = "9_Visualization/figures/annotated_chronogram.tree")
 ```
 
-> **Note on Extended Chronogram Poster & Direct Downloads:**
-> Due to its large format dimensions (A0 poster: 36 × 48 inches / 91.4 × 121.9 cm), 1,024 terminal tips, and node age uncertainty intervals (95% HPD), this extended chronogram is not rendered inline within this document to maintain browser responsiveness.
-> 
-> When executing this workflow locally, the full vector PDF and annotated BEAST chronogram file are generated directly in your workspace:
-> - Local PDF: `9_Visualization/figures/Figure_9_Chronogram_Extended.pdf`
-> - Local Tree: `9_Visualization/figures/annotated_chronogram.tree`
-> 
-> Once the online repository is published on GitHub, these high-resolution assets can be downloaded directly from the repository [`extended_trees/`](https://github.com/beeamerino/PhyloCactus/tree/main/extended_trees) directory:
-> - Direct PDF Download: [`Figure_9_Chronogram_Extended.pdf`](https://raw.githubusercontent.com/beeamerino/PhyloCactus/main/extended_trees/Figure_9_Chronogram_Extended.pdf)
-> - Direct Tree Download: [`annotated_chronogram.tree`](https://raw.githubusercontent.com/beeamerino/PhyloCactus/main/extended_trees/annotated_chronogram.tree)
+> **Full-size chronogram files.**
+> Figure 9 is not rendered on this page because of its size.
+> Running the chunk writes two files to the workspace:
+> - `9_Visualization/figures/Figure_9_Chronogram_Extended.pdf`
+> - `9_Visualization/figures/annotated_chronogram.tree`
+>
+> The same files are in the [`extended_trees/`](https://github.com/beeamerino/PhyloCactus/tree/master/extended_trees) directory of the repository: [Figure_9_Chronogram_Extended.pdf](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/Figure_9_Chronogram_Extended.pdf) and [annotated_chronogram.tree](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/annotated_chronogram.tree).
 
 #### Figure 10: Species Composition
 
-This figure summarizes the methodological composition of the taxonomic universe across pipeline stages, distinguishing taxa that were sampled and dated in the tree (986), sequenced identical duplicates collapsed by `RAxML-NG` (36), unsampled checklist gaps (943), and outgroup reference species (38).
+Status of the 2,003 species in the registry: sampled and dated in the tree (986), sequenced but removed by `RAxML-NG` as identical duplicates (36), accepted species without sequences (943), and outgroups (38).
 
 ```{r figure_10_species_composition, eval = has_data}
 p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(status_pipeline, n), y = n)) +
@@ -771,7 +753,7 @@ p10
 
 #### Figure 11: IUCN Categories
 
-This bar chart summarizes the distribution of IUCN Red List conservation categories among the ingroup species resolved in the final phylogenetic reconstruction.
+Number of ingroup species in the tree in each IUCN Red List category.
 
 ```{r figure_11_iucn_categories, eval = has_data}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
@@ -794,7 +776,8 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 
 #### Figure 12: Molecular Completeness vs. IUCN Category
 
-This plot compares molecular marker completeness across IUCN threat categories for sampled ingroup taxa resolved in the time-calibrated phylogeny, evaluating whether extinction risk correlates with missing molecular data.
+Number of loci per species in each IUCN category, for the ingroup species in the chronogram.
+The figure shows whether threatened species are represented by fewer loci.
 
 ```{r figure_12_completeness_vs_iucn, eval = has_data, fig.width = 7, fig.height = 5}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
@@ -819,10 +802,11 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 }
 ```
 
-#### Figure 13: Conservation Prioritization of Unsampled Gaps by Genus
+#### Figure 13: Threatened Species Without Sequence Data by Genus
 
-This figure visualizes the taxonomic distribution of threatened species (CR, EN, VU) among the 943 checklist gaps that currently lack molecular sequences in public repositories.
-By highlighting genera with the highest concentrations of unsequenced threatened taxa (led by *Parodia*, *Mammillaria*, and *Melocactus*), this analysis establishes explicit priorities for targeted field collecting and sequencing.
+Threatened species (CR, EN, VU) among the 943 accepted species without sequence data, by genus.
+*Parodia* (24 species), *Mammillaria* (22) and *Melocactus* (14) have the most.
+The species are listed in `TABLE_conservation_prioritization_gaps.csv`, which can guide field collecting and sequencing.
 
 ```{r figure_13_conservation_prioritization_gaps, eval = has_data, fig.height = 5}
 plot_gaps_genus <- TABLE_conservation_prioritization_gaps %>%
@@ -852,7 +836,7 @@ p13
 
 #### Figure 14: Endemic Species by Country
 
-This figure summarizes national cactus endemism represented in the phylogenetic tree, ranking countries by the number of endemic species resolved in the molecular framework.
+Countries ranked by the number of endemic ingroup species in the tree, based on IUCN records of endemism.
 
 ```{r figure_14_endemism_by_country, eval = has_data}
 if (any(species_summary_iucn$iucn_is_endemic, na.rm = TRUE)) {
@@ -877,7 +861,7 @@ if (any(species_summary_iucn$iucn_is_endemic, na.rm = TRUE)) {
 
 #### Figure 15: Endemic Species by Country and IUCN Category
 
-This stacked bar chart visualizes the conservation status of national endemics across the top cactus-diverse countries, breaking down endemic richness by IUCN threat category.
+IUCN categories of the endemic ingroup species in the tree, for the countries with the most endemics.
 
 ```{r figure_15_iucn_by_country, eval = has_data}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
@@ -907,7 +891,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 
 #### Figure 16: Primary Ecological Threats
 
-This bar chart illustrates the most frequently documented environmental and anthropogenic threats impacting cactus species in the ingroup phylogeny, based on IUCN Red List threat classifications.
+Threat classes recorded by the IUCN Red List for the ingroup species in the tree, ranked by frequency.
 
 ```{r figure_16_threats, eval = has_data}
 if (any(!is.na(species_summary_iucn$iucn_threat_names))) {
@@ -934,7 +918,7 @@ if (any(!is.na(species_summary_iucn$iucn_threat_names))) {
 
 #### Figure 17: Primary Ecological Habitats
 
-This bar chart displays the primary habitat associations recorded for species in the ingroup phylogeny, identifying major ecological biomes supporting cactus diversification.
+Habitat classes recorded by the IUCN Red List for the ingroup species in the tree.
 
 ```{r figure_17_habitats, eval = has_data}
 if (any(!is.na(species_summary_iucn$iucn_habitat_names))) {
@@ -961,17 +945,13 @@ if (any(!is.na(species_summary_iucn$iucn_habitat_names))) {
 
 ## Conclusion
 
-At this stage, phylogenetic visualization and conservation metadata integration have been successfully completed.
-The resulting outputs provide a comprehensive representation of the evolutionary framework generated by `PhyloCactus`, including the inferred maximum-likelihood topology, the time-calibrated chronogram, molecular sampling completeness, and associated conservation information.
+This tutorial produced the species registry, the conservation tables, and the figures of the dataset, the tree and the chronogram.
 
-The next stage focuses on **phylogenetic validation and comparative analyses**, where the robustness of the focal phylogenetic hypothesis will be evaluated against previously published evolutionary frameworks and alternative topological hypotheses.
-
-Using quantitative tree comparison approaches, including **Robinson-Foulds distances** and **multidimensional scaling (MDS)**, the following tutorial will assess the degree of topological agreement among alternative phylogenetic hypotheses, identify regions of phylogenetic uncertainty, and evaluate how differences in taxon sampling and analytical strategies influence the recovered evolutionary relationships.
+Tutorial 4 compares the tree with published phylogenies of Cactaceae using Robinson-Foulds distances and multidimensional scaling of tree space.
 
 [Continue to Tutorial 4: Phylogenetic Validation and Comparative Analyses](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html)
 
 ## References
 
-- Amaral *et al*. 2022. Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. *Biological Conservation*, 273, 109677. <https://doi.org/10.1016/j.biocon.2022.109677>
+- Isaac *et al*. 2007. Mammals on the EDGE: conservation priorities based on threat and phylogeny. *PLoS ONE*, 2(3), e296. <https://doi.org/10.1371/journal.pone.0000296>
 - Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
-- Thompson *et al*. 2024. Identifying the multiple drivers of cactus diversification. *Nature Communications*, 15(1), 7114. <https://doi.org/10.1038/s41467-024-51666-2>

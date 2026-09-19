@@ -35,8 +35,8 @@ Character path to the annotated support tree file (\code{.raxml.support}).
 \description{
 Maps clade support derived from non-parametric bootstrap replicates onto the best maximum-likelihood
 tree topology. The replicates themselves carry no metric: \code{RAxML-NG --bootstrap} writes plain
-topologies with branch lengths, and the metric is chosen here, at the summarising step. The same
-replicate file can therefore be summarised under both metrics without recomputation.
+topologies with branch lengths, and the metric is chosen here, at the summarizing step. The same
+replicate file can therefore be summarized under both metrics without recomputation.
 }
 \details{
 Defaults to Felsenstein's Bootstrap Percentage (FBP; Felsenstein, 1985), which is the metric the
@@ -46,7 +46,7 @@ be compared. Transfer Bootstrap Expectation (TBE; Lemoine \emph{et al.}, 2018) i
 
 The two are not on a common scale and TBE must never be reported as though it were a bootstrap
 percentage. TBE is bounded below by FBP and its inflation grows with clade size. Measured on the
-987 unconstrained nodes of the 1024 terminal supermatrix tree (2026-09-17): median TBE 0.783
+987 unconstrained nodes of the 1024-terminal reference tree: median TBE 0.783
 against median FBP 0.470, with the gap reaching 0.732 for clades of 51 to 200 terminals (median FBP 0.220,
 median TBE 0.952). Reporting TBE places 61 percent of nodes above 0.70; FBP places 29 percent (703 nodes
 collapsing below 0.70).

@@ -113,6 +113,7 @@ test_that("the smoothing value with the lowest chi-square is selected", {
 
   expect_equal(sel$smoothing, 1)
   expect_false(sel$at_edge)
+  expect_equal(sel$shape, "interior")
   expect_length(w, 0L)
   expect_equal(nrow(sel$table), 5L)
   # Returned in ascending smoothing order, whatever order treePL wrote them.
@@ -131,7 +132,7 @@ test_that("a minimum on a still-falling floor of the grid is reported instead of
   sel <- suppressWarnings(.select_cv_smoothing(f))
   expect_equal(sel$smoothing, 1e-4)
   expect_true(sel$at_edge)
-  expect_false(sel$at_plateau)
+  expect_equal(sel$shape, "edge")
 })
 
 test_that("a minimum on a flat floor is a plateau, and is not warned about", {
@@ -150,8 +151,47 @@ test_that("a minimum on a flat floor is a plateau, and is not warned about", {
   expect_length(w, 0L)                     # a plateau is not a defect
   expect_equal(sel$smoothing, 1e-8)
   expect_true(sel$at_edge)
-  expect_true(sel$at_plateau)
-  expect_message(.select_cv_smoothing(f), "plateau reached")
+  expect_equal(sel$shape, "plateau")
+  expect_message(.select_cv_smoothing(f), "reaches a plateau")
+})
+
+test_that("a flat low end with the minimum inside it is a plateau, not an interior optimum", {
+  tmp <- withr::local_tempdir()
+  # The reference Cactaceae curve (one thread, grid 1e+03 to 1e-14). The lowest chi-square is at
+  # 1e-12, not at the floor, but the three lowest smoothing values differ by 0.06% and the minimum
+  # lies 0.04 units below the value at the floor. The values from 10 upward are of the order of
+  # 1e41, which is how treePL fails at high smoothing.
+  f <- cv_file_with(tmp,
+    c(1000, 100, 10, 1, 0.1, 0.01, 0.001, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10, 1e-11,
+      1e-12, 1e-13, 1e-14),
+    c(9.27978e+40, 9.23935e+40, 1.12066e+41, 546.27, 722.437, 469.865, 288.245, 235.198, 227.567,
+      224.911, 224.97, 223.22, 222.331, 222.663, 221.758, 221.122, 221.259, 221.164))
+
+  w <- character(0)
+  sel <- withCallingHandlers(suppressMessages(.select_cv_smoothing(f)),
+    warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
+
+  expect_length(w, 0L)
+  expect_equal(sel$smoothing, 1e-12)
+  expect_false(sel$at_edge)
+  expect_equal(sel$shape, "plateau")
+  expect_message(.select_cv_smoothing(f), "not an optimum")
+})
+
+test_that("a flat low end lying above an interior minimum is not a plateau", {
+  tmp <- withr::local_tempdir()
+  # The curve turns upward at 1e-3 and then levels off well above its minimum. The flat tail is not
+  # where the data are best fitted, so the minimum stays an interior optimum.
+  f <- cv_file_with(tmp, c(1, 0.1, 0.01, 0.001, 1e-4, 1e-5, 1e-6),
+                    c(500, 300, 200, 150, 250, 251, 250.5))
+
+  w <- character(0)
+  sel <- withCallingHandlers(.select_cv_smoothing(f),
+    warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
+
+  expect_length(w, 0L)
+  expect_equal(sel$smoothing, 0.001)
+  expect_equal(sel$shape, "interior")
 })
 
 test_that("a minimum on the ceiling of the grid is reported too", {
@@ -159,6 +199,7 @@ test_that("a minimum on the ceiling of the grid is reported too", {
   f <- cv_file_with(tmp, c(0.01, 0.1, 1, 10), c(500, 400, 300, 100))
   expect_warning(.select_cv_smoothing(f), "edge of its own grid")
   expect_equal(suppressWarnings(.select_cv_smoothing(f))$smoothing, 10)
+  expect_equal(suppressWarnings(.select_cv_smoothing(f))$shape, "edge")
 })
 
 test_that("an absent or unusable cross-validation file is an error", {
@@ -305,7 +346,7 @@ test_that("run_treePL_cv() warns when cv_nthreads > 1", {
       work_dir = tmp,
       quiet = TRUE
     ),
-    "treePL's cross-validation evaluates replicates across OpenMP threads"
+    "treePL evaluates cross-validation replicates in an OpenMP loop"
   )
 
   # Check that nthreads = 4 was written into the cv configuration

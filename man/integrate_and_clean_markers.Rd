@@ -33,11 +33,11 @@ integrate_and_clean_markers(
 
 \item{metadata_out_file}{Character. Path to outgroup accession occupancy metadata CSV file.}
 
-\item{marker_aliases}{Named character vector or \code{NULL}. Renames outgroup markers onto their ingroup counterpart before the two sets are joined, as \code{c(trnL = "trnL_trnF")}. Names and values are normalised the same way the filenames are, so either spelling works.
+\item{marker_aliases}{Named character vector or \code{NULL}. Renames outgroup markers onto their ingroup counterpart before the two sets are joined, as \code{c(trnL = "trnL_trnF")}. Names and values are normalized the same way the filenames are, so either spelling works.
 
 The two \code{phylotaR} runs cluster independently, so the same region can be named differently in each: the outgroup carries two \code{trnL} accessions of the trnL intron, which is the first half of the ingroup \code{trnL-trnF} amplicon, and they share 63\% of their 20-mers with it. Aliasing is a homology claim and has to be evidenced, not assumed from the name: outgroup \code{ndhF} shares no 20-mer with ingroup \code{ndhF-rpl32} despite the obvious resemblance, because the two datasets cover different parts of the gene. Defaults to \code{NULL}.}
 
-\item{readmit_markers}{Character vector or \code{NULL}. Markers that \code{\link[=run_marker_screening]{run_marker_screening()}} rejected and that are brought back into the joint dataset because they connect the outgroup to the ingroup, read from \code{readmit_dir}. This is a different question from the one Module 3 answers, and it is stated as such: \code{trnT-psbD} resolves the ingroup poorly, with 50 sequences over 1008 Cactaceae terminals, and carries the best outgroup coverage of the dataset, 49 \emph{Portulaca} accessions of 1347 bp against the five or six terminals of overlap the retained loci provide. Retaining it for ingroup resolution would be wrong; retaining it for rooting is the point. Defaults to \code{NULL}.}
+\item{readmit_markers}{Character vector or \code{NULL}. Markers that \code{\link[=run_marker_screening]{run_marker_screening()}} rejected and that are brought back into the joint dataset because they connect the outgroup to the ingroup, read from \code{readmit_dir}. This is a different question from the one Module 3 answers. A marker brought back for this reason must be homologous on both sides; check \code{TABLE_marker_homology_check.csv} (\code{homology_check = TRUE}) before readmitting it. Defaults to \code{NULL}.}
 
 \item{readmit_dir}{Character or \code{NULL}. Directory holding the pre-screening ingroup alignments, normally \verb{2_MAFFT_Cactaceae/alignments}. Required when \code{readmit_markers} is supplied. Defaults to \code{NULL}.}
 
@@ -45,14 +45,14 @@ The two \code{phylotaR} runs cluster independently, so the same region can be na
 
 \item{homology_check}{Logical. For every marker present on both sides, measure the fraction of outgroup k-mers that occur in the ingroup sequences of the same name, write \code{tables/TABLE_marker_homology_check.csv}, and warn about the markers that share almost none. The measure is alignment-free, so it distinguishes sequences that are hard to align from sequences that are not the same region. Reported, never blocking. Defaults to \code{TRUE}.}
 
-\item{homology_k20_min, homology_k10_min}{Numeric. A marker is flagged \code{no_detectable_homology} when it falls below \strong{both}, at \code{k = 20} and \code{k = 10} respectively. Genuine counterparts in this dataset return 0.28 to 0.60 at \code{k = 20}; the two false pairs found on 2026-09-01 returned 0.000 (\code{pepC}, two PEPC paralogues) and 0.039 (\code{trnT-psbD}, ingroup median 598 bp against outgroup 1347 bp). Default to \code{0.05} and \code{0.15}.}
+\item{homology_k20_min, homology_k10_min}{Numeric. A marker is flagged \code{no_detectable_homology} when it falls below \strong{both}, at \code{k = 20} and \code{k = 10} respectively. In the reference dataset \code{trnL_trnF}, \code{matK}, \code{phyC} and \code{rbcL} return 0.26 to 0.59 at \code{k = 20}; \code{trnT-psbD} returns 0.040 (ingroup median 605 bp against outgroup 1347 bp). Default to \code{0.05} and \code{0.15}.}
 }
 \value{
-A data frame containing the comprehensive marker summary with decoupled ingroup and joint metrics.
+A data frame with the marker summary, with separate ingroup and joint metrics.
 }
 \description{
 Integrates independently curated ingroup and outgroup sequence datasets, standardizes species binomials
-against the authoritative taxonomic checklist (Korotkova et al. 2021), and exports decoupled
+against the accepted checklist (Korotkova et al. 2021), and exports decoupled
 FASTA sequence directories (\verb{cleaned_markers_ingroup/}, \verb{cleaned_markers_outgroup/}, \verb{cleaned_markers_joint/}).
 Computes isolated molecular informativeness metrics (tips, length, variable sites, parsimony informative sites,
 GC content, and missingness) for the focal ingroup radiation to avoid outgroup-driven inflation artifacts.
@@ -61,9 +61,9 @@ GC content, and missingness) for the focal ingroup radiation to avoid outgroup-d
 
 \code{marker_aliases} can point two source files at the same \code{marker_key}. When both carry a record for
 the same species, that species appears twice under one FASTA header in the exported marker, and the
-downstream matrix assembly resolves the duplication by file order, silently and in favour of
+downstream matrix assembly resolves the duplication by file order, silently and in favor of
 whichever record sorts first, which is not necessarily the more informative one. The duplicates are
-therefore resolved here, by a rule that is declared rather than incidental: the record with the
+therefore resolved here by an explicit rule: the record with the
 greatest number of non-gap sites is retained, ties are broken on the source file name so that the
 outcome does not depend on the order in which the directory was listed, every competing record is
 written to \code{tables/TABLE_alias_collisions_resolved.csv} with its source file, its length and

@@ -36,14 +36,14 @@ generate_bootstrap_script(
 
 \item{constraint_file}{Character. Path to constraint scaffold tree file.}
 
-\item{outgroup}{Character vector of terminals passed to \code{RAxML-NG --outgroup}, or \code{NULL} (default); multiple terminals are joined with commas. \code{RAxML-NG} writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by \code{automate_treePL()} via \code{ape::root(..., resolve.root = TRUE)}. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with \code{resolve_rooting_outgroup()} rather than naming a terminal by hand.}
+\item{outgroup}{Character vector of terminals passed to \code{RAxML-NG --outgroup}, or \code{NULL} (default); multiple terminals are joined with commas. \code{RAxML-NG} writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by \code{automate_treePL()} via \code{ape::root(..., resolve.root = TRUE)}. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with \code{resolve_rooting_outgroup()}; do not name a terminal by hand.}
 
 \item{bs_per_rep}{Integer. Number of bootstrap trees generated per chunk replicate. Defaults to \code{500}.}
 
 \item{max_reps}{Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (\code{1-max_reps}). Defaults to \code{2},
 giving a total array target of \code{bs_per_rep * max_reps = 1000} bootstrap trees. This provides a safety margin over the autoMRE
-convergence point observed in a production run of this exact dataset (1023 taxa, 11 partitions), which converged (\code{bs-cutoff = 0.03},
-FBP) after 600 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
+convergence point observed in the reference run (1024 taxa, 11 partitions), which converged (\code{bs-cutoff = 0.03},
+FBP) after 650 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
 sampling scheme. Always confirm convergence with \code{check_bs_convergence()} on the collected trees (via \code{collect_bootstraps()}) rather
 than assuming \code{bs_per_rep * max_reps} is sufficient; increase \code{max_reps} and re-run \code{collect_bootstraps()} if it is not.}
 
@@ -90,8 +90,8 @@ Uses coarse-grained parallelization via Slurm Job Arrays (\verb{#SBATCH --array=
 to optimize disk I/O, dynamic per-task seed multiplication for statistical independence, and a configurable thread-to-worker ratio.
 }
 \details{
-The default \code{threads_per_worker = 4L} is configured to optimize throughput on multi-core compute nodes. In a production run of this workload
-(1023 taxa, 11 partitions), using \verb{--threads 40 --workers 10} (4 threads per worker) on an AMD EPYC node provided efficient per-worker
+The default \code{threads_per_worker = 4L} is configured to optimize throughput on multi-core compute nodes. In a production run on the reference dataset,
+using \verb{--threads 40 --workers 10} (4 threads per worker) on an AMD EPYC node provided efficient per-worker
 memory and CPU allocation. This ratio is dataset- and hardware-dependent (it trades per-worker single-tree search speed against the number of trees searched in
 parallel); if you migrate to different node hardware or a markedly different supermatrix size, re-validate it
 empirically with a short trial run before committing a full job array to it.

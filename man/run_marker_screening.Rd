@@ -32,7 +32,7 @@ run_marker_screening(
 
 \item{outgroup_folder}{Character or \code{NULL}. Directory of aligned outgroup locus FASTA files, matched to the ingroup files by marker name. Used for \strong{reporting only}: the summary table gains \code{n_outgroup} and \code{n_total} so a locus rejected here can be seen to carry outgroup data, but no retention decision depends on them. Outgroup markers with no ingroup counterpart simply leave those two columns empty; which ones they are, and what becomes of them, is reported by \code{\link[=integrate_and_clean_markers]{integrate_and_clean_markers()}}, which owns that decision and applies \code{marker_aliases} before comparing the two sets. Defaults to \code{NULL}.
 
-This module asks whether a locus resolves the ingroup radiation, and the answer cannot depend on how many outgroup accessions exist. \code{trnT-psbD} is the case that forced the distinction: 50 ingroup sequences against a threshold of 100, correctly rejected as an ingroup marker, while carrying 49 Portulaca accessions of 1347 bp that are the best outgroup coverage in the dataset. Bringing it back is a decision about connecting the two groups, which belongs to \code{\link[=integrate_and_clean_markers]{integrate_and_clean_markers()}} and its \code{readmit_markers} argument, not to a sequence count here.}
+This module asks whether a locus resolves the ingroup radiation, and the answer cannot depend on how many outgroup accessions exist. \code{trnT-psbD} is the case that forced the distinction: 50 ingroup sequences against a threshold of 100, rejected as an ingroup marker, while carrying 52 \emph{Portulaca} sequences of about 1347 bp, more outgroup sequences than any other marker. Bringing it back is a decision about connecting the two groups, which belongs to \code{\link[=integrate_and_clean_markers]{integrate_and_clean_markers()}} and its \code{readmit_markers} argument, not to a sequence count here.}
 
 \item{max_marker_missing}{Numeric. Maximum allowable missing data fraction per locus. Defaults to \code{0.7}.}
 
@@ -51,8 +51,7 @@ A data frame summarizing saturation statistics, alignment dimensions, and retent
 }
 \description{
 Evaluates phylogenetic informativeness, sequence coverage, alignment length, and substitution saturation across individual locus alignments.
-Filtering out loci exhibiting high substitution saturation or severe site length anomalies prevents systematic noise
-and long-branch attraction (LBA) artifacts from distorting maximum-likelihood supermatrix inference.
+Loci with strong saturation or anomalous sequence lengths are excluded from the supermatrix.
 }
 \examples{
 \dontrun{

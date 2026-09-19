@@ -1,7 +1,7 @@
 # -------------------------------------------------------------
 # PhyloCactus: Tutorial 2 - Phylogenetics Pipeline: Inference & Dating
 # -------------------------------------------------------------
-# This script covers Stages 7 to 10 of the phylogenetic pipeline:
+# This script covers Modules 7 to 10 of the phylogenetic pipeline:
 # Substitution Models, ML search, Bootstraps, and treePL dating.
 #
 # RESUMING AT A LATER STAGE. The stages are long, and a full run spans several sessions. Every
@@ -53,42 +53,27 @@ notify_email <- FALSE
 # and that governs which groups are monophyletic, which nodes exist, and where each calibration
 # lands, since treePL addresses nodes by the MRCA of the terminals declared for them.
 #
-# Root on the whole outgroup clade, not on one of its terminals. Naming a single terminal places
+# Root on the whole outgroup clade. Naming a single terminal places
 # the root INSIDE the clade: the remaining terminals of that lineage fall on the ingroup side, the
 # lineage is left paraphyletic, and its crown node collapses onto the root. Any calibration
 # addressed by the MRCA of that lineage then lands on the root instead of its intended node.
 #
-# Occupancy no longer selects a terminal, since none is selected, but it is still worth checking:
+# Occupancy of the rooting terminals can be checked:
 # a rooting clade whose terminals are all sparsely sampled yields a poorly supported root.
 #
 #   s <- read.csv("6_Concatenated/final_tables/TABLE_final_species_alignment_summary.csv")
 #   s <- s[s$species_class == "outgroup", c("species", "retained_markers", "pct_markers")]
 #   head(s[order(-s$retained_markers), ])
 #
-# WHY THE ROOT MOVED TO TALINACEAE (2026-09-04).
-#
-# Rooting on Portulacaceae, as earlier versions of this script did, asserted the topology
-# (Portulacaceae,(Cactaceae,Anacampserotaceae)). With only those three families sampled that was
-# not a hypothesis the data could test: once Cactaceae is constrained to be monophyletic and the
-# root is placed in Portulacaceae, the grouping of Cactaceae with Anacampserotaceae follows
-# arithmetically, because no fourth lineage is present that would allow any other resolution. The
-# node so produced is the one the Cactaceae_Anacampserotaceae_stem calibration addressed, so that
-# calibration rested on a relationship the matrix could not evaluate.
-#
-# The relationship is genuinely open. Ramirez-Barahona et al. (2020) recover Cactaceae with
-# Anacampserotaceae, on a tree whose interfamilial relationships were left unconstrained.
-# Zuntini et al. (2024) and Kew Tree of Life release 4.0 recover Anacampserotaceae with
-# Portulacaceae, but the quartet support for that node is 0.47 with 0.33 on an alternative, so
-# neither resolution is established. de Vos et al. (2025) describe the region as a zone of gene
-# tree conflict.
-#
-# Sampling Talinaceae supplies the fourth lineage, moves the root outside the ACP clade, and leaves
-# all three resolutions of the quartet available to the likelihood. It also gives ACP_root a parent
-# branch: the node stops being the root of the tree and becomes identifiable, which is the point
-# raised in section 8o of the decision record.
-#
-# The scaffold written by build_constraint_scaffold() places the four families in a basal polytomy
-# for the same reason: a nested outgroup would impose one of the three resolutions.
+# Rooting on Portulacaceae with only three families sampled would impose the grouping of Cactaceae
+# with Anacampserotaceae: no fourth lineage would allow another resolution. The relationship is
+# open in the literature. Ramirez-Barahona et al. (2020) recover Cactaceae with Anacampserotaceae;
+# Zuntini et al. (2024) recover Anacampserotaceae with Portulacaceae, with a quartet support of 0.47
+# against 0.33 for an alternative; de Vos et al. (2025) describe the region as a zone of gene tree
+# conflict. Sampling Talinaceae supplies the fourth lineage, places the root outside the ACP clade,
+# and leaves the three resolutions to the likelihood. It also gives ACP_root a parent branch, so that
+# its age is identifiable. build_constraint_scaffold() places the four families in a basal polytomy
+# for the same reason.
 #
 # Sensitivity check (optional): re-root on Portulacaceae, repeat the dating, and compare the deep
 # topology and the root age against the Talinaceae-rooted result.
@@ -105,7 +90,7 @@ cat("Rooting on", length(rooting_outgroup), "terminals:",
     paste(rooting_outgroup, collapse = ", "), "\n")
 
 # -------------------------------------------------------------
-# Stage 7: Statistical Control of Mutational Heterogeneity
+# Module 7: Preprocess and Substitution Models
 # -------------------------------------------------------------
 # Preprocess partitions before substitution checks.
 # model_handling = "force_dna" writes the datatype token DNA into the model field. RAxML-NG expands
@@ -157,9 +142,9 @@ run_modeltest_ng(
 setwd(tutorial_dir) # return to original working directory
 
 # -------------------------------------------------------------
-# Stage 8: Enforcing Topological Constraints and Inferring Maximum-Likelihood Hypotheses
+# Module 8: Constraint Trees and Maximum Likelihood Search
 # -------------------------------------------------------------
-# Stage 8 needs the outputs of Stage 7. Asking for them by name turns a missing input into an
+# Module 8 needs the outputs of Module 7. Asking for them by name turns a missing input into an
 # error that says which module has not run yet.
 paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file,
                            require = c("analysed_phy", "best_models"))
@@ -227,10 +212,10 @@ if (run_local_ml) {
     prefix = paste0(run_prefix, "_search")
   )
   cat("Submit on cluster with: cd ml_search && sbatch run_ml_search.sh\n")
-  cat("When the job finishes, sync results back and re-run from the Stage 9 block below.\n")
+  cat("When the job finishes, sync results back and re-run from the Module 9 block below.\n")
 }
 
-# Re-resolve now that Stage 8 has written its outputs. resolve_run_paths() finds the best tree in
+# Re-resolve now that Module 8 has written its outputs. resolve_run_paths() finds the best tree in
 # ml_search/ when the search ran on the cluster and in the run root when it ran locally, so the
 # steps below are identical either way.
 paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file)
@@ -244,7 +229,7 @@ rf_dist <- calculate_rf_distances(
 )
 
 # -------------------------------------------------------------
-# Stage 9: Estimating Statistical Robustness via Bootstrap Resampling
+# Module 9: Bootstrap Support
 # -------------------------------------------------------------
 # Resuming here after a restart: run the SETUP block above, then continue from this line.
 paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file,
@@ -301,7 +286,7 @@ if (run_local_bs) {
 # -------------------------------------------------------------------------
 # Collect Bootstrap Replicates
 # -------------------------------------------------------------------------
-# Before running this step, ensure that your bootstrap replicates have finished.
+# Run this step after all bootstrap replicates have finished.
 # If you ran them on HPC, make sure all chunks completed successfully and
 # optionally sync the files back to your local repository.
 
@@ -342,7 +327,7 @@ print(converge_log)
 # EDITORIAL & METHODOLOGICAL NOTE:
 # 1. Primary metric: Felsenstein's Bootstrap Proportions (FBP). This is the canonical metric
 #    reported across published Cactaceae phylogenies (e.g. Hernandez-Hernandez et al. 2014,
-#    Arakaki et al. 2011). TBE systematically inflates support on large clades (median FBP 0.468
+#    Arakaki et al. 2011). TBE systematically inflates support on large clades (median FBP 0.470
 #    vs median TBE 0.783 in unconstrained nodes).
 # 2. Secondary metric: Transfer Bootstrap Expectation (TBE; Lemoine et al. 2018), retained as a
 #    complementary assessment of stability in supermatrices with missing data.
@@ -415,10 +400,10 @@ if (run_local_temporal_bs) {
 }
 
 # -------------------------------------------------------------
-# Stage 10: Accommodating Evolutionary Rate Heterogeneity via Penalized Likelihood (treePL)
+# Module 10: Estimating Divergence Times via Penalized Likelihood
 # -------------------------------------------------------------
 cat("\n=======================================================\n")
-cat("Stage 10: Accommodating Evolutionary Rate Heterogeneity via treePL\n")
+cat("Module 10: Estimating Divergence Times via Penalized Likelihood\n")
 cat("=======================================================\n")
 
 # Resuming here after a restart: run the SETUP block above, then continue from this line.
@@ -440,7 +425,7 @@ tip_labels <- ml_tree$tip.label
 
 # numsites must be the length of the matrix RAxML-NG actually analysed, not a rounded figure.
 # treePL uses it to convert branch lengths into expected substitution counts, so it is read from
-# the header of the matrix Stage 7 reported as analysed. paths$analysed_phy already resolves to the
+# the header of the matrix Module 7 reported as analyzed. paths$analysed_phy already resolves to the
 # reduced PHYLIP when terminals were collapsed and to the supermatrix when they were not.
 phy_header <- strsplit(trimws(readLines(paths$analysed_phy, n = 1)), "\\s+")[[1]]
 num_sites <- as.integer(phy_header[2])
@@ -480,19 +465,15 @@ for (i in seq_len(nrow(calibs))) {
   cfg_lines <- c(cfg_lines, mrca_line, min_line, max_line)
 }
 
-# Node-identity assertions, rewritten on 2026-09-04 when Talinaceae entered the sampling.
-#
-# With Talinaceae rooting the tree, the root is the crown of the ACPT clade and ACP_root is an
-# internal node with a parent branch, which is what makes it identifiable rather than a parameter
-# parked at the end of the tree. The earlier assertion required ACP_root to BE the root and would
-# now fail, correctly: it encoded the previous sampling.
+# Node-identity assertions. With Talinaceae rooting the tree, the root is the crown of the ACPT
+# clade and ACP_root is an internal node with a parent branch, which makes its age identifiable.
 #
 # What still has to hold, and what these lines check:
 #   1. The rooting clade is monophyletic. Rooting on a single terminal instead of the clade leaves
 #      the lineage paraphyletic and collapses its crown onto the root, which silently reassigns
 #      every bound addressed by that lineage.
 #   2. ACP_root resolves to a node that is NOT the root, so the anchor is placed on an internal
-#      node rather than on the deepest split of the tree.
+#      node and not on the deepest split of the tree.
 #   3. ACP_root is monophyletic. If the likelihood placed Talinaceae inside the ACP clade, the
 #      anchor would be addressing something other than the node it was written for.
 stopifnot(ape::is.monophyletic(rooted_ml, grep("^(Talinum|Talinella)_", tip_labels, value = TRUE)))
@@ -500,8 +481,7 @@ acp_tips <- tips_for("Family", "Cactaceae;Anacampserotaceae;Portulacaceae")
 stopifnot(ape::getMRCA(rooted_ml, acp_tips) != root_node)
 stopifnot(ape::is.monophyletic(rooted_ml, acp_tips))
 
-# The resolution of the ACPT quartet is a result of this run, not an assumption, so it is reported
-# rather than asserted. Whether Cactaceae_Anacampserotaceae_stem can be reactivated in
+# The resolution of the ACPT quartet is estimated by this run, so it is reported and not asserted. Whether Cactaceae_Anacampserotaceae_stem can be reactivated in
 # calibrations_bounds.csv depends on what this prints.
 cact_anac <- tips_for("Family", "Cactaceae;Anacampserotaceae")
 anac_por  <- tips_for("Family", "Anacampserotaceae;Portulacaceae")
@@ -532,26 +512,16 @@ cat("   Calibrations compiled successfully to:", calibrations_cfg_path, "\n")
 # 10.2 Run Fast Automated treePL Dating Pipeline
 cat("\nRunning treePL priming, cross-validation and dating over maximum-likelihood tree and bootstrap replicates...\n")
 
-# Priming, cross-validation and dating follow the empirical protocol of Maurin (2020,
-# arXiv:2008.07054, CC BY 4.0) and run through run_treePL_cv(), in R. Until 2026-09-02 they were
-# driven by a copy of the shell script at https://github.com/tongjial/treepl_wrapper, which was an
-# earlier implementation of the same protocol; that script carries no licence, so it could not be
-# redistributed inside this GPL-3 package, and it wrote `smoothing = ` where treePL reads
-# `smooth = `, silently dating every chronogram at the built-in default of 10.
+# Priming, cross-validation and dating follow the protocol of Maurin (2020, arXiv:2008.07054) and
+# run through run_treePL_cv(). The priming parameters are the lowest of the repeats,
+# cross-validation uses `randomcv`, and the smoothing grid runs from 1e+03 to 1e-14, one value per
+# order of magnitude. The grid extends well below the 1e-06 to 1e-08 range reported by Maurin, so
+# that a plateau can be distinguished from a search that stopped at the edge of the grid.
 #
-# Three defaults follow Maurin where the shell script did not: the priming parameters are the
-# lowest rather than the most frequent, cross-validation uses `randomcv` rather than leave-one-out
-# `cv`, and the smoothing grid reaches 1e-14 rather than stopping at 1e-04. Maurin reports optimal
-# smoothing between 1e-06 and 1e-08 for a tree whose branch lengths were rescaled as they are here,
-# and extending the grid down to 1e-14 allows testing whether an interior minimum exists or whether
-# rate smoothing is data-limited.
-# In addition, cross-validation is evaluated on a single thread (`cv_nthreads = 1L`) to guarantee
-# bit-for-bit reproducibility, preventing the race conditions on C `rand()` that occur when treePL
-# evaluates simulated annealing across OpenMP threads.
-
-# Note: For tutorial purposes, you can limit the number of bootstrap trees to process
-# by setting `num_bs = 100` (or any other number). If not provided, it will process all
-# available bootstrap trees. Here we set it to 100 for faster tutorial execution.
+# The seed fixes every stochastic step of the dating. 79992967 is the seed of the reference run:
+# keep it to reproduce the published chronogram, or change it for an independent run.
+#
+# num_bs = 100 dates 100 temporal bootstrap replicates; num_bs = NULL dates all of them.
 automate_treePL(
   cfg_file = calibrations_cfg_path,
   ml_tree_file = paths$best_tree,
@@ -561,9 +531,7 @@ automate_treePL(
   results_dir = file.path(dating_dir, "auto_results"),
   treePL_out = dating_dir,
   num_bs = 100,
-  cvstart = 1e3,
-  cvstop = 1e-14,
-  cv_nthreads = 1L,
+  seed = 79992967,
   # Declared in the SETUP block. Reports the outcome, the timings and the output paths by email.
   notify = notify_email
 )
@@ -572,14 +540,14 @@ cat("\n--- Chronological Dating Results Summary ---\n")
 if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
   ml_chronogram <- ape::read.tree(file.path(dating_dir, "BestTree_treePL.tree"))
   cat("   Best ML Chronogram:\n")
-  cat("     - File site:", file.path(dating_dir, "BestTree_treePL.tree"), "\n")
+  cat("     - File path:", file.path(dating_dir, "BestTree_treePL.tree"), "\n")
   cat("     - Root age:", max(ape::node.depth.edgelength(ml_chronogram)), "Mya\n")
   cat("     - Number of tips:", length(ml_chronogram$tip.label), "\n")
 
   # A node whose age equals one of its own bounds was not estimated: penalized likelihood returned
   # the constraint, and the chronogram gives no sign of it. ACP_root is fixed (min = max), so it
   # sits on its bound by construction; the other three calibrations are expected to be estimated.
-  # The bootstrap chronograms are passed deliberately: a single point estimate can land just inside
+  # The bootstrap chronograms are passed because a single point estimate can land just inside
   # a bound while the underlying age is unidentifiable, and only the replicates separate the two.
   bs_chronograms <- file.path(dating_dir, "bsTree_treePL.tree")
   adherence <- report_bound_adherence(
@@ -592,13 +560,11 @@ if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
 cat("--------------------------------------------\n")
 
 # -------------------------------------------------------------
-# 10.3 Rate Smoothing Cross-Validation Diagnostics (1e3 to 1e-14)
+# 10.3 Cross-validation curve
 # -------------------------------------------------------------
-# automate_treePL() evaluated cross-validation across 18 orders of magnitude (1e3 down to 1e-14)
-# on a single deterministic thread (cv_nthreads = 1L).
-# Here we inspect the complete chi-square curve to determine whether an interior minimum was
-# discovered or whether rate smoothing is data-limited.
-
+# run_treePL_cv() reported the shape of this curve when it ran (interior minimum, edge or plateau);
+# the table shows the curve itself. Values from 10 upward are of the order of 1e41: treePL fails
+# numerically at high smoothing, and those rows carry no information.
 cv_file <- file.path(dating_dir, "auto_results", "ML_tree", "cv_ML_tree")
 if (file.exists(cv_file)) {
   lines_cv <- grep("chisq", readLines(cv_file, warn = FALSE), value = TRUE)
@@ -606,48 +572,22 @@ if (file.exists(cv_file)) {
     smoothing = as.numeric(gsub(".*\\(([^)]*)\\).*", "\\1", lines_cv)),
     chisq = as.numeric(sub(".*\\)\\s*", "", lines_cv))
   )
-  cv_tab <- cv_tab[order(cv_tab$smoothing), ]
-
-  cat("\n--- treePL Rate Smoothing Cross-Validation Profile (1e3 to 1e-14) ---\n")
-  print(cv_tab)
-
-  best_smooth <- cv_tab$smoothing[which.min(cv_tab$chisq)]
-  cat("\nSelected smoothing parameter:", format(best_smooth, scientific = FALSE),
-      "with lowest chi-square:", min(cv_tab$chisq), "\n")
-
-  if (best_smooth <= 1e-14) {
-    cat("\nDiagnostic Result: Cross-validation error decreases monotonically down to the grid floor (1e-14).\n",
-        "Methodological Conclusion: Rate smoothing is data-limited (not identifiable from the sequence data).\n",
-        "The multilocus supermatrix lacks sufficient information to decouple rates and times without\n",
-        "additional internal constraints. In this regime, divergence times cannot rest on an optimum,\n",
-        "and must instead be justified via sensitivity analysis across the low-smoothing bracket.\n")
-  } else {
-    cat("\nDiagnostic Result: Statistically optimal interior minimum identified at smoothing =",
-        format(best_smooth, scientific = FALSE), "\n")
-  }
+  print(cv_tab[order(cv_tab$smoothing), ], row.names = FALSE)
 }
 
 # -------------------------------------------------------------
-# 10.4 Smoothing Sensitivity Analysis Across Orders of Magnitude
+# 10.4 Smoothing sensitivity
 # -------------------------------------------------------------
-# When rate smoothing cannot be uniquely identified by cross-validation, the validity of the
-# inferred chronogram depends on demonstrating that divergence times are stable across the
-# relevant parameter range rather than sensitive to arbitrary boundary choices.
-#
-# We evaluate node ages across 16 orders of magnitude, covering the ultra-low and low smoothing
-# bracket (1e-14, 1e-12, 1e-10, 1e-08, 1e-06, 1e-04) where cross-validation operates, as well
-# as moderate and high values (1e-02, 1, 10, 100).
-# In the low bracket (1e-14 to 1e-04), divergence times across major cactus clades vary by less than
-# 0.6 Ma and remain strictly interior to their calibration bounds.
-# Conversely, at high smoothing (lambda >= 1), excessive penalty forces calibrated nodes against
-# their upper bounds, demonstrating why lower smoothing values are biologically appropriate.
+# The same tree dated across the plateau and beyond it. Read the range of each node across 1e-14
+# to 1e-06, the plateau of the reference run. At 1 and 10 the calibrated nodes sit on their upper
+# bounds; that end of the table lies outside the range supported by cross-validation.
 
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")
 if (file.exists(sensitivity_cfg)) {
   cat("\nRunning smoothing sensitivity analysis across 1e-14 to 100...\n")
   sensitivity <- report_smoothing_sensitivity(
     cfg_file = sensitivity_cfg,
-    smoothing_values = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 1, 10, 100),
+    smoothing_values = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-5, 1e-4, 1e-2, 1, 10, 100),
     treepl_bin = treepl_path
   )
   cat("\n--- Calibrated Node Age Sensitivity Table ---\n")

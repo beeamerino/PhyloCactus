@@ -127,8 +127,7 @@ preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir 
 #' Evaluate Nucleotide Substitution Models via ModelTest-NG
 #'
 #' Evaluates nucleotide substitution model fit per predefined supermatrix partition using `ModelTest-NG` (Darriba *et al.*, 2020).
-#' Selecting optimal substitution models under the AICc criterion controls for mutational rate heterogeneity across molecular locus alignments,
-#' mitigating systematic long-branch attraction (LBA) bias during maximum-likelihood inference.
+#' The model of each partition is selected under the AICc, so substitution models can differ among loci.
 #'
 #' @param modeltest_exec_path Character. System command or full path to executable `ModelTest-NG` binary.
 #' @param aln_file Character. Path to validated PHYLIP supermatrix file.
@@ -209,8 +208,8 @@ run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = 
 #' Synthesize Multifurcating Monophyly Constraint Scaffold
 #'
 #' Constructs a Newick multifurcating constraint tree enforcing monophyly of established higher taxonomic ranks (e.g., subfamilies, tribes).
-#' Constrained maximum-likelihood searches restrict branch topology exploration to scientifically verified monophyletic backbone clades,
-#' preventing aberrant tree topologies when analyzing sparse supermatrices.
+#' The constrained search keeps these clades monophyletic and estimates all other relationships from the data,
+#' which limits the effect of sparse and uneven sampling on the backbone.
 #'
 #' @param alignment_path Character. Path to input PHYLIP supermatrix alignment file.
 #' @param constraints_csv_path Character. Path to taxonomy CSV table mapping species binomials to taxonomic ranks.
@@ -507,7 +506,7 @@ build_constraint_scaffold <- function(alignment_path, constraints_csv_path, outp
 #' @param aln_file Character. Path to input PHYLIP supermatrix alignment file.
 #' @param part_file Character. Path to partition file specifying substitution models per partition.
 #' @param constraint_file Character. Path to Newick topological constraint scaffold file.
-#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()` rather than naming a terminal by hand.
+#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()`; do not name a terminal by hand.
 #' @param n_init_trees Character. Initial starting tree specifications. Defaults to \verb{"rand{25},pars{25}"} (25 random + 25 parsimony trees).
 #' @param seed Integer. Random seed for reproducible tree search initialization. Defaults to `NULL` (random).
 #' @param n_workers Integer. Parallel worker process count for RAxML-NG. If `NULL` (default), derived
@@ -629,7 +628,7 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
 #'
 #' The lower bound on threads per worker exists because per-worker scaling saturates once each
 #' thread holds too few site patterns. As a working floor, keep at least a few hundred patterns per
-#' thread and re-validate on new hardware rather than trusting the default.
+#' thread, and test the setting again on new hardware.
 #'
 #' @param n_trees Integer. Total independent starting trees.
 #' @param threads Integer. Total threads available to the job.
@@ -658,8 +657,8 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
 #' Generate a SLURM Batch Script for the Constrained Maximum-Likelihood Search
 #'
 #' Writes a single SLURM batch script running the same constrained `RAxML-NG` search as
-#' [calculate_ml_tree()], sized for a compute node instead of a workstation. The search is one job
-#' rather than a job array: independent starting-tree searches are distributed across `--workers`
+#' [calculate_ml_tree()], sized for a compute node instead of a workstation. The search is a single
+#' job, not a job array: independent starting-tree searches are distributed across `--workers`
 #' inside the job, and RAxML-NG writes one `.raxml.bestTree` directly, so no collection step is
 #' needed to compare log-likelihoods across tasks.
 #'
@@ -672,10 +671,10 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
 #' across 25 workers execute 2.
 #'
 #' Reference timing illustrating worker parallelization: on an Apple M2 Pro (8 threads, `--workers 1`,
-#' `RAxML-NG` 1.2.2, SSE3 kernels), searching 50 starting trees sequentially required 47115 s (~938 s per tree).
-#' In contrast, the production run on an HPC cluster node (AMD EPYC 9754, 75 threads, `--workers 25`) over the
-#' full supermatrix (1023 terminals, 12806 sites, 5954 patterns, 11 partitions) completed 50 starting trees in
-#' 2393 s (~40 minutes), executing two parallel rounds.
+#' `RAxML-NG` 1.2.2, SSE3 kernels), searching 50 starting trees sequentially on an earlier version of the
+#' supermatrix required 47115 s (~938 s per tree). The production run on an HPC cluster node (AMD EPYC 9754, 75 threads, `--workers 25`) over the
+#' full supermatrix (1024 terminals, 12809 sites, 5959 patterns, 11 partitions) completed 50 starting trees in
+#' 2739 s (~46 minutes), executing two parallel rounds.
 #'
 #' `workers` is derived automatically and constrained to a divisor of the starting tree
 #' count, so that no worker sits idle in the final round.
@@ -683,7 +682,7 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
 #' @param alignment_file Character. Path to input PHYLIP supermatrix alignment file.
 #' @param partition_file Character. Path to partition file specifying substitution models per partition.
 #' @param constraint_file Character. Path to Newick topological constraint scaffold file.
-#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()` rather than naming a terminal by hand.
+#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()`; do not name a terminal by hand.
 #' @param n_init_trees Character. Starting tree specification passed to `--tree`. Defaults to \verb{"rand{25},pars{25}"}.
 #' @param seed Integer. Random seed for reproducible tree search initialization. Defaults to `NULL` (random).
 #' @param threads Integer. CPU cores requested per SLURM task (`--cpus-per-task`). Defaults to `75`.
@@ -875,8 +874,8 @@ generate_ml_search_script <- function(alignment_file, partition_file, constraint
 #'
 #' Maps clade support derived from non-parametric bootstrap replicates onto the best maximum-likelihood
 #' tree topology. The replicates themselves carry no metric: `RAxML-NG --bootstrap` writes plain
-#' topologies with branch lengths, and the metric is chosen here, at the summarising step. The same
-#' replicate file can therefore be summarised under both metrics without recomputation.
+#' topologies with branch lengths, and the metric is chosen here, at the summarizing step. The same
+#' replicate file can therefore be summarized under both metrics without recomputation.
 #'
 #' Defaults to Felsenstein's Bootstrap Percentage (FBP; Felsenstein, 1985), which is the metric the
 #' Cactaceae and Caryophyllales dating literature reports and the only one against which this tree can
@@ -885,7 +884,7 @@ generate_ml_search_script <- function(alignment_file, partition_file, constraint
 #'
 #' The two are not on a common scale and TBE must never be reported as though it were a bootstrap
 #' percentage. TBE is bounded below by FBP and its inflation grows with clade size. Measured on the
-#' 987 unconstrained nodes of the 1024 terminal supermatrix tree (2026-09-17): median TBE 0.783
+#' 987 unconstrained nodes of the 1024-terminal reference tree: median TBE 0.783
 #' against median FBP 0.470, with the gap reaching 0.732 for clades of 51 to 200 terminals (median FBP 0.220,
 #' median TBE 0.952). Reporting TBE places 61 percent of nodes above 0.70; FBP places 29 percent (703 nodes
 #' collapsing below 0.70).
@@ -1029,7 +1028,7 @@ calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = d
 #' @param part_file Character. Path to partition file specifying substitution models. Optional if `aln_file` is an `.rba` binary file. Defaults to `NULL`.
 #' @param constraint_file Character. Path to Newick topological constraint scaffold file.
 #' @param bs_trees Integer. Total number of non-parametric bootstrap trees to generate. Defaults to `500`.
-#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()` rather than naming a terminal by hand.
+#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()`; do not name a terminal by hand.
 #' @param seed Integer. Random seed for reproducible bootstrap initialization. Defaults to `NULL` (random).
 #' @param threads Integer. Number of CPU threads. Defaults to `8` (or detected P-cores).
 #' @param workers Integer. Parallel worker process count. If `NULL` (default), automatically calculated as `max(1L, as.integer(threads / threads_per_worker))`.
@@ -1125,8 +1124,8 @@ run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, con
 #' Uses coarse-grained parallelization via Slurm Job Arrays (`#SBATCH --array=1-N`), pre-parsing to compressed binary `.rba` format
 #' to optimize disk I/O, dynamic per-task seed multiplication for statistical independence, and a configurable thread-to-worker ratio.
 #'
-#' The default `threads_per_worker = 4L` is configured to optimize throughput on multi-core compute nodes. In a production run of this workload
-#' (1023 taxa, 11 partitions), using `--threads 40 --workers 10` (4 threads per worker) on an AMD EPYC node provided efficient per-worker
+#' The default `threads_per_worker = 4L` is configured to optimize throughput on multi-core compute nodes. In a production run on the reference dataset,
+#' using `--threads 40 --workers 10` (4 threads per worker) on an AMD EPYC node provided efficient per-worker
 #' memory and CPU allocation. This ratio is dataset- and hardware-dependent (it trades per-worker single-tree search speed against the number of trees searched in
 #' parallel); if you migrate to different node hardware or a markedly different supermatrix size, re-validate it
 #' empirically with a short trial run before committing a full job array to it.
@@ -1134,12 +1133,12 @@ run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, con
 #' @param alignment_file Character. Path to input PHYLIP alignment file.
 #' @param partition_file Character. Path to partition file.
 #' @param constraint_file Character. Path to constraint scaffold tree file.
-#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()` rather than naming a terminal by hand.
+#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()`; do not name a terminal by hand.
 #' @param bs_per_rep Integer. Number of bootstrap trees generated per chunk replicate. Defaults to `500`.
 #' @param max_reps Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (`1-max_reps`). Defaults to `2`,
 #'   giving a total array target of `bs_per_rep * max_reps = 1000` bootstrap trees. This provides a safety margin over the autoMRE
-#'   convergence point observed in a production run of this exact dataset (1023 taxa, 11 partitions), which converged (`bs-cutoff = 0.03`,
-#'   FBP) after 600 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
+#'   convergence point observed in the reference run (1024 taxa, 11 partitions), which converged (`bs-cutoff = 0.03`,
+#'   FBP) after 650 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
 #'   sampling scheme. Always confirm convergence with `check_bs_convergence()` on the collected trees (via `collect_bootstraps()`) rather
 #'   than assuming `bs_per_rep * max_reps` is sufficient; increase `max_reps` and re-run `collect_bootstraps()` if it is not.
 #' @param base_seed Integer. Base random seed for dynamic seed calculation (`SEED=$(( SLURM_ARRAY_TASK_ID * base_seed ))`). Defaults to `NULL` (random).
@@ -1573,11 +1572,11 @@ as.character.cactus_bs_convergence <- function(x, ...) {
 #' @param part_file Character. Path to partition file specifying substitution models.
 #' @param best_tree_file Character. Path to reference maximum-likelihood tree topology file (used as constraint).
 #' @param bs_trees Integer. Total number of temporal bootstrap trees to generate. Defaults to `500`.
-#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()` rather than naming a terminal by hand.
+#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()`; do not name a terminal by hand.
 #' @param seed Integer. Random seed for reproducible temporal bootstrap initialization. Defaults to `NULL` (random).
 #' @param threads Integer. Number of CPU threads. Defaults to `4`.
 #' @param workers Integer or NULL. Number of parallel tree search workers. If `NULL`, auto-configured. Defaults to `NULL`.
-#' @param blopt Character. Branch length optimization method (`"nr_safe"` or `"nr_fast"`). Defaults to `"nr_safe"` for robust numerical convergence across partitioned alignments.
+#' @param blopt Character. Branch length optimization method (`"nr_safe"` or `"nr_fast"`). Defaults to `"nr_safe"`, the more conservative of the two.
 #' @param output_dir Character. Directory path to save output temporal bootstrap trees. Defaults to `dirname(aln_file)`.
 #' @param prefix Character. Output file prefix. Defaults to `"cactus_temporal"`.
 #' @return Character path to the resulting temporal bootstrap trees file (`.raxml.bootstraps`).
@@ -1647,7 +1646,7 @@ calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, b
 #' @param alignment_file Character. Path to input PHYLIP alignment file.
 #' @param partition_file Character. Path to partition file specifying substitution models.
 #' @param best_tree_file Character. Path to best scoring maximum-likelihood tree topology file (used as constraint).
-#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()` rather than naming a terminal by hand.
+#' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()`; do not name a terminal by hand.
 #' @param bs_trees Integer. Total number of temporal bootstrap trees to generate. Defaults to `500`.
 #' @param base_seed Integer. Random seed for reproducible initialization. Defaults to `NULL` (random).
 #' @param threads Integer. Number of CPU cores requested per SLURM task (`--cpus-per-task`). Defaults to `40`.
@@ -1845,8 +1844,8 @@ extract_species_binomial <- function(header) {
 #' all multi-accession species, and prepares gene tree collections for coalescent analyses (e.g., `ASTRAL-III`).
 #'
 #' @param fasta_dir Character. Directory containing curated aligned FASTA sequence files (e.g., `4_Cleaned/cleaned_markers_ingroup` or `5_MAFFT_Cleaned/aligned_markers`).
-#' @param output_dir Character. Root destination directory path to store Newick tree files and monophyly audit tables.
-#' @param include_outgroup Logical. Include outgroup taxa in single-locus gene tree reconstruction? Defaults to `FALSE` to avoid Long-Branch Attraction (LBA) artifacts when evaluating species monophyly within the ingroup radiation. Set to `TRUE` when preparing unrooted gene trees for `ASTRAL-III`.
+#' @param output_dir Character. Root destination directory path to store Newick tree files and monophyly tables.
+#' @param include_outgroup Logical. Include outgroup taxa in single-locus gene tree reconstruction? Defaults to `FALSE`, so that species monophyly is assessed within the ingroup. Set to `TRUE` when preparing unrooted gene trees for `ASTRAL-III`.
 #' @param method Character. Phylogenetic inference method (`"auto"`, `"raxml"`, `"phangorn"`, or `"nj"`). Defaults to `"auto"`.
 #' @param model Character. Nucleotide substitution model for maximum-likelihood search. Defaults to `"GTR+G"`.
 #' @param threads Integer. Number of computational threads. Defaults to `2L`.

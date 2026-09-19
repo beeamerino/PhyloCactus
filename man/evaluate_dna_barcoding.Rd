@@ -34,25 +34,9 @@ None. The function signals an error.
 }
 \description{
 Not implemented. This function is a documented placeholder that signals an error when
-called. It is retained so that the section keeps a stable entry point in the reference
-index and in the tutorial series while its analytical strategy is being defined.
-}
-\details{
-The implementation withdrawn in v0.4.2 computed intra- and inter-specific pairwise
-distance distributions, derived the DNA barcode gap per locus, and trained a
-\code{DECIPHER::LearnTaxa} classifier against the botanical backbone of Korotkova
-\emph{et al}. (2021). It was withdrawn for two reasons. First, its accuracy estimates were
-produced by evaluating the trained classifier on the same sequence set used for
-training, which measures memorisation rather than diagnostic performance and therefore
-reported values that could not be interpreted. Second, the barcode gap thresholds it
-applied were fixed rather than derived from the empirical distributions of the family,
-a decision that cannot be made before the phylogenetic backbone and its visualisation
-are complete.
-
-The full rationale, the design decisions already taken, and the criteria that must be
-met before the section is reopened are documented in
-\code{vignette("tutorial-5-cactus-phylogeny-barcoding")}. The withdrawn implementation
-remains recoverable from the repository history.
+called. It keeps a stable entry point for the section in the reference index and in the
+tutorial series while the analytical strategy is being defined. The scope of the section
+and its open questions are set out in \code{vignette("tutorial-5-cactus-phylogeny-barcoding")}.
 }
 \examples{
 \dontrun{
@@ -66,7 +50,4 @@ Hernández, H. M., Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müll
 Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G. (2021). Cactaceae at
 Caryophyllales.org - a dynamic online species-level taxonomic backbone for the family.
 \emph{Willdenowia}, 51(2), 251-270. \doi{10.3372/wi.51.51208}
-}
-\seealso{
-\code{\link[=infer_gene_trees]{infer_gene_trees()}} for single-locus gene tree inference, which remains available.
 }

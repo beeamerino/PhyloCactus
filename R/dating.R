@@ -8,10 +8,7 @@
 #' supermatrix, 477 of 2044 branches are clamped, identically at factor 100 and at factor 1, once
 #' `numsites` is divided by the same factor as `automate_treePL()` does. What the factor does
 #' change is the scale of the rate parameters and therefore the numerical conditioning of the
-#' optimisation.
-#'
-#' Earlier versions of this documentation described the rescaling as a guard against numerical
-#' underflow. That is not what it does.
+#' optimization.
 #'
 #' @param tree An object of class `phylo` representing a phylogenetic tree.
 #' @param factor Numeric multiplier applied to all edge lengths. Defaults to `100`.
@@ -111,7 +108,7 @@ root_on_clade <- function(phy, outgroup) {
 #' Abort When a Tree Handed to treePL Is Not Rooted
 #'
 #' `treePL` requires a rooted tree. Given an unrooted one it does not refuse the input, it fails
-#' during optimisation with a message that does not name the cause. Parsing the file and checking
+#' during optimization with a message that does not name the cause. Parsing the file and checking
 #' rootedness first turns that into an actionable error.
 #'
 #' @param treefile Character. Path to a Newick tree file.
@@ -161,7 +158,7 @@ root_on_clade <- function(phy, outgroup) {
 #' The tree path is read from the `treefile` line of `cfg_file` and checked for rootedness before
 #' the binary is invoked, because `treePL` fails opaquely on an unrooted tree. When the
 #' configuration declares no `treefile`, or the declared path cannot be resolved, the check is
-#' skipped with a warning rather than blocking the run.
+#' skipped with a warning and the run continues.
 #' @return Invisible NULL upon system command execution.
 #' @references
 #' Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
@@ -200,16 +197,16 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL){
   cat(Sys.time(), "- Finished:", label, "\n\n")
 }
 
-#' Report a treePL run whose gradient optimisation never moved
+#' Report a treePL run whose gradient optimization never moved
 #'
-#' `treePL` optimises in two phases: simulated annealing, then gradient descent (L-BFGS through
+#' `treePL` optimizes in two phases: simulated annealing, then gradient descent (L-BFGS through
 #' NLopt) from the point annealing reached. Both phases print their objective to the log, as
 #' `exit siman:` and `after opt calc2:`. When the second equals the first to every printed digit,
 #' the gradient phase improved nothing: what the program writes out is the annealing endpoint, not
-#' an optimised penalized-likelihood solution. The exit status is still 0 and the chronogram is
+#' an optimized penalized-likelihood solution. The exit status is still 0 and the chronogram is
 #' still ultrametric, so nothing else in this package notices.
 #'
-#' Measured on 2026-09-02 across twenty-one runs of the same tree at seven smoothing values. The
+#' Measured across twenty-one runs of the same tree at seven smoothing values. The
 #' two runs whose ages were coherent improved by 0.90% and 0.71%; the five that returned absurd
 #' ages improved by 0.0000%, 0.0000%, 0.0000%, 0.0000% and 0.0034%. One of those put `ACP_root` at
 #' 188.13 Ma, older than the crown of Caryophyllales, and another moved `Opuntioideae_mrca` from
@@ -230,7 +227,7 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL){
 #'   smallest measured in a coherent one.
 #'
 #'   Note that on a very small tree the objective is small enough that the printed digits, rather
-#'   than the optimiser, set the floor on a measurable improvement, and annealing can legitimately
+#'   than the optimizer, set the floor on a measurable improvement, and annealing can legitimately
 #'   land where the gradient phase has nothing to add. The package's own fixture trees trigger this
 #'   warning for that reason. It is informative on trees of the size this pipeline is built for.
 #' @return Invisibly the relative improvement, or `NA` when the log does not carry both numbers.
@@ -275,16 +272,11 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL){
 
 #' Confirm that treePL used the smoothing value it was given
 #'
-#' treePL's configuration keyword is `smooth`. A line reading `smoothing = X` is not recognised,
-#' is discarded without any message, and the run proceeds on the built-in default of 10. Between
-#' the first dated tree of this project and 2026-09-02 the wrapper wrote `smoothing`, so every
-#' chronogram was produced at 10 and the cross-validation that selects the value never reached the
-#' program. Nothing in the outputs revealed it: the trees were valid, ultrametric, and plausible.
+#' treePL's configuration keyword is `smooth`. A line reading `smoothing = X` is not recognized,
+#' is discarded without any message, and the run proceeds on the built-in default of 10.
 #'
-#' The one place the truth was visible is treePL's own log, which prints the smoothing it is
-#' actually using. This compares that number against the configuration and stops when they differ,
-#' because a chronogram dated at a smoothing nobody chose is not a result, and the failure is
-#' silent by construction.
+#' treePL's log prints the smoothing it actually uses. This compares that number against the
+#' configuration and stops when they differ.
 #'
 #' @param log_file Path to the captured treePL output.
 #' @param cfg_file Path to the configuration handed to treePL.
@@ -320,55 +312,50 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL){
 #'
 #' Automates cross-validation parameter optimization, rate smoothing selection, and chronogram estimation
 #' across temporal bootstrap replicates using `treePL` (Sanderson, 2002; Smith & O'Meara, 2012).
-#' Propagating temporal uncertainty across branch-length resampled bootstrap trees yields empirical confidence intervals
-#' for node age estimates. Every treePL output (maximum-likelihood chronogram and each bootstrap chronogram) is validated
+#' Dating the bootstrap trees, which share the maximum-likelihood topology, gives confidence intervals on node
+#' ages that reflect branch-length uncertainty. Every treePL output (maximum-likelihood chronogram and each bootstrap chronogram) is validated
 #' after execution: the resulting tree must exist, be non-empty, parse as a valid Newick topology, and be ultrametric.
 #' A run that fails silently (e.g., because the underlying `treePL` binary did not converge) is therefore reported as an
-#' explicit error rather than propagated downstream as a corrupted chronogram. Note that the optimal rate-smoothing
-#' parameter is cross-validated once on the maximum-likelihood tree and reused, unmodified, across all bootstrap
-#' replicates; this is a standard computational shortcut for treePL-based dating pipelines (per-replicate cross-validation
-#' is prohibitively expensive at typical bootstrap replicate counts), following the empirical protocol of Maurin (2020).
+#' explicit error. The rate-smoothing parameter is selected once, by cross-validation on the maximum-likelihood tree,
+#' and reused for all bootstrap replicates, as in the protocol of Maurin (2020); cross-validating each replicate would
+#' multiply the run time by the number of replicates. The confidence intervals therefore do not include uncertainty
+#' in the smoothing value.
 #'
 #' @param cfg_file Character. Path to primary `treePL` configuration file specifying calibration bounds and parameters.
-#' @param wrapper_sh Retired on 2026-09-02 and ignored, with a warning. Priming, cross-validation
-#'   and dating of the maximum-likelihood tree now run through [run_treePL_cv()], which implements
-#'   the protocol of Maurin (2020) in R. The shell script this argument used to point at carried no
-#'   licence and wrote `smoothing = `, a keyword `treePL` discards without a message, so every
-#'   chronogram produced before that date was dated at the built-in default of 10.
+#' @param wrapper_sh Ignored, with a warning. Priming, cross-validation and dating of the
+#'   maximum-likelihood tree run through [run_treePL_cv()], which implements the protocol of
+#'   Maurin (2020) in R.
 #' @param n_prime Integer. Priming repeats on the maximum-likelihood tree. See [run_treePL_cv()].
-#' @param prime_rule `"lowest"` (Maurin 2020) or `"modal"` (the retired shell script's rule).
+#' @param prime_rule `"lowest"` (Maurin 2020) or `"modal"`. See [run_treePL_cv()].
 #' @param cv_method `"randomcv"`, recommended by Maurin (2020) as faster and more stable, or `"cv"`
-#'   for leave-one-out, which is what the retired shell script used.
-#' @param cvstart,cvstop Ends of the cross-validation smoothing grid. The defaults reach lower than
-#'   the shell script's fixed floor of 1e-04, which the August 2026 run of this project hit without
-#'   the chi-square curve ever turning.
+#'   for leave-one-out.
+#' @param cvstart,cvstop Ends of the cross-validation smoothing grid, 1e+03 and 1e-14 by default.
+#'   See [run_treePL_cv()] for how the shape of the resulting curve is classified and reported.
 #' @param ml_tree_file Character. Path to input maximum-likelihood reference tree file.
 #' @param bs_trees_file Character. Path to input temporal bootstrap trees file.
 #' @param results_dir Character. Directory path to save intermediate optimization results.
 #' @param treePL_out Character. Destination directory path for final output chronograms.
 #' @param num_bs Integer or NULL. Maximum number of temporal bootstrap trees to evaluate. If `NULL`, processes all available trees.
-#' @param numsites Integer or NULL. Alignment length, in sites, of the supermatrix actually analysed. If `NULL`, the `numsites` line already present in `cfg_file` is used. This must be the length of the matrix `RAxML-NG` analysed (typically the `*.raxml.reduced.phy` produced by `preprocess_partitions()`), not a rounded figure: `treePL` uses it to convert branch lengths into expected substitution counts, so an incorrect value biases the rate smoothing. Declare the true alignment length here; the division by `rescale_factor` is applied internally.
+#' @param numsites Integer or NULL. Alignment length, in sites, of the supermatrix actually analyzed. If `NULL`, the `numsites` line already present in `cfg_file` is used. This must be the length of the matrix `RAxML-NG` analyzed (typically the `*.raxml.reduced.phy` produced by `preprocess_partitions()`), not a rounded figure: `treePL` uses it to convert branch lengths into expected substitution counts, so an incorrect value biases the rate smoothing. Declare the true alignment length here; the division by `rescale_factor` is applied internally.
 #' @param rescale_factor Numeric. Multiplier applied to every branch length before dating, and the divisor applied to `numsites` in the configurations written for `treePL`. Defaults to `100`.
 #'
 #'   **Why the two are one argument.** `treePL` reads a branch as `edge.length * numsites` expected substitutions. Branch lengths are rescaled because a substantial fraction of a low-divergence plastid supermatrix falls below the internal minimum `treePL` imposes on a branch, and those branches would otherwise be clamped to a common value, erasing the rate signal across them. Rescaling without dividing `numsites` by the same factor leaves `treePL` reading a matrix it believes to be `rescale_factor` times more informative than it is. The likelihood term grows with the substitution counts while the roughness penalty does not, so the effective smoothing becomes weaker than the nominal value by that factor, rates vary almost freely between branches, and node ages stop being determined by the data and start being determined by the edges of the region the calibrations leave feasible. The symptom is a chronogram whose calibrated nodes sit exactly on their bounds. Coupling the two here makes the pair impossible to separate by accident.
 #' @param outgroup Character vector of terminals used to root the maximum-likelihood tree and every bootstrap replicate before penalized-likelihood dating, or `NULL`. Defaults to `NULL`, in which case the set is derived from the maximum-likelihood tree with `resolve_rooting_outgroup()`. Adapt `outgroup` or specify `resolve_rooting_outgroup(pattern = ...)` to the outgroup lineage sampled in your dataset (for example `"^(Talinum|Talinella)_"` when Talinaceae roots the tree). No fixed default is offered because a clade-level rooting set depends on what the supermatrix sampled and cannot be a package constant.
 #'
-#'   **Why a clade rather than a terminal.** Rooting is imposed after the search: `RAxML-NG` returns an unrooted topology and the root is placed on a chosen edge. Naming a single terminal of a sampled outgroup clade places the root *inside* that clade, leaving it paraphyletic in the final tree and collapsing its crown node onto the root. Any calibration addressed by the MRCA of that clade then lands on the root instead of on the node it was written for. Supplying the whole clade places the root on its stem edge, which is the intended edge. Rooting is performed by `root_on_clade()`, which also handles the basal polytomy `RAxML-NG` writes.
+#'   **Why a clade and not a terminal.** Rooting is imposed after the search: `RAxML-NG` returns an unrooted topology and the root is placed on a chosen edge. Naming a single terminal of a sampled outgroup clade places the root *inside* that clade, leaving it paraphyletic in the final tree and collapsing its crown node onto the root. Any calibration addressed by the MRCA of that clade then lands on the root instead of on the node it was written for. Supplying the whole clade places the root on its stem edge, which is the intended edge. Rooting is performed by `root_on_clade()`, which also handles the basal polytomy `RAxML-NG` writes.
 #'
-#'   bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error.
+#'   Bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error.
 #'
 #'   **Topological assumption.** Placing the root on the outgroup lineage (Talinaceae or Portulacaceae) establishes the basal split for dating. In the reference dataset, Talinaceae roots the tree, placing the root on the stem of the ACP clade (Anacampserotaceae, Cactaceae, Portulacaceae) and allowing maximum-likelihood inference to test alternative topological resolutions among the three core families (Ramirez-Barahona et al., 2020; Zuntini et al., 2024). State this assumption in Methods, and treat the root age as conditional on it.
 #' @param seed Integer or NULL. Seed for every stochastic step of the run: R's choice of which
 #'   bootstrap replicates to date, and `treePL`'s own `seed` keyword, which is written into the
 #'   maximum-likelihood configuration and, offset by the replicate index, into each replicate's.
-#'   `treePL` seeds itself from the clock when the keyword is absent. Note that while setting `seed`
-#'   is necessary, it is only sufficient for reproducible cross-validation when `cv_nthreads = 1L`:
-#'   `treePL`'s simulated annealing routine invokes the non-reentrant standard C `rand()` across
-#'   OpenMP threads when `nthreads > 1`, leaving multi-threaded cross-validation non-reproducible.
-#'   Defaults to `NULL`, which draws one and reports it; record the reported value, as it is
-#'   required to reproduce the run.
-#' @param cv_nthreads Integer. Number of threads for the cross-validation stage. Defaults to `1L`
-#'   to guarantee deterministic, bit-for-bit reproducible cross-validation curves. See [run_treePL_cv()].
+#'   `treePL` seeds itself from the clock when the keyword is absent. A fixed `seed` reproduces the
+#'   run when cross-validation uses one thread, which is the default of `cv_nthreads`. Defaults to
+#'   `NULL`, which draws one and reports it; record the reported value, as it is required to
+#'   reproduce the run.
+#' @param cv_nthreads Integer. Number of threads for the cross-validation stage. Defaults to `1L`,
+#'   which makes the cross-validation curve reproducible for a given `seed`. See [run_treePL_cv()].
 #' @param notify Logical. Send an email when the run ends, whether it finished or failed. The
 #'   message carries the status, the start and end times, the elapsed time, the host and the paths
 #'   of the outputs. Intended for this step in particular, which runs on a local machine for hours
@@ -379,9 +366,7 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL){
 #'   `credentials`. Both default to `NULL`, which reads the `MY_EMAIL` and `PHYLOCACTUS_SMTP_CREDS`
 #'   environment variables.
 #' @return Invisibly, the path of the dated maximum-likelihood chronogram written into
-#'   `treePL_out`. Until 2026-09-18 this field read "Invisible NULL upon completion", which the
-#'   function has never done: the value is what `resolve_run_paths()` and the publication step
-#'   downstream expect to receive from it.
+#'   `treePL_out`.
 #' @references
 #' Sanderson, M. J. (2002). Estimating absolute rates of molecular evolution and divergence times:
 #' a penalized likelihood approach. *Molecular Biology and Evolution*, 19(1), 101-109. \doi{10.1093/oxfordjournals.molbev.a003974}
@@ -408,7 +393,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             rescale_factor = 100, n_prime = 10L,
                             prime_rule = c("lowest", "modal"),
                             cv_method = c("randomcv", "cv"),
-                            cvstart = 1e3, cvstop = 1e-8, cv_nthreads = 1L, wrapper_sh = NULL,
+                            cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, wrapper_sh = NULL,
                             notify = FALSE, notify_to = NULL, notify_credentials = NULL) {
 
   # The work itself is unchanged and lives in .automate_treePL_run(). This wrapper exists only to
@@ -469,7 +454,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             rescale_factor = 100, n_prime = 10L,
                             prime_rule = c("lowest", "modal"),
                             cv_method = c("randomcv", "cv"),
-                            cvstart = 1e3, cvstop = 1e-8, cv_nthreads = 1L, wrapper_sh = NULL) {
+                            cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, wrapper_sh = NULL) {
 
   prime_rule <- match.arg(prime_rule)
   cv_method <- match.arg(cv_method)
@@ -605,7 +590,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
   # Carried out by run_treePL_cv(), which implements the protocol of Maurin (2020) in R. Until
   # 2026-09-02 this called out to a vendored copy of an unlicensed shell script; see the notes in
   # R/treepl_cv.R for why that had to go and what the shell script got wrong.
-  if (!file.exists(file.path(ml_dir, "treepl_ML_tree.tre"))) {
+  ml_cached <- file.exists(file.path(ml_dir, "treepl_ML_tree.tre"))
+  if (!ml_cached) {
     run_treePL_cv(cfg_file = cfg_ml_scaled_abs,
                   tree_file = ml_tree_fixed_file_abs,
                   label = "ML_tree",
@@ -658,25 +644,14 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
   }
   cat("Best smoothing strategy chosen:", best_smoothing, "\n")
 
-  # Cross-validation selects by minimum chi-square over a grid the wrapper fixes at 1e-04 to 1e+04.
-  # A minimum at either end is not a selection, it is the grid running out: the curve was still
-  # descending. In the August 2026 run it was monotone all the way down and the wrapper took
-  # cvstart, 1e-04, which is effectively no smoothing at all, and every calibrated node came back
-  # sitting on its own bound.
+  # The shape of the cross-validation curve (interior minimum, edge of the grid or plateau) is
+  # reported by run_treePL_cv() when it runs. When the maximum-likelihood stage is read from disk
+  # instead, the same classification is repeated here on the stored curve.
   cv_file <- file.path(ml_dir, "cv_ML_tree")
-  if (file.exists(cv_file)) {
-    cv_raw <- readLines(cv_file, warn = FALSE)
-    grid <- suppressWarnings(as.numeric(gsub("[()]", "",
-      regmatches(cv_raw, regexpr("\\([0-9.eE+-]+\\)", cv_raw)))))
-    grid <- grid[is.finite(grid)]
-    if (length(grid) > 1L && isTRUE(best_smoothing %in% range(grid))) {
-      warning("Cross-validation selected smoothing = ", best_smoothing,
-              ", which is the ", if (best_smoothing == min(grid)) "lowest" else "highest",
-              " value on the tested grid (", min(grid), " to ", max(grid),
-              "). The curve had not turned, so this is the edge of the search rather than an ",
-              "optimum, and the chronogram should not be interpreted until the grid is widened ",
-              "or the selection is justified on other grounds.", call. = FALSE)
-    }
+  if (ml_cached && file.exists(cv_file)) {
+    tryCatch(invisible(.select_cv_smoothing(cv_file)),
+             error = function(e) message("The cross-validation curve on disk could not be ",
+                                         "classified: ", conditionMessage(e)))
   }
   
   # STEP 4: Prepare and rescale Bootstrap Trees (from concatenated)
@@ -881,10 +856,10 @@ calibration_tips <- function(constraints, column, value, tip_labels) {
 #'     reported as a warning because the run is still valid.}
 #' }
 #'
-#' A descendant maximum below the ancestor minimum is deliberately not flagged: it only states
+#' A descendant maximum below the ancestor minimum is not flagged: it only states
 #' that the descendant is necessarily younger, which is the normal condition for nested bounds.
 #'
-#' Two further conditions are checked because they silently reassign bounds rather than break the
+#' Two further conditions are checked because they silently reassign bounds without stopping the
 #' run: a row resolving to fewer than two terminals, which the configuration builder drops without
 #' reporting, and two rows resolving to the same node, which makes the later `min`/`max` pair
 #' overwrite the earlier one.
@@ -996,7 +971,7 @@ check_calibration_consistency <- function(calibs, tree, constraints, strict = TR
 #' Report Which Calibrated Nodes Came Back Sitting on a Bound
 #'
 #' A node whose estimated age equals one of its own bounds was not estimated. Penalized likelihood
-#' returned the constraint, and the number carries the prior rather than the data. This is
+#' returned the constraint, and the number reflects the prior, not the data. This is
 #' invisible in the output chronogram, which looks like any other, so it has to be checked
 #' explicitly before a date is reported or interpreted.
 #'
@@ -1017,8 +992,8 @@ check_calibration_consistency <- function(calibs, tree, constraints, strict = TR
 #'   sitting on a bound. Defaults to `0.05`.
 #' @param bootstraps Optional. The bootstrap chronograms, as a `multiPhylo`, a list of `phylo`, or
 #'   a path to a Newick file with one tree per line (`bsTree_treePL.tree`). When supplied, the
-#'   verdict is taken from the fraction of replicates sitting on a bound rather than from the
-#'   single point estimate, and a node pinned in most replicates is reported even when the
+#'   verdict is taken from the fraction of replicates sitting on a bound, not from the single
+#'   point estimate, and a node pinned in most replicates is reported even when the
 #'   maximum-likelihood tree alone would have called it interior. Defaults to `NULL`.
 #' @return Invisibly, a data frame with one row per calibrated node: its age in the
 #'   maximum-likelihood chronogram, its bounds, a `status` of `"at_min"`, `"at_max"` or
@@ -1190,9 +1165,8 @@ report_bound_adherence <- function(chronogram, calibs, constraints, tol = 0.05,
 
 #' A treePL configuration identical to another except for its smoothing and output
 #'
-#' Both spellings of the keyword are stripped, not just the current one: configurations written
-#' before 2026-09-02 carry `smoothing`, and leaving it in place would put two smoothing lines in
-#' the file. The value is formatted without scientific notation because `1e-04` is not what
+#' Both spellings of the keyword (`smooth` and `smoothing`) are stripped, so the file never carries
+#' two smoothing lines. The value is formatted without scientific notation because `1e-04` is not what
 #' treePL's parser expects, and a smoothing silently reset to the default is the failure this
 #' whole report exists to make visible.
 #'
@@ -1212,24 +1186,21 @@ report_bound_adherence <- function(chronogram, calibs, constraints, tol = 0.05,
 #' Age of Every Calibrated Node Across a Range of Rate-Smoothing Values
 #'
 #' Penalized likelihood requires a rate-smoothing parameter, and treePL selects one by
-#' cross-validation. When the cross-validated minimum falls on the edge of the tested grid, as it
-#' does for this dataset, the selection is the boundary of the search rather than an optimum, and
-#' a reader is entitled to ask whether the reported ages are an artefact of that choice. This
-#' function answers the question directly: it dates the same tree, under the same calibrations, at
+#' cross-validation. When the cross-validation curve has no interior minimum, because the minimum
+#' falls on the edge of the grid or on a plateau where several values fit about equally well, the
+#' selected value is not an optimum, and the reported ages may depend on that choice. This
+#' function tests that dependence: it dates the same tree, under the same calibrations, at
 #' each smoothing value given, and reports the age of every calibrated node in each run.
 #'
 #' The nodes come from the `mrca` lines of the configuration itself, so the table covers exactly
 #' the nodes the analysis makes claims about and cannot drift out of step with them.
 #'
 #' Each run is checked with the same verification applied everywhere else: the smoothing treePL
-#' reports in its log must match the smoothing requested. Until 2026-09-02 the pipeline wrote the
-#' keyword `smoothing`, which treePL does not recognise and discards without a message, so every
-#' chronogram was produced at the built-in default of 10 and a table like this one would have
-#' shown five identical rows. A run whose smoothing cannot be confirmed is reported as such
-#' rather than tabulated as a result.
+#' reports in its log must match the smoothing requested. A run whose smoothing cannot be confirmed
+#' is reported as such and not tabulated as a result.
 #'
 #' @param cfg_file Character. A treePL configuration carrying the tree, `numsites`, the
-#'   optimisation parameters and the calibrations. The configuration written for the
+#'   optimization parameters and the calibrations. The configuration written for the
 #'   maximum-likelihood chronogram is the natural input.
 #' @param out_csv Character or `NULL`. Where to write the table. Defaults to
 #'   `TABLE_smoothing_sensitivity.csv` beside `cfg_file`.

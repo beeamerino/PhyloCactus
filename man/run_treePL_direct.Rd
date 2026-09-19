@@ -23,7 +23,7 @@ Executes the \code{treePL} binary directly to estimate divergence times from a p
 The tree path is read from the \code{treefile} line of \code{cfg_file} and checked for rootedness before
 the binary is invoked, because \code{treePL} fails opaquely on an unrooted tree. When the
 configuration declares no \code{treefile}, or the declared path cannot be resolved, the check is
-skipped with a warning rather than blocking the run.
+skipped with a warning and the run continues.
 }
 \references{
 Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
