@@ -365,6 +365,10 @@ species in the registry across pipeline stages.</li>
 molecular completeness by category, threatened species without
 sequences, national endemism, threats and habitats.</li>
 </ol>
+<p>The figures on this page are drawn from the reference outputs
+distributed with the package in <code>inst/extdata</code>. The script
+<code>tutorial-3-cactus-phylogeny-visualization.R</code> draws the same
+figures from the outputs of your own run.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
@@ -399,20 +403,18 @@ sequences, national endemism, threats and habitats.</li>
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Load previously written analysis files directly from the tutorial workspace</span></span>
-<span><span class="va">species_summary_iucn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"9_Visualization/tables/TABLE_species_all_data.csv"</span><span class="op">)</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co"># Reference outputs distributed with the package. The script in inst/scripts reads the same</span></span>
+<span><span class="co"># tables from the run directory.</span></span>
+<span><span class="va">species_summary_iucn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"phylocactus_table_species.csv"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span>,</span>
+<span>                                 show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">marker_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"6_Concatenated/final_tables/TABLE_marker_statistics.csv"</span><span class="op">)</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">marker_stats</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"phylocactus_table_markers.csv"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span>,</span>
+<span>                         show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">marker_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">marker_stats</span><span class="op">$</span><span class="va">marker</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">prioritization_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"9_Visualization/tables/TABLE_conservation_prioritization_gaps.csv"</span><span class="op">)</span></span>
-<span><span class="va">TABLE_conservation_prioritization_gaps</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">prioritization_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="va">prioritization_file</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
-<span>  <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">status_pipeline</span> <span class="op">==</span> <span class="st">"unsampled_checklist_gap"</span>, <span class="va">iucn_category</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CR"</span>, <span class="st">"EN"</span>, <span class="st">"VU"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>genus <span class="op">=</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_extract.html" class="external-link">str_extract</a></span><span class="op">(</span><span class="va">species</span>, <span class="st">"^[A-Za-z]+"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
+<span><span class="va">TABLE_conservation_prioritization_gaps</span> <span class="op">&lt;-</span> <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">status_pipeline</span> <span class="op">==</span> <span class="st">"unsampled_checklist_gap"</span>, <span class="va">iucn_category</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CR"</span>, <span class="st">"EN"</span>, <span class="st">"VU"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>genus <span class="op">=</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_extract.html" class="external-link">str_extract</a></span><span class="op">(</span><span class="va">species</span>, <span class="st">"^[A-Za-z]+"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Data Summary Table Generation</span></span>
 <span><span class="va">TABLE_dataset_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
@@ -450,6 +452,72 @@ sequences, national endemism, threats and habitats.</li>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">TABLE_dataset_summary</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="left">metric</th>
+<th align="right">value</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Total ingroup species in checklist</td>
+<td align="right">1965</td>
+</tr>
+<tr class="even">
+<td align="left">Total species with sequences (supermatrix)</td>
+<td align="right">1060</td>
+</tr>
+<tr class="odd">
+<td align="left">Ingroup species with sequences (supermatrix)</td>
+<td align="right">1022</td>
+</tr>
+<tr class="even">
+<td align="left">Outgroup species with sequences (supermatrix)</td>
+<td align="right">38</td>
+</tr>
+<tr class="odd">
+<td align="left">Ingroup species sampled and dated in tree</td>
+<td align="right">986</td>
+</tr>
+<tr class="even">
+<td align="left">Outgroup reference species in tree</td>
+<td align="right">38</td>
+</tr>
+<tr class="odd">
+<td align="left">Sequenced ingroup species collapsed duplicates</td>
+<td align="right">36</td>
+</tr>
+<tr class="even">
+<td align="left">Unsampled ingroup species (checklist gaps)</td>
+<td align="right">943</td>
+</tr>
+<tr class="odd">
+<td align="left">Total species in final phylogeny</td>
+<td align="right">1024</td>
+</tr>
+<tr class="even">
+<td align="left">Ingroup species mapped to IUCN assessment</td>
+<td align="right">1114</td>
+</tr>
+<tr class="odd">
+<td align="left">Ingroup species without IUCN assessment</td>
+<td align="right">851</td>
+</tr>
+<tr class="even">
+<td align="left">Threatened species in phylogeny (VU/EN/CR)
+(Ingroup)</td>
+<td align="right">180</td>
+</tr>
+<tr class="odd">
+<td align="left">Threatened unsequenced species (VU/EN/CR) (Priority
+gaps)</td>
+<td align="right">134</td>
+</tr>
+<tr class="even">
+<td align="left">Endemic species in phylogeny (Ingroup)</td>
+<td align="right">534</td>
+</tr>
+</tbody>
+</table>
 <div class="section level4">
 <h4 id="figure-1-marker-coverage-across-species">Figure 1: Marker Coverage Across Species<a class="anchor" aria-label="anchor" href="#figure-1-marker-coverage-across-species"></a>
 </h4>
@@ -467,6 +535,7 @@ dataset.</p>
 <span>    y <span class="op">=</span> <span class="st">"Number of species"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="va">p1</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_coverage-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-2-distribution-of-marker-completeness">Figure 2: Distribution of Marker Completeness<a class="anchor" aria-label="anchor" href="#figure-2-distribution-of-marker-completeness"></a>
@@ -486,6 +555,7 @@ tree.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="va">p2</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_completeness-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-3-marker-presence-heatmap">Figure 3: Marker Presence Heatmap<a class="anchor" aria-label="anchor" href="#figure-3-marker-presence-heatmap"></a>
@@ -515,6 +585,7 @@ tree.</p>
 <span>    panel.grid.minor <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="va">p3</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_heatmap-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-4-supermatrix-structure">Figure 4: Supermatrix Structure<a class="anchor" aria-label="anchor" href="#figure-4-supermatrix-structure"></a>
@@ -522,7 +593,7 @@ tree.</p>
 <p>Start and end coordinates of each partition in the concatenated
 supermatrix.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ranges_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"6_Concatenated/final_tables/TABLE_marker_ranges.tsv"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">ranges_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"phylocactus_table_marker_ranges.tsv"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">ranges_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">TABLE_marker_ranges</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_tsv</a></span><span class="op">(</span><span class="va">ranges_file</span>, show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="st">"marker"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">TABLE_marker_ranges</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -539,6 +610,7 @@ supermatrix.</p>
 <span>    <span class="va">p4</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/supermatrix_structure-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-5-marker-informativeness">Figure 5: Marker Informativeness<a class="anchor" aria-label="anchor" href="#figure-5-marker-informativeness"></a>
@@ -558,6 +630,7 @@ each partition.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="va">p5</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_informativeness-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-6-maximum-likelihood-tree-with-bootstrap-support-fbp">Figure 6: Maximum-Likelihood Tree with Bootstrap Support (FBP)<a class="anchor" aria-label="anchor" href="#figure-6-maximum-likelihood-tree-with-bootstrap-support-fbp"></a>
@@ -571,10 +644,7 @@ as constrained and carry no FBP value.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yulab-smu.top/contribution-tree-data/" class="external-link">tidytree</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Load support tree from Module 9</span></span>
-<span><span class="va">supp_tree_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"7_Phylogenetics/cactus_support.raxml.support"</span><span class="op">)</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">supp_tree_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">supp_tree_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"7_Phylogenetics/cactus.raxml.bestTree"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
+<span><span class="va">supp_tree_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"phylocactus_ml_tree.tree"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">supp_tree_file</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">supp_tree_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">ml_tree</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.tree.html" class="external-link">read.tree</a></span><span class="op">(</span><span class="va">supp_tree_file</span><span class="op">)</span></span>
@@ -610,7 +680,7 @@ as constrained and carry no FBP value.</p>
 <span></span>
 <span>    <span class="co"># Identify topologically constrained nodes (cactus_constraints.tree)</span></span>
 <span>    <span class="co"># to avoid presenting algorithmic constraints as empirical bootstrap support</span></span>
-<span>    <span class="va">constraint_tree_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"7_Phylogenetics/cactus_constraints.tree"</span><span class="op">)</span></span>
+<span>    <span class="va">constraint_tree_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"phylocactus_constraint_tree.tree"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span></span>
 <span>    <span class="va">constrained_nodes_vec</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span></span>
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">constraint_tree_file</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">constraint_tree_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>      <span class="va">constrained_df</span> <span class="op">&lt;-</span> <span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span></span>
@@ -655,6 +725,7 @@ as constrained and carry no FBP value.</p>
 <span>    <span class="va">p6</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_6_ml_tree-1.png" class="r-plt" alt="" width="816" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-7-full-size-maximum-likelihood-tree">Figure 7: Full-Size Maximum-Likelihood Tree<a class="anchor" aria-label="anchor" href="#figure-7-full-size-maximum-likelihood-tree"></a>
@@ -707,10 +778,7 @@ and <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/ext
 100 bootstrap chronograms, and the axis shows geological periods.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load summary chronogram from Module 10</span></span>
-<span><span class="va">chrono_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"8_Dating/dated_summary_hpd.tree"</span><span class="op">)</span></span>
-<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">chrono_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">chrono_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"8_Dating/BestTree_treePL.tree"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
+<span><span class="va">chrono_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"phylocactus_chronogram_hpd.tree"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">chrono_file</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">chrono_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">chrono_beast</span> <span class="op">&lt;-</span> <span class="fu">treeio</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/treeio/man/beast-parser.html" class="external-link">read.beast</a></span><span class="op">(</span><span class="va">chrono_file</span><span class="op">)</span></span>
@@ -754,6 +822,7 @@ and <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/ext
 <span>    <span class="va">p8</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_8_chronogram-1.png" class="r-plt" alt="" width="816" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-9-full-size-chronogram">Figure 9: Full-Size Chronogram<a class="anchor" aria-label="anchor" href="#figure-9-full-size-chronogram"></a>
@@ -820,6 +889,7 @@ duplicates (36), accepted species without sequences (943), and outgroups
 <span>    y <span class="op">=</span> <span class="st">"Number of species"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="va">p10</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_10_species_composition-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-11-iucn-categories">Figure 11: IUCN Categories<a class="anchor" aria-label="anchor" href="#figure-11-iucn-categories"></a>
@@ -843,6 +913,7 @@ category.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="va">p11</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_11_iucn_categories-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-12-molecular-completeness-vs--iucn-category">Figure 12: Molecular Completeness vs. IUCN Category<a class="anchor" aria-label="anchor" href="#figure-12-molecular-completeness-vs--iucn-category"></a>
@@ -871,6 +942,7 @@ are represented by fewer loci.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="va">p12</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_12_completeness_vs_iucn-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-13-threatened-species-without-sequence-data-by-genus">Figure 13: Threatened Species Without Sequence Data by Genus<a class="anchor" aria-label="anchor" href="#figure-13-threatened-species-without-sequence-data-by-genus"></a>
@@ -905,6 +977,7 @@ field collecting and sequencing.</p>
 <span>    y <span class="op">=</span> <span class="st">"Number of threatened unsequenced species"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="va">p13</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_13_conservation_prioritization_gaps-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-14-endemic-species-by-country">Figure 14: Endemic Species by Country<a class="anchor" aria-label="anchor" href="#figure-14-endemic-species-by-country"></a>
@@ -930,6 +1003,7 @@ tree, based on IUCN records of endemism.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="va">p14</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_14_endemism_by_country-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-15-endemic-species-by-country-and-iucn-category">Figure 15: Endemic Species by Country and IUCN Category<a class="anchor" aria-label="anchor" href="#figure-15-endemic-species-by-country-and-iucn-category"></a>
@@ -960,6 +1034,7 @@ countries with the most endemics.</p>
 <span>    <span class="va">p15</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_15_iucn_by_country-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-16-primary-ecological-threats">Figure 16: Primary Ecological Threats<a class="anchor" aria-label="anchor" href="#figure-16-primary-ecological-threats"></a>
@@ -987,6 +1062,7 @@ in the tree, ranked by frequency.</p>
 <span>    <span class="va">p16</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_16_threats-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level4">
 <h4 id="figure-17-primary-ecological-habitats">Figure 17: Primary Ecological Habitats<a class="anchor" aria-label="anchor" href="#figure-17-primary-ecological-habitats"></a>
@@ -1014,6 +1090,7 @@ in the tree.</p>
 <span>    <span class="va">p17</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
+<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_17_habitats-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
 </div>
 </div>
 </div>

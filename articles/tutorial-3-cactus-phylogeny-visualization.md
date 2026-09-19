@@ -296,6 +296,11 @@ Module 12 produces seventeen figures in five groups:
     completeness by category, threatened species without sequences,
     national endemism, threats and habitats.
 
+The figures on this page are drawn from the reference outputs
+distributed with the package in `inst/extdata`. The script
+`tutorial-3-cactus-phylogeny-visualization.R` draws the same figures
+from the outputs of your own run.
+
 ``` r
 
 library(PhyloCactus)
@@ -331,20 +336,18 @@ theme_phylocactus <- function(base_size = 12, base_family = "") {
     )
 }
 
-# Load previously written analysis files directly from the tutorial workspace
-species_summary_iucn <- read_csv(file.path(tutorial_dir, "9_Visualization/tables/TABLE_species_all_data.csv"), show_col_types = FALSE)
+# Reference outputs distributed with the package. The script in inst/scripts reads the same
+# tables from the run directory.
+species_summary_iucn <- read_csv(system.file("extdata", "phylocactus_table_species.csv", package = "PhyloCactus"),
+                                 show_col_types = FALSE)
 
-marker_stats <- read_csv(file.path(tutorial_dir, "6_Concatenated/final_tables/TABLE_marker_statistics.csv"), show_col_types = FALSE)
+marker_stats <- read_csv(system.file("extdata", "phylocactus_table_markers.csv", package = "PhyloCactus"),
+                         show_col_types = FALSE)
 marker_cols <- intersect(marker_stats$marker, names(species_summary_iucn))
 
-prioritization_file <- file.path(tutorial_dir, "9_Visualization/tables/TABLE_conservation_prioritization_gaps.csv")
-TABLE_conservation_prioritization_gaps <- if (file.exists(prioritization_file)) {
-  read_csv(prioritization_file, show_col_types = FALSE)
-} else {
-  species_summary_iucn %>%
-    filter(status_pipeline == "unsampled_checklist_gap", iucn_category %in% c("CR", "EN", "VU")) %>%
-    mutate(genus = stringr::str_extract(species, "^[A-Za-z]+"))
-}
+TABLE_conservation_prioritization_gaps <- species_summary_iucn %>%
+  filter(status_pipeline == "unsampled_checklist_gap", iucn_category %in% c("CR", "EN", "VU")) %>%
+  mutate(genus = stringr::str_extract(species, "^[A-Za-z]+"))
 
 # Data Summary Table Generation
 TABLE_dataset_summary <- tibble(
@@ -384,6 +387,23 @@ TABLE_dataset_summary <- tibble(
 knitr::kable(TABLE_dataset_summary)
 ```
 
+| metric                                                    | value |
+|:----------------------------------------------------------|------:|
+| Total ingroup species in checklist                        |  1965 |
+| Total species with sequences (supermatrix)                |  1060 |
+| Ingroup species with sequences (supermatrix)              |  1022 |
+| Outgroup species with sequences (supermatrix)             |    38 |
+| Ingroup species sampled and dated in tree                 |   986 |
+| Outgroup reference species in tree                        |    38 |
+| Sequenced ingroup species collapsed duplicates            |    36 |
+| Unsampled ingroup species (checklist gaps)                |   943 |
+| Total species in final phylogeny                          |  1024 |
+| Ingroup species mapped to IUCN assessment                 |  1114 |
+| Ingroup species without IUCN assessment                   |   851 |
+| Threatened species in phylogeny (VU/EN/CR) (Ingroup)      |   180 |
+| Threatened unsequenced species (VU/EN/CR) (Priority gaps) |   134 |
+| Endemic species in phylogeny (Ingroup)                    |   534 |
+
 #### Figure 1: Marker Coverage Across Species
 
 Number of species with sequence data for each locus in the final
@@ -404,6 +424,8 @@ p1 <- ggplot(marker_stats, aes(x = reorder(marker, n_taxa), y = n_taxa)) +
 p1
 ```
 
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_coverage-1.png)
+
 #### Figure 2: Distribution of Marker Completeness
 
 Number of loci per species for the tips of the maximum-likelihood tree.
@@ -423,6 +445,8 @@ if ("retained_markers" %in% names(species_summary_iucn)) {
   p2
 }
 ```
+
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_completeness-1.png)
 
 #### Figure 3: Marker Presence Heatmap
 
@@ -455,6 +479,8 @@ p3 <- ggplot(heatmap_data, aes(x = marker, y = fct_rev(species), fill = present)
 p3
 ```
 
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_heatmap-1.png)
+
 #### Figure 4: Supermatrix Structure
 
 Start and end coordinates of each partition in the concatenated
@@ -462,7 +488,7 @@ supermatrix.
 
 ``` r
 
-ranges_file <- file.path(tutorial_dir, "6_Concatenated/final_tables/TABLE_marker_ranges.tsv")
+ranges_file <- system.file("extdata", "phylocactus_table_marker_ranges.tsv", package = "PhyloCactus")
 if (file.exists(ranges_file)) {
   TABLE_marker_ranges <- read_tsv(ranges_file, show_col_types = FALSE)
   if ("marker" %in% names(TABLE_marker_ranges)) {
@@ -480,6 +506,8 @@ if (file.exists(ranges_file)) {
   }
 }
 ```
+
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/supermatrix_structure-1.png)
 
 #### Figure 5: Marker Informativeness
 
@@ -502,6 +530,8 @@ if ("parsimony_informative" %in% names(marker_stats)) {
 }
 ```
 
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_informativeness-1.png)
+
 #### Figure 6: Maximum-Likelihood Tree with Bootstrap Support (FBP)
 
 Maximum-likelihood tree with FBP values on internal nodes and the major
@@ -515,10 +545,7 @@ library(ape)
 library(tidytree)
 
 # Load support tree from Module 9
-supp_tree_file <- file.path(tutorial_dir, "7_Phylogenetics/cactus_support.raxml.support")
-if (!file.exists(supp_tree_file)) {
-  supp_tree_file <- file.path(tutorial_dir, "7_Phylogenetics/cactus.raxml.bestTree")
-}
+supp_tree_file <- system.file("extdata", "phylocactus_ml_tree.tree", package = "PhyloCactus")
 
 if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
   ml_tree <- ape::read.tree(supp_tree_file)
@@ -554,7 +581,7 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
 
     # Identify topologically constrained nodes (cactus_constraints.tree)
     # to avoid presenting algorithmic constraints as empirical bootstrap support
-    constraint_tree_file <- file.path(tutorial_dir, "7_Phylogenetics/cactus_constraints.tree")
+    constraint_tree_file <- system.file("extdata", "phylocactus_constraint_tree.tree", package = "PhyloCactus")
     constrained_nodes_vec <- integer(0)
     if (file.exists(constraint_tree_file) && nzchar(constraint_tree_file)) {
       constrained_df <- tryCatch(
@@ -600,6 +627,8 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
   }
 }
 ```
+
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_6_ml_tree-1.png)
 
 #### Figure 7: Full-Size Maximum-Likelihood Tree
 
@@ -661,10 +690,7 @@ the axis shows geological periods.
 ``` r
 
 # Load summary chronogram from Module 10
-chrono_file <- file.path(tutorial_dir, "8_Dating/dated_summary_hpd.tree")
-if (!file.exists(chrono_file)) {
-  chrono_file <- file.path(tutorial_dir, "8_Dating/BestTree_treePL.tree")
-}
+chrono_file <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")
 
 if (file.exists(chrono_file) && nzchar(chrono_file)) {
   chrono_beast <- treeio::read.beast(chrono_file)
@@ -709,6 +735,8 @@ if (file.exists(chrono_file) && nzchar(chrono_file)) {
   }
 }
 ```
+
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_8_chronogram-1.png)
 
 #### Figure 9: Full-Size Chronogram
 
@@ -786,6 +814,8 @@ p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(s
 p10
 ```
 
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_10_species_composition-1.png)
+
 #### Figure 11: IUCN Categories
 
 Number of ingroup species in the tree in each IUCN Red List category.
@@ -809,6 +839,8 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   p11
 }
 ```
+
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_11_iucn_categories-1.png)
 
 #### Figure 12: Molecular Completeness vs. IUCN Category
 
@@ -839,6 +871,8 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   p12
 }
 ```
+
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_12_completeness_vs_iucn-1.png)
 
 #### Figure 13: Threatened Species Without Sequence Data by Genus
 
@@ -875,6 +909,8 @@ p13 <- ggplot(plot_gaps_genus %>% filter(genus %in% top_gap_genera),
 p13
 ```
 
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_13_conservation_prioritization_gaps-1.png)
+
 #### Figure 14: Endemic Species by Country
 
 Countries ranked by the number of endemic ingroup species in the tree,
@@ -901,6 +937,8 @@ if (any(species_summary_iucn$iucn_is_endemic, na.rm = TRUE)) {
   p14
 }
 ```
+
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_14_endemism_by_country-1.png)
 
 #### Figure 15: Endemic Species by Country and IUCN Category
 
@@ -934,6 +972,8 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 }
 ```
 
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_15_iucn_by_country-1.png)
+
 #### Figure 16: Primary Ecological Threats
 
 Threat classes recorded by the IUCN Red List for the ingroup species in
@@ -963,6 +1003,8 @@ if (any(!is.na(species_summary_iucn$iucn_threat_names))) {
 }
 ```
 
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_16_threats-1.png)
+
 #### Figure 17: Primary Ecological Habitats
 
 Habitat classes recorded by the IUCN Red List for the ingroup species in
@@ -991,6 +1033,8 @@ if (any(!is.na(species_summary_iucn$iucn_habitat_names))) {
   }
 }
 ```
+
+![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_17_habitats-1.png)
 
 ## Conclusion
 
