@@ -3,8 +3,8 @@
 Maps clade support derived from non-parametric bootstrap replicates onto
 the best maximum-likelihood tree topology. The replicates themselves
 carry no metric: `RAxML-NG --bootstrap` writes plain topologies with
-branch lengths, and the metric is chosen here, at the summarising step.
-The same replicate file can therefore be summarised under both metrics
+branch lengths, and the metric is chosen here, at the summarizing step.
+The same replicate file can therefore be summarized under both metrics
 without recomputation.
 
 ## Usage
@@ -70,11 +70,12 @@ secondary column.
 
 The two are not on a common scale and TBE must never be reported as
 though it were a bootstrap percentage. TBE is bounded below by FBP and
-its inflation grows with clade size. Measured on the 986 unconstrained
-nodes of the 1023 terminal supermatrix tree (2026-09-06): median TBE
-0.783 against median FBP 0.468, with the gap reaching 0.704 for clades
-of 51 to 200 terminals. Reporting TBE would place 61 percent of nodes
-above 0.70; FBP places 29 percent.
+its inflation grows with clade size. Measured on the 987 unconstrained
+nodes of the 1024-terminal reference tree: median TBE 0.783 against
+median FBP 0.470, with the gap reaching 0.732 for clades of 51 to 200
+terminals (median FBP 0.220, median TBE 0.952). Reporting TBE places 61
+percent of nodes above 0.70; FBP places 29 percent (703 nodes collapsing
+below 0.70).
 
 Support values are meaningless for any bipartition imposed through
 `--tree-constraint`, because every replicate reproduces it by

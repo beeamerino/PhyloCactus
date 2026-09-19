@@ -121,6 +121,8 @@ divergence time chronograms over temporal bootstrap cohorts.
 - [`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)
   : Automate treePL Divergence Time Estimation Pipeline Across Bootstrap
   Cohorts
+- [`send_run_notification()`](https://beeamerino.github.io/PhyloCactus/reference/send_run_notification.md)
+  : Send a Run Notification by Email
 - [`report_smoothing_sensitivity()`](https://beeamerino.github.io/PhyloCactus/reference/report_smoothing_sensitivity.md)
   : Age of Every Calibrated Node Across a Range of Rate-Smoothing Values
 - [`check_calibration_consistency()`](https://beeamerino.github.io/PhyloCactus/reference/check_calibration_consistency.md)
@@ -183,6 +185,8 @@ Internal functions for phylogenetic visualization and data preparation.
   : Build Taxonomic Annotation Registry across Tree Levels
 - [`compute_group_nodes()`](https://beeamerino.github.io/PhyloCactus/reference/compute_group_nodes.md)
   : Compute Most Recent Common Ancestor (MRCA) Nodes for Taxon Groups
+- [`extract_species_binomial()`](https://beeamerino.github.io/PhyloCactus/reference/extract_species_binomial.md)
+  : Extract Standardized Species Binomial from Sequence Header
 - [`get_annotation_nodes()`](https://beeamerino.github.io/PhyloCactus/reference/get_annotation_nodes.md)
   : Extract Monophyletic Internal Annotation Nodes
 - [`prepare_tip_annotation()`](https://beeamerino.github.io/PhyloCactus/reference/prepare_tip_annotation.md)

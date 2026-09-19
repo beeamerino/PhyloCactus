@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +55,8 @@
 <span>  preserve_iupac <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  protect_pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  protect_markers <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  rooting_pattern <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  rooting_pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mafft_exec <span class="op">=</span> <span class="st">"mafft"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -92,11 +93,15 @@
 
 
 <dt id="arg-protect-markers">protect_markers<a class="anchor" aria-label="anchor" href="#arg-protect-markers"></a></dt>
-<dd><p>Character vector or <code>NULL</code>. Names of the markers, as they appear in <code>input_dir</code> without the file extension, in which <code>protect_pattern</code> is honoured. <code>NULL</code>, the default, applies the exemption to every marker. Naming markers restricts it to the loci where a short outgroup sequence is worth its gap cost, instead of retaining every fragment of every terminal across the whole matrix: in the August 2026 dataset only <code>trnL_trnF</code> lost rooting terminals, and only there does the exemption buy anything.</p></dd>
+<dd><p>Character vector or <code>NULL</code>. Names of the markers, as they appear in <code>input_dir</code> without the file extension, in which <code>protect_pattern</code> is honored. <code>NULL</code>, the default, applies the exemption to every marker. Naming markers restricts it to the loci where a short outgroup sequence is worth its gap cost, instead of retaining every fragment of every terminal across the whole matrix: in the August 2026 dataset only <code>trnL_trnF</code> lost rooting terminals, and only there does the exemption buy anything.</p></dd>
 
 
 <dt id="arg-rooting-pattern">rooting_pattern<a class="anchor" aria-label="anchor" href="#arg-rooting-pattern"></a></dt>
 <dd><p>Character or <code>NULL</code>. Regular expression identifying the terminals the tree will be rooted on. It exempts nothing. Any matching terminal removed by the occupancy filters is named in a warning and flagged in <code>LOG_SEQ_FILTER_&lt;marker&gt;.csv</code>. A filter that deletes the rooting outgroup must say so at the moment it does it, not four modules downstream: the five <em>Portulaca</em> sequences of <code>trnL_trnF</code>, 297 bp against a threshold of about 353, were removed silently and the branch subtending the outgroup collapsed from roughly 600 expected substitutions to 0.03. Defaults to <code>NULL</code>.</p></dd>
+
+
+<dt id="arg-mafft-exec">mafft_exec<a class="anchor" aria-label="anchor" href="#arg-mafft-exec"></a></dt>
+<dd><p>Character. System command or full path to the executable <code>MAFFT</code> binary, as in <code><a href="run_alignment_pipeline.html">run_alignment_pipeline()</a></code>. A binary configured for Stage 2 has to be configurable for Stage 5 as well, or the two stages of one run align with different versions. Defaults to <code>"mafft"</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -107,14 +112,14 @@
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Re-estimates positional homology alignments (<code>MAFFT</code>) across curated locus FASTA files,
 performs alignment quality masking with <code>DECIPHER</code>, filters low-occupancy sequences,
-and generates comprehensive alignment statistics.</p>
+and writes alignment statistics.</p>
 <p>This is the step that removes individual taxa from a locus without removing the locus itself.
 Sequences that entered Stage 4 as short fragments, typically outgroup accessions that were
 masked separately from the ingroup in <code><a href="run_alignment_pipeline.html">run_alignment_pipeline()</a></code>, fail the occupancy filter here
 and disappear from the supermatrix. Passing <code>mask_alignment_regions = FALSE</code> for the outgroup in
 Stage 2 so that masking happens only once, jointly, at this stage, is preferable to relaxing
 these thresholds or resorting to <code>protect_pattern</code>, because retaining very short sequences
-inflates the gap fraction of the final supermatrix and can destabilise the affected terminals.</p>
+inflates the gap fraction of the final supermatrix and can destabilize the affected terminals.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

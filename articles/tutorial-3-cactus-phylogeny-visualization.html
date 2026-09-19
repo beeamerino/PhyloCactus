@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-09-08</h4>
+            <h4 data-toc-skip class="date">2026-09-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-3-cactus-phylogeny-visualization.Rmd" class="external-link"><code>vignettes/tutorial-3-cactus-phylogeny-visualization.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-3-cactus-phylogeny-visualization.Rmd</code></div>
@@ -78,39 +78,21 @@ Meriño</h4>
 <div class="section level2">
 <h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
 </h2>
-<p>This tutorial represents the final stage of the core phylogenetic
-reconstruction workflow implemented in
-<strong><code>PhyloCactus</code></strong>, focusing on the integration,
-visualization, and biological interpretation of the inferred
-evolutionary framework. Following the assembly of the multilocus
-supermatrix, maximum-likelihood inference, branch support assessment,
-and divergence time estimation described in <a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html">Tutorial
+<p>This tutorial covers the last stage of the core workflow: integration
+of species metadata, figures of the phylogenetic products, and summaries
+of conservation status. It uses the supermatrix, maximum-likelihood
+tree, bootstrap support values and chronogram produced in <a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html">Tutorial
 1</a> and <a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html">Tutorial
-2</a>, this module transforms the resulting phylogenetic outputs into an
-integrative evolutionary resource.</p>
-<p>In <strong>Module 11</strong>, phylogenetic results are enriched with
-external biological information by integrating species-level metadata
-and conservation assessments from the <strong>IUCN Red List</strong>.
-This step generates a comprehensive evolutionary registry that links
-molecular sampling effort, taxonomic validation, distributional
-information, and conservation status. These integrated data provide the
-foundation for evaluating biases in molecular representation,
-identifying threatened evolutionary lineages, and exploring patterns of
-conservation vulnerability across the cactus tree of life.</p>
-<p>In <strong>Module 12</strong>, the final phylogenetic products and
-molecular datasets are visualized and synthesized for downstream
-comparative analyses. The sequence dataset and concatenated supermatrix
-are evaluated for locus coverage and informativeness, while the
-maximum-likelihood topology and time-calibrated chronogram are displayed
-with branch support values (FBP) and divergence time uncertainty
-intervals. Finally, taxonomic reconciliation and macroevolutionary
-patterns across IUCN conservation categories, endemism, and ecological
-threats are synthesized into publication-ready visual summaries.</p>
-<p>Together, this tutorial completes the construction of a reproducible
-phylogenetic framework for <strong>Cactaceae</strong>, integrating
-evolutionary history, temporal diversification, and conservation
-information into a unified analytical resource suitable for
-macroevolutionary, biogeographic, and conservation studies.</p>
+2</a>.</p>
+<p><strong>Module 11</strong> reconciles the species in the supermatrix
+with the accepted checklist of Cactaceae and retrieves species-level
+assessments from the IUCN Red List. The result is one table that
+records, for each species, its taxonomic status, molecular sampling,
+placement in the tree, distribution and conservation category.</p>
+<p><strong>Module 12</strong> produces seventeen figures in five groups:
+coverage of the molecular dataset, structure of the supermatrix, the
+tree and the chronogram, the species accounting across pipeline stages,
+and summaries of IUCN categories, endemism, threats and habitats.</p>
 </div>
 <div class="section level2">
 <h2 id="complete-pipeline-execution-workflow">Complete Pipeline Execution Workflow<a class="anchor" aria-label="anchor" href="#complete-pipeline-execution-workflow"></a>
@@ -118,26 +100,24 @@ macroevolutionary, biogeographic, and conservation studies.</p>
 <div class="section level3">
 <h3 id="setup-creating-a-clean-workspace">Setup: Creating a Clean Workspace<a class="anchor" aria-label="anchor" href="#setup-creating-a-clean-workspace"></a>
 </h3>
-<p>Before proceeding, ensure you have the required packages installed
-and set up. We rely on the <code>rredlist</code> package to interact
-securely with the IUCN Red List API.</p>
+<p>Install the required packages before running this module. IUCN
+queries use the <code>rredlist</code> package.</p>
 <p>To install the required dependencies:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">required_pkgs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dplyr"</span>, <span class="st">"tidyr"</span>, <span class="st">"stringr"</span>, <span class="st">"readr"</span>, <span class="st">"ggplot2"</span>, <span class="st">"forcats"</span>, <span class="st">"purrr"</span>, <span class="st">"scales"</span>, <span class="st">"rredlist"</span><span class="op">)</span></span>
 <span><span class="va">new_pkgs</span> <span class="op">&lt;-</span> <span class="va">required_pkgs</span><span class="op">[</span><span class="op">!</span><span class="op">(</span><span class="va">required_pkgs</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/installed.packages.html" class="external-link">installed.packages</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span>,<span class="st">"Package"</span><span class="op">]</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">new_pkgs</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="va">new_pkgs</span><span class="op">)</span></span></code></pre></div>
-<p><strong>IUCN Red List API Access:</strong> To retrieve threat
-categories automatically, generate a free API token from the <a href="https://apiv3.iucnredlist.org/api/v3/token" class="external-link">IUCN Red List API
-Token Generation Page</a>, submit the request form, and store the
-resulting key in your <code>.Renviron</code> file using
-<code>usethis::edit_r_environ()</code> under the variable
-<code>IUCN_REDLIST_KEY="your_api_key"</code>.</p>
+<p><strong>IUCN Red List API token.</strong> The IUCN queries require a
+personal API token. Run <code><a href="https://docs.ropensci.org/rredlist/reference/rl_use_iucn.html" class="external-link">rredlist::rl_use_iucn()</a></code> to open the
+registration page, store the token in <code>.Renviron</code> (opened
+with <code>usethis::edit_r_environ()</code>) as
+<code>IUCN_REDLIST_KEY="your_api_key"</code>, and restart R.</p>
 </div>
 <div class="section level3">
 <h3 id="data-setup-pre-processing">Data Setup &amp; Pre-processing<a class="anchor" aria-label="anchor" href="#data-setup-pre-processing"></a>
 </h3>
-<p>To quickly run the analyses in this module, you can copy the entire
-executable script to your tutorial directory:</p>
+<p>To run the module as a script, copy the executable script to the
+tutorial directory:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tutorial_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/path.expand.html" class="external-link">path.expand</a></span><span class="op">(</span><span class="st">"~/Desktop/PhyloCactus_Tutorial"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="va">tutorial_dir</span><span class="op">)</span></span>
@@ -152,53 +132,30 @@ executable script to your tutorial directory:</p>
 <h3 id="module-11-taxonomic-reconciliation-and-iucn-metadata-enrichment">Module 11: Taxonomic Reconciliation and IUCN Metadata
 Enrichment<a class="anchor" aria-label="anchor" href="#module-11-taxonomic-reconciliation-and-iucn-metadata-enrichment"></a>
 </h3>
-<p>This vignette assumes that you have completed <a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html">Tutorial
-2: Inference &amp; Dating</a>. Following the completion of
-maximum-likelihood phylogenetic inference, branch support estimation,
-and divergence time reconstruction, this module focuses on enriching the
-resulting evolutionary framework with biological metadata and generating
-comprehensive visual summaries of the final multilocus dataset.</p>
+<p>This module requires the outputs of <a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html">Tutorial
+2: Phylogenetic Inference and Divergence Time Estimation</a>.</p>
 <div class="section level4">
-<h4 id="the-scientific-importance-of-an-integrative-evolutionary-registry">The Scientific Importance of an Integrative Evolutionary
-Registry<a class="anchor" aria-label="anchor" href="#the-scientific-importance-of-an-integrative-evolutionary-registry"></a>
+<h4 id="species-registry">Species Registry<a class="anchor" aria-label="anchor" href="#species-registry"></a>
 </h4>
-<p>At this stage, <code>PhyloCactus</code> generates an integrative
-phylogenetic and conservation registry that links evolutionary
-relationships with complementary biological information, including
-taxonomic validation, geographic distribution, habitat associations,
-IUCN conservation assessments, and molecular sampling coverage.</p>
-<p>The family <strong>Cactaceae</strong> contains numerous
-geographically restricted endemics and highly vulnerable evolutionary
-lineages affected by habitat loss, anthropogenic disturbance, and
-climate-driven environmental change.</p>
-<p>By integrating conservation assessments directly with phylogenetic
-relationships, this framework enables the identification of
-<strong>Evolutionarily Distinct and Globally Endangered (EDGE)</strong>
-lineages, the evaluation of conservation gaps across evolutionary
-history, and the detection of biases in current molecular sampling
-efforts.</p>
-<p>Taxonomic reconciliation is conducted against the dynamic Cactaceae
-species checklist published by the Caryophyllales.org initiative
-(Korotkova <em>et al</em>. 2021), comprising 1,965 accepted species.
-When combined with 38 outgroup species from Anacampserotaceae,
-Portulacaceae, and Talinaceae, the total taxonomic evaluation universe
-encompasses 2,003 taxa. Across the pipeline, 1,060 species possess
-sequence data in the multilocus supermatrix (1,022 ingroup and 38
-outgroup), while the inferred maximum-likelihood tree and dated
-chronogram resolve 1,023 terminal tips (985 ingroup and 38 outgroup).
-Exactly 37 ingroup species were collapsed by <code>RAxML-NG</code> due
-to identical sequence profiles across their sampled loci. Crucially, the
-943 accepted Cactaceae species lacking sequence data represent critical
-gaps for biodiversity inventory, among which 134 are categorized as
-threatened (CR, EN, VU) by the IUCN Red List.</p>
-<p>Because reconciling taxonomic identities, molecular datasets, and
-conservation metadata requires extensive data harmonization,
-<code>PhyloCactus</code> provides dedicated API wrappers
-(<code>get_iucn_data(sp_name)</code>) to facilitate reproducible
-retrieval and integration of species-level information from the IUCN Red
-List database.</p>
-<p>Now, let’s load our libraries and prepare the dataset outputs from
-previous <strong>Modules</strong>.</p>
+<p>The species registry links each accepted species to its molecular
+sampling, its placement in the tree and its IUCN assessment. With these
+data, threatened species without sequence data can be listed, and the
+molecular sampling of threatened and non-threatened species can be
+compared. The registry can also serve as input for phylogeny-based
+conservation metrics such as EDGE scores (Isaac <em>et al</em>. 2007),
+which are not computed in this tutorial.</p>
+<p>Names are reconciled against the Cactaceae checklist of
+Caryophyllales.org (Korotkova <em>et al</em>. 2021; export of 1 July
+2026), which lists 1,965 accepted species. With 38 outgroup species from
+Anacampserotaceae, Portulacaceae and Talinaceae, the registry contains
+2,003 species. The supermatrix includes 1,060 of them (1,022 ingroup, 38
+outgroup). The maximum-likelihood tree and the chronogram have 1,024
+tips (986 ingroup, 38 outgroup), because <code>RAxML-NG</code> removed
+36 ingroup species whose sequences were identical to those of another
+species. The other 943 accepted species have no sequence data, and 134
+of them are listed as threatened (CR, EN or VU) by the IUCN Red
+List.</p>
+<p>Load the libraries and the outputs of the previous modules:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># ============================================================</span></span>
 <span><span class="co"># LIBRARIES</span></span>
@@ -229,7 +186,7 @@ previous <strong>Modules</strong>.</p>
 <span><span class="va">accepted_list_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span></span>
 <span><span class="va">constraints_csv_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"cactus_constraints.csv"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Tree outputs from Stages 9 and 10</span></span>
+<span><span class="co"># Tree outputs from Modules 9 and 10</span></span>
 <span><span class="va">supp_tree_file</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="st">"7_Phylogenetics/cactus_support.raxml.support"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="st">"7_Phylogenetics/cactus_support.raxml.support"</span></span>
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
@@ -260,7 +217,7 @@ previous <strong>Modules</strong>.</p>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="st">"family_sheet"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">accepted_list</span><span class="op">)</span><span class="op">)</span> <span class="va">accepted_list</span><span class="op">$</span><span class="va">family_sheet</span> <span class="op">&lt;-</span> <span class="st">"Cactaceae"</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Normalization helper ensuring perfect match with molecular alignment keys</span></span>
+<span><span class="co"># Normalize names to the format of the alignment keys</span></span>
 <span><span class="va">normalize_species</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">x</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_replace.html" class="external-link">str_replace_all</a></span><span class="op">(</span><span class="st">"\u00d7"</span>, <span class="st">""</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -343,32 +300,20 @@ previous <strong>Modules</strong>.</p>
 <div class="section level4">
 <h4 id="iucn-metadata-enrichment">IUCN Metadata Enrichment<a class="anchor" aria-label="anchor" href="#iucn-metadata-enrichment"></a>
 </h4>
-<p>The integration of conservation information represents an essential
-step for connecting phylogenetic reconstruction with biological
-interpretation. In this module, <code>PhyloCactus</code> retrieves
-species-level conservation assessments from the <strong>IUCN Red List
-database</strong> through the <code>rredlist</code> API interface and
-integrates these records with the final phylogenetic dataset.</p>
-<p>The enrichment process links each taxon included in the molecular
-framework with standardized conservation attributes, including IUCN
-category, assessment status, endemic distribution information, habitat
-associations, and documented threats. This approach allows researchers
-to evaluate whether evolutionary diversity is adequately represented
-within conservation assessments and to identify potential mismatches
-between phylogenetic distinctiveness and extinction risk.</p>
-<p>Because taxonomic discrepancies frequently occur between molecular
-datasets and external biodiversity databases, the workflow first
-performs taxonomic reconciliation against the accepted species checklist
-(Korotkova <em>et al</em>. 2021) before retrieving conservation
-information. Only validated species-level names are queried against the
-IUCN API, reducing false matches and ensuring that conservation metadata
-are associated with the appropriate evolutionary units.</p>
-<p>The resulting enriched table
-(<code>TABLE_species_all_data.csv</code>) represents the integrated
-species registry used throughout the visualization section. This
-resource combines phylogenetic placement, molecular sampling
-information, taxonomic validation, and conservation attributes into a
-single reproducible dataset for downstream comparative analyses.</p>
+<p><code><a href="../reference/get_iucn_data.html">get_iucn_data()</a></code> retrieves the latest IUCN assessment of
+one species through the <code>rredlist</code> interface to the IUCN Red
+List API. It returns the category, criteria, population trend, countries
+of occurrence, endemism, habitats, threats, and use and trade. The query
+covers the 1,965 checklist species and the 38 outgroups. All ingroup
+names in the supermatrix match the checklist, so every query uses an
+accepted name.</p>
+<p>The output table (<code>TABLE_species_all_data.csv</code>) is used by
+all figures in Module 12. The chunk also writes
+<code>TABLE_conservation_prioritization_gaps.csv</code>, which lists the
+threatened species without sequence data. If the table already exists,
+it is read from disk and the API is not queried. IUCN assessments change
+between Red List versions; record the version used with
+<code><a href="https://docs.ropensci.org/rredlist/reference/rl_version.html" class="external-link">rredlist::rl_version()</a></code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># ============================================================</span></span>
 <span><span class="co"># RUN IUCN EXTRACTION OR LOAD INTEGRATED SPECIES TABLE</span></span>
@@ -397,41 +342,28 @@ single reproducible dataset for downstream comparative analyses.</p>
 </div>
 </div>
 <div class="section level3">
-<h3 id="module-12-comprehensive-data-visualization-and-macroevolutionary-summaries">Module 12: Comprehensive Data Visualization and Macroevolutionary
-Summaries<a class="anchor" aria-label="anchor" href="#module-12-comprehensive-data-visualization-and-macroevolutionary-summaries"></a>
+<h3 id="module-12-figures-and-summary-tables">Module 12: Figures and Summary Tables<a class="anchor" aria-label="anchor" href="#module-12-figures-and-summary-tables"></a>
 </h3>
-<p>Following the completion of maximum-likelihood inference, divergence
-time estimation, and biological metadata integration, this module
-presents the complete analytical synthesis of
-<code>PhyloCactus</code>.</p>
-<p>To establish a clear scientific progression, the visualizations are
-structured into five consecutive analytical parts:</p>
+<p>Module 12 produces seventeen figures in five groups:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Molecular Dataset and Alignment Properties (Figures 1 to
-3)</strong>: Taxonomic marker representation, locus completeness per
-species, and locus occupancy heatmaps.</li>
+<strong>Molecular dataset (Figures 1 to 3):</strong> species per
+locus, loci per species, and locus occupancy.</li>
 <li>
-<strong>Supermatrix Concatenation Structure (Figures 4 to
-5)</strong>: Partition architecture, boundary coordinates, and
-parsimony-informative site contributions.</li>
+<strong>Supermatrix (Figures 4 and 5):</strong> partition
+coordinates and parsimony-informative sites per locus.</li>
 <li>
-<strong>Inferred Phylogeny and Divergence Timescale (Figures 6 to
-9)</strong>: Maximum-likelihood topology with Felsenstein’s Bootstrap
-Proportions (FBP), high-resolution uncollapsed A0 poster,
-time-calibrated chronogram with 95% HPD intervals, and extended
-chronogram poster.</li>
+<strong>Tree and chronogram (Figures 6 to 9):</strong>
+maximum-likelihood tree with Felsenstein bootstrap proportions (FBP),
+full-size tree, chronogram with 95% HPD intervals, and full-size
+chronogram.</li>
 <li>
-<strong>Taxonomic Reconciliation and Species Cadastre (Figure
-10)</strong>: Global species accounting comparing the taxonomic
-checklist, supermatrix sampling, collapsed duplicates, and phylogenetic
-placement.</li>
+<strong>Species accounting (Figure 10):</strong> status of every
+species in the registry across pipeline stages.</li>
 <li>
-<strong>IUCN Conservation and Macroevolutionary Syntheses (Figures
-11 to 17)</strong>: Extinction risk distributions, molecular sampling
-completeness across threat categories, conservation prioritization of
-unsampled gaps, national endemism rankings, threat profiles, and
-ecological habitat associations.</li>
+<strong>Conservation (Figures 11 to 17):</strong> IUCN categories,
+molecular completeness by category, threatened species without
+sequences, national endemism, threats and habitats.</li>
 </ol>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
@@ -521,9 +453,8 @@ ecological habitat associations.</li>
 <div class="section level4">
 <h4 id="figure-1-marker-coverage-across-species">Figure 1: Marker Coverage Across Species<a class="anchor" aria-label="anchor" href="#figure-1-marker-coverage-across-species"></a>
 </h4>
-<p>This figure summarizes the taxonomic representation of each molecular
-marker retained in the final dataset by quantifying the number of
-species with available sequence data across locus partitions.</p>
+<p>Number of species with sequence data for each locus in the final
+dataset.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">marker_stats</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">marker</span>, <span class="va">n_taxa</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n_taxa</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"grey35"</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
@@ -540,10 +471,8 @@ species with available sequence data across locus partitions.</p>
 <div class="section level4">
 <h4 id="figure-2-distribution-of-marker-completeness">Figure 2: Distribution of Marker Completeness<a class="anchor" aria-label="anchor" href="#figure-2-distribution-of-marker-completeness"></a>
 </h4>
-<p>This histogram illustrates the distribution of molecular marker
-completeness across taxa resolved in the maximum-likelihood tree,
-indicating the number of retained loci per species following sequence
-filtering and quality control.</p>
+<p>Number of loci per species for the tips of the maximum-likelihood
+tree.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="st">"retained_markers"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">in_ml_tree</span> <span class="op">==</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">retained_markers</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -561,9 +490,7 @@ filtering and quality control.</p>
 <div class="section level4">
 <h4 id="figure-3-marker-presence-heatmap">Figure 3: Marker Presence Heatmap<a class="anchor" aria-label="anchor" href="#figure-3-marker-presence-heatmap"></a>
 </h4>
-<p>This heatmap provides an overview of locus occupancy across all
-species resolved in the phylogeny, illustrating patterns of data
-presence and missingness across individual marker partitions.</p>
+<p>Presence or absence of each locus for every species in the tree.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">heatmap_data</span> <span class="op">&lt;-</span> <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">in_ml_tree</span> <span class="op">==</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -592,9 +519,8 @@ presence and missingness across individual marker partitions.</p>
 <div class="section level4">
 <h4 id="figure-4-supermatrix-structure">Figure 4: Supermatrix Structure<a class="anchor" aria-label="anchor" href="#figure-4-supermatrix-structure"></a>
 </h4>
-<p>This figure depicts the linear architecture of the concatenated
-supermatrix, displaying the start and end nucleotide coordinates for
-each locus partition.</p>
+<p>Start and end coordinates of each partition in the concatenated
+supermatrix.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ranges_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"6_Concatenated/final_tables/TABLE_marker_ranges.tsv"</span><span class="op">)</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">ranges_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -617,9 +543,8 @@ each locus partition.</p>
 <div class="section level4">
 <h4 id="figure-5-marker-informativeness">Figure 5: Marker Informativeness<a class="anchor" aria-label="anchor" href="#figure-5-marker-informativeness"></a>
 </h4>
-<p>We evaluate the phylogenetic utility of each partition by plotting
-the number of parsimony-informative sites against total alignment
-length.</p>
+<p>Number of parsimony-informative sites against alignment length for
+each partition.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="st">"parsimony_informative"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">marker_stats</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">p5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">marker_stats</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">alignment_length</span>, y <span class="op">=</span> <span class="va">parsimony_informative</span>, label <span class="op">=</span> <span class="va">marker</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -637,15 +562,15 @@ length.</p>
 <div class="section level4">
 <h4 id="figure-6-maximum-likelihood-tree-with-bootstrap-support-fbp">Figure 6: Maximum-Likelihood Tree with Bootstrap Support (FBP)<a class="anchor" aria-label="anchor" href="#figure-6-maximum-likelihood-tree-with-bootstrap-support-fbp"></a>
 </h4>
-<p>This plot renders the inferred maximum-likelihood topology annotated
-with Felsenstein’s Bootstrap Proportions (FBP) mapped directly onto
-internal nodes, alongside major clade demarcation layers.</p>
+<p>Maximum-likelihood tree with FBP values on internal nodes and the
+major clades marked. Nodes fixed by the topological constraint are shown
+as constrained and carry no FBP value.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.amazon.com/Integration-Manipulation-Visualization-Phylogenetic-Computational-ebook/dp/B0B5NLZR1Z/" class="external-link">ggtree</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/emmanuelparadis/ape" class="external-link">ape</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yulab-smu.top/contribution-tree-data/" class="external-link">tidytree</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Load support tree from Stage 9</span></span>
+<span><span class="co"># Load support tree from Module 9</span></span>
 <span><span class="va">supp_tree_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"7_Phylogenetics/cactus_support.raxml.support"</span><span class="op">)</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">supp_tree_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">supp_tree_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"7_Phylogenetics/cactus.raxml.bestTree"</span><span class="op">)</span></span>
@@ -732,12 +657,10 @@ internal nodes, alongside major clade demarcation layers.</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="figure-7-extended-constrained-ml-phylogeny-a0-poster">Figure 7: Extended Constrained ML Phylogeny (A0 Poster)<a class="anchor" aria-label="anchor" href="#figure-7-extended-constrained-ml-phylogeny-a0-poster"></a>
+<h4 id="figure-7-full-size-maximum-likelihood-tree">Figure 7: Full-Size Maximum-Likelihood Tree<a class="anchor" aria-label="anchor" href="#figure-7-full-size-maximum-likelihood-tree"></a>
 </h4>
-<p>To examine all 1,023 terminal tips without node compression, this
-visualization formats the complete topology as an A0-dimension poster,
-displaying individual species binomials and node-level bootstrap
-support.</p>
+<p>All 1,024 tips with species names and FBP values, on a 36 × 48 in
+(91.4 × 121.9 cm) page.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">supp_tree_file</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">supp_tree_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">ML_SUPP_LAYER_SPECS</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html" class="external-link">tribble</a></span><span class="op">(</span></span>
@@ -760,39 +683,30 @@ support.</p>
 <span>  </span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="st">"9_Visualization/figures/Figure_7_ML_Tree_Extended.pdf"</span>, plot <span class="op">=</span> <span class="va">p7_supp</span>, width <span class="op">=</span> <span class="fl">36</span>, height <span class="op">=</span> <span class="fl">48</span>, limitsize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>For interactive exploration in external phylogenetic software (such
-as FigTree), the annotated <code>treedata</code> object can be exported
-into Nexus/BEAST format:</p>
+<p>The annotated <code>treedata</code> object can be exported in NEXUS
+format for FigTree or similar programs:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">annotated_treedata</span> <span class="op">&lt;-</span> <span class="fu">PhyloCactus</span><span class="fu">::</span><span class="fu"><a href="../reference/augment_treedata_with_registry.html">augment_treedata_with_registry</a></span><span class="op">(</span><span class="va">ml_tree_plot</span>, <span class="va">registry</span><span class="op">)</span></span>
 <span><span class="fu">treeio</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/treeio/man/write.beast.html" class="external-link">write.beast</a></span><span class="op">(</span><span class="va">annotated_treedata</span>, file <span class="op">=</span> <span class="st">"9_Visualization/figures/annotated_ml_tree.tree"</span><span class="op">)</span></span></code></pre></div>
 <blockquote>
-<p><strong>Note on Extended Tree Poster &amp; Direct Downloads:</strong>
-Due to its large format dimensions (A0 poster: 36 × 48 inches / 91.4 ×
-121.9 cm) and 1,023 terminal tips, this extended tree is not rendered
-inline within this document to maintain browser responsiveness and
-prevent visual overcrowding.</p>
-<p>When executing this workflow locally, the full vector PDF and
-annotated BEAST tree file are generated directly in your workspace: -
-Local PDF:
+<p><strong>Full-size tree files.</strong> Figure 7 is not rendered on
+this page because of its size. Running the chunk writes two files to the
+workspace: -
 <code>9_Visualization/figures/Figure_7_ML_Tree_Extended.pdf</code> -
-Local Tree:
 <code>9_Visualization/figures/annotated_ml_tree.tree</code></p>
-<p>Once the online repository is published on GitHub, these
-high-resolution assets can be downloaded directly from the repository <a href="https://github.com/beeamerino/PhyloCactus/tree/main/extended_trees" class="external-link"><code>extended_trees/</code></a>
-directory: - Direct PDF Download: <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/main/extended_trees/Figure_7_ML_Tree_Extended.pdf" class="external-link"><code>Figure_7_ML_Tree_Extended.pdf</code></a>
-- Direct Tree Download: <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/main/extended_trees/annotated_ml_tree.tree" class="external-link"><code>annotated_ml_tree.tree</code></a></p>
+<p>The same files are in the <a href="https://github.com/beeamerino/PhyloCactus/tree/master/extended_trees" class="external-link"><code>extended_trees/</code></a>
+directory of the repository: <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/Figure_7_ML_Tree_Extended.pdf" class="external-link">Figure_7_ML_Tree_Extended.pdf</a>
+and <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/annotated_ml_tree.tree" class="external-link">annotated_ml_tree.tree</a>.</p>
 </blockquote>
 </div>
 <div class="section level4">
 <h4 id="figure-8-time-calibrated-chronogram-with-hpd-intervals">Figure 8: Time-Calibrated Chronogram with HPD Intervals<a class="anchor" aria-label="anchor" href="#figure-8-time-calibrated-chronogram-with-hpd-intervals"></a>
 </h4>
-<p>This chronogram displays absolute divergence times estimated via
-penalized likelihood (<code>treePL</code>) and summarized across
-temporal bootstrap replicates, with node age uncertainty intervals (95%
-HPD) and a calibrated geological timescale axis.</p>
+<p>Chronogram estimated with penalized likelihood in
+<code>treePL</code>. Node bars are 95% HPD intervals summarized from the
+100 bootstrap chronograms, and the axis shows geological periods.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Load summary chronogram from Stage 10</span></span>
+<code class="sourceCode R"><span><span class="co"># Load summary chronogram from Module 10</span></span>
 <span><span class="va">chrono_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"8_Dating/dated_summary_hpd.tree"</span><span class="op">)</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">chrono_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">chrono_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">tutorial_dir</span>, <span class="st">"8_Dating/BestTree_treePL.tree"</span><span class="op">)</span></span>
@@ -842,11 +756,10 @@ HPD) and a calibrated geological timescale axis.</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="figure-9-extended-time-calibrated-chronogram-a0-poster">Figure 9: Extended Time-Calibrated Chronogram (A0 Poster)<a class="anchor" aria-label="anchor" href="#figure-9-extended-time-calibrated-chronogram-a0-poster"></a>
+<h4 id="figure-9-full-size-chronogram">Figure 9: Full-Size Chronogram<a class="anchor" aria-label="anchor" href="#figure-9-full-size-chronogram"></a>
 </h4>
-<p>This A0-dimension poster presents the uncollapsed temporal chronogram
-with all 1,023 tip names, divergence time confidence intervals, and
-geological period boundaries.</p>
+<p>All 1,024 tips with 95% HPD intervals and period boundaries, on a 36
+× 48 in (91.4 × 121.9 cm) page.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">chrono_file</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">chrono_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">CHRONO_SUPP_LAYER_SPECS</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html" class="external-link">tribble</a></span><span class="op">(</span></span>
@@ -870,39 +783,29 @@ geological period boundaries.</p>
 <span>  </span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="st">"9_Visualization/figures/Figure_9_Chronogram_Extended.pdf"</span>, plot <span class="op">=</span> <span class="va">p9_supp</span>, width <span class="op">=</span> <span class="fl">36</span>, height <span class="op">=</span> <span class="fl">48</span>, limitsize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>For interactive exploration in external phylogenetic software (such
-as FigTree), the annotated <code>treedata</code> object can be exported
-into Nexus/BEAST format:</p>
+<p>The annotated <code>treedata</code> object can be exported in NEXUS
+format for FigTree or similar programs:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">annotated_chrono</span> <span class="op">&lt;-</span> <span class="fu">PhyloCactus</span><span class="fu">::</span><span class="fu"><a href="../reference/augment_treedata_with_registry.html">augment_treedata_with_registry</a></span><span class="op">(</span><span class="va">chrono_beast</span>, <span class="va">registry_chrono</span><span class="op">)</span></span>
 <span><span class="fu">treeio</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/treeio/man/write.beast.html" class="external-link">write.beast</a></span><span class="op">(</span><span class="va">annotated_chrono</span>, file <span class="op">=</span> <span class="st">"9_Visualization/figures/annotated_chronogram.tree"</span><span class="op">)</span></span></code></pre></div>
 <blockquote>
-<p><strong>Note on Extended Chronogram Poster &amp; Direct
-Downloads:</strong> Due to its large format dimensions (A0 poster: 36 ×
-48 inches / 91.4 × 121.9 cm), 1,023 terminal tips, and node age
-uncertainty intervals (95% HPD), this extended chronogram is not
-rendered inline within this document to maintain browser
-responsiveness.</p>
-<p>When executing this workflow locally, the full vector PDF and
-annotated BEAST chronogram file are generated directly in your
-workspace: - Local PDF:
+<p><strong>Full-size chronogram files.</strong> Figure 9 is not rendered
+on this page because of its size. Running the chunk writes two files to
+the workspace: -
 <code>9_Visualization/figures/Figure_9_Chronogram_Extended.pdf</code> -
-Local Tree:
 <code>9_Visualization/figures/annotated_chronogram.tree</code></p>
-<p>Once the online repository is published on GitHub, these
-high-resolution assets can be downloaded directly from the repository <a href="https://github.com/beeamerino/PhyloCactus/tree/main/extended_trees" class="external-link"><code>extended_trees/</code></a>
-directory: - Direct PDF Download: <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/main/extended_trees/Figure_9_Chronogram_Extended.pdf" class="external-link"><code>Figure_9_Chronogram_Extended.pdf</code></a>
-- Direct Tree Download: <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/main/extended_trees/annotated_chronogram.tree" class="external-link"><code>annotated_chronogram.tree</code></a></p>
+<p>The same files are in the <a href="https://github.com/beeamerino/PhyloCactus/tree/master/extended_trees" class="external-link"><code>extended_trees/</code></a>
+directory of the repository: <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/Figure_9_Chronogram_Extended.pdf" class="external-link">Figure_9_Chronogram_Extended.pdf</a>
+and <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/annotated_chronogram.tree" class="external-link">annotated_chronogram.tree</a>.</p>
 </blockquote>
 </div>
 <div class="section level4">
 <h4 id="figure-10-species-composition">Figure 10: Species Composition<a class="anchor" aria-label="anchor" href="#figure-10-species-composition"></a>
 </h4>
-<p>This figure summarizes the methodological composition of the
-taxonomic universe across pipeline stages, distinguishing taxa that were
-sampled and dated in the tree (985), sequenced identical duplicates
-collapsed by <code>RAxML-NG</code> (37), unsampled checklist gaps (943),
-and outgroup reference species (38).</p>
+<p>Status of the 2,003 species in the registry: sampled and dated in the
+tree (986), sequenced but removed by <code>RAxML-NG</code> as identical
+duplicates (36), accepted species without sequences (943), and outgroups
+(38).</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">status_pipeline</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">status_pipeline</span>, <span class="va">n</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"grey35"</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
@@ -921,9 +824,8 @@ and outgroup reference species (38).</p>
 <div class="section level4">
 <h4 id="figure-11-iucn-categories">Figure 11: IUCN Categories<a class="anchor" aria-label="anchor" href="#figure-11-iucn-categories"></a>
 </h4>
-<p>This bar chart summarizes the distribution of IUCN Red List
-conservation categories among the ingroup species resolved in the final
-phylogenetic reconstruction.</p>
+<p>Number of ingroup species in the tree in each IUCN Red List
+category.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">iucn_found</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">TABLE_iucn_categories</span> <span class="op">&lt;-</span> <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -945,10 +847,9 @@ phylogenetic reconstruction.</p>
 <div class="section level4">
 <h4 id="figure-12-molecular-completeness-vs--iucn-category">Figure 12: Molecular Completeness vs. IUCN Category<a class="anchor" aria-label="anchor" href="#figure-12-molecular-completeness-vs--iucn-category"></a>
 </h4>
-<p>This plot compares molecular marker completeness across IUCN threat
-categories for sampled ingroup taxa resolved in the time-calibrated
-phylogeny, evaluating whether extinction risk correlates with missing
-molecular data.</p>
+<p>Number of loci per species in each IUCN category, for the ingroup
+species in the chronogram. The figure shows whether threatened species
+are represented by fewer loci.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">iucn_found</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">p12</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
@@ -964,7 +865,7 @@ molecular data.</p>
 <span>    <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>      title <span class="op">=</span> <span class="st">"Molecular Completeness vs IUCN Category"</span>,</span>
-<span>      subtitle <span class="op">=</span> <span class="st">"Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 985)"</span>,</span>
+<span>      subtitle <span class="op">=</span> <span class="st">"Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 986)"</span>,</span>
 <span>      x <span class="op">=</span> <span class="st">"IUCN Category"</span>,</span>
 <span>      y <span class="op">=</span> <span class="st">"Marker completeness (%)"</span></span>
 <span>    <span class="op">)</span></span>
@@ -972,16 +873,14 @@ molecular data.</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level4">
-<h4 id="figure-13-conservation-prioritization-of-unsampled-gaps-by-genus">Figure 13: Conservation Prioritization of Unsampled Gaps by
-Genus<a class="anchor" aria-label="anchor" href="#figure-13-conservation-prioritization-of-unsampled-gaps-by-genus"></a>
+<h4 id="figure-13-threatened-species-without-sequence-data-by-genus">Figure 13: Threatened Species Without Sequence Data by Genus<a class="anchor" aria-label="anchor" href="#figure-13-threatened-species-without-sequence-data-by-genus"></a>
 </h4>
-<p>This figure visualizes the taxonomic distribution of threatened
-species (CR, EN, VU) among the 943 checklist gaps that currently lack
-molecular sequences in public repositories. By highlighting genera with
-the highest concentrations of unsequenced threatened taxa (led by
-<em>Parodia</em>, <em>Mammillaria</em>, and <em>Melocactus</em>), this
-analysis establishes explicit priorities for targeted field collecting
-and sequencing.</p>
+<p>Threatened species (CR, EN, VU) among the 943 accepted species
+without sequence data, by genus. <em>Parodia</em> (24 species),
+<em>Mammillaria</em> (22) and <em>Melocactus</em> (14) have the most.
+The species are listed in
+<code>TABLE_conservation_prioritization_gaps.csv</code>, which can guide
+field collecting and sequencing.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plot_gaps_genus</span> <span class="op">&lt;-</span> <span class="va">TABLE_conservation_prioritization_gaps</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">genus</span>, <span class="va">iucn_category</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -1010,9 +909,8 @@ and sequencing.</p>
 <div class="section level4">
 <h4 id="figure-14-endemic-species-by-country">Figure 14: Endemic Species by Country<a class="anchor" aria-label="anchor" href="#figure-14-endemic-species-by-country"></a>
 </h4>
-<p>This figure summarizes national cactus endemism represented in the
-phylogenetic tree, ranking countries by the number of endemic species
-resolved in the molecular framework.</p>
+<p>Countries ranked by the number of endemic ingroup species in the
+tree, based on IUCN records of endemism.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">iucn_is_endemic</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">plot_data_endemism</span> <span class="op">&lt;-</span> <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -1036,9 +934,8 @@ resolved in the molecular framework.</p>
 <div class="section level4">
 <h4 id="figure-15-endemic-species-by-country-and-iucn-category">Figure 15: Endemic Species by Country and IUCN Category<a class="anchor" aria-label="anchor" href="#figure-15-endemic-species-by-country-and-iucn-category"></a>
 </h4>
-<p>This stacked bar chart visualizes the conservation status of national
-endemics across the top cactus-diverse countries, breaking down endemic
-richness by IUCN threat category.</p>
+<p>IUCN categories of the endemic ingroup species in the tree, for the
+countries with the most endemics.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">iucn_found</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">plot_iucn_country</span> <span class="op">&lt;-</span> <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -1067,9 +964,8 @@ richness by IUCN threat category.</p>
 <div class="section level4">
 <h4 id="figure-16-primary-ecological-threats">Figure 16: Primary Ecological Threats<a class="anchor" aria-label="anchor" href="#figure-16-primary-ecological-threats"></a>
 </h4>
-<p>This bar chart illustrates the most frequently documented
-environmental and anthropogenic threats impacting cactus species in the
-ingroup phylogeny, based on IUCN Red List threat classifications.</p>
+<p>Threat classes recorded by the IUCN Red List for the ingroup species
+in the tree, ranked by frequency.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">iucn_threat_names</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">plot_threats</span> <span class="op">&lt;-</span> <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -1095,9 +991,8 @@ ingroup phylogeny, based on IUCN Red List threat classifications.</p>
 <div class="section level4">
 <h4 id="figure-17-primary-ecological-habitats">Figure 17: Primary Ecological Habitats<a class="anchor" aria-label="anchor" href="#figure-17-primary-ecological-habitats"></a>
 </h4>
-<p>This bar chart displays the primary habitat associations recorded for
-species in the ingroup phylogeny, identifying major ecological biomes
-supporting cactus diversification.</p>
+<p>Habitat classes recorded by the IUCN Red List for the ingroup species
+in the tree.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">iucn_habitat_names</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">plot_habitats</span> <span class="op">&lt;-</span> <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -1125,23 +1020,11 @@ supporting cactus diversification.</p>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p>At this stage, phylogenetic visualization and conservation metadata
-integration have been successfully completed. The resulting outputs
-provide a comprehensive representation of the evolutionary framework
-generated by <code>PhyloCactus</code>, including the inferred
-maximum-likelihood topology, the time-calibrated chronogram, molecular
-sampling completeness, and associated conservation information.</p>
-<p>The next stage focuses on <strong>phylogenetic validation and
-comparative analyses</strong>, where the robustness of the focal
-phylogenetic hypothesis will be evaluated against previously published
-evolutionary frameworks and alternative topological hypotheses.</p>
-<p>Using quantitative tree comparison approaches, including
-<strong>Robinson-Foulds distances</strong> and <strong>multidimensional
-scaling (MDS)</strong>, the following tutorial will assess the degree of
-topological agreement among alternative phylogenetic hypotheses,
-identify regions of phylogenetic uncertainty, and evaluate how
-differences in taxon sampling and analytical strategies influence the
-recovered evolutionary relationships.</p>
+<p>This tutorial produced the species registry, the conservation tables,
+and the figures of the dataset, the tree and the chronogram.</p>
+<p>Tutorial 4 compares the tree with published phylogenies of Cactaceae
+using Robinson-Foulds distances and multidimensional scaling of tree
+space.</p>
 <p><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html">Continue
 to Tutorial 4: Phylogenetic Validation and Comparative Analyses</a></p>
 </div>
@@ -1149,16 +1032,13 @@ to Tutorial 4: Phylogenetic Validation and Comparative Analyses</a></p>
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <ul>
-<li>Amaral <em>et al</em>. 2022. Spatial patterns of evolutionary
-diversity in Cactaceae show low ecological representation within
-protected areas. <em>Biological Conservation</em>, 273, 109677. <a href="https://doi.org/10.1016/j.biocon.2022.109677" class="external-link uri">https://doi.org/10.1016/j.biocon.2022.109677</a>
+<li>Isaac <em>et al</em>. 2007. Mammals on the EDGE: conservation
+priorities based on threat and phylogeny. <em>PLoS ONE</em>, 2(3), e296.
+<a href="https://doi.org/10.1371/journal.pone.0000296" class="external-link uri">https://doi.org/10.1371/journal.pone.0000296</a>
 </li>
 <li>Korotkova <em>et al</em>. 2021. Cactaceae at Caryophyllales.org - A
 dynamic online species-level taxonomic backbone for the family.
 <em>Willdenowia</em>, 51(2), 251–270. <a href="https://doi.org/10.3372/wi.51.51208" class="external-link uri">https://doi.org/10.3372/wi.51.51208</a>
-</li>
-<li>Thompson <em>et al</em>. 2024. Identifying the multiple drivers of
-cactus diversification. <em>Nature Communications</em>, 15(1), 7114. <a href="https://doi.org/10.1038/s41467-024-51666-2" class="external-link uri">https://doi.org/10.1038/s41467-024-51666-2</a>
 </li>
 </ul>
 </div>

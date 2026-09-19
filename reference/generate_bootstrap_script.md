@@ -56,15 +56,15 @@ generate_bootstrap_script(
   Character vector of terminals passed to `RAxML-NG --outgroup`, or
   `NULL` (default); multiple terminals are joined with commas.
   `RAxML-NG` writes an unrooted topology with these terminals placed
-  first, so this argument orders the output rather than rooting the
-  tree: the root is imposed downstream by
+  first, so this argument orders the output and does not root the tree:
+  the root is imposed downstream by
   [`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)
   via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at
   every stage keeps the output ordering consistent across the
   maximum-likelihood search, the bootstrap replicates and the temporal
   bootstraps. Derive it with
-  [`resolve_rooting_outgroup()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_rooting_outgroup.md)
-  rather than naming a terminal by hand.
+  [`resolve_rooting_outgroup()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_rooting_outgroup.md);
+  do not name a terminal by hand.
 
 - bs_per_rep:
 
@@ -77,11 +77,10 @@ generate_bootstrap_script(
   the SLURM array (`1-max_reps`). Defaults to `2`, giving a total array
   target of `bs_per_rep * max_reps = 1000` bootstrap trees. This
   provides a safety margin over the autoMRE convergence point observed
-  in a production run of this exact dataset (1023 taxa, 11 partitions),
-  which converged (`bs-cutoff = 0.03`, FBP) after 600 of 1000 collected
-  trees, i.e. convergence is not guaranteed at a fixed replicate count
-  for every dataset or taxon sampling scheme. Always confirm convergence
-  with
+  in the reference run (1024 taxa, 11 partitions), which converged
+  (`bs-cutoff = 0.03`, FBP) after 650 of 1000 collected trees, i.e.
+  convergence is not guaranteed at a fixed replicate count for every
+  dataset or taxon sampling scheme. Always confirm convergence with
   [`check_bs_convergence()`](https://beeamerino.github.io/PhyloCactus/reference/check_bs_convergence.md)
   on the collected trees (via
   [`collect_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/collect_bootstraps.md))
@@ -181,11 +180,11 @@ Character path to the generated SLURM batch script file.
 ## Details
 
 The default `threads_per_worker = 4L` is configured to optimize
-throughput on multi-core compute nodes. In a production run of this
-workload (1023 taxa, 11 partitions), using `--threads 40 --workers 10`
-(4 threads per worker) on an AMD EPYC node provided efficient per-worker
-memory and CPU allocation. This ratio is dataset- and hardware-dependent
-(it trades per-worker single-tree search speed against the number of
-trees searched in parallel); if you migrate to different node hardware
-or a markedly different supermatrix size, re-validate it empirically
-with a short trial run before committing a full job array to it.
+throughput on multi-core compute nodes. In a production run on the
+reference dataset, using `--threads 40 --workers 10` (4 threads per
+worker) on an AMD EPYC node provided efficient per-worker memory and CPU
+allocation. This ratio is dataset- and hardware-dependent (it trades
+per-worker single-tree search speed against the number of trees searched
+in parallel); if you migrate to different node hardware or a markedly
+different supermatrix size, re-validate it empirically with a short
+trial run before committing a full job array to it.

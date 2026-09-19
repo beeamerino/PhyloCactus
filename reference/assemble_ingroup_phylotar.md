@@ -3,9 +3,9 @@
 Retrieves orthologous sequence clusters for a focal taxonomic ingroup
 (e.g., family **Cactaceae**, NCBI Taxonomy ID: 3593) directly from
 GenBank using similarity clustering via `phylotaR` (Bennett *et al.*,
-2018). Relying on sequence similarity rather than inconsistent locus
-annotations prevents missing orthologous sequence data caused by gene
-synonymy or mislabeling in public sequence repositories.
+2018). Clusters are formed by sequence similarity, not by GenBank locus
+annotations, so sequences are not lost to gene-name synonyms or
+mislabeled records.
 
 ## Usage
 
@@ -53,7 +53,7 @@ assemble_ingroup_phylotar(
   curation by the expert team supporting `PhyloCactus`: each excluded
   accession was inspected and removed on taxonomic or sequence-quality
   grounds that are not recoverable from GenBank metadata alone. Across
-  both lists they cover 73 unique accessions in 87 records, spanning 16
+  both lists they cover 99 unique accessions in 113 records, spanning 16
   ingroup clusters and 24 outgroup clusters, and they live in
   `inst/extdata/manual_exclusions_ingroup.csv` and
   `inst/extdata/manual_exclusions_outgroup.csv`. Setting this to `FALSE`

@@ -53,12 +53,12 @@ node, terminals matched, and whether the set is monophyletic in `tree`.
   on incompatible timescales, reported as a warning because the run is
   still valid.
 
-A descendant maximum below the ancestor minimum is deliberately not
-flagged: it only states that the descendant is necessarily younger,
-which is the normal condition for nested bounds.
+A descendant maximum below the ancestor minimum is not flagged: it only
+states that the descendant is necessarily younger, which is the normal
+condition for nested bounds.
 
 Two further conditions are checked because they silently reassign bounds
-rather than break the run: a row resolving to fewer than two terminals,
+without stopping the run: a row resolving to fewer than two terminals,
 which the configuration builder drops without reporting, and two rows
 resolving to the same node, which makes the later `min`/`max` pair
 overwrite the earlier one.

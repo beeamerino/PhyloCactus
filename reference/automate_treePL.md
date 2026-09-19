@@ -3,20 +3,19 @@
 Automates cross-validation parameter optimization, rate smoothing
 selection, and chronogram estimation across temporal bootstrap
 replicates using `treePL` (Sanderson, 2002; Smith & O'Meara, 2012).
-Propagating temporal uncertainty across branch-length resampled
-bootstrap trees yields empirical confidence intervals for node age
-estimates. Every treePL output (maximum-likelihood chronogram and each
+Dating the bootstrap trees, which share the maximum-likelihood topology,
+gives confidence intervals on node ages that reflect branch-length
+uncertainty. Every treePL output (maximum-likelihood chronogram and each
 bootstrap chronogram) is validated after execution: the resulting tree
 must exist, be non-empty, parse as a valid Newick topology, and be
 ultrametric. A run that fails silently (e.g., because the underlying
 `treePL` binary did not converge) is therefore reported as an explicit
-error rather than propagated downstream as a corrupted chronogram. Note
-that the optimal rate-smoothing parameter is cross-validated once on the
-maximum-likelihood tree and reused, unmodified, across all bootstrap
-replicates; this is a standard computational shortcut for treePL-based
-dating pipelines (per-replicate cross-validation is prohibitively
-expensive at typical bootstrap replicate counts), following the
-empirical protocol of Maurin (2020).
+error. The rate-smoothing parameter is selected once, by
+cross-validation on the maximum-likelihood tree, and reused for all
+bootstrap replicates, as in the protocol of Maurin (2020);
+cross-validating each replicate would multiply the run time by the
+number of replicates. The confidence intervals therefore do not include
+uncertainty in the smoothing value.
 
 ## Usage
 
@@ -36,8 +35,12 @@ automate_treePL(
   prime_rule = c("lowest", "modal"),
   cv_method = c("randomcv", "cv"),
   cvstart = 1000,
-  cvstop = 1e-08,
-  wrapper_sh = NULL
+  cvstop = 1e-14,
+  cv_nthreads = 1L,
+  wrapper_sh = NULL,
+  notify = FALSE,
+  notify_to = NULL,
+  notify_credentials = NULL
 )
 ```
 
@@ -72,9 +75,9 @@ automate_treePL(
 - numsites:
 
   Integer or NULL. Alignment length, in sites, of the supermatrix
-  actually analysed. If `NULL`, the `numsites` line already present in
+  actually analyzed. If `NULL`, the `numsites` line already present in
   `cfg_file` is used. This must be the length of the matrix `RAxML-NG`
-  analysed (typically the `*.raxml.reduced.phy` produced by
+  analyzed (typically the `*.raxml.reduced.phy` produced by
   [`preprocess_partitions()`](https://beeamerino.github.io/PhyloCactus/reference/preprocess_partitions.md)),
   not a rounded figure: `treePL` uses it to convert branch lengths into
   expected substitution counts, so an incorrect value biases the rate
@@ -94,7 +97,7 @@ automate_treePL(
   default is offered because a clade-level rooting set depends on what
   the supermatrix sampled and cannot be a package constant.
 
-  **Why a clade rather than a terminal.** Rooting is imposed after the
+  **Why a clade and not a terminal.** Rooting is imposed after the
   search: `RAxML-NG` returns an unrooted topology and the root is placed
   on a chosen edge. Naming a single terminal of a sampled outgroup clade
   places the root *inside* that clade, leaving it paraphyletic in the
@@ -125,10 +128,11 @@ automate_treePL(
   of which bootstrap replicates to date, and `treePL`'s own `seed`
   keyword, which is written into the maximum-likelihood configuration
   and, offset by the replicate index, into each replicate's. `treePL`
-  seeds itself from the clock when the keyword is absent, which leaves
-  both the cross-validation and the simulated annealing unreproducible.
-  Defaults to `NULL`, which draws one and reports it; record the
-  reported value, as it is required to reproduce the run.
+  seeds itself from the clock when the keyword is absent. A fixed `seed`
+  reproduces the run when cross-validation uses one thread, which is the
+  default of `cv_nthreads`. Defaults to `NULL`, which draws one and
+  reports it; record the reported value, as it is required to reproduce
+  the run.
 
 - rescale_factor:
 
@@ -159,36 +163,57 @@ automate_treePL(
 
 - prime_rule:
 
-  `"lowest"` (Maurin 2020) or `"modal"` (the retired shell script's
-  rule).
+  `"lowest"` (Maurin 2020) or `"modal"`. See
+  [`run_treePL_cv()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_cv.md).
 
 - cv_method:
 
   `"randomcv"`, recommended by Maurin (2020) as faster and more stable,
-  or `"cv"` for leave-one-out, which is what the retired shell script
-  used.
+  or `"cv"` for leave-one-out.
 
 - cvstart, cvstop:
 
-  Ends of the cross-validation smoothing grid. The defaults reach lower
-  than the shell script's fixed floor of 1e-04, which the August 2026
-  run of this project hit without the chi-square curve ever turning.
+  Ends of the cross-validation smoothing grid, 1e+03 and 1e-14 by
+  default. See
+  [`run_treePL_cv()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_cv.md)
+  for how the shape of the resulting curve is classified and reported.
+
+- cv_nthreads:
+
+  Integer. Number of threads for the cross-validation stage. Defaults to
+  `1L`, which makes the cross-validation curve reproducible for a given
+  `seed`. See
+  [`run_treePL_cv()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_cv.md).
 
 - wrapper_sh:
 
-  Retired on 2026-09-02 and ignored, with a warning. Priming,
-  cross-validation and dating of the maximum-likelihood tree now run
-  through
+  Ignored, with a warning. Priming, cross-validation and dating of the
+  maximum-likelihood tree run through
   [`run_treePL_cv()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_cv.md),
-  which implements the protocol of Maurin (2020) in R. The shell script
-  this argument used to point at carried no licence and wrote
-  `smoothing = `, a keyword `treePL` discards without a message, so
-  every chronogram produced before that date was dated at the built-in
-  default of 10.
+  which implements the protocol of Maurin (2020) in R.
+
+- notify:
+
+  Logical. Send an email when the run ends, whether it finished or
+  failed. The message carries the status, the start and end times, the
+  elapsed time, the host and the paths of the outputs. Intended for this
+  step in particular, which runs on a local machine for hours and has no
+  scheduler to mail on its behalf. A notification that cannot be sent is
+  reported and ignored: it never fails the run. See
+  [`send_run_notification()`](https://beeamerino.github.io/PhyloCactus/reference/send_run_notification.md)
+  for what has to be configured. Defaults to `FALSE`.
+
+- notify_to, notify_credentials:
+
+  Passed to
+  [`send_run_notification()`](https://beeamerino.github.io/PhyloCactus/reference/send_run_notification.md)
+  as `to` and `credentials`. Both default to `NULL`, which reads the
+  `MY_EMAIL` and `PHYLOCACTUS_SMTP_CREDS` environment variables.
 
 ## Value
 
-Invisible NULL upon completion.
+Invisibly, the path of the dated maximum-likelihood chronogram written
+into `treePL_out`.
 
 ## References
 

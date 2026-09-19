@@ -2,8 +2,7 @@
 
 Runs the three stages of the `treePL` protocol of Maurin (2020)
 (priming, cross-validation and dating) from R, and returns what each
-stage chose. It replaces the shell wrapper this package shipped until
-2026-09-02.
+stage chose.
 
 ## Usage
 
@@ -16,7 +15,8 @@ run_treePL_cv(
   prime_rule = c("lowest", "modal"),
   cv_method = c("randomcv", "cv"),
   cvstart = 1000,
-  cvstop = 1e-08,
+  cvstop = 1e-14,
+  cv_nthreads = 1L,
   treepl_bin = "treePL",
   work_dir = NULL,
   quiet = FALSE
@@ -50,15 +50,13 @@ run_treePL_cv(
   grows, so a hundred repeats will select lower parameters than ten of
   the same runs would. Maurin's instruction is to repeat the priming
   analysis a few times and take the lowest, which is what the default
-  pairs with; the shell script's 100 was chosen for a rule that was
-  stable under it. Raising `n_prime` while keeping `"lowest"` is a
-  change of analysis, not a refinement of one, and it should be recorded
-  as such.
+  pairs with. Raising `n_prime` while keeping `"lowest"` is a change of
+  analysis, not a refinement of one, and it should be recorded as such.
 
 - prime_rule:
 
-  `"lowest"` (Maurin) or `"modal"` (the shell script's behaviour). See
-  the note on `n_prime` above before changing either.
+  `"lowest"` (Maurin) or `"modal"` (most frequent combination). See the
+  note on `n_prime` above before changing either.
 
 - cv_method:
 
@@ -66,10 +64,24 @@ run_treePL_cv(
 
 - cvstart, cvstop:
 
-  Ends of the smoothing grid. The defaults span 1e+03 down to 1e-08, low
-  enough to contain the 1e-06 to 1e-08 range Maurin reports for a tree
-  with rescaled branch lengths, which the shell script's floor of 1e-04
-  was not.
+  Ends of the smoothing grid, evaluated at one value per order of
+  magnitude. The defaults span 1e+03 down to 1e-14. Maurin (2020)
+  reports optima between 1e-06 and 1e-08 for trees whose branch lengths
+  are rescaled as this package rescales them; the reference Cactaceae
+  dataset reaches a plateau below 1e-06, which only a grid extending
+  well below that range can show. See the section on curve shapes below.
+
+- cv_nthreads:
+
+  Integer. Number of threads for the cross-validation stage. Defaults to
+  `1L`. `treePL` evaluates cross-validation replicates in an OpenMP
+  loop, inside which simulated annealing calls the non-reentrant C
+  `rand()`; the chi-square sum is also accumulated through an OpenMP
+  reduction, whose order may vary between runs. With more than one
+  thread, two runs with the same `seed` return different
+  cross-validation curves and can select different smoothing values.
+  With one thread the curve is reproducible for a given `seed`, at a
+  cost of about 4% in wall-clock time on the reference dataset.
 
 - treepl_bin:
 
@@ -86,43 +98,54 @@ run_treePL_cv(
 
 ## Value
 
-Invisibly, a list with `smoothing`, `cv_table`, `prime_lines`, `primes`,
-`tree_file` (the chronogram written) and the paths of the three
-configurations.
+Invisibly, a list with `smoothing`, `cv_table`, `cv_at_edge`,
+`cv_shape`, `prime_lines`, `primes`, `tree_file` (the chronogram
+written) and the paths of the three configurations.
 
-## Why this exists in R
-
-The shell script this replaces (github.com/tongjial/treepl_wrapper)
-carries no licence, so it could not be redistributed inside a GPL-3
-package. It also wrote `smoothing = ` into the final configuration, a
-keyword `treePL` does not recognise: the line was discarded without a
-message and every chronogram produced by this project before 2026-09-02
-was dated at the built-in default of 10, with the cross-validation that
-precedes it having no effect on any result. Writing the configuration
-here puts that keyword under `.verify_treepl_smoothing()`, which
-compares what was asked against what `treePL`'s own log reports it used.
-
-## Where this follows the protocol and the wrapper did not
+## Choices relative to the protocol
 
 - **Priming selection.** Maurin instructs repeating the priming analysis
-  and taking the lines with the *lowest* `opt` and `optad`. The shell
-  script took the *most frequent* combination across repeats.
-  `prime_rule` defaults to Maurin's rule; `"modal"` reproduces the old
-  behaviour.
+  and taking the lines with the *lowest* `opt` and `optad`. `prime_rule`
+  defaults to this rule; `"modal"` takes the most frequent combination
+  across repeats instead.
 
 - **Cross-validation method.** Maurin recommends `randomcv`, random
   subsample and replicate cross-validation, over the leave-one-out `cv`,
-  as "much faster and may give more stable results". The shell script
-  hard-coded `cv`. `cv_method` defaults to `randomcv`.
+  as "much faster and may give more stable results". `cv_method`
+  defaults to `randomcv`.
 
-- **The grid.** The shell script hard-coded a grid from 1e-04 to 1e+04.
-  Both ends are arguments here, and a minimum landing on either end is
-  reported rather than returned as if it were an optimum. See
-  `.select_cv_smoothing()`.
+- **The grid.** Both ends of the smoothing grid are arguments, and a
+  minimum on either end is reported as such, not returned as an optimum.
+  See the section on curve shapes below.
 
-- **Parsing.** The priming block is read by keyword rather than by
-  taking the last character of each line and reassembling positionally,
-  which misaligns whenever an optional `moredetail` flag is absent.
+- **Parsing.** The priming block is read by keyword, so an absent
+  optional `moredetail` flag does not shift the values.
+
+- **Smoothing check.** The smoothing that `treePL` reports in its log is
+  compared with the value written to the configuration, and the run
+  stops if they differ.
+
+## Shape of the cross-validation curve
+
+The selected smoothing value is the one with the lowest chi-square.
+`cv_shape` reports what that value means, and a message or warning
+states it when the function runs:
+
+- `"interior"`: the curve turns upward inside the grid; the selected
+  value is an optimum.
+
+- `"edge"`: the minimum is the first or last value of the grid and the
+  curve is still changing there. The optimum most likely lies beyond the
+  grid: extend `cvstart` or `cvstop` and repeat before interpreting any
+  age (Maurin, 2020). Reported as a warning.
+
+- `"plateau"`: the three values at the end of the grid where the curve
+  flattens differ by less than 1% in chi-square and lie within 1% of the
+  minimum. Values on the plateau fit the data about equally well, so the
+  selected value is a nominal choice among them; report node ages across
+  the plateau with
+  [`report_smoothing_sensitivity()`](https://beeamerino.github.io/PhyloCactus/reference/report_smoothing_sensitivity.md).
+  Reported as a message.
 
 ## References
 

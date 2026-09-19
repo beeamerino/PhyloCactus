@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-09-08</h4>
+            <h4 data-toc-skip class="date">2026-09-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-2-cactus-phylogeny-inference.Rmd" class="external-link"><code>vignettes/tutorial-2-cactus-phylogeny-inference.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-2-cactus-phylogeny-inference.Rmd</code></div>
@@ -78,58 +78,27 @@ Meriño</h4>
 <div class="section level2">
 <h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
 </h2>
-<p>Phylogenetic inference represents the transition from a curated
-molecular dataset to an explicit evolutionary hypothesis. After
-assembling and preparing multilocus sequence matrices in <a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html">Tutorial
-1</a>, the next challenge is to estimate evolutionary relationships
-while accounting for the heterogeneous processes that shape molecular
-evolution.</p>
-<p>This tutorial describes the second stage of the
-<code>PhyloCactus</code> workflow, where concatenated multilocus
-datasets are transformed into statistically evaluated phylogenetic
-hypotheses. The pipeline integrates partition specific substitution
-model selection, constrained maximum likelihood inference, assessment of
-topological uncertainty, and divergence time estimation using penalized
-likelihood.</p>
-<p>Large multilocus phylogenetic datasets often contain substantial
-uncertainty due to incomplete molecular sampling, uneven taxonomic
-representation, and heterogeneous sequence availability. However,
-relationships among major taxonomic lineages may already be supported by
-previous phylogenetic studies. To incorporate this available biological
-knowledge while allowing the placement of newly sampled species,
-<code>PhyloCactus</code> uses a taxonomic constraint scaffold defined in
-<code>cactus_constraints.csv</code>. This file assigns sampled species
-to established higher level clades and subfamilies, providing a
-biologically informed framework that reduces exploration of unsupported
-regions of tree space while preserving inference among unresolved
-relationships within major lineages.</p>
-<p>Divergence time estimation requires the integration of molecular
-branch lengths with temporal information derived from fossil evidence or
-previously estimated evolutionary frameworks. Because
-<strong>Cactaceae</strong> lacks reliable direct fossil calibrations
-suitable for dating the entire family, <code>PhyloCactus</code>
-implements temporal constraints through the
-<code>calibrations_bounds.csv</code> file. These bounds incorporate
-lineage specific temporal estimates from Hernández-Hernández <em>et
-al</em>. (2014) for major cactus clades and subfamilies, together with
-secondary calibration information for <strong>Cactaceae</strong> based
-on the broader flowering plant framework proposed by Ramírez-Barahona
-<em>et al</em>. (2020). This strategy allows the estimation of a
-temporal framework while acknowledging the limitations imposed by the
-fossil record.</p>
-<p>Because evolutionary history cannot be directly observed,
-phylogenetic reconstruction relies on statistical models that
-approximate the processes generating molecular variation. Therefore, the
-resulting phylogeny should be interpreted as the evolutionary hypothesis
-that best explains the observed molecular data under the selected models
-and assumptions, rather than as an absolute representation of historical
-relationships.</p>
-<p>The workflow combines <code>ModelTest-NG</code>,
-<code>RAxML-NG</code>, and <code>treePL</code> to estimate a time
-calibrated phylogeny from the curated supermatrices generated in the
-previous tutorial. The resulting evolutionary framework provides the
-foundation for downstream comparative analyses, including historical
-biogeography, diversification dynamics, and trait evolution.</p>
+<p>This tutorial covers the second stage of the <code>PhyloCactus</code>
+workflow (Modules 7 to 10): substitution model selection per partition,
+constrained maximum-likelihood inference, bootstrap support, and
+divergence time estimation by penalized likelihood, starting from the
+supermatrix assembled in <a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html">Tutorial
+1</a>.</p>
+<p>Taxon sampling and sequence availability are uneven across a matrix
+of this size, while relationships among the major lineages of
+<strong>Cactaceae</strong> are established by previous phylogenetic
+studies. The maximum-likelihood search is therefore run under a
+topological constraint derived from <code>cactus_constraints.csv</code>,
+which assigns the sampled species to higher clades and subfamilies. The
+constraint fixes the relationships among those clades and leaves the
+relationships within them to be estimated from the data.</p>
+<p><strong>Cactaceae</strong> lack fossils suitable for calibrating the
+family directly. Divergence times are estimated with secondary
+calibrations (<code>calibrations_bounds.csv</code>): crown ages of major
+clades from Hernández-Hernández <em>et al</em>. (2014), and an age for
+the ACP clade from the angiosperm-wide chronogram of Ramírez-Barahona
+<em>et al</em>. (2020). The resulting chronogram is conditional on those
+studies and on the models selected here.</p>
 </div>
 <div class="section level2">
 <h2 id="complete-pipeline-execution-workflow">Complete Pipeline Execution Workflow<a class="anchor" aria-label="anchor" href="#complete-pipeline-execution-workflow"></a>
@@ -137,19 +106,16 @@ biogeography, diversification dynamics, and trait evolution.</p>
 <div class="section level3">
 <h3 id="setup-creating-a-clean-workspace">Setup: Creating a Clean Workspace<a class="anchor" aria-label="anchor" href="#setup-creating-a-clean-workspace"></a>
 </h3>
-<p>Before proceeding with <strong>Module 7</strong>, ensure that the
-required external phylogenetic binaries (<code>ModelTest-NG</code>,
-<code>RAxML-NG</code>, and <code>treePL</code>) are installed on your
-machine and accessible via your system’s <code>$PATH</code>.</p>
-<p><em>If you are using macOS, many of these can be installed via
-Homebrew (<code>brew install raxml-ng</code>, etc.). On Linux/Windows,
-ensure they are compiled and mapped correctly to your
-<code>$PATH</code>. Alternatively, if you receive a “command not found”
-error, you can provide the absolute path to the executable file (e.g.,
-<code>raxml_path = "/usr/local/bin/raxml-ng"</code>) directly in the
-function arguments.</em></p>
-<p>To quickly run the analyses in this module, you can copy the entire
-executable script to your tutorial directory:</p>
+<p>The external programs <code>ModelTest-NG</code>,
+<code>RAxML-NG</code> and <code>treePL</code> must be installed and
+available on the system <code>PATH</code> before Module 7.</p>
+<p><em>On macOS, several of them can be installed with Homebrew
+(<code>brew install raxml-ng</code>). If R reports “command not found”,
+pass the absolute path of the executable in the corresponding argument
+(for example,
+<code>raxml_path = "/usr/local/bin/raxml-ng"</code>).</em></p>
+<p>The complete script of this tutorial can be copied to the working
+directory:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tutorial_dir</span> <span class="op">&lt;-</span> <span class="st">"~/Desktop/PhyloCactus_Tutorial"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="va">tutorial_dir</span><span class="op">)</span></span>
@@ -163,65 +129,37 @@ executable script to your tutorial directory:</p>
 <div class="section level3">
 <h3 id="module-7-preprocess-and-substitution-models">Module 7: Preprocess and Substitution Models<a class="anchor" aria-label="anchor" href="#module-7-preprocess-and-substitution-models"></a>
 </h3>
-<p>Phylogenetic datasets derived from multiple molecular markers often
-contain substantial evolutionary heterogeneity. Different loci may
-evolve under distinct substitution patterns, nucleotide compositions,
-and selective constraints. If these differences are ignored, a single
-evolutionary model applied across the entire dataset may inadequately
-describe the observed sequence variation and introduce biases during
-likelihood based phylogenetic inference.</p>
-<p>Therefore, before estimating the phylogenetic relationships, the
-concatenated supermatrix must be represented within a statistical
-framework that accounts for variation among molecular partitions.
-Partition specific substitution models provide a more realistic
-approximation of sequence evolution by allowing each locus region to be
-analyzed according to its own evolutionary characteristics.</p>
+<p>Loci differ in substitution pattern, base composition and rate, and a
+single model applied to the whole matrix can describe them poorly and
+bias likelihood-based inference. Each partition of the supermatrix is
+therefore assigned its own substitution model.</p>
 <p>The <strong><code><a href="../reference/preprocess_partitions.html">preprocess_partitions()</a></code></strong> function
-prepares the concatenated supermatrix generated in Module 6 for
-downstream phylogenetic inference. It reads the alignment and partition
-files, verifies their structural compatibility using the
-<code>RAxML-NG</code> parser, and generates standardized input files
-required for substitution model evaluation and maximum likelihood
-analysis.</p>
-<p>The stages of this tutorial run for hours and a complete analysis
-spans several sessions, so each one must be executable on its own rather
-than only as part of a single pass from top to bottom. A script that
-passes results between stages in variables cannot do that: restarting R
-and resuming at Module 8 clears <code>analysed_phy</code> and the stage
-fails on a missing object rather than on a missing file. Hard-coding the
-filenames instead removes the dependency on session state but
-reintroduces the problem the naming convention exists to solve, since
-the same literal name is then retyped at a dozen call sites and drifts
-out of step with the run prefix.</p>
-<p>The <strong><code><a href="../reference/resolve_run_paths.html">resolve_run_paths()</a></code></strong> function
-reconstructs the absolute path of every file of the run from the output
-directory, the run prefix and the supermatrix location. Each module
-below opens by calling it, so every filename has a single definition
-while every stage remains independently runnable. Two of its entries are
-resolved by inspecting the run rather than by convention alone, because
-they record what happened rather than what was chosen:
-<code>analysed_phy</code> points at the reduced matrix when
-<code>RAxML-NG</code> collapsed identical terminals during validation
-and at the supermatrix when it did not, and <code>best_tree</code>
-points into <code>ml_search/</code> when the maximum likelihood search
-was submitted to a cluster and into the run root when it was executed
-locally. Passing <code>require</code> names the entries a stage depends
-on, turning a missing input into an error that identifies the module
-responsible for producing it.</p>
-<p>The <strong><code><a href="../reference/run_modeltest_ng.html">run_modeltest_ng()</a></code></strong> function
-performs automated substitution model evaluation for each predefined
-molecular partition. By interfacing with <code>ModelTest-NG</code>
-(Darriba <em>et al</em>., 2020; Flouri <em>et al</em>., 2015), the
-function compares alternative models of nucleotide evolution and
-identifies the model that provides the best statistical explanation of
-the observed sequence variation according to information criteria such
-as AICc (Akaike, 1974; Hurvich &amp; Tsai, 1989). Selecting optimal
-partition-specific substitution models is crucial for controlling
-mutational rate heterogeneity across loci and mitigating systematic
-artifacts such as Long-Branch Attraction (LBA), where rapidly evolving
-non-homologous lineages false-group together. The resulting model scheme
-provides the statistical foundation for maximum-likelihood tree
+reads the supermatrix and partition file produced in Module 6, checks
+their compatibility with the <code>RAxML-NG</code> parser, and writes
+the input files for model selection and maximum-likelihood
 inference.</p>
+<p>The modules of this tutorial run for hours, and a complete analysis
+spans several R sessions, so each module has to run on its own. Passing
+results between modules in variables fails after a restart, and typing
+the file names at each call site lets them drift out of step with the
+run prefix.</p>
+<p>The <strong><code><a href="../reference/resolve_run_paths.html">resolve_run_paths()</a></code></strong> function
+reconstructs the path of every file of the run from the output
+directory, the run prefix and the supermatrix location, and each module
+below starts by calling it. Two entries depend on what happened in the
+run: <code>analysed_phy</code> points to the reduced matrix when
+<code>RAxML-NG</code> collapsed identical terminals and to the
+supermatrix otherwise, and <code>best_tree</code> points to
+<code>ml_search/</code> when the maximum-likelihood search ran on a
+cluster and to the run root when it ran locally. The
+<code>require</code> argument names the entries a module needs, so that
+a missing input raises an error naming the module that produces it.</p>
+<p>The <strong><code><a href="../reference/run_modeltest_ng.html">run_modeltest_ng()</a></code></strong> function selects
+a substitution model for each partition with <code>ModelTest-NG</code>
+(Darriba <em>et al</em>., 2020; Flouri <em>et al</em>., 2015) under the
+corrected Akaike information criterion (AICc; Akaike, 1974; Hurvich
+&amp; Tsai, 1989). The selected scheme is the model used in the
+maximum-likelihood search.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span></span>
@@ -233,6 +171,17 @@ inference.</p>
 <span><span class="va">modeltest_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"PATH_MODELTEST_NG"</span>, <span class="st">"modeltest-ng"</span><span class="op">)</span></span>
 <span><span class="va">raxml_path</span>     <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"PATH_RAXML_NG"</span>, <span class="st">"raxml-ng"</span><span class="op">)</span></span>
 <span><span class="va">treepl_path</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"PATH_TREEPL"</span>, <span class="st">"treePL"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Email notification for the long steps that run on this machine. Module 10 dates the tree and its</span></span>
+<span><span class="co"># bootstrap replicates locally, for hours, with no scheduler to mail on its behalf. Declared here,</span></span>
+<span><span class="co"># once, so the whole script is switched from one line.</span></span>
+<span><span class="co">#</span></span>
+<span><span class="co"># FALSE sends nothing and needs no configuration. TRUE needs two things, both outside this</span></span>
+<span><span class="co"># repository: MY_EMAIL in your .Renviron, and a blastula credentials file created once with</span></span>
+<span><span class="co"># blastula::create_smtp_creds_file() (use an application password if the account is Gmail). The</span></span>
+<span><span class="co"># package reads neither: it hands the path to blastula. A notification that cannot be sent is</span></span>
+<span><span class="co"># reported and ignored, so it never fails a run. See ?send_run_notification.</span></span>
+<span><span class="va">notify_email</span> <span class="op">&lt;-</span> <span class="cn">FALSE</span></span>
 <span></span>
 <span><span class="co"># Every file of the run carries this prefix, so the run is renamed by changing one value.</span></span>
 <span><span class="va">run_prefix</span> <span class="op">&lt;-</span> <span class="st">"cactus"</span></span>
@@ -302,148 +251,96 @@ inference.</p>
 <div class="section level3">
 <h3 id="module-8-constraint-trees-and-maximum-likelihood-search">Module 8: Constraint Trees and Maximum Likelihood Search<a class="anchor" aria-label="anchor" href="#module-8-constraint-trees-and-maximum-likelihood-search"></a>
 </h3>
-<p>Maximum likelihood inference estimates the evolutionary hypothesis
-that provides the best explanation of the observed molecular data under
-a defined substitution model. The resulting phylogeny should not be
-interpreted as an absolute representation of biological history, but
-rather as the topology that maximizes the likelihood of observing the
-molecular alignment given the evolutionary models, constraints, and
-available molecular evidence.</p>
-<p>Large phylogenetic datasets frequently include incomplete taxonomic
-sampling, uneven sequence availability, and uncertainty associated with
-the placement of newly incorporated species. These challenges become
-particularly relevant when expanding datasets to include a large number
-of taxa from highly diverse evolutionary radiations. In such cases,
-previously established phylogenetic knowledge can be incorporated to
-reduce uncertainty and improve the efficiency of tree space
-exploration.</p>
+<p>The maximum-likelihood tree is the topology that maximizes the
+likelihood of the alignment under the selected models and the
+topological constraint. Taxon sampling is incomplete and uneven, and
+previously established relationships among major lineages are used to
+restrict the search to the part of tree space that remains
+unresolved.</p>
 <p>The <strong><code><a href="../reference/build_constraint_scaffold.html">build_constraint_scaffold()</a></code></strong>
-function generates a topological constraint scaffold from the taxonomic
-framework provided in <code>cactus_constraints.csv</code>. This file
-assigns sampled species to major evolutionary groups within
-<strong>Cactaceae</strong>, including recognized subfamilies and
-internal clades. These assignments are based on previously published
-phylogenetic evidence and current evolutionary consensus regarding
-relationships among major cactus lineages, particularly the framework
-established by Guerrero <em>et al</em>. (2019).</p>
-<p>The constraint scaffold is not intended to replace molecular
-inference or impose a complete predefined phylogeny. Instead, it
-incorporates well supported relationships among higher level lineages
-while allowing unresolved relationships, particularly among newly
-incorporated species, to be inferred directly from the molecular
-dataset. By constraining only relationships supported by previous
-evidence, the approach reduces uncertainty during maximum likelihood
-inference and focuses the analysis on the evolutionary relationships
-that remain to be resolved.</p>
-<p>The <strong><code><a href="../reference/calculate_ml_tree.html">calculate_ml_tree()</a></code></strong> function
-interfaces with <code>RAxML-NG</code> (Kozlov <em>et al</em>., 2019) to
-estimate the maximum likelihood topology from the concatenated molecular
-matrix using the partition specific substitution models identified in
-<strong>Module 7</strong>. The analysis searches for the tree
-configuration that maximizes the likelihood of observing the sequence
-data under the selected evolutionary framework while incorporating the
-constraint scaffold defined for <strong>Cactaceae</strong>.</p>
-<p>The resulting maximum likelihood tree represents the best supported
-evolutionary hypothesis under the available molecular evidence,
-substitution models, and prior phylogenetic framework. This topology
-serves as the reference tree for subsequent branch support estimation
-and divergence time analyses.</p>
-<p>The search runs either on a local workstation through
-<code><a href="../reference/calculate_ml_tree.html">calculate_ml_tree()</a></code> or on an HPC allocation through
+function builds the constraint tree from
+<code>cactus_constraints.csv</code>, which assigns the sampled species
+to subfamilies and major clades of <strong>Cactaceae</strong> following
+published phylogenies, principally Guerrero <em>et al</em>. (2019).</p>
+<p>The constraint does not impose a complete topology. In the reference
+dataset it fixes 34 of the 1021 internal bipartitions, the relationships
+among 21 named clades, and leaves the other 987 to be estimated from the
+data, including the placement of every species within its clade.</p>
+<p>The <strong><code><a href="../reference/calculate_ml_tree.html">calculate_ml_tree()</a></code></strong> function runs
+the constrained search in <code>RAxML-NG</code> (Kozlov <em>et al</em>.,
+2019) with the partition models selected in Module 7.</p>
+<p>The maximum-likelihood tree is the reference topology for bootstrap
+support and divergence time estimation.</p>
+<p>The search runs on a local workstation with
+<code><a href="../reference/calculate_ml_tree.html">calculate_ml_tree()</a></code>, or on a cluster with
 <strong><code><a href="../reference/generate_ml_search_script.html">generate_ml_search_script()</a></code></strong>, which writes
-a SLURM batch script performing the identical constrained search. The
-choice is made with the <code>run_local_ml</code> flag below, mirroring
-the <code>run_local_bs</code> switch used for bootstrap replicates in
-Module 9. Unlike the bootstrap step, the maximum likelihood search is
-submitted as a single job rather than a job array: <code>RAxML-NG</code>
-distributes the independent starting tree searches across workers within
-one job and writes a single best tree, so no collection step is required
-to compare log-likelihoods across tasks.</p>
-<p>The parameter that governs wall-clock in this stage is
-<code>n_workers</code>, not the thread count. <code>RAxML-NG</code>
-assigns each worker <code>threads / workers</code> threads and gives it
-one starting tree at a time, so the search completes in
-<code>ceiling(n_init_trees / workers)</code> sequential rounds. Total
-core-work is fixed: adding threads to a single worker shortens each
-individual tree, while adding workers reduces the number of rounds, and
-the second lever dominates once each worker already holds an efficient
-thread count. A search of 50 starting trees on one worker executes 50
-rounds; the same 50 trees across 25 workers execute two. In a reference
-single-worker benchmark run on an Apple M2 Pro (8 threads,
-<code>n_workers = 1</code>), 50 starting trees required 47115 s,
-approximately 938 s per tree, essentially all of it attributable to
-sequential rounds rather than to per-tree cost. In contrast, running
-across 25 parallel workers on an AMD EPYC 9754 server (75 threads, 3
-threads per worker) on the full production supermatrix (1023 taxa, 12806
-sites, 5954 patterns, 11 partitions) completed 50 starting trees in two
-rounds in only 2393 s (~40 minutes).</p>
-<p>Passing <code>n_workers = NULL</code> derives the worker count
-automatically, constrained to a divisor of the starting tree count so
-that no worker sits idle in the final round. A worker count that does
-not divide the tree count wastes the tail of the search: 16 workers over
-50 trees run four rounds with only two workers occupied in the last one,
-reaching the same wall-clock as 25 workers over two full rounds while
-holding more cores to do it. Per-worker thread allocation should keep
-several hundred site patterns per thread, since parallel efficiency
-within a worker saturates below that;
-<code>min_threads_per_worker</code> sets that floor and warrants
-re-validation on unfamiliar node hardware with a short trial search
-(<code>n_init_trees = "rand{2}"</code>) before committing a full
-allocation.</p>
+a SLURM batch script for the same constrained search. The
+<code>run_local_ml</code> flag below selects between them, as
+<code>run_local_bs</code> does for the bootstrap replicates of Module 9.
+The search is a single job: <code>RAxML-NG</code> distributes the
+starting trees among workers within the job and writes one best
+tree.</p>
+<p>The wall-clock time of this stage depends mainly on
+<code>n_workers</code>. <code>RAxML-NG</code> gives each worker
+<code>threads / workers</code> threads and one starting tree at a time,
+so the search takes <code>ceiling(n_init_trees / workers)</code> rounds:
+50 starting trees take 50 rounds on one worker and two rounds on 25
+workers. On an Apple M2 Pro with one worker and 8 threads, 50 starting
+trees on an earlier version of the supermatrix took 47115 s (about 938 s
+per tree). On an AMD EPYC 9754 node with 25 workers and 75 threads (3
+per worker), 50 starting trees on the reference supermatrix (1024 taxa,
+12809 sites, 5959 patterns, 11 partitions) took 2739 s (about 46
+minutes).</p>
+<p>With <code>n_workers = NULL</code> the worker count is chosen as a
+divisor of the number of starting trees, so that no worker is idle in
+the last round; 16 workers on 50 trees run four rounds with two workers
+busy in the last one, and finish no sooner than 25 workers on two full
+rounds. Each worker should keep several hundred site patterns per
+thread, below which parallel efficiency within a worker saturates.
+<code>min_threads_per_worker</code> sets that floor; on unfamiliar
+hardware it can be checked with a short trial search
+(<code>n_init_trees = "rand{2}"</code>).</p>
 <p>The <strong><code><a href="../reference/calculate_rf_distances.html">calculate_rf_distances()</a></code></strong> function
-evaluates topological variability among independently inferred trees by
-calculating pairwise Robinson Foulds distances (Robinson &amp; Foulds,
-1981). These comparisons provide an additional measure of consistency
-among alternative tree searches and allow the assessment of whether
-independent analyses converge toward similar evolutionary
-hypotheses.</p>
-<p>Rooting is imposed after the search, not during it, and it cannot be
-delegated to <code>RAxML-NG</code>. Under time-reversible substitution
-models the likelihood of a topology is identical for every one of its
-possible rootings (Felsenstein, 1981), so the data carry no information
-about where the root sits and no constraint tree can supply it:
-constraint trees, like the search itself, are unrooted.
-<code>--outgroup</code> only places the named terminals first in the
-output. The root is an outgroup decision, applied afterwards by
-<code><a href="../reference/automate_treePL.html">automate_treePL()</a></code> through <code><a href="../reference/root_on_clade.html">root_on_clade()</a></code>.
-What that argument does control is which edge the root sits on, and the
-choice governs which groups come out monophyletic, which nodes exist,
-and where each calibration lands, since <code>treePL</code> addresses
+computes Robinson-Foulds distances (Robinson &amp; Foulds, 1981) among
+the trees of independent searches, as a measure of their
+convergence.</p>
+<p>The root is placed after the search. Under time-reversible
+substitution models the likelihood of a topology is the same for all its
+rootings (Felsenstein, 1981), so the data carry no information on the
+position of the root, and constraint trees, like the search, are
+unrooted. The <code>--outgroup</code> option of <code>RAxML-NG</code>
+only orders the output. The root is placed by
+<code><a href="../reference/automate_treePL.html">automate_treePL()</a></code> through <code><a href="../reference/root_on_clade.html">root_on_clade()</a></code>, and
+its position determines which groups are monophyletic, which nodes exist
+and where each calibration falls, because <code>treePL</code> addresses
 nodes by the MRCA of the terminals declared for them.</p>
-<p>Root on the whole outgroup clade rather than on one of its terminals.
-Naming a single terminal places the root <em>inside</em> the clade: the
-remaining terminals of that lineage fall on the ingroup side, the
-lineage is left paraphyletic in the final tree, and its crown node
-collapses onto the root. Any calibration addressed by the MRCA of that
-lineage then lands on the root instead of on the node it was written
-for. <code><a href="../reference/resolve_rooting_outgroup.html">resolve_rooting_outgroup()</a></code> returns the full set and
-<code><a href="../reference/root_on_clade.html">root_on_clade()</a></code> places the root on its stem edge, erroring
-when the terminals are not a clade of the unrooted topology. Use
-<code><a href="../reference/root_on_clade.html">root_on_clade()</a></code> rather than <code><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">ape::root()</a></code>
-directly: <code>RAxML-NG</code> writes the topology as an unrooted
-trifurcation, and when the rooting terminals fall on more than one of
-its basal branches, as they do in the reference dataset,
-<code><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">ape::root()</a></code> does not recognise them as a clade and leaves
-the root elsewhere.</p>
-<p>For the reference Cactaceae dataset, the rooting set comprises the 8
-sampled <strong>Talinaceae</strong> terminals (<em>Talinum</em> and
-<em>Talinella</em>). Occupancy across that set is reported per terminal
-in
+<p>The root is placed on the whole outgroup clade. Rooting on a single
+terminal places the root inside the clade: the other terminals of that
+lineage fall on the ingroup side, the lineage becomes paraphyletic, and
+its crown node collapses onto the root, so a calibration addressed by
+the MRCA of that lineage falls on the root.
+<code><a href="../reference/resolve_rooting_outgroup.html">resolve_rooting_outgroup()</a></code> returns the full set, and
+<code><a href="../reference/root_on_clade.html">root_on_clade()</a></code> places the root on its stem edge and stops
+with an error when the terminals are not a clade of the unrooted
+topology. <code><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">ape::root()</a></code> is not used directly because
+<code>RAxML-NG</code> writes the tree as an unrooted trifurcation, and
+when the rooting terminals fall on more than one of its basal branches,
+as in the reference dataset, <code><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">ape::root()</a></code> does not recognize
+them as a clade.</p>
+<p>In the reference dataset the rooting set comprises the 8 sampled
+terminals of Talinaceae (<em>Talinum</em> and <em>Talinella</em>); their
+occupancy is reported in
 <code>6_Concatenated/final_tables/TABLE_final_species_alignment_summary.csv</code>.
 Rooting on Talinaceae places the root on the stem of the ACP clade
-(Anacampserotaceae, Cactaceae, Portulacaceae), avoiding the topological
-artifact of forcing an unverified sister relationship between Cactaceae
-and Anacampserotaceae that occurs when rooting on Portulacaceae in the
-absence of an external fourth lineage.</p>
-<p>With the root placed on the stem of Talinaceae, the crown of the ACP
-clade is an internal node with an estimable stem branch length, allowing
-maximum-likelihood inference to test alternative topological resolutions
-among the three core families (Ramírez-Barahona <em>et al.</em>, 2020;
-Zuntini <em>et al.</em>, 2024; de Vos <em>et al.</em>, 2025).
-Interfamilial relationships within this rapid radiation represent a zone
-of topological conflict, and the recovered tree reflects empirical
-preference under the multilocus supermatrix rather than an assumption
-imposed by outgroup choice.</p>
+(Anacampserotaceae, Cactaceae, Portulacaceae). Rooting on Portulacaceae,
+without a fourth lineage, would impose a sister relationship between
+Cactaceae and Anacampserotaceae.</p>
+<p>With this rooting the crown of the ACP clade is an internal node, and
+the likelihood can choose among the three resolutions of the three
+families (Ramírez-Barahona <em>et al.</em>, 2020; Zuntini <em>et
+al.</em>, 2024; de Vos <em>et al.</em>, 2025). Relationships among these
+families are in conflict across published analyses, and the resolution
+in the tree is an estimate from this supermatrix.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Module 8 needs the outputs of Module 7. Asking for them by name turns a missing input into an</span></span>
 <span><span class="co"># error that says which module has not run yet, instead of a missing object after a restart.</span></span>
@@ -527,92 +424,59 @@ imposed by outgroup choice.</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="module-9-topological-validation-via-bootstrap-support">Module 9: Topological Validation via Bootstrap Support<a class="anchor" aria-label="anchor" href="#module-9-topological-validation-via-bootstrap-support"></a>
+<h3 id="module-9-bootstrap-support">Module 9: Bootstrap Support<a class="anchor" aria-label="anchor" href="#module-9-bootstrap-support"></a>
 </h3>
-<p>Once the maximum likelihood topology has been inferred, the
-statistical support of recovered clades must be evaluated by quantifying
-topological stability associated with each internal node. Bootstrap
-analyses provide an empirical measure of topological stability by
-assessing how consistently specific relationships are recovered under
-resampling of the original sequence alignment.</p>
+<p>Bootstrap analysis measures how consistently each clade of the
+maximum-likelihood tree is recovered when the alignment is
+resampled.</p>
 <p>The <strong><code><a href="../reference/generate_bootstrap_script.html">generate_bootstrap_script()</a></code></strong> and
-<strong><code><a href="../reference/run_local_bootstraps.html">run_local_bootstraps()</a></code></strong> functions configure
-and execute bootstrap searches using <code>RAxML-NG</code>. These
-procedures generate independent resampled datasets while maintaining the
-same substitution model, constraint tree and partition scheme defined
-during the maximum likelihood inference. The resulting bootstrap trees
-represent alternative evolutionary hypotheses derived from the molecular
-dataset and allow the assessment of uncertainty across the inferred
-topology.</p>
+<strong><code><a href="../reference/run_local_bootstraps.html">run_local_bootstraps()</a></code></strong> functions run the
+bootstrap searches in <code>RAxML-NG</code> with the same models,
+constraint and partition scheme as the maximum-likelihood search.</p>
 <p>The <strong><code><a href="../reference/collect_bootstraps.html">collect_bootstraps()</a></code></strong> function
-gathers the independent bootstrap searches, while
-<strong><code><a href="../reference/check_bs_convergence.html">check_bs_convergence()</a></code></strong> evaluates whether a
-sufficient number of replicates has been generated using the
-bootstopping criterion (Pattengale <em>et al</em>., 2010). Convergence
-is evaluated under Felsenstein’s Bootstrap Proportions
-(<code>FBP</code>), testing whether the autoMRE threshold (cutoff &lt;=
-0.03) is satisfied across resampled replicates.</p>
-<p>The <strong><code><a href="../reference/map_branch_supports.html">map_branch_supports()</a></code></strong> function
-summarizes bootstrap information and transfers support values onto the
-best maximum likelihood topology. <code>PhyloCactus</code> adopts
-Felsenstein’s Bootstrap Proportions (<code>FBP</code>) as its primary
-canonical metric. Published phylogenetic studies in Cactaceae
-(Hernández-Hernández <em>et al</em>., 2014; Arakaki <em>et al</em>.,
-2011) report standard FBP bipartition frequencies or Bayesian posterior
-probabilities. Transfer Bootstrap Expectation (<code>TBE</code>; Lemoine
-<em>et al</em>., 2018) is computed as a secondary, complementary metric.
-While TBE mitigates the penalization caused by unstable wildcard taxa in
-large supermatrices with missing data, it systematically inflates
-support values in large clades compared to standard bipartition
-frequencies (for example, free clades of 51 to 200 tips exhibit a median
-FBP of 0.265 alongside a median TBE of 0.969). Reporting FBP as the
-primary metric ensures direct comparability with published botanical
-benchmarks, while retaining TBE provides diagnostic insight into local
-taxon placement stability.</p>
-<p>When interpreting support values, internal nodes enforced by the
-taxonomic constraint scaffold (<code>cactus_constraints.tree</code>)
-return support values of 1.000 by algorithmic definition across all
-bootstrap replicates. These values represent the topological constraint
-itself rather than empirical evidence from the molecular supermatrix,
-and must be designated as constrained rather than estimated in
-publication tables.</p>
+gathers the replicates, and
+<strong><code><a href="../reference/check_bs_convergence.html">check_bs_convergence()</a></code></strong> tests whether their
+number is sufficient with the autoMRE bootstopping criterion (Pattengale
+<em>et al</em>., 2010) on Felsenstein bootstrap proportions (FBP), with
+a cutoff of 0.03. In the reference run the criterion was met after 650
+of 1000 replicates.</p>
+<p>The <strong><code><a href="../reference/map_branch_supports.html">map_branch_supports()</a></code></strong> function maps
+the bootstrap support onto the maximum-likelihood tree. FBP is the
+primary measure, as in published phylogenies of Cactaceae, which report
+bipartition frequencies or posterior probabilities (Arakaki <em>et
+al</em>., 2011; Hernández-Hernández <em>et al</em>., 2014). The transfer
+bootstrap expectation (TBE; Lemoine <em>et al</em>., 2018) is computed
+as a secondary measure. TBE is less sensitive to unstable terminals in
+large matrices with missing data, but it is higher than FBP on large
+clades: on the 987 unconstrained nodes of the reference tree, clades of
+51 to 200 terminals have a median FBP of 0.220 and a median TBE of
+0.952. FBP is reported for comparability with published studies, and TBE
+as a measure of the stability of taxon placement.</p>
+<p>Nodes imposed by the constraint
+(<code>cactus_constraints.tree</code>) are recovered in every bootstrap
+replicate by construction and receive a support of 1.000. That value
+reproduces the constraint and does not measure support from the data;
+these nodes are reported as constrained in publication tables.</p>
 <div class="section level4">
 <h4 id="temporal-bootstrap-replicates-for-divergence-time-estimation">Temporal Bootstrap Replicates for Divergence Time Estimation<a class="anchor" aria-label="anchor" href="#temporal-bootstrap-replicates-for-divergence-time-estimation"></a>
 </h4>
-<p>Divergence time estimation requires an additional assessment of
-uncertainty because branch lengths inferred during maximum likelihood
-analysis are influenced by sampling variation in the molecular data.
-Following the empirical protocol proposed by Maurin (2020) for dating
-large phylogenies with <code>treePL</code>, <code>PhyloCactus</code>
-generates a second set of bootstrap replicates specifically designed for
-temporal analyses.</p>
+<p>Following Maurin (2020), a second set of bootstrap replicates is
+generated for dating, to measure the uncertainty in branch lengths.</p>
 <p>The <strong><code><a href="../reference/calculate_temporal_bootstraps.html">calculate_temporal_bootstraps()</a></code></strong>
-function generates bootstrap alignments and performs maximum likelihood
-searches while constraining the topology to the previously inferred
-maximum likelihood tree. This constraint does not force branch lengths
-to be identical; instead, it preserves the supported evolutionary
-relationships while allowing each bootstrap replicate to independently
-estimate branch length variation from the resampled molecular data.</p>
-<p>This strategy is particularly important for large phylogenetic
-datasets where many relationships are already strongly supported at
-higher taxonomic levels, but uncertainty remains associated with branch
-length estimation and the placement of newly incorporated taxa. By
-maintaining a common topological framework, temporal bootstrap
-replicates provide a distribution of alternative branch length estimates
-that can be propagated into downstream divergence time analyses.</p>
-<p>The resulting bootstrap trees are subsequently used by the dating
-module with <code>treePL</code> (Smith &amp; O’Meara, 2012). Following
-the protocol described by Maurin (2020), the best maximum likelihood
-topology is first optimized to determine the appropriate penalized
-likelihood parameters and smoothing value. These parameters are then
-applied to the temporal bootstrap replicates to estimate a distribution
-of dated trees, from which confidence intervals for node ages can be
-obtained.</p>
-<p>Therefore, <code>PhyloCactus</code> distinguishes between two
-complementary bootstrap procedures: standard bootstrap analyses evaluate
-the topological stability of inferred relationships, whereas temporal
-bootstrap replicates quantify uncertainty in molecular branch length
-estimates required for divergence time estimation.</p>
+function resamples the alignment and estimates branch lengths for each
+replicate with the topology fixed to the maximum-likelihood tree.</p>
+<p>Because the topology is fixed, the dated replicates measure
+uncertainty in branch lengths only. The confidence intervals of node
+ages do not include topological uncertainty, which is measured
+separately by the bootstrap support of Module 9.</p>
+<p>Following Maurin (2020), the penalized likelihood parameters and the
+smoothing value are selected on the maximum-likelihood tree with
+<code>treePL</code> (Smith &amp; O’Meara, 2012) and then applied to the
+temporal replicates, whose dated trees give the confidence intervals of
+node ages.</p>
+<p>The two bootstrap procedures therefore measure different things: the
+standard bootstrap measures topological support, and the temporal
+bootstrap measures uncertainty in branch lengths for dating.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># -------------------------------------------------------------</span></span>
 <span><span class="co"># Estimate Bootstrap Replicates</span></span>
@@ -672,7 +536,7 @@ estimates required for divergence time estimation.</p>
 <span><span class="co"># -------------------------------------------------------------</span></span>
 <span><span class="co"># Collect Bootstrap Replicates</span></span>
 <span><span class="co"># -------------------------------------------------------------</span></span>
-<span><span class="co"># Before running this step, ensure that your bootstrap replicates have finished.</span></span>
+<span><span class="co"># Run this step after all bootstrap replicates have finished.</span></span>
 <span><span class="co"># If you ran them on HPC, make sure all chunks completed successfully and</span></span>
 <span><span class="co"># optionally sync the files back to your local repository.</span></span>
 <span></span>
@@ -779,21 +643,13 @@ estimates required for divergence time estimation.</p>
 <div class="section level3">
 <h3 id="module-10-estimating-divergence-times-via-penalized-likelihood">Module 10: Estimating Divergence Times via Penalized Likelihood<a class="anchor" aria-label="anchor" href="#module-10-estimating-divergence-times-via-penalized-likelihood"></a>
 </h3>
-<p>The inferred maximum likelihood topology provides a robust hypothesis
-of evolutionary relationships; however, branch lengths estimated from
-molecular data represent substitutions per site rather than geological
-time. To reconstruct the temporal history of <strong>Cactaceae</strong>
-diversification, the phylogenetic tree must therefore be transformed
-into an ultrametric chronogram by integrating molecular branch length
-information with temporal constraints derived from previous evolutionary
-studies.</p>
-<p><code>PhyloCactus</code> estimates divergence times using the
-penalized likelihood framework implemented in <code>treePL</code>
-(Sanderson, 2002; Smith &amp; O’Meara, 2012). This approach is
-particularly suitable for large phylogenetic datasets because it
-accommodates lineage specific variation in evolutionary rates while
-remaining computationally feasible for analyses involving hundreds or
-thousands of taxa.</p>
+<p>Branch lengths of the maximum-likelihood tree are in substitutions
+per site. Converting them to time requires calibrations, which here come
+from previous dating studies.</p>
+<p>Divergence times are estimated by penalized likelihood in
+<code>treePL</code> (Sanderson, 2002; Smith &amp; O’Meara, 2012), which
+allows rates to vary among lineages and is computationally feasible for
+trees of thousands of terminals.</p>
 <p>Temporal constraints are provided through the
 <code>calibrations_bounds.csv</code> reference file distributed with the
 package. Each row declares the node it constrains as a set of taxa
@@ -809,19 +665,14 @@ clade; a stem node is the divergence separating that clade from its
 sister, and is therefore always older. Assigning a stem age to a crown
 node inflates the node by construction, and propagates that inflation to
 every node below it.</p>
-<p>Internal calibrations for major cactus lineages are derived from
-Hernández-Hernández <em>et al.</em> (2014), which estimated divergence
-times among the principal evolutionary groups of the family. These are
-crown ages of densely sampled clades (<strong>Opuntioideae</strong>,
-<strong>Cactoideae</strong>, Cacteae) and are applied to the
+<p>Internal calibrations are crown ages of Opuntioideae, Cactoideae and
+Cacteae from Hernández-Hernández <em>et al.</em> (2014), applied to the
 corresponding crown nodes.</p>
-<p>Because <strong>Cactaceae</strong> lacks an unequivocal macrofossil
-record suitable for direct internal node calibration, the root of the
-ingroup is constrained by secondary calibration from the angiosperm-wide
-chronogram of Ramírez-Barahona <em>et al.</em> (2020) under the
-<code>RC_complete</code> scheme. With Talinaceae (<em>Talinum</em> and
-<em>Talinella</em>) explicitly sampled to root the tree, the calibrated
-node is:</p>
+<p>Cactaceae lack a macrofossil record suitable for calibrating internal
+nodes. The deepest calibration is therefore a secondary age from the
+angiosperm-wide chronogram of Ramírez-Barahona <em>et al.</em> (2020),
+<code>RC_complete</code> scheme. With Talinaceae sampled to root the
+tree, the calibrated node is:</p>
 <ul>
 <li>
 <code>ACP_root</code>: Constrains the crown divergence of the
@@ -836,92 +687,152 @@ relaxed clock), with alternative sensitivity schemes available in
 <li>
 <code>Cactaceae_Anacampserotaceae_stem</code> ([21.95, 48.51] Ma) is
 retained in <code>calibrations_bounds.csv</code> with
-<code>used_in_analysis = FALSE</code> because it assumes a sister
-relationship between <strong>Cactaceae</strong> and Anacampserotaceae;
-our unconstrained likelihood inference and phylogenomic evidence
-(Zuntini <em>et al.</em>, 2024 Kew Tree of Life Release 4.0) instead
-recover (Anacampserotaceae + Portulacaceae) sister to
-<strong>Cactaceae</strong>.</li>
+<code>used_in_analysis = FALSE</code>, because it assumes that Cactaceae
+and Anacampserotaceae are sisters. The maximum-likelihood tree recovers
+Anacampserotaceae and Portulacaceae as sisters (FBP 45; the node is not
+constrained), as do Zuntini <em>et al.</em> (2024).</li>
+<li>
+<code>ACPT_root</code> ([33.28, 59.86] Ma, Ramírez-Barahona <em>et
+al.</em>, 2020) is retained with <code>used_in_analysis = FALSE</code>.
+The root of the chronogram is the crown of the ACPT clade, so the
+deepest node of the tree is not calibrated: its age of 45.61 Ma is
+extrapolated above the fixed calibration and depends on the smoothing
+value. It falls inside the published interval, which is a consistency
+check and not a constraint. Activating the bound would add a second
+calibration on the deepest node and would be a different analysis.
+Methods should report the root age as uncalibrated.</li>
 </ul>
-<p>The crown intervals reported by Ramírez-Barahona <em>et al.</em>
-(2020) for these families are also retained with
-<code>used_in_analysis = FALSE</code>, for provenance rather than for
-use. That study samples two terminals per family, so its crown estimate
-is the divergence between the two sampled species rather than the crown
-of the family, and systematically underestimates it. Its stem nodes are
-well defined regardless of within-family sampling, which is why the stem
-bounds are the ones carried forward.</p>
-<p>Secondary calibration inherits the uncertainty of the study it comes
-from without propagating it, so the resulting node ages are conditional
-on that framework rather than independent estimates. Bounds drawn from
-Hernández-Hernández <em>et al.</em> (2014) and from Ramírez-Barahona
-<em>et al.</em> (2020) also come from analyses calibrated under
-different schemes. Both limitations should be stated in Methods.</p>
-<p>The <strong><code><a href="../reference/automate_treePL.html">automate_treePL()</a></code></strong> function performs
-the complete divergence time estimation workflow. First, it prepares the
-maximum likelihood topology, branch length information, and calibration
-constraints required by <code>treePL</code>. The function then performs
-the optimization procedure required to estimate appropriate penalized
-likelihood parameters, including the smoothing parameter selected
-through cross validation.</p>
-<p>Following the empirical protocol described by Maurin (2020), the
-optimization and cross validation steps are performed using the best
-scoring maximum likelihood tree without bootstrap annotations. This
-approach ensures that the dating parameters are optimized using the
-primary evolutionary hypothesis before being propagated to replicate
-datasets. Specifically, the smoothing value selected by cross validation
-on the maximum likelihood tree is reused, unmodified, for every temporal
-bootstrap replicate, rather than re-optimized independently for each
-one. Repeating full cross validation for every replicate is
-computationally prohibitive at typical bootstrap replicate counts, and
-reusing a single, well-supported smoothing value is standard practice in
-<code>treePL</code>-based dating pipelines; the trade-off is that
-per-replicate variation in optimal rate heterogeneity smoothing is not
-itself propagated into the reported confidence intervals, which instead
-capture uncertainty arising from branch length resampling alone.</p>
-<p>After the optimal <code>treePL</code> parameters have been
-identified, the dating procedure is applied to the temporal bootstrap
-replicates generated in <strong>Module 9</strong>. These replicates were
-obtained by resampling the original alignment while maintaining the
-maximum likelihood topology as a constraint. This strategy preserves the
-inferred relationships among taxa while allowing branch lengths to vary
-according to molecular sampling uncertainty.</p>
-<p>Propagating temporal uncertainty through these bootstrap replicates
-allows divergence time estimates to incorporate variation in branch
-length estimation. The resulting collection of dated bootstrap trees
-represents uncertainty associated with the temporal reconstruction under
-a maximum likelihood framework and provides the basis for estimating
-confidence intervals around divergence times.</p>
+<p>The crown intervals of Ramírez-Barahona <em>et al.</em> (2020) for
+these families are also listed with
+<code>used_in_analysis = FALSE</code>, for reference. That study samples
+two terminals per family, so its crown ages are the divergence between
+the two sampled species and underestimate the crown of each family; its
+stem ages do not depend on within-family sampling and are the ones
+used.</p>
+<p>Secondary calibrations do not carry the uncertainty of the studies
+they come from, so the node ages are conditional on those studies. The
+bounds of Hernández-Hernández <em>et al.</em> (2014) and
+Ramírez-Barahona <em>et al.</em> (2020) also come from analyses with
+different calibration schemes. Both limitations should be stated in
+Methods.</p>
+<p>The <strong><code><a href="../reference/automate_treePL.html">automate_treePL()</a></code></strong> function runs the
+dating: it prepares the maximum-likelihood tree and the calibrations for
+<code>treePL</code>, selects the optimization parameters and the
+smoothing value, and dates the maximum-likelihood tree and the temporal
+replicates.</p>
+<p>Following Maurin (2020), the optimization parameters and the
+smoothing value are selected on the maximum-likelihood tree and applied
+unchanged to every temporal replicate. Repeating the cross-validation
+for each replicate is computationally prohibitive; as a consequence, the
+confidence intervals do not include uncertainty in the smoothing
+value.</p>
+<p>The temporal replicates of Module 9 are then dated with those
+parameters.</p>
+<p>The dated replicates give the distribution of each node age, from
+which the confidence intervals are obtained.</p>
+<p>This is the longest step that runs on the local machine, and it has
+no scheduler to send a notification. With
+<code>notify_email &lt;- TRUE</code> in the SETUP block,
+<code><a href="../reference/automate_treePL.html">automate_treePL()</a></code> sends an email when the run ends, with
+its status, start and end times, elapsed time, host, output paths and,
+if the run failed, the R error. This requires <code>MY_EMAIL</code> in
+<code>.Renviron</code> and a <code>blastula</code> credentials file
+created with <code><a href="https://rstudio.github.io/blastula/reference/create_smtp_creds_file.html" class="external-link">blastula::create_smtp_creds_file()</a></code>;
+<code>PhyloCactus</code> passes the path of that file to
+<code>blastula</code> and does not read it. A notification that cannot
+be sent is reported and does not fail the run. See
+<code><a href="../reference/send_run_notification.html">?send_run_notification</a></code>.</p>
 <div class="section level4">
 <h4 id="summarizing-dated-temporal-bootstrap-replicates">Summarizing Dated Temporal Bootstrap Replicates<a class="anchor" aria-label="anchor" href="#summarizing-dated-temporal-bootstrap-replicates"></a>
 </h4>
-<p>After all temporal bootstrap replicates have been independently
-dated, the resulting chronograms must be summarized into a single
-representative time calibrated tree. Following the empirical workflow
-proposed by Maurin (2020), <code>PhyloCactus</code> uses
-<code>TreeAnnotator</code> (Helfrich <em>et al.</em>, 2018) to summarize
-the dated bootstrap distribution.</p>
-<p>Because temporal bootstrap replicates are generated under the maximum
-likelihood topology constraint, all replicate trees share identical
-branching relationships. Therefore, the summary procedure does not
-evaluate alternative topologies, but instead estimates the distribution
-of node ages across independently dated replicate trees.</p>
-<p>The recommended <code>TreeAnnotator</code> configuration specifies a
-maximum sum of clade credibility target tree type, mean height node age
-estimates, and 0% burn-in.</p>
-<p>Under this framework, <code>TreeAnnotator</code> calculates the mean
-age of each node and summarizes the uncertainty associated with
-divergence time estimation across the dated temporal bootstrap
+<p>The dated replicates are summarized with <code>TreeAnnotator</code>
+(Helfrich <em>et al.</em>, 2018), following Maurin (2020).</p>
+<p>All replicates share the maximum-likelihood topology, so the summary
+estimates the distribution of node ages and does not compare
+topologies.</p>
+<p><code>TreeAnnotator</code> is run with a maximum sum of clade
+credibilities target tree, mean node heights, and 0% burn-in. It
+computes the mean age of each node and its interval across the dated
 replicates.</p>
-<p>TreeAnnotator reports these uncertainty intervals as highest
-posterior density (HPD) values due to compatibility with Bayesian
-phylogenetic workflows. However, these values should not be interpreted
-as Bayesian posterior distributions. Within the <code>PhyloCactus</code>
-framework, they represent confidence intervals derived from variation
-among independently dated temporal bootstrap replicates generated
-through penalized likelihood optimization.</p>
-<p>Here is how you execute, print, and visualize these chronological
-calculations:</p>
+<p><code>TreeAnnotator</code> labels these intervals as highest
+posterior density (HPD) intervals because it is written for Bayesian
+analyses. Here they are confidence intervals from independently dated
+bootstrap replicates, not posterior distributions.</p>
+</div>
+<div class="section level4">
+<h4 id="selecting-the-rate-smoothing-parameter">Selecting the Rate-Smoothing Parameter<a class="anchor" aria-label="anchor" href="#selecting-the-rate-smoothing-parameter"></a>
+</h4>
+<p>In penalized likelihood dating, the rate-smoothing parameter
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>)
+governs the roughness penalty that balances adherence to observed branch
+lengths against the enforcement of rate autocorrelation across
+ancestral-descendant lineages (Sanderson, 2002). When
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+approaches zero, each branch is permitted its own independent
+substitution rate (approaching a clockless model); as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>
+increases toward infinity, rate variation across lineages is penalized
+until rates become identical across the entire tree (enforcing a strict
+molecular clock).</p>
+<p>Cross-validation (<code>randomcv</code>) removes subsets of the data,
+re-estimates rates and times without them, and scores the prediction
+error of each smoothing value as a chi-square
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>χ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\chi^2</annotation></semantics></math>);
+the value with the lowest
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>χ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\chi^2</annotation></semantics></math>
+is selected (Maurin, 2020). <code><a href="../reference/automate_treePL.html">automate_treePL()</a></code> evaluates one
+value per order of magnitude from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mn>3</mn></msup><annotation encoding="application/x-tex">10^3</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>14</mn></mrow></msup><annotation encoding="application/x-tex">10^{-14}</annotation></semantics></math>.
+The meaning of the selected value depends on the shape of the curve,
+which <code><a href="../reference/run_treePL_cv.html">run_treePL_cv()</a></code> classifies and reports:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Interior minimum.</strong> The curve decreases and then
+increases within the grid. The lowest value is an optimum, and the
+chronogram is dated at it.</li>
+<li>
+<strong>Edge.</strong> The lowest value lies at the end of the grid,
+and the curve is still decreasing there. The optimum lies beyond the
+grid; <code>cvstop</code> has to be extended and the analysis repeated
+before any age is interpreted (Maurin, 2020).</li>
+<li>
+<strong>Plateau.</strong> The curve decreases and then levels off,
+so that smoothing values below a threshold fit the data about equally
+well. The lowest
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>χ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\chi^2</annotation></semantics></math>
+is one of several equivalent values, and node ages have to be reported
+across the plateau.</li>
+</ol>
+<p>The reference dataset produces a plateau. Between
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>4</mn></mrow></msup><annotation encoding="application/x-tex">10^{-4}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>6</mn></mrow></msup><annotation encoding="application/x-tex">10^{-6}</annotation></semantics></math>
+the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>χ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\chi^2</annotation></semantics></math>
+decreases by 10.3 units; across the eight orders of magnitude from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>6</mn></mrow></msup><annotation encoding="application/x-tex">10^{-6}</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>14</mn></mrow></msup><annotation encoding="application/x-tex">10^{-14}</annotation></semantics></math>
+it decreases by 3.7 units, with three reversals. The lowest value,
+221.12 at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>12</mn></mrow></msup><annotation encoding="application/x-tex">10^{-12}</annotation></semantics></math>,
+is 0.04 units below the value at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>14</mn></mrow></msup><annotation encoding="application/x-tex">10^{-14}</annotation></semantics></math>.
+Cross-validation therefore supports smoothing values below approximately
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>6</mn></mrow></msup><annotation encoding="application/x-tex">10^{-6}</annotation></semantics></math>
+without distinguishing among them. The chronogram is dated at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>12</mn></mrow></msup><annotation encoding="application/x-tex">10^{-12}</annotation></semantics></math>,
+and <code><a href="../reference/report_smoothing_sensitivity.html">report_smoothing_sensitivity()</a></code> dates the same tree at
+values across and beyond the plateau. Across the plateau
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>14</mn></mrow></msup><annotation encoding="application/x-tex">10^{-14}</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mrow><mi>−</mi><mn>6</mn></mrow></msup><annotation encoding="application/x-tex">10^{-6}</annotation></semantics></math>),
+the age of Opuntioideae varies by 0.15 Ma, that of Cacteae by 0.25 Ma,
+that of Cactoideae by 1.09 Ma, and that of the uncalibrated root by 0.89
+Ma. Methods should report the plateau and these ranges.</p>
+<p>The code for Module 10:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Resuming here after a restart: run the SETUP block of Module 7, then continue from this line.</span></span>
 <span><span class="va">paths</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resolve_run_paths.html">resolve_run_paths</a></span><span class="op">(</span><span class="va">output_dir</span>, <span class="va">run_prefix</span>, <span class="va">supermatrix_file</span>,</span>
@@ -983,19 +894,15 @@ calculations:</p>
 <span>  <span class="va">cfg_lines</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cfg_lines</span>, <span class="va">mrca_line</span>, <span class="va">min_line</span>, <span class="va">max_line</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Node-identity assertions, rewritten when Talinaceae entered the sampling.</span></span>
-<span><span class="co">#</span></span>
-<span><span class="co"># With Talinaceae rooting the tree, the root is the crown of the ACPT clade and ACP_root is an</span></span>
-<span><span class="co"># internal node with a parent branch, which is what makes it identifiable rather than a parameter</span></span>
-<span><span class="co"># parked at the end of the tree. The earlier assertion required ACP_root to BE the root and would</span></span>
-<span><span class="co"># now fail, correctly: it encoded the previous sampling.</span></span>
+<span><span class="co"># Node-identity assertions. With Talinaceae rooting the tree, the root is the crown of the ACPT</span></span>
+<span><span class="co"># clade and ACP_root is an internal node with a parent branch, which makes its age identifiable.</span></span>
 <span><span class="co">#</span></span>
 <span><span class="co"># What still has to hold, and what these lines check:</span></span>
 <span><span class="co">#   1. The rooting clade is monophyletic. Rooting on a single terminal instead of the clade leaves</span></span>
 <span><span class="co">#      the lineage paraphyletic and collapses its crown onto the root, which silently reassigns</span></span>
 <span><span class="co">#      every bound addressed by that lineage.</span></span>
 <span><span class="co">#   2. ACP_root resolves to a node that is NOT the root, so the anchor is placed on an internal</span></span>
-<span><span class="co">#      node rather than on the deepest split of the tree.</span></span>
+<span><span class="co">#      node and not on the deepest split of the tree.</span></span>
 <span><span class="co">#   3. ACP_root is monophyletic. If the likelihood placed Talinaceae inside the ACP clade, the</span></span>
 <span><span class="co">#      anchor would be addressing something other than the node it was written for.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/is.monophyletic.html" class="external-link">is.monophyletic</a></span><span class="op">(</span><span class="va">rooted_ml</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"^(Talinum|Talinella)_"</span>, <span class="va">tip_labels</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
@@ -1003,8 +910,7 @@ calculations:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/mrca.html" class="external-link">getMRCA</a></span><span class="op">(</span><span class="va">rooted_ml</span>, <span class="va">acp_tips</span><span class="op">)</span> <span class="op">!=</span> <span class="va">root_node</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/is.monophyletic.html" class="external-link">is.monophyletic</a></span><span class="op">(</span><span class="va">rooted_ml</span>, <span class="va">acp_tips</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># The resolution of the ACPT quartet is a result of this run, not an assumption, so it is reported</span></span>
-<span><span class="co"># rather than asserted. Whether Cactaceae_Anacampserotaceae_stem can be reactivated in</span></span>
+<span><span class="co"># The resolution of the ACPT quartet is estimated by this run, so it is reported and not asserted. Whether Cactaceae_Anacampserotaceae_stem can be reactivated in</span></span>
 <span><span class="co"># calibrations_bounds.csv depends on what this prints.</span></span>
 <span><span class="va">cact_anac</span> <span class="op">&lt;-</span> <span class="fu">tips_for</span><span class="op">(</span><span class="st">"Family"</span>, <span class="st">"Cactaceae;Anacampserotaceae"</span><span class="op">)</span></span>
 <span><span class="va">anac_por</span>  <span class="op">&lt;-</span> <span class="fu">tips_for</span><span class="op">(</span><span class="st">"Family"</span>, <span class="st">"Anacampserotaceae;Portulacaceae"</span><span class="op">)</span></span>
@@ -1035,21 +941,16 @@ calculations:</p>
 <span><span class="co"># 2. Run Fast Automated `treePL` Dating Pipeline</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nRunning automated `treePL` wrapper script over maximum-likelihood tree and bootstrap replicates...\n"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Priming, cross-validation and dating follow the empirical protocol of Maurin (2020,</span></span>
-<span><span class="co"># arXiv:2008.07054, CC BY 4.0) and run through run_treePL_cv(), in R. Until 2026-09-02 they were</span></span>
-<span><span class="co"># driven by a copy of the shell script at https://github.com/tongjial/treepl_wrapper, which was an</span></span>
-<span><span class="co"># earlier implementation of the same protocol; that script carries no licence, so it could not be</span></span>
-<span><span class="co"># redistributed inside this GPL-3 package, and it wrote `smoothing = ` where treePL reads</span></span>
-<span><span class="co"># `smooth = `, silently dating every chronogram at the built-in default of 10.</span></span>
+<span><span class="co"># Priming, cross-validation and dating follow the protocol of Maurin (2020, arXiv:2008.07054) and</span></span>
+<span><span class="co"># run through run_treePL_cv(). The priming parameters are the lowest of the repeats,</span></span>
+<span><span class="co"># cross-validation uses `randomcv`, and the smoothing grid runs from 1e+03 to 1e-14, one value per</span></span>
+<span><span class="co"># order of magnitude. The grid extends well below the 1e-06 to 1e-08 range reported by Maurin, so</span></span>
+<span><span class="co"># that a plateau can be distinguished from a search that stopped at the edge of the grid.</span></span>
 <span><span class="co">#</span></span>
-<span><span class="co"># Three defaults follow Maurin where the shell script did not: the priming parameters are the</span></span>
-<span><span class="co"># lowest rather than the most frequent, cross-validation uses `randomcv` rather than leave-one-out</span></span>
-<span><span class="co"># `cv`, and the smoothing grid reaches 1e-08 rather than stopping at 1e-04. Maurin reports optimal</span></span>
-<span><span class="co"># smoothing between 1e-06 and 1e-08 for a tree whose branch lengths were rescaled as they are here.</span></span>
-<span></span>
-<span><span class="co"># Note: For tutorial purposes, you can limit the number of bootstrap trees to process</span></span>
-<span><span class="co"># by setting `num_bs = 100` (or any other number). If not provided, it will process all</span></span>
-<span><span class="co"># available bootstrap trees. Here we set it to 100 for faster tutorial execution.</span></span>
+<span><span class="co"># The seed fixes every stochastic step of the dating. 79992967 is the seed of the reference run:</span></span>
+<span><span class="co"># keep it to reproduce the published chronogram, or change it for an independent run.</span></span>
+<span><span class="co">#</span></span>
+<span><span class="co"># num_bs = 100 dates 100 temporal bootstrap replicates; num_bs = NULL dates all of them.</span></span>
 <span><span class="fu"><a href="../reference/automate_treePL.html">automate_treePL</a></span><span class="op">(</span></span>
 <span>  cfg_file <span class="op">=</span> <span class="va">calibrations_cfg_path</span>,</span>
 <span>  ml_tree_file <span class="op">=</span> <span class="va">paths</span><span class="op">$</span><span class="va">best_tree</span>,</span>
@@ -1058,7 +959,10 @@ calculations:</p>
 <span>  outgroup <span class="op">=</span> <span class="va">rooting_outgroup</span>,</span>
 <span>  results_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dating_dir</span>, <span class="st">"auto_results"</span><span class="op">)</span>,</span>
 <span>  treePL_out <span class="op">=</span> <span class="va">dating_dir</span>,</span>
-<span>  num_bs <span class="op">=</span> <span class="fl">100</span></span>
+<span>  num_bs <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">79992967</span>,</span>
+<span>  <span class="co"># Declared in the SETUP block. Reports the outcome, the timings and the output paths by email.</span></span>
+<span>  notify <span class="op">=</span> <span class="va">notify_email</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 3. View and evaluate dating metrics cleanly in R</span></span>
@@ -1073,7 +977,7 @@ calculations:</p>
 <span>  <span class="co"># A node whose age equals one of its own bounds was not estimated: penalized likelihood returned</span></span>
 <span>  <span class="co"># the constraint, and the chronogram gives no sign of it. ACP_root is fixed (min = max), so it</span></span>
 <span>  <span class="co"># sits on its bound by construction; the other three calibrations are expected to be estimated.</span></span>
-<span>  <span class="co"># The bootstrap chronograms are passed deliberately: a single point estimate can land just inside</span></span>
+<span>  <span class="co"># The bootstrap chronograms are passed because a single point estimate can land just inside</span></span>
 <span>  <span class="co"># a bound while the underlying age is unidentifiable, and only the replicates separate the two.</span></span>
 <span>  <span class="va">bs_chronograms</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dating_dir</span>, <span class="st">"bsTree_treePL.tree"</span><span class="op">)</span></span>
 <span>  <span class="va">adherence</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/report_bound_adherence.html">report_bound_adherence</a></span><span class="op">(</span></span>
@@ -1083,26 +987,51 @@ calculations:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n   Calibrated node ages against their bounds:\n"</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">adherence</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"--------------------------------------------\n"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"--------------------------------------------\n"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 4. The cross-validation curve</span></span>
+<span><span class="co"># run_treePL_cv() reported the shape of this curve when it ran (interior minimum, edge or plateau);</span></span>
+<span><span class="co"># the table shows the curve itself. Values from 10 upward are of the order of 1e41: treePL fails</span></span>
+<span><span class="co"># numerically at high smoothing, and those rows carry no information.</span></span>
+<span><span class="va">cv_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dating_dir</span>, <span class="st">"auto_results"</span>, <span class="st">"ML_tree"</span>, <span class="st">"cv_ML_tree"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">cv_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">lines_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"chisq"</span>, <span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="va">cv_file</span>, warn <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="va">cv_tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>    smoothing <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">".*\\(([^)]*)\\).*"</span>, <span class="st">"\\1"</span>, <span class="va">lines_cv</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    chisq <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">".*\\)\\s*"</span>, <span class="st">""</span>, <span class="va">lines_cv</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cv_tab</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">cv_tab</span><span class="op">$</span><span class="va">smoothing</span><span class="op">)</span>, <span class="op">]</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># 5. Smoothing sensitivity</span></span>
+<span><span class="co"># The same tree dated across the plateau and beyond it. Read the range of each node across 1e-14</span></span>
+<span><span class="co"># to 1e-06, the plateau of the reference run. At 1 and 10 the calibrated nodes sit on their upper</span></span>
+<span><span class="co"># bounds; that end of the table lies outside the range supported by cross-validation.</span></span>
+<span></span>
+<span><span class="va">sensitivity_cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dating_dir</span>, <span class="st">"auto_results"</span>, <span class="st">"ML_tree"</span>, <span class="st">"configure_smooth_ML_tree"</span><span class="op">)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">sensitivity_cfg</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nRunning smoothing sensitivity analysis across 1e-14 to 100...\n"</span><span class="op">)</span></span>
+<span>  <span class="va">sensitivity</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/report_smoothing_sensitivity.html">report_smoothing_sensitivity</a></span><span class="op">(</span></span>
+<span>    cfg_file <span class="op">=</span> <span class="va">sensitivity_cfg</span>,</span>
+<span>    smoothing_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1e-14</span>, <span class="fl">1e-12</span>, <span class="fl">1e-10</span>, <span class="fl">1e-8</span>, <span class="fl">1e-6</span>, <span class="fl">1e-5</span>, <span class="fl">1e-4</span>, <span class="fl">1e-2</span>, <span class="fl">1</span>, <span class="fl">10</span>, <span class="fl">100</span><span class="op">)</span>,</span>
+<span>    treepl_bin <span class="op">=</span> <span class="va">treepl_path</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n--- Calibrated Node Age Sensitivity Table ---\n"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sensitivity</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"--------------------------------------------\n"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p>At this stage, phylogenetic inference and divergence time estimation
-have been completed. The resulting maximum likelihood topology, branch
-support estimates, and time calibrated chronogram provide the
-evolutionary framework required for downstream comparative analyses.</p>
-<p>The next stage of the <code>PhyloCactus</code> workflow focuses on
-integrating phylogenetic outputs with biological metadata and generating
-publication quality visualizations. In the following tutorial, users
-will learn how to visualize the maximum likelihood phylogeny with branch
-support values, display the dated chronogram with temporal uncertainty
-estimates, and integrate external biodiversity information, including
-IUCN Red List conservation categories.</p>
+<p>Stage 2 ends with the maximum-likelihood tree, its bootstrap support,
+and the dated chronogram with confidence intervals for node ages.</p>
+<p>Tutorial 3 adds IUCN Red List assessments and produces the tree,
+chronogram and conservation figures.</p>
 <p><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html">Continue
-to Tutorial 3: Data Visualization and IUCN Summaries</a></p>
+to Tutorial 3: Visualization and Metadata Integration</a></p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

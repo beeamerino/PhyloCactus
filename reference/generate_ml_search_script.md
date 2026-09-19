@@ -3,8 +3,8 @@
 Writes a single SLURM batch script running the same constrained
 `RAxML-NG` search as
 [`calculate_ml_tree()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_ml_tree.md),
-sized for a compute node instead of a workstation. The search is one job
-rather than a job array: independent starting-tree searches are
+sized for a compute node instead of a workstation. The search is a
+single job, not a job array: independent starting-tree searches are
 distributed across `--workers` inside the job, and RAxML-NG writes one
 `.raxml.bestTree` directly, so no collection step is needed to compare
 log-likelihoods across tasks.
@@ -58,15 +58,15 @@ generate_ml_search_script(
   Character vector of terminals passed to `RAxML-NG --outgroup`, or
   `NULL` (default); multiple terminals are joined with commas.
   `RAxML-NG` writes an unrooted topology with these terminals placed
-  first, so this argument orders the output rather than rooting the
-  tree: the root is imposed downstream by
+  first, so this argument orders the output and does not root the tree:
+  the root is imposed downstream by
   [`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)
   via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at
   every stage keeps the output ordering consistent across the
   maximum-likelihood search, the bootstrap replicates and the temporal
   bootstraps. Derive it with
-  [`resolve_rooting_outgroup()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_rooting_outgroup.md)
-  rather than naming a terminal by hand.
+  [`resolve_rooting_outgroup()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_rooting_outgroup.md);
+  do not name a terminal by hand.
 
 - n_init_trees:
 
@@ -172,11 +172,12 @@ worker executes 50 rounds; the same 50 trees across 25 workers execute
 
 Reference timing illustrating worker parallelization: on an Apple M2 Pro
 (8 threads, `--workers 1`, `RAxML-NG` 1.2.2, SSE3 kernels), searching 50
-starting trees sequentially required 47115 s (~938 s per tree). In
-contrast, the production run on an HPC cluster node (AMD EPYC 9754, 75
-threads, `--workers 25`) over the full supermatrix (1023 terminals,
-12806 sites, 5954 patterns, 11 partitions) completed 50 starting trees
-in 2393 s (~40 minutes), executing two parallel rounds.
+starting trees sequentially on an earlier version of the supermatrix
+required 47115 s (~938 s per tree). The production run on an HPC cluster
+node (AMD EPYC 9754, 75 threads, `--workers 25`) over the full
+supermatrix (1024 terminals, 12809 sites, 5959 patterns, 11 partitions)
+completed 50 starting trees in 2739 s (~46 minutes), executing two
+parallel rounds.
 
 `workers` is derived automatically and constrained to a divisor of the
 starting tree count, so that no worker sits idle in the final round.

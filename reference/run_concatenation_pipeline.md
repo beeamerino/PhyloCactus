@@ -1,12 +1,9 @@
 # Concatenate Locus Alignments and Build Partition Coordinate Maps
 
-Concatenates individual orthologous locus alignments end-to-end into a
-unified multilocus supermatrix. Combining independent molecular loci
-increases statistical power to resolve difficult ancestral nodes while
-allowing partitioned substitution modeling to account for mutational
-rate heterogeneity across molecular locus alignments. Exports one
-coordinate map per partition format rather than one per downstream
-program: a RAxML-style map (`PARTITION_raxml_style.txt`) read by
+Concatenates individual orthologous locus alignments end to end into a
+multilocus supermatrix. Each locus is a partition, so substitution
+models can differ among loci. Exports one coordinate map per partition
+format: a RAxML-style map (`PARTITION_raxml_style.txt`) read by
 `RAxML-NG`, `ModelTest-NG` and `IQ-TREE`, and a NEXUS SETS block
 (`PARTITION_nexus_charset.nex`). Configuration scripts for
 `PartitionFinder2` and `MrBayes` are exported separately under their
@@ -64,8 +61,8 @@ run_concatenation_pipeline(
   only this supermatrix is built without it. The excluded markers are
   named in the run log and listed in
   `logs_and_qc/TABLE_markers_excluded.csv`. A name that matches no
-  alignment raises a warning rather than failing, so a typo is visible
-  instead of silent. Defaults to `NULL`.
+  alignment raises a warning, not an error, so a typo is visible.
+  Defaults to `NULL`.
 
 ## Value
 

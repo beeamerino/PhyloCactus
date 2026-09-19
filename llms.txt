@@ -4,52 +4,40 @@
 modeling, maximum-likelihood inference, and divergence time estimation
 in plant radiations**
 
-## Overview & Biological Motivation
+## Overview
 
-Constructing reliable multilocus molecular sequence matrices directly
-from public repositories such as GenBank presents a fundamental
-computational challenge in systematic biology. Sequence records
-deposited across decades frequently exhibit inconsistent locus
-annotations, duplicated accessions, unvouchered identifications,
-orthographic variants, and massive nomenclatural synonymies.
-Transforming these uncurated records into high-quality phylogenetic
-matrices requires intensive manual curation, taxonomic reconciliation
-against authoritative botanical checklists, and rigorous alignment
-quality control.
+Multilocus sequence matrices assembled from public repositories such as
+GenBank inherit the heterogeneity of decades of deposition: inconsistent
+locus annotations, duplicated accessions, records without vouchers,
+orthographic variants and nomenclatural synonyms. Converting these
+records into a phylogenetic matrix requires curation, taxonomic
+reconciliation against an accepted checklist, and quality control of
+each alignment.
 
-This computational problem becomes exponentially more complex when
-targeting plant lineages with intricate evolutionary histories. Clades
-characterized by recent explosive adaptive radiations, low plastid
-sequence divergence, incomplete lineage sorting (ILS), and ancient
-reticulate evolution amplify the risk of misidentifying orthology,
-accumulating systematic alignment noise, and producing biased
-topological reconstructions.
+The difficulty increases in plant lineages that diversified recently and
+rapidly. Low plastid divergence, incomplete lineage sorting (ILS) and
+reticulate evolution increase the risk of erroneous orthology assessment
+and of alignment error, and both can bias the inferred topology.
 
-The family **Cactaceae** serves as the prime empirical exemplar of these
-combined computational and biological hurdles. Comprising one of the
-largest succulent plant radiations in the Neotropics (Arakaki *et al*.
-2011; Hernández-Hernández *et al*. 2014; Guerrero *et al*. 2019), cactus
-phylogenetics requires extensive data curation to resolve persistent
-gene tree discordance and handle heterogeneous molecular datasets.
+**Cactaceae** combine these properties. The family is one of the largest
+succulent radiations of the Neotropics (Arakaki *et al*. 2011;
+Hernández-Hernández *et al*. 2014; Guerrero *et al*. 2019), and its
+GenBank record is uneven in taxonomic and locus coverage.
 
-`PhyloCactus` was developed to transform this complex data preparation
-and analytical process into a fully automated, transparent, and
-reproducible R workflow. Rather than relying on manual ad hoc scripts,
-`PhyloCactus` orchestrates established bioinformatics software into a
-standardized 4-stage pipeline. The package automates orthology-based
-sequence retrieval (`phylotaR`), alignment of positional homology
-(`MAFFT`), objective quality control masking (`DECIPHER`), mutational
-saturation screening, substitution model evaluation (`ModelTest-NG`),
-constrained maximum-likelihood topology inference (`RAxML-NG`),
-Felsenstein Bootstrap Proportions support mapping (`FBP`), penalized
-likelihood chronogram estimation (`treePL`), IUCN Red List metadata
-enrichment (`rredlist`), and multispecies coalescent tree-space
-validation (`ASTRAL-III`).
+`PhyloCactus` is an R package that implements this assembly and analysis
+as a reproducible workflow. It links established software in four
+stages: orthology-based sequence retrieval (`phylotaR`), multiple
+sequence alignment (`MAFFT`), alignment masking (`DECIPHER`), a
+saturation screen, substitution model selection (`ModelTest-NG`),
+constrained maximum-likelihood inference (`RAxML-NG`), Felsenstein
+bootstrap proportions (FBP), penalized likelihood dating (`treePL`),
+retrieval of IUCN Red List assessments (`rredlist`), and comparison with
+published phylogenies, one of which can be summarized under the
+multispecies coalescent with `ASTRAL-III`.
 
-## Four-Stage Analytical Architecture
+## Workflow
 
-The `PhyloCactus` pipeline is organized into **four analytical stages**
-comprising **thirteen interoperable modules**:
+The workflow comprises thirteen modules grouped in four stages.
 
 ![PhyloCactus Workflow
 Architecture](reference/figures/Fig1_PhyloCactus_Workflow.png)
@@ -57,56 +45,61 @@ Architecture](reference/figures/Fig1_PhyloCactus_Workflow.png)
 PhyloCactus Workflow Architecture
 
 1.  **Stage 1: Data Assembly and Preparation (Modules 1 to 6)**  
-    Retrieves orthologous sequence clusters using similarity-based
-    clustering via `phylotaR`, bypassing GenBank annotation errors.
-    Establishes positional homology with `MAFFT`, applies objective
-    quality control masking with `DECIPHER`, screens locus alignments
-    for mutational saturation slope erosion (Xia test), reconciles
-    species nomenclature against the Caryophyllales.org checklist
-    (`CactaceaeFullList_accepted.csv`; Korotkova *et al*. 2021),
-    executes joint alignment of ingroup (**Cactaceae**) and outgroup
-    (*Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*, *Talinum*,
-    *Talinella*) markers, and concatenates locus alignments into
-    partitioned supermatrices with explicit coordinate boundaries.
+    Retrieves orthologous sequence clusters from GenBank by
+    similarity-based clustering with `phylotaR`, which reduces the
+    dependence on locus annotations. Aligns each locus with `MAFFT` and
+    masks unreliable alignment regions with `DECIPHER`. Screens each
+    locus with a regression of uncorrected p-distance against a
+    Gamma-corrected K80 distance (Kimura 1980; Jin & Nei 1990), a
+    criterion implemented in this package, and rejects loci whose slope
+    falls below the retention threshold. Reconciles species names
+    against the Caryophyllales.org checklist
+    (`CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`; Korotkova *et
+    al*. 2021), realigns ingroup (Cactaceae) and outgroup (*Portulaca*,
+    *Anacampseros*, *Talinopsis*, *Grahamia*, *Talinum*, *Talinella*)
+    sequences jointly, and concatenates the loci into a partitioned
+    supermatrix.
 
 2.  **Stage 2: Phylogenetic Inference and Dating (Modules 7 to 10)**  
-    Evaluates partition-specific nucleotide substitution models using
-    `ModelTest-NG` under corrected Akaike Information Criteria (AICc) to
-    control mutational rate heterogeneity and mitigate Long-Branch
-    Attraction (LBA). Infers maximum-likelihood topologies using
-    `RAxML-NG` under topological constraint scaffolds
-    (`cactus_constraints.csv`) enforcing higher-level clade monophyly
-    (**Cactoideae**, **Opuntioideae**, **Leuenbergeria**, **Pereskia**).
-    Maps primary clade support via Felsenstein Bootstrap Proportions
-    (`FBP`), evaluates Transfer Bootstrap Expectation (`TBE`) as a
-    complementary diagnostic metric, generates topologically constrained
-    temporal bootstrap alignments, and estimates ultrametric chronograms
-    using penalized likelihood in `treePL` guided by secondary
-    calibration boundaries (`calibrations_bounds.csv`).
+    Selects a substitution model for each partition with `ModelTest-NG`
+    under the corrected Akaike information criterion (AICc). Infers the
+    maximum-likelihood tree with `RAxML-NG` under a topological
+    constraint (`cactus_constraints.csv`) that fixes 34 of the 1021
+    internal bipartitions of the reference tree, all of them among its
+    deepest. The constraint imposes the monophyly of 21 named clades and
+    the branching order among them within Cactoideae and within
+    Opuntioideae; the remaining 987 bipartitions are estimated.
+    Bootstrap values on imposed bipartitions reproduce the constraint
+    and are reported as constrained
+    ([`classify_constrained_nodes()`](https://beeamerino.github.io/PhyloCactus/reference/classify_constrained_nodes.md)).
+    Support is summarized as FBP, with the transfer bootstrap
+    expectation (TBE) as a secondary measure. Divergence times are
+    estimated by penalized likelihood in `treePL` with secondary
+    calibrations (`calibrations_bounds.csv`), and their confidence
+    intervals from temporal bootstrap replicates.
 
 3.  **Stage 3: Visualization and Metadata Integration (Modules 11 and
     12)**  
-    Enriches the phylogenetic framework with species-level conservation
-    attributes retrieved automatically from the IUCN Red List database
-    via `rredlist`. Collapses weakly supported internal nodes (FBP \<
-    0.70, `collapse_cutoff`) into soft polytomies to prevent
-    over-interpreting unresolved rapid radiation nodes, and renders
-    publication-ready phylogenetic figures, chronograms, and
-    conservation cadastres using `ggplot2`.
+    Adds species-level IUCN Red List assessments retrieved with
+    `rredlist`, collapses internal nodes with FBP \< 0.70
+    (`collapse_cutoff`) into polytomies, and produces the tree,
+    chronogram and conservation figures with `ggplot2` and `ggtree`.
 
-4.  **Stage 4: Validation and Sub-tree Comparisons (Module 13)**  
-    Quantifies topological congruence between the focal supermatrix tree
-    and external published backbones (e.g., Amaral *et al*. 2022;
-    Thompson *et al*. 2024; de Vos *et al*. 2025) using Robinson-Foulds
-    distances and multidimensional scaling (MDS) tree-space projections
-    (`validate_phylogenies`). Infers summary species trees using
-    `ASTRAL-III` under multispecies coalescent theory to evaluate
-    biological gene tree discordance driven by incomplete lineage
-    sorting.
+4.  **Stage 4: Validation (Module 13)**  
+    Compares the focal tree with published phylogenies (Amaral *et al*.
+    2022; Thompson *et al*. 2024; Zuntini *et al*. 2024; de Vos *et
+    al*. 2025) by Robinson-Foulds and information-theoretic distances
+    and by multidimensional scaling (MDS) of tree space
+    ([`validate_phylogenies()`](https://beeamerino.github.io/PhyloCactus/reference/validate_phylogenies.md)).
+    The published gene trees of de Vos *et al*. (2025) can optionally be
+    summarized into a species tree with `ASTRAL-III`, which then enters
+    the comparison as a further reference; by default the distributed
+    summary tree is used. `PhyloCactus` does not infer gene trees from
+    its own supermatrix and does not quantify gene tree discordance.
 
 ## Installation
 
-Install the development version of `PhyloCactus` directly from GitHub:
+Install the development version from GitHub:
 
 ``` r
 
@@ -116,7 +109,7 @@ if (!requireNamespace("remotes", quietly = TRUE))
 remotes::install_github("beeamerino/PhyloCactus")
 ```
 
-Verify package installation:
+Check the installed version:
 
 ``` r
 
@@ -127,77 +120,95 @@ packageVersion("PhyloCactus")
 
 ## R Dependencies
 
-`PhyloCactus` integrates tools from CRAN, Bioconductor, and GitHub:
-
 | Repository | Main packages |
 |:---|:---|
-| **remotes** | `phylotaR` |
-| **Bioconductor** | `DECIPHER`, `Biostrings` |
-| **CRAN** | `ape`, `ggplot2`, `dplyr`, `tidyr`, `readr`, `stringr`, `purrr`, `rredlist`, `forcats`, `scales`, `RColorBrewer` |
+| **GitHub** | `phylotaR` |
+| **Bioconductor** | `DECIPHER`, `Biostrings`, `ggtree` |
+| **CRAN** | `ape`, `phangorn`, `TreeDist`, `ggplot2`, `dplyr`, `tidyr`, `readr`, `stringr`, `purrr`, `rredlist` |
 
-To install the Bioconductor dependencies:
+The Bioconductor dependencies are installed with:
 
 ``` r
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-BiocManager::install(c("DECIPHER", "Biostrings"))
+BiocManager::install(c("DECIPHER", "Biostrings", "ggtree"))
 ```
 
-## External Software Binaries
+## External Software
 
-Execution of `PhyloCactus` requires the following external command-line
-binaries, which must be installed and available in your system `$PATH`:
+The following programs must be installed and available on the system
+`PATH`, or declared in `~/.Renviron` (`usethis::edit_r_environ()`):
 
 | Software | Purpose | Citation |
 |:---|:---|:---|
-| [`BLAST+`](https://www.ncbi.nlm.nih.gov/books/NBK279690/) | Local sequence similarity searching & cluster identification | Camacho *et al*. (2009) *BMC Bioinformatics* |
-| [`MAFFT`](https://mafft.cbrc.jp/alignment/software/) | Multiple sequence alignment & positional homology | Katoh & Standley (2013) *Mol. Biol. Evol.* |
-| [`ModelTest-NG`](https://github.com/ddarriba/modeltest) | Partitioned substitution model selection under AICc | Darriba *et al*. (2020) *Mol. Biol. Evol.* |
-| [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | Constrained maximum-likelihood tree search & FBP/TBE support | Kozlov *et al*. (2019) *Bioinformatics* |
+| [`BLAST+`](https://www.ncbi.nlm.nih.gov/books/NBK279690/) | Sequence similarity search for cluster identification | Camacho *et al*. (2009) *BMC Bioinformatics* |
+| [`MAFFT`](https://mafft.cbrc.jp/alignment/software/) | Multiple sequence alignment | Katoh & Standley (2013) *Mol. Biol. Evol.* |
+| [`ModelTest-NG`](https://github.com/ddarriba/modeltest) | Substitution model selection for partitioned data | Darriba *et al*. (2020) *Mol. Biol. Evol.* |
+| [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | Constrained maximum-likelihood inference and bootstrap support | Kozlov *et al*. (2019) *Bioinformatics* |
 | [`treePL`](https://github.com/blackrim/treePL) | Penalized likelihood divergence time estimation | Smith & O’Meara (2012) *Bioinformatics* |
 
-Ensure these executables are accessible by adding their installation
-path to your `~/.Renviron` file (`usethis::edit_r_environ()`).
+## Documentation
 
-## Documentation & Tutorials
-
-Learn `PhyloCactus` through the sequential tutorial suite:
-
-| Tutorial | Focus & Scope |
+| Tutorial | Content |
 |:---|:---|
-| [**Get Started**](https://beeamerino.github.io/PhyloCactus/articles/PhyloCactus.html) | Package overview, design principles, and dependency configuration |
-| [**Tutorial 1**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) | Stage 1: Data Assembly, Alignment, Saturation Screening, & Supermatrix Concatenation |
-| [**Tutorial 2**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html) | Stage 2: Substitution Modeling, Constrained ML Search, FBP Support, & treePL Dating |
-| [**Tutorial 3**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html) | Stage 3: IUCN Red List Enrichment, Soft Polytomy Collapsing, & Figure Rendering |
-| [**Tutorial 4**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html) | Stage 4: ASTRAL-III Coalescence, Robinson-Foulds Distances, & MDS Tree-Space Validation |
-| [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html) | Core dictionary of package functions and analytical signatures |
+| [**Get Started**](https://beeamerino.github.io/PhyloCactus/articles/PhyloCactus.html) | Package overview, design and dependency configuration |
+| [**Tutorial 1**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) | Stage 1: data assembly, alignment, saturation screen and supermatrix concatenation |
+| [**Tutorial 2**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html) | Stage 2: substitution models, constrained maximum-likelihood search, bootstrap support and `treePL` dating |
+| [**Tutorial 3**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html) | Stage 3: IUCN Red List data, collapse of weakly supported nodes and figures |
+| [**Tutorial 4**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html) | Stage 4: tree distances, MDS of tree space and the optional `ASTRAL-III` reference summary |
+| [**Tutorial 5**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html) | Section manifest: scope, decisions taken, open questions and reopening criteria for the molecular diagnostic section |
+| [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html) | Package functions and the methods they implement |
 
 ## Citation
 
-If you use `PhyloCactus` in your research, please cite:
+To cite `PhyloCactus`, use the entry returned by:
 
 ``` r
 
 citation("PhyloCactus")
 ```
 
+## References
+
+- Amaral *et al*. 2022. Spatial patterns of evolutionary diversity in
+  Cactaceae show low ecological representation within protected areas.
+  *Biological Conservation*, 273, 109677.
+  <https://doi.org/10.1016/j.biocon.2022.109677>
 - Arakaki *et al*. 2011. Contemporaneous and recent radiations of the
-  world’s major succulent plant lineages. *PNAS*, 108(20), 8379–8384.
-- Guerrero *et al*. 2019. Phylogenetic Relationships and Evolutionary
-  Trends in the Cactus Family. *Journal of Heredity*, 110(1), 4–21.
-- Hernández-Hernández *et al*. 2014. Beyond aridification: Multiple
+  world’s major succulent plant lineages. *PNAS*, 108(20), 8379-8384.
+  <https://doi.org/10.1073/pnas.1100628108>
+- de Vos *et al*. 2025. Phylogenomics and classification of Cactaceae
+  based on hundreds of nuclear genes. *Plant Systematics and Evolution*,
+  311(5), 28. <https://doi.org/10.1007/s00606-025-01948-z>
+- Guerrero *et al*. 2019. Phylogenetic relationships and evolutionary
+  trends in the cactus family. *Journal of Heredity*, 110(1), 4-21.
+  <https://doi.org/10.1093/jhered/esy064>
+- Hernández-Hernández *et al*. 2014. Beyond aridification: multiple
   explanations for the elevated diversification of cacti in the New
-  World Succulent Biome. *New Phytologist*, 202(4), 1382–1397.
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic
+  World Succulent Biome. *New Phytologist*, 202(4), 1382-1397.
+  <https://doi.org/10.1111/nph.12752>
+- Jin, L., & Nei, M. 1990. Limitations of the evolutionary parsimony
+  method of phylogenetic analysis. *Molecular Biology and Evolution*,
+  7(1), 82-102. <https://doi.org/10.1093/oxfordjournals.molbev.a040588>
+- Kimura, M. 1980. A simple method for estimating evolutionary rates of
+  base substitutions through comparative studies of nucleotide
+  sequences. *Journal of Molecular Evolution*, 16(2), 111-120.
+  <https://doi.org/10.1007/BF01731581>
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org, a dynamic
   online species-level taxonomic backbone for the family. *Willdenowia*,
-  51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
+  51(2), 251-270. <https://doi.org/10.3372/wi.51.51208>
+- Thompson *et al*. 2024. Identifying the multiple drivers of cactus
+  diversification. *Nature Communications*, 15(1), 7114.
+  <https://doi.org/10.1038/s41467-024-51666-2>
+- Zuntini *et al*. 2024. Phylogenomics and the rise of the angiosperms.
+  *Nature*, 629, 843-850. <https://doi.org/10.1038/s41586-024-07324-0>
 
 ## License
 
-`PhyloCactus` is licensed under the **GNU General Public License v3.0
-(GPL-3)**.
+`PhyloCactus` is distributed under the GNU General Public License v3.0
+(GPL-3).
 
 # Package index
 
@@ -322,6 +333,8 @@ divergence time chronograms over temporal bootstrap cohorts.
 - [`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)
   : Automate treePL Divergence Time Estimation Pipeline Across Bootstrap
   Cohorts
+- [`send_run_notification()`](https://beeamerino.github.io/PhyloCactus/reference/send_run_notification.md)
+  : Send a Run Notification by Email
 - [`report_smoothing_sensitivity()`](https://beeamerino.github.io/PhyloCactus/reference/report_smoothing_sensitivity.md)
   : Age of Every Calibrated Node Across a Range of Rate-Smoothing Values
 - [`check_calibration_consistency()`](https://beeamerino.github.io/PhyloCactus/reference/check_calibration_consistency.md)
@@ -384,6 +397,8 @@ Internal functions for phylogenetic visualization and data preparation.
   : Build Taxonomic Annotation Registry across Tree Levels
 - [`compute_group_nodes()`](https://beeamerino.github.io/PhyloCactus/reference/compute_group_nodes.md)
   : Compute Most Recent Common Ancestor (MRCA) Nodes for Taxon Groups
+- [`extract_species_binomial()`](https://beeamerino.github.io/PhyloCactus/reference/extract_species_binomial.md)
+  : Extract Standardized Species Binomial from Sequence Header
 - [`get_annotation_nodes()`](https://beeamerino.github.io/PhyloCactus/reference/get_annotation_nodes.md)
   : Extract Monophyletic Internal Annotation Nodes
 - [`prepare_tip_annotation()`](https://beeamerino.github.io/PhyloCactus/reference/prepare_tip_annotation.md)

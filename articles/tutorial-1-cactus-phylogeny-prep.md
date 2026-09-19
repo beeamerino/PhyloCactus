@@ -2,61 +2,31 @@
 
 ## Abstract
 
-Constructing reliable multilocus molecular sequence matrices directly
-from public repositories such as GenBank presents a fundamental
-computational challenge in systematic biology. Sequence records
-deposited across decades frequently exhibit inconsistent locus
-annotations, duplicated accessions, unvouchered identifications,
-orthographic variants, and massive nomenclatural synonymies.
-Transforming these uncurated records into high-quality phylogenetic
-matrices requires intensive manual curation, taxonomic reconciliation
-against authoritative botanical checklists, and rigorous alignment
-quality control.
+Multilocus matrices assembled from GenBank inherit the heterogeneity of
+decades of deposition: inconsistent locus annotations, duplicated
+accessions, records without vouchers, orthographic variants and
+nomenclatural synonyms. In plant lineages that diversified recently and
+rapidly, such as **Cactaceae** (Guerrero *et al*. 2019), low plastid
+divergence, incomplete lineage sorting (ILS) and reticulate evolution
+add to these problems the risk of erroneous orthology assessment and of
+alignment error.
 
-This computational problem becomes exponentially more complex when
-targeting plant lineages with intricate evolutionary histories. Clades
-characterized by recent explosive adaptive radiations, low plastid
-sequence divergence, incomplete lineage sorting (ILS), and ancient
-reticulate evolution amplify the risk of misidentifying orthology,
-accumulating systematic alignment noise, and producing biased
-topological reconstructions.
-
-The family **Cactaceae** serves as the prime empirical exemplar of these
-combined computational and biological hurdles (Guerrero *et al*. 2019).
-Comprising one of the largest succulent plant radiations in the
-Neotropics, cactus phylogenetics requires extensive data curation to
-resolve persistent gene tree discordance and handle heterogeneous
-molecular datasets.
-
-`PhyloCactus` is an R package designed to automate the assembly and
-curation of multilocus phylogenetic datasets. The workflow builds upon
-the orthology-based sequence mining strategy implemented in `phylotaR`,
-extending it with comprehensive taxonomic reconciliation against the
-Caryophyllales.org checklist
+This tutorial covers the first stage of the `PhyloCactus` workflow
+(Modules 1 to 6): orthology-based sequence retrieval with `phylotaR`,
+taxonomic reconciliation against the Caryophyllales.org checklist
 (`CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`; Korotkova *et al*.
-2021), automated quality control procedures using `DECIPHER`,
-substitution saturation filtering, multiple sequence alignment using
-`MAFFT` to infer positional homology, and concatenation of curated loci
-into partitioned supermatrices.
-
-The complete `PhyloCactus` workflow is organized into thirteen
-interoperable modules distributed across four analytical stages. This
-vignette introduces the first stage of the pipeline (Modules 1 to 6),
-guiding users through orthology-based sequence retrieval, taxonomic
-standardization, sequence quality assessment, alignment, and matrix
-assembly. The resulting curated multilocus datasets constitute the
-starting point for all subsequent phylogenetic, biogeographic, and
-macroevolutionary analyses performed within the `PhyloCactus` framework.
+2021), alignment with `MAFFT`, masking with `DECIPHER`, a saturation
+screen, and concatenation of the curated loci into a partitioned
+supermatrix. The supermatrix and its partition scheme are the input of
+Tutorial 2.
 
 ## Complete Pipeline Execution Workflow
 
-Below is a demonstration of how the `PhyloCactus` package functions
-align end-to-end to assemble the initial multilocus sequences.
+The code below runs Modules 1 to 6 in order.
 
 ### Setup: Creating a Clean Workspace
 
-Before beginning the pipeline, it is highly recommended to create a
-dedicated folder for your tutorial outputs.
+Create a dedicated folder for the outputs of the tutorial.
 
 ``` r
 
@@ -76,12 +46,9 @@ file.copy(
 
 ### Module 1: Mine Orthologous Sequence Clusters and Retrieve Metadata
 
-The first stage of the workflow assembles the molecular dataset by
-retrieving orthologous sequence clusters identified by `phylotaR`.
-Rather than relying on heterogeneous gene annotations deposited in
-GenBank, `phylotaR` identifies homologous sequences using sequence
-similarity, providing a reproducible starting point for multilocus
-phylogenetic analyses.
+The first module retrieves orthologous sequence clusters identified by
+`phylotaR`, which groups sequences by similarity and does not depend on
+the gene annotations of GenBank records.
 
 For the default workflow, the ingroup is defined as the family
 **Cactaceae** (NCBI Taxonomy ID: **3593**), allowing all descendant taxa
@@ -93,69 +60,52 @@ with *Anacampseros* (NCBI Taxonomy ID: **107583**), *Talinopsis*
 *Portulaca* (**3582**); and **Talinaceae**, with *Talinum* (**107600**)
 and *Talinella* (**108056**).
 
-Sampling **Talinaceae** provides the essential outgroup lineage required
-to root the tree and evaluate the topological placement of the ACP clade
+**Talinaceae** are sampled to root the tree outside the ACP clade
 (Anacampserotaceae, Cactaceae, Portulacaceae). In a matrix containing
-only Cactaceae, Anacampserotaceae, and Portulacaceae rooted on
+only Cactaceae, Anacampserotaceae and Portulacaceae and rooted on
 Portulacaceae, the grouping of Cactaceae with Anacampserotaceae is
-constrained by the rooting rather than tested by empirical signal.
-Including Talinaceae establishes the root outside the core trio, placing
-the ACP crown as an internal node and enabling maximum-likelihood
-inference to test alternative topological resolutions among the three
-families (Ramírez-Barahona *et al.*, 2020; Zuntini *et al.*, 2024).
-*Amphipetalum* (**1835425**) is excluded because no nucleotide
-accessions were available in GenBank.
+imposed by the rooting and not tested by the data. With Talinaceae
+sampled, the root lies outside the three families, the crown of the ACP
+clade is an internal node, and maximum-likelihood inference can compare
+alternative resolutions among the three families (Ramírez-Barahona *et
+al.*, 2020; Zuntini *et al.*, 2024). *Amphipetalum* (**1835425**) is not
+sampled because GenBank holds no nucleotide records for it.
 
-Note that *Talinopsis* (**107598**) belongs to Anacampserotaceae and not
-to Talinaceae, despite its name and adjacent taxonomic identifier.
-Although these taxonomic identifiers constitute the default
-configuration distributed with the package, users may specify
-alternative ingroup or outgroup NCBI Taxonomy IDs to adapt the workflow
-to other evolutionary systems.
+*Talinopsis* (**107598**) belongs to Anacampserotaceae, not to
+Talinaceae, despite its name and adjacent taxonomic identifier. These
+identifiers are the default configuration; other ingroup or outgroup
+NCBI Taxonomy IDs can be supplied to apply the workflow to other groups.
 
-To ensure reproducible taxonomic and molecular data curation,
-`PhyloCactus` relies on a collection of editable reference files
-distributed with the package (`inst/extdata`) and accessed internally
-using the [`system.file()`](https://rdrr.io/r/base/system.file.html)
-function. Taxonomic standardization is based on a curated taxonomic
-backbone (`CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`) derived
-from the **Caryophyllales.org** project (Korotkova *et al.*, 2021). This
-checklist contains the currently accepted species of **Cactaceae**,
-**Portulacaceae**, and **Anacampserotaceae** and serves as the
-authoritative reference for reconciling species names throughout the
-pipeline. By relying on an external taxonomic backbone rather than
-GenBank nomenclature alone, `PhyloCactus` minimizes inconsistencies
-arising from outdated names, spelling variants, and unresolved
-synonymies.
+Taxonomic and molecular curation relies on reference files distributed
+with the package in `inst/extdata` and read with
+[`system.file()`](https://rdrr.io/r/base/system.file.html). Species
+names are reconciled against a taxonomic backbone
+(`CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`) derived from the
+Caryophyllales.org project (Korotkova *et al.*, 2021), which lists the
+accepted species of Cactaceae, Portulacaceae and Anacampserotaceae.
+Reconciling against this checklist, and not relying on the names in
+GenBank records, reduces inconsistencies from outdated names, spelling
+variants and unresolved synonymy.
 
-Locus selection is controlled by `target_genes.txt`, which defines the
-set of molecular markers targeted during sequence retrieval. The default
-file contains a curated list of loci widely used in **Cactaceae**
-phylogenetics, although users may freely modify or replace this list to
-accommodate alternative taxonomic groups or marker sets. Gene
-nomenclature is standardized using `genes_map.csv`, a curated dictionary
-of synonymous gene names commonly encountered in GenBank. During data
-processing, heterogeneous locus annotations are harmonized into
-standardized marker names, ensuring that equivalent loci are
-consistently recognized despite differences in nomenclature among
-independent sequencing projects. Together, these editable configuration
-files separate biological customization from analytical code, allowing
-the same analytical workflow to be readily adapted to different
-evolutionary systems without modifying the package source code.
+Locus selection is controlled by `target_genes.txt`, which lists the
+markers targeted during retrieval; the default list contains loci
+commonly used in Cactaceae phylogenetics and can be edited or replaced.
+Gene names are standardized with `genes_map.csv`, a dictionary of
+synonymous gene names found in GenBank, so that the same locus is
+recognized under the different names used by independent studies. Both
+files are separate from the package code, so the workflow can be adapted
+to other groups or marker sets without modifying the package.
 
-The exclusion lists deserve a note of their own, because they encode a
-decision rather than a threshold. `manual_exclusions_ingroup.csv` and
-`manual_exclusions_outgroup.csv` remove 73 unique accessions across 87
-records, spanning 16 ingroup clusters and 24 outgroup clusters. These
-are the product of manual curation by the expert team supporting
-`PhyloCactus`: each accession was inspected and removed on taxonomic or
-sequence-quality grounds that are not recoverable from GenBank metadata
-alone. The `apply_manual_exclusions` argument makes that decision
-visible and reversible. It defaults to `TRUE`, and is stated explicitly
-in the call below rather than inherited, so that a reader sees the
-curation exists. Setting it to `FALSE` reproduces the uncurated cluster
-set, which is the way to quantify what the curation actually removes.
-Either way the applied list is written to
+The exclusion lists record a curatorial decision.
+`manual_exclusions_ingroup.csv` and `manual_exclusions_outgroup.csv`
+remove 99 unique accessions across 113 records, in 16 ingroup clusters
+and 24 outgroup clusters. Each accession was inspected and removed by
+the team supporting `PhyloCactus` on taxonomic or sequence-quality
+grounds that cannot be recovered from GenBank metadata. The
+`apply_manual_exclusions` argument defaults to `TRUE` and is stated
+explicitly in the call below so that the curation is visible; setting it
+to `FALSE` reproduces the uncurated cluster set and allows the effect of
+the curation to be measured. The applied list is written to
 `TABLE_MANUAL_EXCLUSIONS_*.csv` in the output directory, so every run
 documents its own curation state.
 
@@ -173,13 +123,10 @@ cluster characteristics, and associated metadata.
 
 The
 [`assemble_outgroup_phylotar()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_outgroup_phylotar.md)
-function performs the same procedure for the selected outgroup taxa. To
-maximize comparability across the final multilocus dataset, only
-orthologous loci corresponding to the standardized marker set recovered
-for the ingroup are retained. The resulting FASTA files and occupancy
-metadata are written to the `1_phylotaR_out_outgroup` directory,
-producing a harmonized collection of orthologous loci that serves as the
-input for downstream analyses.
+function applies the same procedure to the outgroup taxa and retains
+only the loci of the standardized marker set recovered for the ingroup.
+The FASTA files and occupancy metadata are written to
+`1_phylotaR_out_outgroup` and are the input of the next module.
 
 ``` r
 
@@ -231,42 +178,29 @@ if (file.exists(checklist_path)) {
 
 ### Module 2: Align Sequences and Mask Low Confidence Regions
 
-Multiple sequence alignment represents the fundamental hypothesis of
-positional homology upon which all subsequent phylogenetic analyses
-depend. Errors introduced during sequence alignment can propagate
-throughout the analytical pipeline, biasing branch length estimation,
-reducing nodal support, and potentially leading to incorrect
-phylogenetic inference. Consequently, objective alignment and quality
-assessment are essential before constructing concatenated multilocus
-datasets.
+A multiple sequence alignment is the hypothesis of positional homology
+on which all later analyses depend. Alignment errors propagate to branch
+length estimation and nodal support and can lead to incorrect
+topologies, so each alignment is checked before the loci are
+concatenated.
 
 The
 [`run_alignment_pipeline()`](https://beeamerino.github.io/PhyloCactus/reference/run_alignment_pipeline.md)
-function processes the orthologous sequence clusters generated in Module
-1 to produce high quality multiple sequence alignments (MSAs). Primary
-alignments are inferred using **MAFFT** (Katoh & Standley, 2013), a fast
-and accurate multiple sequence alignment algorithm widely adopted in
-molecular phylogenetics. Following alignment, `PhyloCactus` applies the
-**DECIPHER** framework (Wright, 2024) to identify and mask poorly
-aligned regions, ambiguous nucleotide positions, long insertions or
-deletions, and other alignment segments with low confidence that are
-unlikely to represent reliable positional homology. This automated
-masking procedure minimizes the influence of alignment uncertainty while
-preserving informative phylogenetic signal.
+function aligns the clusters produced in Module 1 with `MAFFT` (Katoh &
+Standley, 2013) and masks poorly aligned regions, ambiguous positions,
+long insertions or deletions and other segments of doubtful positional
+homology with `DECIPHER` (Wright, 2024).
 
-Finally, whenever masking is enabled the pipeline filters sequences and
-nucleotide sites according to user defined occupancy thresholds,
-removing loci or taxa with excessive missing data and retaining only
-well supported alignment columns suitable for downstream analyses. The
-`min_masked_alignment_length` argument sets an absolute floor on the
-number of columns that must survive masking: because
-`min_non_gap_fraction` is evaluated relative to the post-masking width,
-a locus collapsed to a handful of columns would otherwise pass the
+When masking is enabled, the pipeline then filters sequences and sites
+by occupancy, removing sequences with excessive missing data and poorly
+occupied columns. The `min_masked_alignment_length` argument sets an
+absolute floor on the number of columns that must remain after masking:
+because `min_non_gap_fraction` is evaluated relative to the post-masking
+width, a locus reduced to a handful of columns would otherwise pass the
 filter and be exported as a near-empty alignment.
 
-Two of the arguments above encode analytical decisions rather than mere
-thresholds, and both are stated explicitly in the call instead of being
-left to the default.
+Two arguments of the call below set analytical choices, and both are
+stated explicitly.
 
 `fix_strand = TRUE` puts every sequence of a marker on the same strand
 before `MAFFT` sees it. GenBank stores each record on whichever strand
@@ -277,99 +211,80 @@ Nothing downstream detects this. The row simply looks like a very
 divergent sequence, or fails the occupancy filter of Module 5 and
 disappears without explanation.
 
-The 2026-09-01 audit found it in the `rbcL` and `matK` accessions of
-*Portulaca oleracea* and *P. pilosa*, both deposited reversed. Their
-aligned `rbcL` sat at 0.51 observed divergence from Cactaceae, and their
-`matK` at 0.40, where *P. grandiflora* of the same genus sits at 0.030
-and 0.066. *P. oleracea* was at that moment the terminal with the most
-retained markers in the outgroup, and therefore the one the acceptance
-check at the end of this tutorial nominated for rooting the tree. The
-ingroup was not clean either, and the first measurement said it was.
-Counted on the curated output of Module 4 it read 0 reversed of 3207;
-counted on the raw input it is 163, of which 77 in `psbA-trnH` and 86 in
-`rpL16`. The difference is the point: a reversed sequence aligns to
-nothing, ends with almost no occupancy, and is discarded by the
-occupancy filter of Module 5, so by the time the data reach a curated
-directory the evidence of the defect has already been removed along with
-the sequences. Correcting the strand recovered them, taking `psbA_trnH`
-from 296 to 368 ingroup sequences and `rpL16` from 600 to 677.
+In the reference dataset, the `rbcL` and `matK` accessions of *Portulaca
+oleracea* and *P. pilosa* are deposited reversed, and so are 163 ingroup
+sequences, 77 of `psbA-trnH` and 86 of `rpL16`. Uncorrected, these
+sequences align to nothing, lose occupancy and are removed by the
+occupancy filter of Module 5, so no reversed sequence remains visible in
+the curated output. Correcting the strand retains them: `psbA_trnH`
+keeps 368 ingroup sequences in place of 296, and `rpL16` 677 in place of
+600.
 
-Orientation is decided against each marker’s own majority rather than an
-external reference, because the pipeline mines whatever GenBank holds
-for a locus and no reference is guaranteed to exist. Every sequence is
-logged with its k-mer match in both directions in
-`tables/LOG_STRAND_<marker>.csv`, and a sequence matching the marker in
-neither direction is left untouched and reported separately: that is a
-homology problem rather than an orientation one, and flipping it would
-only hide it. `mafft --adjustdirection` solves the same problem and is
-not used here because it renames the sequences it flips with an `_R_`
-prefix, which would then have to be undone in the sequence filter log,
-the name crosswalk and the concatenation.
+Orientation is decided against the majority orientation of each marker,
+because no external reference is guaranteed to exist for a mined locus.
+Every sequence is logged with its k-mer match in both directions in
+`tables/LOG_STRAND_<marker>.csv`. A sequence matching the marker in
+neither direction is left unchanged and reported separately: that is a
+homology problem, which reversing the sequence would conceal.
+`mafft --adjustdirection` addresses the same problem but renames the
+sequences it reverses with an `_R_` prefix, which would have to be
+undone in the sequence filter log, the name crosswalk and the
+concatenation.
 
-One case this cannot see: the ingroup and the outgroup are aligned in
-separate runs, so each is oriented within its own pool and neither can
-tell that the two pools disagree with each other. That comparison
-belongs to Module 4, where the two sets are joined, and `homology_check`
-reports it there as `reversed_relative_to_ingroup`.
+The ingroup and the outgroup are aligned in separate runs, so each is
+oriented within its own pool and a disagreement between the two pools is
+not detected here. That comparison is made in Module 4, where the two
+sets are joined, and `homology_check` reports it as
+`reversed_relative_to_ingroup`.
 
 `preserve_iupac = TRUE` retains the IUPAC ambiguity codes (`R`, `Y`,
 `S`, `W`, `K`, `M`, `B`, `D`, `H`, `V`) instead of collapsing them to
-`N`. The tools downstream all accept them, and they are not equivalent
-to missing data: `RAxML-NG` and `ModelTest-NG` treat an ambiguity code
-as a partial constraint on the state, so an `R` site restricts the
-possibilities to A or G whereas an `N` restricts nothing. Collapsing the
-codes therefore discards a real constraint for no analytical gain, and
-it also erases genuine heterozygous signal in multicopy nuclear markers
-such as `ITS`. The alternative remains available for anyone who needs an
-alignment free of ambiguity, but the pipeline does not impose it.
+`N`. `RAxML-NG` and `ModelTest-NG` treat an ambiguity code as a partial
+constraint on the state: an `R` site restricts the state to A or G,
+whereas an `N` does not restrict it. Collapsing the codes discards that
+information and erases heterozygous signal in multicopy nuclear markers
+such as `ITS`. Setting `preserve_iupac = FALSE` collapses them for
+analyses that require alignments without ambiguity codes.
 
-Ambiguity is measured rather than assumed away. The manifest reports
+The amount of ambiguity is reported. The manifest gives
 `mean_fraction_ambiguous_*` for each processing stage and
 `n_sites_ambiguous_*` for the raw input and the final alignment,
-alongside the existing gap and missing-data columns. The `raw_input`
-figures are computed before any cleaning is applied, so they record what
-the source records actually contained irrespective of the policy in
-force. That is what makes a per-locus judgement possible: a marker whose
-ambiguity is concentrated can be examined on its own evidence rather
-than subjected to a global rule.
+alongside the gap and missing-data columns. The `raw_input` values are
+computed before any cleaning, so they record what the source records
+contain under either setting, and a locus with concentrated ambiguity
+can be examined individually.
 
-`min_masked_alignment_length = 100L` sets the floor discussed above. Its
-purpose is to catch alignments that masking has degraded to the point of
-being uninformative, not to arbitrate between loci of different lengths:
-no marker in this dataset is shorter than 100 columns, so a masked
-alignment below that value is degenerate rather than merely short.
-Raising the floor can only reject markers, never admit them, and any
-marker it rejects is reported with a `decision_reason` naming the
-threshold, so its effect is always visible in the screening table.
+`min_masked_alignment_length = 100L` sets the floor described above. It
+detects alignments that masking has reduced to an uninformative remnant;
+it does not select between loci of different lengths, because no marker
+in this dataset is shorter than 100 columns. Raising the floor can only
+reject markers, and a rejected marker is reported with a
+`decision_reason` naming the threshold.
 
-Note that `min_non_gap_fraction`, `max_missing_fraction` and
-`min_masked_alignment_length` are all evaluated against the post-masking
-column set, so when `mask_alignment_regions = FALSE` none of them is
-applied at this stage. That is intentional: with masking deferred,
-occupancy filtering happens exactly once, on the joint ingroup plus
-outgroup alignment of Module 5. The chosen policy and the value of every
-threshold are recorded in `2_MAFFT_*/logs/LOG_alignment_run_info.txt`
-and stamped into each `TABLE_marker_alignment_summary_<marker>.csv`, so
-a given output directory always documents the call that produced it.
-Those same stamped values drive the caching behaviour: a marker is
-reused from a previous run only if all five parameters match, so
-changing `mask_alignment_regions` on an already populated output
-directory forces reprocessing rather than silently returning the earlier
-alignments.
+`min_non_gap_fraction`, `max_missing_fraction` and
+`min_masked_alignment_length` are evaluated on the post-masking column
+set, so none of them is applied at this stage when
+`mask_alignment_regions = FALSE`. With masking deferred, occupancy
+filtering takes place once, on the joint ingroup and outgroup alignment
+of Module 5. The masking policy and the value of every threshold are
+recorded in `2_MAFFT_*/logs/LOG_alignment_run_info.txt` and in each
+`TABLE_marker_alignment_summary_<marker>.csv`. The same values control
+caching: a marker is reused from a previous run only if all five
+parameters match, so changing `mask_alignment_regions` in a populated
+output directory forces reprocessing.
 
 Masking is applied to the ingroup, where each locus is represented by
 dozens to hundreds of sequences and
 [`DECIPHER::MaskAlignment`](https://rdrr.io/pkg/DECIPHER/man/MaskAlignment.html)
-has enough signal to behave reliably. It is **deliberately disabled for
-the outgroup** (`mask_alignment_regions = FALSE`). With only two to
-seven highly divergent accessions per locus, masking the outgroup on its
-own defines a column set that the ingroup does not share and can erode
-an outgroup alignment to a few base pairs; those fragments then fail the
-occupancy filter during the joint realignment of Module 5 and vanish
-from the supermatrix, stripping the outgroup precisely from the loci
-needed to root the tree. Deferring masking to Module 5, where ingroup
-and outgroup are masked together against a single column set, preserves
-outgroup coverage without weakening quality control.
+has enough signal to behave reliably. It is disabled for the outgroup
+(`mask_alignment_regions = FALSE`). With two to seven divergent
+accessions per locus, masking the outgroup separately defines a column
+set that the ingroup does not share and can reduce an outgroup alignment
+to a few base pairs; those fragments then fail the occupancy filter in
+the joint realignment of Module 5 and are lost from the supermatrix,
+together with the characters needed to root the tree. Masking is
+therefore deferred to Module 5, where ingroup and outgroup are masked
+together against a single column set.
 
 ``` r
 
@@ -386,7 +301,7 @@ ingroup_alignment_manifest <- run_alignment_pipeline(
 )
 
 # Align outgroup sequences, deferring masking to the joint realignment of Module 5.
-# The occupancy thresholds are omitted deliberately: they are not applied when masking
+# The occupancy thresholds are omitted: they are not applied when masking
 # is disabled, so passing them here would only suggest a filtering that does not happen.
 outgroup_alignment_manifest <- run_alignment_pipeline(
   input_folder = "1_phylotaR_out_Outgroup",
@@ -430,15 +345,12 @@ using the interquartile range (IQR), identifying sequences that may
 represent incomplete assemblies, sequencing artifacts, or annotation
 errors.
 
-Based on user defined thresholds, loci and sequences that fail these
-quality criteria are excluded from subsequent analyses. The function
-produces a curated collection of phylogenetically informative markers
-together with a comprehensive diagnostic table summarizing saturation
-statistics, sequence length distributions, outlier detection, and
-filtering decisions for each locus. These curated markers constitute the
-final set of ingroup loci that will be combined with the corresponding
-outgroup sequences for downstream concatenation and phylogenetic
-inference.
+Loci and sequences that fail the thresholds are excluded from the
+following modules. The function writes the retained markers and a
+diagnostic table with the saturation statistics, sequence length
+distributions, outliers and filtering decision for each locus. The
+retained markers are combined with the corresponding outgroup sequences
+in Module 4.
 
 ``` r
 
@@ -450,7 +362,7 @@ screening_summary <- run_marker_screening(
   min_aln_len_to_retain = 200,
   min_nseq_to_retain = 100,
   # Reporting only, and only for the loci that have an outgroup counterpart. Which outgroup
-  # markers have none is Stage 4's business, not this module's.
+  # markers have none is Module 4's business, not this module's.
   # The summary table gains n_outgroup and n_total so a rejected locus can be
   # seen to carry outgroup data. No retention decision here depends on the outgroup.
   outgroup_folder = "2_MAFFT_Outgroup/alignments",
@@ -460,23 +372,19 @@ screening_summary <- run_marker_screening(
 
 ### Module 4: Integrate and Decouple Ingroup and Outgroup Markers
 
-The previous modules independently retrieve, align, and evaluate ingroup
-and outgroup sequences. Before downstream concatenation and evolutionary
-modeling, these datasets must be integrated into a standardized
-taxonomic framework to reconcile species binomials against the
-**Caryophyllales.org** taxonomic backbone
+The previous modules retrieve, align and evaluate ingroup and outgroup
+sequences separately. Before concatenation, the two datasets are
+reconciled against the Caryophyllales.org taxonomic backbone
 (`CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`; Korotkova *et al*.
-2021). Taxonomic synonyms, obsolete names, infraspecific designations,
-and orthographic variants are resolved to their accepted species names
-across **Cactaceae** and **Anacampserotaceae**, while root outgroups
-(**Portulacaceae** and **Talinaceae**) are preserved for phylogenetic
-rooting.
+2021): synonyms, obsolete names, infraspecific designations and
+orthographic variants are resolved to accepted species names in
+Cactaceae and Anacampserotaceae, and the Portulacaceae and Talinaceae
+terminals are retained as outgroups.
 
-To prevent outgroup divergence from inflating molecular informativeness
-metrics (such as parsimony informative sites and alignment lengths) of
-the focal radiation, the
+So that outgroup divergence does not inflate the informativeness metrics
+of the ingroup (parsimony informative sites, alignment length),
 [`integrate_and_clean_markers()`](https://beeamerino.github.io/PhyloCactus/reference/integrate_and_clean_markers.md)
-function organizes all curated outputs into structured subdirectories:
+writes its outputs to separate subdirectories:
 
 1.  `4_Cleaned/cleaned_markers_ingroup`: Contains curated sequences
     exclusively for accepted **Cactaceae** taxa, preserved for
@@ -532,8 +440,8 @@ function organizes all curated outputs into structured subdirectories:
       `TABLE_sequence_registry_with_acceptance.csv`,
       `TABLE_duplicate_resolution_species_marker.csv`: Full
       sequence-level traceability and deduplication audit registries.
-5.  `4_Cleaned/logs`: Contains the comprehensive integration and
-    curation audit log (`LOG_clean_integration_summary.txt`).
+5.  `4_Cleaned/logs`: Contains the integration and curation log
+    (`LOG_clean_integration_summary.txt`).
 
 ``` r
 
@@ -548,10 +456,10 @@ integrate_and_clean_markers(
   # The two phylotaR runs cluster independently, so the same region can carry different names.
   # trnL (outgroup, the trnL intron) shares 63% of its 20-mers with trnL-trnF (ingroup), whose
   # amplicon contains that intron. Verified before aliasing: outgroup ndhF shares none with
-  # ndhF-rpl32 despite the resemblance, and is deliberately not aliased.
+  # ndhF-rpl32 despite the resemblance, and is not aliased.
   marker_aliases = c(trnL = "trnL_trnF"),
   # readmit_markers overrides the Module 3 verdict for a locus kept on outgroup grounds rather
-  # than ingroup resolution. Left empty deliberately; see the note below.
+  # than ingroup resolution. Left empty; see the note below.
   readmit_markers = NULL,
   readmit_dir = NULL,
   # Alignment-free homology check, ingroup against outgroup, per marker.
@@ -559,37 +467,30 @@ integrate_and_clean_markers(
 )
 ```
 
-`trnT-psbD` was readmitted here on 2026-09-01 and removed the same day,
-and the reason is worth stating because the counts argued the other way.
-It had the most balanced coverage in the dataset, 49 ingroup terminals
-against 49 outgroup at 0.998 median occupancy, where the next best locus
-offered six outgroup terminals. The sequences are not the same region:
-0.039 of the outgroup 20-mers occur anywhere in the ingroup sequences,
-against 0.28 to 0.60 for every genuine counterpart, and observed
-divergence against Cactaceae is 0.440 where `matK` gives 0.077 and
-`rbcL` 0.033. The ingroup median length is 598 bp and the outgroup 1347.
-It was contributing 521 columns of non-homologous characters to the
-terminals that define the root, which is the branch every calibration is
-estimated across.
+`trnT-psbD` shows why a locus is not readmitted on coverage alone. It
+has more outgroup sequences than any other marker (52 sequences of 52
+*Portulaca* species, against 50 ingroup sequences), but the two sets are
+not the same region: 0.040 of the outgroup 20-mers occur in the ingroup
+sequences, against 0.26 to 0.59 for `trnL_trnF`, `matK`, `phyC` and
+`rbcL`. The median length is 605 bp in the ingroup and 1347 bp in the
+outgroup.
 
-`homology_check` exists because counts cannot see this and neither can a
-coverage table. It measures, for each marker present on both sides, the
-fraction of outgroup k-mers occurring in the ingroup sequences of the
+`homology_check` detects this case, which neither counts nor a coverage
+table can show. For each marker present on both sides, it measures the
+fraction of outgroup k-mers that occur in the ingroup sequences of the
 same name, writes `4_Cleaned/tables/TABLE_marker_homology_check.csv`,
 and warns for the markers below both thresholds. The measure is
-alignment-free, so a low value cannot be fixed by aligning better: it
-separates sequences that are hard to align from sequences that are not
-the same region. It reports and does not block, because a low share on a
-fast-evolving locus is a reason to look rather than a verdict.
+alignment-free, so a low value cannot be corrected by a better
+alignment: it separates sequences that are difficult to align from
+sequences of different regions. It does not block, because a low value
+on a fast-evolving locus calls for inspection and does not by itself
+establish non-homology.
 
 ### Module 5: Joint Realignment of Curated Markers
 
-Although ingroup and outgroup markers were aligned independently during
-earlier stages, integrating both datasets introduces homologous sequence
-variation across divergent lineages. Independent alignment can introduce
-insertion/deletion (indel) boundary shifts at the junction between
-divergent lineages, potentially biasing downstream branch length
-estimation if concatenated directly.
+Ingroup and outgroup markers were aligned separately in Module 2, and
+concatenating separate alignments can shift indel boundaries at the
+junction between divergent lineages and bias branch lengths.
 
 The
 [`run_joint_realignment()`](https://beeamerino.github.io/PhyloCactus/reference/run_joint_realignment.md)
@@ -608,25 +509,23 @@ itself. Sequences that arrive as short fragments fail the filter and
 disappear from the supermatrix; the affected terminals are recorded in
 `5_MAFFT_Cleaned/LOG_SEQ_FILTER_<marker>.csv` with `Retained = FALSE`.
 
-The threshold is a fraction of the alignment width, and the alignment
-width is set by the longest sequences, which are the ingroup ones. An
-outgroup accession covering a shorter amplicon of the same region
-therefore fails on length alone. That is how the five *Portulaca*
-sequences of `trnL_trnF`, 297 bp against a threshold of about 353, left
-the matrix: the branch subtending the outgroup fell from roughly 600
-expected substitutions to 0.03, and the two deepest calibrated nodes
-stopped being estimated at all.
+The threshold is a fraction of the alignment width, which is set by the
+longest sequences, those of the ingroup. An outgroup accession that
+covers a shorter amplicon of the same region therefore fails on length
+alone. In the reference dataset this affects the *Portulaca* sequences
+of `trnL_trnF`; losing them removes most of the characters on the branch
+that subtends the outgroup, and with them the information that dates the
+deepest calibrated nodes.
 
-Three arguments address this. `rooting_pattern` exempts nothing and
-names, in a warning, any rooting terminal the filter removes, so the
-loss is visible where it happens rather than four modules downstream.
-`protect_pattern` retains matching terminals regardless of occupancy.
-`protect_markers` restricts that exemption to named loci, which matters
-because a matrix-wide exemption retains every short fragment of every
-protected terminal in every locus, raising the gap fraction of the
-supermatrix and destabilising the affected terminals during inference.
-Scoping the exemption to the loci that actually lose rooting terminals
-buys the separation without that cost.
+Three arguments address this. `rooting_pattern` exempts nothing but
+names, in a warning, any rooting terminal removed by the filter, so the
+loss is reported where it occurs. `protect_pattern` retains matching
+terminals regardless of occupancy. `protect_markers` restricts that
+exemption to the named loci: an exemption applied to the whole matrix
+retains every short fragment of every protected terminal in every locus,
+which raises the gap fraction of the supermatrix and destabilizes those
+terminals during inference. Restricting it to the loci that lose rooting
+terminals keeps them without that cost.
 
 ``` r
 
@@ -644,27 +543,28 @@ run_joint_realignment(
 
 ### Module 6: Construct the Multilocus Supermatrix
 
-After individual locus alignments have been curated, realigned, and
-evaluated, they are concatenated into a unified multilocus supermatrix
-for partitioned maximum-likelihood phylogenetic inference.
+The curated and realigned loci are concatenated into a multilocus
+supermatrix for partitioned maximum-likelihood inference.
 
-Passing `outgroup_pattern` runs \[report_marker_group_coverage()\]
-first, which counts how many ingroup and how many outgroup terminals
-carry real sequence in each locus and warns when either side is empty. A
-locus sampled almost entirely on one side of the root contributes
-columns the other side cannot share, and the branch lengths spanning
-that bipartition are then estimated from the loci that remain. The
-report does not block: whether such a locus belongs in a matrix depends
-on the analysis the matrix is for, and a nuclear locus with no outgroup
-coverage is unusable for dating and valuable for species discrimination.
+Passing `outgroup_pattern` runs
+[`report_marker_group_coverage()`](https://beeamerino.github.io/PhyloCactus/reference/report_marker_group_coverage.md)
+on the loci that enter the matrix. It counts the ingroup and outgroup
+terminals carrying sequence in each locus and warns when either side is
+empty. A locus sampled almost entirely on one side of the root
+contributes characters that the other side cannot share, and the branch
+lengths across that bipartition are then estimated from the remaining
+loci. The report does not block, because whether such a locus belongs in
+a matrix depends on the purpose of the matrix: a nuclear locus without
+outgroup coverage is of no use for dating and can be informative for
+species discrimination.
 
-Passing a **named** vector rather than a single expression resolves the
-outgroup by family, adding `n_<family>`, `n_<family>_covered` and
+Passing a named vector of expressions, one per family, resolves the
+outgroup by family and adds `n_<family>`, `n_<family>_covered` and
 `median_cov_<family>` to
-`logs_and_qc/SUPP_TABLE_marker_group_coverage.csv`. That distinction
-matters here because the three outgroup families are not sampled alike:
-a combined count can look adequate while one family, and in particular
-the one that carries the root, is absent from the locus entirely.
+`logs_and_qc/SUPP_TABLE_marker_group_coverage.csv`. The three outgroup
+families are not sampled alike, and a combined count can look adequate
+while one family, in particular the one that carries the root, is absent
+from the locus.
 
 The
 [`run_concatenation_pipeline()`](https://beeamerino.github.io/PhyloCactus/reference/run_concatenation_pipeline.md)
@@ -682,23 +582,24 @@ provisionally by Module 4) in place, replacing them with the true
 post-realignment counts now that Module 5’s joint realignment may have
 dropped individual taxa from a locus.
 
-`exclude_markers` names the loci to leave out of this particular
-supermatrix. The alignments are neither modified nor removed, so a locus
-excluded here remains available to every other analysis; only this
-matrix is built without it. The excluded names are echoed to the run log
-and written to `logs_and_qc/TABLE_markers_excluded.csv`, and a name
-matching no alignment raises a warning rather than passing silently, so
-a typo cannot leave a locus in the matrix while the script reads as
-though it had been dropped.
+`exclude_markers` names the loci left out of this supermatrix. The
+alignments are not modified or removed, so an excluded locus remains
+available to other analyses. The excluded names are written to the run
+log and to `logs_and_qc/TABLE_markers_excluded.csv`, and a name matching
+no alignment raises a warning, so a misspelled name cannot leave a locus
+in the matrix unnoticed.
 
 Set `exclude_markers = NULL` to build the full matrix. `phyC` is
-excluded below for the reason the coverage report gives above: it
-carries 167 ingroup terminals and 15 outgroup terminals, all 15 in
-Anacampserotaceae and none in Portulacaceae, so in a matrix built to
-date the divergence between those families it supplies columns that only
-one side of the root can occupy. That is a property of this matrix, not
-of the locus, and `phyC` remains the more discriminating of the two
-nuclear markers for barcoding.
+excluded below because it carries no Portulacaceae terminal: of its 16
+outgroup terminals, 15 are Anacampserotaceae and one is Talinaceae,
+against 167 ingroup terminals (counted in
+`5_MAFFT_Cleaned/aligned_markers/phyC.fasta`; the coverage report lists
+only the loci that enter the supermatrix). In a matrix built to date the
+ACP clade, a locus sampled for Anacampserotaceae and not for
+Portulacaceae supplies characters to only one side of the divergence
+between the two families. The exclusion is a property of this matrix;
+`phyC` remains the more discriminating of the two nuclear markers for
+barcoding.
 
 ``` r
 
@@ -716,37 +617,28 @@ run_concatenation_pipeline(
 
 ## Conclusion
 
-At this stage, the molecular dataset has been fully assembled, curated,
-and prepared for phylogenetic analysis. Orthologous loci have been
-retrieved, taxonomic names standardized, multiple sequence alignments
-refined, phylogenetically informative markers selected, and the final
-multilocus supermatrix constructed together with its corresponding
-partition scheme. These outputs constitute the complete analytical
-dataset required for evolutionary inference.
+Stage 1 ends with the curated loci, the partitioned supermatrix and its
+partition scheme, and the tables documenting each curation step.
 
-The next stage of the `PhyloCactus` workflow focuses on reconstructing
-evolutionary relationships and estimating the temporal framework of
-diversification. In the following tutorial, we will infer a maximum
-likelihood phylogeny using `RAxML-NG`, evaluate branch support, and
-estimate divergence times under a penalized likelihood framework using
-`treePL`. The resulting time calibrated phylogeny will serve as the
-foundation for historical biogeographic and macroevolutionary analyses.
+Tutorial 2 infers the maximum-likelihood phylogeny with `RAxML-NG`,
+estimates branch support, and dates the tree by penalized likelihood
+with `treePL`.
 
-[Continue to Tutorial 2: Inference and Divergence Time
+[Continue to Tutorial 2: Phylogenetic Inference and Divergence Time
 Estimation](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html)
 
 ## References
 
-- Guerrero *et al*. 2019. Phylogenetic Relationships and Evolutionary
-  Trends in the Cactus Family. *Journal of Heredity*, 110(1), 4–21.
+- Guerrero *et al*. 2019. Phylogenetic relationships and evolutionary
+  trends in the cactus family. *Journal of Heredity*, 110(1), 4–21.
   <https://doi.org/10.1093/jhered/esy064>
 - Katoh, K., & Standley, D. M. 2013. MAFFT multiple sequence alignment
-  software version 7: Improvements in performance and usability.
+  software version 7: improvements in performance and usability.
   *Molecular Biology and Evolution*, 30(4), 772–780.
   <https://doi.org/10.1093/molbev/mst010>
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org, a dynamic
   online species-level taxonomic backbone for the family. *Willdenowia*,
   51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
-- Wright, E. 2024. Fast and Flexible Search for Homologous Biological
-  Sequences with DECIPHER v3. *The R Journal*, 16(2), 191-200.
+- Wright, E. 2024. Fast and flexible search for homologous biological
+  sequences with DECIPHER v3. *The R Journal*, 16(2), 191-200.
   <https://doi.org/10.18129/B9.bioc.DECIPHER>

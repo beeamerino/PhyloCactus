@@ -2,10 +2,8 @@
 
 Evaluates phylogenetic informativeness, sequence coverage, alignment
 length, and substitution saturation across individual locus alignments.
-Filtering out loci exhibiting high substitution saturation or severe
-site length anomalies prevents systematic noise and long-branch
-attraction (LBA) artifacts from distorting maximum-likelihood
-supermatrix inference.
+Loci with strong saturation or anomalous sequence lengths are excluded
+from the supermatrix.
 
 ## Usage
 
@@ -68,10 +66,10 @@ run_marker_screening(
   This module asks whether a locus resolves the ingroup radiation, and
   the answer cannot depend on how many outgroup accessions exist.
   `trnT-psbD` is the case that forced the distinction: 50 ingroup
-  sequences against a threshold of 100, correctly rejected as an ingroup
-  marker, while carrying 49 Portulaca accessions of 1347 bp that are the
-  best outgroup coverage in the dataset. Bringing it back is a decision
-  about connecting the two groups, which belongs to
+  sequences against a threshold of 100, rejected as an ingroup marker,
+  while carrying 52 *Portulaca* sequences of about 1347 bp, more
+  outgroup sequences than any other marker. Bringing it back is a
+  decision about connecting the two groups, which belongs to
   [`integrate_and_clean_markers()`](https://beeamerino.github.io/PhyloCactus/reference/integrate_and_clean_markers.md)
   and its `readmit_markers` argument, not to a sequence count here.
 
@@ -82,8 +80,9 @@ run_marker_screening(
 
 - saturation_flag_cutoff:
 
-  Numeric. Uncorrected p-distance vs. raw distance slope threshold to
-  flag substitution saturation. Defaults to `0.3`.
+  Numeric. Slope threshold below which the locus is flagged. The
+  regression is uncorrected p-distance against a Gamma-corrected K80
+  distance, as documented in `saturation_method`. Defaults to `0.3`.
 
 - saturation_keep_cutoff:
 

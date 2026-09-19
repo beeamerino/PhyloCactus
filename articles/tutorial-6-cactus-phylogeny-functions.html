@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-09-08</h4>
+            <h4 data-toc-skip class="date">2026-09-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-6-cactus-phylogeny-functions.Rmd" class="external-link"><code>vignettes/tutorial-6-cactus-phylogeny-functions.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-6-cactus-phylogeny-functions.Rmd</code></div>
@@ -76,56 +76,19 @@ Meriño</h4>
     
     
 <div class="section level2">
-<h2 id="overview-and-methodological-dictionary">Overview and Methodological Dictionary<a class="anchor" aria-label="anchor" href="#overview-and-methodological-dictionary"></a>
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>Following the step-by-step analytical workflows presented in
-Tutorials 1 through 5, this reference guide synthesizes the core
-pipeline functions and methodological principles implemented in
-<code>PhyloCactus</code>. While the complete technical documentation of
-all exported functions, parameters, and input/output signatures is
-provided in the standard R package manual pages (<code>pkgdown</code>
-reference section), this dictionary highlights the primary high-level
-modules that drive the sequential workflow, explaining their biological
-motivation and methodological rationale.</p>
-<div class="section level3">
-<h3 id="narrative-framework-of-the-reference-suite">Narrative Framework of the Reference Suite<a class="anchor" aria-label="anchor" href="#narrative-framework-of-the-reference-suite"></a>
-</h3>
-<ul>
-<li>
-<strong>Where are we?</strong> Having assembled multilocus
-supermatrices, inferred maximum-likelihood phylogenies, estimated
-divergence times with <code>treePL</code>, and validated topologies
-against external backbones, we provide a unified dictionary detailing
-core pipeline functions and their evolutionary context.</li>
-<li>
-<strong>Why are we here?</strong> Complex plant phylogenetic
-pipelines require explicit documentation linking software parameters
-directly to underlying evolutionary mechanics, such as mitigating
-long-branch attraction (LBA), enforcing positional homology, and
-accounting for incomplete lineage sorting (ILS).</li>
-<li>
-<strong>What will we achieve?</strong> A structured methodological
-dictionary mapping sequence mining, alignment quality control,
-substitution model evaluation, maximum-likelihood search, temporal
-calibration, and comparative validation modules.</li>
-<li>
-<strong>What comes next?</strong> Users can query individual
-function manual pages (e.g., <code><a href="../reference/run_concatenation_pipeline.html">?run_concatenation_pipeline</a></code>)
-or consult the <code>pkgdown</code> reference index for detailed
-parameter definitions and audit safeguards.</li>
-</ul>
-</div>
+<p>This page lists the main functions of the <code>PhyloCactus</code>
+workflow, grouped by stage, with the method each one implements and its
+primary reference. Arguments and return values are documented in the
+manual pages and in the <code>pkgdown</code> reference index.</p>
 </div>
 <div class="section level2">
-<h2 id="function-reference-dictionary">Function Reference Dictionary<a class="anchor" aria-label="anchor" href="#function-reference-dictionary"></a>
+<h2 id="functions-by-stage">Functions by Stage<a class="anchor" aria-label="anchor" href="#functions-by-stage"></a>
 </h2>
 <div class="section level3">
-<h3 id="sequence-assembly-mining">Sequence Assembly &amp; Mining<a class="anchor" aria-label="anchor" href="#sequence-assembly-mining"></a>
+<h3 id="sequence-assembly">Sequence Assembly<a class="anchor" aria-label="anchor" href="#sequence-assembly"></a>
 </h3>
-<p>Functions in this category retrieve orthologous sequence clusters
-from public repositories using sequence similarity clustering
-(<code>phylotaR</code>), avoiding nomenclature ambiguities across public
-databases.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -134,41 +97,40 @@ databases.</p>
 </colgroup>
 <thead><tr class="header">
 <th align="left">Function</th>
-<th align="left">Biological &amp; Methodological Application</th>
-<th align="left">Canonical Citation</th>
+<th align="left">Description</th>
+<th align="left">Reference</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left"><code><a href="../reference/assemble_ingroup_phylotar.html">assemble_ingroup_phylotar()</a></code></td>
-<td align="left">Mines orthologous DNA sequence clusters for a focal
-ingroup clade (e.g., Cactaceae; Guerrero et al. 2019) from GenBank using
-<code>phylotaR</code>. Applies strict taxonomic filters, evaluates
-cluster occupancy, and resolves nomenclature inconsistencies.</td>
+<td align="left">Retrieves sequence clusters for the ingroup (Cactaceae,
+NCBI Taxonomy ID 3593) from GenBank with <code>phylotaR</code>. Clusters
+are formed by sequence similarity, not by GenBank locus annotations;
+gene-name synonyms are mapped with <code>genes_map.csv</code>, clusters
+with more than <code>min_species</code> species are retained, and a
+curated list of excluded accessions is applied.</td>
 <td align="left">Bennett et al. (2018)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/assemble_outgroup_phylotar.html">assemble_outgroup_phylotar()</a></code></td>
-<td align="left">Retrieves orthologous sequences for specified outgroup
-lineages to establish accurate root positions for downstream likelihood
-search and chronogram estimation.</td>
+<td align="left">Retrieves sequence clusters for the outgroup genera of
+Anacampserotaceae, Portulacaceae and Talinaceae, for the loci selected
+in the ingroup.</td>
 <td align="left">Bennett et al. (2018)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/fetch_genbank_metadata.html">fetch_genbank_metadata()</a></code></td>
-<td align="left">Interrogates NCBI Entrez utilities to extract sequence
-lengths, organism taxonomy, publication titles, and accession IDs for
-downloaded sequence clusters.</td>
-<td align="left">Camacho et al. (2009)</td>
+<td align="left">Retrieves the organism name and definition line of each
+GenBank accession through <code><a href="https://rdrr.io/pkg/ape/man/read.GenBank.html" class="external-link">ape::read.GenBank()</a></code>, in batches
+with retries, and caches them.</td>
+<td align="left">Paradis &amp; Schliep (2019)</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="alignment-quality-control">Alignment &amp; Quality Control<a class="anchor" aria-label="anchor" href="#alignment-quality-control"></a>
+<h3 id="alignment-and-quality-control">Alignment and Quality Control<a class="anchor" aria-label="anchor" href="#alignment-and-quality-control"></a>
 </h3>
-<p>Functions in this category establish hypotheses of positional
-homology (<code>MAFFT</code>) and apply automated masking of
-non-homologous or ambiguous regions (<code>DECIPHER</code>).</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -177,45 +139,44 @@ non-homologous or ambiguous regions (<code>DECIPHER</code>).</p>
 </colgroup>
 <thead><tr class="header">
 <th align="left">Function</th>
-<th align="left">Biological &amp; Methodological Application</th>
-<th align="left">Canonical Citation</th>
+<th align="left">Description</th>
+<th align="left">Reference</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left"><code><a href="../reference/run_alignment_pipeline.html">run_alignment_pipeline()</a></code></td>
-<td align="left">Generates multiple sequence alignments using
-<code>MAFFT</code> and masks poorly aligned, ambiguous, or hypervariable
-regions using <code>DECIPHER</code>, eliminating systematic noise while
-retaining phylogenetically informative sites.</td>
+<td align="left">Aligns each locus with <code>MAFFT</code> and masks
+poorly aligned columns with <code><a href="https://rdrr.io/pkg/DECIPHER/man/MaskAlignment.html" class="external-link">DECIPHER::MaskAlignment()</a></code>.</td>
 <td align="left">Katoh &amp; Standley (2013); Wright (2024)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/run_marker_screening.html">run_marker_screening()</a></code></td>
-<td align="left">Evaluates phylogenetic informativeness, sequence
-coverage, and substitution saturation across individual locus
-alignments, excluding loci exhibiting high saturation slope
-erosion.</td>
-<td align="left">Xia et al. (2003)</td>
+<td align="left">Screens each locus alignment for coverage, length and
+substitution saturation, by regressing uncorrected p-distance against
+the gamma-corrected K80 distance. The slope threshold below which a
+locus is rejected is a <code>PhyloCactus</code> criterion, not a
+published saturation test; the references cover the distance model
+only.</td>
+<td align="left">Kimura (1980); Jin &amp; Nei (1990)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/clean_taxonomic_names.html">clean_taxonomic_names()</a></code></td>
-<td align="left">Standardizes tip labels against authoritative botanical
-checklists (e.g., Caryophyllales.org checklist), resolving synonymies
-and orthographic variants.</td>
+<td align="left">Keeps the sequences whose name is in the checklist of
+Cactaceae, ignoring differences in spaces, hyphens and underscores, and
+renames them to the spelling of the checklist.</td>
 <td align="left">Korotkova et al. (2021)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/run_joint_realignment.html">run_joint_realignment()</a></code></td>
-<td align="left">Re-estimates positional homology alignments
-(<code>MAFFT</code>) after aggregating ingroup and outgroup sequence
-markers to refine alignment hypotheses.</td>
+<td align="left">Realigns each locus with <code>MAFFT</code> after the
+ingroup and outgroup sequences are combined.</td>
 <td align="left">Katoh &amp; Standley (2013)</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="concatenation-supermatrix-assembly">Concatenation &amp; Supermatrix Assembly<a class="anchor" aria-label="anchor" href="#concatenation-supermatrix-assembly"></a>
+<h3 id="supermatrix">Supermatrix<a class="anchor" aria-label="anchor" href="#supermatrix"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -225,25 +186,23 @@ markers to refine alignment hypotheses.</td>
 </colgroup>
 <thead><tr class="header">
 <th align="left">Function</th>
-<th align="left">Biological &amp; Methodological Application</th>
-<th align="left">Canonical Citation</th>
+<th align="left">Description</th>
+<th align="left">Reference</th>
 </tr></thead>
 <tbody><tr class="odd">
 <td align="left"><code><a href="../reference/run_concatenation_pipeline.html">run_concatenation_pipeline()</a></code></td>
-<td align="left">Concatenates individual orthologous locus alignments
-into a unified multilocus supermatrix and generates partition coordinate
-maps compatible with <code>RAxML-NG</code>, <code>IQ-TREE</code>, and
-<code>MrBayes</code>.</td>
-<td align="left">Kozlov et al. (2019)</td>
+<td align="left">Concatenates the locus alignments into a supermatrix
+and writes partition maps in RAxML format (read by
+<code>RAxML-NG</code>, <code>ModelTest-NG</code> and
+<code>IQ-TREE</code>) and NEXUS format, with configuration files for
+<code>PartitionFinder2</code> and <code>MrBayes</code>.</td>
+<td align="left">Not applicable</td>
 </tr></tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="likelihood-inference-model-evaluation">Likelihood Inference &amp; Model Evaluation<a class="anchor" aria-label="anchor" href="#likelihood-inference-model-evaluation"></a>
+<h3 id="model-selection-and-maximum-likelihood-inference">Model Selection and Maximum-Likelihood Inference<a class="anchor" aria-label="anchor" href="#model-selection-and-maximum-likelihood-inference"></a>
 </h3>
-<p>Functions in this category select optimal nucleotide substitution
-models per partition and infer maximum-likelihood phylogenies under
-topological constraints.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -252,51 +211,48 @@ topological constraints.</p>
 </colgroup>
 <thead><tr class="header">
 <th align="left">Function</th>
-<th align="left">Biological &amp; Methodological Application</th>
-<th align="left">Canonical Citation</th>
+<th align="left">Description</th>
+<th align="left">Reference</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left"><code><a href="../reference/preprocess_partitions.html">preprocess_partitions()</a></code></td>
-<td align="left">Validates structural integrity and syntax of the
-supermatrix and its corresponding partition definitions prior to
-likelihood evaluation using <code>RAxML-NG</code>.</td>
+<td align="left">Checks the supermatrix and partition map with
+<code>RAxML-NG</code> before model selection.</td>
 <td align="left">Kozlov et al. (2019)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/run_modeltest_ng.html">run_modeltest_ng()</a></code></td>
-<td align="left">Identifies the optimal substitution model per partition
-(<code>ModelTest-NG</code>) using AICc criteria, controlling for
-mutational rate heterogeneity and mitigating long-branch attraction
-(LBA).</td>
+<td align="left">Selects a substitution model for each partition with
+<code>ModelTest-NG</code> under the AICc.</td>
 <td align="left">Darriba et al. (2020)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/build_constraint_scaffold.html">build_constraint_scaffold()</a></code></td>
-<td align="left">Synthesizes a Newick multifurcating constraint scaffold
-enforcing monophyletic relationships of established higher taxonomic
-ranks.</td>
+<td align="left">Builds a multifurcating constraint tree that enforces
+the monophyly of subfamilies and major clades of Cactaceae established
+in published phylogenies.</td>
 <td align="left">Guerrero et al. (2019)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/calculate_ml_tree.html">calculate_ml_tree()</a></code></td>
-<td align="left">Infers the maximum-likelihood evolutionary hypothesis
-explaining the supermatrix under selected partition models and
-constraint scaffolds (<code>RAxML-NG</code>).</td>
+<td align="left">Estimates the maximum-likelihood tree with
+<code>RAxML-NG</code> under the partition models and the constraint
+tree, from 25 random and 25 parsimony starting trees by default.</td>
 <td align="left">Kozlov et al. (2019)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/map_branch_supports.html">map_branch_supports()</a></code></td>
-<td align="left">Maps Felsenstein’s Bootstrap Proportions (FBP) and
-Transfer Bootstrap Expectation (TBE) support values onto the best
-maximum-likelihood tree.</td>
+<td align="left">Maps Felsenstein bootstrap proportions (FBP) or
+transfer bootstrap expectation (TBE) from the bootstrap replicates onto
+the maximum-likelihood tree.</td>
 <td align="left">Felsenstein (1985); Lemoine et al. (2018)</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="divergence-time-estimation-treepl-automation">Divergence Time Estimation &amp; treePL Automation<a class="anchor" aria-label="anchor" href="#divergence-time-estimation-treepl-automation"></a>
+<h3 id="divergence-time-estimation">Divergence Time Estimation<a class="anchor" aria-label="anchor" href="#divergence-time-estimation"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -306,41 +262,52 @@ maximum-likelihood tree.</td>
 </colgroup>
 <thead><tr class="header">
 <th align="left">Function</th>
-<th align="left">Biological &amp; Methodological Application</th>
-<th align="left">Canonical Citation</th>
+<th align="left">Description</th>
+<th align="left">Reference</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left"><code><a href="../reference/rescale_tree.html">rescale_tree()</a></code></td>
-<td align="left">Multiplies tree edge lengths by a scaling factor prior
-to penalized likelihood dating (<code>treePL</code>) to improve
-numerical conditioning of rate parameter optimization.</td>
-<td align="left">Sanderson (2002)</td>
+<td align="left">Multiplies all branch lengths by a constant before
+dating with <code>treePL</code>. The factor changes the scale of the
+rate parameters and the numerical conditioning of the optimization; it
+does not change which branches <code>treePL</code> treats as too
+short.</td>
+<td align="left">Smith &amp; O’Meara (2012)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/run_treePL_direct.html">run_treePL_direct()</a></code></td>
-<td align="left">Executes <code>treePL</code> natively via system calls
-to estimate ultrametric chronograms under penalized likelihood.</td>
+<td align="left">Runs the <code>treePL</code> binary on a configuration
+file, after checking that the tree is rooted.</td>
 <td align="left">Smith &amp; O’Meara (2012)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/run_treePL_cv.html">run_treePL_cv()</a></code></td>
-<td align="left">Executes cross-validation parameter optimization, rate
-smoothing selection, and dating stages from R.</td>
-<td align="left">Maurin (2020)</td>
+<td align="left">Selects the rate-smoothing parameter by
+cross-validation, classifies the shape of the cross-validation curve,
+and dates the tree.</td>
+<td align="left">Sanderson (2002); Maurin (2020)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/automate_treePL.html">automate_treePL()</a></code></td>
-<td align="left">Automates cross-validation parameter optimization, rate
-smoothing selection, and chronogram estimation across temporal bootstrap
-replicates.</td>
-<td align="left">Maurin (2020)</td>
+<td align="left">Runs cross-validation, smoothing selection and dating
+on the maximum-likelihood tree and on each bootstrap replicate.</td>
+<td align="left">Smith &amp; O’Meara (2012); Maurin (2020)</td>
+</tr>
+<tr class="odd">
+<td align="left"><code><a href="../reference/send_run_notification.html">send_run_notification()</a></code></td>
+<td align="left">Sends an email when a long analysis ends, reporting
+status, timings and output paths. A failure to send does not stop the
+analysis.</td>
+<td align="left">
+<code>blastula</code> R package, <a href="https://github.com/rstudio/blastula" class="external-link uri">https://github.com/rstudio/blastula</a>
+</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="comparative-validation-iucn-utilities">Comparative Validation &amp; IUCN Utilities<a class="anchor" aria-label="anchor" href="#comparative-validation-iucn-utilities"></a>
+<h3 id="comparison-figures-and-iucn-data">Comparison, Figures and IUCN Data<a class="anchor" aria-label="anchor" href="#comparison-figures-and-iucn-data"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -350,52 +317,147 @@ replicates.</td>
 </colgroup>
 <thead><tr class="header">
 <th align="left">Function</th>
-<th align="left">Biological &amp; Methodological Application</th>
-<th align="left">Canonical Citation</th>
+<th align="left">Description</th>
+<th align="left">Reference</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left"><code><a href="../reference/validate_phylogenies.html">validate_phylogenies()</a></code></td>
-<td align="left">Quantifies topological congruence between the focal
-supermatrix tree and external published backbones using Robinson-Foulds
-distances and multidimensional scaling (MDS).</td>
+<td align="left">Compares the focal tree with published trees using the
+Robinson-Foulds and Different Phylogenetic Information distances, and
+projects the distances into tree space by multidimensional scaling.</td>
 <td align="left">Robinson &amp; Foulds (1981); Smith (2020)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/integrate_publication_tree.html">integrate_publication_tree()</a></code></td>
-<td align="left">Maps statistical support onto chronograms, collapsing
-weakly supported nodes (FBP &lt; 0.70) into soft polytomies to represent
-analytical uncertainty.</td>
+<td align="left">Maps support values onto the chronogram and the
+maximum-likelihood tree and collapses nodes with FBP below 70 into
+polytomies for the publication figures.</td>
 <td align="left">Hillis &amp; Bull (1993)</td>
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/get_iucn_data.html">get_iucn_data()</a></code></td>
-<td align="left">Interrogates the IUCN Red List API via
-<code>rredlist</code> to retrieve extinction threat categories,
-population trends, and geographic endemism metrics.</td>
-<td align="left">IUCN (2024)</td>
+<td align="left">Retrieves the IUCN Red List assessment of a species
+through <code>rredlist</code>: category, criteria, population trend,
+countries of occurrence, endemism, habitats and threats.</td>
+<td align="left">IUCN (2026)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/scale_fill_iucn.html">scale_fill_iucn()</a></code></td>
-<td align="left">Provides a standardized <code>ggplot2</code> manual
-fill scale mapping official IUCN threat categories onto comparative
-figures.</td>
-<td align="left">IUCN (2024)</td>
+<td align="left">
+<code>ggplot2</code> fill scale with the standard IUCN
+Red List category colors.</td>
+<td align="left">IUCN (2026)</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section level3">
-<h3 id="reproducible-execution-example">Reproducible Execution Example<a class="anchor" aria-label="anchor" href="#reproducible-execution-example"></a>
+<h3 id="help-pages">Help Pages<a class="anchor" aria-label="anchor" href="#help-pages"></a>
 </h3>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Query help documentation for any pipeline function</span></span>
 <span><span class="op">?</span><span class="va">run_alignment_pipeline</span></span>
 <span><span class="op">?</span><span class="va">calculate_ml_tree</span></span>
 <span><span class="op">?</span><span class="va">automate_treePL</span></span></code></pre></div>
+<p>The functions used for checks within the tutorials, such as
+<code><a href="../reference/check_calibration_consistency.html">check_calibration_consistency()</a></code>,
+<code><a href="../reference/report_bound_adherence.html">report_bound_adherence()</a></code>,
+<code><a href="../reference/classify_constrained_nodes.html">classify_constrained_nodes()</a></code>,
+<code><a href="../reference/audit_calibration_support.html">audit_calibration_support()</a></code> and
+<code><a href="../reference/report_smoothing_sensitivity.html">report_smoothing_sensitivity()</a></code>, are documented in their
+manual pages and in the tutorials where they are used.</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<ul>
+<li>Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C.
+D., Faurby, S., … &amp; Antonelli, A. 2018. phylotaR: An automated
+pipeline for retrieving orthologous DNA sequences from GenBank in R.
+<em>Life</em>, 8(2), 20. <a href="https://doi.org/10.3390/life8020020" class="external-link uri">https://doi.org/10.3390/life8020020</a>
+</li>
+<li>Darriba, D., Posada, D., Kozlov, A. M., Stamatakis, A., Morel, B.,
+&amp; Flouri, T. 2020. ModelTest-NG: a new and scalable tool for the
+selection of DNA and protein evolutionary models. <em>Molecular Biology
+and Evolution</em>, 37(1), 291-294. <a href="https://doi.org/10.1093/molbev/msz189" class="external-link uri">https://doi.org/10.1093/molbev/msz189</a>
+</li>
+<li>Felsenstein, J. 1985. Confidence limits on phylogenies: an approach
+using the bootstrap. <em>Evolution</em>, 39(4), 783-791. <a href="https://doi.org/10.1111/j.1558-5646.1985.tb00420.x" class="external-link uri">https://doi.org/10.1111/j.1558-5646.1985.tb00420.x</a>
+</li>
+<li>Guerrero, P. C., Majure, L. C., Cornejo-Romero, A., &amp;
+Hernández-Hernández, T. 2019. Phylogenetic Relationships and
+Evolutionary Trends in the Cactus Family. <em>Journal of Heredity</em>,
+110(1), 4-21. <a href="https://doi.org/10.1093/jhered/esy064" class="external-link uri">https://doi.org/10.1093/jhered/esy064</a>
+</li>
+<li>Hillis, D. M., &amp; Bull, J. J. 1993. An empirical test of
+bootstrapping as a method for assessing confidence in phylogenetic
+analysis. <em>Systematic Biology</em>, 42(2), 182-192. <a href="https://doi.org/10.1093/sysbio/42.2.182" class="external-link uri">https://doi.org/10.1093/sysbio/42.2.182</a>
+</li>
+<li>IUCN. 2026. <em>The IUCN Red List of Threatened Species</em>.
+Version 2026-1. Accessed 2026-09-19. <a href="https://www.iucnredlist.org" class="external-link uri">https://www.iucnredlist.org</a>
+</li>
+<li>Jin, L., &amp; Nei, M. 1990. Limitations of the evolutionary
+parsimony method of phylogenetic analysis. <em>Molecular Biology and
+Evolution</em>, 7(1), 82-102. <a href="https://doi.org/10.1093/oxfordjournals.molbev.a040588" class="external-link uri">https://doi.org/10.1093/oxfordjournals.molbev.a040588</a>
+</li>
+<li>Katoh, K., &amp; Standley, D. M. 2013. MAFFT multiple sequence
+alignment software version 7: Improvements in performance and usability.
+<em>Molecular Biology and Evolution</em>, 30(4), 772-780. <a href="https://doi.org/10.1093/molbev/mst010" class="external-link uri">https://doi.org/10.1093/molbev/mst010</a>
+</li>
+<li>Kimura, M. 1980. A simple method for estimating evolutionary rates
+of base substitutions through comparative studies of nucleotide
+sequences. <em>Journal of Molecular Evolution</em>, 16(2), 111-120. <a href="https://doi.org/10.1007/BF01731581" class="external-link uri">https://doi.org/10.1007/BF01731581</a>
+</li>
+<li>Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A.,
+Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker, A.,
+Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,
+Nyffeler, R., Sánchez, D., Schlumpberger, B. O., &amp; Berendsohn, W. G.
+2021. Cactaceae at Caryophyllales.org, a dynamic online species-level
+taxonomic backbone for the family. <em>Willdenowia</em>, 51(2), 251-270.
+<a href="https://doi.org/10.3372/wi.51.51208" class="external-link uri">https://doi.org/10.3372/wi.51.51208</a>
+</li>
+<li>Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., &amp; Stamatakis,
+A. 2019. RAxML-NG: a fast, scalable and user-friendly tool for maximum
+likelihood phylogenetic inference. <em>Bioinformatics</em>, 35(21),
+4453-4455. <a href="https://doi.org/10.1093/bioinformatics/btz305" class="external-link uri">https://doi.org/10.1093/bioinformatics/btz305</a>
+</li>
+<li>Lemoine, F., Domelevo Entfellner, J. B., Wilkinson, E., Correia, D.,
+Dávila Felipe, M., De Oliveira, T., &amp; Gascuel, O. 2018. Renewing
+Felsenstein’s phylogenetic bootstrap in the era of big data.
+<em>Nature</em>, 556(7702), 452-456. <a href="https://doi.org/10.1038/s41586-018-0043-0" class="external-link uri">https://doi.org/10.1038/s41586-018-0043-0</a>
+</li>
+<li>Maurin, K. J. L. 2020. An empirical guide for producing a dated
+phylogeny with treePL in a maximum likelihood framework.
+<em>arXiv</em>:2008.07054. <a href="https://doi.org/10.48550/arXiv.2008.07054" class="external-link uri">https://doi.org/10.48550/arXiv.2008.07054</a>
+</li>
+<li>Paradis, E., &amp; Schliep, K. 2019. ape 5.0: an environment for
+modern phylogenetics and evolutionary analyses in R.
+<em>Bioinformatics</em>, 35(3), 526-528. <a href="https://doi.org/10.1093/bioinformatics/bty633" class="external-link uri">https://doi.org/10.1093/bioinformatics/bty633</a>
+</li>
+<li>Robinson, D. F., &amp; Foulds, L. R. 1981. Comparison of
+phylogenetic trees. <em>Mathematical Biosciences</em>, 53(1-2), 131-147.
+<a href="https://doi.org/10.1016/0025-5564(81)90043-2" class="external-link uri">https://doi.org/10.1016/0025-5564(81)90043-2</a>
+</li>
+<li>Sanderson, M. J. 2002. Estimating absolute rates of molecular
+evolution and divergence times: a penalized likelihood approach.
+<em>Molecular Biology and Evolution</em>, 19(1), 101-109. <a href="https://doi.org/10.1093/oxfordjournals.molbev.a003974" class="external-link uri">https://doi.org/10.1093/oxfordjournals.molbev.a003974</a>
+</li>
+<li>Smith, M. R. 2020. Information theoretic generalized Robinson–Foulds
+metrics for comparing phylogenetic trees. <em>Bioinformatics</em>,
+36(20), 5007-5013. <a href="https://doi.org/10.1093/bioinformatics/btaa614" class="external-link uri">https://doi.org/10.1093/bioinformatics/btaa614</a>
+</li>
+<li>Smith, S. A., &amp; O’Meara, B. C. 2012. treePL: divergence time
+estimation using penalized likelihood for large phylogenies.
+<em>Bioinformatics</em>, 28(20), 2689-2690. <a href="https://doi.org/10.1093/bioinformatics/bts492" class="external-link uri">https://doi.org/10.1093/bioinformatics/bts492</a>
+</li>
+<li>Wright, E. S. 2024. Fast and Flexible Search for Homologous
+Biological Sequences with DECIPHER v3. <em>The R Journal</em>, 16(2),
+191-200. <a href="https://doi.org/10.32614/RJ-2024-022" class="external-link uri">https://doi.org/10.32614/RJ-2024-022</a>
+</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -2,7 +2,7 @@
 
 A node whose estimated age equals one of its own bounds was not
 estimated. Penalized likelihood returned the constraint, and the number
-carries the prior rather than the data. This is invisible in the output
+reflects the prior, not the data. This is invisible in the output
 chronogram, which looks like any other, so it has to be checked
 explicitly before a date is reported or interpreted.
 
@@ -43,9 +43,9 @@ report_bound_adherence(
   Optional. The bootstrap chronograms, as a `multiPhylo`, a list of
   `phylo`, or a path to a Newick file with one tree per line
   (`bsTree_treePL.tree`). When supplied, the verdict is taken from the
-  fraction of replicates sitting on a bound rather than from the single
-  point estimate, and a node pinned in most replicates is reported even
-  when the maximum-likelihood tree alone would have called it interior.
+  fraction of replicates sitting on a bound, not from the single point
+  estimate, and a node pinned in most replicates is reported even when
+  the maximum-likelihood tree alone would have called it interior.
   Defaults to `NULL`.
 
 ## Value

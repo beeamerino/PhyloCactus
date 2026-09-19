@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-09-08</h4>
+            <h4 data-toc-skip class="date">2026-09-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-5-cactus-phylogeny-barcoding.Rmd" class="external-link"><code>vignettes/tutorial-5-cactus-phylogeny-barcoding.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-5-cactus-phylogeny-barcoding.Rmd</code></div>
@@ -79,176 +79,132 @@ Meriño</h4>
 <h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
 </h2>
 <p>This section of <code>PhyloCactus</code> is under construction and
-ships no implementation. The document that follows is a manifest, not a
-tutorial: it states what the molecular diagnostic section is intended to
-do, which design decisions have already been taken, which remain open,
-and what must be true before the section is reopened for implementation.
-Calling <code><a href="../reference/evaluate_dna_barcoding.html">evaluate_dna_barcoding()</a></code> signals an error and
-points here. Single-locus gene tree inference is unaffected and remains
-available through <code><a href="../reference/infer_gene_trees.html">infer_gene_trees()</a></code>, documented with the
-phylogenetic inference module.</p>
+contains no implementation. This document sets out what the molecular
+diagnostic section is intended to do, the design decisions already
+taken, the questions that remain open, and the conditions for
+implementing it. <code><a href="../reference/evaluate_dna_barcoding.html">evaluate_dna_barcoding()</a></code> signals an error
+that points to this page. Single-locus gene trees can still be estimated
+with <code><a href="../reference/infer_gene_trees.html">infer_gene_trees()</a></code>.</p>
 </div>
 <div class="section level2">
-<h2 id="why-the-section-is-empty-rather-than-provisional">Why the Section Is Empty Rather Than Provisional<a class="anchor" aria-label="anchor" href="#why-the-section-is-empty-rather-than-provisional"></a>
-</h2>
-<p>An earlier implementation existed and was withdrawn in v0.4.2. It
-computed intra- and inter-specific pairwise distance distributions,
-derived a DNA barcode gap per locus, and trained a
-<code><a href="https://rdrr.io/pkg/DECIPHER/man/LearnTaxa.html" class="external-link">DECIPHER::LearnTaxa</a></code> classifier against the botanical
-backbone of Korotkova <em>et al</em>. (2021). Two defects made it unsafe
-to keep in place.</p>
-<p>The classifier was evaluated on the same sequence set used to train
-it. That is resubstitution, not validation: it measures how well the
-model memorised its training data, and the resulting per-species and
-per-genus accuracies were inflated by construction. A user reading those
-figures would have had no way to know they did not describe diagnostic
-performance.</p>
-<p>The barcode gap thresholds were fixed rather than derived from the
-empirical distance distributions of the family. In a clade with recent
-rapid radiations and low plastid divergence, a fixed threshold encodes
-an assumption about divergence that Cactaceae does not satisfy uniformly
-across genera.</p>
-<p>Neither defect is difficult to correct in isolation. Both are
-downstream of a strategic question that is still open, so correcting
-them now would produce a working function resting on an undecided
-design. Shipping nothing is preferable to shipping output that could be
-mistaken for a validated result.</p>
-</div>
-<div class="section level2">
-<h2 id="scope-of-the-section">Scope of the Section<a class="anchor" aria-label="anchor" href="#scope-of-the-section"></a>
+<h2 id="scope">Scope<a class="anchor" aria-label="anchor" href="#scope"></a>
 </h2>
 <p>The section is intended to answer one question: given a curated
-multilocus reference library for Cactaceae, how reliably can an
-individual locus, or a combination of loci, assign an unknown sample to
-genus and to species, and where does that resolution break down.</p>
-<p>The intended components are the following.</p>
+multilocus reference library for Cactaceae, how reliably can a single
+locus, or a combination of loci, assign an unknown sample to genus and
+to species, and in which groups does that assignment fail?</p>
+<p>The planned components are:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Empirical barcode gap per locus.</strong> Intra-specific and
-inter-specific pairwise distance distributions computed per marker, with
-the gap reported as an observed quantity rather than tested against a
-fixed cutoff.</li>
+<strong>Empirical barcode gap per locus.</strong> Intraspecific and
+interspecific pairwise distance distributions for each marker, with the
+gap reported as an observed quantity and not tested against a fixed
+cutoff.</li>
 <li>
-<strong>Probabilistic classification with honest
-validation.</strong> A taxonomic classifier trained against the accepted
-checklist and evaluated under stratified cross-validation, with species
-represented by a single accession declared separately because they admit
-no leave-one-out estimate.</li>
+<strong>Probabilistic classification with cross-validation.</strong>
+A taxonomic classifier trained on sequences of accepted species and
+evaluated by cross-validation stratified by species. Species represented
+by a single accession cannot be evaluated by leaving one sequence out,
+and are reported separately.</li>
 <li>
 <strong>Monophyly in single-locus gene trees.</strong> Recovery of
-specific and generic monophyly marker by marker, interpreted through
-biological processes (incomplete lineage sorting, hybridisation, plastid
-capture) rather than as analytical noise, and reporting paraphyletic
-assemblages as evolutionary grades.</li>
+species and genus monophyly for each marker. Non-monophyly is
+interpreted in terms of incomplete lineage sorting, hybridization and
+plastid capture, and paraphyletic assemblages are reported as
+grades.</li>
 </ol>
 </div>
 <div class="section level2">
-<h2 id="decisions-already-taken">Decisions Already Taken<a class="anchor" aria-label="anchor" href="#decisions-already-taken"></a>
+<h2 id="decisions-taken">Decisions Taken<a class="anchor" aria-label="anchor" href="#decisions-taken"></a>
 </h2>
-<p>These are settled and constrain any future implementation.</p>
 <ul>
 <li>
-<strong>Taxonomic backbone.</strong> Nomenclatural reconciliation is
-anchored in the dynamic Cactaceae checklist of Caryophyllales.org
-(Korotkova <em>et al</em>. 2021), the same backbone used throughout the
-assembly modules. No parallel taxonomy will be introduced.</li>
+<strong>Taxonomic backbone.</strong> Names are reconciled against
+the Cactaceae checklist of Caryophyllales.org (Korotkova <em>et al</em>.
+2021), the same backbone used in the assembly modules.</li>
 <li>
-<strong>Input.</strong> The section consumes the curated ingroup
-alignments in <code>4_Cleaned/cleaned_markers_ingroup</code>, produced
-by Module 4, and the phylogenetic products of Module 8 onwards in
-<code>7_Phylogenetics/</code>. It does not re-mine GenBank.</li>
+<strong>Input.</strong> The section uses the curated ingroup
+alignments in <code>4_Cleaned/cleaned_markers_ingroup</code> (Module 4)
+and the phylogenetic products of Modules 7 to 10. It does not query
+GenBank again.</li>
 <li>
-<strong>Gene tree inference stays out.</strong>
-<code><a href="../reference/infer_gene_trees.html">infer_gene_trees()</a></code> was relocated to the phylogenetic
-inference module because its products feed the gene tree versus species
-tree discordance analyses of Module 13, which do not depend on the
-barcoding strategy.</li>
+<strong>Gene trees.</strong> <code><a href="../reference/infer_gene_trees.html">infer_gene_trees()</a></code> belongs
+to the inference module. Its gene trees can be used as input to
+<code>ASTRAL-III</code> (Module 13) and do not depend on the design of
+this section.</li>
 <li>
 <strong>No fixed distance thresholds.</strong> Any decision rule
-must be derived from the observed distributions of the family, and its
-derivation must be reported alongside the result.</li>
+must be derived from the observed distance distributions of the family,
+and its derivation must be reported with the result. In a family with
+recent radiations and low plastid divergence, a fixed threshold assumes
+a level of divergence that is not uniform across genera.</li>
 <li>
-<strong>Validation is not optional.</strong> No classifier accuracy
-will be reported without cross-validation stratified by species, and the
-treatment of singleton species will be declared explicitly.</li>
+<strong>Validation.</strong> Classification accuracy is reported
+only from cross-validation stratified by species. Accuracy measured on
+the training sequences reflects how well the model fits those sequences,
+not its performance on new samples.</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="open-questions">Open Questions<a class="anchor" aria-label="anchor" href="#open-questions"></a>
 </h2>
-<p>These must be resolved before implementation begins.</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Which loci, and combined how.</strong> Whether resolution is
-assessed per locus, on concatenated subsets, or on both, and whether the
-standard barcode combination is evaluated as a unit for comparability
+<strong>Loci and combinations.</strong> Whether resolution is
+assessed per locus, on concatenated subsets, or both, and whether the
+standard plant barcode combination is evaluated as a unit for comparison
 with published surveys.</li>
 <li>
-<strong>The unit of assignment.</strong> Whether the target is
-species-level assignment, generic assignment with an explicit statement
-of specific ambiguity, or a graded output. The biological ceiling on
-monophyly in plants makes universal species assignment unattainable, so
-the reporting format has to accommodate justified non-assignment.</li>
+<strong>Unit of assignment.</strong> Whether the target is
+assignment to species, assignment to genus with an explicit statement of
+ambiguity at species level, or a graded output. Many plant species are
+not monophyletic in single-locus trees, so the output must allow for
+justified non-assignment.</li>
 <li>
-<strong>How ambiguity is reported.</strong> Whether a sample that
-cannot be separated from a set of candidates is reported as a candidate
-set, as a genus-level assignment, or as a failure, and how that
-interacts with the conservation applications of the package.</li>
+<strong>Reporting ambiguity.</strong> Whether a sample that cannot
+be separated from a set of candidates is reported as a candidate set, as
+an assignment to genus, or as a failure, and how this affects the
+conservation applications of the package.</li>
 <li>
-<strong>Relationship to the genome skimming extension.</strong>
-Whether this section remains a Sanger-era diagnostic evaluation, or is
-reframed as the reference-library component of a super-barcoding
-workflow. The two designs imply different outputs and different
-validation regimes.</li>
+<strong>Relationship to genome skimming.</strong> Whether the
+section remains an evaluation of Sanger markers or becomes the
+reference-library component of a plastome-based (super-barcoding)
+workflow. The two designs require different outputs and different
+validation.</li>
 <li>
-<strong>Handling of paralogy and organelle capture.</strong> Whether
-loci showing cyto-nuclear conflict are excluded from diagnostic use,
-flagged, or reported as evidence of reticulation in their own
-right.</li>
+<strong>Paralogy and organelle capture.</strong> Whether loci with
+cytonuclear conflict are excluded from diagnostic use, flagged, or
+reported as evidence of reticulation.</li>
 </ol>
 </div>
 <div class="section level2">
-<h2 id="reopening-criteria">Reopening Criteria<a class="anchor" aria-label="anchor" href="#reopening-criteria"></a>
+<h2 id="conditions-for-implementation">Conditions for Implementation<a class="anchor" aria-label="anchor" href="#conditions-for-implementation"></a>
 </h2>
-<p>The section will be reopened for implementation when all of the
-following hold.</p>
+<p>Two conditions are met in version 0.4.5: a dated and supported
+phylogeny is available (Modules 7 to 10), so monophyly per locus can be
+assessed against a reference topology, and the metadata and
+visualization modules are available (Modules 11 and 12), so diagnostic
+results can be related to conservation status and distribution. Two
+conditions remain:</p>
 <ul>
-<li>Modules 7 to 10 are complete: a dated, supported phylogenetic
-backbone exists, so that monophyly assessments per locus can be read
-against a reference topology rather than in isolation.</li>
-<li>Modules 11 and 12 are complete: the visualisation and metadata
-integration layer exists, so that diagnostic results can be presented
-against the conservation and distribution attributes they are meant to
-inform.</li>
-<li>The five open questions above are answered and recorded.</li>
-<li>A validation plan is written before any code, specifying the
-cross-validation scheme, the treatment of singleton species, and the
-negative controls.</li>
+<li>the five open questions above are answered and recorded;</li>
+<li>a validation plan is written before any code, specifying the
+cross-validation scheme, the treatment of species with a single
+accession, and the negative controls.</li>
 </ul>
-</div>
-<div class="section level2">
-<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
-</h2>
-<p>Until those conditions are met, the correct state of this section is
-empty. The entry point, the documentation and the tutorial slot are
-retained so that the structure of the package reflects the intended
-workflow, and so that a user who reaches this stage is told what is
-missing rather than handed an unvalidated result.</p>
 <p><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html">Continue
-to Tutorial 6: Function Reference &amp; Dictionary</a></p>
+to Tutorial 6: Core Pipeline Functions and Methodological
+Dictionary</a></p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<p>Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A.,
-Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker, A.,
-Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,
-Nyffeler, R., Sánchez, D., Schlumpberger, B. O., &amp; Berendsohn, W. G.
-(2021). Cactaceae at Caryophyllales.org, a dynamic online species-level
-taxonomic backbone for the family. <em>Willdenowia</em>, 51(2), 251-270.
-<a href="https://doi.org/10.3372/wi.51.51208" class="external-link uri">https://doi.org/10.3372/wi.51.51208</a></p>
-<p>Wright, E. S. (2016). Using DECIPHER v2.0 to analyze big biological
-sequence data in R. <em>The R Journal</em>, 8(1), 352-359. <a href="https://doi.org/10.32614/RJ-2016-025" class="external-link uri">https://doi.org/10.32614/RJ-2016-025</a></p>
+<ul>
+<li>Korotkova <em>et al</em>. 2021. Cactaceae at Caryophyllales.org - A
+dynamic online species-level taxonomic backbone for the family.
+<em>Willdenowia</em>, 51(2), 251–270. <a href="https://doi.org/10.3372/wi.51.51208" class="external-link uri">https://doi.org/10.3372/wi.51.51208</a>
+</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

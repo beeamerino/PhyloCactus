@@ -13,7 +13,7 @@ eliminating systematic noise while retaining phylogenetically informative nucleo
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,8 +99,8 @@ eliminating systematic noise while retaining phylogenetically informative nucleo
 
 
 <dt id="arg-min-masked-alignment-length">min_masked_alignment_length<a class="anchor" aria-label="anchor" href="#arg-min-masked-alignment-length"></a></dt>
-<dd><p>Integer. Absolute minimum number of alignment columns that must survive masking for the locus to be retained. Loci falling below this floor are reported as <code>ZERO_RETAINED</code> rather than exported as near-empty alignments. <strong>Defaults to <code>100L</code>.</strong> The floor exists to catch alignments that masking has degraded to the point of being uninformative, not to arbitrate between loci of different lengths: no marker in the reference Cactaceae dataset is shorter than 100 columns, so any masked alignment falling below that value is degenerate rather than merely short. Raising the floor can only reject markers, never admit them; a marker rejected by it is reported with <code>decision_reason</code> naming the threshold, so the effect is always visible in the screening table.</p>
-<p><strong>Scope.</strong> This floor is evaluated only in the masking branch, that is when <code>mask_alignment_regions = TRUE</code>. With masking deferred (<code>FALSE</code>, the configuration used for the outgroup) it is deliberately not applied, because it is defined against a post-masking column set that does not exist in that branch. Outgroup terminals are filtered instead by per-sequence occupancy in <code><a href="run_joint_realignment.html">run_joint_realignment()</a></code> (Module 5). Do not assume this parameter protects both branches.</p></dd>
+<dd><p>Integer. Absolute minimum number of alignment columns that must survive masking for the locus to be retained. Loci falling below this floor are reported as <code>ZERO_RETAINED</code> and are not exported. <strong>Defaults to <code>100L</code>.</strong> The floor exists to catch alignments that masking has degraded to the point of being uninformative, not to arbitrate between loci of different lengths: no marker in the reference Cactaceae dataset is shorter than 100 columns, so any masked alignment below that value is degenerate, not merely short. Raising the floor can only reject markers, never admit them; a marker rejected by it is reported with <code>decision_reason</code> naming the threshold, so the effect is always visible in the screening table.</p>
+<p><strong>Scope.</strong> This floor is evaluated only in the masking branch, that is when <code>mask_alignment_regions = TRUE</code>. With masking deferred (<code>FALSE</code>, the configuration used for the outgroup) it is not applied, because it is defined against a post-masking column set that does not exist in that branch. Outgroup terminals are filtered instead by per-sequence occupancy in <code><a href="run_joint_realignment.html">run_joint_realignment()</a></code> (Module 5). Do not assume this parameter protects both branches.</p></dd>
 
 
 <dt id="arg-preserve-iupac">preserve_iupac<a class="anchor" aria-label="anchor" href="#arg-preserve-iupac"></a></dt>
@@ -108,7 +108,7 @@ eliminating systematic noise while retaining phylogenetically informative nucleo
 
 
 <dt id="arg-fix-strand">fix_strand<a class="anchor" aria-label="anchor" href="#arg-fix-strand"></a></dt>
-<dd><p>Logical. Put every sequence of a marker on the same strand before alignment, deciding orientation against the marker's own majority. GenBank stores each record on whichever strand the submitter deposited, and <code>MAFFT</code> compares only the orientation it is given: a reverse-complemented accession is aligned anyway and contributes columns with no positional homology. Found on 2026-09-01 in the <code>rbcL</code> and <code>matK</code> accessions of <code>Portulaca oleracea</code> and <code>P. pilosa</code>, which sat at 0.51 and 0.40 observed divergence from Cactaceae where <code>P. grandiflora</code> sits at 0.030 and 0.066. Each sequence is logged with its match in both directions in <code>tables/LOG_STRAND_&lt;marker&gt;.csv</code>. Defaults to <code>TRUE</code>.</p></dd>
+<dd><p>Logical. Put every sequence of a marker on the same strand before alignment, deciding orientation against the marker's own majority. GenBank stores each record on whichever strand the submitter deposited, and <code>MAFFT</code> compares only the orientation it is given: a reverse-complemented accession is aligned anyway and contributes columns with no positional homology. Each sequence is logged with its match in both directions in <code>tables/LOG_STRAND_&lt;marker&gt;.csv</code>. Defaults to <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-mafft-exec">mafft_exec<a class="anchor" aria-label="anchor" href="#arg-mafft-exec"></a></dt>
@@ -147,13 +147,12 @@ takes effect instead of silently returning the previous alignments.</p>
 The downstream tools all accept them, and they carry information that <code>N</code> does not: an <code>R</code>
 site constrains the state to A or G, an <code>N</code> constrains nothing. There is no analytical reason
 to discard that constraint, so the pipeline does not.</p>
-<p>Ambiguity is nevertheless measured rather than assumed away. The marker summary reports
+<p>Ambiguity is nevertheless measured. The marker summary reports
 <code>mean_fraction_ambiguous_*</code> for each of the five processing stages, and <code>n_sites_ambiguous_*</code>
 for the raw input and the final alignment. The <code>raw_input</code> figures are computed before
 <code>clean_ambiguous()</code> is applied, so they record what the source records actually contained
-regardless of the policy in force. That is what makes a per-locus decision possible: a marker
-whose ambiguity is concentrated rather than diffuse can be examined on its own evidence
-instead of being subjected to a global rule.</p>
+regardless of the policy in force. A marker whose ambiguity is concentrated in a few sequences or
+sites can therefore be examined on its own evidence, without a global rule.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

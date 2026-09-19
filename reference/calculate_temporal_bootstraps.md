@@ -56,15 +56,15 @@ calculate_temporal_bootstraps(
   Character vector of terminals passed to `RAxML-NG --outgroup`, or
   `NULL` (default); multiple terminals are joined with commas.
   `RAxML-NG` writes an unrooted topology with these terminals placed
-  first, so this argument orders the output rather than rooting the
-  tree: the root is imposed downstream by
+  first, so this argument orders the output and does not root the tree:
+  the root is imposed downstream by
   [`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)
   via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at
   every stage keeps the output ordering consistent across the
   maximum-likelihood search, the bootstrap replicates and the temporal
   bootstraps. Derive it with
-  [`resolve_rooting_outgroup()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_rooting_outgroup.md)
-  rather than naming a terminal by hand.
+  [`resolve_rooting_outgroup()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_rooting_outgroup.md);
+  do not name a terminal by hand.
 
 - seed:
 
@@ -83,8 +83,8 @@ calculate_temporal_bootstraps(
 - blopt:
 
   Character. Branch length optimization method (`"nr_safe"` or
-  `"nr_fast"`). Defaults to `"nr_safe"` for robust numerical convergence
-  across partitioned alignments.
+  `"nr_fast"`). Defaults to `"nr_safe"`, the more conservative of the
+  two.
 
 - output_dir:
 

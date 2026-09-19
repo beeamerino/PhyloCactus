@@ -10,7 +10,8 @@ report_marker_group_coverage(
   input_dir,
   outgroup_pattern,
   min_coverage = 0.2,
-  out_csv = NULL
+  out_csv = NULL,
+  exclude_markers = NULL
 )
 ```
 
@@ -36,6 +37,15 @@ report_marker_group_coverage(
 
   Character or `NULL`. Path to write the table to. Defaults to `NULL`.
 
+- exclude_markers:
+
+  Character vector or `NULL`. Markers to leave out of the report, named
+  as they appear in `input_dir` without the file extension and without
+  any `Masked_` prefix. Passed through by
+  [`run_concatenation_pipeline()`](https://beeamerino.github.io/PhyloCactus/reference/run_concatenation_pipeline.md)
+  so that the coverage table describes the partitions the supermatrix
+  has, not every alignment the folder holds. Defaults to `NULL`.
+
 ## Value
 
 Invisibly, a data frame with one row per marker: alignment length,
@@ -48,11 +58,9 @@ Concatenation assumes that the loci being joined describe the same
 terminals. A locus sampled almost entirely on one side of the root
 breaks that assumption without breaking anything visible: it adds
 columns the other side cannot share, and the branch lengths spanning the
-bipartition are then estimated from the loci that remain. In the August
-2026 supermatrix, `phyC` covered 15 of 24 Anacampserotaceae terminals at
-99.3% and no Portulacaceae terminal at all; the branch subtending the
-outgroup fell from roughly 600 expected substitutions to 0.03, and the
-two deepest calibrated nodes returned their own bounds rather than an
+bipartition are then estimated from the loci that remain. The branch
+subtending the outgroup can then be badly underestimated, and the
+deepest calibrated nodes can return their own bounds instead of an
 estimate.
 
 The function reports and does not block. Whether a locus of that kind

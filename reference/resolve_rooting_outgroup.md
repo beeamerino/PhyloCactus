@@ -8,10 +8,7 @@ the root, returning them as a vector suitable for
 ## Usage
 
 ``` r
-resolve_rooting_outgroup(
-  tip_labels,
-  pattern = "^(Portulaca|Talinum|Talinella)_"
-)
+resolve_rooting_outgroup(tip_labels, pattern = "^(Talinum|Talinella)_")
 ```
 
 ## Arguments
@@ -24,8 +21,15 @@ resolve_rooting_outgroup(
 - pattern:
 
   Character. Regular expression matched against `tip_labels`. Defaults
-  to `"^(Portulaca|Talinum|Talinella)_"`, matching the outgroup lineages
-  that carry the root in the reference Cactaceae dataset.
+  to `"^(Talinum|Talinella)_"`, the Talinaceae terminals that carry the
+  root in the reference Cactaceae dataset. The default names a clade of
+  that topology, which is what
+  [`root_on_clade()`](https://beeamerino.github.io/PhyloCactus/reference/root_on_clade.md)
+  requires: the reference tree recovers Portulacaceae as sister to
+  Anacampserotaceae and the two together as sister to Cactaceae, so a
+  pattern spanning Portulacaceae and Talinaceae names a set that is not
+  a clade of the tree and cannot place the root. Set `pattern` to the
+  outgroup lineage sampled in your own dataset.
 
 ## Value
 
@@ -44,11 +48,11 @@ the root. Any calibration addressed by the MRCA of that clade then
 silently lands on the root instead. Passing the whole clade places the
 root on its stem edge and avoids both consequences.
 
-The trailing underscore in the default pattern is required rather than
-stylistic. Terminals use the underscore as binomial separator, so a bare
-`"^Portulaca"` also matches *Portulacaria* (Didiereaceae), which is
-neither Portulacaceae nor part of the intended rooting sample. The same
-reasoning is applied in
+The trailing underscore in the default pattern is required. Terminals
+use the underscore as binomial separator, so a bare `"^Portulaca"` also
+matches *Portulacaria* (Didiereaceae), which is neither Portulacaceae
+nor part of the intended rooting sample. The same reasoning is applied
+in
 [`run_marker_screening()`](https://beeamerino.github.io/PhyloCactus/reference/run_marker_screening.md)
 and
 [`run_concatenation_pipeline()`](https://beeamerino.github.io/PhyloCactus/reference/run_concatenation_pipeline.md).
@@ -56,6 +60,12 @@ and
 ## Examples
 
 ``` r
-resolve_rooting_outgroup(c("Portulaca_oleracea", "Portulacaria_afra", "Opuntia_ficus-indica"))
+# The default matches the Talinaceae terminals that carry the root in the reference dataset.
+resolve_rooting_outgroup(c("Talinum_paniculatum", "Talinella_pachypoda", "Opuntia_ficus-indica"))
+#> [1] "Talinella_pachypoda" "Talinum_paniculatum"
+
+# The trailing underscore is required: a bare "^Portulaca" also matches Portulacaria
+# (Didiereaceae), which is not Portulacaceae.
+resolve_rooting_outgroup(c("Portulaca_oleracea", "Portulacaria_afra"), pattern = "^Portulaca_")
 #> [1] "Portulaca_oleracea"
 ```

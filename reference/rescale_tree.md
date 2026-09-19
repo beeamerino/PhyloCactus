@@ -33,10 +33,7 @@ supermatrix, 477 of 2044 branches are clamped, identically at factor 100
 and at factor 1, once `numsites` is divided by the same factor as
 [`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)
 does. What the factor does change is the scale of the rate parameters
-and therefore the numerical conditioning of the optimisation.
-
-Earlier versions of this documentation described the rescaling as a
-guard against numerical underflow. That is not what it does.
+and therefore the numerical conditioning of the optimization.
 
 ## Examples
 

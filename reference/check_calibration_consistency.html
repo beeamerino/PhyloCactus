@@ -15,7 +15,7 @@ estimate."><meta property="og:image" content="https://beeamerino.github.io/Phylo
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,9 +101,9 @@ inherited from the descendant. The signature of two sources on incompatible time
 reported as a warning because the run is still valid.</p></dd>
 
 
-</dl><p>A descendant maximum below the ancestor minimum is deliberately not flagged: it only states
+</dl><p>A descendant maximum below the ancestor minimum is not flagged: it only states
 that the descendant is necessarily younger, which is the normal condition for nested bounds.</p>
-<p>Two further conditions are checked because they silently reassign bounds rather than break the
+<p>Two further conditions are checked because they silently reassign bounds without stopping the
 run: a row resolving to fewer than two terminals, which the configuration builder drops without
 reporting, and two rows resolving to the same node, which makes the later <code>min</code>/<code>max</code> pair
 overwrite the earlier one.</p>

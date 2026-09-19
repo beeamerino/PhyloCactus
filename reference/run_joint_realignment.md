@@ -14,7 +14,8 @@ run_joint_realignment(
   preserve_iupac = TRUE,
   protect_pattern = NULL,
   protect_markers = NULL,
-  rooting_pattern = NULL
+  rooting_pattern = NULL,
+  mafft_exec = "mafft"
 )
 ```
 
@@ -67,7 +68,7 @@ run_joint_realignment(
 
   Character vector or `NULL`. Names of the markers, as they appear in
   `input_dir` without the file extension, in which `protect_pattern` is
-  honoured. `NULL`, the default, applies the exemption to every marker.
+  honored. `NULL`, the default, applies the exemption to every marker.
   Naming markers restricts it to the loci where a short outgroup
   sequence is worth its gap cost, instead of retaining every fragment of
   every terminal across the whole matrix: in the August 2026 dataset
@@ -86,6 +87,15 @@ run_joint_realignment(
   subtending the outgroup collapsed from roughly 600 expected
   substitutions to 0.03. Defaults to `NULL`.
 
+- mafft_exec:
+
+  Character. System command or full path to the executable `MAFFT`
+  binary, as in
+  [`run_alignment_pipeline()`](https://beeamerino.github.io/PhyloCactus/reference/run_alignment_pipeline.md).
+  A binary configured for Stage 2 has to be configurable for Stage 5 as
+  well, or the two stages of one run align with different versions.
+  Defaults to `"mafft"`.
+
 ## Value
 
 A data frame containing compiled alignment summary statistics across all
@@ -95,8 +105,7 @@ processed markers.
 
 Re-estimates positional homology alignments (`MAFFT`) across curated
 locus FASTA files, performs alignment quality masking with `DECIPHER`,
-filters low-occupancy sequences, and generates comprehensive alignment
-statistics.
+filters low-occupancy sequences, and writes alignment statistics.
 
 This is the step that removes individual taxa from a locus without
 removing the locus itself. Sequences that entered Stage 4 as short
@@ -108,7 +117,7 @@ Passing `mask_alignment_regions = FALSE` for the outgroup in Stage 2 so
 that masking happens only once, jointly, at this stage, is preferable to
 relaxing these thresholds or resorting to `protect_pattern`, because
 retaining very short sequences inflates the gap fraction of the final
-supermatrix and can destabilise the affected terminals.
+supermatrix and can destabilize the affected terminals.
 
 ## References
 

@@ -64,23 +64,22 @@ run_alignment_pipeline(
 
   Integer. Absolute minimum number of alignment columns that must
   survive masking for the locus to be retained. Loci falling below this
-  floor are reported as `ZERO_RETAINED` rather than exported as
-  near-empty alignments. **Defaults to `100L`.** The floor exists to
-  catch alignments that masking has degraded to the point of being
-  uninformative, not to arbitrate between loci of different lengths: no
-  marker in the reference Cactaceae dataset is shorter than 100 columns,
-  so any masked alignment falling below that value is degenerate rather
-  than merely short. Raising the floor can only reject markers, never
-  admit them; a marker rejected by it is reported with `decision_reason`
-  naming the threshold, so the effect is always visible in the screening
-  table.
+  floor are reported as `ZERO_RETAINED` and are not exported. **Defaults
+  to `100L`.** The floor exists to catch alignments that masking has
+  degraded to the point of being uninformative, not to arbitrate between
+  loci of different lengths: no marker in the reference Cactaceae
+  dataset is shorter than 100 columns, so any masked alignment below
+  that value is degenerate, not merely short. Raising the floor can only
+  reject markers, never admit them; a marker rejected by it is reported
+  with `decision_reason` naming the threshold, so the effect is always
+  visible in the screening table.
 
   **Scope.** This floor is evaluated only in the masking branch, that is
   when `mask_alignment_regions = TRUE`. With masking deferred (`FALSE`,
-  the configuration used for the outgroup) it is deliberately not
-  applied, because it is defined against a post-masking column set that
-  does not exist in that branch. Outgroup terminals are filtered instead
-  by per-sequence occupancy in
+  the configuration used for the outgroup) it is not applied, because it
+  is defined against a post-masking column set that does not exist in
+  that branch. Outgroup terminals are filtered instead by per-sequence
+  occupancy in
   [`run_joint_realignment()`](https://beeamerino.github.io/PhyloCactus/reference/run_joint_realignment.md)
   (Module 5). Do not assume this parameter protects both branches.
 
@@ -105,12 +104,9 @@ run_alignment_pipeline(
   GenBank stores each record on whichever strand the submitter
   deposited, and `MAFFT` compares only the orientation it is given: a
   reverse-complemented accession is aligned anyway and contributes
-  columns with no positional homology. Found on 2026-09-01 in the `rbcL`
-  and `matK` accessions of `Portulaca oleracea` and `P. pilosa`, which
-  sat at 0.51 and 0.40 observed divergence from Cactaceae where
-  `P. grandiflora` sits at 0.030 and 0.066. Each sequence is logged with
-  its match in both directions in `tables/LOG_STRAND_<marker>.csv`.
-  Defaults to `TRUE`.
+  columns with no positional homology. Each sequence is logged with its
+  match in both directions in `tables/LOG_STRAND_<marker>.csv`. Defaults
+  to `TRUE`.
 
 - mafft_exec:
 
@@ -166,15 +162,14 @@ they carry information that `N` does not: an `R` site constrains the
 state to A or G, an `N` constrains nothing. There is no analytical
 reason to discard that constraint, so the pipeline does not.
 
-Ambiguity is nevertheless measured rather than assumed away. The marker
-summary reports `mean_fraction_ambiguous_*` for each of the five
-processing stages, and `n_sites_ambiguous_*` for the raw input and the
-final alignment. The `raw_input` figures are computed before
-`clean_ambiguous()` is applied, so they record what the source records
-actually contained regardless of the policy in force. That is what makes
-a per-locus decision possible: a marker whose ambiguity is concentrated
-rather than diffuse can be examined on its own evidence instead of being
-subjected to a global rule.
+Ambiguity is nevertheless measured. The marker summary reports
+`mean_fraction_ambiguous_*` for each of the five processing stages, and
+`n_sites_ambiguous_*` for the raw input and the final alignment. The
+`raw_input` figures are computed before `clean_ambiguous()` is applied,
+so they record what the source records actually contained regardless of
+the policy in force. A marker whose ambiguity is concentrated in a few
+sequences or sites can therefore be examined on its own evidence,
+without a global rule.
 
 ## References
 

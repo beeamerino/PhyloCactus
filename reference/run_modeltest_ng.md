@@ -1,11 +1,9 @@
 # Evaluate Nucleotide Substitution Models via ModelTest-NG
 
 Evaluates nucleotide substitution model fit per predefined supermatrix
-partition using `ModelTest-NG` (Darriba *et al.*, 2020). Selecting
-optimal substitution models under the AICc criterion controls for
-mutational rate heterogeneity across molecular locus alignments,
-mitigating systematic long-branch attraction (LBA) bias during
-maximum-likelihood inference.
+partition using `ModelTest-NG` (Darriba *et al.*, 2020). The model of
+each partition is selected under the AICc, so substitution models can
+differ among loci.
 
 ## Usage
 

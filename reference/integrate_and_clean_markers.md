@@ -1,9 +1,9 @@
 # Final Marker Integration, Taxonomic Cleaning, and Ingroup-Outgroup Partitioning
 
 Integrates independently curated ingroup and outgroup sequence datasets,
-standardizes species binomials against the authoritative taxonomic
-checklist (Korotkova et al. 2021), and exports decoupled FASTA sequence
-directories (`cleaned_markers_ingroup/`, `cleaned_markers_outgroup/`,
+standardizes species binomials against the accepted checklist (Korotkova
+et al. 2021), and exports decoupled FASTA sequence directories
+(`cleaned_markers_ingroup/`, `cleaned_markers_outgroup/`,
 `cleaned_markers_joint/`). Computes isolated molecular informativeness
 metrics (tips, length, variable sites, parsimony informative sites, GC
 content, and missingness) for the focal ingroup radiation to avoid
@@ -63,7 +63,7 @@ integrate_and_clean_markers(
 
   Named character vector or `NULL`. Renames outgroup markers onto their
   ingroup counterpart before the two sets are joined, as
-  `c(trnL = "trnL_trnF")`. Names and values are normalised the same way
+  `c(trnL = "trnL_trnF")`. Names and values are normalized the same way
   the filenames are, so either spelling works.
 
   The two `phylotaR` runs cluster independently, so the same region can
@@ -81,13 +81,10 @@ integrate_and_clean_markers(
   [`run_marker_screening()`](https://beeamerino.github.io/PhyloCactus/reference/run_marker_screening.md)
   rejected and that are brought back into the joint dataset because they
   connect the outgroup to the ingroup, read from `readmit_dir`. This is
-  a different question from the one Module 3 answers, and it is stated
-  as such: `trnT-psbD` resolves the ingroup poorly, with 50 sequences
-  over 1008 Cactaceae terminals, and carries the best outgroup coverage
-  of the dataset, 49 *Portulaca* accessions of 1347 bp against the five
-  or six terminals of overlap the retained loci provide. Retaining it
-  for ingroup resolution would be wrong; retaining it for rooting is the
-  point. Defaults to `NULL`.
+  a different question from the one Module 3 answers. A marker brought
+  back for this reason must be homologous on both sides; check
+  `TABLE_marker_homology_check.csv` (`homology_check = TRUE`) before
+  readmitting it. Defaults to `NULL`.
 
 - readmit_dir:
 
@@ -115,16 +112,31 @@ integrate_and_clean_markers(
 - homology_k20_min, homology_k10_min:
 
   Numeric. A marker is flagged `no_detectable_homology` when it falls
-  below **both**, at `k = 20` and `k = 10` respectively. Genuine
-  counterparts in this dataset return 0.28 to 0.60 at `k = 20`; the two
-  false pairs found on 2026-09-01 returned 0.000 (`pepC`, two PEPC
-  paralogues) and 0.039 (`trnT-psbD`, ingroup median 598 bp against
-  outgroup 1347 bp). Default to `0.05` and `0.15`.
+  below **both**, at `k = 20` and `k = 10` respectively. In the
+  reference dataset `trnL_trnF`, `matK`, `phyC` and `rbcL` return 0.26
+  to 0.59 at `k = 20`; `trnT-psbD` returns 0.040 (ingroup median 605 bp
+  against outgroup 1347 bp). Default to `0.05` and `0.15`.
 
 ## Value
 
-A data frame containing the comprehensive marker summary with decoupled
-ingroup and joint metrics.
+A data frame with the marker summary, with separate ingroup and joint
+metrics.
+
+## Alias collisions
+
+`marker_aliases` can point two source files at the same `marker_key`.
+When both carry a record for the same species, that species appears
+twice under one FASTA header in the exported marker, and the downstream
+matrix assembly resolves the duplication by file order, silently and in
+favor of whichever record sorts first, which is not necessarily the more
+informative one. The duplicates are therefore resolved here by an
+explicit rule: the record with the greatest number of non-gap sites is
+retained, ties are broken on the source file name so that the outcome
+does not depend on the order in which the directory was listed, every
+competing record is written to
+`tables/TABLE_alias_collisions_resolved.csv` with its source file, its
+length and whether it was retained, and a warning names the affected
+headers.
 
 ## References
 

@@ -9,7 +9,7 @@ warns when either side is empty."><meta property="og:image" content="https://bee
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,8 @@ warns when either side is empty.</p>
 <span>  <span class="va">input_dir</span>,</span>
 <span>  <span class="va">outgroup_pattern</span>,</span>
 <span>  min_coverage <span class="op">=</span> <span class="fl">0.2</span>,</span>
-<span>  out_csv <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  out_csv <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  exclude_markers <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -79,6 +80,13 @@ counts as covered by that marker. Defaults to <code>0.2</code>.</p></dd>
 <dt id="arg-out-csv">out_csv<a class="anchor" aria-label="anchor" href="#arg-out-csv"></a></dt>
 <dd><p>Character or <code>NULL</code>. Path to write the table to. Defaults to <code>NULL</code>.</p></dd>
 
+
+<dt id="arg-exclude-markers">exclude_markers<a class="anchor" aria-label="anchor" href="#arg-exclude-markers"></a></dt>
+<dd><p>Character vector or <code>NULL</code>. Markers to leave out of the report, named as
+they appear in <code>input_dir</code> without the file extension and without any <code>Masked_</code> prefix. Passed
+through by <code><a href="run_concatenation_pipeline.html">run_concatenation_pipeline()</a></code> so that the coverage table describes the partitions
+the supermatrix has, not every alignment the folder holds. Defaults to <code>NULL</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -90,10 +98,9 @@ covered terminals on each side, and the median coverage of each side.</p>
     <p>Concatenation assumes that the loci being joined describe the same terminals. A locus sampled
 almost entirely on one side of the root breaks that assumption without breaking anything
 visible: it adds columns the other side cannot share, and the branch lengths spanning the
-bipartition are then estimated from the loci that remain. In the August 2026 supermatrix,
-<code>phyC</code> covered 15 of 24 Anacampserotaceae terminals at 99.3% and no Portulacaceae terminal at
-all; the branch subtending the outgroup fell from roughly 600 expected substitutions to 0.03,
-and the two deepest calibrated nodes returned their own bounds rather than an estimate.</p>
+bipartition are then estimated from the loci that remain. The branch subtending the outgroup
+can then be badly underestimated, and the deepest calibrated nodes can return their own
+bounds instead of an estimate.</p>
 <p>The function reports and does not block. Whether a locus of that kind belongs in a given matrix
 depends on which analysis the matrix is for: a nuclear locus with no outgroup coverage is
 unusable for dating and valuable for species discrimination.</p>

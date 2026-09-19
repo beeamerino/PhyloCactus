@@ -31,15 +31,14 @@ infer_gene_trees(
 - output_dir:
 
   Character. Root destination directory path to store Newick tree files
-  and monophyly audit tables.
+  and monophyly tables.
 
 - include_outgroup:
 
   Logical. Include outgroup taxa in single-locus gene tree
-  reconstruction? Defaults to `FALSE` to avoid Long-Branch Attraction
-  (LBA) artifacts when evaluating species monophyly within the ingroup
-  radiation. Set to `TRUE` when preparing unrooted gene trees for
-  `ASTRAL-III`.
+  reconstruction? Defaults to `FALSE`, so that species monophyly is
+  assessed within the ingroup. Set to `TRUE` when preparing unrooted
+  gene trees for `ASTRAL-III`.
 
 - method:
 
@@ -57,8 +56,8 @@ infer_gene_trees(
 
 - checklist_path:
 
-  Character. Path to accepted botanical checklist CSV (e.g.,
-  `CactaceaeFullList_accepted.csv`).
+  Character. Path to the accepted botanical checklist (e.g.,
+  `CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`).
 
 ## Value
 

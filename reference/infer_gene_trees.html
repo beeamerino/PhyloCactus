@@ -11,7 +11,7 @@ all multi-accession species, and prepares gene tree collections for coalescent a
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,11 +72,11 @@ all multi-accession species, and prepares gene tree collections for coalescent a
 
 
 <dt id="arg-output-dir">output_dir<a class="anchor" aria-label="anchor" href="#arg-output-dir"></a></dt>
-<dd><p>Character. Root destination directory path to store Newick tree files and monophyly audit tables.</p></dd>
+<dd><p>Character. Root destination directory path to store Newick tree files and monophyly tables.</p></dd>
 
 
 <dt id="arg-include-outgroup">include_outgroup<a class="anchor" aria-label="anchor" href="#arg-include-outgroup"></a></dt>
-<dd><p>Logical. Include outgroup taxa in single-locus gene tree reconstruction? Defaults to <code>FALSE</code> to avoid Long-Branch Attraction (LBA) artifacts when evaluating species monophyly within the ingroup radiation. Set to <code>TRUE</code> when preparing unrooted gene trees for <code>ASTRAL-III</code>.</p></dd>
+<dd><p>Logical. Include outgroup taxa in single-locus gene tree reconstruction? Defaults to <code>FALSE</code>, so that species monophyly is assessed within the ingroup. Set to <code>TRUE</code> when preparing unrooted gene trees for <code>ASTRAL-III</code>.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
@@ -92,7 +92,7 @@ all multi-accession species, and prepares gene tree collections for coalescent a
 
 
 <dt id="arg-checklist-path">checklist_path<a class="anchor" aria-label="anchor" href="#arg-checklist-path"></a></dt>
-<dd><p>Character. Path to accepted botanical checklist CSV (e.g., <code>CactaceaeFullList_accepted.csv</code>).</p></dd>
+<dd><p>Character. Path to the accepted botanical checklist (e.g., <code>CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">

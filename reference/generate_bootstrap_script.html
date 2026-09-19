@@ -13,7 +13,7 @@ to optimize disk I/O, dynamic per-task seed multiplication for statistical indep
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,7 +98,7 @@ to optimize disk I/O, dynamic per-task seed multiplication for statistical indep
 
 
 <dt id="arg-outgroup">outgroup<a class="anchor" aria-label="anchor" href="#arg-outgroup"></a></dt>
-<dd><p>Character vector of terminals passed to <code>RAxML-NG --outgroup</code>, or <code>NULL</code> (default); multiple terminals are joined with commas. <code>RAxML-NG</code> writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by <code><a href="automate_treePL.html">automate_treePL()</a></code> via <code>ape::root(..., resolve.root = TRUE)</code>. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with <code><a href="resolve_rooting_outgroup.html">resolve_rooting_outgroup()</a></code> rather than naming a terminal by hand.</p></dd>
+<dd><p>Character vector of terminals passed to <code>RAxML-NG --outgroup</code>, or <code>NULL</code> (default); multiple terminals are joined with commas. <code>RAxML-NG</code> writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by <code><a href="automate_treePL.html">automate_treePL()</a></code> via <code>ape::root(..., resolve.root = TRUE)</code>. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with <code><a href="resolve_rooting_outgroup.html">resolve_rooting_outgroup()</a></code>; do not name a terminal by hand.</p></dd>
 
 
 <dt id="arg-bs-per-rep">bs_per_rep<a class="anchor" aria-label="anchor" href="#arg-bs-per-rep"></a></dt>
@@ -108,8 +108,8 @@ to optimize disk I/O, dynamic per-task seed multiplication for statistical indep
 <dt id="arg-max-reps">max_reps<a class="anchor" aria-label="anchor" href="#arg-max-reps"></a></dt>
 <dd><p>Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (<code>1-max_reps</code>). Defaults to <code>2</code>,
 giving a total array target of <code>bs_per_rep * max_reps = 1000</code> bootstrap trees. This provides a safety margin over the autoMRE
-convergence point observed in a production run of this exact dataset (1023 taxa, 11 partitions), which converged (<code>bs-cutoff = 0.03</code>,
-FBP) after 600 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
+convergence point observed in the reference run (1024 taxa, 11 partitions), which converged (<code>bs-cutoff = 0.03</code>,
+FBP) after 650 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
 sampling scheme. Always confirm convergence with <code><a href="check_bs_convergence.html">check_bs_convergence()</a></code> on the collected trees (via <code><a href="collect_bootstraps.html">collect_bootstraps()</a></code>) rather
 than assuming <code>bs_per_rep * max_reps</code> is sufficient; increase <code>max_reps</code> and re-run <code><a href="collect_bootstraps.html">collect_bootstraps()</a></code> if it is not.</p></dd>
 
@@ -185,8 +185,8 @@ than assuming <code>bs_per_rep * max_reps</code> is sufficient; increase <code>m
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The default <code>threads_per_worker = 4L</code> is configured to optimize throughput on multi-core compute nodes. In a production run of this workload
-(1023 taxa, 11 partitions), using <code>--threads 40 --workers 10</code> (4 threads per worker) on an AMD EPYC node provided efficient per-worker
+    <p>The default <code>threads_per_worker = 4L</code> is configured to optimize throughput on multi-core compute nodes. In a production run on the reference dataset,
+using <code>--threads 40 --workers 10</code> (4 threads per worker) on an AMD EPYC node provided efficient per-worker
 memory and CPU allocation. This ratio is dataset- and hardware-dependent (it trades per-worker single-tree search speed against the number of trees searched in
 parallel); if you migrate to different node hardware or a markedly different supermatrix size, re-validate it
 empirically with a short trial run before committing a full job array to it.</p>

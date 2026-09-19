@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,48 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.5" id="phylocactus-045">PhyloCactus 0.4.5<a class="anchor" aria-label="anchor" href="#phylocactus-045"></a></h2>
+<ul><li>Corrected the default rooting pattern of <code><a href="../reference/resolve_rooting_outgroup.html">resolve_rooting_outgroup()</a></code> to the Talinaceae terminals that form a clade of the reference topology; the previous default spanned Portulacaceae and Talinaceae, which is not a clade of that tree and could not root it.</li>
+<li>Resolved marker alias collisions in <code><a href="../reference/integrate_and_clean_markers.html">integrate_and_clean_markers()</a></code> with a declared rule and an exported record, and made <code><a href="../reference/run_concatenation_pipeline.html">run_concatenation_pipeline()</a></code> abort on duplicated terminal names instead of silently keeping the first row.</li>
+<li>
+<code><a href="../reference/integrate_publication_tree.html">integrate_publication_tree()</a></code> now reads chronograms written in NEXUS, which is the format <code>TreeAnnotator</code> produces.</li>
+<li>
+<code><a href="../reference/run_joint_realignment.html">run_joint_realignment()</a></code> accepts <code>mafft_exec</code>, matching <code><a href="../reference/run_alignment_pipeline.html">run_alignment_pipeline()</a></code>.</li>
+<li>The saturation screen reports a degenerate regression as such instead of flagging it as saturation.</li>
+<li>
+<code><a href="../reference/report_marker_group_coverage.html">report_marker_group_coverage()</a></code> now runs after <code>exclude_markers</code>, so its table describes the partitions the supermatrix actually contains.</li>
+<li>Corrected published counts in the README, the vignettes and the function documentation: manual exclusions, <code>phyC</code> outgroup coverage, the scope of the topological constraint scaffold, the scope of the <code>ASTRAL-III</code> step, and the name of the distributed checklist file.</li>
+<li>Declared the root of the chronogram as uncalibrated and documented the deactivated <code>ACPT_root</code> bound.</li>
+<li>Regenerated the reference run and republished every distributed artifact with 1,024 terminal tips and 12,809 sites across 11 partitions.</li>
+<li>The reference chronogram is dated at <code>smooth = 1e-12</code>, the lowest cross-validation error on a grid from 1e3 to 1e-14. The error curve levels off below about 1e-06, so this value is one of several that fit the data about equally well. <code><a href="../reference/run_treePL_cv.html">run_treePL_cv()</a></code> now classifies a cross-validation curve as an interior minimum, an edge of the grid or a plateau, and reports the result; the smoothing sensitivity table of Tutorial 2 spans the plateau.</li>
+<li>
+<code><a href="../reference/run_treePL_cv.html">run_treePL_cv()</a></code> and <code><a href="../reference/automate_treePL.html">automate_treePL()</a></code> gain <code>cv_nthreads</code>, the number of threads used for cross-validation (default <code>1L</code>), and their default <code>cvstop</code> is lowered from 1e-8 to 1e-14.</li>
+<li>The tree-space figure of <code><a href="../reference/validate_phylogenies.html">validate_phylogenies()</a></code> identifies each tree by color and shape in a single legend labelled by source, with <em>et al.</em> in italics, and no longer draws point labels inside the panels. Labels are set with the new <code>tree_labels</code> argument. <code>ggrepel</code> is no longer a dependency.</li>
+<li>Fixed the edge test of the cross-validation curve. It compared the selected smoothing value with the ends of the grid through <code><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal()</a></code>, whose absolute tolerance treats any two values below about 1e-8 as equal, so a minimum at 1e-12 on a grid ending at 1e-14 was reported as an edge. The position of the minimum is now read from the sorted grid.</li>
+<li>When <code><a href="../reference/automate_treePL.html">automate_treePL()</a></code> resumes from a cached maximum-likelihood run, it classifies the cross-validation curve on disk and reports its shape; a file it cannot classify is reported and does not stop the run.</li>
+<li>
+<code>phylocactus_table_tree_distances.csv</code> as first released in 0.4.5 was the 0.4.4 table: Tutorial 4 read the focal tree from the installed package, which still held the 0.4.4 chronogram. The table is replaced with distances computed on the 0.4.5 chronogram, and Tutorial 4 now takes the focal tree from the run (<code>8_Dating/dated_summary_hpd.tree</code>), falling back to the distributed chronogram when that file is absent.</li>
+<li>The full-size tree and chronogram in <code>extended_trees/</code> are replaced with those of the 0.4.5 run (1,024 tips; the previous files, from 0.4.4, had 1,023).</li>
+<li>
+<code>phylocactus_table_species.csv</code> is regenerated from a new IUCN Red List query (version 2026-1). One record changes: the assessment details of <em>Stenocactus coptonogonus</em>, previously empty, are now filled; categories and counts are unchanged.</li>
+<li>Documentation corrections: the IUCN token instructions pointed to the retired API v3 and now use <code><a href="https://docs.ropensci.org/rredlist/reference/rl_use_iucn.html" class="external-link">rredlist::rl_use_iucn()</a></code>; the description of <code>ASTRAL-III</code> and of the effect of rooting in <code><a href="../reference/validate_phylogenies.html">validate_phylogenies()</a></code> (distances and tree space are computed on unrooted trees); the reference for the Different Phylogenetic Information distance (Smith 2020, <em>Bioinformatics</em>) and the DOI of Wright (2024); the page size of the full-size tree figures; the links to <code>extended_trees/</code>, which pointed to a branch that does not exist. The tutorials were also edited for concision.</li>
+<li>
+<code>DESCRIPTION</code> declares <code>biocViews:</code>, so that <code>remotes</code> resolves the Bioconductor dependencies.</li>
+<li>Added <code><a href="../reference/send_run_notification.html">send_run_notification()</a></code> and a <code>notify</code> argument to <code><a href="../reference/automate_treePL.html">automate_treePL()</a></code>, which emails the status, timings and output paths when a local dating run ends. Credentials live outside the package and a failed notification never fails the run.</li>
+<li>
+<code><a href="../reference/run_alignment_pipeline.html">run_alignment_pipeline()</a></code> puts every sequence of a marker on the same strand before alignment (<code>fix_strand</code>), because some GenBank accessions are deposited as reverse complements.</li>
+<li>
+<code><a href="../reference/run_marker_screening.html">run_marker_screening()</a></code> flags markers whose ingroup and outgroup sequences share almost no k-mers (<code>no_detectable_homology</code>): two sequences can carry the same gene name and come from different regions.</li>
+<li>Clusters whose GenBank description matches no rule in <code>genes_map.csv</code> are reported with a warning instead of being dropped without notice.</li>
+<li>The bootstrap replicates are written without a support metric; FBP or TBE is chosen when the replicates are summarized with <code><a href="../reference/map_branch_supports.html">map_branch_supports()</a></code>.</li>
+<li>
+<code>treePL</code> runs report when the gradient optimization did not improve on the simulated annealing, in which case the chronogram is not an optimized solution.</li>
+<li>The documentation of <code><a href="../reference/rescale_tree.html">rescale_tree()</a></code> states what the scaling factor changes: the scale of the rate parameters and the numerical conditioning of the optimization, not which branches <code>treePL</code> shortens.</li>
+<li>
+<code><a href="../reference/evaluate_dna_barcoding.html">evaluate_dna_barcoding()</a></code> is a placeholder that signals an error. The DNA barcoding section is under construction; its scope and open questions are set out in Tutorial 5.</li>
+<li>The <code>checklist_path</code> argument of <code><a href="../reference/infer_gene_trees.html">infer_gene_trees()</a></code> is retained and remains reserved for the molecular diagnostic section, which is still under construction.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.4" id="phylocactus-044">PhyloCactus 0.4.4<a class="anchor" aria-label="anchor" href="#phylocactus-044"></a></h2>
 <ul><li>Updated outgroup sampling in data preparation and tree rooting to include Talinaceae (<em>Talinum</em>, <em>Talinella</em>) alongside Portulacaceae and Anacampserotaceae.</li>
 <li>Standardized primary clade support metric to Felsenstein Bootstrap Proportions (FBP) across documentation, functions, and collapsing workflows (<code><a href="../reference/integrate_publication_tree.html">integrate_publication_tree()</a></code>), retaining Transfer Bootstrap Expectation (TBE) as a complementary diagnostic metric.</li>
@@ -48,7 +90,8 @@
 <li>Retired legacy <code>run_treePL()</code> wrapper function.</li>
 <li>Improved documentation, metadata manifests, and error handling across all analytical modules.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

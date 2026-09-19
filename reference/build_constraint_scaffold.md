@@ -1,10 +1,10 @@
 # Synthesize Multifurcating Monophyly Constraint Scaffold
 
 Constructs a Newick multifurcating constraint tree enforcing monophyly
-of established higher taxonomic ranks (e.g., subfamilies, tribes).
-Constrained maximum-likelihood searches restrict branch topology
-exploration to scientifically verified monophyletic backbone clades,
-preventing aberrant tree topologies when analyzing sparse supermatrices.
+of established higher taxonomic ranks (e.g., subfamilies, tribes). The
+constrained search keeps these clades monophyletic and estimates all
+other relationships from the data, which limits the effect of sparse and
+uneven sampling on the backbone.
 
 ## Usage
 

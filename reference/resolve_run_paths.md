@@ -2,9 +2,9 @@
 
 Reconstructs the absolute path of every file a `PhyloCactus` inference
 run produces, given only the output directory, the run prefix and the
-supermatrix location. Because each path is derived rather than carried
-in memory, any stage of the pipeline can be executed in a fresh R
-session without first re-running the stages before it.
+supermatrix location. Because each path is derived, not carried in
+memory, any stage of the pipeline can be executed in a fresh R session
+without first re-running the stages before it.
 
 ## Usage
 
@@ -64,18 +64,17 @@ reporting which files are present.
 The pipeline is a sequence of stages whose outputs feed the next, and a
 linear script holds those outputs in variables such as `analysed_phy` or
 `ml_results`. Restarting R and resuming at a later stage clears those
-variables, and the stage fails on a missing object rather than on a
-missing file. Hard-coding the filenames instead removes the dependency
-on session state but reintroduces the problem this naming convention
-exists to solve: the same literal name is retyped at a dozen call sites,
-drifts out of step with the run prefix, and continues to be read after
-it has stopped describing its contents.
+variables, and the stage fails on a missing object even when the file
+exists. Hard-coding the filenames instead removes the dependency on
+session state but reintroduces the problem this naming convention exists
+to solve: the same literal name is retyped at a dozen call sites, drifts
+out of step with the run prefix, and continues to be read after it has
+stopped describing its contents.
 
 Deriving the paths from the convention keeps a single definition of
 every filename while leaving each stage independently runnable. Two
-entries are resolved by inspection rather than by convention alone,
-because they record facts about the run rather than choices about
-naming:
+entries are resolved by inspecting the run directory, because they
+record facts about the run, not naming choices:
 
 - `analysed_phy` is the reduced PHYLIP when `RAxML-NG` collapsed
   identical terminals during validation, and the supermatrix itself when

@@ -33,7 +33,7 @@ The tree path is read from the `treefile` line of `cfg_file` and checked
 for rootedness before the binary is invoked, because `treePL` fails
 opaquely on an unrooted tree. When the configuration declares no
 `treefile`, or the declared path cannot be resolved, the check is
-skipped with a warning rather than blocking the run.
+skipped with a warning and the run continues.
 
 ## References
 

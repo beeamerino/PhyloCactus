@@ -11,7 +11,7 @@ providing empirical confidence intervals for node ages without introducing topol
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,7 +93,7 @@ providing empirical confidence intervals for node ages without introducing topol
 
 
 <dt id="arg-outgroup">outgroup<a class="anchor" aria-label="anchor" href="#arg-outgroup"></a></dt>
-<dd><p>Character vector of terminals passed to <code>RAxML-NG --outgroup</code>, or <code>NULL</code> (default); multiple terminals are joined with commas. <code>RAxML-NG</code> writes an unrooted topology with these terminals placed first, so this argument orders the output rather than rooting the tree: the root is imposed downstream by <code><a href="automate_treePL.html">automate_treePL()</a></code> via <code>ape::root(..., resolve.root = TRUE)</code>. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with <code><a href="resolve_rooting_outgroup.html">resolve_rooting_outgroup()</a></code> rather than naming a terminal by hand.</p></dd>
+<dd><p>Character vector of terminals passed to <code>RAxML-NG --outgroup</code>, or <code>NULL</code> (default); multiple terminals are joined with commas. <code>RAxML-NG</code> writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by <code><a href="automate_treePL.html">automate_treePL()</a></code> via <code>ape::root(..., resolve.root = TRUE)</code>. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with <code><a href="resolve_rooting_outgroup.html">resolve_rooting_outgroup()</a></code>; do not name a terminal by hand.</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
@@ -109,7 +109,7 @@ providing empirical confidence intervals for node ages without introducing topol
 
 
 <dt id="arg-blopt">blopt<a class="anchor" aria-label="anchor" href="#arg-blopt"></a></dt>
-<dd><p>Character. Branch length optimization method (<code>"nr_safe"</code> or <code>"nr_fast"</code>). Defaults to <code>"nr_safe"</code> for robust numerical convergence across partitioned alignments.</p></dd>
+<dd><p>Character. Branch length optimization method (<code>"nr_safe"</code> or <code>"nr_fast"</code>). Defaults to <code>"nr_safe"</code>, the more conservative of the two.</p></dd>
 
 
 <dt id="arg-output-dir">output_dir<a class="anchor" aria-label="anchor" href="#arg-output-dir"></a></dt>

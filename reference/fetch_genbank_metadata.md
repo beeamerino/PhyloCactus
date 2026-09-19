@@ -1,9 +1,9 @@
 # Fetch GenBank Sequence Metadata via NCBI Entrez Utilities
 
-Queries NCBI Entrez Utilities to retrieve sequence lengths, organism
-taxonomy, publication titles, and accession IDs for a collection of
-GenBank sequence identifiers (SIDs). Metadata retrieval enriches raw
-sequence clusters with verifiable audit data.
+Retrieves the organism name and the definition line of each GenBank
+sequence identifier (SID) with
+[`ape::read.GenBank()`](https://rdrr.io/pkg/ape/man/read.GenBank.html),
+in batches with retries, and caches the result.
 
 ## Usage
 
@@ -45,13 +45,12 @@ fetch_genbank_metadata(
 
 - force_download:
 
-  Logical. Force fresh Entrez queries instead of loading local cache?
-  Defaults to `FALSE`.
+  Logical. Not used in this version: records already in `cache_file` are
+  always reused. Defaults to `FALSE`.
 
 ## Value
 
-A data frame containing fetched GenBank metadata fields for each
-requested sequence ID.
+A data frame with columns `sid`, `Species_gb` and `Description_gb`.
 
 ## Examples
 
