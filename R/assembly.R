@@ -87,69 +87,10 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   
   log_message("Inputs loaded successfully.")
   
-  # Setup / Load phylotaR
-  phylota <- tryCatch({
-    if (force_download) stop("Force download enabled")
-    phylotaR::read_phylota(wd_path)
-  }, error = function(e) {
-    log_message("No valid phylota object found or force_download=TRUE. Running setup and phylotaR pipeline...")
-    if (is.null(ncbi_dr)) {
-      env_blast <- Sys.getenv("BLAST_PATH")
-      if (env_blast != "") {
-        ncbi_dr <- env_blast
-      } else {
-        blastn_path <- Sys.which("blastn")
-        if (blastn_path != "") ncbi_dr <- dirname(blastn_path)
-      }
-    }
-    
-    phylotaR::setup(
-      wd = wd_path, txid = preferred_parent, ncbi_dr = ncbi_dr, v = TRUE, ncps = 1, mncvrg = 80,
-      srch_trm = paste0(
-        "NOT predicted[TI] ",
-        "NOT \"whole genome shotgun\"[TI] ",
-        "NOT unverified[TI] ",
-        "NOT \"synthetic construct\"[Organism] ",
-        "NOT refseq[filter] ",
-        "NOT TSA[Keyword] ",
-        "NOT \"sp.\"[TI] ",
-        "NOT \"sp.\"[Organism] ",
-        "NOT \"sp\"[Organism] ",
-        "NOT \"sp\"[Organism] ",
-        "NOT \"aff.\"[TI] ",
-        "NOT \"aff\"[Organism] ",
-        "NOT \"cf.\"[TI] ",
-        "NOT \"cf\"[Organism] ",
-        "NOT \"var.\"[TI] ",
-        "NOT \"var\"[TI] ",
-        "NOT \"var\"[Organism] ",
-        "NOT \"var.\"[Organism] ",
-        "NOT \"variety\"[TI] ",
-        "NOT \"subsp.\"[TI] ",
-        "NOT \"subsp\"[TI] ",
-        "NOT \"subsp.\"[Organism] ",
-        "NOT \"subsp\"[Organism] ",
-        "NOT \"subspecies\"[Organism] ",
-        "NOT \"x\"[Organism] ",
-        "NOT \" x \"[Organism]"
-      )
-    )
-    
-    log_message("Executing phylotaR::run()...")
-    tryCatch({
-      phylotaR::run(wd = wd_path)
-    }, error = function(erun) {
-      log_message("Error in phylotaR::run(): ", erun$message)
-    })
-    
-    log_message("Attempting to load phylota object after run()...")
-    tryCatch({
-      phylotaR::read_phylota(wd_path)
-    }, error = function(e2) {
-      log_message("read_phylota error: ", e2$message)
-      stop("Could not load phylota object from ", wd_path)
-    })
-  })
+  # Setup / Load phylotaR. Shared with assemble_barcoding_dataset(), so that both branches make the
+  # same phylotaR call and share the same raw workspace, whichever of them runs first.
+  phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = preferred_parent, ncbi_dr = ncbi_dr,
+                                    force_download = force_download, log_message = log_message)
   
   # 8. SPECIES REDUCTION AND CLUSTER FILTERING
   species_reduced <- phylotaR::drop_by_rank(phylota, rnk = "species", n = 1)
@@ -175,26 +116,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   
   seed_meta <- cp_fetch_seed_metadata(smmry_sel_enriched$Seed, log_message = log_message)
 
-  smmry_sel_enriched <- smmry_sel_enriched |>
-    dplyr::mutate(
-      Species = seed_meta$Species,
-      Description = cp_normalize_marker(seed_meta$Description)
-    ) |>
-    dplyr::mutate(
-      Genes_raw = stringr::str_extract_all(Description, pattern),
-      Genes_text = dplyr::if_else(
-        is.na(Description), NA_character_,
-        purrr::map_chr(Genes_raw, ~ paste(unique(cp_normalize_marker(.x)), collapse = ", "))
-      ),
-      top_marker = cp_normalize_marker(top_marker)
-    ) |>
-    dplyr::select(-Genes_raw) |>
-    dplyr::left_join(gene_lookup, by = c("Genes_text" = "search_gene")) |>
-    dplyr::left_join(marker_lookup, by = c("top_marker" = "search_marker")) |>
-    dplyr::mutate(
-      Gene_std = ifelse(is.na(Gene_std), Genes_text, Gene_std),
-      Marker_std = ifelse(is.na(Marker_std), top_marker, Marker_std)
-    )
+  smmry_sel_enriched <- .cp_enrich_cluster_summary(smmry_sel_enriched, seed_meta, pattern, gene_lookup, marker_lookup)
   
   readr::write_csv(tibble::as_tibble(smmry_sel_enriched), path_table_cluster_summary_raw)
   
@@ -332,20 +254,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   smmry_final_enriched <- smmry_final |> dplyr::left_join(cluster_gene_summary_final, by = c("ID" = "cluster_id"))
   
   seed_meta_final <- cp_fetch_seed_metadata(smmry_final_enriched$Seed, log_message = log_message)
-  smmry_final_enriched <- smmry_final_enriched |>
-    dplyr::mutate(Species = seed_meta_final$Species, Description = cp_normalize_marker(seed_meta_final$Description)) |>
-    dplyr::mutate(
-      Genes_raw = stringr::str_extract_all(Description, pattern),
-      Genes_text = dplyr::if_else(
-        is.na(Description), NA_character_,
-        purrr::map_chr(Genes_raw, ~ paste(unique(cp_normalize_marker(.x)), collapse = ", "))
-      ),
-      top_marker = cp_normalize_marker(top_marker)
-    ) |>
-    dplyr::select(-Genes_raw) |>
-    dplyr::left_join(gene_lookup, by = c("Genes_text" = "search_gene")) |>
-    dplyr::left_join(marker_lookup, by = c("top_marker" = "search_marker")) |>
-    dplyr::mutate(Gene_std = ifelse(is.na(Gene_std), Genes_text, Gene_std), Marker_std = ifelse(is.na(Marker_std), top_marker, Marker_std))
+  smmry_final_enriched <- .cp_enrich_cluster_summary(smmry_final_enriched, seed_meta_final, pattern, gene_lookup, marker_lookup)
   
   species_sid_matrix_final <- df_species_clusters_metadata_final |> dplyr::select(species, cluster_id, sid) |> tidyr::pivot_wider(names_from = cluster_id, names_prefix = "cid_", values_from = sid, values_fill = "")
   species_genes_final <- df_species_clusters_metadata_final |> dplyr::group_by(species) |> dplyr::summarise(Genes_text = paste(unique(Genes_text), collapse = "; "), .groups = "drop")
@@ -940,4 +849,127 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
     }
     phylotaR::write_sqs(phylota_obj, sid = sids, sq_nm = scientific_names, outfile = file.path(outdir, paste0("CLUSTER_", cid, ".fasta")))
   }
+}
+
+# ------------------------------------------------------------------------------
+# Shared by assemble_ingroup_phylotar() and assemble_barcoding_dataset(). Moved here in 0.5.0
+# without changing their behaviour, so that the phylogeny and the molecular diagnostic branch make
+# the same phylotaR call on the same workspace and assign clusters to loci with the same code.
+# ------------------------------------------------------------------------------
+
+#' phylotaR search term shared by both branches
+#'
+#' Excludes predicted, unverified, whole-genome shotgun, synthetic, RefSeq and TSA records, and
+#' records named at open nomenclature (sp., aff., cf.), below species (var., subsp.) or as hybrids.
+#' @return Character string passed to `phylotaR::setup(srch_trm = )`.
+#' @noRd
+.phylotar_search_terms <- function() {
+  paste0(
+    "NOT predicted[TI] ",
+    "NOT \"whole genome shotgun\"[TI] ",
+    "NOT unverified[TI] ",
+    "NOT \"synthetic construct\"[Organism] ",
+    "NOT refseq[filter] ",
+    "NOT TSA[Keyword] ",
+    "NOT \"sp.\"[TI] ",
+    "NOT \"sp.\"[Organism] ",
+    "NOT \"sp\"[Organism] ",
+    "NOT \"sp\"[Organism] ",
+    "NOT \"aff.\"[TI] ",
+    "NOT \"aff\"[Organism] ",
+    "NOT \"cf.\"[TI] ",
+    "NOT \"cf\"[Organism] ",
+    "NOT \"var.\"[TI] ",
+    "NOT \"var\"[TI] ",
+    "NOT \"var\"[Organism] ",
+    "NOT \"var.\"[Organism] ",
+    "NOT \"variety\"[TI] ",
+    "NOT \"subsp.\"[TI] ",
+    "NOT \"subsp\"[TI] ",
+    "NOT \"subsp.\"[Organism] ",
+    "NOT \"subsp\"[Organism] ",
+    "NOT \"subspecies\"[Organism] ",
+    "NOT \"x\"[Organism] ",
+    "NOT \" x \"[Organism]"
+  )
+}
+
+#' Read a phylotaR workspace, or mine GenBank into it when it does not exist
+#'
+#' Reads the workspace with `phylotaR::read_phylota()`. When that fails, or when
+#' `force_download = TRUE`, runs `phylotaR::setup()` and `phylotaR::run()` with the parameters of
+#' the phylogeny and reads the result. The reader and the two pipeline steps are arguments only so
+#' that the tests can stand in for them.
+#' @noRd
+.phylotar_load_or_mine <- function(wd_path, preferred_parent = "3593", ncbi_dr = NULL,
+                                   force_download = FALSE, log_message = function(...) {},
+                                   reader = phylotaR::read_phylota,
+                                   setup_fn = phylotaR::setup,
+                                   run_fn = phylotaR::run) {
+  tryCatch({
+    if (force_download) stop("Force download enabled")
+    reader(wd_path)
+  }, error = function(e) {
+    log_message("No valid phylota object found or force_download=TRUE. Running setup and phylotaR pipeline...")
+    if (is.null(ncbi_dr)) {
+      env_blast <- Sys.getenv("BLAST_PATH")
+      if (env_blast != "") {
+        ncbi_dr <- env_blast
+      } else {
+        blastn_path <- Sys.which("blastn")
+        if (blastn_path != "") ncbi_dr <- dirname(blastn_path)
+      }
+    }
+
+    setup_fn(
+      wd = wd_path, txid = preferred_parent, ncbi_dr = ncbi_dr, v = TRUE, ncps = 1, mncvrg = 80,
+      srch_trm = .phylotar_search_terms()
+    )
+
+    log_message("Executing phylotaR::run()...")
+    tryCatch({
+      run_fn(wd = wd_path)
+    }, error = function(erun) {
+      log_message("Error in phylotaR::run(): ", erun$message)
+    })
+
+    log_message("Attempting to load phylota object after run()...")
+    tryCatch({
+      reader(wd_path)
+    }, error = function(e2) {
+      log_message("read_phylota error: ", e2$message)
+      stop("Could not load phylota object from ", wd_path)
+    })
+  })
+}
+
+#' Assign each cluster its standardised gene and marker names
+#'
+#' Adds the species and description of each cluster seed, extracts the gene names the description
+#' mentions, and maps the dominant marker of the cluster (`top_marker`) through `genes_map.csv`.
+#' A marker that `genes_map.csv` does not map keeps its own name.
+#' @param smmry Cluster summary with `Seed` and `top_marker`, one row per cluster.
+#' @param seed_meta Seed metadata (`Species`, `Description`), one row per row of `smmry`, same order.
+#' @noRd
+.cp_enrich_cluster_summary <- function(smmry, seed_meta, pattern, gene_lookup, marker_lookup) {
+  smmry |>
+    dplyr::mutate(
+      Species = seed_meta$Species,
+      Description = cp_normalize_marker(seed_meta$Description)
+    ) |>
+    dplyr::mutate(
+      Genes_raw = stringr::str_extract_all(Description, pattern),
+      Genes_text = dplyr::if_else(
+        is.na(Description), NA_character_,
+        purrr::map_chr(Genes_raw, ~ paste(unique(cp_normalize_marker(.x)), collapse = ", "))
+      ),
+      top_marker = cp_normalize_marker(top_marker)
+    ) |>
+    dplyr::select(-Genes_raw) |>
+    dplyr::left_join(gene_lookup, by = c("Genes_text" = "search_gene")) |>
+    dplyr::left_join(marker_lookup, by = c("top_marker" = "search_marker")) |>
+    dplyr::mutate(
+      Gene_std = ifelse(is.na(Gene_std), Genes_text, Gene_std),
+      Marker_std = ifelse(is.na(Marker_std), top_marker, Marker_std)
+    )
 }
