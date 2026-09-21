@@ -20,8 +20,6 @@ knitr::opts_chunk$set(
 
 This section of `PhyloCactus` is under construction and contains no implementation.
 This document sets out what the molecular diagnostic section is intended to do, the design decisions already taken, the questions that remain open, and the conditions for implementing it.
-`evaluate_dna_barcoding()` signals an error that points to this page.
-Single-locus gene trees can still be estimated with `infer_gene_trees()`.
 
 ## Scope
 
@@ -37,7 +35,6 @@ The planned components are:
 
 - **Taxonomic backbone.** Names are reconciled against the Cactaceae checklist of Caryophyllales.org (Korotkova *et al*. 2021), the same backbone used in the assembly modules.
 - **Input.** The section uses the curated ingroup alignments in `4_Cleaned/cleaned_markers_ingroup` (Module 4) and the phylogenetic products of Modules 7 to 10. It does not query GenBank again.
-- **Gene trees.** `infer_gene_trees()` belongs to the inference module. Its gene trees can be used as input to `ASTRAL-III` (Module 13) and do not depend on the design of this section.
 - **No fixed distance thresholds.** Any decision rule must be derived from the observed distance distributions of the family, and its derivation must be reported with the result. In a family with recent radiations and low plastid divergence, a fixed threshold assumes a level of divergence that is not uniform across genera.
 - **Validation.** Classification accuracy is reported only from cross-validation stratified by species. Accuracy measured on the training sequences reflects how well the model fits those sequences, not its performance on new samples.
 

@@ -46,12 +46,6 @@ reference:
   contents:
   - clean_taxonomic_names
   - integrate_and_clean_markers
-- title: DNA Barcoding (section under construction)
-  desc: Molecular diagnostic section. No implementation is shipped while its analytical
-    strategy is being defined; see the section manifest in Tutorial 5.
-  contents:
-  - barcoding
-  - evaluate_dna_barcoding
 - title: Multiple Alignment, DECIPHER Cleaners, & Masking
   desc: Infer positional homology using `MAFFT` and refine nucleotide alignments with
     `DECIPHER` automated masking.
@@ -87,7 +81,6 @@ reference:
   - calculate_temporal_bootstraps
   - map_branch_supports
   - classify_constrained_nodes
-  - infer_gene_trees
 - title: Divergence Time Estimation & treePL Automation
   desc: Automate `treePL` penalized-likelihood cross-validation and estimate divergence
     time chronograms over temporal bootstrap cohorts.
