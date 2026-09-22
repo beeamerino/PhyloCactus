@@ -157,6 +157,47 @@
   out
 }
 
+#' Locus name of every cluster, keeping the clusters whose gene is not recognised
+#'
+#' A cluster with no standardized marker name is kept under the provisional name `cluster_<ID>` and
+#' listed with the GenBank description of its seed (decision of 2026-09-22).
+#' @param clusters Data frame with `ID`, `Marker_std` and `Description` (seed description).
+#' @return List with `map` (`ID`, `Marker_std`, `locus_provisional`) and `unnamed` (`ID`, `locus`,
+#'   `descripcion_semilla`).
+#' @noRd
+.bc_name_clusters <- function(clusters) {
+  id <- as.character(clusters$ID)
+  marker <- trimws(as.character(clusters$Marker_std))
+  provisional <- is.na(marker) | !nzchar(marker)
+  marker[provisional] <- paste0("cluster_", id[provisional])
+  desc <- if ("Description" %in% names(clusters)) as.character(clusters$Description) else rep(NA_character_, length(id))
+  list(
+    map = data.frame(ID = id, Marker_std = marker, locus_provisional = provisional, stringsAsFactors = FALSE),
+    unnamed = data.frame(ID = id[provisional], locus = marker[provisional], descripcion_semilla = desc[provisional],
+                         stringsAsFactors = FALSE)
+  )
+}
+
+#' Flag the loci named provisionally after their cluster (`cluster_<ID>`)
+#' @noRd
+.bc_flag_provisional <- function(tab) {
+  if (is.null(tab)) return(tab)
+  tab$locus_provisional <- grepl("^cluster_[0-9]+$", as.character(tab$locus))
+  tab
+}
+
+#' Cluster funnel of step 1: how many clusters survive each stage
+#' @noRd
+.bc_cluster_funnel <- function(n_workspace, n_selected, n_with_sequences, marker_map) {
+  data.frame(
+    etapa = c("clusteres_en_workspace", "clusteres_con_mas_de_min_species", "clusteres_con_secuencias_tras_filtros",
+              "clusteres_con_nombre", "clusteres_sin_nombre_conservados", "loci_ensamblados"),
+    n = as.integer(c(n_workspace, n_selected, n_with_sequences, sum(!marker_map$locus_provisional),
+                     sum(marker_map$locus_provisional), length(unique(marker_map$Marker_std)))),
+    stringsAsFactors = FALSE
+  )
+}
+
 #' The five context columns of the validation plan (sec. 3), per locus
 #'
 #' A species has replication in a locus when it has two or more distinct accessions in that locus.
@@ -415,14 +456,20 @@ assemble_barcoding_dataset <- function(wd_path,
                                         log_message = log_message)
   smmry <- .cp_enrich_cluster_summary(smmry, seed_meta, pattern, gene_lookup, marker_lookup)
 
-  marker_map <- data.frame(ID = as.character(smmry$ID), Marker_std = trimws(as.character(smmry$Marker_std)),
-                           stringsAsFactors = FALSE)
-  unmapped <- marker_map$ID[is.na(marker_map$Marker_std) | !nzchar(marker_map$Marker_std)]
-  if (length(unmapped) > 0) {
-    log_message("Clusters with no standardized marker name, not used: ", paste(sort(unmapped), collapse = ", "))
+  # Clusters whose gene is not recognised in target_genes.txt stay in the funnel under a provisional
+  # name (decision of 2026-09-22), so a locus that is new in GenBank is not lost at this point.
+  named <- .bc_name_clusters(data.frame(ID = smmry$ID, Marker_std = smmry$Marker_std,
+                                        Description = smmry$Description, stringsAsFactors = FALSE))
+  marker_map <- named$map
+  if (nrow(named$unnamed) > 0) {
+    log_message("Clusters with no recognised gene, kept under a provisional name: ",
+                paste(named$unnamed$locus, collapse = ", "))
   }
-  marker_map <- marker_map[!is.na(marker_map$Marker_std) & nzchar(marker_map$Marker_std), , drop = FALSE]
+  utils::write.csv(named$unnamed, file.path(dir_asm, "TABLE_barcoding_unnamed_clusters.csv"), row.names = FALSE)
   utils::write.csv(marker_map, file.path(dir_asm, "TABLE_barcoding_cluster_marker_assignment.csv"), row.names = FALSE)
+  funnel <- .bc_cluster_funnel(n_workspace = length(phylota@cids), n_selected = length(selected@cids),
+                               n_with_sequences = length(phylota_final@cids), marker_map = marker_map)
+  utils::write.csv(funnel, file.path(dir_asm, "TABLE_barcoding_cluster_funnel.csv"), row.names = FALSE)
 
   comparison <- NULL
   if (file.exists(phylogeny_map_file)) {
@@ -468,6 +515,7 @@ assemble_barcoding_dataset <- function(wd_path,
     summary = summary_tab,
     marker_map = marker_map,
     comparison = comparison,
+    funnel = funnel,
     counts = list(clusters_selected = length(selected@cids), memberships = nrow(records),
                   sids = length(unique(records$sid)), redundant_removed = nrow(dd$removed),
                   manual = counts_manual, discarded_accessions = nrow(discarded))

@@ -5,20 +5,23 @@
 \title{Screen the Curated Loci of the Molecular Diagnostic Branch}
 \usage{
 screen_barcoding_markers(
-  registry,
-  curated_dir,
-  loci,
+  assembly_dir = file.path("11_barcoding", "1_assembly"),
+  curated_dir = file.path("11_barcoding", "2_curated"),
+  loci = NULL,
   output_dir = file.path("11_barcoding", "3_screening"),
   min_species_with_replica = 20L,
-  saturation_flag_cutoff = 0.3
+  saturation_flag_cutoff = 0.3,
+  paralog_loci = "pepC_like"
 )
 }
 \arguments{
-\item{registry}{Data frame. The accession registry of \code{\link[=assemble_barcoding_dataset]{assemble_barcoding_dataset()}}.}
+\item{assembly_dir}{Character. Output directory of \code{\link[=assemble_barcoding_dataset]{assemble_barcoding_dataset()}}; the accession
+registry \code{TABLE_barcoding_accession_registry.csv} is read from it.}
 
 \item{curated_dir}{Character. Output directory of \code{\link[=curate_barcoding_markers]{curate_barcoding_markers()}}.}
 
-\item{loci}{Character vector. Curated loci.}
+\item{loci}{Character vector or \code{NULL}. Loci to screen. \code{NULL} (the default) screens every curated
+alignment in \code{curated_dir}; the threshold then decides which loci enter (decision of 2026-09-22).}
 
 \item{output_dir}{Character. Destination of the screening tables.}
 
@@ -27,6 +30,9 @@ species keep two or more accessions after curation. Defaults to \code{20L} (deci
 
 \item{saturation_flag_cutoff}{Numeric. Slope threshold of the saturation proxy, as in
 \code{\link[=run_marker_screening]{run_marker_screening()}}. Defaults to \code{0.3}.}
+
+\item{paralog_loci}{Character vector. Loci under paralogy surveillance, flagged in the column
+\code{posible_paralogo} of every table; the flag never excludes a locus. Defaults to \code{"pepC_like"}.}
 }
 \value{
 Invisibly, a list with \code{screening} and \code{identical}. Writes
@@ -36,4 +42,6 @@ Invisibly, a list with \code{screening} and \code{identical}. Writes
 For each curated locus, recomputes the five context columns of the validation plan on the
 accessions that survived curation, applies the branch's replication threshold to them, flags
 saturation (which never excludes a locus), and counts identical aligned sequences per species.
+Inputs are read from the directories of the earlier steps, so the screening runs on its own
+whenever those directories exist.
 }

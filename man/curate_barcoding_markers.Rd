@@ -5,9 +5,9 @@
 \title{Curate the Loci of the Molecular Diagnostic Branch}
 \usage{
 curate_barcoding_markers(
-  input_dir,
+  input_dir = file.path("11_barcoding", "1_assembly"),
   output_dir = file.path("11_barcoding", "2_curated"),
-  loci,
+  loci = NULL,
   mask_alignment_regions = TRUE,
   min_non_gap_fraction = 0.3,
   max_missing_fraction = 0.3,
@@ -23,7 +23,9 @@ curate_barcoding_markers(
 
 \item{output_dir}{Character. Destination; refused inside a directory of the phylogeny.}
 
-\item{loci}{Character vector. Loci to curate, as FASTA file names without extension.}
+\item{loci}{Character vector or \code{NULL}. Loci to curate, as FASTA file names without extension.
+\code{NULL} (the default) curates every FASTA in \code{input_dir}: the loci come out of the data, not out of
+a list (decision of 2026-09-22).}
 
 \item{mask_alignment_regions}{Logical. Apply automated alignment masking via \code{DECIPHER}? Defaults to \code{TRUE}.}
 
@@ -57,8 +59,7 @@ remains identified after curation.
 \dontrun{
 curate_barcoding_markers(
   input_dir = "11_barcoding/1_assembly",
-  output_dir = "11_barcoding/2_curated",
-  loci = c("trnL-trnF", "rpL16", "ITS", "matK")
+  output_dir = "11_barcoding/2_curated"
 )
 }
 }

@@ -1,5 +1,6 @@
 # Tests of the molecular diagnostic branch (11_barcoding/), curation and screening steps.
 # Written before the functions they test.
+# The screening reads its inputs from the directories of steps 1 and 2 (BMM, 2026-09-22).
 
 test_that("Genus_species|sid headers survive the alignment and curation of the phylogeny", {
   skip_if_not_installed("Biostrings")
@@ -84,4 +85,55 @@ test_that("identical sequences are counted per locus and species on the curated 
   s <- tab[tab$species == "Opuntia_stricta", ]
   expect_equal(s$accesiones, 1L)
   expect_equal(s$secuencias_distintas, 1L)
+})
+
+test_that("screening reads the registry from the assembly directory and runs without the assembly object", {
+  skip_if_not_installed("Biostrings")
+  skip_if_not_installed("ape")
+
+  tmp <- withr::local_tempdir()
+  headers <- c("Opuntia_robusta|A1.1", "Opuntia_robusta|A2.1", "Opuntia_stricta|B1.1", "Opuntia_stricta|B2.1")
+  sp <- sub("\\|.*$", "", headers)
+  asm_dir <- file.path(tmp, "1_assembly")
+  dir.create(asm_dir)
+  utils::write.csv(data.frame(sid = sub("^.*\\|", "", headers), species = sp, genus = "Opuntia", locus = "matK",
+                              cluster_id = 1L, nombre_genbank = sp, stringsAsFactors = FALSE),
+                   file.path(asm_dir, "TABLE_barcoding_accession_registry.csv"), row.names = FALSE)
+
+  set.seed(3L)
+  base <- paste(sample(c("A", "C", "G", "T"), 300, replace = TRUE), collapse = "")
+  mutate <- function(s, pos) { substr(s, pos, pos) <- ifelse(substr(s, pos, pos) == "A", "C", "A"); s }
+  aln <- stats::setNames(c(base, mutate(base, 10), mutate(base, 100), mutate(mutate(base, 100), 200)), headers)
+  cur_dir <- file.path(tmp, "2_curated")
+  dir.create(file.path(cur_dir, "alignments"), recursive = TRUE)
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(aln), file.path(cur_dir, "alignments", "ALN_masked_final_matK.fasta"))
+
+  suppressMessages(screen_barcoding_markers(assembly_dir = asm_dir, curated_dir = cur_dir, loci = "matK",
+                                            output_dir = file.path(tmp, "3_screening"), min_species_with_replica = 2L))
+
+  tab <- utils::read.csv(file.path(tmp, "3_screening", "TABLE_barcoding_marker_screening.csv"), stringsAsFactors = FALSE)
+  expect_equal(tab$locus, "matK")
+  expect_equal(tab$especies_con_replica, 2L)
+  expect_equal(tab$entra, TRUE)
+  # Paralogy surveillance (Phase 2, item 5): flagged in every screening table, never excluding
+  expect_equal(tab$posible_paralogo, FALSE)
+
+  suppressMessages(screen_barcoding_markers(assembly_dir = asm_dir, curated_dir = cur_dir, loci = "matK",
+                                            output_dir = file.path(tmp, "3_screening_flag"),
+                                            min_species_with_replica = 2L, paralog_loci = "matK"))
+  for (f in c("TABLE_barcoding_marker_screening.csv", "TABLE_barcoding_identical_sequences.csv")) {
+    t <- utils::read.csv(file.path(tmp, "3_screening_flag", f), stringsAsFactors = FALSE)
+    expect_true(all(t$posible_paralogo), info = f)
+  }
+  t <- utils::read.csv(file.path(tmp, "3_screening_flag", "TABLE_barcoding_marker_screening.csv"), stringsAsFactors = FALSE)
+  expect_equal(t$entra, TRUE)
+})
+
+test_that("screening says which earlier step is missing when the registry is absent", {
+  tmp <- withr::local_tempdir()
+  expect_error(
+    screen_barcoding_markers(assembly_dir = file.path(tmp, "1_assembly"), curated_dir = file.path(tmp, "2_curated"),
+                             loci = "matK", output_dir = file.path(tmp, "3_screening")),
+    "assemble_barcoding_dataset"
+  )
 })
