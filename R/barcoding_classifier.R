@@ -28,9 +28,13 @@
 #' The function refuses a query that sits in its own training set. The folds of Phase 3 never put it
 #' there, and the checker proves it, but the classifier does not rely on that: the defect that
 #' retired the section in v0.4.2 was exactly this one.
+#'
+#' `allow_resubstitution = TRUE` lifts that guard, and only CN3 uses it (validation plan, sec. 4).
+#' It is an argument and not a silent case on purpose: resubstitution is the defect itself, measured
+#' on purpose to report its size, and whoever runs it has to ask for it by name.
 #' @noRd
-.bc_classify_nn <- function(dmat, train_ids, test_id, species) {
-  if (test_id %in% train_ids) {
+.bc_classify_nn <- function(dmat, train_ids, test_id, species, allow_resubstitution = FALSE) {
+  if (test_id %in% train_ids && !isTRUE(allow_resubstitution)) {
     stop("Query '", test_id, "' is in its own training set. ",
          "The classifier refuses to evaluate a sequence it was trained on.", call. = FALSE)
   }

@@ -145,3 +145,68 @@ test_that("the branch assignment is compared with the phylogeny map, and every d
   expect_equal(get("9"), "solo_filogenia")
   expect_equal(nrow(cmp), 5L)
 })
+
+# Decision of BMM, 2026-09-23: the branch has to run without the phylogeny branch. Its outgroup, the
+# one CN2 queries with, therefore has to be obtainable the same way the ingroup is, by mining GenBank
+# or reading the cache, and not by assuming that somebody already ran the phylogeny.
+#
+# The phylogeny mines its outgroup with six genus-level taxids across three families, with the
+# taxonomic reasoning written in Tutorial 1. phylotaR accepts a vector and turns it into its own
+# multiple_ids, which is why the workspace of 2026-09-04 was built that way. The branch needs the
+# same, and it needs it without confusing two different things that `preferred_parent` was doing at
+# once: what to mine, and which parent wins when a sid sits in two clusters.
+
+test_that("what is mined and which parent resolves duplicates are two different things", {
+  # Nothing given: the branch mines its focal clade, as it has since Phase 2
+  expect_identical(.bc_mining_taxids(NULL, "3593"), "3593")
+  # Given: those are mined, and the preferred parent is left out of it
+  seis <- c("107598", "107617", "107583", "3582", "107600", "108056")
+  expect_identical(.bc_mining_taxids(seis, "3593"), seis)
+})
+
+test_that("a missing workspace is mined with every taxid it was given, not only the first", {
+  seis <- c("107598", "107617", "107583", "3582", "107600", "108056")
+  setup_args <- NULL
+  n_read <- 0L
+  obj <- .phylotar_load_or_mine(
+    "wd", preferred_parent = "3593", txid = seis, ncbi_dr = "/opt/blast/bin",
+    reader   = function(wd) {
+      n_read <<- n_read + 1L
+      if (n_read == 1L) stop("no workspace") else "PHYLOTA"
+    },
+    setup_fn = function(...) setup_args <<- list(...),
+    run_fn   = function(...) invisible(NULL)
+  )
+  expect_identical(obj, "PHYLOTA")
+  expect_identical(setup_args$txid, seis)
+  # And the search terms are the shared ones: the outgroup is not mined with a different criterion
+  expect_identical(setup_args$srch_trm, .phylotar_search_terms())
+})
+
+test_that("txid defaults to preferred_parent, so nothing that already worked changes", {
+  setup_args <- NULL
+  n_read <- 0L
+  .phylotar_load_or_mine(
+    "wd", preferred_parent = "3593",
+    reader   = function(wd) {
+      n_read <<- n_read + 1L
+      if (n_read == 1L) stop("no workspace") else "PHYLOTA"
+    },
+    setup_fn = function(...) setup_args <<- list(...),
+    run_fn   = function(...) invisible(NULL)
+  )
+  expect_identical(setup_args$txid, "3593")
+})
+
+test_that("the branch holds its own copy of the outgroup taxids, and notices if the two drift apart", {
+  # Decision of BMM, 2026-09-23: the branch keeps its own copy rather than reading the phylogeny's
+  # default, so that it runs without the phylogeny and so that the list is visible where it is used.
+  # Nothing of the phylogeny is touched. This test is the drift detector: the day somebody adds a
+  # family to one of the two lists, it fails and says which one moved.
+  seis <- c("107598", "107617", "107583", "3582", "107600", "108056")
+  expect_identical(barcoding_outgroup_taxids(), seis)
+  expect_identical(eval(formals(assemble_outgroup_phylotar)$outgroups), barcoding_outgroup_taxids())
+  # And the branch can be told to mine them, without that changing what it mines by default
+  expect_true("taxids" %in% names(formals(assemble_barcoding_dataset)))
+  expect_null(formals(assemble_barcoding_dataset)$taxids)
+})

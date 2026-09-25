@@ -901,11 +901,16 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
 #' the phylogeny and reads the result. The reader and the two pipeline steps are arguments only so
 #' that the tests can stand in for them.
 #' @noRd
-.phylotar_load_or_mine <- function(wd_path, preferred_parent = "3593", ncbi_dr = NULL,
+.phylotar_load_or_mine <- function(wd_path, preferred_parent = "3593", txid = NULL, ncbi_dr = NULL,
                                    force_download = FALSE, log_message = function(...) {},
                                    reader = phylotaR::read_phylota,
                                    setup_fn = phylotaR::setup,
                                    run_fn = phylotaR::run) {
+  # What is mined and which parent wins when a sid sits in two clusters are two different things.
+  # They coincided while only the ingroup used this, with its single focal clade. The outgroup of
+  # CN2 is several clades and has no preferred parent, so `txid` carries what to mine and defaults
+  # to `preferred_parent`, which leaves every existing call doing exactly what it did.
+  if (is.null(txid)) txid <- preferred_parent
   tryCatch({
     if (force_download) stop("Force download enabled")
     reader(wd_path)
@@ -922,7 +927,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
     }
 
     setup_fn(
-      wd = wd_path, txid = preferred_parent, ncbi_dr = ncbi_dr, v = TRUE, ncps = 1, mncvrg = 80,
+      wd = wd_path, txid = txid, ncbi_dr = ncbi_dr, v = TRUE, ncps = 1, mncvrg = 80,
       srch_trm = .phylotar_search_terms()
     )
 

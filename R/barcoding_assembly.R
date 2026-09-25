@@ -49,6 +49,67 @@
 
 #' Accepted name for each GenBank name, with the rule of clean_taxonomic_names()
 #'
+#' Taxonomic IDs of the Outgroup of the Molecular Diagnostic Branch
+#'
+#' The six genus-level NCBI Taxonomy IDs that CN2 queries the library with (validation plan, sec. 4):
+#' the three families that surround Cactaceae.
+#'
+#' - **Anacampserotaceae:** *Talinopsis* (107598), *Grahamia* (107617), *Anacampseros* (107583).
+#' - **Portulacaceae:** *Portulaca* (3582).
+#' - **Talinaceae:** *Talinum* (107600), *Talinella* (108056).
+#'
+#' *Talinopsis* is Anacampserotaceae, not Talinaceae, despite the name and the adjacent id.
+#' *Amphipetalum* (1835425) is not requested: GenBank holds no nucleotide records for it, so the
+#' request would only produce an empty download.
+#'
+#' **This is the branch's own copy** (decision of BMM, 2026-09-23). The phylogeny keeps its list in
+#' `assemble_outgroup_phylotar()` and is not touched, so the branch runs without it. A test compares
+#' the two and fails if they ever drift apart.
+#'
+#' @return Character vector of six taxonomic IDs.
+#' @examples
+#' barcoding_outgroup_taxids()
+#' @export
+barcoding_outgroup_taxids <- function() {
+  c("107598", "107617", "107583", "3582", "107600", "108056")
+}
+
+#' What to mine, which is not the same as which parent resolves duplicates
+#' @noRd
+.bc_mining_taxids <- function(taxids, preferred_parent) {
+  if (is.null(taxids)) preferred_parent else as.character(taxids)
+}
+
+#' Resolve the Names of a Set of Accessions, With or Without a Checklist
+#'
+#' Two behaviours, and the difference matters outside Cactaceae. With a checklist, the one the
+#' branch has used since Phase 2: the checklist spelling for what matches and `NA` for what does
+#' not. With `checklist_path = NULL`, no checklist at all: the GenBank names come back cleaned to
+#' the `Genus_species` convention and nothing is dropped.
+#'
+#' The second is what CN2 needs (validation plan, sec. 4). An outgroup query is, by construction, a
+#' name that a checklist of Cactaceae does not hold, so resolving it against that checklist would
+#' discard the whole control. Added in Phase 5B; the assembly of the ingroup keeps its checklist and
+#' its behaviour untouched.
+#'
+#' @param genbank_names Character vector of names as GenBank writes them.
+#' @param checklist_path Path to a checklist, a character vector of accepted names, or `NULL` for
+#'   no checklist.
+#' @return Character vector, one entry per input name.
+#' @noRd
+.bc_resolve_names <- function(genbank_names, checklist_path = NULL) {
+  if (is.null(checklist_path) || (length(checklist_path) == 1L && is.na(checklist_path))) {
+    limpio <- gsub("[[:space:]]+", " ", trimws(as.character(genbank_names)))
+    return(gsub(" ", "_", limpio, fixed = TRUE))
+  }
+  nombres <- if (length(checklist_path) == 1L && file.exists(checklist_path)) {
+    .bc_read_checklist_names(checklist_path)
+  } else {
+    as.character(checklist_path)
+  }
+  .bc_match_names(genbank_names, nombres)
+}
+
 #' Returns the checklist spelling with underscores for a name that matches, and `NA` for one that
 #' does not. Synonyms are not resolved: the checklist holds accepted names only.
 #' @noRd
@@ -306,7 +367,12 @@
 #'   checklist distributed with the package.
 #' @param min_species Integer. A cluster is retained when it holds more than this number of species.
 #'   Defaults to `50`, as in the phylogeny.
-#' @param preferred_parent Character. NCBI Taxonomy ID of the focal ingroup. Defaults to `"3593"`.
+#' @param preferred_parent Character. NCBI Taxonomy ID of the focal ingroup, used to decide which
+#'   cluster keeps a sid that sits in two. Defaults to `"3593"`.
+#' @param taxids Character vector or `NULL`. What to mine from GenBank when the workspace of
+#'   `wd_path` does not exist yet, which is what lets the branch run without the phylogeny having
+#'   run first. `NULL` mines `preferred_parent`, the behaviour since Phase 2. Several IDs are mined
+#'   together, as [barcoding_outgroup_taxids()] returns them for CN2.
 #' @param ncbi_dr Character or `NULL`. Directory of the BLAST+ binaries, used only when the workspace
 #'   has to be created.
 #' @param force_download Logical. Mine GenBank again even if the workspace exists. Defaults to `FALSE`.
@@ -341,6 +407,7 @@ assemble_barcoding_dataset <- function(wd_path,
                                        checklist_path = NULL,
                                        min_species = 50,
                                        preferred_parent = "3593",
+                                       taxids = NULL,
                                        ncbi_dr = NULL,
                                        force_download = FALSE,
                                        phylogeny_map_file = NULL) {
@@ -349,12 +416,16 @@ assemble_barcoding_dataset <- function(wd_path,
   if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "PhyloCactus")
   if (is.null(genes_map_file)) genes_map_file <- system.file("extdata", "genes_map.csv", package = "PhyloCactus")
   if (is.null(manual_exclusions_file)) manual_exclusions_file <- system.file("extdata", "manual_exclusions_ingroup.csv", package = "PhyloCactus")
+  # NULL keeps the checklist of Cactaceae, which is the behaviour the closed phases depend on.
+  # NA is the way to ask for no checklist at all, which is what the outgroup of CN2 needs.
   if (is.null(checklist_path)) checklist_path <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
   if (is.null(phylogeny_map_file)) {
     phylogeny_map_file <- file.path(dirname(normalizePath(wd_path, mustWork = FALSE)), "1_phylotaR_out_Ingroup",
                                     "TABLE_CLUSTER_MARKER_ASSIGNMENT_INGROUP.csv")
   }
-  for (f in c(target_genes_file, genes_map_file, checklist_path)) {
+  ficheros <- c(target_genes_file, genes_map_file, checklist_path)
+  ficheros <- ficheros[!is.na(ficheros)]
+  for (f in ficheros) {
     if (!nzchar(f) || !file.exists(f)) stop("Input file not found: ", f, call. = FALSE)
   }
 
@@ -383,7 +454,8 @@ assemble_barcoding_dataset <- function(wd_path,
   marker_lookup <- genes_map_df |> dplyr::select(search_marker = search, Marker_std = replace)
 
   # 1. Workspace, shared with the phylogeny
-  phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = preferred_parent, ncbi_dr = ncbi_dr,
+  phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = preferred_parent,
+                                    txid = .bc_mining_taxids(taxids, preferred_parent), ncbi_dr = ncbi_dr,
                                     force_download = force_download, log_message = log_message)
   log_message("Workspace: ", length(phylota@cids), " clusters, ", length(phylota@sids), " sequences in clusters.")
 
@@ -487,7 +559,7 @@ assemble_barcoding_dataset <- function(wd_path,
   kept <- kept[!duplicated(paste(kept$locus, kept$sid)), , drop = FALSE]
 
   # 5. Names, with the rule of clean_taxonomic_names()
-  kept$species <- .bc_match_names(kept$nombre_genbank, .bc_read_checklist_names(checklist_path))
+  kept$species <- .bc_resolve_names(kept$nombre_genbank, checklist_path)
   discarded <- kept[is.na(kept$species), , drop = FALSE]
   discarded_tab <- as.data.frame(table(nombre_genbank = discarded$nombre_genbank, locus = discarded$locus),
                                  stringsAsFactors = FALSE)

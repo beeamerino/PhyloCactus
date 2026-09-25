@@ -14,6 +14,7 @@ assemble_barcoding_dataset(
   checklist_path = NULL,
   min_species = 50,
   preferred_parent = "3593",
+  taxids = NULL,
   ncbi_dr = NULL,
   force_download = FALSE,
   phylogeny_map_file = NULL
@@ -40,7 +41,13 @@ checklist distributed with the package.}
 \item{min_species}{Integer. A cluster is retained when it holds more than this number of species.
 Defaults to \code{50}, as in the phylogeny.}
 
-\item{preferred_parent}{Character. NCBI Taxonomy ID of the focal ingroup. Defaults to \code{"3593"}.}
+\item{preferred_parent}{Character. NCBI Taxonomy ID of the focal ingroup, used to decide which
+cluster keeps a sid that sits in two. Defaults to \code{"3593"}.}
+
+\item{taxids}{Character vector or \code{NULL}. What to mine from GenBank when the workspace of
+\code{wd_path} does not exist yet, which is what lets the branch run without the phylogeny having
+run first. \code{NULL} mines \code{preferred_parent}, the behaviour since Phase 2. Several IDs are mined
+together, as \code{\link[=barcoding_outgroup_taxids]{barcoding_outgroup_taxids()}} returns them for CN2.}
 
 \item{ncbi_dr}{Character or \code{NULL}. Directory of the BLAST+ binaries, used only when the workspace
 has to be created.}

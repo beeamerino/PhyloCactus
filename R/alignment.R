@@ -359,6 +359,43 @@ cached_params_match <- function(cached_summary, stamp) {
 #' @return A list with `dna` (the corrected set) and `log`, one row per sequence.
 #' @keywords internal
 #' @noRd
+# The k-mer parts of .normalise_strand(), pulled out on 2026-09-25 so that the barcoding branch can
+# orient one query against the library with the same rule instead of a second copy of it. The
+# extraction is behaviour preserving: what .normalise_strand() decides is pinned by a test written
+# before this change, and the ingroup of step 1 was re-run afterwards. Decision of BMM, 2026-09-25.
+.kmer_set <- function(s, k) {
+  m <- nchar(s) - k + 1L
+  if (m < 1L) return(character(0))
+  w <- substring(s, seq_len(m), seq_len(m) + k - 1L)
+  unique(w[!grepl("[^ACGTacgt]", w)])
+}
+
+.kmer_sets <- function(seqs, k) lapply(toupper(seqs), .kmer_set, k = k)
+
+.kmer_share <- function(s, pool) if (length(s) == 0L) 0 else length(intersect(s, pool)) / length(s)
+
+.strand_usable <- function(sets) vapply(sets, length, integer(1)) >= 5L
+
+# Seed on the longest sequence, then grow the reference with everything that already agrees with
+# it. Growing first matters: a single seed shares few k-mers with a divergent congener, and the
+# comparison has to be against the marker as a whole.
+.strand_reference_pool <- function(sets, lengths, usable, min_share) {
+  if (!any(usable)) return(character(0))
+  seed <- which.max(ifelse(usable, lengths, -1L))
+  pool <- sets[[seed]]
+  agree <- vapply(seq_along(sets),
+                  function(i) usable[i] && .kmer_share(sets[[i]], pool) >= min_share, logical(1))
+  if (sum(agree) > 1L) pool <- unique(unlist(sets[agree], use.names = FALSE))
+  pool
+}
+
+.strand_action <- function(fwd, rev, usable, min_share, ratio) {
+  flip <- usable & rev > min_share & rev > ratio * fwd
+  ifelse(!usable, "too_short",
+  ifelse(flip, "reverse_complemented",
+  ifelse(pmax(fwd, rev) < min_share, "no_match_either_direction", "kept")))
+}
+
 .normalise_strand <- function(dna, k = 20L, min_share = 0.15, ratio = 3) {
   n <- length(dna)
   empty_log <- data.frame(Seq = character(0), Length = integer(0), ShareForward = numeric(0),
@@ -367,34 +404,19 @@ cached_params_match <- function(cached_summary, stamp) {
   if (n < 3L) return(list(dna = dna, log = empty_log))
 
   seqs <- gsub("-", "", as.character(dna), fixed = TRUE)
-  kset <- function(s) {
-    m <- nchar(s) - k + 1L
-    if (m < 1L) return(character(0))
-    w <- substring(s, seq_len(m), seq_len(m) + k - 1L)
-    unique(w[!grepl("[^ACGTacgt]", w)])
-  }
-  sets <- lapply(toupper(seqs), kset)
+  sets <- .kmer_sets(seqs, k)
   rc <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(seqs)))
-  sets_rc <- lapply(toupper(rc), kset)
+  sets_rc <- .kmer_sets(rc, k)
 
-  # Seed on the longest sequence, then grow the reference with everything that already agrees with
-  # it. Growing first matters: a single seed shares few k-mers with a divergent congener, and the
-  # comparison has to be against the marker as a whole.
-  usable <- vapply(sets, length, integer(1)) >= 5L
+  usable <- .strand_usable(sets)
   if (!any(usable)) return(list(dna = dna, log = empty_log))
-  seed <- which.max(ifelse(usable, nchar(seqs), -1L))
-  pool <- sets[[seed]]
-  share <- function(s, p) if (length(s) == 0L) 0 else length(intersect(s, p)) / length(s)
-  agree <- vapply(seq_len(n), function(i) usable[i] && share(sets[[i]], pool) >= min_share, logical(1))
-  if (sum(agree) > 1L) pool <- unique(unlist(sets[agree], use.names = FALSE))
+  pool <- .strand_reference_pool(sets, nchar(seqs), usable, min_share)
 
-  fwd <- vapply(seq_len(n), function(i) share(sets[[i]], pool), numeric(1))
-  rev <- vapply(seq_len(n), function(i) share(sets_rc[[i]], pool), numeric(1))
+  fwd <- vapply(sets, .kmer_share, numeric(1), pool = pool)
+  rev <- vapply(sets_rc, .kmer_share, numeric(1), pool = pool)
 
-  flip <- usable & rev > min_share & rev > ratio * fwd
-  action <- ifelse(!usable, "too_short",
-            ifelse(flip, "reverse_complemented",
-            ifelse(pmax(fwd, rev) < min_share, "no_match_either_direction", "kept")))
+  action <- .strand_action(fwd, rev, usable, min_share, ratio)
+  flip <- action == "reverse_complemented"
 
   out <- dna
   if (any(flip)) out[flip] <- Biostrings::reverseComplement(dna[flip])
