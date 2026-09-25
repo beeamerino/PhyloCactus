@@ -3,6 +3,18 @@
 * Removed `infer_gene_trees()`. No stage of the pipeline, no tutorial script and no test called it, and on its documented input (one sequence per species) its species monophyly table was always empty. Its `checklist_path` argument had no effect. Per-locus monophyly for the molecular diagnostic section will be computed by the functions of that section. `extract_species_binomial()`, which it shared with the marker integration step, is kept.
 * Removed the placeholder `evaluate_dna_barcoding()` and the `barcoding` documentation topic. The placeholder only signalled an error, and its arguments belonged to the implementation withdrawn in 0.4.2. The molecular diagnostic section is being rebuilt as a separate branch with its own functions; its manifest remains in Tutorial 5.
 
+* Recorded here the development history of 2026-09-01 to 2026-09-06, which until now existed only
+  as comments beside the code it explains and in the review log. It is written under this version
+  rather than under the one it belongs to because all of it is already in commit `166c4a0`, the root
+  of the repository, so git cannot attribute it to 0.4.2, 0.4.3 or 0.4.4. On 2026-09-02 the priming,
+  cross-validation and dating stages stopped calling out to a vendored copy of an unlicensed shell
+  script and moved into R, and the `seed` argument of `automate_treePL()` began to reach treePL
+  itself instead of seeding only R's choice of bootstrap replicates. On 2026-09-01 and 2026-09-04
+  two marker pairs were found to share a name without sharing a region, one of them in the outgroup
+  run. On 2026-09-06 a bootstrap support metric absent from the RAxML-NG log cost a round of
+  confusion, and the metric is now chosen explicitly. The comments that carry these reasons stay
+  where they are, next to the code.
+
 # PhyloCactus 0.4.5
 
 * Corrected the default rooting pattern of `resolve_rooting_outgroup()` to the Talinaceae terminals that form a clade of the reference topology; the previous default spanned Portulacaceae and Talinaceae, which is not a clade of that tree and could not root it.

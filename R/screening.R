@@ -837,7 +837,11 @@ integrate_and_clean_markers <- function(
                 "counterpart, so their aligned columns cannot carry positional homology: ",
                 paste(sprintf("%s (k20 %.3f, k10 %.3f)", bad$marker_key, bad$share_k20,
                               bad$share_k10), collapse = ", "),
-                ". Genuine counterparts in this dataset return 0.28 to 0.60 at k = 20. Such a ",
+                # Recomputed on 2026-09-19 over the current run: 0.26 to 0.59 is the interval of
+                # trnL_trnF, matK, phyC and rbcL in TABLE_marker_homology_check.csv. The 0.28 to
+                # 0.60 written here until 2026-09-25 came from the matrix of 2026-09-01, which the
+                # run no longer reproduces; the tutorials were corrected then and this was not.
+                ". Genuine counterparts in this dataset return 0.26 to 0.59 at k = 20. Such a ",
                 "locus places non-homologous characters on the terminals that define the root, ",
                 "which is where the outgroup branch is estimated. See ",
                 "tables/TABLE_marker_homology_check.csv.", call. = FALSE)

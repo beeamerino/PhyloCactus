@@ -1819,6 +1819,8 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
 #'
 #' @param header Character string of the sequence header.
 #' @return Standardized species binomial formatted with underscores (e.g., `Copiapoa_cinerea`).
+#'   A hyphenated epithet is kept whole, so `Opuntia_ficus-indica|KJ773783.1` returns
+#'   `Opuntia_ficus-indica` and not `Opuntia_ficus`.
 #' @keywords internal
 extract_species_binomial <- function(header) {
   vapply(header, function(h) {
@@ -1826,7 +1828,10 @@ extract_species_binomial <- function(header) {
     first_field <- stringr::str_split(h, "\\|", simplify = TRUE)[1]
     first_field <- stringr::str_trim(first_field)
     if (!nzchar(first_field)) return(NA_character_)
-    clean_field <- stringr::str_replace_all(first_field, "[ -]+", "_")
+    # Only whitespace becomes an underscore. Until 2026-09-25 the hyphen did too, and the two
+    # fields taken below then cut a hyphenated epithet in half: 13 of the 1065 species of the
+    # library and 11 of the 1024 tips of the tree carry one, and they came back truncated.
+    clean_field <- stringr::str_replace_all(first_field, "[ ]+", "_")
     parts <- strsplit(clean_field, "_", fixed = TRUE)[[1]]
     if (length(parts) >= 2) {
       paste0(parts[1], "_", parts[2])

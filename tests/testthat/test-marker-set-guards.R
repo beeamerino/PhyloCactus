@@ -314,7 +314,7 @@ test_that(".normalise_strand flips the reversed sequences and leaves the rest al
 # Added after trnT-psbD, the second false pair of the 2026-09-01 audit and the one that survived
 # every count-based check. It was readmitted precisely because its counts were the best in the
 # dataset: 49 ingroup terminals against 49 outgroup at 0.998 median occupancy. The sequences share
-# 0.039 of their 20-mers, against 0.28-0.60 for every genuine counterpart, and sit at 0.440
+# 0.039 of their 20-mers, against 0.26-0.59 for every genuine counterpart, and sit at 0.440
 # observed divergence from Cactaceae where matK gives 0.077. Counts cannot see this; only the
 # sequences can.
 
@@ -507,4 +507,22 @@ test_that("run_concatenation_pipeline() refuses a marker with duplicated termina
   # And no supermatrix is left behind for someone to pick up as though it were complete.
   expect_false(file.exists(file.path(tmp, "concat", "concatenated_alignments",
                                      "ALIGNMENT_supermatrix.phy")))
+})
+
+
+# Added on 2026-09-25, closing the carry-over declared on 2026-09-19. The interval the warning
+# quotes was recomputed that day over the current run: it is 0.26 to 0.59 at k = 20, the value of
+# trnL_trnF, matK, phyC and rbcL in TABLE_marker_homology_check.csv, and not the 0.28 to 0.60 of the
+# matrix of 2026-09-01. The tutorials were corrected then; the text inside the code was not.
+#
+# Structural, and declared as such: reaching this warning needs a full screening run with an
+# outgroup that shares no region with its ingroup, which is a fixture built to check a sentence.
+
+test_that("the homology warning quotes the interval of the current run", {
+  # The warning lives in integrate_and_clean_markers(), not in run_marker_screening(). The first
+  # version of this test looked in the wrong function on 2026-09-25 and half of it passed for that
+  # reason, which is what gave it away
+  cuerpo <- paste(deparse(body(integrate_and_clean_markers)), collapse = " ")
+  expect_match(cuerpo, "0\\.26 to 0\\.59 at k = 20", fixed = FALSE)
+  expect_false(grepl("0\\.28 to 0\\.60", cuerpo))
 })

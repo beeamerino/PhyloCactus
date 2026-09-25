@@ -24,7 +24,8 @@ automate_treePL(
   wrapper_sh = NULL,
   notify = FALSE,
   notify_to = NULL,
-  notify_credentials = NULL
+  notify_credentials = NULL,
+  treepl_bin = "treePL"
 )
 }
 \arguments{
@@ -89,6 +90,10 @@ Defaults to \code{FALSE}.}
 \item{notify_to, notify_credentials}{Passed to \code{\link[=send_run_notification]{send_run_notification()}} as \code{to} and
 \code{credentials}. Both default to \code{NULL}, which reads the \code{MY_EMAIL} and \code{PHYLOCACTUS_SMTP_CREDS}
 environment variables.}
+
+\item{treepl_bin}{Character. Name or path of the \code{treePL} binary, handed down to both stages,
+the cross-validation and the dating of the bootstrap replicates. Defaults to \code{"treePL"}, which
+is the name both stages used to run with written into the code.}
 }
 \value{
 Invisibly, the path of the dated maximum-likelihood chronogram written into

@@ -154,6 +154,10 @@ root_on_clade <- function(phy, outgroup) {
 #' @param cfg_file Character. Path to `treePL` configuration file.
 #' @param label Character. Descriptive run label identifier.
 #' @param cwd Character. Optional working directory context. Defaults to `NULL`.
+#' @param treepl_bin Character. Name or path of the `treePL` binary. Defaults to `"treePL"`, which
+#'   is what this function used to run with the name written into the code: a run on a machine
+#'   where the binary is not on the path failed with exit status 127 even when the caller had been
+#'   given another path.
 #' @details
 #' The tree path is read from the `treefile` line of `cfg_file` and checked for rootedness before
 #' the binary is invoked, because `treePL` fails opaquely on an unrooted tree. When the
@@ -164,7 +168,7 @@ root_on_clade <- function(phy, outgroup) {
 #' Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
 #' for large phylogenies. *Bioinformatics*, 28(20), 2689-2690. \doi{10.1093/bioinformatics/bts492}
 #' @export
-run_treePL_direct <- function(cfg_file, label, cwd = NULL){
+run_treePL_direct <- function(cfg_file, label, cwd = NULL, treepl_bin = "treePL"){
   if (!is.null(cwd)) {
     oldwd <- getwd()
     on.exit(setwd(oldwd), add = TRUE)
@@ -187,7 +191,7 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL){
   # other message in the console.
   log_file <- paste0("treepl_run_", label, ".log")
   cat(Sys.time(), "- Running treePL (direct) for:", label, "\n")
-  status <- system2("treePL", args = shQuote(cfg_file), stdout = log_file, stderr = log_file)
+  status <- system2(treepl_bin, args = shQuote(cfg_file), stdout = log_file, stderr = log_file)
   if (!identical(as.integer(status), 0L)) {
     stop("treePL direct execution failed for '", label, "' with exit status ", status,
          ". See '", file.path(getwd(), log_file), "'.", call. = FALSE)
@@ -322,6 +326,9 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL){
 #' in the smoothing value.
 #'
 #' @param cfg_file Character. Path to primary `treePL` configuration file specifying calibration bounds and parameters.
+#' @param treepl_bin Character. Name or path of the `treePL` binary, handed down to both stages,
+#'   the cross-validation and the dating of the bootstrap replicates. Defaults to `"treePL"`, which
+#'   is the name both stages used to run with written into the code.
 #' @param wrapper_sh Ignored, with a warning. Priming, cross-validation and dating of the
 #'   maximum-likelihood tree run through [run_treePL_cv()], which implements the protocol of
 #'   Maurin (2020) in R.
@@ -394,7 +401,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             prime_rule = c("lowest", "modal"),
                             cv_method = c("randomcv", "cv"),
                             cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, wrapper_sh = NULL,
-                            notify = FALSE, notify_to = NULL, notify_credentials = NULL) {
+                            notify = FALSE, notify_to = NULL, notify_credentials = NULL,
+                            treepl_bin = "treePL") {
 
   # The work itself is unchanged and lives in .automate_treePL_run(). This wrapper exists only to
   # time the run and to report its outcome, and it is deliberately thin: a notification is a
@@ -408,7 +416,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
       numsites = numsites, outgroup = outgroup, seed = seed,
       rescale_factor = rescale_factor, n_prime = n_prime, prime_rule = prime_rule,
       cv_method = cv_method, cvstart = cvstart, cvstop = cvstop, cv_nthreads = cv_nthreads,
-      wrapper_sh = wrapper_sh
+      wrapper_sh = wrapper_sh, treepl_bin = treepl_bin
     )
   }
 
@@ -454,7 +462,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             rescale_factor = 100, n_prime = 10L,
                             prime_rule = c("lowest", "modal"),
                             cv_method = c("randomcv", "cv"),
-                            cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, wrapper_sh = NULL) {
+                            cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, wrapper_sh = NULL,
+                            treepl_bin = "treePL") {
 
   prime_rule <- match.arg(prime_rule)
   cv_method <- match.arg(cv_method)
@@ -601,6 +610,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                   cvstart = cvstart,
                   cvstop = cvstop,
                   cv_nthreads = cv_nthreads,
+                  treepl_bin = treepl_bin,
                   work_dir = ml_dir)
   } else {
     cat("treePL results for the maximum-likelihood tree already exist! Skipping treePL run.\n")
@@ -745,7 +755,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
     if(length(bs_cfg) == 1){
       label <- basename(bs_folder)
       bs_cfg_abs <- normalizePath(bs_cfg, mustWork = TRUE)
-      run_treePL_direct(bs_cfg_abs, label, cwd = bs_folder)
+      run_treePL_direct(bs_cfg_abs, label, cwd = bs_folder, treepl_bin = treepl_bin)
       .validate_treepl_output(out_tree, label)
       message("Bootstrap treePL completed and validated. Results in:", bs_folder, "\n")
     } else {

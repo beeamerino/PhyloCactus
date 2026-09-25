@@ -346,7 +346,7 @@ run_treePL_cv <- function(cfg_file, tree_file, label,
                paste0("outfile = ", out_tree)), smooth_cfg)
 
   say("Dating at smooth = ", format(sel$smoothing, scientific = FALSE))
-  run_treePL_direct(smooth_cfg, label)
+  run_treePL_direct(smooth_cfg, label, treepl_bin = treepl_bin)
   .validate_treepl_output(out_tree, label)
 
   invisible(list(smoothing = sel$smoothing, cv_table = sel$table, cv_at_edge = sel$at_edge,
