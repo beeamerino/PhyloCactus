@@ -1,9 +1,9 @@
 # -------------------------------------------------------------
 # PhyloCactus: Tutorial 5 - Molecular Diagnostic Branch (11_barcoding/)
 # -------------------------------------------------------------
-# Phases 2 to 5A of PhyloCactus 0.5.0: assembly, curation, screening, reference library,
-# validation folds, barcode gap and classification of those folds. No accuracy is computed here:
-# the negative controls are Phase 5B and the real metrics are Phase 6, in that order.
+# Phases 2 to 5B of PhyloCactus 0.5.0: assembly, curation, screening, reference library,
+# validation folds, barcode gap, classification of those folds and negative controls. No real
+# accuracy is read here: the controls of step 8 come first and the real metrics are Phase 6.
 #
 # The branch reads the same phylotaR workspace as the phylogeny (0_phylotaR_raw_Ingroup/)
 # and writes only under 11_barcoding/. The first run downloads GenBank metadata for the
@@ -151,6 +151,40 @@ classify_barcoding_folds(
 )
 
 # -------------------------------------------------------------
+# Step 8: Negative controls, before any real accuracy is read. CN1 permutes the labels and asks
+# whether the folds leak; CN2 asks the library about sequences that are not cacti; CN3 measures the
+# resubstitution bias on the same queries as step 7.
+# -------------------------------------------------------------
+# CN2 needs an outgroup, assembled from the raw phylotaR workspace of the outgroup with the filters
+# of step 1. checklist_path = NA applies no checklist: NULL would load the checklist of Cactaceae
+# and discard every outgroup name. No manual exclusions, and no minimum of species per cluster.
+# The comparison table is written against the outgroup's own cluster-to-locus assignment.
+assemble_barcoding_dataset(
+  wd_path = "0_phylotaR_raw_Outgroup",
+  output_dir = "11_barcoding/8_controls/outgroup",
+  target_genes_file = system.file("extdata", "target_genes.txt", package = "PhyloCactus"),
+  genes_map_file = system.file("extdata", "genes_map.csv", package = "PhyloCactus"),
+  apply_manual_exclusions = FALSE,
+  checklist_path = NA,
+  min_species = 0,
+  preferred_parent = "3593",
+  force_download = FALSE,
+  phylogeny_map_file = "1_phylotaR_out_Outgroup/TABLE_CLUSTER_MARKER_ASSIGNMENT_OUTGROUP.csv"
+)
+
+# CN2 aligns each outgroup query to the library with MAFFT --add --keeplength, one call per query,
+# so MAFFT has to be available. The three controls take about 11 minutes.
+run_barcoding_controls(
+  library_dir = "11_barcoding/4_library",
+  folds_dir = "11_barcoding/5_folds",
+  output_dir = "11_barcoding/8_controls",
+  outgroup_dir = "11_barcoding/8_controls/outgroup/1_assembly",
+  method = "nn",
+  permutations = 10L,
+  seed = 1L
+)
+
+# -------------------------------------------------------------
 # Results
 # -------------------------------------------------------------
 print(utils::read.csv("11_barcoding/3_screening/TABLE_barcoding_marker_screening.csv"))
@@ -161,3 +195,6 @@ print(utils::read.csv("11_barcoding/4_library/TABLE_barcoding_funnel.csv"))
 print(utils::read.csv("11_barcoding/5_folds/TABLE_barcoding_folds_summary.csv"))
 # Barcode gap per locus and model, with the candidate threshold and its decision
 print(utils::read.csv("11_barcoding/6_gap/TABLE_barcoding_gap_summary.csv"))
+# Negative controls: leakage verdict per locus and scheme, and the outgroup queries per locus
+print(utils::read.csv("11_barcoding/8_controls/TABLE_barcoding_cn1_verdict.csv"))
+print(utils::read.csv("11_barcoding/8_controls/TABLE_barcoding_cn2_outgroup.csv"))

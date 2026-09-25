@@ -363,8 +363,10 @@ barcoding_outgroup_taxids <- function() {
 #' @param manual_exclusions_file Character. Curated accession exclusions; defaults to
 #'   `inst/extdata/manual_exclusions_ingroup.csv`.
 #' @param apply_manual_exclusions Logical. Apply the curated exclusions? Defaults to `TRUE`.
-#' @param checklist_path Character. Accepted checklist (Korotkova *et al*. 2021); defaults to the
-#'   checklist distributed with the package.
+#' @param checklist_path Character. Accepted checklist (Korotkova *et al*. 2021); `NULL`, the default,
+#'   uses the checklist distributed with the package. `NA` applies no checklist and keeps every
+#'   GenBank name, cleaned to `Genus_species`: that is what the outgroup of CN2 needs, since a
+#'   checklist of Cactaceae would discard every outgroup name.
 #' @param min_species Integer. A cluster is retained when it holds more than this number of species.
 #'   Defaults to `50`, as in the phylogeny.
 #' @param preferred_parent Character. NCBI Taxonomy ID of the focal ingroup, used to decide which
