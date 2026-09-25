@@ -109,7 +109,7 @@
 #'   library_dir = "11_barcoding/4_library",
 #'   folds_dir = "11_barcoding/5_folds",
 #'   output_dir = "11_barcoding/8_controls",
-#'   outgroup_dir = "11_barcoding/8_controls/outgroup"
+#'   outgroup_dir = "11_barcoding/8_controls/outgroup/1_assembly"
 #' )
 #' }
 #' @export
