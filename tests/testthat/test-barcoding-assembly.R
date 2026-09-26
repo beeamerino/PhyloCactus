@@ -176,3 +176,22 @@ test_that("writing the branch FASTA files leaves the input directories unchanged
   expect_setequal(names(written), c("Opuntia_robusta|S1.1", "Opuntia_robusta|S2.1"))
   expect_equal(tools::md5sum(list.files(input_dir, full.names = TRUE)), md5_before)
 })
+
+# Added on 2026-09-26. When no name is discarded, table() over empty vectors lost both factor columns
+# and the table was written with the header "accessions","" (outgroup of CN2, run of 2026-09-23).
+test_that("the table of discarded names keeps its three columns when nothing is discarded", {
+  empty_kept <- data.frame(genbank_name = character(0), locus = character(0), species = character(0),
+                      stringsAsFactors = FALSE)
+  d0 <- .bc_discarded_names(empty_kept)
+  expect_identical(names(d0), c("genbank_name", "locus", "accessions"))
+  expect_equal(nrow(d0), 0L)
+
+  k <- data.frame(genbank_name = c("Opuntia_x", "Opuntia_x", "Cereus_y", "Cereus_z"),
+                  locus = c("matK", "matK", "rbcL", "rbcL"),
+                  species = c(NA, NA, NA, "Cereus_z"), stringsAsFactors = FALSE)
+  d <- .bc_discarded_names(k)
+  expect_identical(names(d), c("genbank_name", "locus", "accessions"))
+  expect_equal(d$accessions[d$genbank_name == "Opuntia_x" & d$locus == "matK"], 2L)
+  expect_equal(d$accessions[d$genbank_name == "Cereus_y"], 1L)
+  expect_false("Cereus_z" %in% d$genbank_name)
+})

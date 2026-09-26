@@ -143,6 +143,25 @@ barcoding_outgroup_taxids <- function() {
   }, character(1))
 }
 
+#' Accessions whose name is not in the checklist, counted by GenBank name and locus
+#'
+#' `table()` over empty vectors drops both factor columns, so an empty result is built by hand and
+#' keeps the three columns of the table.
+#' @noRd
+.bc_discarded_names <- function(kept) {
+  d <- kept[is.na(kept$species), , drop = FALSE]
+  if (nrow(d) == 0L) {
+    return(data.frame(genbank_name = character(0), locus = character(0), accessions = integer(0),
+                      stringsAsFactors = FALSE))
+  }
+  tab <- as.data.frame(table(genbank_name = d$genbank_name, locus = d$locus), stringsAsFactors = FALSE)
+  tab <- tab[tab$Freq > 0, , drop = FALSE]
+  names(tab)[names(tab) == "Freq"] <- "accessions"
+  tab$accessions <- as.integer(tab$accessions)
+  rownames(tab) <- NULL
+  tab
+}
+
 #' Resolve sids present in more than one cluster, with the rule of assemble_ingroup_phylotar()
 #'
 #' A sid in some cluster whose parent is `preferred_parent` is kept only there; otherwise it is kept
@@ -563,10 +582,7 @@ assemble_barcoding_dataset <- function(wd_path,
   # 5. Names, with the rule of clean_taxonomic_names()
   kept$species <- .bc_resolve_names(kept$genbank_name, checklist_path)
   discarded <- kept[is.na(kept$species), , drop = FALSE]
-  discarded_tab <- as.data.frame(table(genbank_name = discarded$genbank_name, locus = discarded$locus),
-                                 stringsAsFactors = FALSE)
-  discarded_tab <- discarded_tab[discarded_tab$Freq > 0, , drop = FALSE]
-  names(discarded_tab)[names(discarded_tab) == "Freq"] <- "accessions"
+  discarded_tab <- .bc_discarded_names(kept)
   utils::write.csv(discarded_tab, file.path(dir_asm, "TABLE_barcoding_discarded_names.csv"), row.names = FALSE)
   log_message("Accessions dropped because their name is not in the checklist: ", nrow(discarded),
               " in ", length(unique(discarded$genbank_name)), " names.")
