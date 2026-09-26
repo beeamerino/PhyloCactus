@@ -24,7 +24,7 @@ analyze_barcode_gap(
 T for a pair to have a value (E13 of the validation plan, 2026-09-22). Pairs below it are counted
 apart and left out of every distribution and percentile; they are never imputed.}
 
-\item{paralog_loci}{Character vector. Loci flagged in \code{posible_paralogo}.}
+\item{paralog_loci}{Character vector. Loci flagged in \code{possible_paralog}.}
 
 \item{figures}{Logical. Write one figure per locus, with one panel per model.}
 }

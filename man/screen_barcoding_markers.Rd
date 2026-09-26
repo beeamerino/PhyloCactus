@@ -32,7 +32,7 @@ species keep two or more accessions after curation. Defaults to \code{20L} (deci
 \code{\link[=run_marker_screening]{run_marker_screening()}}. Defaults to \code{0.3}.}
 
 \item{paralog_loci}{Character vector. Loci under paralogy surveillance, flagged in the column
-\code{posible_paralogo} of every table; the flag never excludes a locus. Defaults to \code{"pepC_like"}.}
+\code{possible_paralog} of every table; the flag never excludes a locus. Defaults to \code{"pepC_like"}.}
 }
 \value{
 Invisibly, a list with \code{screening} and \code{identical}. Writes

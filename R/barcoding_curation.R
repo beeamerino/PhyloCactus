@@ -23,14 +23,14 @@
   .bc_read_step_table(file.path(assembly_dir, "TABLE_barcoding_accession_registry.csv"), "assemble_barcoding_dataset")
 }
 
-#' Paralogy surveillance: add `posible_paralogo` to a table with a `locus` column
+#' Paralogy surveillance: add `possible_paralog` to a table with a `locus` column
 #'
 #' Phase 2, item 5 of the 0.5.0 plan: the loci named in `paralog_loci` (by default `pepC_like`) are
 #' flagged in every output of the branch. The flag informs and never excludes.
 #' @noRd
 .bc_flag_paralog <- function(tab, paralog_loci) {
   if (is.null(tab)) return(tab)
-  tab$posible_paralogo <- as.character(tab$locus) %in% paralog_loci
+  tab$possible_paralog <- as.character(tab$locus) %in% paralog_loci
   tab
 }
 
@@ -42,9 +42,9 @@
   n_rep <- function(d) sum(table(d$species) >= 2L)
   curated <- assembled[assembled$sid %in% curated_sids, , drop = FALSE]
   data.frame(
-    especies_con_replica_ensamblado = n_rep(assembled),
-    especies_con_replica_curado = n_rep(curated),
-    pasa_umbral = n_rep(curated) >= min_species_with_replica,
+    species_with_replicate_assembled = n_rep(assembled),
+    species_with_replicate_curated = n_rep(curated),
+    passes_threshold = n_rep(curated) >= min_species_with_replica,
     stringsAsFactors = FALSE
   )
 }
@@ -52,8 +52,8 @@
 #' Screening decision: the threshold decides, saturation only flags (decision D3 of 2026-09-21)
 #' @noRd
 .bc_screen_decision <- function(screen) {
-  screen$entra <- screen$pasa_umbral %in% TRUE
-  screen$marca_saturacion <- screen$saturado %in% TRUE
+  screen$enters <- screen$passes_threshold %in% TRUE
+  screen$saturation_flag <- screen$saturated %in% TRUE
   screen
 }
 
@@ -67,8 +67,8 @@
     s <- toupper(unname(a))
     do.call(rbind, lapply(sort(unique(sp)), function(x) {
       data.frame(locus = l, species = x,
-                 accesiones = sum(sp == x),
-                 secuencias_distintas = length(unique(s[sp == x])),
+                 accessions = sum(sp == x),
+                 distinct_sequences = length(unique(s[sp == x])),
                  stringsAsFactors = FALSE)
     }))
   }))
@@ -158,7 +158,7 @@ curate_barcoding_markers <- function(input_dir = file.path("11_barcoding", "1_as
 #' @param saturation_flag_cutoff Numeric. Slope threshold of the saturation proxy, as in
 #'   [run_marker_screening()]. Defaults to `0.3`.
 #' @param paralog_loci Character vector. Loci under paralogy surveillance, flagged in the column
-#'   `posible_paralogo` of every table; the flag never excludes a locus. Defaults to `"pepC_like"`.
+#'   `possible_paralog` of every table; the flag never excludes a locus. Defaults to `"pepC_like"`.
 #' @return Invisibly, a list with `screening` and `identical`. Writes
 #'   `TABLE_barcoding_marker_screening.csv` and `TABLE_barcoding_identical_sequences.csv`.
 #' @export
@@ -198,12 +198,12 @@ screen_barcoding_markers <- function(assembly_dir = file.path("11_barcoding", "1
     thr <- .bc_screen_threshold(assembled, curated_sids, min_species_with_replica)
     ctx <- .bc_locus_summary(assembled[assembled$sid %in% curated_sids, , drop = FALSE])
     if (is.null(ctx) || nrow(ctx) == 0) {
-      ctx <- data.frame(locus = l, especies_totales = 0L, especies_con_replica = 0L, accesiones_totales = 0L,
-                        generos_totales = 0L, generos_con_2_o_mas_especies = 0L, stringsAsFactors = FALSE)
+      ctx <- data.frame(locus = l, total_species = 0L, species_with_replicate = 0L, total_accessions = 0L,
+                        total_genera = 0L, genera_with_2plus_species = 0L, stringsAsFactors = FALSE)
     }
-    data.frame(ctx, thr[, c("especies_con_replica_ensamblado", "pasa_umbral")],
-               accesiones_ensamblado = nrow(assembled),
-               saturado = sat$saturated, pendiente_saturacion = sat$slope, motivo_saturacion = sat$reason,
+    data.frame(ctx, thr[, c("species_with_replicate_assembled", "passes_threshold")],
+               accessions_assembled = nrow(assembled),
+               saturated = sat$saturated, saturation_slope = sat$slope, saturation_reason = sat$reason,
                stringsAsFactors = FALSE)
   })
   screening <- .bc_flag_provisional(.bc_flag_paralog(.bc_screen_decision(do.call(rbind, rows)), paralog_loci))

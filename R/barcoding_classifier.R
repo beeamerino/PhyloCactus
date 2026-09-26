@@ -6,16 +6,16 @@
 #' Empty prediction row, so every path returns the same columns
 #'
 #' The two methods write the same columns, which is what makes them comparable column by column.
-#' `distancia_vecino` and `margen` are the scores of the nearest neighbour; `confianza` is the score
+#' `nn_distance` and `margin` are the scores of the nearest neighbour; `confidence` is the score
 #' of IdTaxa. Each method fills its own and leaves the other empty. The threshold is not applied
 #' here: it is swept in Phase 6 over these scores, without running the classifier again.
 #' @noRd
-.bc_prediction_row <- function(estado, especie = NA_character_, genero = NA_character_,
-                               candidatas = NA_character_, distancia = NA_real_, margen = NA_real_,
-                               confianza = NA_real_, motivo = NA_character_) {
-  data.frame(estado = as.integer(estado), especie_predicha = especie, genero_predicho = genero,
-             candidatas = candidatas, distancia_vecino = distancia, margen = margen,
-             confianza = confianza, motivo = motivo, stringsAsFactors = FALSE)
+.bc_prediction_row <- function(state, species = NA_character_, genus = NA_character_,
+                               candidates = NA_character_, distance = NA_real_, margin = NA_real_,
+                               confidence = NA_real_, reason = NA_character_) {
+  data.frame(state = as.integer(state), predicted_species = species, predicted_genus = genus,
+             candidates = candidates, nn_distance = distance, margin = margin,
+             confidence = confidence, reason = reason, stringsAsFactors = FALSE)
 }
 
 #' Three states from the structure of the tie at the minimum distance
@@ -40,30 +40,30 @@
   }
   train_ids <- train_ids[train_ids %in% rownames(dmat)]
   if (length(train_ids) == 0L) {
-    return(.bc_prediction_row(3L, motivo = "sin_entrenamiento"))
+    return(.bc_prediction_row(3L, reason = "no_training"))
   }
   d <- dmat[test_id, train_ids]
   names(d) <- train_ids
   d <- d[!is.na(d)]
   if (length(d) == 0L) {
-    return(.bc_prediction_row(3L, motivo = "sin_posiciones_comparables"))
+    return(.bc_prediction_row(3L, reason = "no_comparable_positions"))
   }
   d_min <- min(d)
-  empatadas <- sort(unique(unname(species[names(d)[d == d_min]])), method = "radix")
-  candidatas <- paste(empatadas, collapse = "|")
-  generos <- unique(.bc_genus(empatadas))
+  tied <- sort(unique(unname(species[names(d)[d == d_min]])), method = "radix")
+  candidates <- paste(tied, collapse = "|")
+  genera <- unique(.bc_genus(tied))
 
-  if (length(empatadas) == 1L) {
-    otras <- d[unname(species[names(d)]) != empatadas]
-    margen <- if (length(otras) == 0L) NA_real_ else min(otras) - d_min
-    .bc_prediction_row(1L, especie = empatadas, genero = generos, candidatas = candidatas,
-                       distancia = d_min, margen = margen)
-  } else if (length(generos) == 1L) {
-    .bc_prediction_row(2L, genero = generos, candidatas = candidatas,
-                       distancia = d_min, margen = 0)
+  if (length(tied) == 1L) {
+    others <- d[unname(species[names(d)]) != tied]
+    margin <- if (length(others) == 0L) NA_real_ else min(others) - d_min
+    .bc_prediction_row(1L, species = tied, genus = genera, candidates = candidates,
+                       distance = d_min, margin = margin)
+  } else if (length(genera) == 1L) {
+    .bc_prediction_row(2L, genus = genera, candidates = candidates,
+                       distance = d_min, margin = 0)
   } else {
-    .bc_prediction_row(3L, candidatas = candidatas, distancia = d_min, margen = 0,
-                       motivo = "empate_entre_generos")
+    .bc_prediction_row(3L, candidates = candidates, distance = d_min, margin = 0,
+                       reason = "tie_across_genera")
   }
 }
 
@@ -74,20 +74,20 @@
 #' gives the state directly: species is state 1, genus alone is state 2 with the species of that
 #' genus in the training set as candidates, and neither is state 3.
 #'
-#' It reports `confianza` and leaves the distances empty, and it is a contrast: the branch
+#' It reports `confidence` and leaves the distances empty, and it is a contrast: the branch
 #' classifier is the nearest neighbour (decision of BMM, 2026-09-22).
 #' @noRd
 .bc_classify_idtaxa <- function(train, train_labels, query, threshold = 60, processors = 1L) {
   if (length(train) != length(train_labels)) {
     stop("train and train_labels have different lengths.", call. = FALSE)
   }
-  generos <- .bc_genus(unname(train_labels))
-  taxonomia <- paste0("Root;", generos, ";", unname(train_labels))
+  genera <- .bc_genus(unname(train_labels))
+  taxonomy_str <- paste0("Root;", genera, ";", unname(train_labels))
   dna <- Biostrings::DNAStringSet(toupper(unname(train)))
   names(dna) <- names(train)
-  entrenado <- DECIPHER::LearnTaxa(train = dna, taxonomy = taxonomia, verbose = FALSE)
+  trained <- DECIPHER::LearnTaxa(train = dna, taxonomy = taxonomy_str, verbose = FALSE)
   q <- Biostrings::DNAStringSet(toupper(unname(query)))
-  ids <- DECIPHER::IdTaxa(q, entrenado, strand = "top", threshold = threshold,
+  ids <- DECIPHER::IdTaxa(q, trained, strand = "top", threshold = threshold,
                           processors = processors, verbose = FALSE)
   taxon <- ids[[1]]$taxon
   conf <- ids[[1]]$confidence
@@ -96,14 +96,14 @@
   conf <- conf[ok]
 
   if (length(taxon) >= 3L) {
-    .bc_prediction_row(1L, especie = taxon[3], genero = taxon[2], candidatas = taxon[3],
-                       confianza = conf[3])
+    .bc_prediction_row(1L, species = taxon[3], genus = taxon[2], candidates = taxon[3],
+                       confidence = conf[3])
   } else if (length(taxon) == 2L) {
-    candidatas <- sort(unique(unname(train_labels)[generos == taxon[2]]), method = "radix")
-    .bc_prediction_row(2L, genero = taxon[2], candidatas = paste(candidatas, collapse = "|"),
-                       confianza = conf[2])
+    candidates <- sort(unique(unname(train_labels)[genera == taxon[2]]), method = "radix")
+    .bc_prediction_row(2L, genus = taxon[2], candidates = paste(candidates, collapse = "|"),
+                       confidence = conf[2])
   } else {
-    .bc_prediction_row(3L, motivo = "confianza_insuficiente")
+    .bc_prediction_row(3L, reason = "low_confidence")
   }
 }
 
@@ -115,9 +115,9 @@
 #' @noRd
 .bc_training_alignment <- function(dna, train_ids) {
   m <- as.matrix(dna)
-  faltan <- setdiff(train_ids, rownames(m))
-  if (length(faltan) > 0L) {
-    stop("Training sequences not in the alignment: ", paste(faltan, collapse = ", "), call. = FALSE)
+  missing <- setdiff(train_ids, rownames(m))
+  if (length(missing) > 0L) {
+    stop("Training sequences not in the alignment: ", paste(missing, collapse = ", "), call. = FALSE)
   }
   m <- m[train_ids, , drop = FALSE]
   m[, colSums(as.character(m) != "-") > 0L, drop = FALSE]
@@ -132,29 +132,29 @@
 #' measured by the same operation.
 #'
 #' A query that matches the training set in neither direction is not aligned and not classified: it
-#' is state 3 with the reason `sin_coincidencia`, no species and no distance (decision D4 of BMM,
+#' is state 3 with the reason `no_match`, no species and no distance (decision D4 of BMM,
 #' 2026-09-26). A sequence with no homology to the locus has no nearest neighbour worth publishing.
 #'
 #' @param train_dna Aligned training set, `sid` as row names.
 #' @param species Character vector of species named by `sid`; must cover every training row.
 #' @param query Character. The query sequence; gaps are removed.
 #' @param pool Strand reference pool of the training set, or `NULL` to build it here.
-#' @return One-row data frame: `orientacion` followed by the columns of `.bc_prediction_row()`.
+#' @return One-row data frame: `orientation` followed by the columns of `.bc_prediction_row()`.
 #' @noRd
 .bc_classify_by_add <- function(train_dna, species, query, model, min_comparable, pool = NULL,
                                 mafft_exec = "mafft", mafft_opts = "--auto") {
   train_ids <- rownames(train_dna)
   if (is.null(pool)) pool <- .bc_strand_pool(train_dna)
-  q <- .bc_dnabin_row(gsub("-", "", query, fixed = TRUE), "consulta")
+  q <- .bc_dnabin_row(gsub("-", "", query, fixed = TRUE), "query")
   o <- .bc_orient_to_library(q, pool)
-  if (o$orientacion == "sin_coincidencia") {
-    r <- .bc_prediction_row(3L, motivo = "sin_coincidencia")
+  if (o$orientation == "no_match") {
+    r <- .bc_prediction_row(3L, reason = "no_match")
   } else {
-    junto <- .bc_align_to_library(train_dna, o$query, mafft_exec = mafft_exec, mafft_opts = mafft_opts)
-    dm <- .bc_classifier_matrix(junto, model, min_comparable)
-    r <- .bc_classify_nn(dm, train_ids, "consulta", c(species[train_ids], consulta = "consulta"))
+    joined <- .bc_align_to_library(train_dna, o$query, mafft_exec = mafft_exec, mafft_opts = mafft_opts)
+    dm <- .bc_classifier_matrix(joined, model, min_comparable)
+    r <- .bc_classify_nn(dm, train_ids, "query", c(species[train_ids], query = "query"))
   }
-  cbind(data.frame(orientacion = o$orientacion, stringsAsFactors = FALSE), r)
+  cbind(data.frame(orientation = o$orientation, stringsAsFactors = FALSE), r)
 }
 
 #' Distance matrix of a locus with the short pairs left without value
@@ -174,10 +174,10 @@
 #' this way the hard rule cannot be broken by a mistake here.
 #' @noRd
 .bc_folds_from_table <- function(tab, sids_locus) {
-  key <- paste(tab$locus, tab$pliegue, sep = "\r")
+  key <- paste(tab$locus, tab$fold, sep = "\r")
   lapply(sort(unique(key), method = "radix"), function(k) {
     d <- tab[key == k, , drop = FALSE]
-    list(locus = d$locus[1], pliegue = d$pliegue[1], estrato = d$estrato[1],
+    list(locus = d$locus[1], fold = d$fold[1], stratum = d$stratum[1],
          test_ids = d$sid, train_ids = setdiff(sids_locus, d$sid))
   })
 }
@@ -191,8 +191,8 @@
 #'
 #' The output has three states (validation plan, sec. 1): species, genus with the specific ambiguity
 #' declared, and not assignable. The state comes from the structure of the tie at the minimum
-#' distance, not from a threshold, so the threshold can be swept later over `distancia_vecino`,
-#' `margen` and `confianza` without classifying again.
+#' distance, not from a threshold, so the threshold can be swept later over `nn_distance`,
+#' `margin` and `confidence` without classifying again.
 #'
 #' @param library_dir Character. Output directory of [finalize_barcoding_library()].
 #' @param folds_dir Character. Output directory of [build_barcoding_folds()].
@@ -226,7 +226,7 @@
 #'   `TABLE_barcoding_predictions_<scheme>_<method>.csv` and `TABLE_barcoding_timing_<method>.csv`,
 #'   one row per locus and scheme with the folds, the queries and the seconds they took; with
 #'   `alignment = "add"` both names carry the suffix `_add` and the prediction tables add the columns
-#'   `alineamiento` and `orientacion`.
+#'   `alignment` and `orientation`.
 #' @examples
 #' \dontrun{
 #' classify_barcoding_folds(
@@ -261,7 +261,7 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
   }
   # MAFFT is checked before anything is read or written, so a missing binary costs nothing
   if (alignment == "add") .bc_assert_mafft(mafft_exec)
-  sufijo <- paste0(method, if (alignment == "add") "_add" else "")
+  suffix <- paste0(method, if (alignment == "add") "_add" else "")
   started <- Sys.time()
   call_run <- function() {
     .bc_assert_output_dir(output_dir)
@@ -277,17 +277,17 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
     loci <- if (is.null(loci)) loci_todos else intersect(loci_todos, loci)
 
     out <- list()
-    tiempos <- list()
+    timings <- list()
     for (sc in schemes) {
       tab <- utils::read.csv(file.path(folds_dir, paste0("TABLE_barcoding_folds_", sc, ".csv")),
                              stringsAsFactors = FALSE)
-      filas <- list()
+      rows <- list()
       for (l in loci) {
         d <- lib[lib$locus == l, , drop = FALSE]
         species <- stats::setNames(d$species, d$sid)
-        pliegues <- .bc_folds_from_table(tab[tab$locus == l, , drop = FALSE], d$sid)
-        if (length(pliegues) == 0L) next
-        pliegues <- .bc_sample_folds(pliegues, max_folds, seed)
+        folds <- .bc_folds_from_table(tab[tab$locus == l, , drop = FALSE], d$sid)
+        if (length(folds) == 0L) next
+        folds <- .bc_sample_folds(folds, max_folds, seed)
 
         dna <- ape::read.dna(file.path(library_dir, paste0("LIB_", l, ".fasta")), format = "fasta",
                              as.matrix = TRUE)
@@ -302,21 +302,21 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
         } else NULL
 
         t0 <- Sys.time()
-        for (p in pliegues) {
+        for (p in folds) {
           if (alignment == "add") {
-            ent <- .bc_training_alignment(dna, p$train_ids)
-            pool <- .bc_strand_pool(ent)
+            train_aln <- .bc_training_alignment(dna, p$train_ids)
+            pool <- .bc_strand_pool(train_aln)
           }
           for (q in p$test_ids) {
             if (alignment == "add") {
               s <- paste(as.character(dna[q, ]), collapse = "")
-              r <- .bc_classify_by_add(ent, species, s, model, min_comparable, pool = pool,
+              r <- .bc_classify_by_add(train_aln, species, s, model, min_comparable, pool = pool,
                                        mafft_exec = mafft_exec, mafft_opts = mafft_opts)
-              filas[[length(filas) + 1L]] <- cbind(
-                data.frame(locus = l, esquema = sc, pliegue = p$pliegue, estrato = p$estrato, sid = q,
-                           especie_verdadera = unname(species[q]),
-                           genero_verdadero = .bc_genus(unname(species[q])),
-                           metodo = method, alineamiento = "add", stringsAsFactors = FALSE),
+              rows[[length(rows) + 1L]] <- cbind(
+                data.frame(locus = l, scheme = sc, fold = p$fold, stratum = p$stratum, sid = q,
+                           true_species = unname(species[q]),
+                           true_genus = .bc_genus(unname(species[q])),
+                           method = method, alignment = "add", stringsAsFactors = FALSE),
                 r)
               next
             }
@@ -326,36 +326,36 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
               .bc_classify_idtaxa(seqs[p$train_ids], species[p$train_ids], seqs[[q]],
                                   threshold = threshold)
             }
-            filas[[length(filas) + 1L]] <- cbind(
-              data.frame(locus = l, esquema = sc, pliegue = p$pliegue, estrato = p$estrato, sid = q,
-                         especie_verdadera = unname(species[q]),
-                         genero_verdadero = .bc_genus(unname(species[q])),
-                         metodo = method, stringsAsFactors = FALSE),
+            rows[[length(rows) + 1L]] <- cbind(
+              data.frame(locus = l, scheme = sc, fold = p$fold, stratum = p$stratum, sid = q,
+                         true_species = unname(species[q]),
+                         true_genus = .bc_genus(unname(species[q])),
+                         method = method, stringsAsFactors = FALSE),
               r)
           }
         }
-        segundos <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
-        n_consultas <- sum(vapply(pliegues, function(p) length(p$test_ids), integer(1)))
-        tiempos[[length(tiempos) + 1L]] <- data.frame(
-          locus = l, esquema = sc, metodo = method, alineamiento = alignment,
-          pliegues = length(pliegues), consultas = n_consultas, segundos = segundos,
+        seconds <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
+        n_queries <- sum(vapply(folds, function(p) length(p$test_ids), integer(1)))
+        timings[[length(timings) + 1L]] <- data.frame(
+          locus = l, scheme = sc, method = method, alignment = alignment,
+          folds = length(folds), queries = n_queries, seconds = seconds,
           stringsAsFactors = FALSE)
         message(sprintf("Locus '%s', scheme %s, method %s, alignment %s: %d folds, %d predictions written in %.1f s.",
-                        l, sc, method, alignment, length(pliegues), n_consultas, segundos))
+                        l, sc, method, alignment, length(folds), n_queries, seconds))
       }
-      pred <- do.call(rbind, filas)
+      pred <- do.call(rbind, rows)
       rownames(pred) <- NULL
       out[[sc]] <- pred
       utils::write.csv(pred, file.path(output_dir,
-                                       paste0("TABLE_barcoding_predictions_", sc, "_", sufijo, ".csv")),
+                                       paste0("TABLE_barcoding_predictions_", sc, "_", suffix, ".csv")),
                        row.names = FALSE)
     }
     # The running time is written, not left in prose: the projection of the complete IdTaxa run
     # (about 34 h) and of the add path (8.5 h) rested on rates noted by hand.
-    utils::write.csv(do.call(rbind, tiempos),
-                     file.path(output_dir, paste0("TABLE_barcoding_timing_", sufijo, ".csv")),
+    utils::write.csv(do.call(rbind, timings),
+                     file.path(output_dir, paste0("TABLE_barcoding_timing_", suffix, ".csv")),
                      row.names = FALSE)
-    .bc_classifier_banner(out, output_dir, sufijo)
+    .bc_classifier_banner(out, output_dir, suffix)
     invisible(out)
   }
 
@@ -383,7 +383,7 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
     status = "finished",
     started = started,
     outputs = c(stats::setNames(
-      file.path(output_dir, paste0("TABLE_barcoding_predictions_", names(result), "_", sufijo, ".csv")),
+      file.path(output_dir, paste0("TABLE_barcoding_predictions_", names(result), "_", suffix, ".csv")),
       paste0("Predictions, scheme ", names(result))),
       "Classifier output directory" = output_dir)
   )
@@ -415,8 +415,8 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
 
 #' A declared subset of folds, reproducible and without touching the session's random state
 #' @noRd
-.bc_sample_folds <- function(pliegues, max_folds, seed) {
-  if (is.null(max_folds) || length(pliegues) <= max_folds) return(pliegues)
+.bc_sample_folds <- function(folds, max_folds, seed) {
+  if (is.null(max_folds) || length(folds) <= max_folds) return(folds)
   had <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
   if (had) {
     old <- get(".Random.seed", envir = globalenv())
@@ -425,5 +425,5 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
     on.exit(suppressWarnings(rm(list = ".Random.seed", envir = globalenv())), add = TRUE)
   }
   set.seed(seed)
-  pliegues[sort(sample.int(length(pliegues), as.integer(max_folds)))]
+  folds[sort(sample.int(length(folds), as.integer(max_folds)))]
 }

@@ -199,7 +199,7 @@ run_barcoding_controls(
 
 # -------------------------------------------------------------
 # Step 9: Threshold of remoteness. A query whose distance to its nearest neighbour exceeds the
-# threshold is not named (state 3, reason lejania). The curve reports, for every threshold, what the
+# threshold is not named (state 3, reason remoteness). The curve reports, for every threshold, what the
 # legitimate queries become and how many outgroup queries are rejected; the operating threshold of
 # each locus is the quantile 0.99 of scheme G, fixed without looking at the outgroup.
 # -------------------------------------------------------------

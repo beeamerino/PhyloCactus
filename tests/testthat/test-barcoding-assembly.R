@@ -50,7 +50,7 @@ test_that("no reduction to one sequence per species: every accession of a specie
     sid          = c("S1.1", "S2.1", "S3.1", "T1.1"),
     locus        = "trnL-trnF",
     species      = c("Opuntia_ficus-indica", "Opuntia_ficus-indica", "Opuntia_ficus-indica", "Opuntia_robusta"),
-    nombre_genbank = c("Opuntia_ficus-indica", "Opuntia_ficus-indica", "Opuntia_ficus-indica", "Opuntia_robusta"),
+    genbank_name = c("Opuntia_ficus-indica", "Opuntia_ficus-indica", "Opuntia_ficus-indica", "Opuntia_robusta"),
     stringsAsFactors = FALSE
   )
 
@@ -111,17 +111,17 @@ test_that("the registry has one row per (locus, sid) and refuses a sid in two lo
     sid        = c("S1.1", "S2.1", "S3.1"),
     locus      = c("matK", "matK", "rbcL"),
     species    = c("Opuntia_robusta", "Opuntia_robusta", "Opuntia_robusta"),
-    nombre_genbank = "Opuntia_robusta",
+    genbank_name = "Opuntia_robusta",
     stringsAsFactors = FALSE
   )
 
   registry <- .bc_build_registry(base)
-  expect_named(registry, c("sid", "species", "genus", "locus", "cluster_id", "nombre_genbank"), ignore.order = TRUE)
+  expect_named(registry, c("sid", "species", "genus", "locus", "cluster_id", "genbank_name"), ignore.order = TRUE)
   expect_equal(registry$genus, rep("Opuntia", 3L))
   expect_equal(as.integer(table(registry$locus)[c("matK", "rbcL")]), c(2L, 1L))
 
   in_two_loci <- rbind(base, data.frame(cluster_id = 4L, sid = "S1.1", locus = "rbcL",
-                                        species = "Opuntia_robusta", nombre_genbank = "Opuntia_robusta"))
+                                        species = "Opuntia_robusta", genbank_name = "Opuntia_robusta"))
   expect_error(.bc_build_registry(in_two_loci), "more than one locus")
 })
 
@@ -139,12 +139,12 @@ test_that("the per-locus summary counts replication within a locus, never across
   rb <- s[s$locus == "rbcL", ]
 
   # Opuntia stricta and Cereus jamacaru have one accession in each locus: no replica in either.
-  expect_equal(mk$especies_totales, 3L)
-  expect_equal(mk$especies_con_replica, 1L)
-  expect_equal(mk$accesiones_totales, 4L)
-  expect_equal(mk$generos_totales, 2L)
-  expect_equal(mk$generos_con_2_o_mas_especies, 1L)
-  expect_equal(rb$especies_con_replica, 0L)
+  expect_equal(mk$total_species, 3L)
+  expect_equal(mk$species_with_replicate, 1L)
+  expect_equal(mk$total_accessions, 4L)
+  expect_equal(mk$total_genera, 2L)
+  expect_equal(mk$genera_with_2plus_species, 1L)
+  expect_equal(rb$species_with_replicate, 0L)
 })
 
 test_that("branch functions refuse to write into the phylogeny's directories", {
@@ -165,7 +165,7 @@ test_that("writing the branch FASTA files leaves the input directories unchanged
 
   registry <- data.frame(
     sid = c("S1.1", "S2.1"), species = "Opuntia_robusta", genus = "Opuntia",
-    locus = "matK", cluster_id = 0L, nombre_genbank = "Opuntia_robusta", stringsAsFactors = FALSE
+    locus = "matK", cluster_id = 0L, genbank_name = "Opuntia_robusta", stringsAsFactors = FALSE
   )
   sequences <- c(S1.1 = "ACGTACGTAC", S2.1 = "ACGTACGTAA")
   out_dir <- file.path(tmp, "11_barcoding", "1_assembly")

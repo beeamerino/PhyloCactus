@@ -20,7 +20,7 @@
   # genus. Without indels the alignment is the identity and both paths have to agree exactly.
   # Divergences of 3 to 7 %, not the 8 to 20 % of the fixture of step 7: the orientation of the add
   # path looks for shared 20-mers, and at 25 substitutions in 300 bases almost none survives, so a
-  # legitimate query came back as sin_coincidencia. On the real data none of the 720 legitimate
+  # legitimate query came back as no_match. On the real data none of the 720 legitimate
   # queries of the probe of 2026-09-25 did; the first version of this fixture was the outlier.
   lib_dir <- file.path(tmp, "4_library")
   dir.create(lib_dir, showWarnings = FALSE, recursive = TRUE)
@@ -51,11 +51,11 @@ test_that("the training alignment of a fold holds only the training set, and no 
              b = c("a", "c", "-", "g", "-"),
              q = c("a", "c", "t", "g", "t"))
   dna <- ape::as.DNAbin(m)
-  ent <- .bc_training_alignment(dna, c("a", "b"))
-  expect_equal(rownames(ent), c("a", "b"))
+  train_aln <- .bc_training_alignment(dna, c("a", "b"))
+  expect_equal(rownames(train_aln), c("a", "b"))
   # The third column was open only for the query: with the query out it has no base left
-  expect_equal(ncol(ent), 4L)
-  expect_true(all(colSums(as.character(ent) != "-") > 0))
+  expect_equal(ncol(train_aln), 4L)
+  expect_true(all(colSums(as.character(train_aln) != "-") > 0))
   expect_error(.bc_training_alignment(dna, c("a", "z")), "z")
 })
 
@@ -78,10 +78,10 @@ test_that("without indels both paths give the same state, species and distance f
     add <- utils::read.csv(file.path(out_dir, paste0("TABLE_barcoding_predictions_", sc, "_nn_add.csv")),
                            stringsAsFactors = FALSE)
     expect_equal(add$sid, lib$sid)
-    expect_equal(add$estado, lib$estado)
-    expect_equal(add$especie_predicha, lib$especie_predicha)
-    expect_equal(add$genero_predicho, lib$genero_predicho)
-    expect_equal(add$distancia_vecino, lib$distancia_vecino, tolerance = 1e-9)
+    expect_equal(add$state, lib$state)
+    expect_equal(add$predicted_species, lib$predicted_species)
+    expect_equal(add$predicted_genus, lib$predicted_genus)
+    expect_equal(add$nn_distance, lib$nn_distance, tolerance = 1e-9)
   }
 })
 
@@ -95,13 +95,13 @@ test_that("the add path writes its own tables and leaves the tables of the libra
 
   suppressMessages(classify_barcoding_folds(library_dir = f$library_dir, folds_dir = f$folds_dir,
                                             output_dir = out_dir, method = "nn"))
-  previas <- list.files(out_dir, pattern = "_nn\\.csv$", full.names = TRUE)
-  md5_antes <- tools::md5sum(previas)
+  previous <- list.files(out_dir, pattern = "_nn\\.csv$", full.names = TRUE)
+  md5_before <- tools::md5sum(previous)
 
   suppressMessages(classify_barcoding_folds(library_dir = f$library_dir, folds_dir = f$folds_dir,
                                             output_dir = out_dir, method = "nn", alignment = "add"))
 
-  expect_identical(tools::md5sum(previas), md5_antes)
+  expect_identical(tools::md5sum(previous), md5_before)
   for (sc in c("species", "genus")) {
     add <- utils::read.csv(file.path(out_dir, paste0("TABLE_barcoding_predictions_", sc, "_nn_add.csv")),
                            stringsAsFactors = FALSE)
@@ -109,9 +109,9 @@ test_that("the add path writes its own tables and leaves the tables of the libra
                              stringsAsFactors = FALSE)
     # One row per query of the folds, and the path declared in every row
     expect_setequal(paste(add$locus, add$sid), paste(folds$locus, folds$sid))
-    expect_true(all(c("alineamiento", "orientacion") %in% names(add)))
-    expect_true(all(add$alineamiento == "add"))
-    expect_true(all(add$orientacion %in% c("directa", "reversa", "sin_coincidencia")))
+    expect_true(all(c("alignment", "orientation") %in% names(add)))
+    expect_true(all(add$alignment == "add"))
+    expect_true(all(add$orientation %in% c("forward", "reverse", "no_match")))
   }
 })
 
@@ -121,17 +121,17 @@ test_that("a legitimate query with no homology to its training set is state 3, a
   set.seed(22L)
   base <- paste(sample(c("a", "c", "g", "t"), 300, replace = TRUE), collapse = "")
   vary <- function(s, k) { for (p in sample(seq_len(300), k)) substr(s, p, p) <- sample(c("a", "c", "g", "t"), 1); s }
-  ent <- c(A1 = vary(base, 2), A2 = vary(base, 3), B1 = vary(base, 25), B2 = vary(base, 28))
-  ent <- ape::as.DNAbin(do.call(rbind, strsplit(ent, "")))
+  train_aln <- c(A1 = vary(base, 2), A2 = vary(base, 3), B1 = vary(base, 25), B2 = vary(base, 28))
+  train_aln <- ape::as.DNAbin(do.call(rbind, strsplit(train_aln, "")))
   species <- c(A1 = "Opuntia_robusta", A2 = "Opuntia_robusta", B1 = "Opuntia_stricta", B2 = "Opuntia_stricta")
-  ajena <- paste(sample(c("a", "c", "g", "t"), 300, replace = TRUE), collapse = "")
+  alien <- paste(sample(c("a", "c", "g", "t"), 300, replace = TRUE), collapse = "")
 
-  r <- .bc_classify_by_add(ent, species, ajena, model = "raw", min_comparable = 100L)
-  expect_equal(r$orientacion, "sin_coincidencia")
-  expect_equal(r$estado, 3L)
-  expect_equal(r$motivo, "sin_coincidencia")
-  expect_true(is.na(r$especie_predicha))
-  expect_true(is.na(r$distancia_vecino))
+  r <- .bc_classify_by_add(train_aln, species, alien, model = "raw", min_comparable = 100L)
+  expect_equal(r$orientation, "no_match")
+  expect_equal(r$state, 3L)
+  expect_equal(r$reason, "no_match")
+  expect_true(is.na(r$predicted_species))
+  expect_true(is.na(r$nn_distance))
 })
 
 test_that("CN2 and the add path of step 7 are one path: the same query gets the same answer", {
@@ -153,10 +153,10 @@ test_that("CN2 and the add path of step 7 are one path: the same query gets the 
   a <- .bc_classify_by_add(lib, species, q, model = "raw", min_comparable = 100L)
   b <- .bc_cn2_queries(og, lib, data.frame(sid = h$sid, species = h$species, stringsAsFactors = FALSE),
                        model = "raw", min_comparable = 100L, locus = "matK")
-  expect_equal(a$estado, b$estado)
-  expect_equal(a$especie_predicha, b$especie_predicha)
-  expect_equal(a$distancia_vecino, b$distancia_vecino)
-  expect_equal(a$orientacion, b$orientacion)
+  expect_equal(a$state, b$state)
+  expect_equal(a$predicted_species, b$predicted_species)
+  expect_equal(a$nn_distance, b$nn_distance)
+  expect_equal(a$orientation, b$orientation)
 })
 
 test_that("the add path needs MAFFT and says so before classifying anything, and refuses IdTaxa", {
@@ -188,18 +188,18 @@ test_that("step 7 writes its running time per locus and scheme, for both paths",
   suppressMessages(classify_barcoding_folds(library_dir = f$library_dir, folds_dir = f$folds_dir,
                                             output_dir = out_dir, method = "nn"))
   t <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_timing_nn.csv"), stringsAsFactors = FALSE)
-  expect_true(all(c("locus", "esquema", "metodo", "alineamiento", "pliegues", "consultas",
-                    "segundos") %in% names(t)))
+  expect_true(all(c("locus", "scheme", "method", "alignment", "folds", "queries",
+                    "seconds") %in% names(t)))
   expect_equal(nrow(t), 2L)
-  expect_setequal(t$esquema, c("species", "genus"))
-  expect_true(all(t$segundos >= 0))
-  expect_true(all(t$alineamiento == "library"))
+  expect_setequal(t$scheme, c("species", "genus"))
+  expect_true(all(t$seconds >= 0))
+  expect_true(all(t$alignment == "library"))
 
   skip_if_not(.add_mafft_ok(), "MAFFT is not available")
   suppressMessages(classify_barcoding_folds(library_dir = f$library_dir, folds_dir = f$folds_dir,
                                             output_dir = out_dir, method = "nn", alignment = "add"))
   ta <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_timing_nn_add.csv"), stringsAsFactors = FALSE)
-  expect_true(all(ta$alineamiento == "add"))
+  expect_true(all(ta$alignment == "add"))
   # The timing of one path does not overwrite the other
   expect_true(file.exists(file.path(out_dir, "TABLE_barcoding_timing_nn.csv")))
 })

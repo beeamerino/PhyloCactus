@@ -79,7 +79,7 @@ nothing. A control over one species is an anecdote and has to be read as one.
 against its own training set with the query put back into it. Nothing else changes between this
 figure and the honest one, which is what makes the two comparable: until 2026-09-25 this control
 ran over the whole library instead, a different set of queries, and the two figures could not be
-subtracted. Written with the label \code{irreproducible_resustitucion} in the table itself, so the
+subtracted. Written with the label \code{irreproducible_resubstitution} in the table itself, so the
 figure cannot travel without it. \strong{Its value is published in Phase 6 and only next to the honest
 figure}, which does not exist yet.
 }
