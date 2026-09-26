@@ -540,3 +540,38 @@ test_that("step 8 writes the three control tables, labels CN3, and names the ste
                                       output_dir = file.path("4_Cleaned", "ctl")),
                "phylogeny")
 })
+
+# Added on 2026-09-26, decision D4 of BMM (proposal of Phase 6A, finding H1). A query that matches
+# the locus in neither direction was left as it arrived, aligned and classified all the same: in the
+# run of 2026-09-25 the 83 sequences of trnS-trnG, all of Talinopsis frutescens, came out in state 1
+# with Espostoa senilis as their species and distances of 0.34 to 0.39. The summary already kept them
+# out; the table by query did not, and any reader of that table would have counted them. A sequence
+# with no homology to the locus has no nearest neighbour worth publishing.
+
+test_that("a CN2 query that matches the locus in neither direction is state 3, with no species and no distance", {
+  skip_if_not_installed("Biostrings")
+  skip_if_not_installed("ape")
+  skip_if_not(.ctl_mafft_ok(), "MAFFT is not available")
+  tmp <- withr::local_tempdir()
+  f <- .ctl_library(tmp)
+  og <- .ctl_outgroup_hebras(tmp, f$base)
+  out_dir <- file.path(tmp, "8_controls")
+
+  suppressMessages(run_barcoding_controls(library_dir = f$library_dir, folds_dir = f$folds_dir,
+                                          output_dir = out_dir, outgroup_dir = og,
+                                          controls = "CN2", loci = "matK"))
+
+  q <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_cn2_queries.csv"), stringsAsFactors = FALSE)
+  sc <- q[q$orientacion == "sin_coincidencia", , drop = FALSE]
+  expect_equal(nrow(sc), 1L)
+  expect_equal(sc$estado, 3L)
+  expect_equal(sc$motivo, "sin_coincidencia")
+  expect_true(is.na(sc$especie_predicha))
+  expect_true(is.na(sc$genero_predicho))
+  expect_true(is.na(sc$distancia_vecino))
+  # The two comparable queries keep what they had: this change touches nothing else
+  comp <- q[q$orientacion != "sin_coincidencia", , drop = FALSE]
+  expect_equal(nrow(comp), 2L)
+  expect_false(any(is.na(comp$distancia_vecino)))
+  expect_false(any(comp$motivo %in% "sin_coincidencia"))
+})
