@@ -1,4 +1,4 @@
-# Tests of the chunked run of step 7 and of the SLURM job that runs it (11_barcoding/7_classifier/).
+# Tests of the chunked run of step 7 and of the SLURM job scripts that run it (11_barcoding/7_classifier/).
 # Written before the code. Phase 6B of PhyloCactus 0.5.0, decisions K1, K4 and K5 of BMM (26-09).
 #
 # The full IdTaxa run takes about 34 hours of one core and runs on Leftraru as a job array: the
@@ -171,16 +171,21 @@ test_that("the merge refuses a missing chunk, a fold twice, a fold missing and a
 
 # ---- K5: the SLURM job --------------------------------------------------------------------------
 
+# Same conventions as generate_ml_search_script() and generate_bootstrap_script(): cluster_* arguments,
+# load_module, short SBATCH flags, one log per array task, the versions printed by the job, and the
+# job resolving its paths from the submit directory. Revised on 2026-09-26 before the code, after
+# BMM asked to follow the RAxML-NG scripts.
 test_that("the SLURM job runs one chunk per task and merges after the array, with nothing hard-coded", {
   tmp <- withr::local_tempdir()
   job_dir <- file.path(tmp, "job dir")
 
-  files <- write_barcoding_slurm_job(
-    job_dir = job_dir, n_chunks = 12L,
+  files <- generate_barcoding_job_scripts(
     library_dir = "/data/11_barcoding/4_library", folds_dir = "/data/11_barcoding/5_folds",
-    output_dir = "/data/11_barcoding/7_classifier", method = "idtaxa",
-    partition = "general", account = "acc123", time = "04:00:00", mem = "4G",
-    r_setup = "module load R/4.4.1", lib_path = "/home/u/R/lib", email = "user@example.org")
+    classifier_dir = "/data/11_barcoding/7_classifier", method = "idtaxa", n_chunks = 12L,
+    job_dir = job_dir,
+    cluster_job_name = "cactus_idtaxa", cluster_partition = "main", cluster_mem = "4G",
+    cluster_time = "04:00:00", cluster_queue = "long", cluster_mail_user = "user@example.org",
+    load_module = c("gcc/14.2.0", "R/4.4.1"), r_lib = "/home/u/R/lib")
 
   expect_setequal(basename(files), c("job_array.sh", "job_merge.sh", "submit.sh", "run_chunk.R", "run_merge.R"))
   expect_true(all(file.exists(files)))
@@ -188,20 +193,29 @@ test_that("the SLURM job runs one chunk per task and merges after the array, wit
   arr <- read("job_array.sh"); mrg <- read("job_merge.sh"); sub <- read("submit.sh")
   rc <- read("run_chunk.R"); rm_ <- read("run_merge.R")
 
-  expect_match(arr, "#SBATCH --array=1-12", fixed = TRUE)
-  expect_match(arr, "#SBATCH --partition=general", fixed = TRUE)
-  expect_match(arr, "#SBATCH --account=acc123", fixed = TRUE)
-  expect_match(arr, "#SBATCH --time=04:00:00", fixed = TRUE)
+  expect_match(arr, "#SBATCH -J cactus_idtaxa", fixed = TRUE)
+  expect_match(arr, "#SBATCH -p main", fixed = TRUE)
+  expect_match(arr, "#SBATCH -t 04:00:00", fixed = TRUE)
   expect_match(arr, "#SBATCH --mem=4G", fixed = TRUE)
   expect_match(arr, "#SBATCH --cpus-per-task=1", fixed = TRUE)
-  expect_match(arr, "module load R/4.4.1", fixed = TRUE)
+  expect_match(arr, "#SBATCH --array=1-12", fixed = TRUE)
+  expect_match(arr, "#SBATCH -o slurm_%A_%a.out", fixed = TRUE)
+  expect_match(arr, "#SBATCH -q long", fixed = TRUE)
+  expect_match(arr, "#SBATCH --mail-user=user@example.org", fixed = TRUE)
+  expect_match(arr, "module load gcc/14.2.0 R/4.4.1", fixed = TRUE)
+  expect_match(arr, "R_LIBS_USER=", fixed = TRUE)
+  expect_match(arr, "/home/u/R/lib", fixed = TRUE)
+  expect_match(arr, "SLURM_SUBMIT_DIR", fixed = TRUE)
   expect_match(arr, "SLURM_ARRAY_TASK_ID", fixed = TRUE)
-  expect_match(arr, "user@example.org", fixed = TRUE)
+  # The job prints the versions it ran with, as the RAxML-NG jobs do
+  expect_match(arr, "DECIPHER", fixed = TRUE)
+  expect_match(arr, "PhyloCactus", fixed = TRUE)
   # The path with a space reaches bash quoted
   expect_match(arr, shQuote(file.path(job_dir, "run_chunk.R")), fixed = TRUE)
   expect_match(sub, "--parsable", fixed = TRUE)
   expect_match(sub, "--dependency=afterok:", fixed = TRUE)
   expect_match(mrg, "run_merge.R", fixed = TRUE)
+  expect_false(grepl("--array", mrg, fixed = TRUE))
 
   # The R scripts are valid R and carry the arguments of the run
   expect_silent(parse(file.path(job_dir, "run_chunk.R")))
@@ -210,7 +224,6 @@ test_that("the SLURM job runs one chunk per task and merges after the array, wit
   expect_match(rc, "n_chunks = 12L", fixed = TRUE)
   expect_match(rc, "\"idtaxa\"", fixed = TRUE)
   expect_match(rc, "/data/11_barcoding/5_folds", fixed = TRUE)
-  expect_match(rc, "/home/u/R/lib", fixed = TRUE)
   expect_match(rm_, "merge_barcoding_chunks", fixed = TRUE)
 
   # Nothing about a particular cluster is written unless it was passed
@@ -218,17 +231,16 @@ test_that("the SLURM job runs one chunk per task and merges after the array, wit
   expect_false(grepl("leftraru|nlhpc", all_text, ignore.case = TRUE))
 
   # An optional value that is not passed leaves no line behind
-  files2 <- write_barcoding_slurm_job(
-    job_dir = file.path(tmp, "job2"), n_chunks = 2L, library_dir = "l", folds_dir = "f",
-    output_dir = "o", method = "nn", partition = "general", time = "01:00:00", mem = "2G",
-    r_setup = "module load R")
+  generate_barcoding_job_scripts(
+    library_dir = "l", folds_dir = "f", classifier_dir = "o", method = "nn", n_chunks = 2L,
+    job_dir = file.path(tmp, "job2"), cluster_mail_user = "")
   arr2 <- paste(readLines(file.path(tmp, "job2", "job_array.sh")), collapse = "\n")
-  expect_false(grepl("--account", arr2, fixed = TRUE))
+  expect_false(grepl("#SBATCH -q", arr2, fixed = TRUE))
   expect_false(grepl("--mail-user", arr2, fixed = TRUE))
+  expect_false(grepl("module load", arr2, fixed = TRUE))
+  expect_false(grepl("R_LIBS_USER", arr2, fixed = TRUE))
 
-  expect_error(write_barcoding_slurm_job(job_dir = file.path(tmp, "job3"), n_chunks = 0L,
-                                         library_dir = "l", folds_dir = "f", output_dir = "o",
-                                         partition = "general", time = "01:00:00", mem = "2G",
-                                         r_setup = "module load R"),
+  expect_error(generate_barcoding_job_scripts(library_dir = "l", folds_dir = "f", classifier_dir = "o",
+                                              n_chunks = 0L, job_dir = file.path(tmp, "job3")),
                "n_chunks")
 })
