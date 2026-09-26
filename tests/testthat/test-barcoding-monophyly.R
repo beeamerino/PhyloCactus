@@ -150,6 +150,9 @@ test_that("the job script of a locus carries the locus, its seed, the model and 
   expect_match(txt, "--model GTR+G4", fixed = TRUE)
   expect_match(txt, "--tree 'pars{10},rand{10}'", fixed = TRUE)
   expect_match(txt, "--bs-trees 'autoMRE{1000}'", fixed = TRUE)
+  # The autoMRE cutoff written, not left to the RAxML-NG default: 0.03, as in the bootstrap
+  # convergence test of the phylogeny (cactus_bs_convergence.raxml.log)
+  expect_match(txt, "--bs-cutoff 0.03", fixed = TRUE)
   expect_match(txt, "--workers ", fixed = TRUE)
   expect_match(txt, "--force perf_threads --extra thread-nopin", fixed = TRUE)
   expect_match(txt, "export OMP_PROC_BIND=false", fixed = TRUE)
@@ -158,6 +161,12 @@ test_that("the job script of a locus carries the locus, its seed, the model and 
   expect_match(txt, "LIB_matK.fasta", fixed = TRUE)
   expect_false(grepl("tree-constraint", txt, fixed = TRUE))
   expect_false(grepl("mail-user|#SBATCH -q ", txt))
+  # With an address, every SLURM mail, as the jobs of the phylogeny
+  suppressMessages(generate_barcoding_gene_tree_scripts(library_dir = lib, trees_dir = file.path(tmp, "trees2"),
+                                                         cluster_mail_user = "someone@example.org"))
+  txt2 <- paste(readLines(file.path(tmp, "trees2", "job", "job_matK.sh")), collapse = "\n")
+  expect_match(txt2, "#SBATCH --mail-type=ALL", fixed = TRUE)
+  expect_match(txt2, "#SBATCH --mail-user=someone@example.org", fixed = TRUE)
   expect_true(file.exists(file.path(trees, "job", "submit.sh")))
 })
 
