@@ -419,7 +419,8 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
             train_aln <- .bc_training_alignment(dna, p$train_ids)
             pool <- .bc_strand_pool(train_aln)
           }
-          # IdTaxa learns the fold once; LearnTaxa() is deterministic (decision K2)
+          # IdTaxa learns the fold once (decision K2); LearnTaxa() draws from the generator, so the
+          # training has a seed of its own
           trained <- if (method == "idtaxa") {
             .bc_idtaxa_train(seqs[p$train_ids], species[p$train_ids],
                              train_seed = .bc_query_seed(seed, l, sc, p$fold, "<training>"))
