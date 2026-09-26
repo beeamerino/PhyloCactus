@@ -103,13 +103,17 @@
 #'   package.
 #' @param model,starting_trees,bs_trees Character. RAxML-NG options. Default `"GTR+G4"`,
 #'   `"pars{10},rand{10}"` and `"autoMRE{1000}"`.
+#' @param bs_cutoff Numeric. Cutoff of the autoMRE convergence test (`--bs-cutoff`), written in the
+#'   job rather than left to the RAxML-NG default. Defaults to 0.03, the value of the bootstrap
+#'   convergence test of the phylogeny.
 #' @param seed Integer. Seed of the run, from which each locus derives its own.
 #' @param threads Integer. Cores per job (`--cpus-per-task` and `--threads`). Defaults to 32.
 #' @param workers,min_threads_per_worker Integer. RAxML-NG workers over the starting trees; `NULL`
 #'   plans them as [generate_ml_search_script()] does.
 #' @param job_dir Character. Where the scripts are written. Defaults to `job/` inside `trees_dir`.
 #' @param cluster_job_name,cluster_partition,cluster_mem,cluster_time,cluster_queue,cluster_mail_user,load_module
-#'   As in [generate_barcoding_job_scripts()].
+#'   As in [generate_barcoding_job_scripts()]; with an address every SLURM mail is sent
+#'   (`--mail-type=ALL`), as in the jobs of the phylogeny.
 #' @param raxml_exec Character. The RAxML-NG command. Defaults to the MPI build used by the
 #'   phylogeny on Leftraru, `raxml-ng-mpi`, with its modules in `load_module`.
 #' @return Invisibly, the paths of the job scripts.
@@ -128,7 +132,8 @@ generate_barcoding_gene_tree_scripts <- function(library_dir, trees_dir, loci = 
                                                  constraints_csv = system.file("extdata", "cactus_constraints.csv",
                                                                                package = "PhyloCactus"),
                                                  model = "GTR+G4", starting_trees = "pars{10},rand{10}",
-                                                 bs_trees = "autoMRE{1000}", seed = 1L, threads = 32L,
+                                                 bs_trees = "autoMRE{1000}", bs_cutoff = 0.03,
+                                                 seed = 1L, threads = 32L,
                                                  workers = NULL, min_threads_per_worker = 4L,
                                                  job_dir = file.path(trees_dir, "job"),
                                                  cluster_job_name = "cactus_genetree",
@@ -168,7 +173,7 @@ generate_barcoding_gene_tree_scripts <- function(library_dir, trees_dir, loci = 
         cons_line <- paste0(" --tree-constraint ", shQuote(f_cons))
       }
     }
-    job <- c(.bc_slurm_header(paste0(cluster_job_name, "_", l), paste0("slurm_", l, "_%j"), "END,FAIL",
+    job <- c(.bc_slurm_header(paste0(cluster_job_name, "_", l), paste0("slurm_", l, "_%j"), "ALL",
                               cluster_partition, cluster_mem, cluster_time, cluster_queue,
                               cluster_mail_user, load_module, cpus = threads),
              paste0("# Gene tree of ", l, ", Phase 6E. Written by generate_barcoding_gene_tree_scripts() on ",
@@ -189,9 +194,10 @@ generate_barcoding_gene_tree_scripts <- function(library_dir, trees_dir, loci = 
              "fi",
              "",
              paste0("echo \"Gene tree of ", l, ": ", n_trees, " starting trees over ", plan$workers,
-                    " workers, bootstraps ", bs_trees, "\""),
+                    " workers, bootstraps ", bs_trees, ", autoMRE cutoff ", format(bs_cutoff), "\""),
              paste0(raxml_exec, " --all --msa \"$RBA_FILE\" --tree ", shQuote(starting_trees, type = "sh"),
-                    " --bs-trees ", shQuote(bs_trees, type = "sh"), " --bs-metric fbp --seed ", l_seed,
+                    " --bs-trees ", shQuote(bs_trees, type = "sh"), " --bs-cutoff ", format(bs_cutoff),
+                    " --bs-metric fbp --seed ", l_seed,
                     " --threads ${SLURM_CPUS_PER_TASK:-", threads, "} --workers ", plan$workers,
                     " --force perf_threads --extra thread-nopin",
                     " --prefix ", shQuote(file.path(trees_dir, l)), cons_line))
