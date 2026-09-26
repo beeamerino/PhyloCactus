@@ -1,9 +1,9 @@
 # -------------------------------------------------------------
 # PhyloCactus: Tutorial 5 - Molecular Diagnostic Branch (11_barcoding/)
 # -------------------------------------------------------------
-# Phases 2 to 5B of PhyloCactus 0.5.0: assembly, curation, screening, reference library,
-# validation folds, barcode gap, classification of those folds and negative controls. No real
-# accuracy is read here: the controls of step 8 come first and the real metrics are Phase 6.
+# Phases 2 to 6A of PhyloCactus 0.5.0: assembly, curation, screening, reference library,
+# validation folds, barcode gap, classification of those folds, negative controls and the
+# threshold of remoteness. The controls of step 8 come before any real figure is read.
 #
 # The branch reads the same phylotaR workspace as the phylogeny (0_phylotaR_raw_Ingroup/)
 # and writes only under 11_barcoding/. The first run downloads GenBank metadata for the
@@ -138,6 +138,19 @@ classify_barcoding_folds(
   min_comparable = 100L
 )
 
+# The same classifier, with every query measured the way a query of a user is measured: stripped of
+# gaps, oriented against the training set of its fold and added to it with MAFFT --add --keeplength,
+# one call per query. Writes the tables with the suffix _add and the running time per locus. About
+# 8 h on this machine (29 475 s on 2026-09-26); step 9 reads these tables.
+classify_barcoding_folds(
+  library_dir = "11_barcoding/4_library",
+  folds_dir = "11_barcoding/5_folds",
+  output_dir = "11_barcoding/7_classifier",
+  method = "nn",
+  alignment = "add",
+  notify = notify_email
+)
+
 # The classifier of the real use: IdTaxa needs no alignment, so it is the one that can answer a
 # query a user brings. It retrains once per fold, hence the sample declared in the SETUP block.
 classify_barcoding_folds(
@@ -185,6 +198,21 @@ run_barcoding_controls(
 )
 
 # -------------------------------------------------------------
+# Step 9: Threshold of remoteness. A query whose distance to its nearest neighbour exceeds the
+# threshold is not named (state 3, reason lejania). The curve reports, for every threshold, what the
+# legitimate queries become and how many outgroup queries are rejected; the operating threshold of
+# each locus is the quantile 0.99 of scheme G, fixed without looking at the outgroup.
+# -------------------------------------------------------------
+sweep_barcoding_threshold(
+  classifier_dir = "11_barcoding/7_classifier",
+  controls_dir = "11_barcoding/8_controls",
+  output_dir = "11_barcoding/9_threshold",
+  alignment = "add",
+  q = 0.99,
+  quantile_type = 1L
+)
+
+# -------------------------------------------------------------
 # Results
 # -------------------------------------------------------------
 print(utils::read.csv("11_barcoding/3_screening/TABLE_barcoding_marker_screening.csv"))
@@ -198,3 +226,6 @@ print(utils::read.csv("11_barcoding/6_gap/TABLE_barcoding_gap_summary.csv"))
 # Negative controls: leakage verdict per locus and scheme, and the outgroup queries per locus
 print(utils::read.csv("11_barcoding/8_controls/TABLE_barcoding_cn1_verdict.csv"))
 print(utils::read.csv("11_barcoding/8_controls/TABLE_barcoding_cn2_outgroup.csv"))
+
+# Threshold of remoteness per locus and scheme, with the outgroup rejection where it is measured
+print(utils::read.csv("11_barcoding/9_threshold/TABLE_barcoding_threshold_operating.csv"))
