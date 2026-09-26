@@ -84,7 +84,10 @@
 #' Writes one job per locus that infers the gene tree of its library alignment (step 4) with
 #' RAxML-NG: an unconstrained or constrained search from 20 starting trees, bootstrap replicates
 #' until the autoMRE test converges (at most 1000), and the bootstrap support (FBP) mapped on the
-#' best tree, all in one `raxml-ng --all` call. Phase 6E, decisions N1, N2 and N10 of BMM.
+#' best tree, all in one `--all` call after the alignment is parsed to RBA. Phase 6E, decisions N1,
+#' N2 and N10 of BMM. The job follows the conventions of [generate_ml_search_script()]: the MPI
+#' build and its modules, workers over the starting trees, `--force perf_threads` and
+#' `--extra thread-nopin`, thread binding off.
 #'
 #' @details
 #' Each locus gets a fixed seed derived from its name and `seed`, the same on any machine. With
@@ -101,11 +104,14 @@
 #' @param model,starting_trees,bs_trees Character. RAxML-NG options. Default `"GTR+G4"`,
 #'   `"pars{10},rand{10}"` and `"autoMRE{1000}"`.
 #' @param seed Integer. Seed of the run, from which each locus derives its own.
-#' @param threads Integer. Threads (and cores) per job.
+#' @param threads Integer. Cores per job (`--cpus-per-task` and `--threads`). Defaults to 32.
+#' @param workers,min_threads_per_worker Integer. RAxML-NG workers over the starting trees; `NULL`
+#'   plans them as [generate_ml_search_script()] does.
 #' @param job_dir Character. Where the scripts are written. Defaults to `job/` inside `trees_dir`.
 #' @param cluster_job_name,cluster_partition,cluster_mem,cluster_time,cluster_queue,cluster_mail_user,load_module
 #'   As in [generate_barcoding_job_scripts()].
-#' @param raxml_exec Character. The `raxml-ng` command.
+#' @param raxml_exec Character. The RAxML-NG command. Defaults to the MPI build used by the
+#'   phylogeny on Leftraru, `raxml-ng-mpi`, with its modules in `load_module`.
 #' @return Invisibly, the paths of the job scripts.
 #' @seealso [assess_barcoding_monophyly()], [generate_barcoding_job_scripts()].
 #' @examples
@@ -113,7 +119,7 @@
 #' generate_barcoding_gene_tree_scripts(
 #'   library_dir = "/home/user/PhyloCactus_Tutorial/11_barcoding/4_library",
 #'   trees_dir = "/home/user/PhyloCactus_Tutorial/11_barcoding/12_monophyly/trees",
-#'   loci = "trnL-trnF", load_module = "raxml-ng"
+#'   loci = "trnL-trnF"
 #' )
 #' }
 #' @export
@@ -122,13 +128,16 @@ generate_barcoding_gene_tree_scripts <- function(library_dir, trees_dir, loci = 
                                                  constraints_csv = system.file("extdata", "cactus_constraints.csv",
                                                                                package = "PhyloCactus"),
                                                  model = "GTR+G4", starting_trees = "pars{10},rand{10}",
-                                                 bs_trees = "autoMRE{1000}", seed = 1L, threads = 4L,
+                                                 bs_trees = "autoMRE{1000}", seed = 1L, threads = 32L,
+                                                 workers = NULL, min_threads_per_worker = 4L,
                                                  job_dir = file.path(trees_dir, "job"),
                                                  cluster_job_name = "cactus_genetree",
-                                                 cluster_partition = "main", cluster_mem = "8G",
-                                                 cluster_time = "24:00:00", cluster_queue = NULL,
+                                                 cluster_partition = "main", cluster_mem = "16G",
+                                                 cluster_time = "48:00:00", cluster_queue = NULL,
                                                  cluster_mail_user = Sys.getenv("MY_EMAIL", ""),
-                                                 load_module = NULL, raxml_exec = "raxml-ng") {
+                                                 load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o",
+                                                                 "raxml-ng/1.1.0-mpi-zen4-n"),
+                                                 raxml_exec = "raxml-ng-mpi") {
   constraint <- match.arg(constraint)
   files <- list.files(library_dir, pattern = "^LIB_.*\\.fasta$", full.names = TRUE)
   if (length(files) == 0L) {
@@ -141,6 +150,10 @@ generate_barcoding_gene_tree_scripts <- function(library_dir, trees_dir, loci = 
     stop("No constraint table at ", constraints_csv, ".", call. = FALSE)
   }
   dir.create(job_dir, recursive = TRUE, showWarnings = FALSE)
+  threads <- as.integer(threads)
+  n_trees <- .parse_n_start_trees(starting_trees)
+  plan <- if (is.null(workers)) .plan_ml_workers(n_trees, threads, min_threads_per_worker) else
+    list(workers = max(1L, as.integer(workers)))
   jobs <- character(0)
   for (l in loci) {
     msa <- file.path(library_dir, paste0("LIB_", l, ".fasta"))
@@ -160,12 +173,27 @@ generate_barcoding_gene_tree_scripts <- function(library_dir, trees_dir, loci = 
                               cluster_mail_user, load_module, cpus = threads),
              paste0("# Gene tree of ", l, ", Phase 6E. Written by generate_barcoding_gene_tree_scripts() on ",
                     format(Sys.time(), "%Y-%m-%d %H:%M"), "; constraint: ", constraint, "; seed ", l_seed, "."),
+             "echo \"=== RAxML-NG version used by this job ===\"",
+             paste0(raxml_exec, " --version | head -n 2"),
+             "echo \"=========================================\"",
+             "",
+             "# Thread binding off, as in the ML search of the phylogeny on Leftraru",
+             "export OMP_PROC_BIND=false",
+             "export OMPI_MCA_hwloc_base_binding_policy=none",
+             "",
              paste0("mkdir -p ", shQuote(trees_dir)),
-             "echo \"=== Versions used by this job ===\"",
-             paste0(raxml_exec, " --version | head -3"),
-             "echo \"================================\"",
-             paste0(raxml_exec, " --all --msa ", shQuote(msa), " --model ", model, " --tree ", starting_trees,
-                    " --bs-trees ", bs_trees, " --bs-metric fbp --seed ", l_seed, " --threads ", threads,
+             paste0("RBA_PREFIX=", shQuote(file.path(trees_dir, paste0(l, "_parsed")))),
+             "RBA_FILE=\"${RBA_PREFIX}.raxml.rba\"",
+             "if [ ! -f \"$RBA_FILE\" ]; then",
+             paste0("    ", raxml_exec, " --parse --msa ", shQuote(msa), " --model ", model, " --prefix \"$RBA_PREFIX\""),
+             "fi",
+             "",
+             paste0("echo \"Gene tree of ", l, ": ", n_trees, " starting trees over ", plan$workers,
+                    " workers, bootstraps ", bs_trees, "\""),
+             paste0(raxml_exec, " --all --msa \"$RBA_FILE\" --tree ", shQuote(starting_trees, type = "sh"),
+                    " --bs-trees ", shQuote(bs_trees, type = "sh"), " --bs-metric fbp --seed ", l_seed,
+                    " --threads ${SLURM_CPUS_PER_TASK:-", threads, "} --workers ", plan$workers,
+                    " --force perf_threads --extra thread-nopin",
                     " --prefix ", shQuote(file.path(trees_dir, l)), cons_line))
     f_job <- file.path(job_dir, paste0("job_", l, ".sh"))
     writeLines(job, f_job)
