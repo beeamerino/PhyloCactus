@@ -87,7 +87,14 @@
 #' @param output_dir Character. Destination; refused inside a directory of the phylogeny.
 #' @param outgroup_dir Character or `NULL`. Directory with `<locus>.fasta` of the outgroup, as the
 #'   assembly writes them. `NULL` skips CN2 and says so.
-#' @param method Character. `"nn"` or `"idtaxa"`.
+#' @param method Character. `"nn"` or `"idtaxa"`. With `"idtaxa"` only CN2 runs (decision K6 of
+#'   BMM, 2026-09-26): CN1 would retrain IdTaxa once per fold and permutation, and CN3 measures a
+#'   bias of the nearest neighbour. The outgroup queries are oriented against the library with the
+#'   rule of the nearest neighbour, classified by IdTaxa trained on the whole locus at threshold 0
+#'   with a seed per query, and written to `TABLE_barcoding_cn2_queries_idtaxa.csv`; the tables of
+#'   the nearest neighbour are not touched. MAFFT is not needed.
+#' @param threshold Numeric. Confidence threshold applied to IdTaxa's output, for `"idtaxa"`, as in
+#'   [classify_barcoding_folds()].
 #' @param permutations Integer. Permutations of CN1; at least 10 in a real run.
 #' @param seed Integer. Seed of the permutations, declared so they are reproducible.
 #' @param model,min_comparable Distance model and minimum of comparable positions, as in step 7.
@@ -127,8 +134,13 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
                                    max_folds = NULL,
                                    controls = c("CN1", "CN2", "CN3"),
                                    mafft_exec = "mafft",
-                                   mafft_opts = "--auto") {
+                                   mafft_opts = "--auto",
+                                   threshold = 60) {
   method <- match.arg(method)
+  if (method == "idtaxa" && any(c("CN1", "CN3") %in% controls)) {
+    stop("CN1 and CN3 run with the nearest neighbour only (decision K6); with method = \"idtaxa\" ",
+         "ask for controls = \"CN2\".", call. = FALSE)
+  }
   .bc_assert_output_dir(output_dir)
   lib <- .bc_library_from_dir(library_dir)
   for (sc in schemes) {
@@ -137,7 +149,7 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
       stop("No ", basename(f), " in ", folds_dir, ". Run build_barcoding_folds() first.", call. = FALSE)
     }
   }
-  if ("CN2" %in% controls && !is.null(outgroup_dir)) {
+  if ("CN2" %in% controls && !is.null(outgroup_dir) && method == "nn") {
     # CN2 aligns every query against the library, so the controls need MAFFT at run time. The
     # check belongs here and not inside the CN2 loop: an absent binary has to cost seconds, not
     # the hour that CN1 takes before reaching it.
@@ -152,7 +164,7 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   for (l in loci) {
     dna <- ape::read.dna(file.path(library_dir, paste0("LIB_", l, ".fasta")), format = "fasta")
     rownames(dna) <- .bc_parse_header(labels(dna))$sid
-    dist_matrices[[l]] <- .bc_classifier_matrix(dna, model, min_comparable)
+    if (method == "nn") dist_matrices[[l]] <- .bc_classifier_matrix(dna, model, min_comparable)
     sequences[[l]] <- dna
   }
 
@@ -204,7 +216,23 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
     utils::write.csv(verdict, file.path(output_dir, "TABLE_barcoding_cn1_verdict.csv"), row.names = FALSE)
   }
 
-  if ("CN2" %in% controls) {
+  if ("CN2" %in% controls && method == "idtaxa") {
+    queries <- list()
+    for (l in loci) {
+      f <- if (is.null(outgroup_dir)) NA_character_ else file.path(outgroup_dir, paste0(l, ".fasta"))
+      if (is.na(f) || !file.exists(f)) next
+      queries[[length(queries) + 1L]] <- .bc_cn2_queries_idtaxa(
+        ape::read.dna(f, format = "fasta"), sequences[[l]], lib[lib$locus == l, , drop = FALSE], l,
+        seed = seed, threshold = threshold)
+    }
+    cn2_q <- if (length(queries) > 0L) do.call(rbind, queries) else NULL
+    if (!is.null(cn2_q)) rownames(cn2_q) <- NULL
+    out$cn2_queries_idtaxa <- cn2_q
+    utils::write.csv(if (is.null(cn2_q)) data.frame() else cn2_q,
+                     file.path(output_dir, "TABLE_barcoding_cn2_queries_idtaxa.csv"), row.names = FALSE)
+  }
+
+  if ("CN2" %in% controls && method == "nn") {
     queries <- list()
     summary_df <- list()
     for (l in loci) {
@@ -431,6 +459,46 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   do.call(rbind, rows)
 }
 
+#' CN2 with IdTaxa: the outgroup queries of one locus, oriented and classified
+#'
+#' The orientation is the one of the nearest neighbour, against the strand pool of the library of
+#' the locus; a query that matches the locus in neither direction is state 3 with the reason
+#' `no_match` and no confidence, and IdTaxa is not called for it (decision D4). The others are
+#' classified by IdTaxa trained once on the whole locus, at threshold 0, each with the seed of
+#' `.bc_query_seed(seed, locus, "cn2", 0, sid)`.
+#' @noRd
+.bc_cn2_queries_idtaxa <- function(og, lib_dna, lib_tab, locus, seed = 1L, threshold = 60) {
+  restore_rng <- .bc_rng_state()
+  on.exit(restore_rng(), add = TRUE)
+  species <- stats::setNames(lib_tab$species, lib_tab$sid)
+  h <- .bc_parse_header(labels(og))
+  lib_m <- as.matrix(lib_dna)[lib_tab$sid, , drop = FALSE]
+  pool <- .bc_strand_pool(lib_m)
+  lib_seqs <- gsub("-", "", toupper(apply(as.character(lib_m), 1, paste, collapse = "")), fixed = TRUE)
+  names(lib_seqs) <- rownames(lib_m)
+  trained <- .bc_idtaxa_train(lib_seqs, species[names(lib_seqs)])
+  queries <- as.character(og)
+  if (!is.list(queries)) queries <- lapply(seq_len(nrow(queries)), function(i) queries[i, ])
+  rows <- lapply(seq_along(queries), function(i) {
+    s <- gsub("-", "", paste(queries[[i]], collapse = ""), fixed = TRUE)
+    o <- .bc_orient_to_library(.bc_dnabin_row(s, "query"), pool)
+    r <- if (o$orientation == "no_match") {
+      cbind(.bc_prediction_row(3L, reason = "no_match"),
+            data.frame(genus_idtaxa = NA_character_, species_idtaxa = NA_character_,
+                       genus_confidence = NA_real_, species_confidence = NA_real_,
+                       stringsAsFactors = FALSE))
+    } else {
+      oriented <- toupper(paste(as.character(as.matrix(o$query)), collapse = ""))
+      .bc_classify_idtaxa(lib_seqs, species[names(lib_seqs)], oriented, threshold = threshold,
+                          trained = trained,
+                          query_seed = .bc_query_seed(seed, locus, "cn2", 0L, h$sid[i]))
+    }
+    cbind(data.frame(locus = locus, sid = h$sid[i], query_species = h$species[i],
+                     orientation = o$orientation, stringsAsFactors = FALSE), r)
+  })
+  do.call(rbind, rows)
+}
+
 #' The empty shape of that table, so a run with no outgroup at all still writes its columns
 #' @noRd
 .bc_cn2_queries_empty <- function() {
@@ -456,6 +524,11 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
         sum(out$cn2$comparable > 0), " loci\n", sep = "")
     cat("       ", sum(out$cn2$reversed), " reversed before aligning; ",
         sum(out$cn2$no_match), " match the locus in neither direction\n", sep = "")
+  }
+  if (!is.null(out$cn2_queries_idtaxa)) {
+    q <- out$cn2_queries_idtaxa
+    cat("  CN2 with IdTaxa: ", sum(q$orientation != "no_match"), " comparable outgroup queries of ",
+        nrow(q), "; ", sum(q$orientation == "no_match"), " match the locus in neither direction\n", sep = "")
   }
   if (!is.null(out$cn3)) cat("  CN3: written and labelled; its figure belongs to Phase 6\n")
   cat("  Output directory:      ", output_dir, "\n")

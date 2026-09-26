@@ -67,17 +67,63 @@
   }
 }
 
-#' The same three states, from IdTaxa, as a contrast for the nearest neighbour
+#' Seed of one query, a pure function of the run seed and of where the query sits
 #'
-#' `DECIPHER::LearnTaxa()` and `IdTaxa()` with the genus and the species as the two ranks below
-#' `Root`. IdTaxa returns only the ranks above its own confidence threshold, so the depth it reaches
-#' gives the state directly: species is state 1, genus alone is state 2 with the species of that
-#' genus in the training set as candidates, and neither is state 3.
+#' IdTaxa draws k-mers at random for its confidence, and the draw depends on the state of the
+#' generator when `IdTaxa()` is called. Measured on 2026-09-26 (DECIPHER 3.9.4): without a seed two
+#' calls disagree; with the same seed they agree; and several queries in one call do not give what
+#' one call per query gives. So each query gets its own seed, derived from the seed of the run, the
+#' locus, the scheme, the fold and the `sid`, and from nothing else: not from the other folds, not
+#' from the chunk, not from the order of the run (decision K1 of BMM).
 #'
-#' It reports `confidence` and leaves the distances empty, and it is a contrast: the branch
-#' classifier is the nearest neighbour (decision of BMM, 2026-09-22).
+#' The four fields are joined by a carriage return and hashed base 31 modulo the Mersenne prime
+#' 2^31 - 1, in doubles, which are exact below 2^53; the result is combined with the run seed. It
+#' touches no random state.
 #' @noRd
-.bc_classify_idtaxa <- function(train, train_labels, query, threshold = 60, processors = 1L) {
+.bc_query_seed <- function(seed, locus, scheme, fold, sid) {
+  m <- 2147483647
+  key <- paste(locus, scheme, as.character(fold), sid, sep = "\r")
+  h <- 0
+  for (b in as.numeric(utf8ToInt(enc2utf8(key)))) h <- (h * 31 + b) %% m
+  s <- ((as.numeric(seed) %% m) * 1000003 + h) %% m
+  as.integer(if (s == 0) 1 else s)
+}
+
+#' The session's random state, as a function that puts it back
+#'
+#' Used as `restore <- .bc_rng_state(); on.exit(restore(), add = TRUE)` by the steps that train or
+#' classify with IdTaxa: LearnTaxa() and IdTaxa() draw from the generator, and a step of the package
+#' leaves the session's generator as it found it.
+#' @noRd
+.bc_rng_state <- function() {
+  had <- exists(".Random.seed", envir = globalenv(), inherits = FALSE)
+  old_seed <- if (had) get(".Random.seed", envir = globalenv()) else NULL
+  old_kind <- RNGkind()
+  function() {
+    suppressWarnings(RNGkind(old_kind[1], old_kind[2], old_kind[3]))
+    if (had) assign(".Random.seed", old_seed, envir = globalenv())
+    else suppressWarnings(rm(list = ".Random.seed", envir = globalenv()))
+    invisible(TRUE)
+  }
+}
+
+#' Evaluate an expression with a declared generator and seed, and give the session its state back
+#' @noRd
+.bc_with_seed <- function(seed, expr) {
+  restore <- .bc_rng_state()
+  on.exit(restore(), add = TRUE)
+  suppressWarnings(RNGkind("Mersenne-Twister", "Inversion", "Rejection"))
+  set.seed(seed)
+  force(expr)
+}
+
+#' Training of IdTaxa for one fold
+#'
+#' `DECIPHER::LearnTaxa()` with the genus and the species as the two ranks below `Root`. It is
+#' deterministic (measured on 2026-09-26), so a fold is learnt once and every query of the fold is
+#' classified against the same training (decision K2 of BMM).
+#' @noRd
+.bc_idtaxa_train <- function(train, train_labels) {
   if (length(train) != length(train_labels)) {
     stop("train and train_labels have different lengths.", call. = FALSE)
   }
@@ -86,25 +132,63 @@
   dna <- Biostrings::DNAStringSet(toupper(unname(train)))
   names(dna) <- names(train)
   trained <- DECIPHER::LearnTaxa(train = dna, taxonomy = taxonomy_str, verbose = FALSE)
+  attr(trained, "bc_labels") <- unname(train_labels)
+  trained
+}
+
+#' One row of IdTaxa from the confidences of each rank, cut at a threshold
+#'
+#' IdTaxa runs at threshold 0, so the genus and the species it reaches and the confidence of each
+#' are always written (`genus_idtaxa`, `species_idtaxa`, `genus_confidence`, `species_confidence`).
+#' The three states then come from `threshold`, as IdTaxa itself would have cut them: species at or
+#' above it is state 1; genus alone at or above it is state 2, with the species of that genus in the
+#' training set as candidates; neither is state 3. Cutting afterwards gives exactly what a run at
+#' that threshold gives (measured on 2026-09-26), which is why the threshold can be swept in step 9.
+#' @noRd
+.bc_idtaxa_row <- function(genus_idtaxa, species_idtaxa, genus_confidence, species_confidence,
+                           threshold, train_labels) {
+  if (!is.na(species_confidence) && species_confidence >= threshold) {
+    r <- .bc_prediction_row(1L, species = species_idtaxa, genus = genus_idtaxa,
+                            candidates = species_idtaxa, confidence = species_confidence)
+  } else if (!is.na(genus_confidence) && genus_confidence >= threshold) {
+    labels <- unique(unname(train_labels))
+    candidates <- sort(labels[.bc_genus(labels) == genus_idtaxa], method = "radix")
+    r <- .bc_prediction_row(2L, genus = genus_idtaxa, candidates = paste(candidates, collapse = "|"),
+                            confidence = genus_confidence)
+  } else {
+    r <- .bc_prediction_row(3L, reason = "low_confidence")
+  }
+  cbind(r, data.frame(genus_idtaxa = genus_idtaxa, species_idtaxa = species_idtaxa,
+                      genus_confidence = genus_confidence, species_confidence = species_confidence,
+                      stringsAsFactors = FALSE))
+}
+
+#' The same three states, from IdTaxa, the classifier of real use
+#'
+#' `train` and `train_labels` are the training sequences and their species; `trained`, when given,
+#' is their training from `.bc_idtaxa_train()`, learnt once per fold. `query_seed` is the seed of
+#' this query from `.bc_query_seed()`: it is set just before the call to `IdTaxa()`, and the
+#' session's random state is given back afterwards. Without it the answer is not reproducible.
+#' @noRd
+.bc_classify_idtaxa <- function(train, train_labels, query, threshold = 60, processors = 1L,
+                                trained = NULL, query_seed = NULL) {
+  if (is.null(trained)) trained <- .bc_idtaxa_train(train, train_labels)
   q <- Biostrings::DNAStringSet(toupper(unname(query)))
-  ids <- DECIPHER::IdTaxa(q, trained, strand = "top", threshold = threshold,
-                          processors = processors, verbose = FALSE)
+  call_idtaxa <- function() {
+    DECIPHER::IdTaxa(q, trained, strand = "top", threshold = 0, processors = processors,
+                     verbose = FALSE)
+  }
+  ids <- if (is.null(query_seed)) call_idtaxa() else .bc_with_seed(query_seed, call_idtaxa())
   taxon <- ids[[1]]$taxon
   conf <- ids[[1]]$confidence
   ok <- !grepl("^unclassified", taxon)
   taxon <- taxon[ok]
   conf <- conf[ok]
-
-  if (length(taxon) >= 3L) {
-    .bc_prediction_row(1L, species = taxon[3], genus = taxon[2], candidates = taxon[3],
-                       confidence = conf[3])
-  } else if (length(taxon) == 2L) {
-    candidates <- sort(unique(unname(train_labels)[genera == taxon[2]]), method = "radix")
-    .bc_prediction_row(2L, genus = taxon[2], candidates = paste(candidates, collapse = "|"),
-                       confidence = conf[2])
-  } else {
-    .bc_prediction_row(3L, reason = "low_confidence")
-  }
+  .bc_idtaxa_row(genus_idtaxa = if (length(taxon) >= 2L) taxon[2] else NA_character_,
+                 species_idtaxa = if (length(taxon) >= 3L) taxon[3] else NA_character_,
+                 genus_confidence = if (length(conf) >= 2L) conf[2] else NA_real_,
+                 species_confidence = if (length(conf) >= 3L) conf[3] else NA_real_,
+                 threshold = threshold, train_labels = train_labels)
 }
 
 #' Training alignment of one fold: the training rows, and no column left with gaps only
@@ -205,8 +289,19 @@
 #' @param loci Character vector or `NULL` for every locus of the library.
 #' @param max_folds Integer or `NULL`. Folds per locus and scheme; a declared random subset, for the
 #'   contrast with IdTaxa, which retrains once per fold. `NULL` means all of them.
-#' @param seed Integer. Seed of that subset, so it is reproducible.
-#' @param threshold Numeric. Confidence threshold of [DECIPHER::IdTaxa()], for `"idtaxa"`.
+#' @param seed Integer. Seed of that subset, so it is reproducible, and, for `"idtaxa"`, the seed
+#'   from which the seed of every query is derived with its locus, scheme, fold and `sid`, so that
+#'   each answer is reproducible and independent of the rest of the run.
+#' @param threshold Numeric. Confidence threshold applied to the output of [DECIPHER::IdTaxa()], for
+#'   `"idtaxa"`. IdTaxa itself always runs at threshold 0 and the confidence of each rank is written
+#'   (`genus_confidence`, `species_confidence`), so any other threshold can be applied afterwards
+#'   with the same result as a run at that threshold.
+#' @param chunk,n_chunks Integers, or `NULL` for a run without chunks. With both, only chunk
+#'   `chunk` of `n_chunks` is classified: inside each locus and scheme the folds, in the order of
+#'   step 5, are dealt round-robin to the chunks. The chunk writes its tables in `chunks/` of
+#'   `output_dir`, with the suffix `_chunk<k>of<n>`, together with its session; the tables of a whole
+#'   run are then written by [merge_barcoding_chunks()]. For a job array on a cluster, see
+#'   [generate_barcoding_job_scripts()].
 #' @param alignment Character. How the distance of a query is measured, for `"nn"`. `"library"`,
 #'   the default, reads it from the joint alignment of the library, in which the query took part.
 #'   `"add"` removes the query's gaps, orients it against the training set of its fold and adds it
@@ -247,6 +342,8 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
                                      max_folds = NULL,
                                      seed = 1L,
                                      threshold = 60,
+                                     chunk = NULL,
+                                     n_chunks = NULL,
                                      alignment = c("library", "add"),
                                      mafft_exec = "mafft",
                                      mafft_opts = "--auto",
@@ -255,6 +352,7 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
                                      notify_credentials = NULL) {
   method <- match.arg(method)
   alignment <- match.arg(alignment)
+  .bc_check_chunk(chunk, n_chunks)
   if (alignment == "add" && method != "nn") {
     stop("alignment = \"add\" measures the distance of the nearest neighbour and applies only to ",
          "method = \"nn\". IdTaxa does not align.", call. = FALSE)
@@ -262,8 +360,12 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
   # MAFFT is checked before anything is read or written, so a missing binary costs nothing
   if (alignment == "add") .bc_assert_mafft(mafft_exec)
   suffix <- paste0(method, if (alignment == "add") "_add" else "")
+  chunk_tag <- if (is.null(chunk)) "" else paste0("_chunk", as.integer(chunk), "of", as.integer(n_chunks))
   started <- Sys.time()
   call_run <- function() {
+    # Training and classification touch the generator; the session gets its state back
+    restore_rng <- .bc_rng_state()
+    on.exit(restore_rng(), add = TRUE)
     .bc_assert_output_dir(output_dir)
     lib <- .bc_library_from_dir(library_dir)
     for (sc in schemes) {
@@ -273,6 +375,8 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
       }
     }
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+    write_dir <- if (is.null(chunk)) output_dir else file.path(output_dir, "chunks")
+    dir.create(write_dir, recursive = TRUE, showWarnings = FALSE)
     loci_todos <- sort(unique(lib$locus), method = "radix")
     loci <- if (is.null(loci)) loci_todos else intersect(loci_todos, loci)
 
@@ -288,6 +392,8 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
         folds <- .bc_folds_from_table(tab[tab$locus == l, , drop = FALSE], d$sid)
         if (length(folds) == 0L) next
         folds <- .bc_sample_folds(folds, max_folds, seed)
+        if (!is.null(chunk)) folds <- folds[.bc_chunk_assign(length(folds), n_chunks) == chunk]
+        if (length(folds) == 0L) next
 
         dna <- ape::read.dna(file.path(library_dir, paste0("LIB_", l, ".fasta")), format = "fasta",
                              as.matrix = TRUE)
@@ -307,6 +413,8 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
             train_aln <- .bc_training_alignment(dna, p$train_ids)
             pool <- .bc_strand_pool(train_aln)
           }
+          # IdTaxa learns the fold once; LearnTaxa() is deterministic (decision K2)
+          trained <- if (method == "idtaxa") .bc_idtaxa_train(seqs[p$train_ids], species[p$train_ids]) else NULL
           for (q in p$test_ids) {
             if (alignment == "add") {
               s <- paste(as.character(dna[q, ]), collapse = "")
@@ -324,7 +432,8 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
               .bc_classify_nn(dmat, p$train_ids, q, species)
             } else {
               .bc_classify_idtaxa(seqs[p$train_ids], species[p$train_ids], seqs[[q]],
-                                  threshold = threshold)
+                                  threshold = threshold, trained = trained,
+                                  query_seed = .bc_query_seed(seed, l, sc, p$fold, q))
             }
             rows[[length(rows) + 1L]] <- cbind(
               data.frame(locus = l, scheme = sc, fold = p$fold, stratum = p$stratum, sid = q,
@@ -343,19 +452,29 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
         message(sprintf("Locus '%s', scheme %s, method %s, alignment %s: %d folds, %d predictions written in %.1f s.",
                         l, sc, method, alignment, length(folds), n_queries, seconds))
       }
-      pred <- do.call(rbind, rows)
-      rownames(pred) <- NULL
+      pred <- if (length(rows) > 0L) do.call(rbind, rows) else NULL
+      if (!is.null(pred)) rownames(pred) <- NULL
       out[[sc]] <- pred
-      utils::write.csv(pred, file.path(output_dir,
-                                       paste0("TABLE_barcoding_predictions_", sc, "_", suffix, ".csv")),
+      utils::write.csv(if (is.null(pred)) data.frame() else pred,
+                       file.path(write_dir, paste0("TABLE_barcoding_predictions_", sc, "_", suffix,
+                                                   chunk_tag, ".csv")),
                        row.names = FALSE)
     }
     # The running time is written, not left in prose: the projection of the complete IdTaxa run
     # (about 34 h) and of the add path (8.5 h) rested on rates noted by hand.
-    utils::write.csv(do.call(rbind, timings),
-                     file.path(output_dir, paste0("TABLE_barcoding_timing_", suffix, ".csv")),
+    utils::write.csv(if (length(timings) > 0L) do.call(rbind, timings) else data.frame(),
+                     file.path(write_dir, paste0("TABLE_barcoding_timing_", suffix, chunk_tag, ".csv")),
                      row.names = FALSE)
-    .bc_classifier_banner(out, output_dir, suffix)
+    if (!is.null(chunk)) {
+      # The session of every chunk is kept next to its tables: on a cluster each task may run on
+      # another node, and the versions it ran with are part of the result
+      writeLines(c(paste0("Chunk ", chunk, " of ", n_chunks, ", method ", suffix, ", seed ", seed,
+                          ", finished ", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"),
+                          " on ", Sys.info()[["nodename"]]),
+                   utils::capture.output(utils::sessionInfo())),
+                 file.path(write_dir, paste0("SESSION_barcoding_", suffix, chunk_tag, ".txt")))
+    }
+    .bc_classifier_banner(out, write_dir, paste0(suffix, chunk_tag))
     invisible(out)
   }
 
@@ -404,7 +523,7 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
   cat("====================================================\n")
   cat("  Method:                ", method, "\n")
   for (sc in names(out)) {
-    cat("  Scheme ", sc, ": ", nrow(out[[sc]]), " predictions in ",
+    cat("  Scheme ", sc, ": ", NROW(out[[sc]]), " predictions in ",
         file.path(output_dir, paste0("TABLE_barcoding_predictions_", sc, "_", method, ".csv")),
         "\n", sep = "")
   }

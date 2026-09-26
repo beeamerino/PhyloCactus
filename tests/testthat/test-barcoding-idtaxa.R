@@ -127,8 +127,9 @@ test_that("the answer of a query does not depend on the other queries of the run
     x[train], stats::setNames(sp, sid)[train], x[[row$sid]],
     query_seed = .bc_query_seed(1L, row$locus, "genus", row$fold, row$sid)))
 
-  expect_identical(alone$genus_confidence, row$genus_confidence)
-  expect_identical(alone$species_confidence, row$species_confidence)
+  # The table went through a CSV, which keeps 15 significant digits
+  expect_equal(alone$genus_confidence, row$genus_confidence, tolerance = 1e-12)
+  expect_equal(alone$species_confidence, row$species_confidence, tolerance = 1e-12)
   expect_identical(alone$state, row$state)
 })
 
@@ -186,9 +187,11 @@ test_that("IdTaxa runs at threshold 0 and the three states come from the confide
       p <- d$tab; t <- d$t
       want <- ifelse(p$species_confidence >= t, 1L, ifelse(p$genus_confidence >= t, 2L, 3L))
       expect_identical(p$state, want)
-      expect_identical(p$predicted_species[p$state == 1L], p$species_idtaxa[p$state == 1L])
+      expect_identical(as.character(p$predicted_species[p$state == 1L]),
+                       as.character(p$species_idtaxa[p$state == 1L]))
       expect_true(all(is.na(p$predicted_species[p$state != 1L])))
-      expect_identical(p$predicted_genus[p$state %in% 1:2], p$genus_idtaxa[p$state %in% 1:2])
+      expect_identical(as.character(p$predicted_genus[p$state %in% 1:2]),
+                       as.character(p$genus_idtaxa[p$state %in% 1:2]))
       expect_true(all(is.na(p$predicted_genus[p$state == 3L])))
     }
   }
@@ -197,6 +200,8 @@ test_that("IdTaxa runs at threshold 0 and the three states come from the confide
 # ---- K6: CN2 with IdTaxa --------------------------------------------------------------------------
 
 .idt_outgroup <- function(tmp, root) {
+  # root is a sequence of the library: an outgroup query that shares no 20-mer with the locus would
+  # be noise and not an outgroup (same reason as the fixture of test-barcoding-controls.R)
   og <- file.path(tmp, "outgroup")
   dir.create(og, showWarnings = FALSE, recursive = TRUE)
   set.seed(12L)
@@ -214,7 +219,7 @@ test_that("CN2 with IdTaxa classifies the comparable outgroup queries and leaves
   .idt_skip()
   tmp <- withr::local_tempdir()
   f <- .idt_fixture(tmp)
-  og <- .idt_outgroup(tmp, f$root)
+  og <- .idt_outgroup(tmp, unname(f$seqs$matK[1]))
   out_dir <- file.path(tmp, "8_controls")
   dir.create(out_dir)
   # A table of the nearest neighbour already in place must come out untouched
@@ -235,9 +240,13 @@ test_that("CN2 with IdTaxa classifies the comparable outgroup queries and leaves
   expect_equal(nm$state, 3L)
   expect_equal(nm$reason, "no_match")
   expect_true(is.na(nm$genus_confidence))
-  # The same sequence on either strand gets the same answer
-  expect_identical(q$genus_confidence[1], q$genus_confidence[2])
+  # The same sequence on either strand gets the same taxa. Not the same confidences: the seed of a
+  # query is derived from its sid, and the two copies have different sids (changed on 2026-09-26,
+  # before the code, when the seed rule of K1 was written into the function)
+  expect_identical(q$genus_idtaxa[1], q$genus_idtaxa[2])
+  expect_identical(q$species_idtaxa[1], q$species_idtaxa[2])
   expect_false(is.na(q$genus_confidence[1]))
+  expect_false(is.na(q$genus_confidence[2]))
   expect_identical(tools::md5sum(nn_file), before)
 })
 
