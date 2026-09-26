@@ -146,6 +146,60 @@ test_that("IdTaxa in three chunks, merged, gives the tables of one run without c
   expect_identical(.idt_md5(parts), .idt_md5(file.path(tmp, "one")))
 })
 
+# ---- The training draws from the generator too (pilot of 26-09) ----------------------------------
+
+# Found by the pilot of 26-09 on real data: two identical runs gave different tables although each
+# IdTaxa() call had its seed. LearnTaxa() classifies its own training sequences in rounds, with
+# sample(), and where the labels conflict, as GenBank's do, the training it returns depends on the
+# generator. The fixture of this file had clean labels, so it never showed. Added before the fix.
+.idt_noisy <- function() {
+  set.seed(31L)
+  root <- paste(sample(c("A", "C", "G", "T"), 300, replace = TRUE), collapse = "")
+  x <- character(0); lab <- character(0)
+  for (g in 1:4) {
+    gb <- .idt_vary(root, 30)
+    for (e in 1:6) {
+      k <- sample(0:3, 1)
+      sb <- if (k == 0) gb else .idt_vary(gb, k)
+      for (r in 1:3) { x <- c(x, .idt_vary(sb, 2)); lab <- c(lab, paste0(c("Opuntia", "Cereus", "Mammillaria", "Echinopsis")[g], "_sp", e)) }
+    }
+  }
+  sw <- c(3, 20, 41); lab[sw] <- lab[sw + 4]
+  names(x) <- paste0("s", seq_along(x), ".1")
+  list(x = x, lab = stats::setNames(lab, names(x)))
+}
+
+test_that("the training of a fold is reproducible, although LearnTaxa draws from the generator", {
+  .idt_skip()
+  n <- .idt_noisy()
+  prints <- vapply(1:6, function(s) {
+    set.seed(s)
+    paste(round(.bc_idtaxa_train(n$x, n$lab)$fraction, 6), collapse = ",")
+  }, character(1))
+  # The fact the fix answers: without a seed, the training depends on the session's generator
+  expect_gt(length(unique(prints)), 1L)
+
+  set.seed(1L); a <- .bc_idtaxa_train(n$x, n$lab, train_seed = 11L)
+  set.seed(2L); b <- .bc_idtaxa_train(n$x, n$lab, train_seed = 11L)
+  expect_identical(a, b)
+})
+
+test_that("two runs on a library with conflicting labels write the same tables", {
+  .idt_skip()
+  tmp <- withr::local_tempdir()
+  n <- .idt_noisy()
+  lib_dir <- file.path(tmp, "4_library"); dir.create(lib_dir)
+  y <- n$x
+  names(y) <- paste0(n$lab, "|matK_", names(n$x))
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(y), file.path(lib_dir, "LIB_matK.fasta"))
+  folds_dir <- file.path(tmp, "5_folds")
+  suppressMessages(build_barcoding_folds(library_dir = lib_dir, output_dir = folds_dir))
+  f <- list(library_dir = lib_dir, folds_dir = folds_dir)
+  set.seed(1L); .idt_run(f, file.path(tmp, "a"))
+  set.seed(2L); .idt_run(f, file.path(tmp, "b"))
+  expect_identical(.idt_md5(file.path(tmp, "a")), .idt_md5(file.path(tmp, "b")))
+})
+
 # ---- K2: one training per fold -------------------------------------------------------------------
 
 test_that("a training learnt once per fold gives the same answer as a training per query", {
@@ -156,9 +210,9 @@ test_that("a training learnt once per fold gives the same answer as a training p
   sid <- sub("^[^|]*\\|", "", names(x)); sp <- stats::setNames(sub("\\|.*$", "", names(x)), sid)
   names(x) <- sid
   train <- sid[-c(1, 4)]
-  trained <- .bc_idtaxa_train(x[train], sp[train])
+  trained <- .bc_idtaxa_train(x[train], sp[train], train_seed = 3L)
   for (q in sid[c(1, 4)]) {
-    each <- suppressWarnings(.bc_classify_idtaxa(x[train], sp[train], x[[q]], query_seed = 7L))
+    each <- suppressWarnings(.bc_classify_idtaxa(x[train], sp[train], x[[q]], query_seed = 7L, train_seed = 3L))
     once <- suppressWarnings(.bc_classify_idtaxa(x[train], sp[train], x[[q]], query_seed = 7L, trained = trained))
     expect_identical(once, each)
   }

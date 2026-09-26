@@ -476,7 +476,8 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   pool <- .bc_strand_pool(lib_m)
   lib_seqs <- gsub("-", "", toupper(apply(as.character(lib_m), 1, paste, collapse = "")), fixed = TRUE)
   names(lib_seqs) <- rownames(lib_m)
-  trained <- .bc_idtaxa_train(lib_seqs, species[names(lib_seqs)])
+  trained <- .bc_idtaxa_train(lib_seqs, species[names(lib_seqs)],
+                              train_seed = .bc_query_seed(seed, locus, "cn2", 0L, "<training>"))
   queries <- as.character(og)
   if (!is.list(queries)) queries <- lapply(seq_len(nrow(queries)), function(i) queries[i, ])
   rows <- lapply(seq_along(queries), function(i) {
