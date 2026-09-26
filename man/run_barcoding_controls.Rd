@@ -19,7 +19,8 @@ run_barcoding_controls(
   max_folds = NULL,
   controls = c("CN1", "CN2", "CN3"),
   mafft_exec = "mafft",
-  mafft_opts = "--auto"
+  mafft_opts = "--auto",
+  threshold = 60
 )
 }
 \arguments{
@@ -32,7 +33,12 @@ run_barcoding_controls(
 \item{outgroup_dir}{Character or \code{NULL}. Directory with \verb{<locus>.fasta} of the outgroup, as the
 assembly writes them. \code{NULL} skips CN2 and says so.}
 
-\item{method}{Character. \code{"nn"} or \code{"idtaxa"}.}
+\item{method}{Character. \code{"nn"} or \code{"idtaxa"}. With \code{"idtaxa"} only CN2 runs (decision K6 of
+BMM, 2026-09-26): CN1 would retrain IdTaxa once per fold and permutation, and CN3 measures a
+bias of the nearest neighbour. The outgroup queries are oriented against the library with the
+rule of the nearest neighbour, classified by IdTaxa trained on the whole locus at threshold 0
+with a seed per query, and written to \code{TABLE_barcoding_cn2_queries_idtaxa.csv}; the tables of
+the nearest neighbour are not touched. MAFFT is not needed.}
 
 \item{permutations}{Integer. Permutations of CN1; at least 10 in a real run.}
 
@@ -53,6 +59,9 @@ distance of another. Without \code{outgroup_dir} MAFFT is never called.}
 
 \item{mafft_opts}{Character. Further options for \code{MAFFT}. \code{--add} and \code{--keeplength} are added
 by the function and are not optional.}
+
+\item{threshold}{Numeric. Confidence threshold applied to IdTaxa's output, for \code{"idtaxa"}, as in
+\code{\link[=classify_barcoding_folds]{classify_barcoding_folds()}}.}
 }
 \value{
 Invisibly, a list with the tables. Writes \code{TABLE_barcoding_cn1_permutations.csv},
