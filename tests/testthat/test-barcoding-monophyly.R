@@ -153,7 +153,11 @@ test_that("the job script of a locus carries the locus, its seed, the model and 
   # The autoMRE cutoff written, not left to the RAxML-NG default: 0.03, as in the bootstrap
   # convergence test of the phylogeny (cactus_bs_convergence.raxml.log)
   expect_match(txt, "--bs-cutoff 0.03", fixed = TRUE)
-  expect_match(txt, "--workers ", fixed = TRUE)
+  # RAxML-NG refuses threads that are not a multiple of the workers (Leftraru, 26-09: 32 threads
+  # over 5 workers). With 32 cores asked and 20 starting trees, 5 workers of 6 threads: 30 in all
+  expect_match(txt, "--workers 5 ", fixed = TRUE)
+  expect_match(txt, "--threads 30 ", fixed = TRUE)
+  expect_match(txt, "#SBATCH --cpus-per-task=30", fixed = TRUE)
   expect_match(txt, "--force perf_threads --extra thread-nopin", fixed = TRUE)
   expect_match(txt, "export OMP_PROC_BIND=false", fixed = TRUE)
   expect_match(txt, "--bs-metric fbp", fixed = TRUE)
