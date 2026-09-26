@@ -66,7 +66,7 @@ test_that("the seed of a query is a pure function of the seed, the locus, the sc
   set.seed(99L); stats::runif(3)
   before <- get(".Random.seed", envir = globalenv())
   expect_identical(.bc_query_seed(1L, "matK", "species", 3L, "matK_A1.1"), a)
-  expect_identical(get(".Random.seed", envir = globalenv()), before)
+  expect_true(identical(get(".Random.seed", envir = globalenv()), before))
 
   # Any field that changes gives another seed
   expect_false(identical(.bc_query_seed(2L, "matK", "species", 3L, "matK_A1.1"), a))

@@ -102,7 +102,7 @@ test_that("an IdTaxa run leaves the session's random state as it found it", {
   set.seed(3L)
   before <- get(".Random.seed", envir = globalenv())
   .idt_run(f, file.path(tmp, "a"))
-  expect_identical(get(".Random.seed", envir = globalenv()), before)
+  expect_true(identical(get(".Random.seed", envir = globalenv()), before))
 })
 
 test_that("the answer of a query does not depend on the other queries of the run", {
