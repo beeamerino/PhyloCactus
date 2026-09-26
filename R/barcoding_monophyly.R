@@ -107,7 +107,8 @@
 #'   job rather than left to the RAxML-NG default. Defaults to 0.03, the value of the bootstrap
 #'   convergence test of the phylogeny.
 #' @param seed Integer. Seed of the run, from which each locus derives its own.
-#' @param threads Integer. Cores per job (`--cpus-per-task` and `--threads`). Defaults to 32.
+#' @param threads Integer. Cores available per job. The job asks for the threads the worker plan
+#'   uses, workers times threads per worker, which RAxML-NG requires; 32 gives 30. Defaults to 32.
 #' @param workers,min_threads_per_worker Integer. RAxML-NG workers over the starting trees; `NULL`
 #'   plans them as [generate_ml_search_script()] does.
 #' @param job_dir Character. Where the scripts are written. Defaults to `job/` inside `trees_dir`.
@@ -157,8 +158,13 @@ generate_barcoding_gene_tree_scripts <- function(library_dir, trees_dir, loci = 
   dir.create(job_dir, recursive = TRUE, showWarnings = FALSE)
   threads <- as.integer(threads)
   n_trees <- .parse_n_start_trees(starting_trees)
-  plan <- if (is.null(workers)) .plan_ml_workers(n_trees, threads, min_threads_per_worker) else
-    list(workers = max(1L, as.integer(workers)))
+  # RAxML-NG refuses a thread count that is not a multiple of the workers, so the job asks for
+  # exactly the threads the plan uses: workers times threads per worker
+  plan <- if (is.null(workers)) .plan_ml_workers(n_trees, threads, min_threads_per_worker) else {
+    w <- max(1L, as.integer(workers))
+    list(workers = w, threads_per_worker = max(1L, threads %/% w), threads_used = w * max(1L, threads %/% w))
+  }
+  threads_used <- as.integer(plan$threads_used)
   jobs <- character(0)
   for (l in loci) {
     msa <- file.path(library_dir, paste0("LIB_", l, ".fasta"))
@@ -175,7 +181,7 @@ generate_barcoding_gene_tree_scripts <- function(library_dir, trees_dir, loci = 
     }
     job <- c(.bc_slurm_header(paste0(cluster_job_name, "_", l), paste0("slurm_", l, "_%j"), "ALL",
                               cluster_partition, cluster_mem, cluster_time, cluster_queue,
-                              cluster_mail_user, load_module, cpus = threads),
+                              cluster_mail_user, load_module, cpus = threads_used),
              paste0("# Gene tree of ", l, ", Phase 6E. Written by generate_barcoding_gene_tree_scripts() on ",
                     format(Sys.time(), "%Y-%m-%d %H:%M"), "; constraint: ", constraint, "; seed ", l_seed, "."),
              "echo \"=== RAxML-NG version used by this job ===\"",
@@ -194,11 +200,11 @@ generate_barcoding_gene_tree_scripts <- function(library_dir, trees_dir, loci = 
              "fi",
              "",
              paste0("echo \"Gene tree of ", l, ": ", n_trees, " starting trees over ", plan$workers,
-                    " workers, bootstraps ", bs_trees, ", autoMRE cutoff ", format(bs_cutoff), "\""),
+                    " workers of ", plan$threads_per_worker, " threads, bootstraps ", bs_trees, ", autoMRE cutoff ", format(bs_cutoff), "\""),
              paste0(raxml_exec, " --all --msa \"$RBA_FILE\" --tree ", shQuote(starting_trees, type = "sh"),
                     " --bs-trees ", shQuote(bs_trees, type = "sh"), " --bs-cutoff ", format(bs_cutoff),
                     " --bs-metric fbp --seed ", l_seed,
-                    " --threads ${SLURM_CPUS_PER_TASK:-", threads, "} --workers ", plan$workers,
+                    " --threads ", threads_used, " --workers ", plan$workers,
                     " --force perf_threads --extra thread-nopin",
                     " --prefix ", shQuote(file.path(trees_dir, l)), cons_line))
     f_job <- file.path(job_dir, paste0("job_", l, ".sh"))
