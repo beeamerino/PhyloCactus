@@ -515,23 +515,25 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   cat("  Barcoding Negative Controls Complete \U0001f335\n")
   cat("====================================================\n")
   cat("  Method:                ", method, "\n")
-  if (!is.null(out$cn1_verdict)) {
+  if (!is.null(out[["cn1_verdict"]])) {
     cat("  CN1: ", nrow(out$cn1_verdict), " locus-scheme pairs, leakage flagged in ",
         sum(out$cn1_verdict$leakage), "\n", sep = "")
   }
-  if (!is.null(out$cn2)) {
-    cat("  CN2: ", sum(out$cn2$n_species), " outgroup species (", sum(out$cn2$comparable),
-        " comparable sequences of ", sum(out$cn2$queries), ") over ",
-        sum(out$cn2$comparable > 0), " loci\n", sep = "")
-    cat("       ", sum(out$cn2$reversed), " reversed before aligning; ",
-        sum(out$cn2$no_match), " match the locus in neither direction\n", sep = "")
+  # `[[` and not `$`: `$` matches partially, and with IdTaxa `out$cn2` found `cn2_queries_idtaxa`
+  cn2 <- out[["cn2"]]
+  if (!is.null(cn2)) {
+    cat("  CN2: ", sum(cn2$n_species), " outgroup species (", sum(cn2$comparable),
+        " comparable sequences of ", sum(cn2$queries), ") over ",
+        sum(cn2$comparable > 0), " loci\n", sep = "")
+    cat("       ", sum(cn2$reversed), " reversed before aligning; ",
+        sum(cn2$no_match), " match the locus in neither direction\n", sep = "")
   }
   if (!is.null(out$cn2_queries_idtaxa)) {
     q <- out$cn2_queries_idtaxa
     cat("  CN2 with IdTaxa: ", sum(q$orientation != "no_match"), " comparable outgroup queries of ",
         nrow(q), "; ", sum(q$orientation == "no_match"), " match the locus in neither direction\n", sep = "")
   }
-  if (!is.null(out$cn3)) cat("  CN3: written and labelled; its figure belongs to Phase 6\n")
+  if (!is.null(out[["cn3"]])) cat("  CN3: written and labelled; its figure belongs to Phase 6\n")
   cat("  Output directory:      ", output_dir, "\n")
   cat("====================================================\n\n")
   invisible(TRUE)
