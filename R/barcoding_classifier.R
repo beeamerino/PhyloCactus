@@ -119,11 +119,17 @@
 
 #' Training of IdTaxa for one fold
 #'
-#' `DECIPHER::LearnTaxa()` with the genus and the species as the two ranks below `Root`. It is
-#' deterministic (measured on 2026-09-26), so a fold is learnt once and every query of the fold is
-#' classified against the same training (decision K2 of BMM).
+#' `DECIPHER::LearnTaxa()` with the genus and the species as the two ranks below `Root`. A fold is
+#' learnt once and every query of the fold is classified against the same training (decision K2 of
+#' BMM).
+#'
+#' LearnTaxa() draws from the generator: it classifies its own training sequences in rounds with
+#' `sample()`, and where labels conflict, as GenBank's do, the training it returns depends on the
+#' state of the generator. The first measurements of 2026-09-26 missed it because their labels were
+#' clean; the pilot on real data found it (two identical runs, different tables). So the training
+#' has its own seed, `train_seed`, from `.bc_query_seed(seed, locus, scheme, fold, "<training>")`.
 #' @noRd
-.bc_idtaxa_train <- function(train, train_labels) {
+.bc_idtaxa_train <- function(train, train_labels, train_seed = NULL) {
   if (length(train) != length(train_labels)) {
     stop("train and train_labels have different lengths.", call. = FALSE)
   }
@@ -131,9 +137,8 @@
   taxonomy_str <- paste0("Root;", genera, ";", unname(train_labels))
   dna <- Biostrings::DNAStringSet(toupper(unname(train)))
   names(dna) <- names(train)
-  trained <- DECIPHER::LearnTaxa(train = dna, taxonomy = taxonomy_str, verbose = FALSE)
-  attr(trained, "bc_labels") <- unname(train_labels)
-  trained
+  learn <- function() DECIPHER::LearnTaxa(train = dna, taxonomy = taxonomy_str, verbose = FALSE)
+  if (is.null(train_seed)) learn() else .bc_with_seed(train_seed, learn())
 }
 
 #' One row of IdTaxa from the confidences of each rank, cut at a threshold
@@ -166,13 +171,14 @@
 #' The same three states, from IdTaxa, the classifier of real use
 #'
 #' `train` and `train_labels` are the training sequences and their species; `trained`, when given,
-#' is their training from `.bc_idtaxa_train()`, learnt once per fold. `query_seed` is the seed of
+#' is their training from `.bc_idtaxa_train()`, learnt once per fold; without it the training is
+#' learnt here, with `train_seed`. `query_seed` is the seed of
 #' this query from `.bc_query_seed()`: it is set just before the call to `IdTaxa()`, and the
 #' session's random state is given back afterwards. Without it the answer is not reproducible.
 #' @noRd
 .bc_classify_idtaxa <- function(train, train_labels, query, threshold = 60, processors = 1L,
-                                trained = NULL, query_seed = NULL) {
-  if (is.null(trained)) trained <- .bc_idtaxa_train(train, train_labels)
+                                trained = NULL, query_seed = NULL, train_seed = NULL) {
+  if (is.null(trained)) trained <- .bc_idtaxa_train(train, train_labels, train_seed = train_seed)
   q <- Biostrings::DNAStringSet(toupper(unname(query)))
   call_idtaxa <- function() {
     DECIPHER::IdTaxa(q, trained, strand = "top", threshold = 0, processors = processors,
@@ -414,7 +420,10 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
             pool <- .bc_strand_pool(train_aln)
           }
           # IdTaxa learns the fold once; LearnTaxa() is deterministic (decision K2)
-          trained <- if (method == "idtaxa") .bc_idtaxa_train(seqs[p$train_ids], species[p$train_ids]) else NULL
+          trained <- if (method == "idtaxa") {
+            .bc_idtaxa_train(seqs[p$train_ids], species[p$train_ids],
+                             train_seed = .bc_query_seed(seed, l, sc, p$fold, "<training>"))
+          } else NULL
           for (q in p$test_ids) {
             if (alignment == "add") {
               s <- paste(as.character(dna[q, ]), collapse = "")
