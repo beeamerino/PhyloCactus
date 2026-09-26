@@ -168,7 +168,11 @@ test_that("IdTaxa answers with the same columns and the same three states as the
     .bc_classify_idtaxa(seqs[train], sp[train], seqs[["O11.1"]])))
   nn <- .bc_classify_nn(.cls_pdist(seqs), train, "O11.1", sp)
 
-  expect_setequal(names(r), names(nn))
+  # Since Phase 6B (K3) IdTaxa also writes the taxon and the confidence of each rank, so its columns
+  # are those of the nearest neighbour plus four; changed on 2026-09-26, before the code.
+  expect_true(all(names(nn) %in% names(r)))
+  expect_setequal(setdiff(names(r), names(nn)),
+                  c("genus_idtaxa", "species_idtaxa", "genus_confidence", "species_confidence"))
   expect_true(r$state %in% c(1L, 2L, 3L))
   expect_equal(r$state, 1L)
   expect_equal(r$predicted_species, "Opuntia_robusta")
