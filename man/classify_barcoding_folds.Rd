@@ -16,6 +16,9 @@ classify_barcoding_folds(
   max_folds = NULL,
   seed = 1L,
   threshold = 60,
+  alignment = c("library", "add"),
+  mafft_exec = "mafft",
+  mafft_opts = "--auto",
   notify = FALSE,
   notify_to = NULL,
   notify_credentials = NULL
@@ -46,6 +49,16 @@ contrast with IdTaxa, which retrains once per fold. \code{NULL} means all of the
 
 \item{threshold}{Numeric. Confidence threshold of \code{\link[DECIPHER:IdTaxa]{DECIPHER::IdTaxa()}}, for \code{"idtaxa"}.}
 
+\item{alignment}{Character. How the distance of a query is measured, for \code{"nn"}. \code{"library"},
+the default, reads it from the joint alignment of the library, in which the query took part.
+\code{"add"} removes the query's gaps, orients it against the training set of its fold and adds it
+to that training alignment with \verb{MAFFT --add --keeplength}, one call per query: the path of CN2
+and of a query brought by a user. The probe of 2026-09-25 found the two paths agreeing on 699 of
+720 queries and 4 answers changed. \code{"add"} writes its own tables, with the suffix \verb{_add}, and
+never touches those of \code{"library"}.}
+
+\item{mafft_exec, mafft_opts}{Command of the \code{MAFFT} binary and its options, for \code{alignment = "add"}.}
+
 \item{notify}{Logical. Send an email when the run ends, whether it finished or failed. Intended
 for \code{method = "idtaxa"}, which retrains once per fold and is measured in hours. A notification
 that cannot be sent is reported and ignored: it never fails the run. See
@@ -57,7 +70,10 @@ environment variables.}
 }
 \value{
 Invisibly, a list of prediction tables by scheme. Writes
-\verb{TABLE_barcoding_predictions_<scheme>_<method>.csv}.
+\verb{TABLE_barcoding_predictions_<scheme>_<method>.csv} and \verb{TABLE_barcoding_timing_<method>.csv},
+one row per locus and scheme with the folds, the queries and the seconds they took; with
+\code{alignment = "add"} both names carry the suffix \verb{_add} and the prediction tables add the columns
+\code{alineamiento} and \code{orientacion}.
 }
 \description{
 Step 7 of the branch. Reads the library of step 4 and the folds of step 5, classifies every query
