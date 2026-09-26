@@ -52,7 +52,7 @@ contrast with IdTaxa, which retrains once per fold. \code{NULL} means all of the
 \item{alignment}{Character. How the distance of a query is measured, for \code{"nn"}. \code{"library"},
 the default, reads it from the joint alignment of the library, in which the query took part.
 \code{"add"} removes the query's gaps, orients it against the training set of its fold and adds it
-to that training alignment with \verb{MAFFT --add --keeplength}, one call per query: the path of CN2
+to that training alignment with \code{MAFFT --add --keeplength}, one call per query: the path of CN2
 and of a query brought by a user. The probe of 2026-09-25 found the two paths agreeing on 699 of
 720 queries and 4 answers changed. \code{"add"} writes its own tables, with the suffix \verb{_add}, and
 never touches those of \code{"library"}.}
