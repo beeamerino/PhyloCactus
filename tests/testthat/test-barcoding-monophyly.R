@@ -140,10 +140,19 @@ test_that("the job script of a locus carries the locus, its seed, the model and 
                                                          cluster_mail_user = ""))
   job <- readLines(file.path(trees, "job", "job_matK.sh"))
   txt <- paste(job, collapse = "\n")
-  expect_match(txt, "raxml-ng --all", fixed = TRUE)
+  # The conventions of the ML search of the phylogeny on Leftraru (run_ml_search.sh of 17-09):
+  # the MPI build and its modules, the alignment parsed to RBA first, workers over the starting
+  # trees, perf_threads and thread-nopin, thread binding off, the tree specification quoted
+  expect_match(txt, "module load gcc/14.2.0-nlhpc openmpi/5.0.3-o raxml-ng/1.1.0-mpi-zen4-n", fixed = TRUE)
+  expect_match(txt, "raxml-ng-mpi --parse --msa", fixed = TRUE)
+  expect_match(txt, "raxml-ng-mpi --all --msa", fixed = TRUE)
+  expect_match(txt, ".raxml.rba", fixed = TRUE)
   expect_match(txt, "--model GTR+G4", fixed = TRUE)
-  expect_match(txt, "--tree pars{10},rand{10}", fixed = TRUE)
-  expect_match(txt, "--bs-trees autoMRE{1000}", fixed = TRUE)
+  expect_match(txt, "--tree 'pars{10},rand{10}'", fixed = TRUE)
+  expect_match(txt, "--bs-trees 'autoMRE{1000}'", fixed = TRUE)
+  expect_match(txt, "--workers ", fixed = TRUE)
+  expect_match(txt, "--force perf_threads --extra thread-nopin", fixed = TRUE)
+  expect_match(txt, "export OMP_PROC_BIND=false", fixed = TRUE)
   expect_match(txt, "--bs-metric fbp", fixed = TRUE)
   expect_match(txt, paste0("--seed ", .bc_query_seed(1L, "matK", "gene_tree", 0L, "<raxml>")), fixed = TRUE)
   expect_match(txt, "LIB_matK.fasta", fixed = TRUE)
