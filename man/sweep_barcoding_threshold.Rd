@@ -9,9 +9,10 @@ sweep_barcoding_threshold(
   controls_dir = file.path("11_barcoding", "8_controls"),
   output_dir = file.path("11_barcoding", "9_threshold"),
   alignment = c("add", "library"),
-  q = 0.99,
+  q = NULL,
   quantile_type = 1L,
-  figures = TRUE
+  figures = TRUE,
+  method = c("nn", "idtaxa")
 )
 }
 \arguments{
@@ -26,13 +27,22 @@ sweep_barcoding_threshold(
 the tables of \code{alignment = "add"}, measured the way a user query is measured; \code{"library"} reads
 those of the joint alignment.}
 
-\item{q}{Numeric. Quantile of the scheme G distances that sets the operating threshold. Defaults
-to \code{0.99}.}
+\item{q}{Numeric. Quantile of scheme G that sets the operating threshold. Defaults to \code{0.99} of
+the distances for \code{"nn"} and \code{0.01} of the genus confidences for \code{"idtaxa"}.}
 
 \item{quantile_type}{Integer. Type of \code{\link[stats:quantile]{stats::quantile()}}. Defaults to \code{1L}, whose result is always
 a distance observed in the data.}
 
 \item{figures}{Logical. Write one figure per locus, PDF and PNG at 300 dpi, 180 mm wide.}
+
+\item{method}{Character. \code{"nn"}, the nearest neighbour and its rule of remoteness, or \code{"idtaxa"},
+IdTaxa and its confidence threshold (Phase 6B, decision K7 of BMM). With \code{"idtaxa"} the tables
+read are \verb{TABLE_barcoding_predictions_<scheme>_idtaxa.csv} and
+\code{TABLE_barcoding_cn2_queries_idtaxa.csv}, the curve runs over the confidence threshold, the
+operating threshold of a locus is the quantile \code{q} of \code{genus_confidence} of its scheme G queries
+(the rule of D1 turned around, since confidence rises where distance falls), and it is reported
+next to 60, DECIPHER's default, in the column \code{rule}. The tables written carry the suffix
+\verb{_idtaxa}.}
 }
 \value{
 Invisibly, a list with \code{curve} and \code{operating}. Writes

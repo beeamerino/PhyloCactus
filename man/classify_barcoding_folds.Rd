@@ -16,6 +16,8 @@ classify_barcoding_folds(
   max_folds = NULL,
   seed = 1L,
   threshold = 60,
+  chunk = NULL,
+  n_chunks = NULL,
   alignment = c("library", "add"),
   mafft_exec = "mafft",
   mafft_opts = "--auto",
@@ -45,9 +47,21 @@ classify_barcoding_folds(
 \item{max_folds}{Integer or \code{NULL}. Folds per locus and scheme; a declared random subset, for the
 contrast with IdTaxa, which retrains once per fold. \code{NULL} means all of them.}
 
-\item{seed}{Integer. Seed of that subset, so it is reproducible.}
+\item{seed}{Integer. Seed of that subset, so it is reproducible, and, for \code{"idtaxa"}, the seed
+from which the seed of every query is derived with its locus, scheme, fold and \code{sid}, so that
+each answer is reproducible and independent of the rest of the run.}
 
-\item{threshold}{Numeric. Confidence threshold of \code{\link[DECIPHER:IdTaxa]{DECIPHER::IdTaxa()}}, for \code{"idtaxa"}.}
+\item{threshold}{Numeric. Confidence threshold applied to the output of \code{\link[DECIPHER:IdTaxa]{DECIPHER::IdTaxa()}}, for
+\code{"idtaxa"}. IdTaxa itself always runs at threshold 0 and the confidence of each rank is written
+(\code{genus_confidence}, \code{species_confidence}), so any other threshold can be applied afterwards
+with the same result as a run at that threshold.}
+
+\item{chunk, n_chunks}{Integers, or \code{NULL} for a run without chunks. With both, only chunk
+\code{chunk} of \code{n_chunks} is classified: inside each locus and scheme the folds, in the order of
+step 5, are dealt round-robin to the chunks. The chunk writes its tables in \verb{chunks/} of
+\code{output_dir}, with the suffix \verb{_chunk<k>of<n>}, together with its session; the tables of a whole
+run are then written by \code{\link[=merge_barcoding_chunks]{merge_barcoding_chunks()}}. For a job array on a cluster, see
+\code{\link[=generate_barcoding_job_scripts]{generate_barcoding_job_scripts()}}.}
 
 \item{alignment}{Character. How the distance of a query is measured, for \code{"nn"}. \code{"library"},
 the default, reads it from the joint alignment of the library, in which the query took part.
