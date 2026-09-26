@@ -6,7 +6,7 @@
 # reductions to one sequence per species of the phylogeny is applied. Each sequence keeps its
 # GenBank accession (sid) in the FASTA header, as Genus_species|sid.
 #
-# Governing documents: personal/review_log/phylocactus/04_barcoding_0.5.0/, validation plan of
+# Governing documents: 01_minutes_and_phases/04_barcoding_0.5.0/ of the audit repository, validation plan of
 # 2026-09-10 with its amendments of 2026-09-19 and 2026-09-21, and the Phase 2 design of 2026-09-21.
 # ------------------------------------------------------------------------------
 
