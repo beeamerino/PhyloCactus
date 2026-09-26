@@ -304,6 +304,22 @@ test_that("CN2 with IdTaxa classifies the comparable outgroup queries and leaves
   expect_identical(tools::md5sum(nn_file), before)
 })
 
+test_that("the banner of CN2 with IdTaxa has no line of the nearest neighbour", {
+  # On Leftraru (2026-09-26) the banner printed "CN2: 0 outgroup species ... over 0 loci" above the
+  # IdTaxa line: `out$cn2` matched `cn2_queries_idtaxa` partially. Written before the fix.
+  .idt_skip()
+  tmp <- withr::local_tempdir()
+  f <- .idt_fixture(tmp)
+  og <- .idt_outgroup(tmp, unname(f$seqs$matK[1]))
+  txt <- suppressWarnings(suppressMessages(utils::capture.output(
+    run_barcoding_controls(library_dir = f$library_dir, folds_dir = f$folds_dir,
+                           output_dir = file.path(tmp, "8_controls"), outgroup_dir = og,
+                           method = "idtaxa", controls = "CN2", loci = "matK"))))
+  expect_false(any(grepl("^  CN2: ", txt)))
+  expect_false(any(grepl("reversed before aligning", txt)))
+  expect_true(any(grepl("^  CN2 with IdTaxa: 2 comparable outgroup queries of 3", txt)))
+})
+
 test_that("CN1 and CN3 are not run with IdTaxa", {
   skip_if_not_installed("Biostrings")
   skip_if_not_installed("ape")
