@@ -413,18 +413,20 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   # The pool of the locus is built once; the alignment is one call per query, decision of BMM of
   # 2026-09-25, so that no query is ever aligned in the company of another, which is how a real
   # query will arrive.
+  #
+  # Since 2026-09-26 the orientation, the alignment and the classification of one query are
+  # .bc_classify_by_add(), shared with the add path of step 7, and a query that matches the locus
+  # in neither direction comes back as state 3 with no species and no distance (decision D4).
+  lib_m <- lib_m[lib_tab$sid, , drop = FALSE]
   pool <- .bc_strand_pool(lib_m)
-  consultas <- as.list(og)
+  consultas <- as.character(og)
+  if (!is.list(consultas)) consultas <- lapply(seq_len(nrow(consultas)), function(i) consultas[i, ])
   filas <- lapply(seq_along(consultas), function(i) {
-    q <- consultas[i]
-    names(q) <- "consulta"
-    o <- .bc_orient_to_library(q, pool)
-    junto <- .bc_align_to_library(lib_m, o$query, mafft_exec = mafft_exec, mafft_opts = mafft_opts)
-    dm <- .bc_classifier_matrix(junto, model, min_comparable)
-    sp <- c(species, consulta = "consulta_externa")
-    r <- .bc_classify_nn(dm, lib_tab$sid, "consulta", sp)
+    r <- .bc_classify_by_add(lib_m, species, paste(consultas[[i]], collapse = ""), model,
+                             min_comparable, pool = pool, mafft_exec = mafft_exec,
+                             mafft_opts = mafft_opts)
     cbind(data.frame(locus = locus, sid = h$sid[i], especie_consulta = h$species[i],
-                     orientacion = o$orientacion, stringsAsFactors = FALSE), r)
+                     stringsAsFactors = FALSE), r)
   })
   do.call(rbind, filas)
 }

@@ -107,6 +107,56 @@
   }
 }
 
+#' Training alignment of one fold: the training rows, and no column left with gaps only
+#'
+#' A column that only the queries of the fold had opened carries no base once they are out. It is
+#' dropped because `MAFFT --add --keeplength` would drop it too, and the check of
+#' [.bc_align_to_library()] that the library keeps its width would then stop the run.
+#' @noRd
+.bc_training_alignment <- function(dna, train_ids) {
+  m <- as.matrix(dna)
+  faltan <- setdiff(train_ids, rownames(m))
+  if (length(faltan) > 0L) {
+    stop("Training sequences not in the alignment: ", paste(faltan, collapse = ", "), call. = FALSE)
+  }
+  m <- m[train_ids, , drop = FALSE]
+  m[, colSums(as.character(m) != "-") > 0L, drop = FALSE]
+}
+
+#' Nearest neighbour of one query measured the way the identification will measure it
+#'
+#' The query arrives unaligned. It is oriented against the training set with the rule of
+#' `.normalise_strand()`, added to the training alignment with `MAFFT --add --keeplength`, one call
+#' for this query alone, and classified with the three states of [.bc_classify_nn()] under E13.
+#' CN2 and the add path of step 7 both go through here, so an alien query and a legitimate one are
+#' measured by the same operation.
+#'
+#' A query that matches the training set in neither direction is not aligned and not classified: it
+#' is state 3 with the reason `sin_coincidencia`, no species and no distance (decision D4 of BMM,
+#' 2026-09-26). A sequence with no homology to the locus has no nearest neighbour worth publishing.
+#'
+#' @param train_dna Aligned training set, `sid` as row names.
+#' @param species Character vector of species named by `sid`; must cover every training row.
+#' @param query Character. The query sequence; gaps are removed.
+#' @param pool Strand reference pool of the training set, or `NULL` to build it here.
+#' @return One-row data frame: `orientacion` followed by the columns of [.bc_prediction_row()].
+#' @noRd
+.bc_classify_by_add <- function(train_dna, species, query, model, min_comparable, pool = NULL,
+                                mafft_exec = "mafft", mafft_opts = "--auto") {
+  train_ids <- rownames(train_dna)
+  if (is.null(pool)) pool <- .bc_strand_pool(train_dna)
+  q <- .bc_dnabin_row(gsub("-", "", query, fixed = TRUE), "consulta")
+  o <- .bc_orient_to_library(q, pool)
+  if (o$orientacion == "sin_coincidencia") {
+    r <- .bc_prediction_row(3L, motivo = "sin_coincidencia")
+  } else {
+    junto <- .bc_align_to_library(train_dna, o$query, mafft_exec = mafft_exec, mafft_opts = mafft_opts)
+    dm <- .bc_classifier_matrix(junto, model, min_comparable)
+    r <- .bc_classify_nn(dm, train_ids, "consulta", c(species[train_ids], consulta = "consulta"))
+  }
+  cbind(data.frame(orientacion = o$orientacion, stringsAsFactors = FALSE), r)
+}
+
 #' Distance matrix of a locus with the short pairs left without value
 #' @noRd
 .bc_classifier_matrix <- function(dna, model, min_comparable) {
@@ -157,6 +207,14 @@
 #'   contrast with IdTaxa, which retrains once per fold. `NULL` means all of them.
 #' @param seed Integer. Seed of that subset, so it is reproducible.
 #' @param threshold Numeric. Confidence threshold of [DECIPHER::IdTaxa()], for `"idtaxa"`.
+#' @param alignment Character. How the distance of a query is measured, for `"nn"`. `"library"`,
+#'   the default, reads it from the joint alignment of the library, in which the query took part.
+#'   `"add"` removes the query's gaps, orients it against the training set of its fold and adds it
+#'   to that training alignment with `MAFFT --add --keeplength`, one call per query: the path of CN2
+#'   and of a query brought by a user. The probe of 2026-09-25 found the two paths agreeing on 699 of
+#'   720 queries and 4 answers changed. `"add"` writes its own tables, with the suffix `_add`, and
+#'   never touches those of `"library"`.
+#' @param mafft_exec,mafft_opts Command of the `MAFFT` binary and its options, for `alignment = "add"`.
 #' @param notify Logical. Send an email when the run ends, whether it finished or failed. Intended
 #'   for `method = "idtaxa"`, which retrains once per fold and is measured in hours. A notification
 #'   that cannot be sent is reported and ignored: it never fails the run. See
@@ -165,7 +223,10 @@
 #'   `credentials`. Both default to `NULL`, which reads the `MY_EMAIL` and `PHYLOCACTUS_SMTP_CREDS`
 #'   environment variables.
 #' @return Invisibly, a list of prediction tables by scheme. Writes
-#'   `TABLE_barcoding_predictions_<scheme>_<method>.csv`.
+#'   `TABLE_barcoding_predictions_<scheme>_<method>.csv` and `TABLE_barcoding_timing_<method>.csv`,
+#'   one row per locus and scheme with the folds, the queries and the seconds they took; with
+#'   `alignment = "add"` both names carry the suffix `_add` and the prediction tables add the columns
+#'   `alineamiento` and `orientacion`.
 #' @examples
 #' \dontrun{
 #' classify_barcoding_folds(
@@ -186,10 +247,21 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
                                      max_folds = NULL,
                                      seed = 1L,
                                      threshold = 60,
+                                     alignment = c("library", "add"),
+                                     mafft_exec = "mafft",
+                                     mafft_opts = "--auto",
                                      notify = FALSE,
                                      notify_to = NULL,
                                      notify_credentials = NULL) {
   method <- match.arg(method)
+  alignment <- match.arg(alignment)
+  if (alignment == "add" && method != "nn") {
+    stop("alignment = \"add\" measures the distance of the nearest neighbour and applies only to ",
+         "method = \"nn\". IdTaxa does not align.", call. = FALSE)
+  }
+  # MAFFT is checked before anything is read or written, so a missing binary costs nothing
+  if (alignment == "add") .bc_assert_mafft(mafft_exec)
+  sufijo <- paste0(method, if (alignment == "add") "_add" else "")
   started <- Sys.time()
   call_run <- function() {
     .bc_assert_output_dir(output_dir)
@@ -205,6 +277,7 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
     loci <- if (is.null(loci)) loci_todos else intersect(loci_todos, loci)
 
     out <- list()
+    tiempos <- list()
     for (sc in schemes) {
       tab <- utils::read.csv(file.path(folds_dir, paste0("TABLE_barcoding_folds_", sc, ".csv")),
                              stringsAsFactors = FALSE)
@@ -216,9 +289,12 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
         if (length(pliegues) == 0L) next
         pliegues <- .bc_sample_folds(pliegues, max_folds, seed)
 
-        dna <- ape::read.dna(file.path(library_dir, paste0("LIB_", l, ".fasta")), format = "fasta")
+        dna <- ape::read.dna(file.path(library_dir, paste0("LIB_", l, ".fasta")), format = "fasta",
+                             as.matrix = TRUE)
         rownames(dna) <- .bc_parse_header(labels(dna))$sid
-        dmat <- if (method == "nn") .bc_classifier_matrix(dna, model, min_comparable) else NULL
+        dmat <- if (method == "nn" && alignment == "library") {
+          .bc_classifier_matrix(dna, model, min_comparable)
+        } else NULL
         seqs <- if (method == "idtaxa") {
           s <- stats::setNames(toupper(apply(as.character(as.matrix(dna)), 1, paste, collapse = "")),
                                rownames(dna))
@@ -227,7 +303,23 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
 
         t0 <- Sys.time()
         for (p in pliegues) {
+          if (alignment == "add") {
+            ent <- .bc_training_alignment(dna, p$train_ids)
+            pool <- .bc_strand_pool(ent)
+          }
           for (q in p$test_ids) {
+            if (alignment == "add") {
+              s <- paste(as.character(dna[q, ]), collapse = "")
+              r <- .bc_classify_by_add(ent, species, s, model, min_comparable, pool = pool,
+                                       mafft_exec = mafft_exec, mafft_opts = mafft_opts)
+              filas[[length(filas) + 1L]] <- cbind(
+                data.frame(locus = l, esquema = sc, pliegue = p$pliegue, estrato = p$estrato, sid = q,
+                           especie_verdadera = unname(species[q]),
+                           genero_verdadero = .bc_genus(unname(species[q])),
+                           metodo = method, alineamiento = "add", stringsAsFactors = FALSE),
+                r)
+              next
+            }
             r <- if (method == "nn") {
               .bc_classify_nn(dmat, p$train_ids, q, species)
             } else {
@@ -242,19 +334,28 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
               r)
           }
         }
-        message(sprintf("Locus '%s', scheme %s, method %s: %d folds, %d predictions written in %.1f s.",
-                        l, sc, method, length(pliegues),
-                        sum(vapply(pliegues, function(p) length(p$test_ids), integer(1))),
-                        as.numeric(difftime(Sys.time(), t0, units = "secs"))))
+        segundos <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
+        n_consultas <- sum(vapply(pliegues, function(p) length(p$test_ids), integer(1)))
+        tiempos[[length(tiempos) + 1L]] <- data.frame(
+          locus = l, esquema = sc, metodo = method, alineamiento = alignment,
+          pliegues = length(pliegues), consultas = n_consultas, segundos = segundos,
+          stringsAsFactors = FALSE)
+        message(sprintf("Locus '%s', scheme %s, method %s, alignment %s: %d folds, %d predictions written in %.1f s.",
+                        l, sc, method, alignment, length(pliegues), n_consultas, segundos))
       }
       pred <- do.call(rbind, filas)
       rownames(pred) <- NULL
       out[[sc]] <- pred
       utils::write.csv(pred, file.path(output_dir,
-                                       paste0("TABLE_barcoding_predictions_", sc, "_", method, ".csv")),
+                                       paste0("TABLE_barcoding_predictions_", sc, "_", sufijo, ".csv")),
                        row.names = FALSE)
     }
-    .bc_classifier_banner(out, output_dir, method)
+    # The running time is written, not left in prose: the projection of the complete IdTaxa run
+    # (about 34 h) and of the add path (8.5 h) rested on rates noted by hand.
+    utils::write.csv(do.call(rbind, tiempos),
+                     file.path(output_dir, paste0("TABLE_barcoding_timing_", sufijo, ".csv")),
+                     row.names = FALSE)
+    .bc_classifier_banner(out, output_dir, sufijo)
     invisible(out)
   }
 
@@ -282,7 +383,7 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
     status = "finished",
     started = started,
     outputs = c(stats::setNames(
-      file.path(output_dir, paste0("TABLE_barcoding_predictions_", names(result), "_", method, ".csv")),
+      file.path(output_dir, paste0("TABLE_barcoding_predictions_", names(result), "_", sufijo, ".csv")),
       paste0("Predictions, scheme ", names(result))),
       "Classifier output directory" = output_dir)
   )
@@ -294,7 +395,8 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
 #' Closing banner of step 7, in the format the phylogeny already uses
 #'
 #' It reports what was written and where, and nothing else. No accuracy, no rate: Phase 5A does not
-#' measure any, and a banner is exactly where a number nobody asked for would slip in.
+#' measure any, and a banner is exactly where a number nobody asked for would slip in. `method` is the
+#' suffix of the tables, `nn`, `nn_add` or `idtaxa`.
 #' @noRd
 .bc_classifier_banner <- function(out, output_dir, method) {
   cat("\n====================================================\n")
