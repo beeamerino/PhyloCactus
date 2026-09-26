@@ -36,7 +36,7 @@
 .lib_registry <- function(headers, locus) {
   sp <- sub("\\|.*$", "", headers)
   data.frame(sid = sub("^.*\\|", "", headers), species = sp, genus = sub("_.*$", "", sp),
-             locus = locus, cluster_id = 1L, nombre_genbank = sp, stringsAsFactors = FALSE)
+             locus = locus, cluster_id = 1L, genbank_name = sp, stringsAsFactors = FALSE)
 }
 
 .strand_log <- function(headers, unmatched = character(0)) {
@@ -56,11 +56,11 @@ test_that("identical aligned sequences collapse within a species to the alphabet
   expect_setequal(names(out$aln), c("Opuntia_robusta|A9.1", "Opuntia_robusta|C1.1"))
   m <- out$map
   expect_equal(nrow(m), 3L)
-  expect_equal(m$representante[m$sid == "B2.1"], "A9.1")
-  expect_equal(m$representante[m$sid == "A9.1"], "A9.1")
-  expect_equal(m$representante[m$sid == "C1.1"], "C1.1")
-  expect_equal(m$colapsada[m$sid == "B2.1"], TRUE)
-  expect_equal(sum(m$colapsada), 1L)
+  expect_equal(m$representative[m$sid == "B2.1"], "A9.1")
+  expect_equal(m$representative[m$sid == "A9.1"], "A9.1")
+  expect_equal(m$representative[m$sid == "C1.1"], "C1.1")
+  expect_equal(m$collapsed[m$sid == "B2.1"], TRUE)
+  expect_equal(sum(m$collapsed), 1L)
   expect_true(all(m$locus == "matK"))
 })
 
@@ -70,7 +70,7 @@ test_that("identical sequences of different species are not collapsed", {
   out <- .bc_collapse_identical(aln, locus = "matK")
 
   expect_setequal(names(out$aln), names(aln))
-  expect_false(any(out$map$colapsada))
+  expect_false(any(out$map$collapsed))
 })
 
 test_that("sequence identity ignores letter case", {
@@ -107,7 +107,7 @@ test_that("the final library excludes non-homologous sequences, collapses identi
 
   # rbcL did not enter the screening and has no curated alignment: the library must not look for it.
   dirs <- .lib_step_files(tmp, registry,
-                          data.frame(locus = c("matK", "ITS", "rbcL"), entra = c(TRUE, TRUE, FALSE),
+                          data.frame(locus = c("matK", "ITS", "rbcL"), enters = c(TRUE, TRUE, FALSE),
                                      stringsAsFactors = FALSE))
 
   lib <- suppressMessages(finalize_barcoding_library(
@@ -120,11 +120,11 @@ test_that("the final library excludes non-homologous sequences, collapses identi
   # Exclusion, declared with locus, species, description and reason
   ex <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_excluded_nonhomologous.csv"), stringsAsFactors = FALSE)
   expect_setequal(ex$sid, c("B3.1", "D9.1"))
-  expect_true(all(c("locus", "sid", "species", "descripcion", "motivo", "en_alineamiento_curado") %in% names(ex)))
-  expect_true(all(ex$motivo == "no_match_either_direction"))
-  expect_equal(ex$descripcion[ex$sid == "D9.1"], "D9.1 Opuntia stricta pseudogene")
-  expect_equal(ex$en_alineamiento_curado[ex$sid == "B3.1"], TRUE)
-  expect_equal(ex$en_alineamiento_curado[ex$sid == "D9.1"], FALSE)
+  expect_true(all(c("locus", "sid", "species", "description", "reason", "in_curated_alignment") %in% names(ex)))
+  expect_true(all(ex$reason == "no_match_either_direction"))
+  expect_equal(ex$description[ex$sid == "D9.1"], "D9.1 Opuntia stricta pseudogene")
+  expect_equal(ex$in_curated_alignment[ex$sid == "B3.1"], TRUE)
+  expect_equal(ex$in_curated_alignment[ex$sid == "D9.1"], FALSE)
 
   # matK library: excluded sequence out, identical copy collapsed onto A1.1
   f_matk <- file.path(out_dir, "LIB_matK.fasta")
@@ -133,19 +133,19 @@ test_that("the final library excludes non-homologous sequences, collapses identi
                   c("Opuntia_robusta|A1.1", "Opuntia_robusta|A2.1", "Opuntia_stricta|B1.1", "Opuntia_stricta|B2.1"))
 
   col <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_collapsed_identical.csv"), stringsAsFactors = FALSE)
-  expect_equal(col$representante[col$locus == "matK" & col$sid == "A3.1"], "A1.1")
+  expect_equal(col$representative[col$locus == "matK" & col$sid == "A3.1"], "A1.1")
   expect_false("B3.1" %in% col$sid)
 
   # Threshold after the collapse: matK keeps 2 species with replica; ITS drops from 2 to 0 and leaves the library
   s <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_library_summary.csv"), stringsAsFactors = FALSE)
-  expect_equal(s$especies_con_replica[s$locus == "matK"], 2L)
-  expect_equal(s$especies_con_replica_antes_colapso[s$locus == "ITS"], 2L)
-  expect_equal(s$especies_con_replica[s$locus == "ITS"], 0L)
-  expect_equal(s$accesiones_excluidas_no_homologas[s$locus == "matK"], 1L)
-  expect_equal(s$accesiones_colapsadas[s$locus == "matK"], 1L)
-  expect_equal(s$accesiones_colapsadas[s$locus == "ITS"], 2L)
-  expect_equal(s$entra[s$locus == "matK"], TRUE)
-  expect_equal(s$entra[s$locus == "ITS"], FALSE)
+  expect_equal(s$species_with_replicate[s$locus == "matK"], 2L)
+  expect_equal(s$species_with_replicate_before_collapse[s$locus == "ITS"], 2L)
+  expect_equal(s$species_with_replicate[s$locus == "ITS"], 0L)
+  expect_equal(s$accessions_excluded_nonhomologous[s$locus == "matK"], 1L)
+  expect_equal(s$accessions_collapsed[s$locus == "matK"], 1L)
+  expect_equal(s$accessions_collapsed[s$locus == "ITS"], 2L)
+  expect_equal(s$enters[s$locus == "matK"], TRUE)
+  expect_equal(s$enters[s$locus == "ITS"], FALSE)
   expect_false(file.exists(file.path(out_dir, "LIB_ITS.fasta")))
 
   expect_identical(lib$summary$locus, s$locus)
@@ -155,21 +155,21 @@ test_that("the final library excludes non-homologous sequences, collapses identi
   # at each stage; a locus that did not enter the screening keeps its row, with NA after that point.
   fn <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_funnel.csv"), stringsAsFactors = FALSE)
   expect_setequal(fn$locus, c("matK", "ITS", "rbcL"))
-  expect_true(all(c("locus_provisional", "posible_paralogo") %in% names(fn)))
+  expect_true(all(c("provisional_locus", "possible_paralog") %in% names(fn)))
   m <- fn[fn$locus == "matK", ]
-  expect_equal(c(m$accesiones_ensamblado, m$accesiones_curadas, m$accesiones_excluidas_no_homologas,
-                 m$accesiones_colapsadas, m$accesiones_tras_colapso, m$especies_con_replica), c(6L, 6L, 1L, 1L, 4L, 2L))
-  expect_equal(c(m$entra_cribado, m$entra), c(TRUE, TRUE))
+  expect_equal(c(m$accessions_assembled, m$accessions_curated, m$accessions_excluded_nonhomologous,
+                 m$accessions_collapsed, m$accessions_after_collapse, m$species_with_replicate), c(6L, 6L, 1L, 1L, 4L, 2L))
+  expect_equal(c(m$enters_screening, m$enters), c(TRUE, TRUE))
   i <- fn[fn$locus == "ITS", ]
-  expect_equal(c(i$accesiones_ensamblado, i$accesiones_curadas, i$accesiones_colapsadas, i$accesiones_tras_colapso),
+  expect_equal(c(i$accessions_assembled, i$accessions_curated, i$accessions_collapsed, i$accessions_after_collapse),
                c(5L, 4L, 2L, 2L))
-  expect_equal(c(i$entra_cribado, i$entra), c(TRUE, FALSE))
+  expect_equal(c(i$enters_screening, i$enters), c(TRUE, FALSE))
   r <- fn[fn$locus == "rbcL", ]
-  expect_equal(r$accesiones_ensamblado, 0L)
-  expect_equal(r$entra_cribado, FALSE)
-  expect_equal(r$entra, FALSE)
-  expect_true(is.na(r$accesiones_curadas))
-  expect_true(is.na(r$accesiones_tras_colapso))
+  expect_equal(r$accessions_assembled, 0L)
+  expect_equal(r$enters_screening, FALSE)
+  expect_equal(r$enters, FALSE)
+  expect_true(is.na(r$accessions_curated))
+  expect_true(is.na(r$accessions_after_collapse))
 })
 
 test_that("a locus under paralogy surveillance is flagged in every table of the library, and never excluded for it", {
@@ -186,7 +186,7 @@ test_that("a locus under paralogy surveillance is flagged in every table of the 
                       list(matK = .strand_log(names(matk)),
                            pepC_like = .strand_log(names(pepc), "Opuntia_stricta|Q9.1")))
   registry <- rbind(.lib_registry(names(matk), "matK"), .lib_registry(names(pepc), "pepC_like"))
-  dirs <- .lib_step_files(tmp, registry, data.frame(locus = c("matK", "pepC_like"), entra = TRUE))
+  dirs <- .lib_step_files(tmp, registry, data.frame(locus = c("matK", "pepC_like"), enters = TRUE))
 
   suppressMessages(finalize_barcoding_library(
     assembly_dir = dirs$assembly_dir, curated_dir = cur, screening_dir = dirs$screening_dir,
@@ -197,12 +197,12 @@ test_that("a locus under paralogy surveillance is flagged in every table of the 
   for (f in c("TABLE_barcoding_library_summary.csv", "TABLE_barcoding_excluded_nonhomologous.csv",
               "TABLE_barcoding_collapsed_identical.csv")) {
     t <- utils::read.csv(file.path(out_dir, f), stringsAsFactors = FALSE)
-    expect_true("posible_paralogo" %in% names(t), info = f)
-    expect_true(all(t$posible_paralogo[t$locus == "pepC_like"]), info = f)
-    expect_false(any(t$posible_paralogo[t$locus == "matK"]), info = f)
+    expect_true("possible_paralog" %in% names(t), info = f)
+    expect_true(all(t$possible_paralog[t$locus == "pepC_like"]), info = f)
+    expect_false(any(t$possible_paralog[t$locus == "matK"]), info = f)
   }
   s <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_library_summary.csv"), stringsAsFactors = FALSE)
-  expect_equal(s$entra[s$locus == "pepC_like"], TRUE)
+  expect_equal(s$enters[s$locus == "pepC_like"], TRUE)
   expect_true(file.exists(file.path(out_dir, "LIB_pepC_like.fasta")))
 })
 
@@ -213,10 +213,10 @@ test_that("pepC_like is the locus under paralogy surveillance by default", {
 
 test_that("the paralogy flag marks only the named loci and leaves an empty table valid", {
   flagged <- .bc_flag_paralog(data.frame(locus = c("matK", "pepC_like", "ITS"), stringsAsFactors = FALSE), "pepC_like")
-  expect_equal(flagged$posible_paralogo, c(FALSE, TRUE, FALSE))
+  expect_equal(flagged$possible_paralog, c(FALSE, TRUE, FALSE))
   empty <- .bc_flag_paralog(data.frame(locus = character(0)), "pepC_like")
   expect_equal(nrow(empty), 0L)
-  expect_true("posible_paralogo" %in% names(empty))
+  expect_true("possible_paralog" %in% names(empty))
 })
 
 test_that("the final library refuses to write inside a directory of the phylogeny", {

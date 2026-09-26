@@ -95,18 +95,18 @@
     shared <- intersect(f$train_ids, f$test_ids)
     if (length(shared) > 0) {
       out[[length(out) + 1L]] <- data.frame(
-        pliegue = i, locus = f$locus, esquema = f$scheme, estrato = f$stratum,
-        motivo = "accesion_en_entrenamiento_y_evaluacion",
-        detalle = paste(sort(shared, method = "radix"), collapse = ";"), stringsAsFactors = FALSE)
+        fold = i, locus = f$locus, scheme = f$scheme, stratum = f$stratum,
+        reason = "accession_in_training_and_test",
+        detail = paste(sort(shared, method = "radix"), collapse = ";"), stringsAsFactors = FALSE)
     }
     if (identical(f$scheme, "genus")) {
       d <- library[library$locus == f$locus, , drop = FALSE]
       sp_train <- unique(d$species[d$sid %in% f$train_ids])
       if (f$stratum %in% sp_train) {
         out[[length(out) + 1L]] <- data.frame(
-          pliegue = i, locus = f$locus, esquema = f$scheme, estrato = f$stratum,
-          motivo = "especie_evaluada_en_entrenamiento",
-          detalle = paste(sort(d$sid[d$species == f$stratum & d$sid %in% f$train_ids], method = "radix"),
+          fold = i, locus = f$locus, scheme = f$scheme, stratum = f$stratum,
+          reason = "test_species_in_training",
+          detail = paste(sort(d$sid[d$species == f$stratum & d$sid %in% f$train_ids], method = "radix"),
                           collapse = ";"), stringsAsFactors = FALSE)
       }
     }
@@ -114,8 +114,8 @@
   })
   rows <- rows[!vapply(rows, is.null, logical(1))]
   if (length(rows) == 0) {
-    return(data.frame(pliegue = integer(0), locus = character(0), esquema = character(0),
-                      estrato = character(0), motivo = character(0), detalle = character(0),
+    return(data.frame(fold = integer(0), locus = character(0), scheme = character(0),
+                      stratum = character(0), reason = character(0), detail = character(0),
                       stringsAsFactors = FALSE))
   }
   out <- do.call(rbind, rows)
@@ -219,8 +219,8 @@ build_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_lib
     violations <- .barcoding_check_folds(folds, lib)
     if (nrow(violations) > 0) {
       stop("Scheme '", sc, "': ", nrow(violations), " fold(s) break the rule that no accession is in ",
-           "training and evaluation at once. First: ", violations$locus[1], ", ", violations$estrato[1],
-           ", ", violations$motivo[1], ".", call. = FALSE)
+           "training and evaluation at once. First: ", violations$locus[1], ", ", violations$stratum[1],
+           ", ", violations$reason[1], ".", call. = FALSE)
     }
     folds_by_scheme[[sc]] <- folds
 
@@ -228,7 +228,7 @@ build_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_lib
     tab <- do.call(rbind, lapply(sort(unique(loci), method = "radix"), function(l) {
       ff <- folds[loci == l]
       do.call(rbind, lapply(seq_along(ff), function(i) {
-        data.frame(locus = l, pliegue = i, estrato = ff[[i]]$stratum, sid = ff[[i]]$test_ids,
+        data.frame(locus = l, fold = i, stratum = ff[[i]]$stratum, sid = ff[[i]]$test_ids,
                    stringsAsFactors = FALSE)
       }))
     }))
@@ -241,12 +241,12 @@ build_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_lib
       gen_eval <- unique(d$genus[d$species %in% strata])
       ctx <- .bc_locus_summary(d)
       data.frame(
-        locus = l, esquema = sc, pliegues = length(ff),
-        accesiones_evaluacion = sum(vapply(ff, function(f) length(f$test_ids), integer(1))),
-        especies_evaluables = length(strata),
-        especies_solo_entrenamiento = length(unique(d$species)) - length(strata),
-        generos_evaluables = length(gen_eval),
-        generos_solo_entrenamiento = length(unique(d$genus)) - length(gen_eval),
+        locus = l, scheme = sc, folds = length(ff),
+        accessions_test = sum(vapply(ff, function(f) length(f$test_ids), integer(1))),
+        species_testable = length(strata),
+        species_training_only = length(unique(d$species)) - length(strata),
+        genera_testable = length(gen_eval),
+        genera_training_only = length(unique(d$genus)) - length(gen_eval),
         ctx[, setdiff(names(ctx), "locus"), drop = FALSE],
         stringsAsFactors = FALSE
       )

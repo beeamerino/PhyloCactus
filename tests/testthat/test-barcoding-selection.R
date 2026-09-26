@@ -12,35 +12,35 @@ test_that("clusters without a recognised gene keep a provisional name instead of
 
   expect_equal(out$map$ID, c("0", "5", "7"))
   expect_equal(out$map$Marker_std, c("trnL-trnF", "cluster_5", "cluster_7"))
-  expect_equal(out$map$locus_provisional, c(FALSE, TRUE, TRUE))
+  expect_equal(out$map$provisional_locus, c(FALSE, TRUE, TRUE))
   expect_equal(out$unnamed$ID, c("5", "7"))
   expect_equal(out$unnamed$locus, c("cluster_5", "cluster_7"))
-  expect_equal(out$unnamed$descripcion_semilla, c("seed 5 hypothetical protein", "seed 7 unknown"))
+  expect_equal(out$unnamed$seed_description, c("seed 5 hypothetical protein", "seed 7 unknown"))
 })
 
 test_that("with every cluster named, the unnamed table is empty but keeps its columns", {
   out <- .bc_name_clusters(data.frame(ID = "0", Marker_std = "matK", Description = "d", stringsAsFactors = FALSE))
   expect_equal(nrow(out$unnamed), 0L)
-  expect_true(all(c("ID", "locus", "descripcion_semilla") %in% names(out$unnamed)))
-  expect_false(out$map$locus_provisional)
+  expect_true(all(c("ID", "locus", "seed_description") %in% names(out$unnamed)))
+  expect_false(out$map$provisional_locus)
 })
 
 test_that("provisional loci are recognised by their cluster_<id> name only", {
   tab <- .bc_flag_provisional(data.frame(locus = c("matK", "cluster_12", "cluster_x", "ITS_cluster_3"),
                                          stringsAsFactors = FALSE))
-  expect_equal(tab$locus_provisional, c(FALSE, TRUE, FALSE, FALSE))
-  expect_equal(.bc_flag_provisional(data.frame(locus = character(0)))$locus_provisional, logical(0))
+  expect_equal(tab$provisional_locus, c(FALSE, TRUE, FALSE, FALSE))
+  expect_equal(.bc_flag_provisional(data.frame(locus = character(0)))$provisional_locus, logical(0))
 })
 
 test_that("the cluster funnel of step 1 counts every stage", {
   map <- data.frame(ID = c("0", "1", "5"), Marker_std = c("trnL-trnF", "trnL-trnF", "cluster_5"),
-                    locus_provisional = c(FALSE, FALSE, TRUE), stringsAsFactors = FALSE)
+                    provisional_locus = c(FALSE, FALSE, TRUE), stringsAsFactors = FALSE)
 
   f <- .bc_cluster_funnel(n_workspace = 1371L, n_selected = 72L, n_with_sequences = 32L, marker_map = map)
 
-  expect_equal(f$etapa, c("clusteres_en_workspace", "clusteres_con_mas_de_min_species",
-                          "clusteres_con_secuencias_tras_filtros", "clusteres_con_nombre",
-                          "clusteres_sin_nombre_conservados", "loci_ensamblados"))
+  expect_equal(f$stage, c("clusters_in_workspace", "clusters_over_min_species",
+                          "clusters_with_sequences", "clusters_named",
+                          "clusters_unnamed_kept", "assembled_loci"))
   expect_equal(f$n, c(1371L, 72L, 32L, 2L, 1L, 2L))
 })
 
@@ -89,7 +89,7 @@ test_that("screening screens every curated alignment when no list is given, and 
     sids <- paste0(l, "_", 1:4, ".1")
     sp <- rep(c("Opuntia_robusta", "Opuntia_stricta"), each = 2)
     reg <- rbind(reg, data.frame(sid = sids, species = sp, genus = "Opuntia", locus = l, cluster_id = 1L,
-                                 nombre_genbank = sp, stringsAsFactors = FALSE))
+                                 genbank_name = sp, stringsAsFactors = FALSE))
     Biostrings::writeXStringSet(Biostrings::DNAStringSet(stats::setNames(seqs, paste0(sp, "|", sids))),
                                 file.path(cur_dir, "alignments", paste0("ALN_masked_final_", l, ".fasta")))
   }
@@ -101,8 +101,8 @@ test_that("screening screens every curated alignment when no list is given, and 
   for (f in c("TABLE_barcoding_marker_screening.csv", "TABLE_barcoding_identical_sequences.csv")) {
     t <- utils::read.csv(file.path(tmp, "3_screening", f), stringsAsFactors = FALSE)
     expect_setequal(unique(t$locus), c("matK", "cluster_7"))
-    expect_true(all(t$locus_provisional[t$locus == "cluster_7"]), info = f)
-    expect_false(any(t$locus_provisional[t$locus == "matK"]), info = f)
+    expect_true(all(t$provisional_locus[t$locus == "cluster_7"]), info = f)
+    expect_false(any(t$provisional_locus[t$locus == "matK"]), info = f)
   }
 })
 
@@ -110,7 +110,7 @@ test_that("screening refuses to run when the curated directory holds no alignmen
   tmp <- withr::local_tempdir()
   dir.create(file.path(tmp, "1_assembly"))
   utils::write.csv(data.frame(sid = "a", species = "Opuntia_robusta", genus = "Opuntia", locus = "matK",
-                              cluster_id = 1L, nombre_genbank = "Opuntia_robusta"),
+                              cluster_id = 1L, genbank_name = "Opuntia_robusta"),
                    file.path(tmp, "1_assembly", "TABLE_barcoding_accession_registry.csv"), row.names = FALSE)
   dir.create(file.path(tmp, "2_curated", "alignments"), recursive = TRUE)
   expect_error(

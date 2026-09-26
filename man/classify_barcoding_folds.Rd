@@ -73,7 +73,7 @@ Invisibly, a list of prediction tables by scheme. Writes
 \verb{TABLE_barcoding_predictions_<scheme>_<method>.csv} and \verb{TABLE_barcoding_timing_<method>.csv},
 one row per locus and scheme with the folds, the queries and the seconds they took; with
 \code{alignment = "add"} both names carry the suffix \verb{_add} and the prediction tables add the columns
-\code{alineamiento} and \code{orientacion}.
+\code{alignment} and \code{orientation}.
 }
 \description{
 Step 7 of the branch. Reads the library of step 4 and the folds of step 5, classifies every query
@@ -84,8 +84,8 @@ these tables afterwards.
 \details{
 The output has three states (validation plan, sec. 1): species, genus with the specific ambiguity
 declared, and not assignable. The state comes from the structure of the tie at the minimum
-distance, not from a threshold, so the threshold can be swept later over \code{distancia_vecino},
-\code{margen} and \code{confianza} without classifying again.
+distance, not from a threshold, so the threshold can be swept later over \code{nn_distance},
+\code{margin} and \code{confidence} without classifying again.
 }
 \examples{
 \dontrun{

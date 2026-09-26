@@ -87,7 +87,7 @@ test_that("the checker reports a leak introduced on purpose, and nothing on the 
   leaky_e[[1]]$train_ids <- c(leaky_e[[1]]$train_ids, leaky_e[[1]]$test_ids)
   v <- .barcoding_check_folds(leaky_e, lib)
   expect_equal(nrow(v), 1L)
-  expect_equal(v$motivo, "accesion_en_entrenamiento_y_evaluacion")
+  expect_equal(v$reason, "accession_in_training_and_test")
 
   # Scheme G with another sequence of the evaluated species kept in the training set
   leaky_g <- clean_g
@@ -96,7 +96,7 @@ test_that("the checker reports a leak introduced on purpose, and nothing on the 
   leaky_g[[i]]$train_ids <- c(leaky_g[[i]]$train_ids, "A2.1")
   v <- .barcoding_check_folds(leaky_g, lib)
   expect_equal(nrow(v), 1L)
-  expect_equal(v$motivo, "especie_evaluada_en_entrenamiento")
+  expect_equal(v$reason, "test_species_in_training")
 })
 
 test_that("label permutation touches the training set only, keeps the labels and is reproducible", {
@@ -183,12 +183,12 @@ test_that("step 5 writes the fold tables and the summary, and names the step tha
   s <- utils::read.csv(file.path(tmp, "5_folds", "TABLE_barcoding_folds_summary.csv"), stringsAsFactors = FALSE)
 
   expect_setequal(paste(e$locus, e$sid), c("matK A1.1", "matK A2.1", "matK C1.1", "matK C2.1"))
-  expect_equal(length(unique(paste(g$locus, g$pliegue))), 4L)
-  expect_setequal(g$sid[g$locus == "matK" & g$estrato == "Opuntia_robusta"], c("A1.1", "A2.1"))
-  m <- s[s$locus == "matK" & s$esquema == "species", ]
-  expect_equal(c(m$pliegues, m$especies_evaluables, m$especies_solo_entrenamiento), c(4L, 2L, 2L))
-  mg <- s[s$locus == "matK" & s$esquema == "genus", ]
-  expect_equal(c(mg$pliegues, mg$generos_evaluables, mg$generos_solo_entrenamiento), c(2L, 1L, 2L))
+  expect_equal(length(unique(paste(g$locus, g$fold))), 4L)
+  expect_setequal(g$sid[g$locus == "matK" & g$stratum == "Opuntia_robusta"], c("A1.1", "A2.1"))
+  m <- s[s$locus == "matK" & s$scheme == "species", ]
+  expect_equal(c(m$folds, m$species_testable, m$species_training_only), c(4L, 2L, 2L))
+  mg <- s[s$locus == "matK" & s$scheme == "genus", ]
+  expect_equal(c(mg$folds, mg$genera_testable, mg$genera_training_only), c(2L, 1L, 2L))
   expect_equal(nrow(out$summary), nrow(s))
 
   expect_error(build_barcoding_folds(library_dir = file.path(tmp, "none"), output_dir = file.path(tmp, "5_folds")),

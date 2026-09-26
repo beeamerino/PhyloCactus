@@ -9,22 +9,22 @@
 # The metric functions are written here because CN1 needs them. In this phase they are applied only
 # to permuted labels, to outgroup queries and to resubstitution. Not once to the true labels.
 
-.ctl_predictions <- function(esquema = "species") {
+.ctl_predictions <- function(scheme = "species") {
   # A prediction table by hand, with the three states and the cases the plan separates
   data.frame(
-    locus = "matK", esquema = esquema, pliegue = 1:6, estrato = NA_character_,
+    locus = "matK", scheme = scheme, fold = 1:6, stratum = NA_character_,
     sid = paste0("q", 1:6),
-    especie_verdadera = c("Opuntia_robusta", "Opuntia_robusta", "Opuntia_robusta",
+    true_species = c("Opuntia_robusta", "Opuntia_robusta", "Opuntia_robusta",
                           "Opuntia_stricta", "Cereus_jamacaru", "Cereus_jamacaru"),
-    genero_verdadero = c("Opuntia", "Opuntia", "Opuntia", "Opuntia", "Cereus", "Cereus"),
-    metodo = "nn",
-    estado = c(1L, 1L, 2L, 3L, 1L, 2L),
-    especie_predicha = c("Opuntia_robusta", "Opuntia_stricta", NA, NA, "Cereus_jamacaru", NA),
-    genero_predicho = c("Opuntia", "Opuntia", "Opuntia", NA, "Cereus", "Opuntia"),
-    candidatas = c("Opuntia_robusta", "Opuntia_stricta", "Opuntia_robusta|Opuntia_stricta",
+    true_genus = c("Opuntia", "Opuntia", "Opuntia", "Opuntia", "Cereus", "Cereus"),
+    method = "nn",
+    state = c(1L, 1L, 2L, 3L, 1L, 2L),
+    predicted_species = c("Opuntia_robusta", "Opuntia_stricta", NA, NA, "Cereus_jamacaru", NA),
+    predicted_genus = c("Opuntia", "Opuntia", "Opuntia", NA, "Cereus", "Opuntia"),
+    candidates = c("Opuntia_robusta", "Opuntia_stricta", "Opuntia_robusta|Opuntia_stricta",
                    "Cereus_jamacaru|Opuntia_robusta", "Cereus_jamacaru",
                    "Opuntia_robusta|Opuntia_stricta"),
-    distancia_vecino = 0, margen = 0, confianza = NA_real_, motivo = NA_character_,
+    nn_distance = 0, margin = 0, confidence = NA_real_, reason = NA_character_,
     stringsAsFactors = FALSE
   )
 }
@@ -53,7 +53,7 @@
   isTRUE(tryCatch(.bc_assert_mafft("mafft"), error = function(e) FALSE))
 }
 
-.ctl_outgroup <- function(tmp, base, largos = c(240, 300, 355)) {
+.ctl_outgroup <- function(tmp, base, seq_lengths = c(240, 300, 355)) {
   # The outgroup as it comes out of step 1: unaligned, and every sequence of a different length.
   # The first version of this fixture wrote three sequences of exactly the 300 bases of the library,
   # so the truncation to min(ncol) never truncated anything and the defect stayed hidden until the
@@ -61,7 +61,7 @@
   og <- file.path(tmp, "outgroup")
   dir.create(og, showWarnings = FALSE, recursive = TRUE)
   set.seed(8L)
-  ajeno <- function(n) {
+  alien_seq <- function(n) {
     s <- base
     # Fifteen substitutions, not a hundred: measured on the real data of 2026-09-25, the outgroup
     # shares between 0.23 and 0.82 of its 20-mers with the library of its locus, so a fixture that
@@ -71,9 +71,9 @@
     else substr(s, 1, n)
   }
   x <- stats::setNames(
-    vapply(largos, ajeno, character(1)),
+    vapply(seq_lengths, alien_seq, character(1)),
     paste0(c("Portulaca_amilis", "Talinum_paniculatum", "Anacampseros_filamentosa"),
-           "|matK_o", seq_along(largos), ".1"))
+           "|matK_o", seq_along(seq_lengths), ".1"))
   Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), file.path(og, "matK.fasta"))
   og
 }
@@ -84,12 +84,12 @@ test_that("the metric counts a hit as the plan defines it, and never a candidate
 
   # Species: only state 1 with the right species. Rows 1 and 5 hit; row 2 is a confident error,
   # rows 3 and 6 are genus with ambiguity, row 4 is not assignable
-  expect_equal(e$consultas, 6L)
-  expect_equal(e$aciertos, 2L)
-  expect_equal(e$exactitud, 2 / 6)
+  expect_equal(e$queries, 6L)
+  expect_equal(e$hits, 2L)
+  expect_equal(e$accuracy, 2 / 6)
   # Genus: rows 1, 2, 3 and 5 hit; row 6 gives the wrong genus, row 4 gives none
-  expect_equal(g$aciertos, 4L)
-  expect_equal(g$exactitud, 4 / 6)
+  expect_equal(g$hits, 4L)
+  expect_equal(g$accuracy, 4 / 6)
 })
 
 test_that("the base rate is the majority class among the queries evaluated, not of the library", {
@@ -97,23 +97,23 @@ test_that("the base rate is the majority class among the queries evaluated, not 
   g <- .bc_metric_accuracy(.ctl_predictions("genus"))
 
   # Three of the six queries are Opuntia_robusta; four of the six are Opuntia
-  expect_equal(e$tasa_base, 3 / 6)
-  expect_equal(g$tasa_base, 4 / 6)
+  expect_equal(e$base_rate, 3 / 6)
+  expect_equal(g$base_rate, 4 / 6)
 })
 
 test_that("CN1 declares leakage when the permuted accuracy does not fall, and not when it falls", {
   # Permuted accuracies around the base rate: no leakage
-  limpio <- .bc_cn1_verdict(c(0.34, 0.30, 0.36, 0.33, 0.31, 0.35, 0.32, 0.34, 0.33, 0.30),
-                            tasa_base = 1 / 3)
+  cleaned <- .bc_cn1_verdict(c(0.34, 0.30, 0.36, 0.33, 0.31, 0.35, 0.32, 0.34, 0.33, 0.30),
+                            base_rate = 1 / 3)
   # Permuted accuracies that stay high: the labels are reaching the classifier through some other way
-  con_fuga <- .bc_cn1_verdict(c(0.98, 0.99, 1.00, 0.97, 0.99, 1.00, 0.98, 0.99, 0.98, 1.00),
-                              tasa_base = 1 / 3)
+  with_leak <- .bc_cn1_verdict(c(0.98, 0.99, 1.00, 0.97, 0.99, 1.00, 0.98, 0.99, 0.98, 1.00),
+                              base_rate = 1 / 3)
 
-  expect_false(limpio$hay_fuga)
-  expect_true(con_fuga$hay_fuga)
-  expect_equal(limpio$permutaciones, 10L)
+  expect_false(cleaned$leakage)
+  expect_true(with_leak$leakage)
+  expect_equal(cleaned$permutations, 10L)
   # The threshold is the rule of the plan, written out: base rate plus three standard deviations
-  expect_equal(limpio$umbral, 1 / 3 + 3 * stats::sd(c(0.34, 0.30, 0.36, 0.33, 0.31, 0.35, 0.32, 0.34, 0.33, 0.30)))
+  expect_equal(cleaned$threshold, 1 / 3 + 3 * stats::sd(c(0.34, 0.30, 0.36, 0.33, 0.31, 0.35, 0.32, 0.34, 0.33, 0.30)))
 })
 
 test_that("CN1 writes one row per permutation and its verdict, with the base rate beside it", {
@@ -129,35 +129,35 @@ test_that("CN1 writes one row per permutation and its verdict, with the base rat
   p <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_cn1_permutations.csv"), stringsAsFactors = FALSE)
   v <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_cn1_verdict.csv"), stringsAsFactors = FALSE)
 
-  expect_setequal(unique(p$permutacion), 1:5)
-  expect_true(all(c("locus", "esquema", "metodo", "permutacion", "exactitud", "tasa_base") %in% names(p)))
-  expect_true(all(c("media", "sd", "umbral", "hay_fuga", "tasa_base", "permutaciones") %in% names(v)))
+  expect_setequal(unique(p$permutation), 1:5)
+  expect_true(all(c("locus", "scheme", "method", "permutation", "accuracy", "base_rate") %in% names(p)))
+  expect_true(all(c("mean", "sd", "threshold", "leakage", "base_rate", "permutations") %in% names(v)))
   expect_equal(nrow(p), nrow(v) * 5L)
   # The folds of this fixture have no leakage
-  expect_false(any(v$hay_fuga))
+  expect_false(any(v$leakage))
   # And not a single column carries the accuracy with the true labels: that is Phase 6
-  expect_false(any(grepl("verdadera|real|honesta", names(v), ignore.case = TRUE)))
+  expect_false(any(grepl("true|real|honest", names(v), ignore.case = TRUE)))
 })
 
-.ctl_dnabin <- function(x, nombre = "consulta") {
-  ape::as.DNAbin(matrix(strsplit(tolower(x), "")[[1]], nrow = 1, dimnames = list(nombre, NULL)))
+.ctl_dnabin <- function(x, seq_name = "query") {
+  ape::as.DNAbin(matrix(strsplit(tolower(x), "")[[1]], nrow = 1, dimnames = list(seq_name, NULL)))
 }
 
 .ctl_rc <- function(x) {
   as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(x)))
 }
 
-.ctl_outgroup_hebras <- function(tmp, base) {
+.ctl_outgroup_strands <- function(tmp, base) {
   # Three queries: one forward, the same one reverse complemented, and one that belongs to no
   # locus at all. The second is the one that matters: a control that gives a different answer to
   # the same sequence depending on how GenBank stored it is not measuring the classifier.
-  og <- file.path(tmp, "outgroup_hebras")
+  og <- file.path(tmp, "outgroup_strands")
   dir.create(og, showWarnings = FALSE, recursive = TRUE)
   set.seed(12L)
   s <- base
   for (p in sample(seq_len(300), 15)) substr(s, p, p) <- sample(c("A", "C", "G", "T"), 1)
-  ajena <- paste(sample(c("A", "C", "G", "T"), 300, replace = TRUE), collapse = "")
-  x <- stats::setNames(c(s, .ctl_rc(s), ajena),
+  alien <- paste(sample(c("A", "C", "G", "T"), 300, replace = TRUE), collapse = "")
+  x <- stats::setNames(c(s, .ctl_rc(s), alien),
                        paste0(c("Portulaca_amilis", "Portulaca_amilis", "Talinum_paniculatum"),
                               "|matK_h", 1:3, ".1"))
   Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), file.path(og, "matK.fasta"))
@@ -183,9 +183,9 @@ test_that("the strand rule keeps deciding what it decided before it was shared",
   set.seed(11L)
   base <- paste(sample(c("A", "C", "G", "T"), 400, replace = TRUE), collapse = "")
   vary <- function(s, k) { for (p in sample(seq_len(400), k)) substr(s, p, p) <- sample(c("A","C","G","T"), 1); s }
-  d_directa <- vary(base, 10)
+  d_forward <- vary(base, 10)
   x <- c(a = base, b = vary(base, 8), c = vary(base, 12),
-         d = .ctl_rc(d_directa),
+         d = .ctl_rc(d_forward),
          e = paste(sample(c("A", "C", "G", "T"), 400, replace = TRUE), collapse = ""))
 
   r <- .normalise_strand(Biostrings::DNAStringSet(x))
@@ -194,7 +194,7 @@ test_that("the strand rule keeps deciding what it decided before it was shared",
                c("kept", "kept", "kept", "reverse_complemented", "no_match_either_direction"))
   expect_equal(r$log$Seq, names(x))
   # What it turns comes back in the direction of the marker, base by base
-  expect_equal(as.character(r$dna[["d"]]), d_directa)
+  expect_equal(as.character(r$dna[["d"]]), d_forward)
   # What matches neither direction is returned untouched, and only reported
   expect_equal(as.character(r$dna[["e"]]), unname(x["e"]))
 })
@@ -208,22 +208,22 @@ test_that("a query is turned against the library, and one that matches no locus 
   pool <- .bc_strand_pool(lib)
 
   set.seed(13L)
-  directa <- f$base
-  ajena <- paste(sample(c("A", "C", "G", "T"), 300, replace = TRUE), collapse = "")
+  forward <- f$base
+  alien <- paste(sample(c("A", "C", "G", "T"), 300, replace = TRUE), collapse = "")
 
-  d <- .bc_orient_to_library(.ctl_dnabin(directa), pool)
-  r <- .bc_orient_to_library(.ctl_dnabin(.ctl_rc(directa)), pool)
-  a <- .bc_orient_to_library(.ctl_dnabin(ajena), pool)
+  d <- .bc_orient_to_library(.ctl_dnabin(forward), pool)
+  r <- .bc_orient_to_library(.ctl_dnabin(.ctl_rc(forward)), pool)
+  a <- .bc_orient_to_library(.ctl_dnabin(alien), pool)
 
-  expect_equal(d$orientacion, "directa")
-  expect_equal(r$orientacion, "reversa")
-  expect_equal(a$orientacion, "sin_coincidencia")
+  expect_equal(d$orientation, "forward")
+  expect_equal(r$orientation, "reverse")
+  expect_equal(a$orientation, "no_match")
   # The turned one comes back as the forward one, base by base
   expect_identical(as.character(r$query), as.character(d$query))
   # The one that matches neither is returned as it arrived
-  expect_identical(as.character(a$query), as.character(.ctl_dnabin(ajena)))
+  expect_identical(as.character(a$query), as.character(.ctl_dnabin(alien)))
   # And the name it travels under does not change
-  expect_equal(rownames(r$query), "consulta")
+  expect_equal(rownames(r$query), "query")
 })
 
 test_that("CN2 answers the same for a sequence and for its reverse complement, and says which it was", {
@@ -232,7 +232,7 @@ test_that("CN2 answers the same for a sequence and for its reverse complement, a
   skip_if_not(.ctl_mafft_ok(), "MAFFT is not available")
   tmp <- withr::local_tempdir()
   f <- .ctl_library(tmp)
-  og <- .ctl_outgroup_hebras(tmp, f$base)
+  og <- .ctl_outgroup_strands(tmp, f$base)
   out_dir <- file.path(tmp, "8_controls")
 
   suppressMessages(run_barcoding_controls(library_dir = f$library_dir, folds_dir = f$folds_dir,
@@ -240,13 +240,13 @@ test_that("CN2 answers the same for a sequence and for its reverse complement, a
                                           controls = "CN2", loci = "matK"))
 
   q <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_cn2_queries.csv"), stringsAsFactors = FALSE)
-  expect_true("orientacion" %in% names(q))
-  expect_equal(q$orientacion, c("directa", "reversa", "sin_coincidencia"))
+  expect_true("orientation" %in% names(q))
+  expect_equal(q$orientation, c("forward", "reverse", "no_match"))
   # The same sequence, stored either way, has to give the same answer. This is the test that the
   # real run of 2026-09-25 would have failed
-  expect_equal(q$distancia_vecino[2], q$distancia_vecino[1])
-  expect_equal(q$especie_predicha[2], q$especie_predicha[1])
-  expect_equal(q$estado[2], q$estado[1])
+  expect_equal(q$nn_distance[2], q$nn_distance[1])
+  expect_equal(q$predicted_species[2], q$predicted_species[1])
+  expect_equal(q$state[2], q$state[1])
 })
 
 test_that("the CN2 summary counts apart what was turned and what matches no locus", {
@@ -255,7 +255,7 @@ test_that("the CN2 summary counts apart what was turned and what matches no locu
   skip_if_not(.ctl_mafft_ok(), "MAFFT is not available")
   tmp <- withr::local_tempdir()
   f <- .ctl_library(tmp)
-  og <- .ctl_outgroup_hebras(tmp, f$base)
+  og <- .ctl_outgroup_strands(tmp, f$base)
   out_dir <- file.path(tmp, "8_controls")
 
   suppressMessages(run_barcoding_controls(library_dir = f$library_dir, folds_dir = f$folds_dir,
@@ -263,15 +263,15 @@ test_that("the CN2 summary counts apart what was turned and what matches no locu
                                           controls = "CN2", loci = "matK"))
 
   cn2 <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_cn2_outgroup.csv"), stringsAsFactors = FALSE)
-  expect_true(all(c("comparables", "invertidas", "sin_coincidencia") %in% names(cn2)))
-  expect_equal(cn2$consultas, 3L)
-  expect_equal(cn2$invertidas, 1L)
-  expect_equal(cn2$sin_coincidencia, 1L)
+  expect_true(all(c("comparable", "reversed", "no_match") %in% names(cn2)))
+  expect_equal(cn2$queries, 3L)
+  expect_equal(cn2$reversed, 1L)
+  expect_equal(cn2$no_match, 1L)
   # A sequence that matches the locus in neither direction is not a query of this control: it is
   # counted, it is published, and it stays out of the proportions and out of the species
-  expect_equal(cn2$comparables, 2L)
-  expect_equal(cn2$estado_1 + cn2$estado_2 + cn2$estado_3, 2L)
-  expect_equal(cn2$especies, 1L)
+  expect_equal(cn2$comparable, 2L)
+  expect_equal(cn2$state_1 + cn2$state_2 + cn2$state_3, 2L)
+  expect_equal(cn2$n_species, 1L)
 })
 
 # Added on 2026-09-25, after CN2 crashed on the real data with "DNA sequences in list not of the
@@ -300,18 +300,18 @@ test_that("a query of a different length enters the library alignment without mo
   # known, and any comparison by position displaces it by exactly 40 columns
   s <- as.character(lib)[1, ]
   query <- ape::as.DNAbin(matrix(s[s != "-"][-seq_len(40)], nrow = 1,
-                                 dimnames = list("consulta", NULL)))
+                                 dimnames = list("query", NULL)))
 
   al <- .bc_align_to_library(lib, query)
 
   expect_equal(ncol(al), ncol(lib))
   expect_equal(nrow(al), nrow(lib) + 1L)
-  expect_true("consulta" %in% rownames(al))
+  expect_true("query" %in% rownames(al))
   # The library comes back exactly as it went in, row by row and column by column
   expect_identical(as.character(al[rownames(lib), , drop = FALSE]), as.character(lib))
   # And the query lands on the columns it came from, not forty positions to the left
   d <- .bc_classifier_matrix(al, "raw", 100L)
-  expect_lt(d["consulta", rownames(lib)[1]], 0.01)
+  expect_lt(d["query", rownames(lib)[1]], 0.01)
 })
 
 test_that("the alignment of a query survives a directory whose name carries a space", {
@@ -326,12 +326,12 @@ test_that("the alignment of a query survives a directory whose name carries a sp
   rownames(lib) <- .bc_parse_header(labels(lib))$sid
   s <- as.character(lib)[2, ]
   query <- ape::as.DNAbin(matrix(s[s != "-"][-seq_len(25)], nrow = 1,
-                                 dimnames = list("consulta", NULL)))
+                                 dimnames = list("query", NULL)))
 
   al <- .bc_align_to_library(lib, query)
   expect_equal(ncol(al), ncol(lib))
   d <- .bc_classifier_matrix(al, "raw", 100L)
-  expect_lt(d["consulta", rownames(lib)[2]], 0.01)
+  expect_lt(d["query", rownames(lib)[2]], 0.01)
 })
 
 test_that("CN2 names MAFFT when it is missing, before CN1 spends a single permutation", {
@@ -375,8 +375,8 @@ test_that("CN2 publishes the distance of every alien query, and they fall beyond
 
   # The fixture is unaligned and of three different lengths, which is the state the outgroup of
   # step 1 is really in. If this stops being true the test stops testing anything
-  largos <- nchar(as.character(Biostrings::readDNAStringSet(file.path(og, "matK.fasta"))))
-  expect_equal(length(unique(largos)), 3L)
+  seq_lengths <- nchar(as.character(Biostrings::readDNAStringSet(file.path(og, "matK.fasta"))))
+  expect_equal(length(unique(seq_lengths)), 3L)
 
   suppressMessages(run_barcoding_controls(library_dir = f$library_dir, folds_dir = f$folds_dir,
                                           output_dir = out_dir, outgroup_dir = og, permutations = 2L))
@@ -387,26 +387,26 @@ test_that("CN2 publishes the distance of every alien query, and they fall beyond
   # Every locus of the library appears, including the one with no outgroup sequence at all: a
   # control over zero sequences is not a control, and it has to say so rather than disappear
   expect_setequal(cn2$locus, c("matK", "rbcL"))
-  expect_equal(cn2$consultas[cn2$locus == "matK"], 3L)
-  expect_equal(cn2$consultas[cn2$locus == "rbcL"], 0L)
-  expect_true(all(c("estado_1", "estado_2", "estado_3", "mediana_distancia_vecino",
-                    "especies") %in% names(cn2)))
+  expect_equal(cn2$queries[cn2$locus == "matK"], 3L)
+  expect_equal(cn2$queries[cn2$locus == "rbcL"], 0L)
+  expect_true(all(c("state_1", "state_2", "state_3", "median_nn_distance",
+                    "n_species") %in% names(cn2)))
 
   # Finding of the real run, 2026-09-25: the outgroup of GenBank carries population level studies.
   # trnS-trnG came back with 83 sequences, all of Talinopsis frutescens, and 117 of the 235 ITS
   # sequences are that same species. Counting queries would make trnS-trnG look like the best
   # controlled locus when it is the worst: one species tested 83 times. So the table publishes the
   # species beside the queries, and the acta cites the species as the size of the control.
-  expect_equal(cn2$especies[cn2$locus == "matK"], 3L)
-  expect_equal(cn2$especies[cn2$locus == "rbcL"], 0L)
+  expect_equal(cn2$n_species[cn2$locus == "matK"], 3L)
+  expect_equal(cn2$n_species[cn2$locus == "rbcL"], 0L)
 
   # One row per alien query, with the distance that Phase 6 will sweep the threshold over
   expect_equal(nrow(q), 3L)
-  expect_true(all(c("locus", "sid", "especie_consulta", "estado", "distancia_vecino") %in% names(q)))
-  expect_setequal(q$especie_consulta,
+  expect_true(all(c("locus", "sid", "query_species", "state", "nn_distance") %in% names(q)))
+  expect_setequal(q$query_species,
                   c("Portulaca_amilis", "Talinum_paniculatum", "Anacampseros_filamentosa"))
   # All three arrive in the direction of the library, and the table says so
-  expect_equal(q$orientacion, rep("directa", 3))
+  expect_equal(q$orientation, rep("forward", 3))
 
   # And the point of the control: the alien queries fall beyond anything the library holds inside a
   # species. If they did not, no threshold could ever separate them
@@ -415,7 +415,7 @@ test_that("CN2 publishes the distance of every alien query, and they fall beyond
   rownames(dna) <- h$sid
   g <- .compute_barcode_gap(.bc_distance_matrix(dna, "raw"), stats::setNames(h$species, h$sid),
                             locus = "matK", model = "raw")
-  expect_true(all(q$distancia_vecino > max(g$intra$distancia)))
+  expect_true(all(q$nn_distance > max(g$intra$distance)))
 })
 
 # Added on 2026-09-25, after the real run of the three controls. CN3 measured resubstitution over
@@ -446,15 +446,15 @@ test_that("CN3 evaluates the queries of the folds, in both schemes, and nothing 
   cn3 <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_cn3_resubstitution.csv"),
                          stringsAsFactors = FALSE)
 
-  expect_setequal(cn3$esquema, c("species", "genus"))
-  expect_true(all(cn3$etiqueta == "irreproducible_resustitucion"))
+  expect_setequal(cn3$scheme, c("species", "genus"))
+  expect_true(all(cn3$label == "irreproducible_resubstitution"))
 
   # The number of queries is counted from the folds file, not from the function under test
   for (sc in c("species", "genus")) {
     tab <- utils::read.csv(file.path(f$folds_dir, paste0("TABLE_barcoding_folds_", sc, ".csv")),
                            stringsAsFactors = FALSE)
     for (l in unique(cn3$locus)) {
-      expect_equal(cn3$consultas[cn3$locus == l & cn3$esquema == sc],
+      expect_equal(cn3$queries[cn3$locus == l & cn3$scheme == sc],
                    sum(tab$locus == l))
     }
   }
@@ -476,12 +476,12 @@ test_that("resubstitution hands the query the answer the honest run cannot give 
                 0.21, 0.01, 0), 3, 3, dimnames = list(ids, ids))
   sp <- stats::setNames(c("Opuntia_robusta", "Opuntia_stricta", "Opuntia_stricta"), ids)
 
-  honesta <- .bc_classify_nn(m, c("B1.1", "B2.1"), "A1.1", sp)
-  resust <- .bc_classify_nn(m, c("B1.1", "B2.1", "A1.1"), "A1.1", sp, allow_resubstitution = TRUE)
+  honest <- .bc_classify_nn(m, c("B1.1", "B2.1"), "A1.1", sp)
+  resub <- .bc_classify_nn(m, c("B1.1", "B2.1", "A1.1"), "A1.1", sp, allow_resubstitution = TRUE)
 
-  expect_false(identical(honesta$especie_predicha, "Opuntia_robusta"))
-  expect_equal(resust$especie_predicha, "Opuntia_robusta")
-  expect_equal(resust$distancia_vecino, 0)
+  expect_false(identical(honest$predicted_species, "Opuntia_robusta"))
+  expect_equal(resub$predicted_species, "Opuntia_robusta")
+  expect_equal(resub$nn_distance, 0)
 })
 
 test_that("CN3 has to ask for the resubstitution out loud, and the guard holds without it", {
@@ -494,22 +494,22 @@ test_that("CN3 has to ask for the resubstitution out loud, and the guard holds w
   expect_error(.bc_classify_nn(m, ids, "A1.1", sp), "training set")
 
   r <- .bc_classify_nn(m, ids, "A1.1", sp, allow_resubstitution = TRUE)
-  expect_equal(r$estado, 1L)
-  expect_equal(r$especie_predicha, "Opuntia_robusta")
-  expect_equal(r$distancia_vecino, 0)
+  expect_equal(r$state, 1L)
+  expect_equal(r$predicted_species, "Opuntia_robusta")
+  expect_equal(r$nn_distance, 0)
 })
 
 test_that("the assembly keeps the GenBank names when no checklist is given, and does not change with one", {
-  nombres <- c("Portulaca amilis", "Talinum paniculatum", "Opuntia robusta")
-  lista <- c("Opuntia robusta", "Opuntia stricta")
+  name_vec <- c("Portulaca amilis", "Talinum paniculatum", "Opuntia robusta")
+  name_list <- c("Opuntia robusta", "Opuntia stricta")
 
-  sin_lista <- .bc_resolve_names(nombres, checklist_path = NULL)
-  con_lista <- .bc_resolve_names(nombres, checklist_path = lista)
+  sin_lista <- .bc_resolve_names(name_vec, checklist_path = NULL)
+  with_list <- .bc_resolve_names(name_vec, checklist_path = name_list)
 
   # Without a checklist nothing is dropped: the names come back cleaned, with underscores
   expect_equal(sin_lista, c("Portulaca_amilis", "Talinum_paniculatum", "Opuntia_robusta"))
   # With a checklist the behaviour is the one of the closed phase: what does not match is NA
-  expect_equal(con_lista, c(NA, NA, "Opuntia_robusta"))
+  expect_equal(with_list, c(NA, NA, "Opuntia_robusta"))
   # And the default of the assembly is still the Cactaceae checklist, not NULL
   expect_null(formals(assemble_barcoding_dataset)$checklist_path)
   expect_match(deparse(body(assemble_barcoding_dataset)), "CactaceaeFullList", all = FALSE)
@@ -530,8 +530,8 @@ test_that("step 8 writes the three control tables, labels CN3, and names the ste
   expect_true(file.exists(file.path(out_dir, "TABLE_barcoding_cn3_resubstitution.csv")))
   cn3 <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_cn3_resubstitution.csv"), stringsAsFactors = FALSE)
   # CN3 carries its label in the table itself, so it cannot travel without it
-  expect_true("etiqueta" %in% names(cn3))
-  expect_true(all(cn3$etiqueta == "irreproducible_resustitucion"))
+  expect_true("label" %in% names(cn3))
+  expect_true(all(cn3$label == "irreproducible_resubstitution"))
 
   expect_error(run_barcoding_controls(library_dir = f$library_dir, folds_dir = file.path(tmp, "none"),
                                       output_dir = out_dir),
@@ -554,7 +554,7 @@ test_that("a CN2 query that matches the locus in neither direction is state 3, w
   skip_if_not(.ctl_mafft_ok(), "MAFFT is not available")
   tmp <- withr::local_tempdir()
   f <- .ctl_library(tmp)
-  og <- .ctl_outgroup_hebras(tmp, f$base)
+  og <- .ctl_outgroup_strands(tmp, f$base)
   out_dir <- file.path(tmp, "8_controls")
 
   suppressMessages(run_barcoding_controls(library_dir = f$library_dir, folds_dir = f$folds_dir,
@@ -562,16 +562,16 @@ test_that("a CN2 query that matches the locus in neither direction is state 3, w
                                           controls = "CN2", loci = "matK"))
 
   q <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_cn2_queries.csv"), stringsAsFactors = FALSE)
-  sc <- q[q$orientacion == "sin_coincidencia", , drop = FALSE]
+  sc <- q[q$orientation == "no_match", , drop = FALSE]
   expect_equal(nrow(sc), 1L)
-  expect_equal(sc$estado, 3L)
-  expect_equal(sc$motivo, "sin_coincidencia")
-  expect_true(is.na(sc$especie_predicha))
-  expect_true(is.na(sc$genero_predicho))
-  expect_true(is.na(sc$distancia_vecino))
+  expect_equal(sc$state, 3L)
+  expect_equal(sc$reason, "no_match")
+  expect_true(is.na(sc$predicted_species))
+  expect_true(is.na(sc$predicted_genus))
+  expect_true(is.na(sc$nn_distance))
   # The two comparable queries keep what they had: this change touches nothing else
-  comp <- q[q$orientacion != "sin_coincidencia", , drop = FALSE]
+  comp <- q[q$orientation != "no_match", , drop = FALSE]
   expect_equal(nrow(comp), 2L)
-  expect_false(any(is.na(comp$distancia_vecino)))
-  expect_false(any(comp$motivo %in% "sin_coincidencia"))
+  expect_false(any(is.na(comp$nn_distance)))
+  expect_false(any(comp$reason %in% "no_match"))
 })

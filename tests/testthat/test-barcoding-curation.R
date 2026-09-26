@@ -59,18 +59,18 @@ test_that("the replication threshold is evaluated on the curated set, not on the
 
   scr <- .bc_screen_threshold(assembled, curated_sids, min_species_with_replica = 2L)
 
-  expect_equal(scr$especies_con_replica_ensamblado, 2L)
-  expect_equal(scr$especies_con_replica_curado, 0L)
-  expect_false(scr$pasa_umbral)
+  expect_equal(scr$species_with_replicate_assembled, 2L)
+  expect_equal(scr$species_with_replicate_curated, 0L)
+  expect_false(scr$passes_threshold)
 })
 
 test_that("saturation is flagged and never excludes a locus", {
   scr <- .bc_screen_decision(
-    data.frame(locus = c("matK", "ITS"), pasa_umbral = c(TRUE, TRUE), saturado = c(FALSE, TRUE),
+    data.frame(locus = c("matK", "ITS"), passes_threshold = c(TRUE, TRUE), saturated = c(FALSE, TRUE),
                stringsAsFactors = FALSE)
   )
-  expect_true(all(scr$entra))
-  expect_equal(scr$marca_saturacion, c(FALSE, TRUE))
+  expect_true(all(scr$enters))
+  expect_equal(scr$saturation_flag, c(FALSE, TRUE))
 })
 
 test_that("identical sequences are counted per locus and species on the curated alignment", {
@@ -80,11 +80,11 @@ test_that("identical sequences are counted per locus and species on the curated 
   tab <- .bc_identical_sequences(list(matK = aln))
 
   r <- tab[tab$species == "Opuntia_robusta", ]
-  expect_equal(r$accesiones, 3L)
-  expect_equal(r$secuencias_distintas, 2L)
+  expect_equal(r$accessions, 3L)
+  expect_equal(r$distinct_sequences, 2L)
   s <- tab[tab$species == "Opuntia_stricta", ]
-  expect_equal(s$accesiones, 1L)
-  expect_equal(s$secuencias_distintas, 1L)
+  expect_equal(s$accessions, 1L)
+  expect_equal(s$distinct_sequences, 1L)
 })
 
 test_that("screening reads the registry from the assembly directory and runs without the assembly object", {
@@ -97,7 +97,7 @@ test_that("screening reads the registry from the assembly directory and runs wit
   asm_dir <- file.path(tmp, "1_assembly")
   dir.create(asm_dir)
   utils::write.csv(data.frame(sid = sub("^.*\\|", "", headers), species = sp, genus = "Opuntia", locus = "matK",
-                              cluster_id = 1L, nombre_genbank = sp, stringsAsFactors = FALSE),
+                              cluster_id = 1L, genbank_name = sp, stringsAsFactors = FALSE),
                    file.path(asm_dir, "TABLE_barcoding_accession_registry.csv"), row.names = FALSE)
 
   set.seed(3L)
@@ -113,20 +113,20 @@ test_that("screening reads the registry from the assembly directory and runs wit
 
   tab <- utils::read.csv(file.path(tmp, "3_screening", "TABLE_barcoding_marker_screening.csv"), stringsAsFactors = FALSE)
   expect_equal(tab$locus, "matK")
-  expect_equal(tab$especies_con_replica, 2L)
-  expect_equal(tab$entra, TRUE)
+  expect_equal(tab$species_with_replicate, 2L)
+  expect_equal(tab$enters, TRUE)
   # Paralogy surveillance (Phase 2, item 5): flagged in every screening table, never excluding
-  expect_equal(tab$posible_paralogo, FALSE)
+  expect_equal(tab$possible_paralog, FALSE)
 
   suppressMessages(screen_barcoding_markers(assembly_dir = asm_dir, curated_dir = cur_dir, loci = "matK",
                                             output_dir = file.path(tmp, "3_screening_flag"),
                                             min_species_with_replica = 2L, paralog_loci = "matK"))
   for (f in c("TABLE_barcoding_marker_screening.csv", "TABLE_barcoding_identical_sequences.csv")) {
     t <- utils::read.csv(file.path(tmp, "3_screening_flag", f), stringsAsFactors = FALSE)
-    expect_true(all(t$posible_paralogo), info = f)
+    expect_true(all(t$possible_paralog), info = f)
   }
   t <- utils::read.csv(file.path(tmp, "3_screening_flag", "TABLE_barcoding_marker_screening.csv"), stringsAsFactors = FALSE)
-  expect_equal(t$entra, TRUE)
+  expect_equal(t$enters, TRUE)
 })
 
 test_that("screening says which earlier step is missing when the registry is absent", {

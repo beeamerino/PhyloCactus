@@ -43,7 +43,7 @@ Invisibly, a list with \code{curve} and \code{operating}. Writes
 Step 9 of the branch. Without a rule of remoteness the nearest neighbour names a cactus species
 for any query: in the negative control CN2, 288 of 312 outgroup queries came out in state 1. This
 step applies the rule (a query whose distance to its nearest neighbour exceeds a threshold is
-state 3, reason \code{lejania}) over every threshold observed, and fixes an operating threshold per
+state 3, reason \code{remoteness}) over every threshold observed, and fixes an operating threshold per
 locus.
 }
 \details{

@@ -29,37 +29,37 @@ test_that("the two distributions are built from the matrix, and a species withou
   g <- .compute_barcode_gap(m, .gap_species(), locus = "matK", model = "raw")
 
   expect_setequal(paste(g$intra$sid_a, g$intra$sid_b), c("A1.1 A2.1", "B1.1 B2.1"))
-  expect_equal(g$intra$distancia[paste(g$intra$sid_a, g$intra$sid_b) == "A1.1 A2.1"], 0.01)
-  expect_true(all(g$intra$locus == "matK" & g$intra$modelo == "raw"))
+  expect_equal(g$intra$distance[paste(g$intra$sid_a, g$intra$sid_b) == "A1.1 A2.1"], 0.01)
+  expect_true(all(g$intra$locus == "matK" & g$intra$model == "raw"))
   # Nearest neighbour of another species, per sequence
-  nn <- stats::setNames(g$inter$distancia, g$inter$sid)
+  nn <- stats::setNames(g$inter$distance, g$inter$sid)
   expect_equal(unname(nn[c("A1.1", "A2.1", "B1.1", "B2.1", "C1.1")]), c(0.20, 0.21, 0.20, 0.22, 0.25))
-  expect_equal(g$inter$sid_vecino[g$inter$sid == "A1.1"], "B1.1")
-  expect_equal(g$inter$especie_vecino[g$inter$sid == "C1.1"], "Opuntia_stricta")
+  expect_equal(g$inter$nn_sid[g$inter$sid == "A1.1"], "B1.1")
+  expect_equal(g$inter$nn_species[g$inter$sid == "C1.1"], "Opuntia_stricta")
   # The species with a single sequence gives no intraspecific pair, but is a query and can be a neighbour
-  expect_false("Cereus_jamacaru" %in% g$intra$especie)
+  expect_false("Cereus_jamacaru" %in% g$intra$species)
   expect_true("C1.1" %in% g$inter$sid)
-  expect_equal(g$resumen$pares_intra, 2L)
-  expect_equal(g$resumen$consultas_inter, 5L)
+  expect_equal(g$summary_df$intra_pairs, 2L)
+  expect_equal(g$summary_df$inter_queries, 5L)
 })
 
 test_that("the candidate threshold is the 95th intraspecific percentile, with a gap and without it", {
   sp <- .gap_species()
   con_gap <- .compute_barcode_gap(
     .gap_matrix(c(0.01, 0.20, 0.22, 0.30, 0.21, 0.23, 0.31, 0.02, 0.25, 0.26)), sp, "matK", "raw")
-  intra <- con_gap$intra$distancia
-  inter <- con_gap$inter$distancia
-  expect_equal(con_gap$resumen$umbral_candidato, stats::quantile(intra, 0.95, type = 7, names = FALSE))
-  expect_equal(con_gap$resumen$p5_inter, stats::quantile(inter, 0.05, type = 7, names = FALSE))
-  expect_true(con_gap$resumen$hay_gap)
+  intra <- con_gap$intra$distance
+  inter <- con_gap$inter$distance
+  expect_equal(con_gap$summary_df$candidate_threshold, stats::quantile(intra, 0.95, type = 7, names = FALSE))
+  expect_equal(con_gap$summary_df$p5_inter, stats::quantile(inter, 0.05, type = 7, names = FALSE))
+  expect_true(con_gap$summary_df$has_gap)
 
   # Overlap: the intraspecific distances are larger than the closest interspecific ones
-  sin_gap <- .compute_barcode_gap(
+  no_gap <- .compute_barcode_gap(
     .gap_matrix(c(0.30, 0.05, 0.22, 0.28, 0.06, 0.23, 0.29, 0.31, 0.25, 0.26)), sp, "matK", "raw")
-  expect_false(sin_gap$resumen$hay_gap)
-  expect_equal(sin_gap$resumen$umbral_candidato,
-               stats::quantile(sin_gap$intra$distancia, 0.95, type = 7, names = FALSE))
-  expect_gt(sin_gap$resumen$umbral_candidato, sin_gap$resumen$p5_inter)
+  expect_false(no_gap$summary_df$has_gap)
+  expect_equal(no_gap$summary_df$candidate_threshold,
+               stats::quantile(no_gap$intra$distance, 0.95, type = 7, names = FALSE))
+  expect_gt(no_gap$summary_df$candidate_threshold, no_gap$summary_df$p5_inter)
 })
 
 test_that("pairs without a value are declared, excluded from the percentiles and never imputed", {
@@ -67,14 +67,14 @@ test_that("pairs without a value are declared, excluded from the percentiles and
   v <- c(NA, 0.20, 0.22, 0.30, 0.21, 0.23, 0.31, 0.02, 0.25, 0.26)  # the pair of Opuntia_robusta has no value
   g <- .compute_barcode_gap(.gap_matrix(v), sp, "matK", "K80")
 
-  expect_equal(g$resumen$pares_intra, 1L)
-  expect_equal(g$resumen$pares_intra_sin_valor, 1L)
-  expect_false(any(is.na(g$intra$distancia)))
+  expect_equal(g$summary_df$intra_pairs, 1L)
+  expect_equal(g$summary_df$intra_pairs_no_value, 1L)
+  expect_false(any(is.na(g$intra$distance)))
   expect_false("A1.1 A2.1" %in% paste(g$intra$sid_a, g$intra$sid_b))
   # The percentile uses the values that exist, and the maximum is not imputed anywhere
-  expect_equal(g$resumen$p95_intra, 0.02)
-  expect_equal(g$resumen$umbral_candidato, 0.02)
-  expect_equal(g$resumen$consultas_inter_sin_valor, 0L)
+  expect_equal(g$summary_df$p95_intra, 0.02)
+  expect_equal(g$summary_df$candidate_threshold, 0.02)
+  expect_equal(g$summary_df$inter_queries_no_value, 0L)
 })
 
 test_that("both models are reported for every locus, and neither is chosen for separating better", {
@@ -94,10 +94,10 @@ test_that("both models are reported for every locus, and neither is chosen for s
   out <- suppressMessages(analyze_barcode_gap(library_dir = lib_dir, output_dir = file.path(tmp, "6_gap")))
 
   s <- utils::read.csv(file.path(tmp, "6_gap", "TABLE_barcoding_gap_summary.csv"), stringsAsFactors = FALSE)
-  expect_setequal(s$modelo, c("raw", "K80"))
+  expect_setequal(s$model, c("raw", "K80"))
   expect_equal(nrow(s), 2L)
   expect_true(all(s$locus == "matK"))
-  expect_true(all(s$umbral_candidato == s$p95_intra))
+  expect_true(all(s$candidate_threshold == s$p95_intra))
   expect_equal(nrow(out$summary), 2L)
 })
 
@@ -122,14 +122,14 @@ test_that("step 6 writes the distances and the figure, flags the loci and names 
 
   out_dir <- file.path(tmp, "6_gap")
   d <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_distances_matK.csv"), stringsAsFactors = FALSE)
-  expect_setequal(unique(d$tipo), c("intra", "inter_vecino"))
-  expect_setequal(unique(d$modelo), c("raw", "K80"))
+  expect_setequal(unique(d$type), c("intra", "inter_nn"))
+  expect_setequal(unique(d$model), c("raw", "K80"))
   expect_true(all(file.exists(file.path(out_dir, paste0("FIG_barcoding_gap_", c("matK", "pepC_like"), ".png")))))
 
   s <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_gap_summary.csv"), stringsAsFactors = FALSE)
-  expect_true(all(s$posible_paralogo[s$locus == "pepC_like"]))
-  expect_false(any(s$posible_paralogo[s$locus == "matK"]))
-  expect_false(any(s$locus_provisional))
+  expect_true(all(s$possible_paralog[s$locus == "pepC_like"]))
+  expect_false(any(s$possible_paralog[s$locus == "matK"]))
+  expect_false(any(s$provisional_locus))
 
   expect_error(analyze_barcode_gap(library_dir = file.path(tmp, "none"), output_dir = file.path(tmp, "6_gap")),
                "finalize_barcoding_library")
@@ -168,23 +168,23 @@ test_that("a pair with too few comparable positions has no value, and is counted
 
   g <- .compute_barcode_gap(d, sp, "matK", "raw", comparable = cmp, min_comparable = 100L)
 
-  expect_equal(g$resumen$pares_intra, 1L)
-  expect_equal(g$resumen$pares_intra_solapamiento_corto, 1L)
+  expect_equal(g$summary_df$intra_pairs, 1L)
+  expect_equal(g$summary_df$intra_pairs_short_overlap, 1L)
   expect_false("A1.1 A2.1" %in% paste(g$intra$sid_a, g$intra$sid_b))
   # A1.1 no longer has B1.1 as its neighbour: that pair has no value
-  expect_equal(g$inter$sid_vecino[g$inter$sid == "A1.1"], "B2.1")
-  expect_equal(g$inter$distancia[g$inter$sid == "A1.1"], 0.22)
-  expect_equal(g$resumen$pares_inter_solapamiento_corto, 1L)
-  expect_equal(g$resumen$minimo_comparables, 100L)
+  expect_equal(g$inter$nn_sid[g$inter$sid == "A1.1"], "B2.1")
+  expect_equal(g$inter$distance[g$inter$sid == "A1.1"], 0.22)
+  expect_equal(g$summary_df$inter_pairs_short_overlap, 1L)
+  expect_equal(g$summary_df$min_comparable, 100L)
 })
 
 test_that("without a comparable matrix nothing is excluded, and the counters are zero", {
   sp <- .gap_species()
   g <- .compute_barcode_gap(.gap_matrix(c(0.01, 0.20, 0.22, 0.30, 0.21, 0.23, 0.31, 0.02, 0.25, 0.26)),
                             sp, "matK", "raw")
-  expect_equal(g$resumen$pares_intra, 2L)
-  expect_equal(g$resumen$pares_intra_solapamiento_corto, 0L)
-  expect_equal(g$resumen$pares_inter_solapamiento_corto, 0L)
+  expect_equal(g$summary_df$intra_pairs, 2L)
+  expect_equal(g$summary_df$intra_pairs_short_overlap, 0L)
+  expect_equal(g$summary_df$inter_pairs_short_overlap, 0L)
 })
 
 test_that("the three descriptive columns measure the overlap that a percentile of zero hides", {
@@ -195,14 +195,14 @@ test_that("the three descriptive columns measure the overlap that a percentile o
   g <- .compute_barcode_gap(d, sp, "matK", "raw")
 
   # Queries whose nearest neighbour of another species is at distance 0: A1.1, B1.1, A2.1, C1.1
-  expect_equal(g$resumen$consultas_inter_cero, 4L)
-  expect_equal(g$resumen$prop_inter_cero, 4 / 5)
+  expect_equal(g$summary_df$inter_queries_zero, 4L)
+  expect_equal(g$summary_df$prop_inter_zero, 4 / 5)
   # Opuntia_robusta with Opuntia_stricta is within the genus; with Cereus_jamacaru it is not
-  expect_equal(g$resumen$inter_cero_congenere, 2L)
-  expect_equal(g$resumen$inter_cero_otro_genero, 2L)
+  expect_equal(g$summary_df$inter_zero_congeneric, 2L)
+  expect_equal(g$summary_df$inter_zero_other_genus, 2L)
   # Queries whose neighbour is closer than the candidate threshold
-  expect_equal(g$resumen$prop_inter_bajo_umbral,
-               mean(g$inter$distancia < g$resumen$umbral_candidato, na.rm = TRUE))
+  expect_equal(g$summary_df$prop_inter_below_threshold,
+               mean(g$inter$distance < g$summary_df$candidate_threshold, na.rm = TRUE))
 })
 
 test_that("step 6 declares the minimum of comparable positions it used", {
@@ -223,11 +223,11 @@ test_that("step 6 declares the minimum of comparable positions it used", {
                                        models = "raw", min_comparable = 100L, figures = FALSE))
 
   s <- utils::read.csv(file.path(tmp, "6_gap", "TABLE_barcoding_gap_summary.csv"), stringsAsFactors = FALSE)
-  expect_equal(s$minimo_comparables, 100L)
+  expect_equal(s$min_comparable, 100L)
   # B1.1 shares only 40 positions with the rest: every pair of B1.1 has no value
-  expect_true(s$pares_inter_solapamiento_corto > 0L)
-  expect_true(all(c("prop_inter_cero", "inter_cero_congenere", "inter_cero_otro_genero",
-                    "prop_inter_bajo_umbral") %in% names(s)))
+  expect_true(s$inter_pairs_short_overlap > 0L)
+  expect_true(all(c("prop_inter_zero", "inter_zero_congeneric", "inter_zero_other_genus",
+                    "prop_inter_below_threshold") %in% names(s)))
 })
 
 # Figures (BMM, 2026-09-22): the editorial design of the package and Q1 standards. Vector output for
@@ -236,30 +236,30 @@ test_that("step 6 declares the minimum of comparable positions it used", {
 
 test_that("the per-species view pairs each species' largest intraspecific distance with its nearest neighbour", {
   intra <- data.frame(
-    locus = "matK", modelo = "raw",
-    especie = c("Opuntia_robusta", "Opuntia_robusta", "Opuntia_stricta"),
+    locus = "matK", model = "raw",
+    species = c("Opuntia_robusta", "Opuntia_robusta", "Opuntia_stricta"),
     sid_a = c("A1.1", "A1.1", "B1.1"), sid_b = c("A2.1", "A3.1", "B2.1"),
-    distancia = c(0.01, 0.03, 0.05), stringsAsFactors = FALSE
+    distance = c(0.01, 0.03, 0.05), stringsAsFactors = FALSE
   )
   inter <- data.frame(
-    locus = "matK", modelo = "raw",
+    locus = "matK", model = "raw",
     sid = c("A1.1", "A2.1", "A3.1", "B1.1", "B2.1", "C1.1"),
-    especie = c(rep("Opuntia_robusta", 3), "Opuntia_stricta", "Opuntia_stricta", "Cereus_jamacaru"),
-    sid_vecino = NA_character_, especie_vecino = NA_character_,
-    distancia = c(0.08, 0.09, 0.07, 0.02, 0.04, 0.10), stringsAsFactors = FALSE
+    species = c(rep("Opuntia_robusta", 3), "Opuntia_stricta", "Opuntia_stricta", "Cereus_jamacaru"),
+    nn_sid = NA_character_, nn_species = NA_character_,
+    distance = c(0.08, 0.09, 0.07, 0.02, 0.04, 0.10), stringsAsFactors = FALSE
   )
 
   sp <- .bc_gap_species_summary(intra, inter)
 
-  r <- sp[sp$especie == "Opuntia_robusta", ]
+  r <- sp[sp$species == "Opuntia_robusta", ]
   expect_equal(c(r$intra_max, r$inter_min), c(0.03, 0.07))
-  expect_false(r$sin_gap)
-  s <- sp[sp$especie == "Opuntia_stricta", ]
+  expect_false(r$no_gap)
+  s <- sp[sp$species == "Opuntia_stricta", ]
   expect_equal(c(s$intra_max, s$inter_min), c(0.05, 0.02))
-  expect_true(s$sin_gap)
+  expect_true(s$no_gap)
   # A species without replica has no intraspecific distance and does not appear
-  expect_false("Cereus_jamacaru" %in% sp$especie)
-  expect_true(all(sp$modelo == "raw"))
+  expect_false("Cereus_jamacaru" %in% sp$species)
+  expect_true(all(sp$model == "raw"))
 })
 
 test_that("step 6 writes a vector figure and a raster copy per locus, plus one overview", {
@@ -296,19 +296,19 @@ test_that("step 6 writes a vector figure and a raster copy per locus, plus one o
 })
 
 test_that("the figures use the palette of the package and both models, with the two views", {
-  intra <- data.frame(locus = "matK", modelo = rep(c("raw", "K80"), each = 2),
-                      especie = "Opuntia_robusta", sid_a = "A1.1", sid_b = c("A2.1", "A3.1"),
-                      distancia = c(0.01, 0.02, 0.011, 0.021), stringsAsFactors = FALSE)
-  inter <- data.frame(locus = "matK", modelo = rep(c("raw", "K80"), each = 3),
-                      sid = c("A1.1", "A2.1", "B1.1"), especie = c("Opuntia_robusta", "Opuntia_robusta", "Opuntia_stricta"),
-                      sid_vecino = "B1.1", especie_vecino = "Opuntia_stricta",
-                      distancia = c(0.05, 0.06, 0.05, 0.051, 0.061, 0.051), stringsAsFactors = FALSE)
-  resumen <- data.frame(locus = "matK", modelo = c("raw", "K80"), p95_intra = c(0.02, 0.021),
-                        p5_inter = c(0.05, 0.051), umbral_candidato = c(0.02, 0.021),
-                        hay_gap = TRUE, pares_intra = 2L, consultas_inter = 3L,
-                        prop_inter_cero = 0, stringsAsFactors = FALSE)
+  intra <- data.frame(locus = "matK", model = rep(c("raw", "K80"), each = 2),
+                      species = "Opuntia_robusta", sid_a = "A1.1", sid_b = c("A2.1", "A3.1"),
+                      distance = c(0.01, 0.02, 0.011, 0.021), stringsAsFactors = FALSE)
+  inter <- data.frame(locus = "matK", model = rep(c("raw", "K80"), each = 3),
+                      sid = c("A1.1", "A2.1", "B1.1"), species = c("Opuntia_robusta", "Opuntia_robusta", "Opuntia_stricta"),
+                      nn_sid = "B1.1", nn_species = "Opuntia_stricta",
+                      distance = c(0.05, 0.06, 0.05, 0.051, 0.061, 0.051), stringsAsFactors = FALSE)
+  summary_df <- data.frame(locus = "matK", model = c("raw", "K80"), p95_intra = c(0.02, 0.021),
+                        p5_inter = c(0.05, 0.051), candidate_threshold = c(0.02, 0.021),
+                        has_gap = TRUE, intra_pairs = 2L, inter_queries = 3L,
+                        prop_inter_zero = 0, stringsAsFactors = FALSE)
 
-  p <- .bc_gap_plot(intra, inter, resumen, "matK")
+  p <- .bc_gap_plot(intra, inter, summary_df, "matK")
 
   expect_s3_class(p, "patchwork")
   expect_equal(length(p$patches$plots) + 1L, 4L)
@@ -322,11 +322,11 @@ test_that("the figures use the palette of the package and both models, with the 
 # travel in the subtitle, not in annotations next to their own vertical lines.
 
 .gap_fig_strings <- function(q) {
-  etiquetas <- unlist(q$labels, use.names = FALSE)
-  anotaciones <- unlist(lapply(q$layers, function(l) {
+  label_set <- unlist(q$labels, use.names = FALSE)
+  annotations <- unlist(lapply(q$layers, function(l) {
     if (!is.null(l$aes_params$label)) as.character(l$aes_params$label) else NULL
   }), use.names = FALSE)
-  out <- c(etiquetas, anotaciones)
+  out <- c(label_set, annotations)
   out[!is.na(out) & nzchar(out)]
 }
 
@@ -336,44 +336,44 @@ test_that("the figures use the palette of the package and both models, with the 
 }
 
 test_that("every visible string of the figures is English and short, and no text is drawn inside the panels", {
-  intra <- data.frame(locus = "matK", modelo = rep(c("raw", "K80"), each = 2),
-                      especie = "Opuntia_robusta", sid_a = "A1.1", sid_b = c("A2.1", "A3.1"),
-                      distancia = c(0.01, 0.02, 0.011, 0.021), stringsAsFactors = FALSE)
-  inter <- data.frame(locus = "matK", modelo = rep(c("raw", "K80"), each = 3),
+  intra <- data.frame(locus = "matK", model = rep(c("raw", "K80"), each = 2),
+                      species = "Opuntia_robusta", sid_a = "A1.1", sid_b = c("A2.1", "A3.1"),
+                      distance = c(0.01, 0.02, 0.011, 0.021), stringsAsFactors = FALSE)
+  inter <- data.frame(locus = "matK", model = rep(c("raw", "K80"), each = 3),
                       sid = c("A1.1", "A2.1", "B1.1"),
-                      especie = c("Opuntia_robusta", "Opuntia_robusta", "Opuntia_stricta"),
-                      sid_vecino = "B1.1", especie_vecino = "Opuntia_stricta",
-                      distancia = c(0.05, 0.06, 0.05, 0.051, 0.061, 0.051), stringsAsFactors = FALSE)
-  resumen <- data.frame(locus = "matK", modelo = c("raw", "K80"), p95_intra = c(0.02, 0.021),
-                        p5_inter = c(0.05, 0.051), umbral_candidato = c(0.02, 0.021),
-                        hay_gap = TRUE, pares_intra = 2L, consultas_inter = 3L,
-                        prop_inter_cero = 0, minimo_comparables = 100L, stringsAsFactors = FALSE)
-  vision <- data.frame(locus = c("matK", "rbcL"), modelo = "raw", p95_intra = c(0.02, 0.03),
-                       p5_inter = c(0, 0), prop_inter_cero = c(0.2, 0.5), stringsAsFactors = FALSE)
+                      species = c("Opuntia_robusta", "Opuntia_robusta", "Opuntia_stricta"),
+                      nn_sid = "B1.1", nn_species = "Opuntia_stricta",
+                      distance = c(0.05, 0.06, 0.05, 0.051, 0.061, 0.051), stringsAsFactors = FALSE)
+  summary_df <- data.frame(locus = "matK", model = c("raw", "K80"), p95_intra = c(0.02, 0.021),
+                        p5_inter = c(0.05, 0.051), candidate_threshold = c(0.02, 0.021),
+                        has_gap = TRUE, intra_pairs = 2L, inter_queries = 3L,
+                        prop_inter_zero = 0, min_comparable = 100L, stringsAsFactors = FALSE)
+  vision <- data.frame(locus = c("matK", "rbcL"), model = "raw", p95_intra = c(0.02, 0.03),
+                       p5_inter = c(0, 0), prop_inter_zero = c(0.2, 0.5), stringsAsFactors = FALSE)
 
-  r <- resumen[resumen$modelo == "raw", , drop = FALSE][1, ]
-  d <- .bc_gap_distribution_panel(intra[intra$modelo == "raw", ], inter[inter$modelo == "raw", ], r, "matK")
+  r <- summary_df[summary_df$model == "raw", , drop = FALSE][1, ]
+  d <- .bc_gap_distribution_panel(intra[intra$model == "raw", ], inter[inter$model == "raw", ], r, "matK")
   s <- .bc_gap_species_panel(.bc_gap_species_summary(intra, inter), r, "matK")
-  p <- .bc_gap_plot(intra, inter, resumen, "matK")
+  p <- .bc_gap_plot(intra, inter, summary_df, "matK")
   o <- .bc_gap_overview_plot(vision)
 
-  leyenda <- levels(d$data$distribucion)
-  series <- unique(as.character(o$patches$plots[[1]]$data$serie))
+  legend_labels <- levels(d$data$distribution)
+  series <- unique(as.character(o$patches$plots[[1]]$data$series))
   pie <- p$patches$annotation$caption
-  visibles <- c(.gap_fig_strings(d), .gap_fig_strings(s), leyenda, series,
+  visibles <- c(.gap_fig_strings(d), .gap_fig_strings(s), legend_labels, series,
                 .gap_fig_strings(o$patches$plots[[1]]), .gap_fig_strings(o), pie)
 
   # No Spanish and no accented characters anywhere the reader can see
-  castellano <- paste0("(?i)\\b(distancia|distancias|especie|especies|consulta|consultas|pares|",
+  spanish_pattern <- paste0("(?i)\\b(distancia|distancias|especie|especies|consulta|consultas|pares|",
                        "modelo|proporcion|intraespecific[ao]s?|interespecific[ao]s?|umbral|vecino|",
                        "ningun|identica|porcentaje|replica|conspecifico|proximo|diagonal|bajo|",
                        "tiene|queda|siempre|secuencias|percentil)\\b")
-  malas <- visibles[grepl(castellano, visibles, perl = TRUE)]
-  expect_equal(malas, character(0))
+  bad <- visibles[grepl(spanish_pattern, visibles, perl = TRUE)]
+  expect_equal(bad, character(0))
   expect_identical(visibles, iconv(visibles, "UTF-8", "ASCII", sub = "?"))
 
   # Short: titles, subtitles, axes and legend keys of one panel; the caption is the only long string
-  expect_lte(max(nchar(c(.gap_fig_strings(d), .gap_fig_strings(s), leyenda, series))), 60L)
+  expect_lte(max(nchar(c(.gap_fig_strings(d), .gap_fig_strings(s), legend_labels, series))), 60L)
   expect_lte(max(nchar(c(.gap_fig_strings(o$patches$plots[[1]]), .gap_fig_strings(o)))), 60L)
   expect_lte(nchar(pie), 125L)
 
@@ -396,14 +396,14 @@ test_that("every visible string of the figures is English and short, and no text
 # per-species panel the species whose nearest neighbour is at distance 0 are cut by the axis.
 
 test_that("the overview reads its title from the table instead of asserting a result", {
-  sin_gap <- data.frame(locus = c("matK", "rbcL"), modelo = "raw", p95_intra = c(0.02, 0.03),
-                        p5_inter = c(0, 0), prop_inter_cero = c(0.2, 0.5), hay_gap = FALSE,
+  no_gap <- data.frame(locus = c("matK", "rbcL"), model = "raw", p95_intra = c(0.02, 0.03),
+                        p5_inter = c(0, 0), prop_inter_zero = c(0.2, 0.5), has_gap = FALSE,
                         stringsAsFactors = FALSE)
-  con_gap <- data.frame(locus = c("matK", "rbcL"), modelo = "raw", p95_intra = c(0.005, 0.03),
-                        p5_inter = c(0.01, 0), prop_inter_cero = c(0.2, 0.5), hay_gap = c(TRUE, FALSE),
+  con_gap <- data.frame(locus = c("matK", "rbcL"), model = "raw", p95_intra = c(0.005, 0.03),
+                        p5_inter = c(0.01, 0), prop_inter_zero = c(0.2, 0.5), has_gap = c(TRUE, FALSE),
                         stringsAsFactors = FALSE)
 
-  a <- .bc_gap_overview_plot(sin_gap)$patches$plots[[1]]$labels
+  a <- .bc_gap_overview_plot(no_gap)$patches$plots[[1]]$labels
   b <- .bc_gap_overview_plot(con_gap)$patches$plots[[1]]$labels
 
   expect_match(a$title, "^No locus")
@@ -413,8 +413,8 @@ test_that("the overview reads its title from the table instead of asserting a re
   expect_match(b$subtitle, "1 of 2")
   expect_lte(max(nchar(c(a$title, b$title, a$subtitle, b$subtitle))), 60L)
 
-  # A table without the hay_gap column is read from the two percentiles, not refused
-  sin_col <- sin_gap[, setdiff(names(sin_gap), "hay_gap")]
+  # A table without the has_gap column is read from the two percentiles, not refused
+  sin_col <- no_gap[, setdiff(names(no_gap), "has_gap")]
   expect_match(.bc_gap_overview_plot(sin_col)$patches$plots[[1]]$labels$title, "^No locus")
 })
 
@@ -425,15 +425,15 @@ test_that("the title is indented so the tag of the panel does not fall on it", {
 })
 
 test_that("a species whose nearest neighbour is at distance 0 is drawn whole, not cut by the axis", {
-  intra <- data.frame(locus = "matK", modelo = "raw", especie = c("Opuntia_robusta", "Opuntia_stricta"),
+  intra <- data.frame(locus = "matK", model = "raw", species = c("Opuntia_robusta", "Opuntia_stricta"),
                       sid_a = c("A1.1", "B1.1"), sid_b = c("A2.1", "B2.1"),
-                      distancia = c(0.01, 0.02), stringsAsFactors = FALSE)
-  inter <- data.frame(locus = "matK", modelo = "raw", sid = c("A1.1", "B1.1"),
-                      especie = c("Opuntia_robusta", "Opuntia_stricta"),
-                      sid_vecino = c("B1.1", "A1.1"), especie_vecino = c("Opuntia_stricta", "Opuntia_robusta"),
-                      distancia = c(0, 0.05), stringsAsFactors = FALSE)
-  r <- data.frame(locus = "matK", modelo = "raw", p95_intra = 0.02, p5_inter = 0,
-                  hay_gap = FALSE, pares_intra = 2L, consultas_inter = 2L, prop_inter_cero = 0.5,
+                      distance = c(0.01, 0.02), stringsAsFactors = FALSE)
+  inter <- data.frame(locus = "matK", model = "raw", sid = c("A1.1", "B1.1"),
+                      species = c("Opuntia_robusta", "Opuntia_stricta"),
+                      nn_sid = c("B1.1", "A1.1"), nn_species = c("Opuntia_stricta", "Opuntia_robusta"),
+                      distance = c(0, 0.05), stringsAsFactors = FALSE)
+  r <- data.frame(locus = "matK", model = "raw", p95_intra = 0.02, p5_inter = 0,
+                  has_gap = FALSE, intra_pairs = 2L, inter_queries = 2L, prop_inter_zero = 0.5,
                   stringsAsFactors = FALSE)
 
   s <- .bc_gap_species_panel(.bc_gap_species_summary(intra, inter), r, "matK")
@@ -446,8 +446,8 @@ test_that("a species whose nearest neighbour is at distance 0 is drawn whole, no
 test_that("the title of the narrow panel of the overview fits its third of the page", {
   # In the figure of 2026-09-22 the title of the right panel was cut against the edge: it holds a
   # third of the 180 mm, so it takes a shorter title than the left one.
-  d <- data.frame(locus = c("matK", "rbcL"), modelo = "raw", p95_intra = c(0.02, 0.03),
-                  p5_inter = c(0, 0), prop_inter_cero = c(0.2, 0.5), hay_gap = FALSE,
+  d <- data.frame(locus = c("matK", "rbcL"), model = "raw", p95_intra = c(0.02, 0.03),
+                  p5_inter = c(0, 0), prop_inter_zero = c(0.2, 0.5), has_gap = FALSE,
                   stringsAsFactors = FALSE)
 
   o <- .bc_gap_overview_plot(d)

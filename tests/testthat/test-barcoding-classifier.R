@@ -52,14 +52,14 @@ test_that("one species at the minimum distance gives state 1, with a positive ma
   r <- .bc_classify_nn(m, .cls_train, "Q1.1", .cls_species())
 
   expect_equal(nrow(r), 1L)
-  expect_equal(r$estado, 1L)
-  expect_equal(r$especie_predicha, "Opuntia_robusta")
-  expect_equal(r$genero_predicho, "Opuntia")
-  expect_equal(r$candidatas, "Opuntia_robusta")
-  expect_equal(r$distancia_vecino, 0.01)
+  expect_equal(r$state, 1L)
+  expect_equal(r$predicted_species, "Opuntia_robusta")
+  expect_equal(r$predicted_genus, "Opuntia")
+  expect_equal(r$candidates, "Opuntia_robusta")
+  expect_equal(r$nn_distance, 0.01)
   # Margin: nearest sequence of another species (B1.1, 0.10) minus the minimum
-  expect_equal(r$margen, 0.09)
-  expect_true(is.na(r$motivo))
+  expect_equal(r$margin, 0.09)
+  expect_true(is.na(r$reason))
 })
 
 test_that("a tie between species of one genus gives state 2, never state 1, and the candidates are declared", {
@@ -67,13 +67,13 @@ test_that("a tie between species of one genus gives state 2, never state 1, and 
 
   r <- .bc_classify_nn(m, .cls_train, "Q1.1", .cls_species())
 
-  expect_equal(r$estado, 2L)
-  expect_true(is.na(r$especie_predicha))
-  expect_equal(r$genero_predicho, "Opuntia")
-  expect_equal(r$candidatas, "Opuntia_robusta|Opuntia_stricta")
-  expect_equal(r$distancia_vecino, 0)
+  expect_equal(r$state, 2L)
+  expect_true(is.na(r$predicted_species))
+  expect_equal(r$predicted_genus, "Opuntia")
+  expect_equal(r$candidates, "Opuntia_robusta|Opuntia_stricta")
+  expect_equal(r$nn_distance, 0)
   # Another species sits at the same distance: the margin is exactly 0
-  expect_equal(r$margen, 0)
+  expect_equal(r$margin, 0)
 })
 
 test_that("a tie across genera gives state 3, with the candidates and no genus", {
@@ -81,11 +81,11 @@ test_that("a tie across genera gives state 3, with the candidates and no genus",
 
   r <- .bc_classify_nn(m, .cls_train, "Q1.1", .cls_species())
 
-  expect_equal(r$estado, 3L)
-  expect_true(is.na(r$especie_predicha))
-  expect_true(is.na(r$genero_predicho))
-  expect_equal(r$candidatas, "Cereus_jamacaru|Opuntia_robusta")
-  expect_equal(r$margen, 0)
+  expect_equal(r$state, 3L)
+  expect_true(is.na(r$predicted_species))
+  expect_true(is.na(r$predicted_genus))
+  expect_equal(r$candidates, "Cereus_jamacaru|Opuntia_robusta")
+  expect_equal(r$margin, 0)
 })
 
 test_that("a query with no distance that has a value is state 3 with the reason declared", {
@@ -93,11 +93,11 @@ test_that("a query with no distance that has a value is state 3 with the reason 
 
   r <- .bc_classify_nn(m, .cls_train, "Q1.1", .cls_species())
 
-  expect_equal(r$estado, 3L)
-  expect_equal(r$motivo, "sin_posiciones_comparables")
-  expect_true(is.na(r$distancia_vecino))
-  expect_true(is.na(r$margen))
-  expect_true(is.na(r$candidatas) || r$candidatas == "")
+  expect_equal(r$state, 3L)
+  expect_equal(r$reason, "no_comparable_positions")
+  expect_true(is.na(r$nn_distance))
+  expect_true(is.na(r$margin))
+  expect_true(is.na(r$candidates) || r$candidates == "")
 })
 
 test_that("the classifier refuses a query that is in its own training set", {
@@ -169,9 +169,9 @@ test_that("IdTaxa answers with the same columns and the same three states as the
   nn <- .bc_classify_nn(.cls_pdist(seqs), train, "O11.1", sp)
 
   expect_setequal(names(r), names(nn))
-  expect_true(r$estado %in% c(1L, 2L, 3L))
-  expect_equal(r$estado, 1L)
-  expect_equal(r$especie_predicha, "Opuntia_robusta")
+  expect_true(r$state %in% c(1L, 2L, 3L))
+  expect_equal(r$state, 1L)
+  expect_equal(r$predicted_species, "Opuntia_robusta")
 })
 
 test_that("step 7 writes one row per query, nothing aggregated, and names the step that is missing", {
@@ -208,12 +208,12 @@ test_that("step 7 writes one row per query, nothing aggregated, and names the st
   expect_equal(nrow(e), nrow(fe))
   expect_equal(nrow(g), nrow(fg))
   expect_setequal(paste(e$locus, e$sid), paste(fe$locus, fe$sid))
-  expect_true(all(c("locus", "esquema", "pliegue", "sid", "especie_verdadera", "genero_verdadero",
-                    "metodo", "estado", "especie_predicha", "genero_predicho", "candidatas",
-                    "distancia_vecino", "margen", "motivo") %in% names(e)))
-  expect_true(all(e$estado %in% c(1L, 2L, 3L)))
+  expect_true(all(c("locus", "scheme", "fold", "sid", "true_species", "true_genus",
+                    "method", "state", "predicted_species", "predicted_genus", "candidates",
+                    "nn_distance", "margin", "reason") %in% names(e)))
+  expect_true(all(e$state %in% c(1L, 2L, 3L)))
   # Nothing aggregated: this phase does not look at any accuracy
-  expect_false(any(grepl("exactitud|acierto|precision|exhaustividad|tasa|media|porcentaje",
+  expect_false(any(grepl("accuracy|hit|precision|recall|rate|mean|percent",
                          names(e), ignore.case = TRUE)))
 
   expect_error(classify_barcoding_folds(library_dir = lib_dir, folds_dir = file.path(tmp, "none"),
@@ -255,17 +255,17 @@ test_that("step 7 closes with the banner of the package, the cactus included", {
   f <- .cls_fixture(tmp)
   out_dir <- file.path(tmp, "7_classifier")
 
-  salida <- utils::capture.output(
+  out_path <- utils::capture.output(
     suppressMessages(classify_barcoding_folds(library_dir = f$library_dir, folds_dir = f$folds_dir,
                                               output_dir = out_dir, method = "nn")))
-  texto <- paste(salida, collapse = "\n")
+  banner_text <- paste(out_path, collapse = "\n")
 
-  expect_match(texto, "Barcoding Classification Complete", fixed = TRUE)
-  expect_match(texto, "\U0001f335", fixed = TRUE)
-  expect_match(texto, out_dir, fixed = TRUE)
-  expect_match(texto, "nn", fixed = TRUE)
+  expect_match(banner_text, "Barcoding Classification Complete", fixed = TRUE)
+  expect_match(banner_text, "\U0001f335", fixed = TRUE)
+  expect_match(banner_text, out_dir, fixed = TRUE)
+  expect_match(banner_text, "nn", fixed = TRUE)
   # The banner counts rows written, which is not a measure of anything: this phase has no accuracy
-  expect_false(grepl("accuracy|exactitud|correct", texto, ignore.case = TRUE))
+  expect_false(grepl("accuracy|correct", banner_text, ignore.case = TRUE))
 })
 
 test_that("the notification never fails the run of step 7", {

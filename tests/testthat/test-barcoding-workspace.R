@@ -137,12 +137,12 @@ test_that("the branch assignment is compared with the phylogeny map, and every d
 
   cmp <- .bc_compare_marker_maps(branch, phylogeny)
 
-  get <- function(id) cmp$estado[cmp$ID == id]
-  expect_equal(get("0"), "igual")
-  expect_equal(get("11"), "solo_rama")
-  expect_equal(get("45"), "solo_rama")
-  expect_equal(get("7"), "distinto")
-  expect_equal(get("9"), "solo_filogenia")
+  get <- function(id) cmp$state[cmp$ID == id]
+  expect_equal(get("0"), "same")
+  expect_equal(get("11"), "branch_only")
+  expect_equal(get("45"), "branch_only")
+  expect_equal(get("7"), "different")
+  expect_equal(get("9"), "phylogeny_only")
   expect_equal(nrow(cmp), 5L)
 })
 
@@ -160,16 +160,16 @@ test_that("what is mined and which parent resolves duplicates are two different 
   # Nothing given: the branch mines its focal clade, as it has since Phase 2
   expect_identical(.bc_mining_taxids(NULL, "3593"), "3593")
   # Given: those are mined, and the preferred parent is left out of it
-  seis <- c("107598", "107617", "107583", "3582", "107600", "108056")
-  expect_identical(.bc_mining_taxids(seis, "3593"), seis)
+  six_taxids <- c("107598", "107617", "107583", "3582", "107600", "108056")
+  expect_identical(.bc_mining_taxids(six_taxids, "3593"), six_taxids)
 })
 
 test_that("a missing workspace is mined with every taxid it was given, not only the first", {
-  seis <- c("107598", "107617", "107583", "3582", "107600", "108056")
+  six_taxids <- c("107598", "107617", "107583", "3582", "107600", "108056")
   setup_args <- NULL
   n_read <- 0L
   obj <- .phylotar_load_or_mine(
-    "wd", preferred_parent = "3593", txid = seis, ncbi_dr = "/opt/blast/bin",
+    "wd", preferred_parent = "3593", txid = six_taxids, ncbi_dr = "/opt/blast/bin",
     reader   = function(wd) {
       n_read <<- n_read + 1L
       if (n_read == 1L) stop("no workspace") else "PHYLOTA"
@@ -178,7 +178,7 @@ test_that("a missing workspace is mined with every taxid it was given, not only 
     run_fn   = function(...) invisible(NULL)
   )
   expect_identical(obj, "PHYLOTA")
-  expect_identical(setup_args$txid, seis)
+  expect_identical(setup_args$txid, six_taxids)
   # And the search terms are the shared ones: the outgroup is not mined with a different criterion
   expect_identical(setup_args$srch_trm, .phylotar_search_terms())
 })
@@ -203,8 +203,8 @@ test_that("the branch holds its own copy of the outgroup taxids, and notices if 
   # default, so that it runs without the phylogeny and so that the list is visible where it is used.
   # Nothing of the phylogeny is touched. This test is the drift detector: the day somebody adds a
   # family to one of the two lists, it fails and says which one moved.
-  seis <- c("107598", "107617", "107583", "3582", "107600", "108056")
-  expect_identical(barcoding_outgroup_taxids(), seis)
+  six_taxids <- c("107598", "107617", "107583", "3582", "107600", "108056")
+  expect_identical(barcoding_outgroup_taxids(), six_taxids)
   expect_identical(eval(formals(assemble_outgroup_phylotar)$outgroups), barcoding_outgroup_taxids())
   # And the branch can be told to mine them, without that changing what it mines by default
   expect_true("taxids" %in% names(formals(assemble_barcoding_dataset)))

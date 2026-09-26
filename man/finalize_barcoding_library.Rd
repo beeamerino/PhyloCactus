@@ -34,7 +34,7 @@ read for the description of each excluded sequence.}
 species keep two or more distinct sequences. Defaults to \code{20L} (decision of 2026-09-21).}
 
 \item{paralog_loci}{Character vector. Loci under paralogy surveillance, flagged in the column
-\code{posible_paralogo} of every table; the flag never excludes a locus. Defaults to \code{"pepC_like"}.}
+\code{possible_paralog} of every table; the flag never excludes a locus. Defaults to \code{"pepC_like"}.}
 }
 \value{
 Invisibly, a list with \code{summary}, \code{excluded} and \code{collapsed}. Writes \verb{LIB_<locus>.fasta}
@@ -56,7 +56,7 @@ columns made only of gaps.
 }
 \details{
 Every input is read from the directory of the step that wrote it, so the library runs on its own
-whenever those directories exist. The loci are those marked \code{entra} in the screening table.
+whenever those directories exist. The loci are those marked \code{enters} in the screening table.
 }
 \examples{
 \dontrun{

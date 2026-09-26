@@ -99,15 +99,15 @@ barcoding_outgroup_taxids <- function() {
 #' @noRd
 .bc_resolve_names <- function(genbank_names, checklist_path = NULL) {
   if (is.null(checklist_path) || (length(checklist_path) == 1L && is.na(checklist_path))) {
-    limpio <- gsub("[[:space:]]+", " ", trimws(as.character(genbank_names)))
-    return(gsub(" ", "_", limpio, fixed = TRUE))
+    cleaned <- gsub("[[:space:]]+", " ", trimws(as.character(genbank_names)))
+    return(gsub(" ", "_", cleaned, fixed = TRUE))
   }
-  nombres <- if (length(checklist_path) == 1L && file.exists(checklist_path)) {
+  name_vec <- if (length(checklist_path) == 1L && file.exists(checklist_path)) {
     .bc_read_checklist_names(checklist_path)
   } else {
     as.character(checklist_path)
   }
-  .bc_match_names(genbank_names, nombres)
+  .bc_match_names(genbank_names, name_vec)
 }
 
 #' Returns the checklist spelling with underscores for a name that matches, and `NA` for one that
@@ -196,7 +196,7 @@ barcoding_outgroup_taxids <- function() {
 #' Accession registry: one row per (locus, sid), no sid in two loci
 #' @noRd
 .bc_build_registry <- function(records) {
-  req <- c("cluster_id", "sid", "locus", "species", "nombre_genbank")
+  req <- c("cluster_id", "sid", "locus", "species", "genbank_name")
   miss <- setdiff(req, names(records))
   if (length(miss) > 0) stop("Registry input lacks columns: ", paste(miss, collapse = ", "), call. = FALSE)
   r <- records[!duplicated(paste(records$locus, records$sid)), req, drop = FALSE]
@@ -210,7 +210,7 @@ barcoding_outgroup_taxids <- function() {
     genus = .bc_genus(r$species),
     locus = r$locus,
     cluster_id = as.integer(r$cluster_id),
-    nombre_genbank = r$nombre_genbank,
+    genbank_name = r$genbank_name,
     stringsAsFactors = FALSE
   )
   out <- out[order(out$locus, out$species, out$sid), , drop = FALSE]
@@ -223,8 +223,8 @@ barcoding_outgroup_taxids <- function() {
 #' A cluster with no standardized marker name is kept under the provisional name `cluster_<ID>` and
 #' listed with the GenBank description of its seed (decision of 2026-09-22).
 #' @param clusters Data frame with `ID`, `Marker_std` and `Description` (seed description).
-#' @return List with `map` (`ID`, `Marker_std`, `locus_provisional`) and `unnamed` (`ID`, `locus`,
-#'   `descripcion_semilla`).
+#' @return List with `map` (`ID`, `Marker_std`, `provisional_locus`) and `unnamed` (`ID`, `locus`,
+#'   `seed_description`).
 #' @noRd
 .bc_name_clusters <- function(clusters) {
   id <- as.character(clusters$ID)
@@ -233,8 +233,8 @@ barcoding_outgroup_taxids <- function() {
   marker[provisional] <- paste0("cluster_", id[provisional])
   desc <- if ("Description" %in% names(clusters)) as.character(clusters$Description) else rep(NA_character_, length(id))
   list(
-    map = data.frame(ID = id, Marker_std = marker, locus_provisional = provisional, stringsAsFactors = FALSE),
-    unnamed = data.frame(ID = id[provisional], locus = marker[provisional], descripcion_semilla = desc[provisional],
+    map = data.frame(ID = id, Marker_std = marker, provisional_locus = provisional, stringsAsFactors = FALSE),
+    unnamed = data.frame(ID = id[provisional], locus = marker[provisional], seed_description = desc[provisional],
                          stringsAsFactors = FALSE)
   )
 }
@@ -243,7 +243,7 @@ barcoding_outgroup_taxids <- function() {
 #' @noRd
 .bc_flag_provisional <- function(tab) {
   if (is.null(tab)) return(tab)
-  tab$locus_provisional <- grepl("^cluster_[0-9]+$", as.character(tab$locus))
+  tab$provisional_locus <- grepl("^cluster_[0-9]+$", as.character(tab$locus))
   tab
 }
 
@@ -251,10 +251,10 @@ barcoding_outgroup_taxids <- function() {
 #' @noRd
 .bc_cluster_funnel <- function(n_workspace, n_selected, n_with_sequences, marker_map) {
   data.frame(
-    etapa = c("clusteres_en_workspace", "clusteres_con_mas_de_min_species", "clusteres_con_secuencias_tras_filtros",
-              "clusteres_con_nombre", "clusteres_sin_nombre_conservados", "loci_ensamblados"),
-    n = as.integer(c(n_workspace, n_selected, n_with_sequences, sum(!marker_map$locus_provisional),
-                     sum(marker_map$locus_provisional), length(unique(marker_map$Marker_std)))),
+    stage = c("clusters_in_workspace", "clusters_over_min_species", "clusters_with_sequences",
+              "clusters_named", "clusters_unnamed_kept", "assembled_loci"),
+    n = as.integer(c(n_workspace, n_selected, n_with_sequences, sum(!marker_map$provisional_locus),
+                     sum(marker_map$provisional_locus), length(unique(marker_map$Marker_std)))),
     stringsAsFactors = FALSE
   )
 }
@@ -272,11 +272,11 @@ barcoding_outgroup_taxids <- function() {
     sp_by_gen <- tapply(d$species, d$genus, function(x) length(unique(x)))
     data.frame(
       locus = l,
-      especies_totales = length(n_by_sp),
-      especies_con_replica = sum(n_by_sp >= 2L),
-      accesiones_totales = nrow(d),
-      generos_totales = length(sp_by_gen),
-      generos_con_2_o_mas_especies = sum(sp_by_gen >= 2L),
+      total_species = length(n_by_sp),
+      species_with_replicate = sum(n_by_sp >= 2L),
+      total_accessions = nrow(d),
+      total_genera = length(sp_by_gen),
+      genera_with_2plus_species = sum(sp_by_gen >= 2L),
       stringsAsFactors = FALSE
     )
   }))
@@ -328,14 +328,14 @@ barcoding_outgroup_taxids <- function() {
 #' Compare the branch's cluster-to-locus assignment with the phylogeny's
 #' @noRd
 .bc_compare_marker_maps <- function(branch, phylogeny) {
-  b <- data.frame(ID = as.character(branch$ID), marker_rama = trimws(as.character(branch$Marker_std)),
+  b <- data.frame(ID = as.character(branch$ID), marker_branch = trimws(as.character(branch$Marker_std)),
                   stringsAsFactors = FALSE)
-  p <- data.frame(ID = as.character(phylogeny$ID), marker_filogenia = trimws(as.character(phylogeny$Marker_std)),
+  p <- data.frame(ID = as.character(phylogeny$ID), marker_phylogeny = trimws(as.character(phylogeny$Marker_std)),
                   stringsAsFactors = FALSE)
   m <- merge(b, p, by = "ID", all = TRUE)
-  m$estado <- ifelse(is.na(m$marker_filogenia), "solo_rama",
-              ifelse(is.na(m$marker_rama), "solo_filogenia",
-              ifelse(m$marker_rama == m$marker_filogenia, "igual", "distinto")))
+  m$state <- ifelse(is.na(m$marker_phylogeny), "branch_only",
+              ifelse(is.na(m$marker_branch), "phylogeny_only",
+              ifelse(m$marker_branch == m$marker_phylogeny, "same", "different")))
   m <- m[order(suppressWarnings(as.integer(m$ID)), m$ID), , drop = FALSE]
   rownames(m) <- NULL
   m
@@ -425,9 +425,9 @@ assemble_barcoding_dataset <- function(wd_path,
     phylogeny_map_file <- file.path(dirname(normalizePath(wd_path, mustWork = FALSE)), "1_phylotaR_out_Ingroup",
                                     "TABLE_CLUSTER_MARKER_ASSIGNMENT_INGROUP.csv")
   }
-  ficheros <- c(target_genes_file, genes_map_file, checklist_path)
-  ficheros <- ficheros[!is.na(ficheros)]
-  for (f in ficheros) {
+  files <- c(target_genes_file, genes_map_file, checklist_path)
+  files <- files[!is.na(files)]
+  for (f in files) {
     if (!nzchar(f) || !file.exists(f)) stop("Input file not found: ", f, call. = FALSE)
   }
 
@@ -499,14 +499,14 @@ assemble_barcoding_dataset <- function(wd_path,
   }
 
   txids <- vapply(kept$sid, function(s) as.character(selected@sqs[[s]]@txid), character(1), USE.NAMES = FALSE)
-  kept$nombre_genbank <- cp_clean_species_name(phylotaR::get_tx_slot(selected, txid = txids, slt_nm = "scnm"))
+  kept$genbank_name <- cp_clean_species_name(phylotaR::get_tx_slot(selected, txid = txids, slt_nm = "scnm"))
 
   # 4. Cluster-to-locus assignment, with the phylogeny's code and the branch's own caches
   metadata <- cp_download_all_metadata(unique(kept$sid),
                                        file.path(dir_cache, "CACHE_GENBANK_METADATA_BARCODING.csv"),
                                        batch_size = 200, sleep_time = 0.5, max_retries = 5,
                                        log_message = log_message)
-  df_meta <- data.frame(cluster_id = kept$cluster_id, species = kept$nombre_genbank, sid = kept$sid,
+  df_meta <- data.frame(cluster_id = kept$cluster_id, species = kept$genbank_name, sid = kept$sid,
                         stringsAsFactors = FALSE) |>
     dplyr::left_join(metadata, by = "sid") |>
     cp_annotate_marker_text(pattern = pattern, genes_map_df = genes_map_df)
@@ -549,7 +549,7 @@ assemble_barcoding_dataset <- function(wd_path,
   if (file.exists(phylogeny_map_file)) {
     comparison <- .bc_compare_marker_maps(marker_map, utils::read.csv(phylogeny_map_file, stringsAsFactors = FALSE))
     utils::write.csv(comparison, file.path(dir_asm, "TABLE_barcoding_marker_assignment_comparison.csv"), row.names = FALSE)
-    tab <- table(comparison$estado)
+    tab <- table(comparison$state)
     log_message("Comparison with the phylogeny's assignment: ",
                 paste(names(tab), as.integer(tab), sep = " ", collapse = "; "))
   } else {
@@ -561,15 +561,15 @@ assemble_barcoding_dataset <- function(wd_path,
   kept <- kept[!duplicated(paste(kept$locus, kept$sid)), , drop = FALSE]
 
   # 5. Names, with the rule of clean_taxonomic_names()
-  kept$species <- .bc_resolve_names(kept$nombre_genbank, checklist_path)
+  kept$species <- .bc_resolve_names(kept$genbank_name, checklist_path)
   discarded <- kept[is.na(kept$species), , drop = FALSE]
-  discarded_tab <- as.data.frame(table(nombre_genbank = discarded$nombre_genbank, locus = discarded$locus),
+  discarded_tab <- as.data.frame(table(genbank_name = discarded$genbank_name, locus = discarded$locus),
                                  stringsAsFactors = FALSE)
   discarded_tab <- discarded_tab[discarded_tab$Freq > 0, , drop = FALSE]
-  names(discarded_tab)[names(discarded_tab) == "Freq"] <- "accesiones"
+  names(discarded_tab)[names(discarded_tab) == "Freq"] <- "accessions"
   utils::write.csv(discarded_tab, file.path(dir_asm, "TABLE_barcoding_discarded_names.csv"), row.names = FALSE)
   log_message("Accessions dropped because their name is not in the checklist: ", nrow(discarded),
-              " in ", length(unique(discarded$nombre_genbank)), " names.")
+              " in ", length(unique(discarded$genbank_name)), " names.")
 
   # 6. Registry, FASTA files and per-locus summary
   registry <- .bc_build_registry(kept[!is.na(kept$species), , drop = FALSE])

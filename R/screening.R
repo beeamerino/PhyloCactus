@@ -866,7 +866,7 @@ integrate_and_clean_markers <- function(
     dplyr::distinct(species, marker_key, sid, .keep_all = TRUE)
 
   message("Building raw integration table...")
-  tabla_raw_list <- vector("list", length(markers_to_process))
+  tab_raw_list <- vector("list", length(markers_to_process))
 
   for (i in seq_along(markers_to_process)) {
     mk <- markers_to_process[i]
@@ -886,17 +886,17 @@ integrate_and_clean_markers <- function(
       warning(sprintf("Marker %s contains no sequences. Skipping.", mk), call. = FALSE)
       next
     }
-    tabla_raw_list[[i]] <- combined_df
+    tab_raw_list[[i]] <- combined_df
   }
 
-  tabla_raw <- dplyr::bind_rows(tabla_raw_list)
-  if (nrow(tabla_raw) == 0) stop("No sequences were recovered from ingroup/outgroup FASTA files.", call. = FALSE)
+  tab_raw <- dplyr::bind_rows(tab_raw_list)
+  if (nrow(tab_raw) == 0) stop("No sequences were recovered from ingroup/outgroup FASTA files.", call. = FALSE)
 
-  tabla_raw <- dplyr::left_join(tabla_raw, metadata_all, by = c("species", "marker_key"))
-  unmatched_metadata <- dplyr::distinct(dplyr::filter(tabla_raw, is.na(sid)), marker_key, source_branch, species, fasta_name)
+  tab_raw <- dplyr::left_join(tab_raw, metadata_all, by = c("species", "marker_key"))
+  unmatched_metadata <- dplyr::distinct(dplyr::filter(tab_raw, is.na(sid)), marker_key, source_branch, species, fasta_name)
 
   message("Exporting TABLE_raw_species_metadata.csv ...")
-  write_clean_table(tabla_raw, "TABLE_raw_species_metadata.csv")
+  write_clean_table(tab_raw, "TABLE_raw_species_metadata.csv")
   if (nrow(unmatched_metadata) > 0) write_clean_table(unmatched_metadata, "TABLE_unmatched_metadata_rows.csv")
 
   if (grepl("\\.xlsx?$", accepted_list_file, ignore.case = TRUE)) {
@@ -936,7 +936,7 @@ integrate_and_clean_markers <- function(
 
   outgroup_species <- unique(dplyr::pull(dplyr::filter(metadata_all, is_outgroup), species))
 
-  tabla_raw <- tabla_raw |>
+  tab_raw <- tab_raw |>
     dplyr::mutate(
       matched_to_metadata = !is.na(sid),
       accepted_in_checklist = dplyr::if_else(source_branch == "ingroup", species %in% checklist_cactaceae, species %in% accepted_species),
@@ -953,7 +953,7 @@ integrate_and_clean_markers <- function(
     )
 
   message("Performing duplicate audit and master registry...")
-  duplicate_groups <- tabla_raw |>
+  duplicate_groups <- tab_raw |>
     dplyr::filter(!is.na(species), !is.na(marker_key)) |>
     dplyr::group_by(marker_key, species) |>
     dplyr::summarise(
@@ -975,16 +975,16 @@ integrate_and_clean_markers <- function(
       .groups = "drop"
     )
 
-  tabla_raw <- tabla_raw |>
+  tab_raw <- tab_raw |>
     dplyr::left_join(
       duplicate_groups |> dplyr::select(marker_key, species, n_records_total, n_records_ingroup, n_records_outgroup, classification_conflict, duplicate_class, is_duplicate_species_marker),
       by = c("marker_key", "species")
     )
 
   message("Exporting TABLE_raw_with_acceptance.csv ...")
-  write_clean_table(tabla_raw, "TABLE_raw_with_acceptance.csv")
+  write_clean_table(tab_raw, "TABLE_raw_with_acceptance.csv")
 
-  sequence_registry <- tabla_raw |>
+  sequence_registry <- tab_raw |>
     dplyr::select(marker_key, source_branch, species, fasta_name, sid, is_outgroup, matched_to_metadata, accepted_in_checklist, is_outgroup_species, accepted_or_outgroup, matched_to_checklist, record_status, is_duplicate_species_marker, n_records_total, n_records_ingroup, n_records_outgroup, duplicate_class, classification_conflict) |>
     dplyr::arrange(marker_key, species, source_branch, fasta_name)
 
@@ -995,16 +995,16 @@ integrate_and_clean_markers <- function(
   message(sprintf("Duplicate species \U00d7 marker combinations: %d", nrow(duplicates)))
 
   message("Selecting one record per species X marker...")
-  tabla_selected <- tabla_raw |>
+  tab_selected <- tab_raw |>
     dplyr::filter(!is.na(species), !is.na(marker_key), !is.na(sid)) |>
     dplyr::mutate(sid = as.character(sid), fasta_name = as.character(fasta_name), accepted_rank = dplyr::if_else(accepted_or_outgroup, 1L, 0L), outgroup_rank = dplyr::if_else(is_outgroup_species, 1L, 0L)) |>
     dplyr::arrange(marker_key, species, dplyr::desc(accepted_rank), dplyr::desc(outgroup_rank), sid, fasta_name) |>
     dplyr::distinct(species, marker_key, .keep_all = TRUE) |>
     dplyr::select(species, marker_key, sid, fasta_name, source_branch, accepted_in_checklist, is_outgroup_species, accepted_or_outgroup)
 
-  tabla_selected_final <- dplyr::filter(tabla_selected, accepted_or_outgroup)
+  tab_selected_final <- dplyr::filter(tab_selected, accepted_or_outgroup)
 
-  tabla_wide <- tabla_selected_final |>
+  tab_wide <- tab_selected_final |>
     dplyr::mutate(species_class = dplyr::if_else(is_outgroup_species, "outgroup", "ingroup")) |>
     dplyr::select(species, species_class, accepted_or_outgroup, marker_key, sid) |>
     dplyr::distinct(species, marker_key, .keep_all = TRUE) |>
@@ -1012,9 +1012,9 @@ integrate_and_clean_markers <- function(
     dplyr::arrange(species_class, species)
 
   message("Exporting TABLE_species_marker_sid_matrix.csv ...")
-  write_clean_table(tabla_wide, "TABLE_species_marker_sid_matrix.csv")
+  write_clean_table(tab_wide, "TABLE_species_marker_sid_matrix.csv")
 
-  duplicate_resolution <- tabla_raw |>
+  duplicate_resolution <- tab_raw |>
     dplyr::filter(!is.na(species), !is.na(marker_key)) |>
     dplyr::group_by(marker_key, species) |>
     dplyr::summarise(
@@ -1039,7 +1039,7 @@ integrate_and_clean_markers <- function(
     ) |>
     dplyr::filter(n_records_total > 1) |>
     dplyr::left_join(
-      dplyr::transmute(tabla_selected, marker_key, species, sid_selected = sid, fasta_selected = fasta_name, source_selected = source_branch, selected_accepted_or_outgroup = accepted_or_outgroup),
+      dplyr::transmute(tab_selected, marker_key, species, sid_selected = sid, fasta_selected = fasta_name, source_selected = source_branch, selected_accepted_or_outgroup = accepted_or_outgroup),
       by = c("marker_key", "species")
     ) |>
     dplyr::arrange(dplyr::desc(n_records_total), marker_key, species)
@@ -1048,14 +1048,14 @@ integrate_and_clean_markers <- function(
   write_clean_table(duplicate_resolution, "TABLE_duplicate_resolution_species_marker.csv")
 
   message("Mapping selected sequences back to FASTA headers...")
-  tabla_fasta_map <- tabla_raw |>
+  tab_fasta_map <- tab_raw |>
     dplyr::select(marker_key, sid, fasta_name, species, source_branch) |>
     dplyr::filter(!is.na(sid), !is.na(fasta_name), !is.na(species)) |>
     dplyr::mutate(sid = as.character(sid)) |> dplyr::distinct()
 
-  selected_fasta <- tabla_selected_final |>
+  selected_fasta <- tab_selected_final |>
     dplyr::select(species, marker_key, sid, source_branch) |>
-    dplyr::left_join(tabla_fasta_map, by = c("species", "marker_key", "sid", "source_branch")) |>
+    dplyr::left_join(tab_fasta_map, by = c("species", "marker_key", "sid", "source_branch")) |>
     dplyr::group_by(species, marker_key, sid, source_branch) |>
     dplyr::summarise(fasta_name = dplyr::first(stats::na.omit(fasta_name)), .groups = "drop")
 
@@ -1190,10 +1190,10 @@ integrate_and_clean_markers <- function(
   write_clean_table(table_metrics_joint, "TABLE_marker_metrics_joint.csv")
 
   message("Exporting marker taxon composition table...")
-  raw_counts_group <- tabla_raw |> dplyr::group_by(marker_key, source_branch) |> dplyr::summarise(n_species = dplyr::n_distinct(species[!is.na(species)]), n_records = dplyr::n_distinct(fasta_name[!is.na(fasta_name)]), .groups = "drop") |> dplyr::mutate(stage = "raw", group = source_branch) |> dplyr::select(marker_key, stage, group, n_species, n_records)
-  raw_counts_total <- tabla_raw |> dplyr::group_by(marker_key) |> dplyr::summarise(n_species = dplyr::n_distinct(species[!is.na(species)]), n_records = dplyr::n_distinct(fasta_name[!is.na(fasta_name)]), .groups = "drop") |> dplyr::mutate(stage = "raw", group = "total") |> dplyr::select(marker_key, stage, group, n_species, n_records)
-  selected_counts_group <- tabla_selected_final |> dplyr::mutate(group = dplyr::if_else(is_outgroup_species, "outgroup", "ingroup")) |> dplyr::group_by(marker_key, group) |> dplyr::summarise(n_species = dplyr::n_distinct(species[!is.na(species)]), n_records = dplyr::n_distinct(sid[!is.na(sid)]), .groups = "drop") |> dplyr::mutate(stage = "selected") |> dplyr::select(marker_key, stage, group, n_species, n_records)
-  selected_counts_total <- tabla_selected_final |> dplyr::group_by(marker_key) |> dplyr::summarise(n_species = dplyr::n_distinct(species[!is.na(species)]), n_records = dplyr::n_distinct(sid[!is.na(sid)]), .groups = "drop") |> dplyr::mutate(stage = "selected", group = "total") |> dplyr::select(marker_key, stage, group, n_species, n_records)
+  raw_counts_group <- tab_raw |> dplyr::group_by(marker_key, source_branch) |> dplyr::summarise(n_species = dplyr::n_distinct(species[!is.na(species)]), n_records = dplyr::n_distinct(fasta_name[!is.na(fasta_name)]), .groups = "drop") |> dplyr::mutate(stage = "raw", group = source_branch) |> dplyr::select(marker_key, stage, group, n_species, n_records)
+  raw_counts_total <- tab_raw |> dplyr::group_by(marker_key) |> dplyr::summarise(n_species = dplyr::n_distinct(species[!is.na(species)]), n_records = dplyr::n_distinct(fasta_name[!is.na(fasta_name)]), .groups = "drop") |> dplyr::mutate(stage = "raw", group = "total") |> dplyr::select(marker_key, stage, group, n_species, n_records)
+  selected_counts_group <- tab_selected_final |> dplyr::mutate(group = dplyr::if_else(is_outgroup_species, "outgroup", "ingroup")) |> dplyr::group_by(marker_key, group) |> dplyr::summarise(n_species = dplyr::n_distinct(species[!is.na(species)]), n_records = dplyr::n_distinct(sid[!is.na(sid)]), .groups = "drop") |> dplyr::mutate(stage = "selected") |> dplyr::select(marker_key, stage, group, n_species, n_records)
+  selected_counts_total <- tab_selected_final |> dplyr::group_by(marker_key) |> dplyr::summarise(n_species = dplyr::n_distinct(species[!is.na(species)]), n_records = dplyr::n_distinct(sid[!is.na(sid)]), .groups = "drop") |> dplyr::mutate(stage = "selected", group = "total") |> dplyr::select(marker_key, stage, group, n_species, n_records)
   exported_counts_group <- exported_registry |> dplyr::group_by(marker_key, source_branch) |> dplyr::summarise(n_species = dplyr::n_distinct(species[!is.na(species)]), n_records = dplyr::n_distinct(fasta_name[!is.na(fasta_name)]), .groups = "drop") |> dplyr::mutate(stage = "exported", group = source_branch) |> dplyr::select(marker_key, stage, group, n_species, n_records)
   exported_counts_total <- exported_registry |> dplyr::group_by(marker_key) |> dplyr::summarise(n_species = dplyr::n_distinct(species[!is.na(species)]), n_records = dplyr::n_distinct(fasta_name[!is.na(fasta_name)]), .groups = "drop") |> dplyr::mutate(stage = "exported", group = "total") |> dplyr::select(marker_key, stage, group, n_species, n_records)
 
@@ -1201,9 +1201,9 @@ integrate_and_clean_markers <- function(
   write_clean_table(marker_taxon_composition, "TABLE_marker_taxon_composition.csv")
 
   message("Exporting enriched marker summary table...")
-  raw_summary <- tabla_raw |> dplyr::group_by(marker_key) |> dplyr::summarise(n_records_raw_total = dplyr::n_distinct(fasta_name[!is.na(fasta_name)]), n_records_raw_ingroup = dplyr::n_distinct(fasta_name[source_branch == "ingroup" & !is.na(fasta_name)]), n_records_raw_outgroup = dplyr::n_distinct(fasta_name[source_branch == "outgroup" & !is.na(fasta_name)]), n_species_raw_total = dplyr::n_distinct(species[!is.na(species)]), n_species_raw_ingroup = dplyr::n_distinct(species[source_branch == "ingroup" & !is.na(species)]), n_species_raw_outgroup = dplyr::n_distinct(species[source_branch == "outgroup" & !is.na(species)]), n_species_raw_accepted_ingroup = dplyr::n_distinct(species[source_branch == "ingroup" & accepted_in_checklist & !is.na(species)]), n_species_raw_rejected_ingroup = dplyr::n_distinct(species[source_branch == "ingroup" & !accepted_in_checklist & !is.na(species)]), .groups = "drop")
+  raw_summary <- tab_raw |> dplyr::group_by(marker_key) |> dplyr::summarise(n_records_raw_total = dplyr::n_distinct(fasta_name[!is.na(fasta_name)]), n_records_raw_ingroup = dplyr::n_distinct(fasta_name[source_branch == "ingroup" & !is.na(fasta_name)]), n_records_raw_outgroup = dplyr::n_distinct(fasta_name[source_branch == "outgroup" & !is.na(fasta_name)]), n_species_raw_total = dplyr::n_distinct(species[!is.na(species)]), n_species_raw_ingroup = dplyr::n_distinct(species[source_branch == "ingroup" & !is.na(species)]), n_species_raw_outgroup = dplyr::n_distinct(species[source_branch == "outgroup" & !is.na(species)]), n_species_raw_accepted_ingroup = dplyr::n_distinct(species[source_branch == "ingroup" & accepted_in_checklist & !is.na(species)]), n_species_raw_rejected_ingroup = dplyr::n_distinct(species[source_branch == "ingroup" & !accepted_in_checklist & !is.na(species)]), .groups = "drop")
   duplicate_summary <- duplicate_groups |> dplyr::group_by(marker_key) |> dplyr::summarise(n_species_marker_duplicated = sum(n_records_total > 1, na.rm = TRUE), n_duplicate_records_excess_total = sum(pmax(n_records_total - 1L, 0L), na.rm = TRUE), n_duplicate_records_excess_ingroup = sum(pmax(n_records_ingroup - 1L, 0L), na.rm = TRUE), n_duplicate_records_excess_outgroup = sum(pmax(n_records_outgroup - 1L, 0L), na.rm = TRUE), n_duplicate_records_excess_mixed = sum(dplyr::if_else(n_records_ingroup > 0 & n_records_outgroup > 0, n_records_total - 1L, 0L), na.rm = TRUE), n_classification_conflicts = sum(classification_conflict, na.rm = TRUE), .groups = "drop")
-  selected_summary <- tabla_selected_final |> dplyr::group_by(marker_key) |> dplyr::summarise(n_species_selected_total = dplyr::n_distinct(species[!is.na(species)]), n_species_selected_ingroup = dplyr::n_distinct(species[!is.na(species) & !is_outgroup_species]), n_species_selected_outgroup = dplyr::n_distinct(species[!is.na(species) & is_outgroup_species]), n_records_selected_total = dplyr::n_distinct(sid[!is.na(sid)]), .groups = "drop")
+  selected_summary <- tab_selected_final |> dplyr::group_by(marker_key) |> dplyr::summarise(n_species_selected_total = dplyr::n_distinct(species[!is.na(species)]), n_species_selected_ingroup = dplyr::n_distinct(species[!is.na(species) & !is_outgroup_species]), n_species_selected_outgroup = dplyr::n_distinct(species[!is.na(species) & is_outgroup_species]), n_records_selected_total = dplyr::n_distinct(sid[!is.na(sid)]), .groups = "drop")
   exported_summary <- exported_registry |> dplyr::group_by(marker_key) |> dplyr::summarise(n_sequences_exported = dplyr::n_distinct(fasta_name[!is.na(fasta_name)]), n_species_exported_total = dplyr::n_distinct(species[!is.na(species)]), n_species_exported_ingroup = dplyr::n_distinct(species[!is.na(species) & source_branch == "ingroup"]), n_species_exported_outgroup = dplyr::n_distinct(species[!is.na(species) & source_branch == "outgroup"]), .groups = "drop")
 
   # Join metrics
@@ -1221,7 +1221,7 @@ integrate_and_clean_markers <- function(
       pis_inflation_ratio = dplyr::if_else(!is.na(pis_ingroup) & pis_ingroup > 0 & !is.na(pis_joint), round(pis_joint / pis_ingroup, 2), NA_real_)
     )
 
-  tabla_summary <- raw_summary |>
+  tab_summary <- raw_summary |>
     dplyr::left_join(duplicate_summary, by = "marker_key") |>
     dplyr::left_join(selected_summary, by = "marker_key") |>
     dplyr::left_join(exported_summary, by = "marker_key") |>
@@ -1247,26 +1247,26 @@ integrate_and_clean_markers <- function(
     ) |>
     dplyr::arrange(dplyr::desc(n_species_raw_total), marker_key)
 
-  write_clean_table(tabla_summary, "TABLE_marker_summary.csv")
+  write_clean_table(tab_summary, "TABLE_marker_summary.csv")
 
   message("Exporting dataset species summary and species curation status tables...")
   n_checklist_cactaceae <- length(checklist_cactaceae)
   n_checklist_anacampserotaceae <- length(checklist_anacampserotaceae)
   
-  n_raw_ingroup_species <- dplyr::n_distinct(tabla_raw$species[tabla_raw$source_branch == "ingroup" & !is.na(tabla_raw$species)])
-  n_accepted_ingroup_species <- dplyr::n_distinct(tabla_selected_final$species[!tabla_selected_final$is_outgroup_species & !is.na(tabla_selected_final$species)])
-  n_rejected_ingroup_species <- dplyr::n_distinct(tabla_raw$species[tabla_raw$source_branch == "ingroup" & !tabla_raw$accepted_in_checklist & !is.na(tabla_raw$species)])
+  n_raw_ingroup_species <- dplyr::n_distinct(tab_raw$species[tab_raw$source_branch == "ingroup" & !is.na(tab_raw$species)])
+  n_accepted_ingroup_species <- dplyr::n_distinct(tab_selected_final$species[!tab_selected_final$is_outgroup_species & !is.na(tab_selected_final$species)])
+  n_rejected_ingroup_species <- dplyr::n_distinct(tab_raw$species[tab_raw$source_branch == "ingroup" & !tab_raw$accepted_in_checklist & !is.na(tab_raw$species)])
   
   pct_cactaceae_recovered <- if (n_checklist_cactaceae > 0) round(100 * n_accepted_ingroup_species / n_checklist_cactaceae, 2) else NA_real_
 
-  outgroup_final_species <- unique(tabla_selected_final$species[tabla_selected_final$is_outgroup_species & !is.na(tabla_selected_final$species)])
+  outgroup_final_species <- unique(tab_selected_final$species[tab_selected_final$is_outgroup_species & !is.na(tab_selected_final$species)])
   # The trailing underscore is required: without it "^Portulaca" also matches Portulacaria
   # (Didiereaceae). Species labels in the registry use underscore as the binomial separator.
   n_selected_anacampserotaceae <- sum(outgroup_final_species %in% checklist_anacampserotaceae | grepl("^(Anacampseros|Grahamia|Talinopsis)_", outgroup_final_species))
   n_selected_portulacaceae <- sum(grepl("^Portulaca_", outgroup_final_species))
   n_selected_talinaceae <- sum(grepl("^(Talinum|Talinella)_", outgroup_final_species))
   n_selected_outgroup_species <- length(outgroup_final_species)
-  n_final_joint_species <- dplyr::n_distinct(tabla_selected_final$species[!is.na(tabla_selected_final$species)])
+  n_final_joint_species <- dplyr::n_distinct(tab_selected_final$species[!is.na(tab_selected_final$species)])
 
   dataset_species_summary <- tibble::tribble(
     ~metric, ~value, ~details,
@@ -1281,9 +1281,9 @@ integrate_and_clean_markers <- function(
     "Unique Talinaceae outgroup species retained", as.character(n_selected_talinaceae), "Provisional (Stage 4) count of Talinaceae retained for rooting; updated in place by run_concatenation_pipeline() (Stage 6)",
     "Total unique outgroup species retained", as.character(n_selected_outgroup_species), "Provisional (Stage 4) count of outgroups (Anacampserotaceae + Portulacaceae + Talinaceae); updated in place by run_concatenation_pipeline() (Stage 6)",
     "Total unique species in final dataset (Joint)", as.character(n_final_joint_species), "Provisional (Stage 4) species total (Cactaceae + Outgroups); updated in place by run_concatenation_pipeline() (Stage 6)",
-    "Total curated sequence records (Cactaceae Ingroup)", as.character(sum(!tabla_selected_final$is_outgroup_species)), "Total single-locus accessions in cleaned_markers_ingroup",
-    "Total curated sequence records (Outgroups)", as.character(sum(tabla_selected_final$is_outgroup_species)), "Total single-locus accessions in cleaned_markers_outgroup",
-    "Total curated sequence records (Joint)", as.character(nrow(tabla_selected_final)), "Total single-locus accessions in cleaned_markers_joint"
+    "Total curated sequence records (Cactaceae Ingroup)", as.character(sum(!tab_selected_final$is_outgroup_species)), "Total single-locus accessions in cleaned_markers_ingroup",
+    "Total curated sequence records (Outgroups)", as.character(sum(tab_selected_final$is_outgroup_species)), "Total single-locus accessions in cleaned_markers_outgroup",
+    "Total curated sequence records (Joint)", as.character(nrow(tab_selected_final)), "Total single-locus accessions in cleaned_markers_joint"
   )
 
   # --- Loci accounting, added per user request (initial mined loci per group, plus a
@@ -1329,7 +1329,7 @@ integrate_and_clean_markers <- function(
   )
   write_clean_table(dataset_species_summary, "TABLE_dataset_species_summary.csv")
 
-  species_curation_status <- tabla_raw |>
+  species_curation_status <- tab_raw |>
     dplyr::filter(!is.na(species)) |>
     dplyr::group_by(species) |>
     dplyr::summarise(
@@ -1344,14 +1344,14 @@ integrate_and_clean_markers <- function(
         accepted_in_checklist ~ "accepted_ingroup",
         TRUE ~ "rejected_ingroup"
       ),
-      retained_in_final_dataset = dplyr::first(species) %in% tabla_selected_final$species,
+      retained_in_final_dataset = dplyr::first(species) %in% tab_selected_final$species,
       n_raw_records = dplyr::n(),
       n_markers_raw = dplyr::n_distinct(marker_key),
       raw_markers = collapse_unique(marker_key),
       .groups = "drop"
     ) |>
     dplyr::left_join(
-      tabla_selected_final |>
+      tab_selected_final |>
         dplyr::group_by(species) |>
         dplyr::summarise(
           n_markers_retained = dplyr::n_distinct(marker_key),
@@ -1404,7 +1404,7 @@ integrate_and_clean_markers <- function(
       group = dplyr::if_else(is_outgroup | family %in% c("Portulacaceae", "Anacampserotaceae", "Talinaceae"), "outgroup", "ingroup")
     )
 
-  marker_sids_wide <- tabla_selected_final |>
+  marker_sids_wide <- tab_selected_final |>
     dplyr::select(species, marker_key, sid) |>
     dplyr::distinct(species, marker_key, .keep_all = TRUE) |>
     tidyr::pivot_wider(
@@ -1425,7 +1425,7 @@ integrate_and_clean_markers <- function(
     ) |>
     dplyr::left_join(marker_sids_wide, by = "species") |>
     dplyr::left_join(
-      tabla_selected_final |>
+      tab_selected_final |>
         dplyr::group_by(species) |>
         dplyr::summarise(
           n_markers_retained = dplyr::n_distinct(marker_key),
@@ -1459,10 +1459,10 @@ integrate_and_clean_markers <- function(
     sprintf("Cactaceae checklist recovery rate: %.2f%%", pct_cactaceae_recovered),
     sprintf("Unique outgroup species retained (Anacampserotaceae: %d, Portulacaceae: %d, Talinaceae: %d, Total: %d)", n_selected_anacampserotaceae, n_selected_portulacaceae, n_selected_talinaceae, n_selected_outgroup_species),
     sprintf("Total unique species in final joint dataset: %d", n_final_joint_species),
-    sprintf("Rows in raw integration table: %d", nrow(tabla_raw)),
+    sprintf("Rows in raw integration table: %d", nrow(tab_raw)),
     sprintf("Unmatched metadata rows: %d", nrow(unmatched_metadata)),
     sprintf("Duplicate species \U00d7 marker combinations: %d", nrow(duplicates)),
-    sprintf("Selected unique species \U00d7 marker rows (accepted final): %d", nrow(tabla_selected_final)),
+    sprintf("Selected unique species \U00d7 marker rows (accepted final): %d", nrow(tab_selected_final)),
     sprintf("Missing SID-to-header mappings: %d", nrow(missing_map)),
     sprintf("Exported FASTA markers: %d", length(exported_markers)),
     sprintf("Decoupled directories populated: cleaned_markers_ingroup, cleaned_markers_outgroup, cleaned_markers_joint"),
@@ -1471,5 +1471,5 @@ integrate_and_clean_markers <- function(
   writeLines(log_lines, con = file.path(out_logs_dir, "LOG_clean_integration_summary.txt"))
   
   message("\nMarker integration and cleaning pipeline completed. \U0001f335")
-  return(invisible(tabla_summary))
+  return(invisible(tab_summary))
 }

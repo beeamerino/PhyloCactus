@@ -18,24 +18,24 @@
 #' @noRd
 .bc_metric_accuracy <- function(pred) {
   if (nrow(pred) == 0L) {
-    return(data.frame(locus = character(0), esquema = character(0), metodo = character(0),
-                      consultas = integer(0), aciertos = integer(0), exactitud = numeric(0),
-                      tasa_base = numeric(0), stringsAsFactors = FALSE))
+    return(data.frame(locus = character(0), scheme = character(0), method = character(0),
+                      queries = integer(0), hits = integer(0), accuracy = numeric(0),
+                      base_rate = numeric(0), stringsAsFactors = FALSE))
   }
-  key <- paste(pred$locus, pred$esquema, pred$metodo, sep = "\r")
+  key <- paste(pred$locus, pred$scheme, pred$method, sep = "\r")
   out <- do.call(rbind, lapply(sort(unique(key), method = "radix"), function(k) {
     d <- pred[key == k, , drop = FALSE]
-    especie <- d$esquema[1] == "species"
-    verdad <- if (especie) d$especie_verdadera else d$genero_verdadero
-    acierto <- if (especie) {
-      d$estado == 1L & !is.na(d$especie_predicha) & d$especie_predicha == d$especie_verdadera
+    species_scheme <- d$scheme[1] == "species"
+    truth <- if (species_scheme) d$true_species else d$true_genus
+    is_hit <- if (species_scheme) {
+      d$state == 1L & !is.na(d$predicted_species) & d$predicted_species == d$true_species
     } else {
-      d$estado %in% c(1L, 2L) & !is.na(d$genero_predicho) & d$genero_predicho == d$genero_verdadero
+      d$state %in% c(1L, 2L) & !is.na(d$predicted_genus) & d$predicted_genus == d$true_genus
     }
-    data.frame(locus = d$locus[1], esquema = d$esquema[1], metodo = d$metodo[1],
-               consultas = nrow(d), aciertos = as.integer(sum(acierto)),
-               exactitud = sum(acierto) / nrow(d),
-               tasa_base = max(table(verdad)) / length(verdad),
+    data.frame(locus = d$locus[1], scheme = d$scheme[1], method = d$method[1],
+               queries = nrow(d), hits = as.integer(sum(is_hit)),
+               accuracy = sum(is_hit) / nrow(d),
+               base_rate = max(table(truth)) / length(truth),
                stringsAsFactors = FALSE)
   }))
   rownames(out) <- NULL
@@ -49,12 +49,12 @@
 #' distribution, never a single value. Above the threshold there is leakage, the real result is not
 #' interpreted and the branch goes back to Phase 3.
 #' @noRd
-.bc_cn1_verdict <- function(exactitudes, tasa_base) {
-  exactitudes <- exactitudes[!is.na(exactitudes)]
-  desv <- if (length(exactitudes) > 1L) stats::sd(exactitudes) else 0
-  umbral <- tasa_base + 3 * desv
-  data.frame(permutaciones = length(exactitudes), media = mean(exactitudes), sd = desv,
-             tasa_base = tasa_base, umbral = umbral, hay_fuga = mean(exactitudes) > umbral,
+.bc_cn1_verdict <- function(accuracies, base_rate) {
+  accuracies <- accuracies[!is.na(accuracies)]
+  sd_perm <- if (length(accuracies) > 1L) stats::sd(accuracies) else 0
+  threshold <- base_rate + 3 * sd_perm
+  data.frame(permutations = length(accuracies), mean = mean(accuracies), sd = sd_perm,
+             base_rate = base_rate, threshold = threshold, leakage = mean(accuracies) > threshold,
              stringsAsFactors = FALSE)
 }
 
@@ -78,7 +78,7 @@
 #' against its own training set with the query put back into it. Nothing else changes between this
 #' figure and the honest one, which is what makes the two comparable: until 2026-09-25 this control
 #' ran over the whole library instead, a different set of queries, and the two figures could not be
-#' subtracted. Written with the label `irreproducible_resustitucion` in the table itself, so the
+#' subtracted. Written with the label `irreproducible_resubstitution` in the table itself, so the
 #' figure cannot travel without it. **Its value is published in Phase 6 and only next to the honest
 #' figure**, which does not exist yet.
 #'
@@ -147,105 +147,105 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   loci_todos <- sort(unique(lib$locus), method = "radix")
   loci <- if (is.null(loci)) loci_todos else intersect(loci_todos, loci)
 
-  matrices <- list()
-  secuencias <- list()
+  dist_matrices <- list()
+  sequences <- list()
   for (l in loci) {
     dna <- ape::read.dna(file.path(library_dir, paste0("LIB_", l, ".fasta")), format = "fasta")
     rownames(dna) <- .bc_parse_header(labels(dna))$sid
-    matrices[[l]] <- .bc_classifier_matrix(dna, model, min_comparable)
-    secuencias[[l]] <- dna
+    dist_matrices[[l]] <- .bc_classifier_matrix(dna, model, min_comparable)
+    sequences[[l]] <- dna
   }
 
   out <- list()
 
   if ("CN1" %in% controls) {
-    filas <- list()
+    rows <- list()
     for (sc in schemes) {
       tab <- utils::read.csv(file.path(folds_dir, paste0("TABLE_barcoding_folds_", sc, ".csv")),
                              stringsAsFactors = FALSE)
       for (l in loci) {
         d <- lib[lib$locus == l, , drop = FALSE]
         species <- stats::setNames(d$species, d$sid)
-        pliegues <- .bc_sample_folds(.bc_folds_from_table(tab[tab$locus == l, , drop = FALSE], d$sid),
+        folds <- .bc_sample_folds(.bc_folds_from_table(tab[tab$locus == l, , drop = FALSE], d$sid),
                                      max_folds, seed)
-        if (length(pliegues) == 0L) next
+        if (length(folds) == 0L) next
         for (k in seq_len(permutations)) {
-          pred <- do.call(rbind, lapply(pliegues, function(p) {
-            etiquetas <- .barcoding_permute_labels(
+          pred <- do.call(rbind, lapply(folds, function(p) {
+            label_set <- .barcoding_permute_labels(
               list(train_ids = p$train_ids, test_ids = p$test_ids), species, seed = seed + k)
             do.call(rbind, lapply(p$test_ids, function(q) {
-              r <- .bc_classify_nn(matrices[[l]], p$train_ids, q, etiquetas)
-              cbind(data.frame(locus = l, esquema = sc, metodo = method,
-                               especie_verdadera = unname(species[q]),
-                               genero_verdadero = .bc_genus(unname(species[q])),
+              r <- .bc_classify_nn(dist_matrices[[l]], p$train_ids, q, label_set)
+              cbind(data.frame(locus = l, scheme = sc, method = method,
+                               true_species = unname(species[q]),
+                               true_genus = .bc_genus(unname(species[q])),
                                stringsAsFactors = FALSE), r)
             }))
           }))
           m <- .bc_metric_accuracy(pred)
-          filas[[length(filas) + 1L]] <- cbind(data.frame(permutacion = k, stringsAsFactors = FALSE), m)
+          rows[[length(rows) + 1L]] <- cbind(data.frame(permutation = k, stringsAsFactors = FALSE), m)
         }
         message(sprintf("CN1, locus '%s', scheme %s: %d permutations over %d folds.",
-                        l, sc, permutations, length(pliegues)))
+                        l, sc, permutations, length(folds)))
       }
     }
-    perm <- do.call(rbind, filas)
+    perm <- do.call(rbind, rows)
     rownames(perm) <- NULL
-    key <- paste(perm$locus, perm$esquema, perm$metodo, sep = "\r")
-    veredicto <- do.call(rbind, lapply(sort(unique(key), method = "radix"), function(k) {
+    key <- paste(perm$locus, perm$scheme, perm$method, sep = "\r")
+    verdict <- do.call(rbind, lapply(sort(unique(key), method = "radix"), function(k) {
       d <- perm[key == k, , drop = FALSE]
-      cbind(data.frame(locus = d$locus[1], esquema = d$esquema[1], metodo = d$metodo[1],
+      cbind(data.frame(locus = d$locus[1], scheme = d$scheme[1], method = d$method[1],
                        stringsAsFactors = FALSE),
-            .bc_cn1_verdict(d$exactitud, d$tasa_base[1]))
+            .bc_cn1_verdict(d$accuracy, d$base_rate[1]))
     }))
-    rownames(veredicto) <- NULL
+    rownames(verdict) <- NULL
     out$cn1 <- perm
-    out$cn1_verdict <- veredicto
+    out$cn1_verdict <- verdict
     utils::write.csv(perm, file.path(output_dir, "TABLE_barcoding_cn1_permutations.csv"), row.names = FALSE)
-    utils::write.csv(veredicto, file.path(output_dir, "TABLE_barcoding_cn1_verdict.csv"), row.names = FALSE)
+    utils::write.csv(verdict, file.path(output_dir, "TABLE_barcoding_cn1_verdict.csv"), row.names = FALSE)
   }
 
   if ("CN2" %in% controls) {
-    consultas <- list()
-    resumen <- list()
+    queries <- list()
+    summary_df <- list()
     for (l in loci) {
       f <- if (is.null(outgroup_dir)) NA_character_ else file.path(outgroup_dir, paste0(l, ".fasta"))
       if (is.na(f) || !file.exists(f)) {
         # A locus with no outgroup sequence still appears, and says so. A control over zero
         # sequences is not a control, and hiding the row would hide exactly that.
-        resumen[[length(resumen) + 1L]] <- data.frame(
-          locus = l, consultas = 0L, comparables = 0L, invertidas = 0L, sin_coincidencia = 0L,
-          especies = 0L, estado_1 = 0L, estado_2 = 0L, estado_3 = 0L,
-          prop_no_asignable = NA_real_, mediana_distancia_vecino = NA_real_,
-          motivo = "sin secuencias de grupo externo", stringsAsFactors = FALSE)
+        summary_df[[length(summary_df) + 1L]] <- data.frame(
+          locus = l, queries = 0L, comparable = 0L, reversed = 0L, no_match = 0L,
+          n_species = 0L, state_1 = 0L, state_2 = 0L, state_3 = 0L,
+          prop_unassigned = NA_real_, median_nn_distance = NA_real_,
+          reason = "no outgroup sequences", stringsAsFactors = FALSE)
         next
       }
-      q <- .bc_cn2_queries(ape::read.dna(f, format = "fasta"), secuencias[[l]],
+      q <- .bc_cn2_queries(ape::read.dna(f, format = "fasta"), sequences[[l]],
                            lib[lib$locus == l, , drop = FALSE], model, min_comparable, l,
                            mafft_exec = mafft_exec, mafft_opts = mafft_opts)
-      consultas[[length(consultas) + 1L]] <- q
+      queries[[length(queries) + 1L]] <- q
       # A sequence that matches the locus in neither direction is published and counted, and stays
       # out of everything else: it is not a query of this control. Measured on 2026-09-25, all 83
       # outgroup sequences of trnS-trnG are in that state, so that locus tests nothing.
-      comp <- q[q$orientacion != "sin_coincidencia", , drop = FALSE]
-      resumen[[length(resumen) + 1L]] <- data.frame(
-        locus = l, consultas = nrow(q), comparables = nrow(comp),
-        invertidas = as.integer(sum(q$orientacion == "reversa")),
-        sin_coincidencia = as.integer(sum(q$orientacion == "sin_coincidencia")),
+      comp <- q[q$orientation != "no_match", , drop = FALSE]
+      summary_df[[length(summary_df) + 1L]] <- data.frame(
+        locus = l, queries = nrow(q), comparable = nrow(comp),
+        reversed = as.integer(sum(q$orientation == "reverse")),
+        no_match = as.integer(sum(q$orientation == "no_match")),
         # The size of this control is the number of species, not the number of sequences. GenBank
         # holds population level studies: in the run of 2026-09-25 the 83 outgroup sequences of
         # trnS-trnG were all Talinopsis frutescens, one species queried 83 times. Publishing only
         # the sequences would make that look like the best controlled locus instead of the worst.
-        especies = length(unique(comp$especie_consulta)),
-        estado_1 = as.integer(sum(comp$estado == 1L)), estado_2 = as.integer(sum(comp$estado == 2L)),
-        estado_3 = as.integer(sum(comp$estado == 3L)),
-        prop_no_asignable = if (nrow(comp) == 0L) NA_real_ else mean(comp$estado == 3L),
-        mediana_distancia_vecino = if (nrow(comp) == 0L) NA_real_ else
-          stats::median(comp$distancia_vecino, na.rm = TRUE),
-        motivo = NA_character_, stringsAsFactors = FALSE)
+        n_species = length(unique(comp$query_species)),
+        state_1 = as.integer(sum(comp$state == 1L)), state_2 = as.integer(sum(comp$state == 2L)),
+        state_3 = as.integer(sum(comp$state == 3L)),
+        prop_unassigned = if (nrow(comp) == 0L) NA_real_ else mean(comp$state == 3L),
+        median_nn_distance = if (nrow(comp) == 0L) NA_real_ else
+          stats::median(comp$nn_distance, na.rm = TRUE),
+        reason = NA_character_, stringsAsFactors = FALSE)
     }
-    cn2 <- do.call(rbind, resumen)
+    cn2 <- do.call(rbind, summary_df)
     rownames(cn2) <- NULL
-    cn2_q <- if (length(consultas) > 0L) do.call(rbind, consultas) else
+    cn2_q <- if (length(queries) > 0L) do.call(rbind, queries) else
       .bc_cn2_queries_empty()
     rownames(cn2_q) <- NULL
     out$cn2 <- cn2
@@ -255,33 +255,33 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   }
 
   if ("CN3" %in% controls) {
-    filas <- list()
+    rows <- list()
     for (sc in schemes) {
       tab <- utils::read.csv(file.path(folds_dir, paste0("TABLE_barcoding_folds_", sc, ".csv")),
                              stringsAsFactors = FALSE)
       for (l in loci) {
         d <- lib[lib$locus == l, , drop = FALSE]
         species <- stats::setNames(d$species, d$sid)
-        pliegues <- .bc_sample_folds(.bc_folds_from_table(tab[tab$locus == l, , drop = FALSE], d$sid),
+        folds <- .bc_sample_folds(.bc_folds_from_table(tab[tab$locus == l, , drop = FALSE], d$sid),
                                      max_folds, seed)
-        if (length(pliegues) == 0L) next
-        pred <- do.call(rbind, lapply(pliegues, function(p) {
+        if (length(folds) == 0L) next
+        pred <- do.call(rbind, lapply(folds, function(p) {
           do.call(rbind, lapply(p$test_ids, function(q) {
             # The training set of the honest run with the query put back into it. One difference,
             # and only one, between this figure and the honest one.
-            r <- .bc_classify_nn(matrices[[l]], c(p$train_ids, q), q, species,
+            r <- .bc_classify_nn(dist_matrices[[l]], c(p$train_ids, q), q, species,
                                  allow_resubstitution = TRUE)
-            cbind(data.frame(locus = l, esquema = sc, metodo = method,
-                             especie_verdadera = unname(species[q]),
-                             genero_verdadero = .bc_genus(unname(species[q])),
+            cbind(data.frame(locus = l, scheme = sc, method = method,
+                             true_species = unname(species[q]),
+                             true_genus = .bc_genus(unname(species[q])),
                              stringsAsFactors = FALSE), r)
           }))
         }))
-        filas[[length(filas) + 1L]] <- .bc_metric_accuracy(pred)
+        rows[[length(rows) + 1L]] <- .bc_metric_accuracy(pred)
       }
     }
-    cn3 <- do.call(rbind, filas)
-    cn3$etiqueta <- "irreproducible_resustitucion"
+    cn3 <- do.call(rbind, rows)
+    cn3$label <- "irreproducible_resubstitution"
     rownames(cn3) <- NULL
     out$cn3 <- cn3
     utils::write.csv(cn3, file.path(output_dir, "TABLE_barcoding_cn3_resubstitution.csv"), row.names = FALSE)
@@ -337,7 +337,7 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
 
 .bc_orient_to_library <- function(query, pool, k = 20L, min_share = 0.15, ratio = 3) {
   m <- as.matrix(query)
-  nombre <- rownames(m)
+  seq_name <- rownames(m)
   s <- gsub("-", "", toupper(paste(as.character(m), collapse = "")), fixed = TRUE)
   rc <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(s)))
   sets <- .kmer_sets(c(s, rc), k)
@@ -345,18 +345,18 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
 
   fwd <- .kmer_share(sets[[1]], pool)
   rev <- .kmer_share(sets[[2]], pool)
-  accion <- .strand_action(fwd, rev, usable, min_share, ratio)
+  action <- .strand_action(fwd, rev, usable, min_share, ratio)
 
-  orientacion <- switch(accion, kept = "directa", reverse_complemented = "reversa",
-                        "sin_coincidencia")
-  secuencia <- if (accion == "reverse_complemented") rc else s
-  list(query = .bc_dnabin_row(secuencia, nombre), orientacion = orientacion,
-       share_directa = fwd, share_reversa = rev)
+  orientation <- switch(action, kept = "forward", reverse_complemented = "reverse",
+                        "no_match")
+  sequence <- if (action == "reverse_complemented") rc else s
+  list(query = .bc_dnabin_row(sequence, seq_name), orientation = orientation,
+       share_forward = fwd, share_reverse = rev)
 }
 
-.bc_dnabin_row <- function(s, nombre) {
+.bc_dnabin_row <- function(s, seq_name) {
   ape::as.DNAbin(matrix(strsplit(tolower(s), "")[[1]], nrow = 1,
-                        dimnames = list(nombre, NULL)))
+                        dimnames = list(seq_name, NULL)))
 }
 
 # Adds one query to the alignment of the library without moving a single column of it.
@@ -382,26 +382,26 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
 
   dir <- tempfile("bc_align_")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
-  anterior <- setwd(dir)
-  on.exit({ setwd(anterior); unlink(dir, recursive = TRUE) }, add = TRUE)
+  previous_wd <- setwd(dir)
+  on.exit({ setwd(previous_wd); unlink(dir, recursive = TRUE) }, add = TRUE)
 
-  ape::write.FASTA(lib_m, "biblioteca.fasta")
-  ape::write.FASTA(query, "consulta.fasta")
-  run_mafft("biblioteca.fasta", "alineado.fasta", mafft_exec = mafft_exec,
-            mafft_opts = paste("--add consulta.fasta --keeplength", mafft_opts))
-  al <- ape::read.dna("alineado.fasta", format = "fasta", as.matrix = TRUE)
+  ape::write.FASTA(lib_m, "library.fasta")
+  ape::write.FASTA(query, "query.fasta")
+  run_mafft("library.fasta", "aligned.fasta", mafft_exec = mafft_exec,
+            mafft_opts = paste("--add query.fasta --keeplength", mafft_opts))
+  al <- ape::read.dna("aligned.fasta", format = "fasta", as.matrix = TRUE)
 
   if (ncol(al) != ncol(lib_m)) {
     stop("MAFFT --keeplength returned ", ncol(al), " columns for an alignment of ", ncol(lib_m),
          ". The library would stop being fixed between queries.", call. = FALSE)
   }
-  faltan <- setdiff(c(rownames(lib_m), qn), rownames(al))
-  if (length(faltan) > 0L) {
-    stop("MAFFT did not return ", length(faltan), " of the sequences it was given, the first being '",
-         faltan[1], "'.", call. = FALSE)
+  missing <- setdiff(c(rownames(lib_m), qn), rownames(al))
+  if (length(missing) > 0L) {
+    stop("MAFFT did not return ", length(missing), " of the sequences it was given, the first being '",
+         missing[1], "'.", call. = FALSE)
   }
   al <- al[c(rownames(lib_m), qn), , drop = FALSE]
-  rownames(al) <- c(rownames(lib_m), "consulta")
+  rownames(al) <- c(rownames(lib_m), "query")
   al
 }
 
@@ -419,23 +419,23 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   # in neither direction comes back as state 3 with no species and no distance (decision D4).
   lib_m <- lib_m[lib_tab$sid, , drop = FALSE]
   pool <- .bc_strand_pool(lib_m)
-  consultas <- as.character(og)
-  if (!is.list(consultas)) consultas <- lapply(seq_len(nrow(consultas)), function(i) consultas[i, ])
-  filas <- lapply(seq_along(consultas), function(i) {
-    r <- .bc_classify_by_add(lib_m, species, paste(consultas[[i]], collapse = ""), model,
+  queries <- as.character(og)
+  if (!is.list(queries)) queries <- lapply(seq_len(nrow(queries)), function(i) queries[i, ])
+  rows <- lapply(seq_along(queries), function(i) {
+    r <- .bc_classify_by_add(lib_m, species, paste(queries[[i]], collapse = ""), model,
                              min_comparable, pool = pool, mafft_exec = mafft_exec,
                              mafft_opts = mafft_opts)
-    cbind(data.frame(locus = locus, sid = h$sid[i], especie_consulta = h$species[i],
+    cbind(data.frame(locus = locus, sid = h$sid[i], query_species = h$species[i],
                      stringsAsFactors = FALSE), r)
   })
-  do.call(rbind, filas)
+  do.call(rbind, rows)
 }
 
 #' The empty shape of that table, so a run with no outgroup at all still writes its columns
 #' @noRd
 .bc_cn2_queries_empty <- function() {
-  cbind(data.frame(locus = character(0), sid = character(0), especie_consulta = character(0),
-                   orientacion = character(0), stringsAsFactors = FALSE),
+  cbind(data.frame(locus = character(0), sid = character(0), query_species = character(0),
+                   orientation = character(0), stringsAsFactors = FALSE),
         .bc_prediction_row(1L)[0, , drop = FALSE])
 }
 
@@ -448,14 +448,14 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   cat("  Method:                ", method, "\n")
   if (!is.null(out$cn1_verdict)) {
     cat("  CN1: ", nrow(out$cn1_verdict), " locus-scheme pairs, leakage flagged in ",
-        sum(out$cn1_verdict$hay_fuga), "\n", sep = "")
+        sum(out$cn1_verdict$leakage), "\n", sep = "")
   }
   if (!is.null(out$cn2)) {
-    cat("  CN2: ", sum(out$cn2$especies), " outgroup species (", sum(out$cn2$comparables),
-        " comparable sequences of ", sum(out$cn2$consultas), ") over ",
-        sum(out$cn2$comparables > 0), " loci\n", sep = "")
-    cat("       ", sum(out$cn2$invertidas), " reversed before aligning; ",
-        sum(out$cn2$sin_coincidencia), " match the locus in neither direction\n", sep = "")
+    cat("  CN2: ", sum(out$cn2$n_species), " outgroup species (", sum(out$cn2$comparable),
+        " comparable sequences of ", sum(out$cn2$queries), ") over ",
+        sum(out$cn2$comparable > 0), " loci\n", sep = "")
+    cat("       ", sum(out$cn2$reversed), " reversed before aligning; ",
+        sum(out$cn2$no_match), " match the locus in neither direction\n", sep = "")
   }
   if (!is.null(out$cn3)) cat("  CN3: written and labelled; its figure belongs to Phase 6\n")
   cat("  Output directory:      ", output_dir, "\n")
