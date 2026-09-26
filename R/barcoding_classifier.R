@@ -111,7 +111,7 @@
 #'
 #' A column that only the queries of the fold had opened carries no base once they are out. It is
 #' dropped because `MAFFT --add --keeplength` would drop it too, and the check of
-#' [.bc_align_to_library()] that the library keeps its width would then stop the run.
+#' `.bc_align_to_library()` that the library keeps its width would then stop the run.
 #' @noRd
 .bc_training_alignment <- function(dna, train_ids) {
   m <- as.matrix(dna)
@@ -127,7 +127,7 @@
 #'
 #' The query arrives unaligned. It is oriented against the training set with the rule of
 #' `.normalise_strand()`, added to the training alignment with `MAFFT --add --keeplength`, one call
-#' for this query alone, and classified with the three states of [.bc_classify_nn()] under E13.
+#' for this query alone, and classified with the three states of `.bc_classify_nn()` under E13.
 #' CN2 and the add path of step 7 both go through here, so an alien query and a legitimate one are
 #' measured by the same operation.
 #'
@@ -139,7 +139,7 @@
 #' @param species Character vector of species named by `sid`; must cover every training row.
 #' @param query Character. The query sequence; gaps are removed.
 #' @param pool Strand reference pool of the training set, or `NULL` to build it here.
-#' @return One-row data frame: `orientacion` followed by the columns of [.bc_prediction_row()].
+#' @return One-row data frame: `orientacion` followed by the columns of `.bc_prediction_row()`.
 #' @noRd
 .bc_classify_by_add <- function(train_dna, species, query, model, min_comparable, pool = NULL,
                                 mafft_exec = "mafft", mafft_opts = "--auto") {
