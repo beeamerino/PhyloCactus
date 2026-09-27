@@ -62,6 +62,10 @@ half as many hits, since an inverted repeat or an rDNA array can hold more than 
 more of its library sequences: beyond its first and last 20-mer of the core, the query keeps
 only as many bases as the core itself holds there (\code{core_trimmed} gives the bases removed). A
 segment held by one or two references only is left out, so it cannot name them.
+\item When IdTaxa reaches a genus with 3 or more sequences in the locus, the region is cut again to
+the core of that genus, with the same rule, and classified again if that changes it
+(\code{genus_core_trimmed}). Two long references of a genus of short sequences cannot then take
+the queries of its absent species.
 \item State 3 is returned with its reason: \code{no_overlap} (no match), \code{short_overlap} (a region
 shorter than \code{min_overlap}) or \code{low_confidence} (IdTaxa's genus confidence under \code{threshold}).
 }
