@@ -39,7 +39,9 @@
 .idn_rc <- function(s) as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(s)))
 
 # Three loci of 300 bases, each from its own random root, so that no locus shares 20-mers with
-# another; three genera, two species each, three accessions per species.
+# another; three genera, two species each, three accessions per species. The divergence within a
+# locus is kept at the scale of a cactus barcode (a few per cent): with 40 changes per genus, as in
+# the fixture of step 7, the k-mer pool of the strand rule holds the seed genus only.
 .idn_fixture <- function(tmp) {
   lib_dir <- file.path(tmp, "4_library")
   dir.create(lib_dir, showWarnings = FALSE, recursive = TRUE)
@@ -51,12 +53,12 @@
     root <- .idn_random(300)
     x <- character(0)
     for (g in seq_along(genera)) {
-      gb <- .idn_vary(root, 40)
+      gb <- .idn_vary(root, 6)
       for (e in seq_along(epithets)) {
-        sb <- .idn_vary(gb, 10)
+        sb <- .idn_vary(gb, 3)
         for (r in 1:3) {
           x[paste0(genera[g], "_", epithets[e], "|", l, "_", substr(genera[g], 1, 1), e, r, ".1")] <-
-            .idn_vary(sb, 2)
+            .idn_vary(sb, 1)
         }
       }
     }
@@ -66,14 +68,19 @@
   list(library_dir = lib_dir, seqs = seqs, out = file.path(tmp, "10_identify"))
 }
 
+# Messages are collected with a calling handler: test_that() muffles them before a message sink
+# would see them.
 .idn_run <- function(f, query, ...) {
   res <- NULL
-  txt <- suppressWarnings(utils::capture.output(
-    msg <- utils::capture.output(
-      res <- identify_barcoding_query(query, library_dir = f$library_dir,
-                                      metrics_dir = file.path(dirname(f$library_dir), "11_metrics"),
-                                      output_dir = f$out, ...),
-      type = "message")))
+  msg <- character(0)
+  txt <- suppressWarnings(utils::capture.output(withCallingHandlers(
+    res <- identify_barcoding_query(query, library_dir = f$library_dir,
+                                    metrics_dir = file.path(dirname(f$library_dir), "11_metrics"),
+                                    output_dir = f$out, ...),
+    message = function(m) {
+      msg <<- c(msg, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    })))
   list(tab = res, text = c(txt, msg))
 }
 
@@ -254,7 +261,9 @@ test_that("the identification reproduces the CN2 table with IdTaxa row by row", 
                            method = "idtaxa", controls = "CN2", loci = "matK"))))
   cn2 <- utils::read.csv(file.path(tmp, "8_controls", "TABLE_barcoding_cn2_queries_idtaxa.csv"),
                          stringsAsFactors = FALSE)
-  r <- .idn_run(f, og_fasta, locus = "matK")$tab
+  .idn_run(f, og_fasta, locus = "matK")
+  # Both tables are compared as written to disk, as the probe on the real CN2 table will compare them
+  r <- utils::read.csv(file.path(f$out, "TABLE_barcoding_identify_query.csv"), stringsAsFactors = FALSE)
   expect_identical(r$query, names(x))
   expect_identical(r$state, cn2$state)
   expect_identical(r$predicted_species, cn2$predicted_species)
