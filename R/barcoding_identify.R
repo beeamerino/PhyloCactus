@@ -202,6 +202,7 @@
   }
   t <- .bc_core_cut(oriented, wl$core_pool)
   if (is.null(t)) return(empty(path, "no_overlap", start, end, other, o$orientation))
+  before_j1 <- list(start = start, end = end, oriented = oriented)
   trimmed <- cut(t)
   if (end - start + 1L < min_overlap) {
     return(empty(path, "short_overlap", start, end, other, o$orientation, trimmed))
@@ -212,14 +213,24 @@
                         query_seed = .bc_query_seed(seed, locus, "cn2", 0L, id))
   }
   r <- classify()
-  # J2: cut again to the core of the genus reached, and classify again when that changes the region
+  # J3: the region as it was before J1, cut to the core of the genus reached; classified again when
+  # that is not the region already classified. The core of a genus can be narrower or wider than
+  # that of the locus.
   genus_trimmed <- 0L
   if (!is.na(r$genus_idtaxa)) {
     gpool <- .bc_genus_core(wl, r$genus_idtaxa)
-    tg <- if (is.null(gpool)) NULL else .bc_core_cut(oriented, gpool)
-    if (!is.null(tg) && (tg[1] > 1L || tg[2] < nchar(oriented)) && tg[2] - tg[1] + 1L >= min_overlap) {
+    tg <- if (is.null(gpool)) NULL else .bc_core_cut(before_j1$oriented, gpool)
+    if (!is.null(tg) && tg[2] - tg[1] + 1L >= min_overlap) {
+      j1 <- list(start = start, end = end, oriented = oriented)
+      start <- before_j1$start
+      end <- before_j1$end
+      oriented <- before_j1$oriented
       genus_trimmed <- cut(tg)
-      r <- classify()
+      if (start == j1$start && end == j1$end) {
+        genus_trimmed <- 0L
+      } else {
+        r <- classify()
+      }
     }
   }
   cbind(data.frame(path = path, region_start = start, region_end = end,
@@ -300,10 +311,12 @@
 #'    more of its library sequences: beyond its first and last 20-mer of the core, the query keeps
 #'    only as many bases as the core itself holds there (`core_trimmed` gives the bases removed). A
 #'    segment held by one or two references only is left out, so it cannot name them.
-#' 4. When IdTaxa reaches a genus with 3 or more sequences in the locus, the region is cut again to
-#'    the core of that genus, with the same rule, and classified again if that changes it
-#'    (`genus_core_trimmed`). Two long references of a genus of short sequences cannot then take
-#'    the queries of its absent species.
+#' 4. When IdTaxa reaches a genus with 3 or more sequences in the locus, the region as it was before
+#'    step 3 is cut to the core of that genus, with the same rule, and classified again if that is
+#'    not the region already classified (`genus_core_trimmed` gives the bases removed from it). The
+#'    core of a genus can be narrower than that of the locus (two long references of a genus of
+#'    short sequences cannot then take the queries of its absent species) or wider (a genus whose
+#'    sequences are all longer than the core of the locus keeps them).
 #' 5. State 3 is returned with its reason: `no_overlap` (no match), `short_overlap` (a region
 #'    shorter than `min_overlap`) or `low_confidence` (IdTaxa's genus confidence under `threshold`).
 #'
