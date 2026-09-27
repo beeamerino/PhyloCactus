@@ -19,7 +19,39 @@
     trained <- .bc_idtaxa_train(lib_seqs, species[names(lib_seqs)],
                                 train_seed = .bc_idtaxa_whole_locus_seed(seed, locus))
   }
-  list(species = species[names(lib_seqs)], pool = pool, lib_seqs = lib_seqs, trained = trained)
+  list(species = species[names(lib_seqs)], pool = pool, lib_seqs = lib_seqs, trained = trained,
+       core_pool = .bc_core_pool(lib_m))
+}
+
+#' The 20-mers of the core of a locus, with their distance to each end of the core (amendment J1)
+#'
+#' The core is the span of alignment columns covered by `min_cover` or more of the library
+#' sequences. Each 20-mer of a library sequence inside that span is kept with the number of bases
+#' of that sequence before it and after it inside the core, the largest over the sequences that
+#' hold it. The query is then cut only where it runs beyond those distances, so the ends of a
+#' divergent query that lies inside the core are kept.
+#' @noRd
+.bc_core_pool <- function(lib_m, min_cover = 0.5, k = 20L) {
+  m <- as.character(lib_m)
+  covered <- which(colMeans(m != "-") >= min_cover)
+  empty <- data.frame(kmer = character(0), before = integer(0), after = integer(0))
+  if (length(covered) == 0L) return(empty)
+  span <- m[, min(covered):max(covered), drop = FALSE]
+  seqs <- gsub("-", "", toupper(apply(span, 1, paste, collapse = "")), fixed = TRUE)
+  parts <- lapply(seqs, function(x) {
+    n <- nchar(x) - k + 1L
+    if (n < 1L) return(NULL)
+    w <- substring(x, seq_len(n), seq_len(n) + k - 1L)
+    ok <- !grepl("[^ACGT]", w)
+    data.frame(kmer = w[ok], before = (seq_len(n) - 1L)[ok], after = (nchar(x) - (seq_len(n) + k - 1L))[ok],
+               stringsAsFactors = FALSE)
+  })
+  d <- do.call(rbind, parts)
+  if (is.null(d)) return(empty)
+  before <- tapply(d$before, d$kmer, max)
+  after <- tapply(d$after, d$kmer, max)
+  data.frame(kmer = names(before), before = as.integer(before), after = as.integer(after[names(before)]),
+             stringsAsFactors = FALSE)
 }
 
 #' @noRd
@@ -90,10 +122,11 @@
 .bc_identify_one <- function(s, id, locus, wl, width, threshold, min_overlap, seed) {
   n <- nchar(s)
   empty <- function(path, reason, start = NA_integer_, end = NA_integer_, other = NA_integer_,
-                    orientation = NA_character_) {
+                    orientation = NA_character_, trimmed = NA_integer_) {
     cbind(data.frame(path = path, region_start = start, region_end = end,
                      region_length = if (is.na(start)) NA_integer_ else as.integer(end - start + 1L),
-                     other_windows = other, orientation = orientation, stringsAsFactors = FALSE),
+                     other_windows = other, orientation = orientation, core_trimmed = trimmed,
+                     stringsAsFactors = FALSE),
           .bc_prediction_row(3L, reason = reason),
           data.frame(genus_idtaxa = NA_character_, species_idtaxa = NA_character_,
                      genus_confidence = NA_real_, species_confidence = NA_real_,
@@ -124,16 +157,37 @@
     o <- .bc_orient_to_library(.bc_dnabin_row(region, "query"), wl$pool)
     if (o$orientation == "no_match") return(empty(path, "no_overlap", start, end, other))
   }
-  if (end - start + 1L < min_overlap) {
-    return(empty(path, "short_overlap", start, end, other, o$orientation))
-  }
+  # J1: the region is cut where it runs beyond the core of the locus, in the coordinates of the
+  # query. Before the first core 20-mer the query keeps at most as many bases as the core holds
+  # before that 20-mer, and the same after the last one.
   oriented <- toupper(paste(as.character(as.matrix(o$query)), collapse = ""))
+  hits <- .bc_kmer_hits(oriented, wl$core_pool$kmer)
+  if (length(hits) == 0L) return(empty(path, "no_overlap", start, end, other, o$orientation))
+  h1 <- min(hits)
+  h2 <- max(hits)
+  k1 <- match(substr(oriented, h1, h1 + 19L), wl$core_pool$kmer)
+  k2 <- match(substr(oriented, h2, h2 + 19L), wl$core_pool$kmer)
+  t1 <- h1 - min(h1 - 1L, wl$core_pool$before[k1])
+  t2 <- h2 + 19L + min(nchar(oriented) - (h2 + 19L), wl$core_pool$after[k2])
+  trimmed <- as.integer((t1 - 1L) + (nchar(oriented) - t2))
+  if (o$orientation == "reverse") {
+    new_start <- end - t2 + 1L
+    end <- end - t1 + 1L
+  } else {
+    new_start <- start + t1 - 1L
+    end <- start + t2 - 1L
+  }
+  start <- new_start
+  oriented <- substr(oriented, t1, t2)
+  if (end - start + 1L < min_overlap) {
+    return(empty(path, "short_overlap", start, end, other, o$orientation, trimmed))
+  }
   r <- .bc_classify_idtaxa(wl$lib_seqs, wl$species, oriented, threshold = threshold,
                            trained = wl$trained,
                            query_seed = .bc_query_seed(seed, locus, "cn2", 0L, id))
   cbind(data.frame(path = path, region_start = start, region_end = end,
                    region_length = as.integer(end - start + 1L), other_windows = other,
-                   orientation = o$orientation, stringsAsFactors = FALSE), r)
+                   orientation = o$orientation, core_trimmed = trimmed, stringsAsFactors = FALSE), r)
 }
 
 #' The wrong-species rates of 6D for each locus, or NA with the reason (decision I6)
@@ -204,7 +258,11 @@
 #'    locus, the region of the query with the most 20-mer hits in a window of that width is cropped
 #'    and tested again (`path = "crop"`). `other_windows` counts the other windows with at least
 #'    half as many hits, since an inverted repeat or an rDNA array can hold more than one copy.
-#' 3. State 3 is returned with its reason: `no_overlap` (no match), `short_overlap` (a region
+#' 3. The region is cut to the core of the locus, the span of alignment columns covered by half or
+#'    more of its library sequences: beyond its first and last 20-mer of the core, the query keeps
+#'    only as many bases as the core itself holds there (`core_trimmed` gives the bases removed). A
+#'    segment held by one or two references only is left out, so it cannot name them.
+#' 4. State 3 is returned with its reason: `no_overlap` (no match), `short_overlap` (a region
 #'    shorter than `min_overlap`) or `low_confidence` (IdTaxa's genus confidence under `threshold`).
 #'
 #' The model of each locus is IdTaxa trained on the whole library of the locus with a fixed seed,
@@ -290,7 +348,7 @@ identify_barcoding_query <- function(query,
   cols <- c("query", "locus", "query_length", "path", "region_start", "region_end",
             "region_length", "other_windows", "orientation", "state", "predicted_species",
             "predicted_genus", "candidates", "genus_idtaxa", "species_idtaxa", "genus_confidence",
-            "species_confidence", "reason", "threshold", "validation_ws_rate_species_present",
+            "species_confidence", "reason", "core_trimmed", "threshold", "validation_ws_rate_species_present",
             "validation_ws_rate_species_absent")
   tab <- tab[, cols]
   tab$query_length <- as.integer(tab$query_length)
@@ -298,6 +356,7 @@ identify_barcoding_query <- function(query,
   tab$region_end <- as.integer(tab$region_end)
   tab$region_length <- as.integer(tab$region_length)
   tab$other_windows <- as.integer(tab$other_windows)
+  tab$core_trimmed <- as.integer(tab$core_trimmed)
   rownames(tab) <- NULL
 
   for (nm in unique(tab$query)) {
