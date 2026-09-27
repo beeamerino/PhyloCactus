@@ -87,7 +87,7 @@
 .idn_columns <- c("query", "locus", "query_length", "path", "region_start", "region_end",
                   "region_length", "other_windows", "orientation", "state", "predicted_species",
                   "predicted_genus", "candidates", "genus_idtaxa", "species_idtaxa",
-                  "genus_confidence", "species_confidence", "reason", "core_trimmed", "threshold",
+                  "genus_confidence", "species_confidence", "reason", "core_trimmed", "genus_core_trimmed", "threshold",
                   "validation_ws_rate_species_present", "validation_ws_rate_species_absent")
 
 # ---- I3 to I5: the Sanger path --------------------------------------------------------------------
@@ -375,4 +375,65 @@ test_that("a query of the segments outside the core only is state 3 and never na
   expect_equal(r$state, 3L)
   expect_true(r$reason %in% c("no_overlap", "short_overlap"))
   expect_true(is.na(r$predicted_genus))
+})
+
+# ---- J2: the core of the genus reached ---------------------------------------------------------------
+# After J1 the real-sequence probe still found, in matK, two Mammillaria references of about 1950
+# bases taking the queries of absent Mammillaria species of 1000 bases, while every other species of
+# the genus has about 800. The region is cut again to the core of the genus IdTaxa reaches.
+
+# One aligned locus of 1000 columns. Opuntia and Cereus cover all of it, so the core of the locus
+# (J1) is the whole alignment; Mammillaria has four species over the first 600 columns and two species
+# over all 1000.
+.idn_genus_fixture <- function(tmp) {
+  lib_dir <- file.path(tmp, "4_library")
+  dir.create(lib_dir, recursive = TRUE, showWarnings = FALSE)
+  set.seed(47L)
+  root <- .idn_random(1000)
+  x <- character(0)
+  for (g in c("Opuntia", "Cereus")) {
+    gb <- .idn_vary(root, 20)
+    for (e in c("alpha", "beta", "gamma")) {
+      sb <- .idn_vary(gb, 6)
+      for (r in 1:2) x[paste0(g, "_", e, "|m_", substr(g, 1, 1), substr(e, 1, 1), r, ".1")] <- .idn_vary(sb, 1)
+    }
+  }
+  mb <- .idn_vary(root, 20)
+  for (e in c("alpha", "beta", "gamma", "delta")) {
+    sb <- .idn_vary(mb, 6)
+    for (r in 1:2) {
+      x[paste0("Mammillaria_", e, "|m_M", substr(e, 1, 1), r, ".1")] <-
+        paste0(substr(.idn_vary(sb, 1), 1, 600), strrep("-", 400))
+    }
+  }
+  for (e in c("longa", "longior")) {
+    x[paste0("Mammillaria_", e, "|m_L", substr(e, 5, 5), "1.1")] <- .idn_vary(.idn_vary(mb, 6), 1)
+  }
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), file.path(lib_dir, "LIB_matK.fasta"))
+  list(library_dir = lib_dir, mb = mb, longa = unname(x["Mammillaria_longa|m_La1.1"]),
+       out = file.path(tmp, "10_identify"))
+}
+
+test_that("a query longer than the common extent of its genus is cut to the core of the genus (J2)", {
+  .idn_skip()
+  f <- .idn_genus_fixture(withr::local_tempdir())
+  # An absent Mammillaria species over the first 600 columns, with the last 400 of a long reference,
+  # as the matK records of the real probe
+  q <- paste0(substr(.idn_vary(.idn_vary(f$mb, 6), 1), 1, 600), substr(f$longa, 601, 1000))
+  r <- .idn_run(f, c(q = q), locus = "matK")$tab
+  expect_identical(r$path, "whole")
+  expect_equal(r$core_trimmed, 0L)
+  expect_gte(r$genus_core_trimmed, 380L)
+  expect_lte(r$region_length, 620L)
+  expect_false(r$predicted_species %in% c("Mammillaria_longa", "Mammillaria_longior"))
+  expect_identical(r$genus_idtaxa, "Mammillaria")
+})
+
+test_that("a query inside the common extent of its genus is not cut again", {
+  .idn_skip()
+  f <- .idn_genus_fixture(withr::local_tempdir())
+  s <- gsub("-", "", as.character(Biostrings::readDNAStringSet(file.path(f$library_dir, "LIB_matK.fasta")))[1])
+  r <- .idn_run(f, c(q = s), locus = "matK")$tab
+  expect_equal(r$genus_core_trimmed, 0L)
+  expect_equal(r$region_length, unname(nchar(s)))
 })
