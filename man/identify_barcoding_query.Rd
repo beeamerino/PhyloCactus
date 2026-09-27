@@ -58,6 +58,10 @@ the rest of the branch (share of 0.15, ratio of 3). If it matches, it is classif
 locus, the region of the query with the most 20-mer hits in a window of that width is cropped
 and tested again (\code{path = "crop"}). \code{other_windows} counts the other windows with at least
 half as many hits, since an inverted repeat or an rDNA array can hold more than one copy.
+\item The region is cut to the core of the locus, the span of alignment columns covered by half or
+more of its library sequences: beyond its first and last 20-mer of the core, the query keeps
+only as many bases as the core itself holds there (\code{core_trimmed} gives the bases removed). A
+segment held by one or two references only is left out, so it cannot name them.
 \item State 3 is returned with its reason: \code{no_overlap} (no match), \code{short_overlap} (a region
 shorter than \code{min_overlap}) or \code{low_confidence} (IdTaxa's genus confidence under \code{threshold}).
 }
