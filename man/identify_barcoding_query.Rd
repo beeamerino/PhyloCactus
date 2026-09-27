@@ -62,7 +62,7 @@ half as many hits, since an inverted repeat or an rDNA array can hold more than 
 more of its library sequences: beyond its first and last 20-mer of the core, the query keeps
 only as many bases as the core itself holds there (\code{core_trimmed} gives the bases removed). A
 segment held by one or two references only is left out, so it cannot name them.
-\item When IdTaxa reaches a genus with 3 or more sequences in the locus, the region as it was before
+\item When IdTaxa assigns a genus (state 1 or 2) with 3 or more sequences in the locus, the region as it was before
 step 3 is cut to the core of that genus, with the same rule, and classified again if that is
 not the region already classified (\code{genus_core_trimmed} gives the bases removed from it). The
 core of a genus can be narrower than that of the locus (two long references of a genus of

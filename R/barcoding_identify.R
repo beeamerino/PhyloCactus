@@ -217,7 +217,8 @@
   # that is not the region already classified. The core of a genus can be narrower or wider than
   # that of the locus.
   genus_trimmed <- 0L
-  if (!is.na(r$genus_idtaxa)) {
+  # J3b: only after a first pass that assigns the genus (state 1 or 2)
+  if (!is.na(r$genus_idtaxa) && r$state %in% 1:2) {
     gpool <- .bc_genus_core(wl, r$genus_idtaxa)
     tg <- if (is.null(gpool)) NULL else .bc_core_cut(before_j1$oriented, gpool)
     if (!is.null(tg) && tg[2] - tg[1] + 1L >= min_overlap) {
@@ -311,7 +312,7 @@
 #'    more of its library sequences: beyond its first and last 20-mer of the core, the query keeps
 #'    only as many bases as the core itself holds there (`core_trimmed` gives the bases removed). A
 #'    segment held by one or two references only is left out, so it cannot name them.
-#' 4. When IdTaxa reaches a genus with 3 or more sequences in the locus, the region as it was before
+#' 4. When IdTaxa assigns a genus (state 1 or 2) with 3 or more sequences in the locus, the region as it was before
 #'    step 3 is cut to the core of that genus, with the same rule, and classified again if that is
 #'    not the region already classified (`genus_core_trimmed` gives the bases removed from it). The
 #'    core of a genus can be narrower than that of the locus (two long references of a genus of
