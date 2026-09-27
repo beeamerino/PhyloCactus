@@ -437,3 +437,49 @@ test_that("a query inside the common extent of its genus is not cut again", {
   expect_equal(r$genus_core_trimmed, 0L)
   expect_equal(r$region_length, unname(nchar(s)))
 })
+
+# ---- J3: the second pass starts from the region before J1 --------------------------------------------
+# After J1 and J2 the real-sequence probe found Rhipsalis queries in rbcL (1339 bases, as every
+# Rhipsalis sequence of the library) cut by J1 to the core of the locus (545 bases, the extent of most
+# other genera) and then named after one Rhipsalis species. The second pass cuts the region as it was
+# before J1 to the core of the genus reached, which can be wider than the core of the locus.
+
+# One aligned locus of 800 columns: Opuntia and Cereus over columns 251 to 550 only, Rhipsalis over
+# all 800. The core of the locus is 251 to 550; the core of Rhipsalis is all 800.
+.idn_wide_genus_fixture <- function(tmp) {
+  lib_dir <- file.path(tmp, "4_library")
+  dir.create(lib_dir, recursive = TRUE, showWarnings = FALSE)
+  set.seed(53L)
+  root <- .idn_random(800)
+  x <- character(0)
+  for (g in c("Opuntia", "Cereus")) {
+    gb <- .idn_vary(root, 16)
+    for (e in c("alpha", "beta", "gamma")) {
+      sb <- .idn_vary(gb, 6)
+      for (r in 1:2) {
+        s <- .idn_vary(sb, 1)
+        x[paste0(g, "_", e, "|r_", substr(g, 1, 1), substr(e, 1, 1), r, ".1")] <-
+          paste0(strrep("-", 250), substr(s, 251, 550), strrep("-", 250))
+      }
+    }
+  }
+  rb <- .idn_vary(root, 16)
+  rsp <- list()
+  for (e in c("alpha", "beta", "gamma")) {
+    rsp[[e]] <- .idn_vary(rb, 6)
+    for (r in 1:2) x[paste0("Rhipsalis_", e, "|r_R", substr(e, 1, 1), r, ".1")] <- .idn_vary(rsp[[e]], 1)
+  }
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), file.path(lib_dir, "LIB_rbcL.fasta"))
+  list(library_dir = lib_dir, rsp = rsp, out = file.path(tmp, "10_identify"))
+}
+
+test_that("a query of a genus wider than the core of the locus is classified over the core of its genus (J3)", {
+  .idn_skip()
+  f <- .idn_wide_genus_fixture(withr::local_tempdir())
+  q <- .idn_vary(f$rsp$alpha, 1)
+  r <- .idn_run(f, c(q = q), locus = "rbcL")$tab
+  expect_identical(r$genus_idtaxa, "Rhipsalis")
+  expect_gte(r$core_trimmed, 480L)
+  expect_equal(r$genus_core_trimmed, 0L)
+  expect_gte(r$region_length, 780L)
+})
