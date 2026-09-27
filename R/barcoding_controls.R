@@ -470,14 +470,12 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
 .bc_cn2_queries_idtaxa <- function(og, lib_dna, lib_tab, locus, seed = 1L, threshold = 60) {
   restore_rng <- .bc_rng_state()
   on.exit(restore_rng(), add = TRUE)
-  species <- stats::setNames(lib_tab$species, lib_tab$sid)
   h <- .bc_parse_header(labels(og))
-  lib_m <- as.matrix(lib_dna)[lib_tab$sid, , drop = FALSE]
-  pool <- .bc_strand_pool(lib_m)
-  lib_seqs <- gsub("-", "", toupper(apply(as.character(lib_m), 1, paste, collapse = "")), fixed = TRUE)
-  names(lib_seqs) <- rownames(lib_m)
-  trained <- .bc_idtaxa_train(lib_seqs, species[names(lib_seqs)],
-                              train_seed = .bc_query_seed(seed, locus, "cn2", 0L, "<training>"))
+  wl <- .bc_idtaxa_whole_locus(lib_dna, lib_tab, locus, seed)
+  species <- wl$species
+  pool <- wl$pool
+  lib_seqs <- wl$lib_seqs
+  trained <- wl$trained
   queries <- as.character(og)
   if (!is.list(queries)) queries <- lapply(seq_len(nrow(queries)), function(i) queries[i, ])
   rows <- lapply(seq_along(queries), function(i) {
