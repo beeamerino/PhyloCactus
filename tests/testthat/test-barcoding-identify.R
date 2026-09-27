@@ -483,3 +483,16 @@ test_that("a query of a genus wider than the core of the locus is classified ove
   expect_equal(r$genus_core_trimmed, 0L)
   expect_gte(r$region_length, 780L)
 })
+
+test_that("the second pass follows only a genus the first pass assigns (J3b)", {
+  # After J3 a genus reached below the threshold (Carnegiea in matK, one species, all its sequences
+  # long) took back long queries that J1 had cut. With a threshold nothing reaches, the first pass
+  # is state 3 and the region stays as J1 cut it.
+  .idn_skip()
+  f <- .idn_wide_genus_fixture(withr::local_tempdir())
+  q <- .idn_vary(f$rsp$alpha, 1)
+  r <- .idn_run(f, c(q = q), locus = "rbcL", threshold = 101)$tab
+  expect_equal(r$state, 3L)
+  expect_equal(r$genus_core_trimmed, 0L)
+  expect_lte(r$region_length, 320L)
+})
