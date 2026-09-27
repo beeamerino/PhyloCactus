@@ -87,7 +87,7 @@
 .idn_columns <- c("query", "locus", "query_length", "path", "region_start", "region_end",
                   "region_length", "other_windows", "orientation", "state", "predicted_species",
                   "predicted_genus", "candidates", "genus_idtaxa", "species_idtaxa",
-                  "genus_confidence", "species_confidence", "reason", "threshold",
+                  "genus_confidence", "species_confidence", "reason", "core_trimmed", "threshold",
                   "validation_ws_rate_species_present", "validation_ws_rate_species_absent")
 
 # ---- I3 to I5: the Sanger path --------------------------------------------------------------------
@@ -312,4 +312,67 @@ test_that("each row carries the 6D wrong-species rates of its locus, or NA with 
   out <- .idn_run(f, q, threshold = 50, run_name = "t50")
   expect_true(all(is.na(out$tab$validation_ws_rate_species_present)))
   expect_true(any(grepl("threshold", out$text)))
+})
+
+# ---- J1: the core of the locus -----------------------------------------------------------------------
+# The real-sequence probe (27-09) found queries that cover a segment held by one or two references
+# of a locus named after those references. The query is cut to the core: the span of alignment
+# columns covered by 50 % or more of the library sequences of the locus.
+
+# One aligned locus: 18 sequences over the 300 core columns and one reference that also covers 150
+# columns on each side, of another genus.
+.idn_core_fixture <- function(tmp) {
+  lib_dir <- file.path(tmp, "4_library")
+  dir.create(lib_dir, recursive = TRUE, showWarnings = FALSE)
+  set.seed(43L)
+  root <- .idn_random(300)
+  left <- .idn_random(150)
+  right <- .idn_random(150)
+  gaps <- strrep("-", 150)
+  x <- character(0)
+  core <- character(0)
+  for (g in c("Opuntia", "Cereus", "Mammillaria")) {
+    gb <- .idn_vary(root, 6)
+    for (e in c("alpha", "beta")) {
+      sb <- .idn_vary(gb, 3)
+      for (r in 1:3) {
+        s <- .idn_vary(sb, 1)
+        sid <- paste0("psbA_", substr(g, 1, 1), substr(e, 1, 1), r, ".1")
+        x[paste0(g, "_", e, "|", sid)] <- paste0(gaps, s, gaps)
+        core[sid] <- s
+      }
+    }
+  }
+  x["Calymmanthium_substerile|psbA_K1.1"] <- paste0(left, .idn_vary(root, 12), right)
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), file.path(lib_dir, "LIB_psbA-trnH.fasta"))
+  list(library_dir = lib_dir, core = core, left = left, right = right,
+       out = file.path(tmp, "10_identify"))
+}
+
+test_that("a query that runs beyond the core is cut to it and answered as the core alone", {
+  .idn_skip()
+  f <- .idn_core_fixture(withr::local_tempdir())
+  s <- unname(f$core["psbA_Oa1.1"])
+  long <- paste0(.idn_vary(f$left, 2), s, .idn_vary(f$right, 2))
+  bare <- .idn_run(f, c(q = s), locus = "psbA-trnH")$tab
+  r <- .idn_run(f, c(q = long), locus = "psbA-trnH")$tab
+  expect_identical(r$path, "whole")
+  expect_gte(r$region_start, 151L)
+  expect_lte(r$region_end, 450L)
+  expect_gte(r$region_length, 280L)
+  expect_gte(r$core_trimmed, 280L)
+  expect_identical(r$predicted_genus, "Opuntia")
+  for (col in c("state", "predicted_species", "predicted_genus")) {
+    expect_identical(r[[col]], bare[[col]])
+  }
+  expect_equal(bare$core_trimmed, 0L)
+})
+
+test_that("a query of the segments outside the core only is state 3 and never named", {
+  .idn_skip()
+  f <- .idn_core_fixture(withr::local_tempdir())
+  r <- .idn_run(f, c(q = paste0(.idn_vary(f$left, 2), .idn_vary(f$right, 2))), locus = "psbA-trnH")$tab
+  expect_equal(r$state, 3L)
+  expect_true(r$reason %in% c("no_overlap", "short_overlap"))
+  expect_true(is.na(r$predicted_genus))
 })
