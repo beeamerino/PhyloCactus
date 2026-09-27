@@ -20,7 +20,7 @@
                                 train_seed = .bc_idtaxa_whole_locus_seed(seed, locus))
   }
   list(species = species[names(lib_seqs)], pool = pool, lib_seqs = lib_seqs, trained = trained,
-       core_pool = .bc_core_pool(lib_m))
+       core_pool = .bc_core_pool(lib_m), lib_m = lib_m, genus_cores = new.env())
 }
 
 #' The 20-mers of the core of a locus, with their distance to each end of the core (amendment J1)
@@ -52,6 +52,30 @@
   after <- tapply(d$after, d$kmer, max)
   data.frame(kmer = names(before), before = as.integer(before), after = as.integer(after[names(before)]),
              stringsAsFactors = FALSE)
+}
+
+#' Where a query runs beyond a core: first and last base to keep, or NULL with no core 20-mer
+#' @noRd
+.bc_core_cut <- function(oriented, pool) {
+  hits <- .bc_kmer_hits(oriented, pool$kmer)
+  if (length(hits) == 0L) return(NULL)
+  h1 <- min(hits)
+  h2 <- max(hits)
+  k1 <- match(substr(oriented, h1, h1 + 19L), pool$kmer)
+  k2 <- match(substr(oriented, h2, h2 + 19L), pool$kmer)
+  c(h1 - min(h1 - 1L, pool$before[k1]),
+    h2 + 19L + min(nchar(oriented) - (h2 + 19L), pool$after[k2]))
+}
+
+#' The core pool of one genus of a locus (amendment J2), computed once per call; NULL for a genus
+#' with fewer than `min_sequences` sequences in the locus
+#' @noRd
+.bc_genus_core <- function(wl, genus, min_sequences = 3L) {
+  if (exists(genus, envir = wl$genus_cores, inherits = FALSE)) return(get(genus, envir = wl$genus_cores))
+  rows <- names(wl$species)[.bc_genus(unname(wl$species)) == genus]
+  pool <- if (length(rows) >= min_sequences) .bc_core_pool(wl$lib_m[rows, , drop = FALSE]) else NULL
+  assign(genus, pool, envir = wl$genus_cores)
+  pool
 }
 
 #' @noRd
@@ -123,10 +147,11 @@
   n <- nchar(s)
   empty <- function(path, reason, start = NA_integer_, end = NA_integer_, other = NA_integer_,
                     orientation = NA_character_, trimmed = NA_integer_) {
+    genus_trimmed <- NA_integer_
     cbind(data.frame(path = path, region_start = start, region_end = end,
                      region_length = if (is.na(start)) NA_integer_ else as.integer(end - start + 1L),
                      other_windows = other, orientation = orientation, core_trimmed = trimmed,
-                     stringsAsFactors = FALSE),
+                     genus_core_trimmed = genus_trimmed, stringsAsFactors = FALSE),
           .bc_prediction_row(3L, reason = reason),
           data.frame(genus_idtaxa = NA_character_, species_idtaxa = NA_character_,
                      genus_confidence = NA_real_, species_confidence = NA_real_,
@@ -161,33 +186,46 @@
   # query. Before the first core 20-mer the query keeps at most as many bases as the core holds
   # before that 20-mer, and the same after the last one.
   oriented <- toupper(paste(as.character(as.matrix(o$query)), collapse = ""))
-  hits <- .bc_kmer_hits(oriented, wl$core_pool$kmer)
-  if (length(hits) == 0L) return(empty(path, "no_overlap", start, end, other, o$orientation))
-  h1 <- min(hits)
-  h2 <- max(hits)
-  k1 <- match(substr(oriented, h1, h1 + 19L), wl$core_pool$kmer)
-  k2 <- match(substr(oriented, h2, h2 + 19L), wl$core_pool$kmer)
-  t1 <- h1 - min(h1 - 1L, wl$core_pool$before[k1])
-  t2 <- h2 + 19L + min(nchar(oriented) - (h2 + 19L), wl$core_pool$after[k2])
-  trimmed <- as.integer((t1 - 1L) + (nchar(oriented) - t2))
-  if (o$orientation == "reverse") {
-    new_start <- end - t2 + 1L
-    end <- end - t1 + 1L
-  } else {
-    new_start <- start + t1 - 1L
-    end <- start + t2 - 1L
+  # Keeps bases t[1] to t[2] of the oriented region and moves start and end in query coordinates
+  cut <- function(t) {
+    if (o$orientation == "reverse") {
+      new_start <- end - t[2] + 1L
+      end <<- end - t[1] + 1L
+    } else {
+      new_start <- start + t[1] - 1L
+      end <<- start + t[2] - 1L
+    }
+    start <<- new_start
+    removed <- as.integer((t[1] - 1L) + (nchar(oriented) - t[2]))
+    oriented <<- substr(oriented, t[1], t[2])
+    removed
   }
-  start <- new_start
-  oriented <- substr(oriented, t1, t2)
+  t <- .bc_core_cut(oriented, wl$core_pool)
+  if (is.null(t)) return(empty(path, "no_overlap", start, end, other, o$orientation))
+  trimmed <- cut(t)
   if (end - start + 1L < min_overlap) {
     return(empty(path, "short_overlap", start, end, other, o$orientation, trimmed))
   }
-  r <- .bc_classify_idtaxa(wl$lib_seqs, wl$species, oriented, threshold = threshold,
-                           trained = wl$trained,
-                           query_seed = .bc_query_seed(seed, locus, "cn2", 0L, id))
+  classify <- function() {
+    .bc_classify_idtaxa(wl$lib_seqs, wl$species, oriented, threshold = threshold,
+                        trained = wl$trained,
+                        query_seed = .bc_query_seed(seed, locus, "cn2", 0L, id))
+  }
+  r <- classify()
+  # J2: cut again to the core of the genus reached, and classify again when that changes the region
+  genus_trimmed <- 0L
+  if (!is.na(r$genus_idtaxa)) {
+    gpool <- .bc_genus_core(wl, r$genus_idtaxa)
+    tg <- if (is.null(gpool)) NULL else .bc_core_cut(oriented, gpool)
+    if (!is.null(tg) && (tg[1] > 1L || tg[2] < nchar(oriented)) && tg[2] - tg[1] + 1L >= min_overlap) {
+      genus_trimmed <- cut(tg)
+      r <- classify()
+    }
+  }
   cbind(data.frame(path = path, region_start = start, region_end = end,
                    region_length = as.integer(end - start + 1L), other_windows = other,
-                   orientation = o$orientation, core_trimmed = trimmed, stringsAsFactors = FALSE), r)
+                   orientation = o$orientation, core_trimmed = trimmed,
+                   genus_core_trimmed = genus_trimmed, stringsAsFactors = FALSE), r)
 }
 
 #' The wrong-species rates of 6D for each locus, or NA with the reason (decision I6)
@@ -262,7 +300,11 @@
 #'    more of its library sequences: beyond its first and last 20-mer of the core, the query keeps
 #'    only as many bases as the core itself holds there (`core_trimmed` gives the bases removed). A
 #'    segment held by one or two references only is left out, so it cannot name them.
-#' 4. State 3 is returned with its reason: `no_overlap` (no match), `short_overlap` (a region
+#' 4. When IdTaxa reaches a genus with 3 or more sequences in the locus, the region is cut again to
+#'    the core of that genus, with the same rule, and classified again if that changes it
+#'    (`genus_core_trimmed`). Two long references of a genus of short sequences cannot then take
+#'    the queries of its absent species.
+#' 5. State 3 is returned with its reason: `no_overlap` (no match), `short_overlap` (a region
 #'    shorter than `min_overlap`) or `low_confidence` (IdTaxa's genus confidence under `threshold`).
 #'
 #' The model of each locus is IdTaxa trained on the whole library of the locus with a fixed seed,
@@ -348,7 +390,7 @@ identify_barcoding_query <- function(query,
   cols <- c("query", "locus", "query_length", "path", "region_start", "region_end",
             "region_length", "other_windows", "orientation", "state", "predicted_species",
             "predicted_genus", "candidates", "genus_idtaxa", "species_idtaxa", "genus_confidence",
-            "species_confidence", "reason", "core_trimmed", "threshold", "validation_ws_rate_species_present",
+            "species_confidence", "reason", "core_trimmed", "genus_core_trimmed", "threshold", "validation_ws_rate_species_present",
             "validation_ws_rate_species_absent")
   tab <- tab[, cols]
   tab$query_length <- as.integer(tab$query_length)
@@ -357,6 +399,7 @@ identify_barcoding_query <- function(query,
   tab$region_length <- as.integer(tab$region_length)
   tab$other_windows <- as.integer(tab$other_windows)
   tab$core_trimmed <- as.integer(tab$core_trimmed)
+  tab$genus_core_trimmed <- as.integer(tab$genus_core_trimmed)
   rownames(tab) <- NULL
 
   for (nm in unique(tab$query)) {
