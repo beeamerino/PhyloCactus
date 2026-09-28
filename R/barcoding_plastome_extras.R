@@ -122,6 +122,8 @@
 #'   of its library sequences), so a record has the extent of the library; regions shorter than
 #'   `min_region` are not written. Where the crop finds more than one window (an inverted repeat),
 #'   the best one is kept and `other_windows` counts the rest.
+#' - **Duplicates:** RefSeq is left out of the query, and a plastome whose sequence (on either strand)
+#'   repeats one already downloaded adds nothing; it is listed in `TABLE_duplicate_plastomes.csv`.
 #' - **Identifier:** `sid = <accession>__<locus>`, so a sid stays unique across loci.
 #' - **Same specimen:** a plastome whose `specimen_voucher` matches that of a library accession of
 #'   the same species in the same locus (same collector surname and number, or the same normalised
@@ -148,7 +150,7 @@
 #' }
 #' @export
 extract_barcoding_plastome_loci <- function(query = paste0("Cactaceae[Organism] AND 100000:170000[SLEN] AND ",
-                                                           "(chloroplast OR plastid) AND \"complete genome\""),
+                                                           "(chloroplast OR plastid) AND \"complete genome\" NOT refseq[filter]"),
                                             library_dir = file.path("11_barcoding", "4_library"),
                                             output_dir = file.path("0_genomic_raw", "plastomes"),
                                             checklist_path = system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx",
@@ -167,6 +169,17 @@ extract_barcoding_plastome_loci <- function(query = paste0("Cactaceae[Organism] 
   utils::write.csv(data.frame(accession = pl$accession, organism = pl$organism, length = nchar(pl$sequence),
                               md5 = pl$md5, query = query, retrieved = format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")),
                    file.path(output_dir, "MANIFEST.csv"), row.names = FALSE)
+
+  # RefSeq copies (NC_) repeat GenBank records: the same sequence, on either strand, is kept once,
+  # the GenBank accession first (28-09: 55 of 161 downloads were such copies)
+  pl <- pl[order(grepl("^NC_", pl$accession)), , drop = FALSE]
+  rc <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(pl$sequence)))
+  key <- ifelse(pl$sequence < rc, pl$sequence, rc)
+  dup <- duplicated(key)
+  duplicates <- data.frame(accession = pl$accession[dup], duplicate_of = pl$accession[match(key[dup], key)],
+                           stringsAsFactors = FALSE)
+  utils::write.csv(duplicates, file.path(output_dir, "TABLE_duplicate_plastomes.csv"), row.names = FALSE)
+  pl <- pl[!dup, , drop = FALSE]
 
   matched <- .bc_resolve_names(pl$organism, checklist_path)
   pl$species <- sub("_(subsp|ssp|var|subvar|f|fo|forma)[.]?_.*$", "", matched)
@@ -220,10 +233,11 @@ extract_barcoding_plastome_loci <- function(query = paste0("Cactaceae[Organism] 
   utils::write.csv(skipped, file.path(output_dir, "TABLE_skipped_same_specimen.csv"), row.names = FALSE)
   utils::write.csv(unmatched, file.path(output_dir, "TABLE_unmatched_names.csv"), row.names = FALSE)
   Biostrings::writeXStringSet(Biostrings::DNAStringSet(seqs), file.path(output_dir, "extra_records.fasta"))
-  message("Plastomes: ", nrow(pl) + nrow(unmatched), " downloaded, ", nrow(unmatched), " with a name out of the ",
+  message("Plastomes: ", nrow(pl) + nrow(unmatched) + nrow(duplicates), " downloaded, ", nrow(duplicates),
+          " duplicates, ", nrow(unmatched), " with a name out of the ",
           "checklist; extra records: ", nrow(records), " in ", length(unique(records$locus)), " loci; skipped as ",
           "the same specimen: ", nrow(skipped), ".")
-  invisible(list(records = records, skipped = skipped, unmatched = unmatched))
+  invisible(list(records = records, skipped = skipped, unmatched = unmatched, duplicates = duplicates))
 }
 
 #' The extra records of `extra_records_dir` appended to the registry and sequences of step 1
