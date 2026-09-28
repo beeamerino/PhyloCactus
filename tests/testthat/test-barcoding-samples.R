@@ -128,6 +128,8 @@ test_that("a Sanger sample is identified as one sample, with its report, and com
   expect_identical(idx$status, c("identified", "identified", "not_run"))
   expect_true(file.exists(file.path(tmp, "out", "spec1", "REPORT_spec1.html")))
   expect_equal(idx$loci_found[idx$sample_id == "spec1"], 2L)
+  # The states are counted over the regions found, not over the loci absent from the sequences
+  expect_equal(idx$state1 + idx$state2 + idx$state3, idx$loci_found)
   expect_false(idx$voucher_missing[idx$sample_id == "spec1"])
   expect_true(idx$voucher_missing[idx$sample_id == "spec2"])
   # The answer against the declared species
