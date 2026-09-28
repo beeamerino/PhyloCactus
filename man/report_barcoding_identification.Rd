@@ -33,7 +33,8 @@ writes, for each query, \verb{REPORT_<run_name>_<query>.html}, a self-contained 
 package (no \code{pandoc}); an assembly, a set of reads, or several sequences declared as one sample
 (argument \code{sample} of \code{\link[=identify_barcoding_query]{identify_barcoding_query()}}) get one \verb{REPORT_<run_name>.html} that reads
 them together. For the run, a set of CSV files: \verb{REPORT_<run_name>_answer.csv},
-\verb{_alternatives.csv}, \verb{_agreement.csv}, \verb{_sampling.csv} and \verb{_provenance.csv}.
+\verb{_alternatives.csv}, \verb{_agreement.csv}, \verb{_sampling.csv} and \verb{_provenance.csv}, and
+\verb{REPORT_<run_name>_checksums.csv} with the md5 of the table, the run record and every file written.
 }
 \details{
 The report has nine sections: (1) query and route; (2) answer per locus; (3) reading across loci,
