@@ -57,7 +57,8 @@ string) does not add that locus; the pair is listed in \code{TABLE_skipped_same_
 Writes to \code{output_dir}: \verb{downloads/<accession>.gb}, \code{MANIFEST.csv} (accession, organism, length,
 md5, query, date), \code{extra_records.fasta} (headers \code{Genus_species|sid}),
 \code{TABLE_genomic_extra_records.csv} (sid, accession, species, organism, locus, region_start,
-region_end, strand, region_length, other_windows, md5), \code{TABLE_skipped_same_specimen.csv} and
+region_end, strand, region_length, other_windows, md5 of the plastome file, library_md5 of the
+\verb{LIB_<locus>.fasta} that set the extent), \code{TABLE_skipped_same_specimen.csv} and
 \code{TABLE_unmatched_names.csv}.
 }
 \examples{

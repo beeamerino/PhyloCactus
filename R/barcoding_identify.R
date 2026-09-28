@@ -387,6 +387,25 @@ identify_barcoding_query <- function(query,
   }
   restore_rng <- .bc_rng_state()
   on.exit(restore_rng(), add = TRUE)
+  tab <- .bc_identify_table(q, loci, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed)
+
+  for (nm in unique(tab$query)) {
+    if (all(tab$reason[tab$query == nm] %in% "no_overlap")) {
+      message("Not assignable: no overlap with the library (", nm, ").")
+    }
+  }
+  out_file <- file.path(output_dir, paste0("TABLE_barcoding_identify_", run_name, ".csv"))
+  utils::write.csv(tab, out_file, row.names = FALSE)
+  .bc_identify_banner(tab, out_file)
+  invisible(tab)
+}
+
+#' Identification table of step 10: every query against every locus, in the order of the queries
+#'
+#' Shared by [identify_barcoding_query()] and [identify_barcoding_assembly()]; the caller fixes and
+#' restores the random state.
+#' @noRd
+.bc_identify_table <- function(q, loci, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed) {
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   models_dir <- file.path(output_dir, "models")
   ids <- .bc_parse_header(names(q))$sid
@@ -422,16 +441,7 @@ identify_barcoding_query <- function(query,
   tab$core_trimmed <- as.integer(tab$core_trimmed)
   tab$genus_core_trimmed <- as.integer(tab$genus_core_trimmed)
   rownames(tab) <- NULL
-
-  for (nm in unique(tab$query)) {
-    if (all(tab$reason[tab$query == nm] %in% "no_overlap")) {
-      message("Not assignable: no overlap with the library (", nm, ").")
-    }
-  }
-  out_file <- file.path(output_dir, paste0("TABLE_barcoding_identify_", run_name, ".csv"))
-  utils::write.csv(tab, out_file, row.names = FALSE)
-  .bc_identify_banner(tab, out_file)
-  invisible(tab)
+  tab
 }
 
 #' @noRd
