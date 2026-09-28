@@ -14,7 +14,8 @@ identify_barcoding_query(
   threshold = 60,
   min_overlap = 100L,
   seed = 1L,
-  processors = 1L
+  processors = 1L,
+  report = TRUE
 )
 }
 \arguments{
@@ -40,6 +41,9 @@ Phase 6B.}
 \item{seed}{Integer. Seed of the models and of the queries. Defaults to 1, as in Tutorial 5.}
 
 \item{processors}{Integer. Processors for \code{DECIPHER::IdTaxa()}.}
+
+\item{report}{Logical. Write the identification report (\code{\link[=report_barcoding_identification]{report_barcoding_identification()}}).
+The run record \verb{RUN_<run_name>.csv} is written in any case.}
 }
 \value{
 Invisibly, the table of answers: one row per query and locus tested.

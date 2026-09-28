@@ -61,6 +61,8 @@
 #' @param fastp,getorganelle Character. The executables.
 #' @param getorg_path Character. The GetOrganelle folder of databases (`GETORG_PATH`, by default
 #'   `~/.GetOrganelle`).
+#' @param report Logical. Write the identification report ([report_barcoding_identification()]).
+#'   The run record `RUN_<run_name>.csv` is written in any case.
 #' @param runner Function `(cmd, args, stdout, stderr)` that runs an external step, as [system2()];
 #'   the default runs the tools. The tests pass a fake one.
 #' @return Invisibly, the table of [identify_barcoding_query()], one row per locus, with the columns
@@ -85,7 +87,8 @@ identify_barcoding_reads <- function(reads1,
                                      runner = .bc_reads_runner,
                                      threshold = 60,
                                      min_overlap = 100L,
-                                     seed = 1L) {
+                                     seed = 1L,
+                                     report = TRUE) {
   # RA1: input
   if (is.null(reads2)) {
     stop("Single-end reads are not tested in 0.5.0 (matrix of accepted inputs of 28-09): give the two ",
@@ -195,6 +198,16 @@ identify_barcoding_reads <- function(reads1,
   }
   out_file <- file.path(rdir, paste0("TABLE_barcoding_identify_", run_name, ".csv"))
   utils::write.csv(tab, out_file, row.names = FALSE)
+  .bc_write_run_record(rdir, run_name, input_path = paste(c(reads1, reads2), collapse = "; "),
+                       input_md5 = paste(unname(tools::md5sum(c(reads1, reads2))), collapse = "; "), input_type = "reads",
+                       route = c("fastp", "GetOrganelle embplant_pt", "GetOrganelle embplant_nr", "crop", "cut to locus core (J1)",
+                                 "IdTaxa", "cut to genus core (J3b)", "longest region per locus"),
+                       library_dir = library_dir, loci = loci, models_dir = file.path(output_dir, "models"),
+                       threshold = threshold, seed = seed, min_overlap = min_overlap,
+                       extra = manifest[manifest$kind != "input", , drop = FALSE])
   .bc_identify_banner(tab, out_file)
+  if (isTRUE(report)) {
+    report_barcoding_identification(run_name, results_dir = rdir, library_dir = library_dir, metrics_dir = metrics_dir)
+  }
   invisible(tab)
 }

@@ -19,7 +19,8 @@ identify_barcoding_reads(
   runner = .bc_reads_runner,
   threshold = 60,
   min_overlap = 100L,
-  seed = 1L
+  seed = 1L,
+  report = TRUE
 )
 }
 \arguments{
@@ -41,6 +42,9 @@ identify_barcoding_reads(
 
 \item{runner}{Function \verb{(cmd, args, stdout, stderr)} that runs an external step, as \code{\link[=system2]{system2()}};
 the default runs the tools. The tests pass a fake one.}
+
+\item{report}{Logical. Write the identification report (\code{\link[=report_barcoding_identification]{report_barcoding_identification()}}).
+The run record \verb{RUN_<run_name>.csv} is written in any case.}
 }
 \value{
 Invisibly, the table of \code{\link[=identify_barcoding_query]{identify_barcoding_query()}}, one row per locus, with the columns

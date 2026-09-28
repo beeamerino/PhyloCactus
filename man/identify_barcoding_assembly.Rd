@@ -18,7 +18,8 @@ identify_barcoding_assembly(
   samtools = "samtools",
   threshold = 60,
   min_overlap = 100L,
-  seed = 1L
+  seed = 1L,
+  report = TRUE
 )
 }
 \arguments{
@@ -38,6 +39,9 @@ identify_barcoding_assembly(
 \item{threads}{Integer. Threads of \code{minimap2}.}
 
 \item{minimap2, samtools}{Character. The executables.}
+
+\item{report}{Logical. Write the identification report (\code{\link[=report_barcoding_identification]{report_barcoding_identification()}}).
+The run record \verb{RUN_<run_name>.csv} is written in any case.}
 }
 \value{
 Invisibly, the table of \code{\link[=identify_barcoding_query]{identify_barcoding_query()}}, one row per locus, with the columns

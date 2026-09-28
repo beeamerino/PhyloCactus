@@ -367,6 +367,8 @@
 #' @param min_overlap Integer. Minimum length of the region to classify. Defaults to 100.
 #' @param seed Integer. Seed of the models and of the queries. Defaults to 1, as in Tutorial 5.
 #' @param processors Integer. Processors for `DECIPHER::IdTaxa()`.
+#' @param report Logical. Write the identification report ([report_barcoding_identification()]).
+#'   The run record `RUN_<run_name>.csv` is written in any case.
 #' @return Invisibly, the table of answers: one row per query and locus tested.
 #' @seealso [run_barcoding_controls()], [sweep_barcoding_threshold()],
 #'   [summarise_barcoding_metrics()].
@@ -385,7 +387,16 @@ identify_barcoding_query <- function(query,
                                      threshold = 60,
                                      min_overlap = 100L,
                                      seed = 1L,
-                                     processors = 1L) {
+                                     processors = 1L,
+                                     report = TRUE) {
+  is_file <- is.character(query) && length(query) == 1L && is.null(names(query)) && file.exists(query)
+  input_type <- "sequences"
+  if (is_file) {
+    first <- readLines(query, n = 1L, warn = FALSE)
+    if (grepl("\\.(gb|gbk|gbff|genbank)$", query, ignore.case = TRUE) || (length(first) == 1L && startsWith(first, "LOCUS"))) {
+      input_type <- "genbank"
+    }
+  }
   q <- .bc_identify_read_query(query)
   .bc_assert_output_dir(output_dir)
   lib <- .bc_library_from_dir(library_dir)
@@ -410,7 +421,16 @@ identify_barcoding_query <- function(query,
   }
   out_file <- file.path(output_dir, paste0("TABLE_barcoding_identify_", run_name, ".csv"))
   utils::write.csv(tab, out_file, row.names = FALSE)
+  .bc_write_run_record(output_dir, run_name, input_path = if (is_file) query else "(sequences given in R)",
+                       input_md5 = if (is_file) unname(tools::md5sum(query)) else NA_character_, input_type = input_type,
+                       route = c(if (input_type == "genbank") "GenBank flat file read", "strand rule", "crop", "cut to locus core (J1)",
+                                 "IdTaxa", "cut to genus core (J3b)"),
+                       library_dir = library_dir, loci = loci, models_dir = file.path(output_dir, "models"),
+                       threshold = threshold, seed = seed, min_overlap = min_overlap)
   .bc_identify_banner(tab, out_file)
+  if (isTRUE(report)) {
+    report_barcoding_identification(run_name, results_dir = output_dir, library_dir = library_dir, metrics_dir = metrics_dir)
+  }
   invisible(tab)
 }
 

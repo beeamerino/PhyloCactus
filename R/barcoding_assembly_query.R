@@ -67,6 +67,8 @@
 #' @param low_mapq Integer. Mapping quality under which a hit is flagged. Defaults to 20.
 #' @param threads Integer. Threads of `minimap2`.
 #' @param minimap2,samtools Character. The executables.
+#' @param report Logical. Write the identification report ([report_barcoding_identification()]).
+#'   The run record `RUN_<run_name>.csv` is written in any case.
 #' @return Invisibly, the table of [identify_barcoding_query()], one row per locus, with the columns
 #'   `scaffold`, `scaffold_length`, `hit_start`, `hit_end`, `mapq`, `matching_bases`,
 #'   `scaffolds_hit` and `low_mapq`.
@@ -89,7 +91,8 @@ identify_barcoding_assembly <- function(assembly,
                                         samtools = "samtools",
                                         threshold = 60,
                                         min_overlap = 100L,
-                                        seed = 1L) {
+                                        seed = 1L,
+                                        report = TRUE) {
   if (!file.exists(assembly)) stop("Assembly not found: ", assembly, ".", call. = FALSE)
   exe <- Sys.which(c(minimap2, samtools))
   if (any(!nzchar(exe))) {
@@ -187,6 +190,17 @@ identify_barcoding_assembly <- function(assembly,
   rownames(tab) <- NULL
   out_file <- file.path(output_dir, paste0("TABLE_barcoding_identify_", run_name, ".csv"))
   utils::write.csv(tab, out_file, row.names = FALSE)
+  .bc_write_run_record(output_dir, run_name, input_path = assembly, input_md5 = unname(tools::md5sum(assembly)),
+                       input_type = "assembly",
+                       route = c("minimap2 -x asm20", "samtools faidx", "crop", "cut to locus core (J1)", "IdTaxa",
+                                 "cut to genus core (J3b)"),
+                       library_dir = library_dir, loci = loci, models_dir = file.path(output_dir, "models"),
+                       threshold = threshold, seed = seed, min_overlap = min_overlap,
+                       tools = c(minimap2 = .bc_tool_version(exe[[1]]), samtools = .bc_tool_version(exe[[2]])),
+                       extra = data.frame(kind = "setting", name = c("flank", "low_mapq"), value = c(format(flank), format(low_mapq))))
   .bc_identify_banner(tab, out_file)
+  if (isTRUE(report)) {
+    report_barcoding_identification(run_name, results_dir = output_dir, library_dir = library_dir, metrics_dir = metrics_dir)
+  }
   invisible(tab)
 }
