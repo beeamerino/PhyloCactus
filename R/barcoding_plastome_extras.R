@@ -6,6 +6,10 @@
 #' Default GenBank fetcher: flat files for a query or for a set of accessions
 #' @noRd
 .bc_fetch_genbank <- function(query = NULL, ids = NULL, batch = 20L) {
+  if (!requireNamespace("rentrez", quietly = TRUE)) {
+    stop("The default download needs the package rentrez (install.packages(\"rentrez\")), or pass a ",
+         "function as `fetch`.", call. = FALSE)
+  }
   if (!is.null(ids)) {
     ids <- unique(ids)
     parts <- lapply(split(ids, ceiling(seq_along(ids) / 100)), function(b)
