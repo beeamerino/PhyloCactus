@@ -534,3 +534,18 @@ test_that("a plastome in a GenBank flat file is identified as the same plastome 
   b <- .idn_run(f, c(OQ000012.1 = s), run_name = "fa")$tab
   expect_identical(a[, setdiff(names(a), "validation_ws_rate_species_present")], b[, setdiff(names(b), "validation_ws_rate_species_present")])
 })
+
+test_that("a locus whose library holds a single species is state 3 with its reason, and the run goes on", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  x <- f$seqs$rbcL
+  one <- x[startsWith(names(x), "Opuntia_alpha|")]
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(one), file.path(f$library_dir, "LIB_rbcL.fasta"))
+  r <- .idn_run(f, c(q1 = unname(f$seqs$matK[1])))
+  expect_setequal(r$tab$locus, c("matK", "rbcL", "trnL-trnF"))
+  b <- r$tab[r$tab$locus == "rbcL", ]
+  expect_equal(b$state, 3L)
+  expect_identical(b$reason, "single_species_library")
+  expect_true(any(grepl("rbcL", r$text) & grepl("one species", r$text)))
+  expect_true(r$tab$state[r$tab$locus == "matK"] %in% 1:2)
+})
