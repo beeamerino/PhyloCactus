@@ -218,22 +218,49 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
     ggplot2::theme_void() + ggplot2::theme(legend.position = "bottom")
 }
 
-#' Answer per locus: genus and species confidence, threshold line, colour by state (Fig. 3c style)
+#' Answer per locus: species as a solid bar, genus as a striped bar, colour by state (Fig. 3c style)
+#'
+#' The two ranks are told apart by the fill (solid, striped), not by a shade, so that no rank can be
+#' read as a state (BMM, 28-09). Drawn with rectangles and segments: no pattern package is needed.
 #' @noRd
 .bc_report_answer_plot <- function(t, threshold) {
-  d <- rbind(data.frame(locus = t$locus, compartment = t$compartment, rank = "genus", confidence = t$genus_confidence,
-                        state = as.character(t$state)),
-             data.frame(locus = t$locus, compartment = t$compartment, rank = "species", confidence = t$species_confidence,
-                        state = as.character(t$state)))
-  d$confidence[is.na(d$confidence)] <- 0
-  ggplot2::ggplot(d, ggplot2::aes(x = .data$locus, y = .data$confidence, fill = .data$state, alpha = .data$rank)) +
-    ggplot2::geom_col(position = ggplot2::position_dodge(width = 0.8), width = 0.75, colour = "grey30") +
+  t <- t[order(t$compartment != "plastid", t$locus, method = "radix"), , drop = FALSE]
+  # One position per locus across both panels, so that no break of one panel carries a label of the other
+  t$i <- seq_len(nrow(t))
+  t$state <- factor(as.character(t$state), levels = c("1", "2", "3"))
+  w <- 0.36
+  bars <- rbind(data.frame(compartment = t$compartment, state = t$state, rank = "genus", xmin = t$i - w - 0.02, xmax = t$i - 0.02,
+                           ymax = ifelse(is.na(t$genus_confidence), 0, t$genus_confidence)),
+                data.frame(compartment = t$compartment, state = t$state, rank = "species", xmin = t$i + 0.02, xmax = t$i + w + 0.02,
+                           ymax = ifelse(is.na(t$species_confidence), 0, t$species_confidence)))
+  gen <- bars[bars$rank == "genus" & bars$ymax > 0, , drop = FALSE]
+  stripes <- do.call(rbind, c(list(data.frame(compartment = character(0), state = factor(character(0), levels = c("1", "2", "3")),
+                                              x = numeric(0), xend = numeric(0), y = numeric(0))),
+                              lapply(seq_len(nrow(gen)), function(k) {
+    if (gen$ymax[k] < 4) return(NULL)
+    y <- seq(4, gen$ymax[k], by = 4)
+    data.frame(compartment = gen$compartment[k], state = gen$state[k], x = gen$xmin[k], xend = gen$xmax[k], y = y)
+  })))
+  lab <- unique(t[, c("compartment", "i", "locus")])
+  # Zero-height rectangles of the three states, so that the legend always shows all three
+  keys <- data.frame(compartment = t$compartment[1], state = factor(c("1", "2", "3"), levels = c("1", "2", "3")),
+                     xmin = t$i[1], xmax = t$i[1], ymax = 0)
+  ggplot2::ggplot() +
+    ggplot2::geom_rect(data = keys, ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax, ymin = 0, ymax = .data$ymax,
+                                                 fill = .data$state)) +
+    ggplot2::geom_rect(data = bars[bars$rank == "species", ], ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax, ymin = 0,
+                                                                           ymax = .data$ymax, fill = .data$state), colour = "grey20") +
+    ggplot2::geom_rect(data = gen, ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax, ymin = 0, ymax = .data$ymax,
+                                                colour = .data$state), fill = "white", linewidth = 0.6) +
+    ggplot2::geom_segment(data = stripes, ggplot2::aes(x = .data$x, xend = .data$xend, y = .data$y, yend = .data$y,
+                                                       colour = .data$state), linewidth = 0.6) +
     ggplot2::geom_hline(yintercept = threshold, linetype = "dashed") +
     ggplot2::scale_fill_manual(values = .bc_state_colours(), name = "State", drop = FALSE) +
-    ggplot2::scale_alpha_manual(values = c(genus = 1, species = 0.5), name = "Rank") +
+    ggplot2::scale_colour_manual(values = .bc_state_colours(), guide = "none", drop = FALSE) +
+    ggplot2::scale_x_continuous(breaks = lab$i, labels = lab$locus, expand = ggplot2::expansion(add = 0.6)) +
     ggplot2::coord_cartesian(ylim = c(0, 100)) +
     ggplot2::facet_grid(. ~ compartment, scales = "free_x", space = "free_x") +
-    ggplot2::labs(x = NULL, y = "IdTaxa confidence") +
+    ggplot2::labs(x = NULL, y = "IdTaxa confidence", caption = "Striped bar: genus. Solid bar: species. Dashed line: threshold.") +
     ggplot2::theme_bw() + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 }
 
@@ -249,7 +276,41 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
                                `FALSE` = "none"), name = NULL) +
     ggplot2::facet_grid(genus ~ ., scales = "free_y", space = "free_y") +
     ggplot2::labs(x = NULL, y = NULL) +
-    ggplot2::theme_bw() + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+    ggplot2::theme_bw() + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+                                         strip.text.y = ggplot2::element_text(angle = 0, face = "italic"))
+}
+
+#' The kind of data of a query, named at the start of the report
+#' @noRd
+.bc_report_data_kind <- function(input_type, query_length) {
+  if (identical(input_type, "assembly")) return("Nuclear genome assembly (FASTA); loci located with minimap2 and cut with samtools")
+  if (identical(input_type, "reads")) {
+    return("Genome skimming or whole-genome sequencing reads (Illumina, paired-end); plastome and nrDNA assembled with GetOrganelle")
+  }
+  n <- suppressWarnings(max(query_length, na.rm = TRUE))
+  kind <- if (is.finite(n) && n >= 100000) sprintf("Complete plastome (%s bases)", format(n, big.mark = " "))
+          else if (is.finite(n) && n >= 5000) sprintf("Contig or partial plastome (%s bases)", format(n, big.mark = " "))
+          else sprintf("Sanger-type sequence (%s bases; one or a few loci)", if (is.finite(n)) n else "unknown")
+  if (identical(input_type, "genbank")) paste0(kind, ", read from a GenBank flat file") else kind
+}
+
+#' The sources of the library, in words
+#' @noRd
+.bc_report_library_words <- function(libc) {
+  ex <- libc[libc$source == "genbank_plastome", , drop = FALSE]
+  w <- "Sanger records of GenBank (phylotaR)"
+  if (nrow(ex)) w <- paste0(w, " and ", nrow(ex), " loci cut from ", length(unique(sub("__.*$", "", ex$sid))), " GenBank plastomes")
+  w
+}
+
+#' Banner of the report: the logo of the package and its name
+#' @noRd
+.bc_report_banner <- function(subtitle) {
+  f <- system.file("report", "logo.png", package = "PhyloCactus")
+  logo <- if (nzchar(f)) paste0("<img alt=\"PhyloCactus logo\" src=\"data:image/png;base64,",
+                                .bc_base64(readBin(f, "raw", file.size(f))), "\"/>") else ""
+  paste0("<div class=\"banner\">", logo, "<div><h1>\U0001F335 PhyloCactus</h1>",
+         "<p><strong>Molecular identification report</strong></p><p>", .bc_html_escape(subtitle), "</p></div></div>")
 }
 
 #' Build the identification report of one run
@@ -383,7 +444,11 @@ report_barcoding_identification <- function(run_name,
   css <- paste0("<style>body{font-family:Helvetica,Arial,sans-serif;max-width:60em;margin:2em auto;padding:0 1em;color:#222}",
                 "h1{font-size:1.5em}h2{font-size:1.15em;border-bottom:1px solid #ccc;margin-top:1.6em}",
                 "table{border-collapse:collapse;font-size:0.85em;margin:0.5em 0}th,td{border:1px solid #ccc;padding:2px 6px;text-align:left}",
-                "th{background:#f3f3f3}img{max-width:100%}.note{color:#555;font-size:0.9em}</style>")
+                "th{background:#f3f3f3}img{max-width:100%}.note{color:#555;font-size:0.9em}",
+                ".banner{display:flex;align-items:center;gap:1.2em;padding:1em 1.4em;border-radius:10px;color:#fff;",
+                "background:linear-gradient(90deg,#231640 0%,#3B1F5C 45%,#C2387A 80%,#EF5A50 100%);margin-bottom:1.2em}",
+                ".banner img{height:96px;width:auto}.banner h1{margin:0;font-size:1.7em;letter-spacing:0.02em}",
+                ".banner p{margin:0.25em 0 0 0;opacity:0.9}table.glance td:first-child{font-weight:bold;width:7em}</style>")
   lib_sum <- if (nrow(libc)) {
     s <- do.call(rbind, lapply(split(libc, libc$locus), function(x) data.frame(locus = x$locus[1], species = length(unique(x$species)),
                    sequences = nrow(x), from_phylotaR = sum(x$source == "phylotaR"), from_genbank_plastomes = sum(x$source == "genbank_plastome"))))
@@ -395,9 +460,15 @@ report_barcoding_identification <- function(run_name,
     t <- t[order(t$compartment != "plastid", t$locus, method = "radix"), , drop = FALSE]
     named_genera <- sort(unique(t$genus_idtaxa[!is.na(t$genus_idtaxa)]), method = "radix")
     named_species <- unique(c(t$species_idtaxa[!is.na(t$species_idtaxa)], alternatives$species[alternatives$query %in% t$query]))
+    glance <- .bc_html_table(data.frame(
+      item = c("Data", "Library", "Answers", "Reading"),
+      value = c(.bc_report_data_kind(input_type, t$query_length), .bc_report_library_words(libc),
+                sprintf("%d loci: %d named to species (state 1), %d to genus (state 2), %d not assignable (state 3)",
+                        nrow(t), sum(t$state == 1L), sum(t$state == 2L), sum(t$state == 3L)),
+                "Each locus is answered on its own; no call is made across loci (section 3)")), class = "glance")
     sec <- function(i, title, body) sprintf("<h2 id=\"section-%d\">%d. %s</h2>\n%s", i, i, title, body)
     s1 <- paste0(.bc_html_table(data.frame(item = c("Query", "Input", "Input type", "md5 of the input", "Run"),
-                                           value = c(q, get("path"), input_type, get("md5"), run_name))),
+                                           value = c(q, get("path"), .bc_report_data_kind(input_type, t$query_length), get("md5"), run_name))),
                  "<p>Steps of the route: ", if (is.na(get("steps"))) "not recorded" else .bc_html_escape(get("steps")), ". Steps in grey were not needed for this query.</p>",
                  .bc_html_plot(.bc_report_route_plot(input_type, t), width = 9, height = 1.8))
     s2 <- paste0("<p>One answer per locus, each from its own model; state 1 names a species, state 2 a genus, state 3 ",
@@ -431,7 +502,7 @@ report_barcoding_identification <- function(run_name,
     s6 <- if (nrow(sq)) paste0("<p>Sequences per species and locus in the library for the genera named by the query; empty cells ",
                                "are species with no sequence of that locus; species named by the query in bold.</p>",
                                .bc_html_plot(.bc_report_sampling_plot(sq, named_species), width = 8,
-                                             height = 1 + 0.22 * length(unique(sq$species))))
+                                             height = 1 + 0.25 * length(unique(sq$species)) + 0.3 * length(unique(sq$genus))))
           else "<p>No genus was named by any locus.</p>"
     s7 <- if (identical(input_type, "reads")) .bc_html_table(rec[rec$kind %in% c("output", "tool", "command"), , drop = FALSE])
           else "<p>Not applicable: the query is not a set of reads.</p>"
@@ -444,9 +515,9 @@ report_barcoding_identification <- function(run_name,
                  "vary little within genera and many species have one sequence or none in the library (section 6). A state 3 is ",
                  "not evidence that the species is absent from the library; a state 1 relies on the species being in it. If the ",
                  "query comes from a specimen already in the library, its answer is not an independent test.</p>")
-    html <- paste0("<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"/><title>PhyloCactus identification report: ",
-                   .bc_html_escape(q), "</title>", css, "</head><body>\n<h1>PhyloCactus identification report</h1>\n",
-                   "<p class=\"note\">", if (per_run) "Sample" else "Query", " ", .bc_html_escape(q), ", run ", .bc_html_escape(run_name), ".</p>\n",
+    html <- paste0("<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"/><title>\U0001F335 PhyloCactus identification report: ",
+                   .bc_html_escape(q), "</title>", css, "</head><body>\n",
+                   .bc_report_banner(paste0(if (per_run) "Sample " else "Query ", q, " \u00b7 run ", run_name)), "\n", glance, "\n",
                    sec(1, "Query and route", s1), "\n", sec(2, "Answer per locus", s2), "\n",
                    sec(3, "Reading across loci", s3), "\n", sec(4, "Alternatives (not assigned)", s4), "\n",
                    sec(5, "How far to trust each locus", s5), "\n", sec(6, "Sampling of the named genera in the library", s6), "\n",
