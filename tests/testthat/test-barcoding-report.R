@@ -388,3 +388,12 @@ test_that("the report carries the cactus of PhyloCactus in its title", {
   h <- .rep_html(f)
   expect_true(grepl("\U0001F335", h, fixed = TRUE))
 })
+
+test_that("a genus confidence under the first stripe still gives a report", {
+  skip_if_not_installed("Biostrings")
+  t <- .rep_table()
+  t$genus_confidence[t$locus == "trnL-trnF"] <- 1.9
+  f <- .rep_fixture(withr::local_tempdir(), table = t)
+  expect_error(.rep_run(f), NA)
+  expect_true(file.exists(file.path(f$results_dir, "REPORT_run1_q1.html")))
+})
