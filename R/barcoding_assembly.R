@@ -387,6 +387,9 @@ barcoding_outgroup_taxids <- function() {
 #'   GenBank name, cleaned to `Genus_species`: that is what the outgroup of CN2 needs, since a
 #'   checklist of Cactaceae would discard every outgroup name.
 #' @param min_species Integer. A cluster is retained when it holds more than this number of species.
+#' @param extra_records_dir Character or `NULL`. A folder written by [extract_barcoding_plastome_loci()];
+#'   its records are appended to their loci and the registry gains a `source` column (`phylotaR` or
+#'   `genbank_plastome`). `NULL`, the default, leaves the step as it was.
 #'   Defaults to `50`, as in the phylogeny.
 #' @param preferred_parent Character. NCBI Taxonomy ID of the focal ingroup, used to decide which
 #'   cluster keeps a sid that sits in two. Defaults to `"3593"`.
@@ -431,7 +434,8 @@ assemble_barcoding_dataset <- function(wd_path,
                                        taxids = NULL,
                                        ncbi_dr = NULL,
                                        force_download = FALSE,
-                                       phylogeny_map_file = NULL) {
+                                       phylogeny_map_file = NULL,
+                                       extra_records_dir = NULL) {
   .bc_assert_output_dir(output_dir)
 
   if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "PhyloCactus")
@@ -589,10 +593,16 @@ assemble_barcoding_dataset <- function(wd_path,
 
   # 6. Registry, FASTA files and per-locus summary
   registry <- .bc_build_registry(kept[!is.na(kept$species), , drop = FALSE])
-  utils::write.csv(registry, file.path(dir_asm, "TABLE_barcoding_accession_registry.csv"), row.names = FALSE)
-
   sequences <- vapply(registry$sid, function(s) rawToChar(selected@sqs[[s]]@sq), character(1))
   names(sequences) <- registry$sid
+  # Extra records from GenBank plastomes (Phase 8, F2); NULL leaves the step as it was
+  extra <- .bc_add_extra_records(registry, sequences, extra_records_dir)
+  if (!is.null(extra_records_dir)) {
+    log_message("Extra records from ", extra_records_dir, ": ", nrow(extra$registry) - nrow(registry), ".")
+  }
+  registry <- extra$registry
+  sequences <- extra$sequences
+  utils::write.csv(registry, file.path(dir_asm, "TABLE_barcoding_accession_registry.csv"), row.names = FALSE)
   .bc_write_locus_fastas(registry, sequences, dir_asm)
 
   summary_tab <- .bc_locus_summary(registry)
