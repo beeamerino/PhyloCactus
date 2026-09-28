@@ -17,7 +17,8 @@ assemble_barcoding_dataset(
   taxids = NULL,
   ncbi_dr = NULL,
   force_download = FALSE,
-  phylogeny_map_file = NULL
+  phylogeny_map_file = NULL,
+  extra_records_dir = NULL
 )
 }
 \arguments{
@@ -40,8 +41,7 @@ uses the checklist distributed with the package. \code{NA} applies no checklist 
 GenBank name, cleaned to \code{Genus_species}: that is what the outgroup of CN2 needs, since a
 checklist of Cactaceae would discard every outgroup name.}
 
-\item{min_species}{Integer. A cluster is retained when it holds more than this number of species.
-Defaults to \code{50}, as in the phylogeny.}
+\item{min_species}{Integer. A cluster is retained when it holds more than this number of species.}
 
 \item{preferred_parent}{Character. NCBI Taxonomy ID of the focal ingroup, used to decide which
 cluster keeps a sid that sits in two. Defaults to \code{"3593"}.}
@@ -59,6 +59,11 @@ has to be created.}
 \item{phylogeny_map_file}{Character or \code{NULL}. Cluster-to-locus table of the phylogeny, compared
 with the branch's own when it exists. Defaults to
 \verb{1_phylotaR_out_Ingroup/TABLE_CLUSTER_MARKER_ASSIGNMENT_INGROUP.csv} next to \code{wd_path}.}
+
+\item{extra_records_dir}{Character or \code{NULL}. A folder written by \code{\link[=extract_barcoding_plastome_loci]{extract_barcoding_plastome_loci()}};
+its records are appended to their loci and the registry gains a \code{source} column (\code{phylotaR} or
+\code{genbank_plastome}). \code{NULL}, the default, leaves the step as it was.
+Defaults to \code{50}, as in the phylogeny.}
 }
 \value{
 Invisibly, a list with \code{registry}, \code{summary}, \code{marker_map}, \code{comparison} and \code{counts}.
