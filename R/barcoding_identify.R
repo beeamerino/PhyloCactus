@@ -270,16 +270,28 @@
   na
 }
 
+#' Aligned reads are not accepted (decision Z2 of BMM, 28-09)
+#' @noRd
+.bc_stop_aligned_reads <- function(path) {
+  if (grepl("\\.(bam|cram|sam)$", path, ignore.case = TRUE)) {
+    stop("Aligned reads (BAM, CRAM, SAM) are not accepted in 0.5.0. Convert them to FASTQ first, for ",
+         "instance samtools fastq -1 reads_1.fastq.gz -2 reads_2.fastq.gz <file> (after samtools collate for a ",
+         "sorted file), and give the two files to identify_barcoding_reads().", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
 #' The query as a named character vector, from a FASTA path, a DNAStringSet or a character vector
 #' @noRd
 .bc_identify_read_query <- function(query) {
   if (is.character(query) && length(query) == 1L && is.null(names(query)) && file.exists(query)) {
+    .bc_stop_aligned_reads(query)
     first <- readLines(query, n = 1L, warn = FALSE)
     if (grepl("\\.(fastq|fq)(\\.gz)?$", query, ignore.case = TRUE) ||
         (length(first) == 1L && startsWith(first, "@"))) {
-      stop("This is a FASTQ file of raw reads. Raw reads need assembly or mapping first, which is ",
-           "Phase 8 of the branch; step 10 takes sequences (FASTA, a DNAStringSet or a character ",
-           "vector).", call. = FALSE)
+      stop("This is a FASTQ file of raw reads. Raw reads need assembly first: paired Illumina reads go to ",
+           "identify_barcoding_reads(); step 10 takes sequences (FASTA, GenBank, a DNAStringSet or a ",
+           "character vector).", call. = FALSE)
     }
     if (grepl("\\.(gb|gbk|gbff|genbank)$", query, ignore.case = TRUE) ||
         (length(first) == 1L && startsWith(first, "LOCUS"))) {
@@ -338,7 +350,9 @@
 #' (`validation_ws_rate_species_absent`, scheme G), when that table exists and was measured at the
 #' same threshold.
 #'
-#' Raw reads (FASTQ) are not accepted: they need assembly or mapping first.
+#' Raw reads (FASTQ) are not accepted: paired Illumina reads go to [identify_barcoding_reads()], a genome
+#' assembly to [identify_barcoding_assembly()]. Aligned reads (BAM, CRAM, SAM) stop with the command that
+#' converts them to FASTQ.
 #'
 #' @param query A FASTA or GenBank flat-file path (a GenBank record is named by its accession), a
 #'   `Biostrings::DNAStringSet` or a named character vector of sequences.
