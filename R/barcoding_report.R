@@ -489,9 +489,15 @@ report_barcoding_identification <- function(run_name,
     t <- t[order(t$compartment != "plastid", t$locus, method = "radix"), , drop = FALSE]
     named_genera <- sort(unique(t$genus_idtaxa[!is.na(t$genus_idtaxa)]), method = "radix")
     named_species <- unique(c(t$species_idtaxa[!is.na(t$species_idtaxa)], alternatives$species[alternatives$query %in% t$query]))
+    specimen <- if (any(rec$kind == "sample")) {
+      dec <- get("declared_species"); vou <- get("voucher")
+      paste0("declared species: ", if (is.na(dec)) "not declared" else dec,
+             "; voucher: ", if (is.na(vou)) "none (no voucher: the leakage rule per specimen cannot be applied to this sample)" else vou,
+             "; answer against the declared species: ", .bc_declared_comparison(t, dec))
+    } else NULL
     glance <- .bc_html_table(data.frame(
-      item = c("Data", "Loci found", "Library", "Answers", "Reading"),
-      value = c(.bc_report_data_kind(input_type, t$query_length), .bc_report_loci_found(t, get("loci_declared")),
+      item = c("Data", if (!is.null(specimen)) "Specimen", "Loci found", "Library", "Answers", "Reading"),
+      value = c(.bc_report_data_kind(input_type, t$query_length), specimen, .bc_report_loci_found(t, get("loci_declared")),
                 .bc_report_library_words(libc),
                 sprintf("%d loci: %d named to species (state 1), %d to genus (state 2), %d not assignable (state 3)",
                         nrow(t), sum(t$state == 1L), sum(t$state == 2L), sum(t$state == 3L)),
