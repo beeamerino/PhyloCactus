@@ -183,6 +183,19 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
   }))
 }
 
+#' Candidates of state 2, one row per locus, for the HTML
+#' @noRd
+.bc_report_candidates_summary <- function(al) {
+  c2 <- al[al$kind == "candidate_of_named_genus", , drop = FALSE]
+  if (!nrow(c2)) return(NULL)
+  key <- paste(if ("query" %in% names(c2)) c2$query else "", c2$locus, sep = "\r")
+  do.call(rbind, lapply(split(seq_len(nrow(c2)), factor(key, levels = unique(key))), function(i) {
+    x <- c2[i, , drop = FALSE]
+    data.frame(locus = x$locus[1], genus = x$genus[1], species_in_library = nrow(x),
+               species = paste(sort(x$species, method = "radix"), collapse = ", "), stringsAsFactors = FALSE)
+  }))
+}
+
 #' Route diagram of one query (Fig. 1 of Zeng et al. 2026, as run for this query)
 #' @noRd
 .bc_report_route_plot <- function(input_type, t) {
@@ -243,7 +256,8 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
 #'
 #' Reads `TABLE_barcoding_identify_<run_name>.csv` and `RUN_<run_name>.csv` from `results_dir` and
 #' writes, for each query, `REPORT_<run_name>_<query>.html`, a self-contained page written by the
-#' package (no `pandoc`), and for the run a set of CSV files: `REPORT_<run_name>_answer.csv`,
+#' package (no `pandoc`); an assembly or a set of reads is one sample and gets one
+#' `REPORT_<run_name>.html` that reads its regions together. For the run, a set of CSV files: `REPORT_<run_name>_answer.csv`,
 #' `_alternatives.csv`, `_agreement.csv`, `_sampling.csv` and `_provenance.csv`.
 #'
 #' The report has nine sections: (1) query and route; (2) answer per locus; (3) reading across loci,
@@ -284,6 +298,10 @@ report_barcoding_identification <- function(run_name,
   threshold <- suppressWarnings(as.numeric(get("threshold")))
   if (is.na(threshold)) threshold <- tab$threshold[1]
   tab$compartment <- ifelse(tab$locus %in% .bc_nuclear_loci(), "nuclear", "plastid")
+  # One report per sample: a query of sequences is a sample; an assembly or a set of reads is one
+  # sample whose regions (scaffolds, contigs) are rows of the same table
+  per_run <- input_type %in% c("assembly", "reads")
+  tab$unit <- if (per_run) run_name else tab$query
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
   # Answer
@@ -315,8 +333,8 @@ report_barcoding_identification <- function(run_name,
 
   # Reading across loci, descriptive
   agree <- list()
-  for (q in unique(tab$query)) {
-    x <- tab[tab$query == q, , drop = FALSE]
+  for (q in unique(tab$unit)) {
+    x <- tab[tab$unit == q, , drop = FALSE]
     for (rk in c("genus", "species")) {
       col <- paste0(rk, "_idtaxa"); cf <- paste0(rk, "_confidence")
       for (tx in sort(unique(x[[col]][!is.na(x[[col]])]), method = "radix")) {
@@ -372,11 +390,11 @@ report_barcoding_identification <- function(run_name,
     s[order(s$locus, method = "radix"), , drop = FALSE]
   } else NULL
   paths <- character(0)
-  for (q in unique(tab$query)) {
-    t <- tab[tab$query == q, , drop = FALSE]
+  for (q in unique(tab$unit)) {
+    t <- tab[tab$unit == q, , drop = FALSE]
     t <- t[order(t$compartment != "plastid", t$locus, method = "radix"), , drop = FALSE]
     named_genera <- sort(unique(t$genus_idtaxa[!is.na(t$genus_idtaxa)]), method = "radix")
-    named_species <- unique(c(t$species_idtaxa[!is.na(t$species_idtaxa)], alternatives$species[alternatives$query == q]))
+    named_species <- unique(c(t$species_idtaxa[!is.na(t$species_idtaxa)], alternatives$species[alternatives$query %in% t$query]))
     sec <- function(i, title, body) sprintf("<h2 id=\"section-%d\">%d. %s</h2>\n%s", i, i, title, body)
     s1 <- paste0(.bc_html_table(data.frame(item = c("Query", "Input", "Input type", "md5 of the input", "Run"),
                                            value = c(q, get("path"), input_type, get("md5"), run_name))),
@@ -385,16 +403,23 @@ report_barcoding_identification <- function(run_name,
     s2 <- paste0("<p>One answer per locus, each from its own model; state 1 names a species, state 2 a genus, state 3 ",
                  "is not assignable. The dashed line is the threshold of ", threshold, ".</p>",
                  .bc_html_plot(.bc_report_answer_plot(t, threshold)),
-                 .bc_html_table(answer[answer$query == q, setdiff(names(answer), "query"), drop = FALSE]))
+                 .bc_html_table(answer[answer$query %in% t$query, if (per_run) names(answer) else setdiff(names(answer), "query"),
+                                       drop = FALSE]))
     ag <- agreement[agreement$query == q, setdiff(names(agreement), "query"), drop = FALSE]
     s3 <- paste0("<p>The loci are read side by side; no call is made across them (rule E8 of the validation plan). ",
                  "For each genus and species named by any locus, at any confidence: the loci that name it and how many of them ",
                  "assign it at the threshold. Loci with no answer are listed under rank <em>none</em>.</p>", .bc_html_table(ag))
-    al <- alternatives[alternatives$query == q, setdiff(names(alternatives), "query"), drop = FALSE]
+    al <- alternatives[alternatives$query %in% t$query, if (per_run) names(alternatives) else setdiff(names(alternatives), "query"),
+                       drop = FALSE]
     s4 <- paste0("<p>Alternatives under the threshold of ", threshold, ", not assigned. IdTaxa gives one path per query and ",
                  "locus: the alternatives are that path when it falls under the threshold, and in state 2 the species of the ",
                  "named genus in the library. They are not identifications; they say where the data point when they do not ",
-                 "decide.</p>", .bc_html_table(al))
+                 "decide.</p>",
+                 "<p>Best path under the threshold, per locus:</p>",
+                 .bc_html_table(al[al$kind == "best_path_under_threshold", setdiff(names(al), c("kind", "assigned")), drop = FALSE]),
+                 "<p>Species of the named genus in the library, for the loci in state 2 (all of them in ",
+                 "<code>REPORT_", .bc_html_escape(run_name), "_alternatives.csv</code>):</p>",
+                 .bc_html_table(.bc_report_candidates_summary(al)))
     rates <- unique(t[, c("locus", "validation_ws_rate_species_present", "validation_ws_rate_species_absent")])
     gd_q <- if (is.null(gd)) NULL else gd[gd$genus %in% named_genera, , drop = FALSE]
     s5 <- paste0("<p>Wrong-species rate of each locus in the validation (6D): with the species of the query in the library ",
@@ -421,13 +446,14 @@ report_barcoding_identification <- function(run_name,
                  "query comes from a specimen already in the library, its answer is not an independent test.</p>")
     html <- paste0("<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"/><title>PhyloCactus identification report: ",
                    .bc_html_escape(q), "</title>", css, "</head><body>\n<h1>PhyloCactus identification report</h1>\n",
-                   "<p class=\"note\">Query ", .bc_html_escape(q), ", run ", .bc_html_escape(run_name), ".</p>\n",
+                   "<p class=\"note\">", if (per_run) "Sample" else "Query", " ", .bc_html_escape(q), ", run ", .bc_html_escape(run_name), ".</p>\n",
                    sec(1, "Query and route", s1), "\n", sec(2, "Answer per locus", s2), "\n",
                    sec(3, "Reading across loci", s3), "\n", sec(4, "Alternatives (not assigned)", s4), "\n",
                    sec(5, "How far to trust each locus", s5), "\n", sec(6, "Sampling of the named genera in the library", s6), "\n",
                    sec(7, "Reads", s7), "\n", sec(8, "Library, models and software", s8), "\n", sec(9, "Limits", s9),
                    "\n</body></html>\n")
-    p <- file.path(output_dir, paste0("REPORT_", run_name, "_", gsub("[^A-Za-z0-9._-]", "_", q), ".html"))
+    p <- file.path(output_dir, if (per_run) paste0("REPORT_", run_name, ".html")
+                               else paste0("REPORT_", run_name, "_", gsub("[^A-Za-z0-9._-]", "_", q), ".html"))
     writeLines(html, p, useBytes = TRUE)
     paths <- c(paths, p)
   }
