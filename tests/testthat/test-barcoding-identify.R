@@ -496,3 +496,41 @@ test_that("the second pass follows only a genus the first pass assigns (J3b)", {
   expect_equal(r$genus_core_trimmed, 0L)
   expect_lte(r$region_length, 320L)
 })
+
+# ---- H5: GenBank flat files as queries (Phase 8, 28-09) -----------------------------------------------
+
+.idn_gb <- function(accession, organism, sequence) {
+  s <- tolower(sequence)
+  starts <- seq(1, nchar(s), by = 60)
+  origin <- vapply(starts, function(i) sprintf("%9d %s", i, substr(s, i, min(i + 59, nchar(s)))), "")
+  c(sprintf("LOCUS       %s %d bp    DNA     circular PLN 01-JAN-2026", sub("\\..*$", "", accession), nchar(s)),
+    sprintf("VERSION     %s", accession), "FEATURES             Location/Qualifiers",
+    sprintf("                     /organism=\"%s\"", organism), "ORIGIN", origin, "//")
+}
+
+test_that("a GenBank flat file is read as queries named by their accession", {
+  tmp <- withr::local_tempdir()
+  set.seed(71L)
+  a <- .idn_random(500); b <- .idn_random(700)
+  f <- file.path(tmp, "plastomes.gb")
+  writeLines(c(.idn_gb("OQ000010.1", "Opuntia alpha", a), .idn_gb("OQ000011.1", "Cereus beta", b)), f)
+  q <- .bc_identify_read_query(f)
+  expect_identical(names(q), c("OQ000010.1", "OQ000011.1"))
+  expect_identical(unname(q), toupper(c(a, b)))
+  # Recognised by its first line whatever the extension
+  f2 <- file.path(tmp, "plastomes.txt")
+  file.copy(f, f2)
+  expect_identical(.bc_identify_read_query(f2), q)
+})
+
+test_that("a plastome in a GenBank flat file is identified as the same plastome in FASTA", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  set.seed(72L)
+  s <- paste0(.idn_random(5000), unname(f$seqs$matK[13]), .idn_random(5000), unname(f$seqs$rbcL[1]), .idn_random(5000))
+  gb <- file.path(dirname(f$library_dir), "p.gbk")
+  writeLines(.idn_gb("OQ000012.1", "Mammillaria alpha", s), gb)
+  a <- .idn_run(f, gb, run_name = "gb")$tab
+  b <- .idn_run(f, c(OQ000012.1 = s), run_name = "fa")$tab
+  expect_identical(a[, setdiff(names(a), "validation_ws_rate_species_present")], b[, setdiff(names(b), "validation_ws_rate_species_present")])
+})
