@@ -281,7 +281,13 @@
            "Phase 8 of the branch; step 10 takes sequences (FASTA, a DNAStringSet or a character ",
            "vector).", call. = FALSE)
     }
-    query <- Biostrings::readDNAStringSet(query)
+    if (grepl("\\.(gb|gbk|gbff|genbank)$", query, ignore.case = TRUE) ||
+        (length(first) == 1L && startsWith(first, "LOCUS"))) {
+      pl <- .bc_parse_genbank(readLines(query, warn = FALSE))
+      query <- stats::setNames(pl$sequence, pl$accession)
+    } else {
+      query <- Biostrings::readDNAStringSet(query)
+    }
   }
   if (methods::is(query, "DNAStringSet")) query <- stats::setNames(as.character(query), names(query))
   if (!is.character(query) || length(query) == 0L) {
@@ -334,7 +340,8 @@
 #'
 #' Raw reads (FASTQ) are not accepted: they need assembly or mapping first.
 #'
-#' @param query A FASTA path, a `Biostrings::DNAStringSet` or a named character vector of sequences.
+#' @param query A FASTA or GenBank flat-file path (a GenBank record is named by its accession), a
+#'   `Biostrings::DNAStringSet` or a named character vector of sequences.
 #' @param locus Character or `NULL`. Loci to test; `NULL` tests every locus of the library.
 #' @param library_dir Character. Directory of step 4, with the `LIB_<locus>.fasta` files.
 #' @param metrics_dir Character. Directory of step 11, with
