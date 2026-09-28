@@ -30,7 +30,8 @@ Invisibly, the paths of the HTML reports.
 \description{
 Reads \verb{TABLE_barcoding_identify_<run_name>.csv} and \verb{RUN_<run_name>.csv} from \code{results_dir} and
 writes, for each query, \verb{REPORT_<run_name>_<query>.html}, a self-contained page written by the
-package (no \code{pandoc}), and for the run a set of CSV files: \verb{REPORT_<run_name>_answer.csv},
+package (no \code{pandoc}); an assembly or a set of reads is one sample and gets one
+\verb{REPORT_<run_name>.html} that reads its regions together. For the run, a set of CSV files: \verb{REPORT_<run_name>_answer.csv},
 \verb{_alternatives.csv}, \verb{_agreement.csv}, \verb{_sampling.csv} and \verb{_provenance.csv}.
 }
 \details{
