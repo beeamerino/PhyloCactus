@@ -445,11 +445,11 @@ report_barcoding_identification <- function(run_name,
                                                   max_confidence = max(x[[cf]][k], na.rm = TRUE), stringsAsFactors = FALSE)
       }
     }
-    k <- which(is.na(x$genus_idtaxa))
-    if (length(k)) {
-      agree[[length(agree) + 1L]] <- data.frame(query = q, rank = "none", taxon = NA_character_, n_loci = length(k), n_assigned = 0L,
-                                                loci = paste(sort(x$locus[k], method = "radix"), collapse = "; "),
-                                                max_confidence = NA_real_, stringsAsFactors = FALSE)
+    # Loci with no answer in any sequence of the sample, each counted once
+    none <- setdiff(sort(unique(x$locus), method = "radix"), x$locus[!is.na(x$genus_idtaxa)])
+    if (length(none)) {
+      agree[[length(agree) + 1L]] <- data.frame(query = q, rank = "none", taxon = NA_character_, n_loci = length(none), n_assigned = 0L,
+                                                loci = paste(none, collapse = "; "), max_confidence = NA_real_, stringsAsFactors = FALSE)
     }
   }
   agreement <- do.call(rbind, agree)
@@ -516,11 +516,18 @@ report_barcoding_identification <- function(run_name,
                                            value = c(q, get("path"), .bc_report_data_kind(input_type, t$query_length), get("md5"), run_name))),
                  "<p>Steps of the route: ", if (is.na(get("steps"))) "not recorded" else .bc_html_escape(get("steps")), ". Steps in grey were not needed for this query.</p>",
                  .bc_html_plot(.bc_report_route_plot(input_type, t), width = 9, height = 1.8))
+    # The loci found only; the loci absent from the query are named once (every row stays in the CSV)
+    fnd <- !t$reason %in% c("no_overlap", "assembly_failed", "single_species_library")
+    tf <- t[fnd, , drop = FALSE]
+    nf <- setdiff(sort(unique(t$locus), method = "radix"), tf$locus)
+    af <- answer[paste(answer$query, answer$locus) %in% paste(tf$query, tf$locus), if (per_run) names(answer) else setdiff(names(answer), "query"),
+                 drop = FALSE]
     s2 <- paste0("<p>One answer per locus, each from its own model; state 1 names a species, state 2 a genus, state 3 ",
                  "is not assignable. The dashed line is the threshold of ", threshold, ".</p>",
-                 .bc_html_plot(.bc_report_answer_plot(t, threshold)),
-                 .bc_html_table(answer[answer$query %in% t$query, if (per_run) names(answer) else setdiff(names(answer), "query"),
-                                       drop = FALSE]))
+                 if (nrow(tf)) .bc_html_plot(.bc_report_answer_plot(tf, threshold)) else "<p>No locus of the library was found.</p>",
+                 .bc_html_table(af),
+                 "<p>Loci not found in the ", if (per_run) "sample" else "query", ": ",
+                 if (length(nf)) .bc_html_escape(paste(nf, collapse = ", ")) else "none", ".</p>")
     ag <- agreement[agreement$query == q, setdiff(names(agreement), "query"), drop = FALSE]
     s3 <- paste0("<p>The loci are read side by side; no call is made across them (rule E8 of the validation plan). ",
                  "For each genus and species named by any locus, at any confidence: the loci that name it and how many of them ",
