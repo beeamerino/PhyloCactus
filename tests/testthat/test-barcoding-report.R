@@ -475,3 +475,25 @@ test_that("the answers at the start count the loci found only, and name the loci
   expect_true(grepl("3 loci found: 1 named to species (state 1), 1 to genus (state 2), 1 not assignable (state 3)", top, fixed = TRUE))
   expect_true(grepl("not found: ITS", top, fixed = TRUE))
 })
+
+test_that("a sample of several sequences shows the loci found only, and counts the loci not found once", {
+  skip_if_not_installed("Biostrings")
+  a <- .rep_table("seqA"); a[a$locus != "matK", c("state", "predicted_species", "predicted_genus", "genus_idtaxa", "species_idtaxa",
+                                               "genus_confidence", "species_confidence")] <- list(3L, NA, NA, NA, NA, NA, NA)
+  a$reason[a$locus != "matK"] <- "no_overlap"; a$path[a$locus != "matK"] <- "none"
+  b <- .rep_table("seqB"); b[b$locus != "rbcL", c("state", "predicted_species", "predicted_genus", "genus_idtaxa", "species_idtaxa",
+                                               "genus_confidence", "species_confidence")] <- list(3L, NA, NA, NA, NA, NA, NA)
+  b$reason[b$locus != "rbcL"] <- "no_overlap"; b$path[b$locus != "rbcL"] <- "none"
+  rec <- rbind(.rep_record(), data.frame(kind = "setting", name = "sample", value = "spec"))
+  f <- .rep_fixture(withr::local_tempdir(), table = rbind(a, b), record = rec)
+  .rep_run(f)
+  expect_equal(nrow(.rep_csv(f, "answer")), 8L)
+  ag <- .rep_csv(f, "agreement")
+  none <- ag[ag$rank == "none", ]
+  expect_equal(none$n_loci, 2L)
+  expect_identical(none$loci, "ITS; trnL-trnF")
+  h <- paste(readLines(file.path(f$results_dir, "REPORT_run1.html"), warn = FALSE), collapse = "\n")
+  s2 <- sub(".*id=\"section-2\"(.*?)id=\"section-3\".*", "\\1", h)
+  expect_false(grepl("no_overlap", s2, fixed = TRUE))
+  expect_true(grepl("Loci not found in the sample: ITS, trnL-trnF", s2, fixed = TRUE))
+})
