@@ -445,10 +445,10 @@ report_barcoding_identification <- function(run_name,
                 "h1{font-size:1.5em}h2{font-size:1.15em;border-bottom:1px solid #ccc;margin-top:1.6em}",
                 "table{border-collapse:collapse;font-size:0.85em;margin:0.5em 0}th,td{border:1px solid #ccc;padding:2px 6px;text-align:left}",
                 "th{background:#f3f3f3}img{max-width:100%}.note{color:#555;font-size:0.9em}",
-                ".banner{display:flex;align-items:center;gap:1.2em;padding:1em 1.4em;border-radius:10px;color:#fff;",
-                "background:linear-gradient(90deg,#231640 0%,#3B1F5C 45%,#C2387A 80%,#EF5A50 100%);margin-bottom:1.2em}",
-                ".banner img{height:96px;width:auto}.banner h1{margin:0;font-size:1.7em;letter-spacing:0.02em}",
-                ".banner p{margin:0.25em 0 0 0;opacity:0.9}table.glance td:first-child{font-weight:bold;width:7em}</style>")
+                ".banner{display:flex;align-items:center;gap:1.2em;padding:0.4em 0 0.9em 0;color:#231640;",
+                "border-bottom:2px solid #231640;margin-bottom:1.2em}",
+                ".banner img{height:120px;width:auto}.banner h1{margin:0;font-size:1.8em;letter-spacing:0.02em}",
+                ".banner p{margin:0.25em 0 0 0;color:#444}table.glance td:first-child{font-weight:bold;width:7em}</style>")
   lib_sum <- if (nrow(libc)) {
     s <- do.call(rbind, lapply(split(libc, libc$locus), function(x) data.frame(locus = x$locus[1], species = length(unique(x$species)),
                    sequences = nrow(x), from_phylotaR = sum(x$source == "phylotaR"), from_genbank_plastomes = sum(x$source == "genbank_plastome"))))
