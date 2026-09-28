@@ -93,15 +93,17 @@
 #' The run record of one identification (IR1), written as RUN_<run_name>.csv
 #' @noRd
 .bc_write_run_record <- function(dir, run_name, input_path, input_md5, input_type, route, library_dir, loci,
-                                 models_dir, threshold, seed, min_overlap, tools = character(0), extra = NULL) {
+                                 models_dir, threshold, seed, min_overlap, tools = character(0), extra = NULL,
+                                 loci_declared = NULL) {
   lib_files <- file.path(library_dir, paste0("LIB_", loci, ".fasta"))
   mod_files <- file.path(models_dir, paste0("MODEL_idtaxa_", loci, ".rds"))
   mod_files <- mod_files[file.exists(mod_files)]
   d <- rbind(
     data.frame(kind = "input", name = c("path", "md5", "input_type"), value = c(input_path, input_md5, input_type)),
     data.frame(kind = "route", name = "steps", value = paste(route, collapse = "; ")),
-    data.frame(kind = "setting", name = c("run_name", "threshold", "seed", "min_overlap", "date"),
+    data.frame(kind = "setting", name = c("run_name", "threshold", "seed", "min_overlap", "loci_declared", "date"),
                value = c(run_name, format(threshold), format(seed), format(min_overlap),
+                         if (length(loci_declared)) paste(loci_declared, collapse = ", ") else "none",
                          format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"))),
     .bc_software_record(tools),
     data.frame(kind = "library", name = basename(lib_files), value = unname(tools::md5sum(lib_files))),
@@ -313,6 +315,31 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
          "<p><strong>Molecular identification report</strong></p><p>", .bc_html_escape(subtitle), "</p></div></div>")
 }
 
+#' The loci found in the query, and whether they were declared or detected
+#' @noRd
+.bc_report_loci_found <- function(t, declared) {
+  found <- sort(unique(t$locus[!t$reason %in% c("no_overlap", "assembly_failed")]), method = "radix")
+  how <- if (is.na(declared) || identical(declared, "none")) {
+    "detected by overlap with the library; no locus was declared, so every locus of the library was tested"
+  } else paste0("declared by the user: ", declared)
+  paste0(if (length(found)) paste(found, collapse = ", ") else "none", " (", how, ")")
+}
+
+#' Footer of the report: version of PhyloCactus and how to cite it
+#' @noRd
+.bc_report_footer <- function(run_date) {
+  v <- tryCatch(as.character(utils::packageVersion("PhyloCactus")), error = function(e) "unknown")
+  year <- if (!is.na(run_date) && grepl("^[0-9]{4}", run_date)) substr(run_date, 1, 4) else format(Sys.Date(), "%Y")
+  cit <- tryCatch(suppressWarnings(format(utils::citation("PhyloCactus"), style = "text")), error = function(e) character(0))
+  cit <- if (length(cit)) paste(cit, collapse = " ") else
+    paste0("Meri\u00f1o, B. M. (", year, "). PhyloCactus. R package version ", v, ". https://github.com/beeamerino/PhyloCactus")
+  cit <- gsub("(????)", paste0("(", year, ")"), cit, fixed = TRUE)
+  cit <- gsub("\\s+", " ", gsub("[_<>]", "", cit))
+  paste0("<footer><p>Report written by PhyloCactus ", .bc_html_escape(v), " \U0001F335</p>",
+         "<p><strong>How to cite:</strong> ", .bc_html_escape(cit),
+         " Until a publication describes PhyloCactus, cite the repository as above.</p></footer>")
+}
+
 #' Build the identification report of one run
 #'
 #' Reads `TABLE_barcoding_identify_<run_name>.csv` and `RUN_<run_name>.csv` from `results_dir` and
@@ -444,7 +471,7 @@ report_barcoding_identification <- function(run_name,
   css <- paste0("<style>body{font-family:Helvetica,Arial,sans-serif;max-width:60em;margin:2em auto;padding:0 1em;color:#222}",
                 "h1{font-size:1.5em}h2{font-size:1.15em;border-bottom:1px solid #ccc;margin-top:1.6em}",
                 "table{border-collapse:collapse;font-size:0.85em;margin:0.5em 0}th,td{border:1px solid #ccc;padding:2px 6px;text-align:left}",
-                "th{background:#f3f3f3}img{max-width:100%}.note{color:#555;font-size:0.9em}",
+                "th{background:#f3f3f3}img{max-width:100%}footer{margin-top:2.5em;padding-top:0.8em;border-top:2px solid #231640;font-size:0.85em;color:#444}.note{color:#555;font-size:0.9em}",
                 ".banner{display:flex;align-items:center;gap:1.2em;padding:0.4em 0 0.9em 0;color:#231640;",
                 "border-bottom:2px solid #231640;margin-bottom:1.2em}",
                 ".banner img{height:120px;width:auto}.banner h1{margin:0;font-size:1.8em;letter-spacing:0.02em}",
@@ -461,8 +488,9 @@ report_barcoding_identification <- function(run_name,
     named_genera <- sort(unique(t$genus_idtaxa[!is.na(t$genus_idtaxa)]), method = "radix")
     named_species <- unique(c(t$species_idtaxa[!is.na(t$species_idtaxa)], alternatives$species[alternatives$query %in% t$query]))
     glance <- .bc_html_table(data.frame(
-      item = c("Data", "Library", "Answers", "Reading"),
-      value = c(.bc_report_data_kind(input_type, t$query_length), .bc_report_library_words(libc),
+      item = c("Data", "Loci found", "Library", "Answers", "Reading"),
+      value = c(.bc_report_data_kind(input_type, t$query_length), .bc_report_loci_found(t, get("loci_declared")),
+                .bc_report_library_words(libc),
                 sprintf("%d loci: %d named to species (state 1), %d to genus (state 2), %d not assignable (state 3)",
                         nrow(t), sum(t$state == 1L), sum(t$state == 2L), sum(t$state == 3L)),
                 "Each locus is answered on its own; no call is made across loci (section 3)")), class = "glance")
@@ -522,7 +550,7 @@ report_barcoding_identification <- function(run_name,
                    sec(3, "Reading across loci", s3), "\n", sec(4, "Alternatives (not assigned)", s4), "\n",
                    sec(5, "How far to trust each locus", s5), "\n", sec(6, "Sampling of the named genera in the library", s6), "\n",
                    sec(7, "Reads", s7), "\n", sec(8, "Library, models and software", s8), "\n", sec(9, "Limits", s9),
-                   "\n</body></html>\n")
+                   "\n", .bc_report_footer(get("date")), "\n</body></html>\n")
     p <- file.path(output_dir, if (per_run) paste0("REPORT_", run_name, ".html")
                                else paste0("REPORT_", run_name, "_", gsub("[^A-Za-z0-9._-]", "_", q), ".html"))
     writeLines(html, p, useBytes = TRUE)

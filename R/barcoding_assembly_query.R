@@ -197,7 +197,8 @@ identify_barcoding_assembly <- function(assembly,
                        library_dir = library_dir, loci = loci, models_dir = file.path(output_dir, "models"),
                        threshold = threshold, seed = seed, min_overlap = min_overlap,
                        tools = c(minimap2 = .bc_tool_version(exe[[1]]), samtools = .bc_tool_version(exe[[2]])),
-                       extra = data.frame(kind = "setting", name = c("flank", "low_mapq"), value = c(format(flank), format(low_mapq))))
+                       extra = data.frame(kind = "setting", name = c("flank", "low_mapq"), value = c(format(flank), format(low_mapq))),
+                       loci_declared = locus)
   .bc_identify_banner(tab, out_file)
   if (isTRUE(report)) {
     report_barcoding_identification(run_name, results_dir = output_dir, library_dir = library_dir, metrics_dir = metrics_dir)
