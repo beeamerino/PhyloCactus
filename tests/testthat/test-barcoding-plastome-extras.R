@@ -186,3 +186,18 @@ test_that("a RefSeq copy of a plastome already downloaded adds nothing and is li
   expect_identical(du$duplicate_of, "OQ000001.1")
   expect_true(grepl("NOT refseq[filter]", eval(formals(extract_barcoding_plastome_loci)$query), fixed = TRUE))
 })
+
+test_that("each extra record carries the md5 of the library file that set its extent (N1)", {
+  # One folder 0 for both branches (28-09): the extent of a record depends on the library it was cut
+  # with, so the record says which one.
+  tmp <- withr::local_tempdir()
+  f <- .pex_library(tmp)
+  gb <- .pex_gb("NC_000008.1", "Opuntia alpha", .pex_plastome(f))
+  x <- .pex_run(f, .pex_fetch(gb), tmp)
+  rec <- utils::read.csv(file.path(x$out, "TABLE_genomic_extra_records.csv"), stringsAsFactors = FALSE)
+  expect_true("library_md5" %in% names(rec))
+  for (l in rec$locus) {
+    expect_identical(rec$library_md5[rec$locus == l],
+                     unname(tools::md5sum(file.path(f$dir, paste0("LIB_", l, ".fasta")))))
+  }
+})
