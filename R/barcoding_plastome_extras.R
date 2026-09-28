@@ -132,7 +132,8 @@
 #' Writes to `output_dir`: `downloads/<accession>.gb`, `MANIFEST.csv` (accession, organism, length,
 #' md5, query, date), `extra_records.fasta` (headers `Genus_species|sid`),
 #' `TABLE_genomic_extra_records.csv` (sid, accession, species, organism, locus, region_start,
-#' region_end, strand, region_length, other_windows, md5), `TABLE_skipped_same_specimen.csv` and
+#' region_end, strand, region_length, other_windows, md5 of the plastome file, library_md5 of the
+#' `LIB_<locus>.fasta` that set the extent), `TABLE_skipped_same_specimen.csv` and
 #' `TABLE_unmatched_names.csv`.
 #'
 #' @param query Character. GenBank query of the plastomes.
@@ -188,6 +189,8 @@ extract_barcoding_plastome_loci <- function(query = paste0("Cactaceae[Organism] 
 
   loci <- sub("^LIB_(.*)\\.fasta$", "\\1", list.files(library_dir, pattern = "^LIB_.*\\.fasta$"))
   pools <- lapply(stats::setNames(loci, loci), function(l) .bc_locus_pools(library_dir, l))
+  # The extent of a record is set by the library it is cut with (N1, 28-09)
+  lib_md5 <- vapply(loci, function(l) unname(tools::md5sum(file.path(library_dir, paste0("LIB_", l, ".fasta")))), "")
 
   # Vouchers of the library accessions of the species that come with a voucher
   lib_v <- data.frame(sid = character(0), voucher = character(0), stringsAsFactors = FALSE)
@@ -218,13 +221,15 @@ extract_barcoding_plastome_loci <- function(query = paste0("Cactaceae[Organism] 
       records[[length(records) + 1L]] <- data.frame(
         sid = sid, accession = pl$accession[i], species = pl$species[i], organism = pl$organism[i], locus = l,
         region_start = reg$start, region_end = reg$end, strand = reg$strand,
-        region_length = nchar(reg$sequence), other_windows = reg$other, md5 = pl$md5[i], stringsAsFactors = FALSE)
+        region_length = nchar(reg$sequence), other_windows = reg$other, md5 = pl$md5[i],
+        library_md5 = lib_md5[[l]], stringsAsFactors = FALSE)
       seqs[paste0(pl$species[i], "|", sid)] <- reg$sequence
     }
   }
   empty_rec <- data.frame(sid = character(0), accession = character(0), species = character(0), organism = character(0),
                           locus = character(0), region_start = integer(0), region_end = integer(0), strand = character(0),
-                          region_length = integer(0), other_windows = integer(0), md5 = character(0))
+                          region_length = integer(0), other_windows = integer(0), md5 = character(0),
+                          library_md5 = character(0))
   records <- if (length(records)) do.call(rbind, records) else empty_rec
   skipped <- if (length(skipped)) do.call(rbind, skipped) else
     data.frame(accession = character(0), species = character(0), locus = character(0), library_sid = character(0),
