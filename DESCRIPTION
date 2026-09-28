@@ -43,6 +43,7 @@ Imports:
     phylotaR
 Suggests:
     testthat (>= 3.0.0),
+    rentrez,
     blastula,
     withr,
     phytools,
