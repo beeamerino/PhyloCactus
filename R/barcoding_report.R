@@ -318,7 +318,7 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
 #' The loci found in the query, and whether they were declared or detected
 #' @noRd
 .bc_report_loci_found <- function(t, declared) {
-  found <- sort(unique(t$locus[!t$reason %in% c("no_overlap", "assembly_failed")]), method = "radix")
+  found <- sort(unique(t$locus[!t$reason %in% c("no_overlap", "assembly_failed", "single_species_library")]), method = "radix")
   how <- if (is.na(declared) || identical(declared, "none")) {
     "detected by overlap with the library; no locus was declared, so every locus of the library was tested"
   } else paste0("declared by the user: ", declared)

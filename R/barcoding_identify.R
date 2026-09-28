@@ -350,6 +350,9 @@
 #' (`validation_ws_rate_species_absent`, scheme G), when that table exists and was measured at the
 #' same threshold.
 #'
+#' A locus whose library holds a single species cannot be trained: its rows are state 3 with reason
+#' `single_species_library`.
+#'
 #' Raw reads (FASTQ) are not accepted: paired Illumina reads go to [identify_barcoding_reads()], a genome
 #' assembly to [identify_barcoding_assembly()]. Aligned reads (BAM, CRAM, SAM) stop with the command that
 #' converts them to FASTQ.
@@ -451,6 +454,22 @@ identify_barcoding_query <- function(query,
 
   rows <- list()
   for (l in loci) {
+    if (length(unique(lib$species[lib$locus == l])) < 2L) {
+      # IdTaxa cannot be trained on one species: every query is state 3 for this locus, with its reason
+      message("Locus ", l, ": the library holds one species only; IdTaxa cannot be trained and the locus is state 3 ",
+              "(single_species_library).")
+      for (i in seq_along(q)) {
+        rows[[length(rows) + 1L]] <- cbind(
+          data.frame(query = names(q)[i], locus = l, query_length = nchar(q[i]), .qi = i, stringsAsFactors = FALSE),
+          data.frame(path = "none", region_start = NA_integer_, region_end = NA_integer_, region_length = NA_integer_,
+                     other_windows = NA_integer_, orientation = NA_character_, core_trimmed = NA_integer_,
+                     genus_core_trimmed = NA_integer_, stringsAsFactors = FALSE),
+          .bc_prediction_row(3L, reason = "single_species_library"),
+          data.frame(genus_idtaxa = NA_character_, species_idtaxa = NA_character_, genus_confidence = NA_real_,
+                     species_confidence = NA_real_, stringsAsFactors = FALSE))
+      }
+      next
+    }
     wl <- .bc_identify_model(library_dir, lib, l, seed, models_dir)
     width <- floor(1.5 * max(nchar(wl$lib_seqs)))
     for (i in seq_along(q)) {
