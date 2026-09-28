@@ -6,7 +6,7 @@
 \usage{
 extract_barcoding_plastome_loci(
   query = paste0("Cactaceae[Organism] AND 100000:170000[SLEN] AND ",
-    "(chloroplast OR plastid) AND \\"complete genome\\""),
+    "(chloroplast OR plastid) AND \\"complete genome\\" NOT refseq[filter]"),
   library_dir = file.path("11_barcoding", "4_library"),
   output_dir = file.path("0_genomic_raw", "plastomes"),
   checklist_path = system.file("extdata",
@@ -46,6 +46,8 @@ of the library; unmatched names are left out and listed in \code{TABLE_unmatched
 of its library sequences), so a record has the extent of the library; regions shorter than
 \code{min_region} are not written. Where the crop finds more than one window (an inverted repeat),
 the best one is kept and \code{other_windows} counts the rest.
+\item \strong{Duplicates:} RefSeq is left out of the query, and a plastome whose sequence (on either strand)
+repeats one already downloaded adds nothing; it is listed in \code{TABLE_duplicate_plastomes.csv}.
 \item \strong{Identifier:} \verb{sid = <accession>__<locus>}, so a sid stays unique across loci.
 \item \strong{Same specimen:} a plastome whose \code{specimen_voucher} matches that of a library accession of
 the same species in the same locus (same collector surname and number, or the same normalised

@@ -97,7 +97,7 @@ test_that("an infraspecific name is cut to the binomial and an unmatched name is
   tmp <- withr::local_tempdir()
   f <- .pex_library(tmp)
   gb <- c(.pex_gb("NC_000002.1", "Opuntia alpha subsp. gamma", .pex_plastome(f)),
-          .pex_gb("NC_000003.1", "Opuntia inexistens", .pex_plastome(f)))
+          .pex_gb("NC_000003.1", "Opuntia inexistens", .pex_vary(.pex_plastome(f), 50)))
   x <- .pex_run(f, .pex_fetch(gb), tmp)
   rec <- utils::read.csv(file.path(x$out, "TABLE_genomic_extra_records.csv"), stringsAsFactors = FALSE)
   expect_true(all(rec$species == "Opuntia_alpha"))
@@ -184,5 +184,5 @@ test_that("a RefSeq copy of a plastome already downloaded adds nothing and is li
   du <- utils::read.csv(file.path(x$out, "TABLE_duplicate_plastomes.csv"), stringsAsFactors = FALSE)
   expect_identical(du$accession, "NC_000007.1")
   expect_identical(du$duplicate_of, "OQ000001.1")
-  expect_true(grepl("NOT refseq[filter]", formals(extract_barcoding_plastome_loci)$query, fixed = TRUE))
+  expect_true(grepl("NOT refseq[filter]", eval(formals(extract_barcoding_plastome_loci)$query), fixed = TRUE))
 })
