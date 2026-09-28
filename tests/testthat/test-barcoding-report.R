@@ -466,3 +466,12 @@ test_that("identify_barcoding_query() takes several sequences of one specimen as
   expect_identical(rec$value[rec$name == "sample"], "specimen_1")
   expect_identical(list.files(f$out, pattern = "^REPORT_s.*\\.html$"), "REPORT_s.html")
 })
+
+test_that("the answers at the start count the loci found only, and name the loci not found", {
+  skip_if_not_installed("Biostrings")
+  f <- .rep_fixture(withr::local_tempdir())
+  .rep_run(f)
+  top <- sub("id=\"section-2\".*", "", .rep_html(f))
+  expect_true(grepl("3 loci found: 1 named to species (state 1), 1 to genus (state 2), 1 not assignable (state 3)", top, fixed = TRUE))
+  expect_true(grepl("not found: ITS", top, fixed = TRUE))
+})
