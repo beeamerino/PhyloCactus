@@ -169,3 +169,20 @@ test_that("step 1 takes the extra records only when asked, and marks their sourc
   expect_identical(unname(both$sequences["NC_1.1__matK"]), "GGCC")
   expect_false(anyDuplicated(both$registry$sid) > 0)
 })
+
+test_that("a RefSeq copy of a plastome already downloaded adds nothing and is listed", {
+  # The first real run (28-09) downloaded 55 RefSeq copies (NC_) of 161 plastomes, each also present
+  # under its GenBank accession: a specimen counted twice would be a false replicate.
+  tmp <- withr::local_tempdir()
+  f <- .pex_library(tmp)
+  s <- .pex_plastome(f)
+  gb <- c(.pex_gb("OQ000001.1", "Opuntia alpha", s), .pex_gb("NC_000007.1", "Opuntia alpha", s))
+  x <- .pex_run(f, .pex_fetch(gb), tmp)
+  rec <- utils::read.csv(file.path(x$out, "TABLE_genomic_extra_records.csv"), stringsAsFactors = FALSE)
+  expect_true(all(rec$accession == "OQ000001.1"))
+  expect_equal(nrow(rec), 2L)
+  du <- utils::read.csv(file.path(x$out, "TABLE_duplicate_plastomes.csv"), stringsAsFactors = FALSE)
+  expect_identical(du$accession, "NC_000007.1")
+  expect_identical(du$duplicate_of, "OQ000001.1")
+  expect_true(grepl("NOT refseq[filter]", formals(extract_barcoding_plastome_loci)$query, fixed = TRUE))
+})
