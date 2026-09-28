@@ -344,8 +344,9 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
 #'
 #' Reads `TABLE_barcoding_identify_<run_name>.csv` and `RUN_<run_name>.csv` from `results_dir` and
 #' writes, for each query, `REPORT_<run_name>_<query>.html`, a self-contained page written by the
-#' package (no `pandoc`); an assembly or a set of reads is one sample and gets one
-#' `REPORT_<run_name>.html` that reads its regions together. For the run, a set of CSV files: `REPORT_<run_name>_answer.csv`,
+#' package (no `pandoc`); an assembly, a set of reads, or several sequences declared as one sample
+#' (argument `sample` of [identify_barcoding_query()]) get one `REPORT_<run_name>.html` that reads
+#' them together. For the run, a set of CSV files: `REPORT_<run_name>_answer.csv`,
 #' `_alternatives.csv`, `_agreement.csv`, `_sampling.csv` and `_provenance.csv`.
 #'
 #' The report has nine sections: (1) query and route; (2) answer per locus; (3) reading across loci,
@@ -388,8 +389,9 @@ report_barcoding_identification <- function(run_name,
   tab$compartment <- ifelse(tab$locus %in% .bc_nuclear_loci(), "nuclear", "plastid")
   # One report per sample: a query of sequences is a sample; an assembly or a set of reads is one
   # sample whose regions (scaffolds, contigs) are rows of the same table
-  per_run <- input_type %in% c("assembly", "reads")
-  tab$unit <- if (per_run) run_name else tab$query
+  sample_name <- get("sample")
+  per_run <- input_type %in% c("assembly", "reads") || !is.na(sample_name)
+  tab$unit <- if (!is.na(sample_name)) sample_name else if (per_run) run_name else tab$query
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
   # Answer

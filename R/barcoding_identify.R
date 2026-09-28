@@ -367,6 +367,9 @@
 #' @param min_overlap Integer. Minimum length of the region to classify. Defaults to 100.
 #' @param seed Integer. Seed of the models and of the queries. Defaults to 1, as in Tutorial 5.
 #' @param processors Integer. Processors for `DECIPHER::IdTaxa()`.
+#' @param sample Character or `NULL`. A name for the specimen when the sequences of `query` are
+#'   several loci of one specimen: they are then one sample, with one report that reads them
+#'   together. `NULL` (the default): each sequence is a sample of its own.
 #' @param report Logical. Write the identification report ([report_barcoding_identification()]).
 #'   The run record `RUN_<run_name>.csv` is written in any case.
 #' @return Invisibly, the table of answers: one row per query and locus tested.
@@ -388,6 +391,7 @@ identify_barcoding_query <- function(query,
                                      min_overlap = 100L,
                                      seed = 1L,
                                      processors = 1L,
+                                     sample = NULL,
                                      report = TRUE) {
   is_file <- is.character(query) && length(query) == 1L && is.null(names(query)) && file.exists(query)
   input_type <- "sequences"
@@ -426,7 +430,8 @@ identify_barcoding_query <- function(query,
                        route = c(if (input_type == "genbank") "GenBank flat file read", "strand rule", "crop", "cut to locus core (J1)",
                                  "IdTaxa", "cut to genus core (J3b)"),
                        library_dir = library_dir, loci = loci, models_dir = file.path(output_dir, "models"),
-                       threshold = threshold, seed = seed, min_overlap = min_overlap, loci_declared = locus)
+                       threshold = threshold, seed = seed, min_overlap = min_overlap, loci_declared = locus,
+                       extra = if (!is.null(sample)) data.frame(kind = "setting", name = "sample", value = as.character(sample)))
   .bc_identify_banner(tab, out_file)
   if (isTRUE(report)) {
     report_barcoding_identification(run_name, results_dir = output_dir, library_dir = library_dir, metrics_dir = metrics_dir)

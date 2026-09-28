@@ -15,6 +15,7 @@ identify_barcoding_query(
   min_overlap = 100L,
   seed = 1L,
   processors = 1L,
+  sample = NULL,
   report = TRUE
 )
 }
@@ -41,6 +42,10 @@ Phase 6B.}
 \item{seed}{Integer. Seed of the models and of the queries. Defaults to 1, as in Tutorial 5.}
 
 \item{processors}{Integer. Processors for \code{DECIPHER::IdTaxa()}.}
+
+\item{sample}{Character or \code{NULL}. A name for the specimen when the sequences of \code{query} are
+several loci of one specimen: they are then one sample, with one report that reads them
+together. \code{NULL} (the default): each sequence is a sample of its own.}
 
 \item{report}{Logical. Write the identification report (\code{\link[=report_barcoding_identification]{report_barcoding_identification()}}).
 The run record \verb{RUN_<run_name>.csv} is written in any case.}
