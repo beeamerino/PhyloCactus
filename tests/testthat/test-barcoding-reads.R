@@ -209,3 +209,24 @@ test_that("a missing external tool stops with its name before anything runs", {
                "no_such_fastp")
   expect_false(dir.exists(f$out))
 })
+
+test_that("aligned reads (BAM, CRAM, SAM) stop with the conversion to FASTQ (Z2)", {
+  skip_if_not_installed("Biostrings")
+  f <- .rds_fixture(withr::local_tempdir())
+  for (ext in c("bam", "cram", "sam")) {
+    b <- file.path(f$tmp, paste0("run.", ext))
+    writeLines("x", b)
+    expect_error(identify_barcoding_reads(b, b, library_dir = f$library_dir, output_dir = f$out,
+                                          getorg_path = f$getorg_path, runner = .rds_runner(f)$runner),
+                 "samtools fastq", fixed = TRUE)
+    expect_error(identify_barcoding_query(b, library_dir = f$library_dir, output_dir = f$out),
+                 "samtools fastq", fixed = TRUE)
+  }
+})
+
+test_that("a FASTQ given to step 10 points to the function of route A", {
+  skip_if_not_installed("Biostrings")
+  f <- .rds_fixture(withr::local_tempdir())
+  expect_error(identify_barcoding_query(f$reads[1], library_dir = f$library_dir, output_dir = f$out),
+               "identify_barcoding_reads()", fixed = TRUE)
+})
