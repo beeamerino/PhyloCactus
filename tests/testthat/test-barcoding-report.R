@@ -397,3 +397,45 @@ test_that("a genus confidence under the first stripe still gives a report", {
   expect_error(.rep_run(f), NA)
   expect_true(file.exists(file.path(f$results_dir, "REPORT_run1_q1.html")))
 })
+
+test_that("the report says which loci were found in the query and whether they were declared", {
+  skip_if_not_installed("Biostrings")
+  f <- .rep_fixture(withr::local_tempdir())
+  .rep_run(f)
+  top <- sub("id=\"section-2\".*", "", .rep_html(f))
+  expect_true(grepl("Loci found", top, fixed = TRUE))
+  expect_true(grepl("matK, rbcL, trnL-trnF", top, fixed = TRUE))
+  expect_true(grepl("detected by overlap with the library", top, fixed = TRUE))
+  rec <- rbind(.rep_record(), data.frame(kind = "setting", name = "loci_declared", value = "matK"))
+  g <- .rep_fixture(withr::local_tempdir(), record = rec)
+  .rep_run(g)
+  top <- sub("id=\"section-2\".*", "", .rep_html(g))
+  expect_true(grepl("declared by the user: matK", top, fixed = TRUE))
+})
+
+test_that("the report ends with the version of PhyloCactus and how to cite it", {
+  skip_if_not_installed("Biostrings")
+  f <- .rep_fixture(withr::local_tempdir())
+  .rep_run(f)
+  h <- .rep_html(f)
+  foot <- sub(".*<footer", "<footer", h)
+  expect_true(grepl("<footer", h, fixed = TRUE))
+  expect_true(grepl(as.character(utils::packageVersion("PhyloCactus")), foot, fixed = TRUE))
+  expect_true(grepl("How to cite", foot, fixed = TRUE))
+  expect_true(grepl("https://github.com/beeamerino/PhyloCactus", foot, fixed = TRUE))
+  expect_false(grepl("????", foot, fixed = TRUE))
+})
+
+test_that("identify_barcoding_query() records the loci declared by the user, or none", {
+  .rep_skip_idtaxa()
+  f <- .rep_idn_library(withr::local_tempdir())
+  q <- c(q1 = unname(f$seqs$matK[1]))
+  suppressMessages(invisible(utils::capture.output(
+    identify_barcoding_query(q, library_dir = f$library_dir, metrics_dir = NULL, output_dir = f$out, run_name = "a"))))
+  suppressMessages(invisible(utils::capture.output(
+    identify_barcoding_query(q, locus = "matK", library_dir = f$library_dir, metrics_dir = NULL, output_dir = f$out, run_name = "b"))))
+  a <- utils::read.csv(file.path(f$out, "RUN_a.csv"), stringsAsFactors = FALSE)
+  b <- utils::read.csv(file.path(f$out, "RUN_b.csv"), stringsAsFactors = FALSE)
+  expect_identical(a$value[a$name == "loci_declared"], "none")
+  expect_identical(b$value[b$name == "loci_declared"], "matK")
+})
