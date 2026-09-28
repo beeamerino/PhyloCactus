@@ -18,7 +18,8 @@ identify_barcoding_query(
 )
 }
 \arguments{
-\item{query}{A FASTA path, a \code{Biostrings::DNAStringSet} or a named character vector of sequences.}
+\item{query}{A FASTA or GenBank flat-file path (a GenBank record is named by its accession), a
+\code{Biostrings::DNAStringSet} or a named character vector of sequences.}
 
 \item{locus}{Character or \code{NULL}. Loci to test; \code{NULL} tests every locus of the library.}
 
