@@ -439,3 +439,30 @@ test_that("identify_barcoding_query() records the loci declared by the user, or 
   expect_identical(a$value[a$name == "loci_declared"], "none")
   expect_identical(b$value[b$name == "loci_declared"], "matK")
 })
+
+test_that("several sequences declared as one sample give one report that reads them together (S4)", {
+  skip_if_not_installed("Biostrings")
+  t <- .rep_table()
+  t$query <- paste0("seq_", t$locus)
+  rec <- rbind(.rep_record(), data.frame(kind = "setting", name = "sample", value = "specimen_1"))
+  f <- .rep_fixture(withr::local_tempdir(), table = t, record = rec)
+  .rep_run(f)
+  expect_identical(list.files(f$results_dir, pattern = "\\.html$"), "REPORT_run1.html")
+  ag <- .rep_csv(f, "agreement")
+  expect_identical(unique(ag$query), "specimen_1")
+  expect_equal(ag$n_loci[ag$rank == "genus" & ag$taxon == "Opuntia"], 2L)
+  h <- paste(readLines(file.path(f$results_dir, "REPORT_run1.html"), warn = FALSE), collapse = "\n")
+  expect_true(grepl("Sample specimen_1", h, fixed = TRUE))
+})
+
+test_that("identify_barcoding_query() takes several sequences of one specimen as one sample (S4)", {
+  .rep_skip_idtaxa()
+  f <- .rep_idn_library(withr::local_tempdir())
+  q <- c(a = unname(f$seqs$matK[1]), b = unname(f$seqs$rbcL[1]))
+  suppressMessages(invisible(utils::capture.output(
+    identify_barcoding_query(q, library_dir = f$library_dir, metrics_dir = NULL, output_dir = f$out, run_name = "s",
+                             sample = "specimen_1"))))
+  rec <- utils::read.csv(file.path(f$out, "RUN_s.csv"), stringsAsFactors = FALSE)
+  expect_identical(rec$value[rec$name == "sample"], "specimen_1")
+  expect_identical(list.files(f$out, pattern = "^REPORT_s.*\\.html$"), "REPORT_s.html")
+})
