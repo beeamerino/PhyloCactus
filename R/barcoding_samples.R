@@ -46,7 +46,7 @@
 #' optionally `file_2` (the second file of paired reads), `declared_species` and `voucher`.
 #'
 #' Writes one folder per identified sample in `output_dir` and `TABLE_barcoding_samples_index.csv`:
-#' status (`identified`, `not_run`, `error`), message, loci found, answers per state, species and
+#' status (`identified`, `not_run`, `error`), message, loci found, answers per state over the loci found, species and
 #' genera named, the answer against the declared species (`species agrees`, `genus agrees`,
 #' `disagrees`, `not assigned`, `not declared`), whether the voucher is missing, and the report.
 #'
@@ -120,7 +120,8 @@ identify_barcoding_samples <- function(sheet,
       found <- !tab$reason %in% c("no_overlap", "assembly_failed", "single_species_library")
       idx$status <- "identified"; idx$message <- ""
       idx$loci_found <- sum(found)
-      idx$state1 <- sum(tab$state == 1L); idx$state2 <- sum(tab$state == 2L); idx$state3 <- sum(tab$state == 3L)
+      # States over the regions found only: a locus absent from the sequences is not an abstention
+      idx$state1 <- sum(tab$state[found] == 1L); idx$state2 <- sum(tab$state[found] == 2L); idx$state3 <- sum(tab$state[found] == 3L)
       idx$species_named <- paste(unique(stats::na.omit(tab$predicted_species[tab$state == 1L])), collapse = "; ")
       idx$genera_named <- paste(unique(stats::na.omit(tab$predicted_genus[tab$state %in% 1:2])), collapse = "; ")
       idx$declared_comparison <- .bc_declared_comparison(tab, r$declared_species)

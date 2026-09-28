@@ -39,7 +39,7 @@ Columns of the sheet: \code{sample_id} (unique), \code{input_type} (a row of the
 optionally \code{file_2} (the second file of paired reads), \code{declared_species} and \code{voucher}.
 
 Writes one folder per identified sample in \code{output_dir} and \code{TABLE_barcoding_samples_index.csv}:
-status (\code{identified}, \code{not_run}, \code{error}), message, loci found, answers per state, species and
+status (\code{identified}, \code{not_run}, \code{error}), message, loci found, answers per state over the loci found, species and
 genera named, the answer against the declared species (\verb{species agrees}, \verb{genus agrees},
 \code{disagrees}, \verb{not assigned}, \verb{not declared}), whether the voucher is missing, and the report.
 }

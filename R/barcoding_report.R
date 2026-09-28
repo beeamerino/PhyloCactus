@@ -325,6 +325,16 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
   paste0(if (length(found)) paste(found, collapse = ", ") else "none", " (", how, ")")
 }
 
+#' The answers of a sample, counted over the loci found, and the loci not found
+#' @noRd
+.bc_report_answers_words <- function(t) {
+  f <- t[!t$reason %in% c("no_overlap", "assembly_failed", "single_species_library"), , drop = FALSE]
+  nf <- setdiff(sort(unique(t$locus), method = "radix"), f$locus)
+  paste0(sprintf("%d loci found: %d named to species (state 1), %d to genus (state 2), %d not assignable (state 3)",
+                 nrow(f), sum(f$state == 1L), sum(f$state == 2L), sum(f$state == 3L)),
+         "; not found: ", if (length(nf)) paste(nf, collapse = ", ") else "none")
+}
+
 #' Footer of the report: version of PhyloCactus and how to cite it
 #' @noRd
 .bc_report_footer <- function(run_date) {
@@ -499,8 +509,7 @@ report_barcoding_identification <- function(run_name,
       item = c("Data", if (!is.null(specimen)) "Specimen", "Loci found", "Library", "Answers", "Reading"),
       value = c(.bc_report_data_kind(input_type, t$query_length), specimen, .bc_report_loci_found(t, get("loci_declared")),
                 .bc_report_library_words(libc),
-                sprintf("%d loci: %d named to species (state 1), %d to genus (state 2), %d not assignable (state 3)",
-                        nrow(t), sum(t$state == 1L), sum(t$state == 2L), sum(t$state == 3L)),
+                .bc_report_answers_words(t),
                 "Each locus is answered on its own; no call is made across loci (section 3)")), class = "glance")
     sec <- function(i, title, body) sprintf("<h2 id=\"section-%d\">%d. %s</h2>\n%s", i, i, title, body)
     s1 <- paste0(.bc_html_table(data.frame(item = c("Query", "Input", "Input type", "md5 of the input", "Run"),
