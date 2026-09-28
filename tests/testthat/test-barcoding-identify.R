@@ -549,3 +549,14 @@ test_that("a locus whose library holds a single species is state 3 with its reas
   expect_true(any(grepl("rbcL", r$text) & grepl("one species", r$text)))
   expect_true(r$tab$state[r$tab$locus == "matK"] %in% 1:2)
 })
+
+test_that("a region identical to a library sequence names that accession (K1)", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  same <- unname(f$seqs$matK[1])
+  other <- .idn_vary(unname(f$seqs$matK[4]), 5)
+  r <- .idn_run(f, c(q1 = same, q2 = other), locus = "matK")$tab
+  expect_true("identical_to_library" %in% names(r))
+  expect_identical(r$identical_to_library[r$query == "q1"], sub("^[^|]*[|]", "", names(f$seqs$matK)[1]))
+  expect_true(is.na(r$identical_to_library[r$query == "q2"]))
+})

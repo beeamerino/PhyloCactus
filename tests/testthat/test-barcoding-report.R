@@ -497,3 +497,26 @@ test_that("a sample of several sequences shows the loci found only, and counts t
   expect_false(grepl("no_overlap", s2, fixed = TRUE))
   expect_true(grepl("Loci not found in the sample: ITS, trnL-trnF", s2, fixed = TRUE))
 })
+
+test_that("the report names a locus identical to a library accession as not independent (K1)", {
+  skip_if_not_installed("Biostrings")
+  t <- .rep_table()
+  t$identical_to_library <- ifelse(t$locus == "matK", "m1.1", NA)
+  f <- .rep_fixture(withr::local_tempdir(), table = t)
+  .rep_run(f)
+  top <- sub("id=\"section-2\".*", "", .rep_html(f))
+  expect_true(grepl("matK identical to library accession m1.1", top, fixed = TRUE))
+  expect_true(grepl("not an independent identification", top, fixed = TRUE))
+  expect_identical(.rep_csv(f, "answer")$identical_to_library[.rep_csv(f, "answer")$locus == "matK"], "m1.1")
+})
+
+test_that("the line Data gives the number of sequences of a sample and their lengths (K2)", {
+  skip_if_not_installed("Biostrings")
+  a <- .rep_table("seqA"); b <- .rep_table("seqB"); b$query_length <- 450L
+  rec <- rbind(.rep_record(), data.frame(kind = "setting", name = "sample", value = "spec"))
+  f <- .rep_fixture(withr::local_tempdir(), table = rbind(a, b), record = rec)
+  .rep_run(f)
+  h <- paste(readLines(file.path(f$results_dir, "REPORT_run1.html"), warn = FALSE), collapse = "\n")
+  top <- sub("id=\"section-2\".*", "", h)
+  expect_true(grepl("2 sequences, 300 to 450 bases", top, fixed = TRUE))
+})
