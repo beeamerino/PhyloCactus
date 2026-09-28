@@ -105,6 +105,9 @@
                value = c(run_name, format(threshold), format(seed), format(min_overlap),
                          if (length(loci_declared)) paste(loci_declared, collapse = ", ") else "none",
                          format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z"))),
+    data.frame(kind = "machine", name = c("machine", "operating_system", "platform"),
+               value = c(unname(Sys.info()[["nodename"]]), paste(Sys.info()[["sysname"]], Sys.info()[["release"]]),
+                         R.version$platform)),
     .bc_software_record(tools),
     data.frame(kind = "library", name = basename(lib_files), value = unname(tools::md5sum(lib_files))),
     if (length(mod_files)) data.frame(kind = "model", name = basename(mod_files), value = unname(tools::md5sum(mod_files))),
@@ -291,7 +294,8 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
   }
   if (!is.null(query) && length(unique(query)) > 1L) {
     len <- tapply(query_length, query, max)
-    return(sprintf("%d sequences, %d to %d bases%s", length(len), min(len), max(len),
+    return(sprintf("%d sequences, %s%s", length(len),
+                   if (min(len) == max(len)) sprintf("%d bases each", min(len)) else sprintf("%d to %d bases", min(len), max(len)),
                    if (identical(input_type, "genbank")) ", read from a GenBank flat file" else ""))
   }
   n <- suppressWarnings(max(query_length, na.rm = TRUE))
@@ -362,7 +366,8 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
 #' package (no `pandoc`); an assembly, a set of reads, or several sequences declared as one sample
 #' (argument `sample` of [identify_barcoding_query()]) get one `REPORT_<run_name>.html` that reads
 #' them together. For the run, a set of CSV files: `REPORT_<run_name>_answer.csv`,
-#' `_alternatives.csv`, `_agreement.csv`, `_sampling.csv` and `_provenance.csv`.
+#' `_alternatives.csv`, `_agreement.csv`, `_sampling.csv` and `_provenance.csv`, and
+#' `REPORT_<run_name>_checksums.csv` with the md5 of the table, the run record and every file written.
 #'
 #' The report has nine sections: (1) query and route; (2) answer per locus; (3) reading across loci,
 #' descriptive only, since the loci are never combined into one call (rule E8 of the validation
@@ -517,10 +522,13 @@ report_barcoding_identification <- function(run_name,
                                              collapse = "; "),
                                        ": the answer of ", if (nrow(idl) > 1L) "these loci" else "this locus",
                                        " is the query finding itself in the library, not an independent identification") else NULL
+    ran <- paste0(if (is.na(get("date"))) "date not recorded" else get("date"), " on ",
+                  if (is.na(get("machine"))) "machine not recorded" else
+                    paste0(get("machine"), " (", get("operating_system"), "; ", get("platform"), ")"))
     glance <- .bc_html_table(data.frame(
-      item = c("Data", if (!is.null(specimen)) "Specimen", "Loci found", if (!is.null(identical)) "Identical to the library",
+      item = c("Identification run", "Data", if (!is.null(specimen)) "Specimen", "Loci found", if (!is.null(identical)) "Identical to the library",
                "Library", "Answers", "Reading"),
-      value = c(.bc_report_data_kind(input_type, t$query_length, t$query), specimen, .bc_report_loci_found(t, get("loci_declared")),
+      value = c(ran, .bc_report_data_kind(input_type, t$query_length, t$query), specimen, .bc_report_loci_found(t, get("loci_declared")),
                 identical,
                 .bc_report_library_words(libc),
                 .bc_report_answers_words(t),
@@ -594,6 +602,10 @@ report_barcoding_identification <- function(run_name,
     writeLines(html, p, useBytes = TRUE)
     paths <- c(paths, p)
   }
+  # Checksums of what the report rests on and of what it wrote (the HTML cannot hold its own md5)
+  ck_files <- c(f_tab, f_rec, paths, paste0(base, c("answer", "alternatives", "agreement", "sampling", "provenance"), ".csv"))
+  utils::write.csv(data.frame(file = basename(ck_files), md5 = unname(tools::md5sum(ck_files)), stringsAsFactors = FALSE),
+                   paste0(base, "checksums.csv"), row.names = FALSE)
   message("Identification report: ", paste(paths, collapse = ", "))
   invisible(paths)
 }
