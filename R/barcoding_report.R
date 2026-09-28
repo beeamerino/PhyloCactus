@@ -309,7 +309,7 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
   f <- system.file("report", "logo.png", package = "PhyloCactus")
   logo <- if (nzchar(f)) paste0("<img alt=\"PhyloCactus logo\" src=\"data:image/png;base64,",
                                 .bc_base64(readBin(f, "raw", file.size(f))), "\"/>") else ""
-  paste0("<div class=\"banner\">", logo, "<div><h1>\U0001F335 PhyloCactus</h1>",
+  paste0("<div class=\"banner\">", logo, "<div><h1>PhyloCactus \U0001F335</h1>",
          "<p><strong>Molecular identification report</strong></p><p>", .bc_html_escape(subtitle), "</p></div></div>")
 }
 
@@ -515,7 +515,7 @@ report_barcoding_identification <- function(run_name,
                  "vary little within genera and many species have one sequence or none in the library (section 6). A state 3 is ",
                  "not evidence that the species is absent from the library; a state 1 relies on the species being in it. If the ",
                  "query comes from a specimen already in the library, its answer is not an independent test.</p>")
-    html <- paste0("<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"/><title>\U0001F335 PhyloCactus identification report: ",
+    html <- paste0("<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"/><title>PhyloCactus identification report \U0001F335: ",
                    .bc_html_escape(q), "</title>", css, "</head><body>\n",
                    .bc_report_banner(paste0(if (per_run) "Sample " else "Query ", q, " \u00b7 run ", run_name)), "\n", glance, "\n",
                    sec(1, "Query and route", s1), "\n", sec(2, "Answer per locus", s2), "\n",
