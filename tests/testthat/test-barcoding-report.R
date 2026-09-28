@@ -359,3 +359,32 @@ test_that("an assembly or a set of reads gives one report for the sample, readin
     expect_setequal(a$query, t$query)
   }
 })
+
+test_that("the report names the kind of data at its start and the library it used", {
+  skip_if_not_installed("Biostrings")
+  kinds <- list(sequences = "Sanger-type sequence", assembly = "Nuclear genome assembly",
+                reads = "Genome skimming or whole-genome sequencing reads")
+  for (type in names(kinds)) {
+    f <- .rep_fixture(withr::local_tempdir(), record = .rep_record(type))
+    .rep_run(f)
+    h <- paste(readLines(list.files(f$results_dir, pattern = "\\.html$", full.names = TRUE)[1], warn = FALSE), collapse = "\n")
+    top <- sub("id=\"section-2\".*", "", h)
+    expect_true(grepl(kinds[[type]], top, fixed = TRUE), info = type)
+    expect_true(grepl("Sanger records of GenBank (phylotaR)", top, fixed = TRUE), info = type)
+  }
+  # A query of plastome length is named as such
+  t <- .rep_table()
+  t$query_length <- 150000L
+  f <- .rep_fixture(withr::local_tempdir(), table = t, record = .rep_record("genbank"))
+  .rep_run(f)
+  top <- sub("id=\"section-2\".*", "", .rep_html(f))
+  expect_true(grepl("Complete plastome", top, fixed = TRUE))
+})
+
+test_that("the report carries the cactus of PhyloCactus in its title", {
+  skip_if_not_installed("Biostrings")
+  f <- .rep_fixture(withr::local_tempdir())
+  .rep_run(f)
+  h <- .rep_html(f)
+  expect_true(grepl("\U0001F335", h, fixed = TRUE))
+})
