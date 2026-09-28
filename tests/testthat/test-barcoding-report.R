@@ -520,3 +520,30 @@ test_that("the line Data gives the number of sequences of a sample and their len
   top <- sub("id=\"section-2\".*", "", h)
   expect_true(grepl("2 sequences, 300 to 450 bases", top, fixed = TRUE))
 })
+
+test_that("the report says when and on which machine the identification ran, with the checksums of its files", {
+  .rep_skip_idtaxa()
+  f <- .rep_idn_library(withr::local_tempdir())
+  suppressMessages(invisible(utils::capture.output(
+    identify_barcoding_query(c(q1 = unname(f$seqs$matK[1])), library_dir = f$library_dir, metrics_dir = NULL,
+                             output_dir = f$out, run_name = "m"))))
+  rec <- utils::read.csv(file.path(f$out, "RUN_m.csv"), stringsAsFactors = FALSE)
+  expect_true(all(c("date", "machine", "operating_system", "platform") %in% rec$name))
+  expect_identical(rec$value[rec$name == "machine"], unname(Sys.info()[["nodename"]]))
+  h <- paste(readLines(file.path(f$out, "REPORT_m_q1.html"), warn = FALSE), collapse = "\n")
+  top <- sub("id=\"section-2\".*", "", h)
+  expect_true(grepl(rec$value[rec$name == "date"], top, fixed = TRUE))
+  expect_true(grepl(unname(Sys.info()[["nodename"]]), top, fixed = TRUE))
+  ck <- utils::read.csv(file.path(f$out, "REPORT_m_checksums.csv"), stringsAsFactors = FALSE)
+  for (x in c("REPORT_m_q1.html", "REPORT_m_answer.csv", "TABLE_barcoding_identify_m.csv", "RUN_m.csv")) {
+    expect_identical(ck$md5[ck$file == x], unname(tools::md5sum(file.path(f$out, x))), info = x)
+  }
+})
+
+test_that("a run record without the machine still gives a report, saying it was not recorded", {
+  skip_if_not_installed("Biostrings")
+  f <- .rep_fixture(withr::local_tempdir())
+  .rep_run(f)
+  top <- sub("id=\"section-2\".*", "", .rep_html(f))
+  expect_true(grepl("machine not recorded", top, fixed = TRUE))
+})
