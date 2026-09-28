@@ -341,3 +341,21 @@ test_that("a GenBank flat file is recorded as such in the run record", {
   expect_identical(rec$value[rec$name == "input_type"], "genbank")
   expect_true(file.exists(file.path(f$out, "REPORT_g_AB000001.1.html")))
 })
+
+test_that("an assembly or a set of reads gives one report for the sample, reading its regions together", {
+  skip_if_not_installed("Biostrings")
+  t <- .rep_table("acc")
+  t$query <- paste0("acc__", t$locus)
+  for (type in c("assembly", "reads")) {
+    f <- .rep_fixture(withr::local_tempdir(), table = t, record = .rep_record(type))
+    .rep_run(f)
+    html <- list.files(f$results_dir, pattern = "\\.html$")
+    expect_identical(html, "REPORT_run1.html")
+    ag <- .rep_csv(f, "agreement")
+    op <- ag[ag$rank == "genus" & ag$taxon == "Opuntia", ]
+    expect_equal(op$n_loci, 2L)
+    expect_identical(unique(ag$query), "run1")
+    a <- .rep_csv(f, "answer")
+    expect_setequal(a$query, t$query)
+  }
+})
