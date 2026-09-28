@@ -426,7 +426,7 @@ identify_barcoding_query <- function(query,
                        route = c(if (input_type == "genbank") "GenBank flat file read", "strand rule", "crop", "cut to locus core (J1)",
                                  "IdTaxa", "cut to genus core (J3b)"),
                        library_dir = library_dir, loci = loci, models_dir = file.path(output_dir, "models"),
-                       threshold = threshold, seed = seed, min_overlap = min_overlap)
+                       threshold = threshold, seed = seed, min_overlap = min_overlap, loci_declared = locus)
   .bc_identify_banner(tab, out_file)
   if (isTRUE(report)) {
     report_barcoding_identification(run_name, results_dir = output_dir, library_dir = library_dir, metrics_dir = metrics_dir)
