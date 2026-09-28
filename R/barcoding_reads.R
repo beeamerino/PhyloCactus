@@ -36,7 +36,8 @@
 #'
 #' Accepted: paired Illumina reads, two FASTQ files, plain or gzipped. Single-end reads stop (not
 #' tested in 0.5.0), and so do long reads (median length above 600 bases over the first 10 000 reads;
-#' not admitted in 0.5.0). Target capture, RAD-seq and GBS, RNA-seq and mixed amplicons are rejected in
+#' not admitted in 0.5.0). Aligned reads (BAM, CRAM, SAM) stop with the command that converts them to
+#' FASTQ. Target capture, RAD-seq and GBS, RNA-seq and mixed amplicons are rejected in
 #' 0.5.0 (matrix of accepted inputs of 28-09) but cannot be told from the files; they should not be
 #' given to this function.
 #'
@@ -90,6 +91,7 @@ identify_barcoding_reads <- function(reads1,
     stop("Single-end reads are not tested in 0.5.0 (matrix of accepted inputs of 28-09): give the two ",
          "FASTQ files of a paired Illumina run.", call. = FALSE)
   }
+  for (f in c(reads1, reads2)) .bc_stop_aligned_reads(f)
   for (f in c(reads1, reads2)) if (!file.exists(f)) stop("Reads not found: ", f, ".", call. = FALSE)
   ml <- .bc_fastq_median_length(reads1)
   if (!is.na(ml) && ml > 600) {

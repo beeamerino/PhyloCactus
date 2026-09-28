@@ -84,7 +84,9 @@ species present (\code{validation_ws_rate_species_present}, scheme E) and absent
 (\code{validation_ws_rate_species_absent}, scheme G), when that table exists and was measured at the
 same threshold.
 
-Raw reads (FASTQ) are not accepted: they need assembly or mapping first.
+Raw reads (FASTQ) are not accepted: paired Illumina reads go to \code{\link[=identify_barcoding_reads]{identify_barcoding_reads()}}, a genome
+assembly to \code{\link[=identify_barcoding_assembly]{identify_barcoding_assembly()}}. Aligned reads (BAM, CRAM, SAM) stop with the command that
+converts them to FASTQ.
 }
 \examples{
 \dontrun{
