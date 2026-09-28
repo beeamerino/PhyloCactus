@@ -284,10 +284,15 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
 
 #' The kind of data of a query, named at the start of the report
 #' @noRd
-.bc_report_data_kind <- function(input_type, query_length) {
+.bc_report_data_kind <- function(input_type, query_length, query = NULL) {
   if (identical(input_type, "assembly")) return("Nuclear genome assembly (FASTA); loci located with minimap2 and cut with samtools")
   if (identical(input_type, "reads")) {
     return("Genome skimming or whole-genome sequencing reads (Illumina, paired-end); plastome and nrDNA assembled with GetOrganelle")
+  }
+  if (!is.null(query) && length(unique(query)) > 1L) {
+    len <- tapply(query_length, query, max)
+    return(sprintf("%d sequences, %d to %d bases%s", length(len), min(len), max(len),
+                   if (identical(input_type, "genbank")) ", read from a GenBank flat file" else ""))
   }
   n <- suppressWarnings(max(query_length, na.rm = TRUE))
   kind <- if (is.finite(n) && n >= 100000) sprintf("Complete plastome (%s bases)", format(n, big.mark = " "))
@@ -405,7 +410,9 @@ report_barcoding_identification <- function(run_name,
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
 
   # Answer
-  extra <- intersect(c("scaffold", "scaffold_length", "mapq", "scaffolds_hit", "low_mapq", "contig", "organelle"), names(tab))
+  if (!"identical_to_library" %in% names(tab)) tab$identical_to_library <- NA_character_
+  extra <- intersect(c("identical_to_library", "scaffold", "scaffold_length", "mapq", "scaffolds_hit", "low_mapq", "contig", "organelle"),
+                     names(tab))
   answer <- tab[, c("query", "locus", "compartment", "state", "predicted_species", "predicted_genus", "genus_confidence",
                     "species_confidence", "reason", "region_length", "validation_ws_rate_species_present",
                     "validation_ws_rate_species_absent", extra)]
@@ -505,15 +512,22 @@ report_barcoding_identification <- function(run_name,
              "; voucher: ", if (is.na(vou)) "none (no voucher: the leakage rule per specimen cannot be applied to this sample)" else vou,
              "; answer against the declared species: ", .bc_declared_comparison(t, dec))
     } else NULL
+    idl <- t[!is.na(t$identical_to_library) & !t$reason %in% c("no_overlap", "assembly_failed", "single_species_library"), , drop = FALSE]
+    identical <- if (nrow(idl)) paste0(paste(sprintf("%s identical to library accession %s", idl$locus, idl$identical_to_library),
+                                             collapse = "; "),
+                                       ": the answer of ", if (nrow(idl) > 1L) "these loci" else "this locus",
+                                       " is the query finding itself in the library, not an independent identification") else NULL
     glance <- .bc_html_table(data.frame(
-      item = c("Data", if (!is.null(specimen)) "Specimen", "Loci found", "Library", "Answers", "Reading"),
-      value = c(.bc_report_data_kind(input_type, t$query_length), specimen, .bc_report_loci_found(t, get("loci_declared")),
+      item = c("Data", if (!is.null(specimen)) "Specimen", "Loci found", if (!is.null(identical)) "Identical to the library",
+               "Library", "Answers", "Reading"),
+      value = c(.bc_report_data_kind(input_type, t$query_length, t$query), specimen, .bc_report_loci_found(t, get("loci_declared")),
+                identical,
                 .bc_report_library_words(libc),
                 .bc_report_answers_words(t),
                 "Each locus is answered on its own; no call is made across loci (section 3)")), class = "glance")
     sec <- function(i, title, body) sprintf("<h2 id=\"section-%d\">%d. %s</h2>\n%s", i, i, title, body)
     s1 <- paste0(.bc_html_table(data.frame(item = c("Query", "Input", "Input type", "md5 of the input", "Run"),
-                                           value = c(q, get("path"), .bc_report_data_kind(input_type, t$query_length), get("md5"), run_name))),
+                                           value = c(q, get("path"), .bc_report_data_kind(input_type, t$query_length, t$query), get("md5"), run_name))),
                  "<p>Steps of the route: ", if (is.na(get("steps"))) "not recorded" else .bc_html_escape(get("steps")), ". Steps in grey were not needed for this query.</p>",
                  .bc_html_plot(.bc_report_route_plot(input_type, t), width = 9, height = 1.8))
     # The loci found only; the loci absent from the query are named once (every row stays in the CSV)
