@@ -281,6 +281,29 @@
   invisible(TRUE)
 }
 
+#' Library accessions whose sequence holds the region, or is held by it, on either strand (K1)
+#'
+#' A region identical to a library sequence is the query finding itself (or its own specimen): its
+#' answer is not an independent identification, and the report says so (decision K1 of BMM, 28-09).
+#' @noRd
+.bc_identical_to_library <- function(region, lib_seqs, min_overlap) {
+  region <- toupper(region)
+  if (nchar(region) < min_overlap) return(NA_character_)
+  rc <- as.character(Biostrings::reverseComplement(Biostrings::DNAString(region)))
+  hit <- grepl(region, lib_seqs, fixed = TRUE) | grepl(rc, lib_seqs, fixed = TRUE)
+  # A library sequence held by the region: only those whose first 20-mer is in the region are tested
+  k <- 20L
+  n <- nchar(region)
+  cand <- which(!hit & nchar(lib_seqs) >= min_overlap & nchar(lib_seqs) <= n)
+  if (length(cand) && n >= k) {
+    kmers <- unique(c(substring(region, 1:(n - k + 1L), k:n), substring(rc, 1:(n - k + 1L), k:n)))
+    cand <- cand[substr(lib_seqs[cand], 1L, k) %in% kmers]
+    for (j in cand) hit[j] <- grepl(lib_seqs[[j]], region, fixed = TRUE) || grepl(lib_seqs[[j]], rc, fixed = TRUE)
+  }
+  if (!any(hit)) return(NA_character_)
+  paste(sort(names(lib_seqs)[hit], method = "radix"), collapse = "; ")
+}
+
 #' The query as a named character vector, from a FASTA path, a DNAStringSet or a character vector
 #' @noRd
 .bc_identify_read_query <- function(query) {
@@ -466,7 +489,7 @@ identify_barcoding_query <- function(query,
                      genus_core_trimmed = NA_integer_, stringsAsFactors = FALSE),
           .bc_prediction_row(3L, reason = "single_species_library"),
           data.frame(genus_idtaxa = NA_character_, species_idtaxa = NA_character_, genus_confidence = NA_real_,
-                     species_confidence = NA_real_, stringsAsFactors = FALSE))
+                     species_confidence = NA_real_, identical_to_library = NA_character_, stringsAsFactors = FALSE))
       }
       next
     }
@@ -474,6 +497,8 @@ identify_barcoding_query <- function(query,
     width <- floor(1.5 * max(nchar(wl$lib_seqs)))
     for (i in seq_along(q)) {
       r <- .bc_identify_one(unname(q[i]), ids[i], l, wl, width, threshold, min_overlap, seed)
+      r$identical_to_library <- if (is.na(r$region_start)) NA_character_ else
+        .bc_identical_to_library(substr(unname(q[i]), r$region_start, r$region_end), wl$lib_seqs, min_overlap)
       rows[[length(rows) + 1L]] <- cbind(
         data.frame(query = names(q)[i], locus = l, query_length = nchar(q[i]), .qi = i,
                    stringsAsFactors = FALSE), r)
@@ -488,7 +513,7 @@ identify_barcoding_query <- function(query,
   cols <- c("query", "locus", "query_length", "path", "region_start", "region_end",
             "region_length", "other_windows", "orientation", "state", "predicted_species",
             "predicted_genus", "candidates", "genus_idtaxa", "species_idtaxa", "genus_confidence",
-            "species_confidence", "reason", "core_trimmed", "genus_core_trimmed", "threshold", "validation_ws_rate_species_present",
+            "species_confidence", "reason", "core_trimmed", "genus_core_trimmed", "identical_to_library", "threshold", "validation_ws_rate_species_present",
             "validation_ws_rate_species_absent")
   tab <- tab[, cols]
   tab$query_length <- as.integer(tab$query_length)
