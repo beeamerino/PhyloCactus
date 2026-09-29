@@ -96,6 +96,8 @@
                                  models_dir, threshold, seed, min_overlap, tools = character(0), extra = NULL,
                                  loci_declared = NULL) {
   lib_files <- file.path(library_dir, paste0("LIB_", loci, ".fasta"))
+  unm_files <- file.path(library_dir, paste0("UNMASKED_", loci, ".fasta"))
+  lib_files <- c(lib_files, unm_files[file.exists(unm_files)])
   mod_files <- file.path(models_dir, paste0("MODEL_idtaxa_", loci, ".rds"))
   mod_files <- mod_files[file.exists(mod_files)]
   d <- rbind(
