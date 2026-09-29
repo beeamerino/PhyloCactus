@@ -340,3 +340,56 @@ test_that("the shipped exclusion lists are keyed by locus and accession (X2)", {
     expect_false(any(duplicated(paste(x$locus, x$sid))), info = f)
   }
 })
+
+# Phase 10, Y2 (BMM, 29-09): only the clusters that overlap the largest cluster of their locus are
+# pooled; a fragment of another region of the same gene is left out and listed.
+.y2_random <- function(n) paste(sample(c("A", "C", "G", "T"), n, replace = TRUE), collapse = "")
+.y2_vary <- function(s, k) { for (p in sample(seq_len(nchar(s)), k)) substr(s, p, p) <- sample(c("A", "C", "G", "T"), 1); s }
+
+test_that("a cluster overlaps the main cluster of its locus when its sequences share 20-mers with it (Y2)", {
+  set.seed(81L)
+  region <- .y2_random(600)
+  other <- .y2_random(600)
+  main <- vapply(1:20, function(i) .y2_vary(region, 10), "")
+  same_region <- vapply(1:10, function(i) .y2_vary(substr(region, 100, 500), 8), "")
+  same_region_rc <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(same_region)))
+  fragment <- vapply(1:10, function(i) .y2_vary(other, 8), "")
+  expect_true(.cp_overlaps_main(same_region, main))
+  expect_true(.cp_overlaps_main(same_region_rc, main))
+  expect_false(.cp_overlaps_main(fragment, main))
+})
+
+test_that("only clusters overlapping the main cluster are pooled, and the locus is counted on them (Y2)", {
+  sp <- rbind(.y1_species(1L, paste0("a", 1:40)), .y1_species(2L, paste0("b", 1:20)),
+              .y1_species(3L, paste0("c", 1:30)))
+  loc <- data.frame(cluster_id = 1:3, locus = "pepC_like", stringsAsFactors = FALSE)
+  # 1 is the main cluster (most species); 2 overlaps it; 3 is a fragment of another region
+  ov <- data.frame(cluster_id = 1:3, overlaps_main = c(TRUE, TRUE, FALSE))
+  out <- .cp_select_clusters_by_locus(sp, loc, min_species = 50, overlap = ov)
+  expect_setequal(out$keep, c(1L, 2L))
+  expect_equal(out$table$species[out$table$locus == "pepC_like"], 60L)
+  expect_identical(out$fragments$cluster_id, 3L)
+  # Without the overlap, the fragment would have been pooled: 90 species
+  expect_setequal(.cp_select_clusters_by_locus(sp, loc, min_species = 50)$keep, 1:3)
+})
+
+test_that("the overlap of every named cluster with its main cluster is read from the workspace (Y2)", {
+  skip_if_not_installed("phylotaR")
+  data("aotus", package = "phylotaR", envir = environment())
+  loc <- data.frame(cluster_id = as.integer(aotus@cids), locus = "x", stringsAsFactors = FALSE)
+  sp <- .cp_cluster_species(phylotaR::drop_by_rank(aotus, rnk = "species", n = 1))
+  ov <- .cp_cluster_overlap(aotus, loc, sp)
+  expect_setequal(names(ov), c("cluster_id", "overlaps_main"))
+  expect_equal(nrow(ov), length(aotus@cids))
+  expect_equal(sum(ov$overlaps_main[ov$cluster_id %in% ov$cluster_id]), sum(ov$overlaps_main))
+  # The main cluster overlaps itself
+  main <- names(sort(table(sp$cluster_id), decreasing = TRUE))[1]
+  expect_true(ov$overlaps_main[ov$cluster_id == as.integer(main)])
+})
+
+test_that("both branches pass the overlap to the selection by locus (Y2)", {
+  for (f in list(assemble_ingroup_phylotar, assemble_barcoding_dataset)) {
+    b <- paste(deparse(body(f)), collapse = "\n")
+    expect_match(b, ".cp_cluster_overlap(", fixed = TRUE)
+  }
+})
