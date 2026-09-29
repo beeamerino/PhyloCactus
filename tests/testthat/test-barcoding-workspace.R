@@ -393,3 +393,9 @@ test_that("both branches pass the overlap to the selection by locus (Y2)", {
     expect_match(b, ".cp_cluster_overlap(", fixed = TRUE)
   }
 })
+
+test_that("the branch log names the exclusion pairs as pairs, not rows of the file (X2, BMM 29-09)", {
+  b <- paste(deparse(body(assemble_barcoding_dataset)), collapse = "\n")
+  expect_false(grepl(" in the file; ", b, fixed = TRUE))
+  expect_match(b, " (cluster, accession) pairs from the list; ", fixed = TRUE)
+})
