@@ -269,7 +269,7 @@ extract_barcoding_plastome_loci <- function(query = paste0("Cactaceae[Organism] 
   add <- data.frame(sid = tab$sid, species = tab$species, genus = .bc_genus(tab$species), locus = tab$locus,
                     cluster_id = NA_integer_, genbank_name = gsub(" ", "_", tab$organism),
                     source = "genbank_plastome", stringsAsFactors = FALSE)
-  registry$source <- "phylotaR"
+  if (is.null(registry$source)) registry$source <- "phylotaR"
   out <- rbind(registry, add)
   if (anyDuplicated(out$sid)) {
     stop("An extra record repeats a sid of the registry: ", paste(utils::head(out$sid[duplicated(out$sid)], 5), collapse = ", "),
