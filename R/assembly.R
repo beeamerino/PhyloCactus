@@ -977,7 +977,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
 #' (decision Y1 of BMM, 29-09) without downloading metadata.
 #' @return A data frame with `cluster_id` and `locus` (`NA` when no gene is recognised).
 #' @noRd
-.cp_cluster_loci <- function(phylota, pattern, genes_map_df, marker_lookup, variants = .cp_locus_variants()) {
+.cp_cluster_loci <- function(phylota, pattern, genes_map_df, marker_lookup) {
   cids <- phylota@cids
   if (length(cids) == 0) return(data.frame(cluster_id = integer(0), locus = character(0)))
   df <- do.call(rbind, lapply(cids, function(cid) {
@@ -991,28 +991,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
   locus <- marker_lookup$Marker_std[match(top, marker_lookup$search_marker)]
   locus <- ifelse(is.na(locus), top, locus)
   locus[!nzchar(locus)] <- NA_character_
-  .cp_apply_locus_variants(data.frame(cluster_id = as.integer(s$cluster_id), locus = locus, stringsAsFactors = FALSE),
-                           variants)
-}
-
-#' Variant names of a locus and the locus they are pooled with (decision Y3 of BMM, 29-09)
-#'
-#' The table fixed before the probe X3 ran (`inst/extdata/locus_name_variants.csv`): names that
-#' `.cp_cluster_loci()` gives to clusters of a library locus (`trnK` for `matK`, `trnL-rpl32` for
-#' `rpl32-trnL`...). Applied after `genes_map.csv`, which is not changed.
-#' @noRd
-.cp_locus_variants <- function() {
-  utils::read.csv(system.file("extdata", "locus_name_variants.csv", package = "PhyloCactus"),
-                  stringsAsFactors = FALSE, colClasses = "character")
-}
-
-#' A variant name takes the name of its locus; other names and `NA` are kept
-#' @noRd
-.cp_apply_locus_variants <- function(cluster_locus, variants) {
-  if (is.null(variants) || !nrow(variants)) return(cluster_locus)
-  hit <- match(cluster_locus$locus, variants$name)
-  cluster_locus$locus[!is.na(hit)] <- variants$locus[hit[!is.na(hit)]]
-  cluster_locus
+  data.frame(cluster_id = as.integer(s$cluster_id), locus = locus, stringsAsFactors = FALSE)
 }
 
 #' Clusters over the cut of min_species, the clusters of one locus pooled (decision Y1 of BMM, 29-09)
