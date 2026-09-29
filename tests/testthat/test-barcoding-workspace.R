@@ -269,3 +269,74 @@ test_that("the three mining functions take the notification arguments (L4)", {
     expect_false(eval(formals(f)$notify))
   }
 })
+
+# Phase 10, Y1 (BMM, 29-09): the cut of min_species applies to the locus, the clusters named alike
+# pooled, in both branches; a cluster without a locus name is judged alone.
+.y1_species <- function(cid, sp) data.frame(cluster_id = cid, species = sp, stringsAsFactors = FALSE)
+
+test_that("clusters of one locus are pooled before the cut of min_species (Y1)", {
+  sp <- rbind(.y1_species(1L, paste0("s", 1:30)), .y1_species(2L, paste0("s", 31:60)),
+              .y1_species(3L, paste0("t", 1:30)), .y1_species(4L, paste0("t", 21:50)),
+              .y1_species(5L, paste0("u", 1:60)), .y1_species(6L, paste0("v", 1:40)),
+              .y1_species(7L, paste0("w", 1:40)))
+  loc <- data.frame(cluster_id = 1:7, locus = c("psbA-trnH", "psbA-trnH", "rpL16", "rpL16", NA, NA, ""),
+                    stringsAsFactors = FALSE)
+  out <- .cp_select_clusters_by_locus(sp, loc, min_species = 50)
+  # psbA-trnH 60 species in two clusters of 30: kept; rpL16 50 species (overlap): not over 50
+  expect_setequal(out$keep, c(1L, 2L, 5L))
+  tab <- out$table
+  expect_equal(tab$species[tab$locus == "psbA-trnH"], 60L)
+  expect_equal(tab$species[tab$locus == "rpL16"], 50L)
+  # Unnamed clusters are not pooled with one another
+  expect_false(6L %in% out$keep)
+  expect_false(7L %in% out$keep)
+})
+
+test_that("the locus of every cluster is read from the definition lines of its sequences (Y1)", {
+  skip_if_not_installed("phylotaR")
+  data("aotus", package = "phylotaR", envir = environment())
+  lookup <- data.frame(search_marker = "cytb", Marker_std = "cytb", stringsAsFactors = FALSE)
+  gm <- data.frame(search = "cytb", replace = "cytb", stringsAsFactors = FALSE)
+  loc <- .cp_cluster_loci(aotus, pattern = cp_build_pattern(c("cytb", "cytochrome b")), genes_map_df = gm,
+                          marker_lookup = lookup)
+  expect_setequal(names(loc), c("cluster_id", "locus"))
+  expect_equal(nrow(loc), length(aotus@cids))
+  expect_true(any(loc$locus %in% "cytb"))
+})
+
+test_that("both branches select clusters by locus and translate the manual exclusions (Y1, X2)", {
+  for (f in list(assemble_ingroup_phylotar, assemble_barcoding_dataset)) {
+    b <- paste(deparse(body(f)), collapse = "\n")
+    expect_match(b, ".cp_select_clusters_by_locus(", fixed = TRUE)
+    expect_match(b, ".cp_exclusion_pairs(", fixed = TRUE)
+    expect_false(grepl("ntaxa > min_species", b, fixed = TRUE))
+  }
+})
+
+# X2 (BMM, 29-09): the curated exclusions are keyed by locus and accession, so that they survive a
+# new mining that renumbers the clusters.
+test_that("exclusions by (locus, sid) become the (cluster, sid) pairs of the present workspace (X2)", {
+  records <- data.frame(cluster_id = c(10L, 11L, 12L, 12L, 20L), sid = c("A.1", "A.1", "B.1", "C.1", "B.1"),
+                        stringsAsFactors = FALSE)
+  loc <- data.frame(cluster_id = c(10L, 11L, 12L, 20L), locus = c("ITS", "ITS", "matK", "rbcL"),
+                    stringsAsFactors = FALSE)
+  exc <- data.frame(locus = c("ITS", "matK", "trnL-trnF"), sid = c("A.1", "B.1", "Z.1"),
+                    reason = c("not homologous", "chimeric", "gone"), stringsAsFactors = FALSE)
+  p <- .cp_exclusion_pairs(exc, records, loc)
+  # A.1 leaves both ITS clusters; B.1 leaves matK and stays in rbcL; Z.1 matches nothing
+  expect_setequal(paste(p$pairs$cluster_id, p$pairs$sid), c("10 A.1", "11 A.1", "12 B.1"))
+  expect_identical(p$pairs$reason[p$pairs$sid == "B.1"], "chimeric")
+  expect_equal(p$counts$n_file, 3L)
+  expect_equal(p$counts$n_matched, 2L)
+  expect_identical(p$unmatched$sid, "Z.1")
+})
+
+test_that("the shipped exclusion lists are keyed by locus and accession (X2)", {
+  for (f in c("manual_exclusions_ingroup.csv", "manual_exclusions_outgroup.csv")) {
+    x <- utils::read.csv(system.file("extdata", f, package = "PhyloCactus"), stringsAsFactors = FALSE)
+    expect_true(all(c("locus", "sid", "reason") %in% names(x)), info = f)
+    expect_false("cluster_id" %in% names(x), info = f)
+    expect_true(all(nzchar(x$locus) & !is.na(x$locus)), info = f)
+    expect_false(any(duplicated(paste(x$locus, x$sid))), info = f)
+  }
+})
