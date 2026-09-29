@@ -281,6 +281,16 @@
   invisible(TRUE)
 }
 
+#' The sequences K1 compares a region with: those of UNMASKED_<locus>.fasta, named by sid, when the
+#' library has it (K3); otherwise the library sequences without gaps
+#' @noRd
+.bc_unmasked_seqs <- function(library_dir, locus, lib_seqs) {
+  f <- file.path(library_dir, paste0("UNMASKED_", locus, ".fasta"))
+  if (!file.exists(f)) return(lib_seqs)
+  u <- Biostrings::readDNAStringSet(f)
+  stats::setNames(toupper(as.character(u)), .bc_parse_header(names(u))$sid)
+}
+
 #' Library accessions whose sequence holds the region, or is held by it, on either strand (K1)
 #'
 #' A region identical to a library sequence is the query finding itself (or its own specimen): its
@@ -495,10 +505,11 @@ identify_barcoding_query <- function(query,
     }
     wl <- .bc_identify_model(library_dir, lib, l, seed, models_dir)
     width <- floor(1.5 * max(nchar(wl$lib_seqs)))
+    ident_seqs <- .bc_unmasked_seqs(library_dir, l, wl$lib_seqs)
     for (i in seq_along(q)) {
       r <- .bc_identify_one(unname(q[i]), ids[i], l, wl, width, threshold, min_overlap, seed)
       r$identical_to_library <- if (is.na(r$region_start)) NA_character_ else
-        .bc_identical_to_library(substr(unname(q[i]), r$region_start, r$region_end), wl$lib_seqs, min_overlap)
+        .bc_identical_to_library(substr(unname(q[i]), r$region_start, r$region_end), ident_seqs, min_overlap)
       rows[[length(rows) + 1L]] <- cbind(
         data.frame(query = names(q)[i], locus = l, query_length = nchar(q[i]), .qi = i,
                    stringsAsFactors = FALSE), r)

@@ -30,6 +30,22 @@
   list(aln = aln[!map$collapsed], map = map)
 }
 
+#' Write UNMASKED_<locus>.fasta: the step 1 sequence of each accession, representatives and the
+#' accessions collapsed onto them (decision K3 of BMM, 28-09)
+#' @noRd
+.bc_write_unmasked <- function(assembly_dir, output_dir, locus, sids) {
+  f <- file.path(assembly_dir, paste0(locus, ".fasta"))
+  if (!file.exists(f)) {
+    message("Locus '", locus, "': no ", basename(f), " in ", assembly_dir, "; UNMASKED_", locus,
+            ".fasta not written, and a query equal to a masked accession is not recognised as it.")
+    return(invisible(NULL))
+  }
+  raw <- Biostrings::readDNAStringSet(f)
+  raw <- raw[match(sids, .bc_parse_header(names(raw))$sid, nomatch = 0L)]
+  Biostrings::writeXStringSet(raw, file.path(output_dir, paste0("UNMASKED_", locus, ".fasta")))
+  invisible(NULL)
+}
+
 #' Build the Final Reference Library of the Molecular Diagnostic Branch
 #'
 #' Takes the curated alignments written by [curate_barcoding_markers()] and writes the reference
@@ -59,7 +75,9 @@
 #' @param paralog_loci Character vector. Loci under paralogy surveillance, flagged in the column
 #'   `possible_paralog` of every table; the flag never excludes a locus. Defaults to `"pepC_like"`.
 #' @return Invisibly, a list with `summary`, `excluded` and `collapsed`. Writes `LIB_<locus>.fasta`
-#'   for every locus that enters, `TABLE_barcoding_library_summary.csv`,
+#'   for every locus that enters, `UNMASKED_<locus>.fasta` beside it (the sequence of step 1, before
+#'   masking, of every accession the locus represents, collapsed ones included; used to recognise a
+#'   query that is itself a library accession), `TABLE_barcoding_library_summary.csv`,
 #'   `TABLE_barcoding_excluded_nonhomologous.csv`, `TABLE_barcoding_collapsed_identical.csv` and
 #'   `TABLE_barcoding_funnel.csv` (per locus: accessions assembled, curated, excluded, collapsed and
 #'   kept, species with replica, and whether the locus entered the screening and the library).
@@ -161,6 +179,8 @@ finalize_barcoding_library <- function(assembly_dir = file.path("11_barcoding", 
                             stringsAsFactors = FALSE)
     if (passes) {
       Biostrings::writeXStringSet(Biostrings::DNAStringSet(col$aln), file.path(output_dir, paste0("LIB_", l, ".fasta")))
+      # K3: the step 1 sequence of every accession the library represents, before masking
+      .bc_write_unmasked(assembly_dir, output_dir, l, col$map$sid)
     }
     message(sprintf("Locus '%s': %d non-homologous removed, %d identical collapsed, %d species with replica (%s).",
                     l, n_excluded, sum(col$map$collapsed), ctx$species_with_replicate,
