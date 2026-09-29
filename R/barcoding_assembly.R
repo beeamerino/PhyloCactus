@@ -602,6 +602,13 @@ assemble_barcoding_dataset <- function(wd_path,
   registry <- .bc_build_registry(kept[!is.na(kept$species), , drop = FALSE])
   sequences <- vapply(registry$sid, function(s) rawToChar(selected@sqs[[s]]@sq), character(1))
   names(sequences) <- registry$sid
+  # Records over 2000 bases cut to the extent of the shorter records of their locus (L2, 28-09)
+  cut <- .bc_cut_long_records(registry, sequences)
+  utils::write.csv(cut$table, file.path(dir_asm, "TABLE_barcoding_long_records_cut.csv"), row.names = FALSE)
+  log_message("Records over 2000 bases: ", sum(cut$table$action == "cut"), " cut to the extent of their locus, ",
+              sum(cut$table$action == "no_overlap"), " left out.")
+  registry <- cut$registry
+  sequences <- cut$sequences
   # Extra records from GenBank plastomes (Phase 8, F2); NULL leaves the step as it was
   extra <- .bc_add_extra_records(registry, sequences, extra_records_dir)
   if (!is.null(extra_records_dir)) {
