@@ -387,10 +387,16 @@ barcoding_outgroup_taxids <- function() {
 #'   GenBank name, cleaned to `Genus_species`: that is what the outgroup of CN2 needs, since a
 #'   checklist of Cactaceae would discard every outgroup name.
 #' @param min_species Integer. A cluster is retained when it holds more than this number of species.
+#'   Defaults to `50`, as in the phylogeny.
 #' @param extra_records_dir Character or `NULL`. A folder written by [extract_barcoding_plastome_loci()];
 #'   its records are appended to their loci and the registry gains a `source` column (`phylotaR` or
 #'   `genbank_plastome`). `NULL`, the default, leaves the step as it was.
-#'   Defaults to `50`, as in the phylogeny.
+#' @param own_dir Character or `NULL`. A folder of own data (`0_own/`): `SAMPLES.csv` (`sample`,
+#'   `species`, `voucher`, `data_type`, `published`, `notes`) and one FASTA per library locus, named as
+#'   the locus, with headers `>sample`. The records join their loci before the cut of long records,
+#'   with the sid `own:<sample>:<locus>` and `source = "own"`; a record whose sample is not in the
+#'   sheet, whose species is not in the checklist or whose locus is not in the registry is left out and
+#'   listed in `TABLE_barcoding_own_left_out.csv`. `NULL`, the default, leaves the step as it was.
 #' @param preferred_parent Character. NCBI Taxonomy ID of the focal ingroup, used to decide which
 #'   cluster keeps a sid that sits in two. Defaults to `"3593"`.
 #' @param taxids Character vector or `NULL`. What to mine from GenBank when the workspace of
@@ -439,6 +445,7 @@ assemble_barcoding_dataset <- function(wd_path,
                                        force_download = FALSE,
                                        phylogeny_map_file = NULL,
                                        extra_records_dir = NULL,
+                                       own_dir = NULL,
                                        notify = FALSE,
                                        notify_to = NULL,
                                        notify_credentials = NULL) {
@@ -614,6 +621,18 @@ assemble_barcoding_dataset <- function(wd_path,
   registry <- .bc_build_registry(kept[!is.na(kept$species), , drop = FALSE])
   sequences <- vapply(registry$sid, function(s) rawToChar(selected@sqs[[s]]@sq), character(1))
   names(sequences) <- registry$sid
+  # Own data (O1 to O3, BMM 29-09): records of 0_own/ join their loci before the cut of long records
+  if (!is.null(own_dir)) {
+    own <- .bc_own_records(own_dir, checklist_path, loci = unique(registry$locus))
+    utils::write.csv(own$left_out, file.path(dir_asm, "TABLE_barcoding_own_left_out.csv"), row.names = FALSE)
+    log_message("Own records from ", own_dir, ": ", nrow(own$registry), " added; ", nrow(own$left_out),
+                " left out (TABLE_barcoding_own_left_out.csv).")
+    registry$source <- "phylotaR"
+    registry <- rbind(registry, own$registry)
+    registry <- registry[order(registry$locus, registry$species, registry$sid), , drop = FALSE]
+    rownames(registry) <- NULL
+    sequences <- c(sequences, own$sequences)[registry$sid]
+  }
   # Records over 2000 bases cut to the extent of the shorter records of their locus (L2, 28-09)
   cut <- .bc_cut_long_records(registry, sequences)
   utils::write.csv(cut$table, file.path(dir_asm, "TABLE_barcoding_long_records_cut.csv"), row.names = FALSE)

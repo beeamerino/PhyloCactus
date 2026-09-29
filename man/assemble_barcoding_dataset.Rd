@@ -19,6 +19,7 @@ assemble_barcoding_dataset(
   force_download = FALSE,
   phylogeny_map_file = NULL,
   extra_records_dir = NULL,
+  own_dir = NULL,
   notify = FALSE,
   notify_to = NULL,
   notify_credentials = NULL
@@ -44,7 +45,8 @@ uses the checklist distributed with the package. \code{NA} applies no checklist 
 GenBank name, cleaned to \code{Genus_species}: that is what the outgroup of CN2 needs, since a
 checklist of Cactaceae would discard every outgroup name.}
 
-\item{min_species}{Integer. A cluster is retained when it holds more than this number of species.}
+\item{min_species}{Integer. A cluster is retained when it holds more than this number of species.
+Defaults to \code{50}, as in the phylogeny.}
 
 \item{preferred_parent}{Character. NCBI Taxonomy ID of the focal ingroup, used to decide which
 cluster keeps a sid that sits in two. Defaults to \code{"3593"}.}
@@ -65,8 +67,14 @@ with the branch's own when it exists. Defaults to
 
 \item{extra_records_dir}{Character or \code{NULL}. A folder written by \code{\link[=extract_barcoding_plastome_loci]{extract_barcoding_plastome_loci()}};
 its records are appended to their loci and the registry gains a \code{source} column (\code{phylotaR} or
-\code{genbank_plastome}). \code{NULL}, the default, leaves the step as it was.
-Defaults to \code{50}, as in the phylogeny.}
+\code{genbank_plastome}). \code{NULL}, the default, leaves the step as it was.}
+
+\item{own_dir}{Character or \code{NULL}. A folder of own data (\verb{0_own/}): \code{SAMPLES.csv} (\code{sample},
+\code{species}, \code{voucher}, \code{data_type}, \code{published}, \code{notes}) and one FASTA per library locus, named as
+the locus, with headers \verb{>sample}. The records join their loci before the cut of long records,
+with the sid \verb{own:<sample>:<locus>} and \code{source = "own"}; a record whose sample is not in the
+sheet, whose species is not in the checklist or whose locus is not in the registry is left out and
+listed in \code{TABLE_barcoding_own_left_out.csv}. \code{NULL}, the default, leaves the step as it was.}
 
 \item{notify}{Logical. Send an email through \code{\link[=send_run_notification]{send_run_notification()}} when a mining ends or fails;
 reading an existing workspace sends nothing. Defaults to \code{FALSE}.}
