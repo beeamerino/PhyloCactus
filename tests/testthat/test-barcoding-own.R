@@ -92,3 +92,13 @@ test_that("step 1 takes own_dir, adds the own records before the cut of long rec
   expect_match(b, "TABLE_barcoding_own_left_out.csv", fixed = TRUE)
   expect_lt(regexpr(".bc_own_records(", b, fixed = TRUE), regexpr(".bc_cut_long_records(", b, fixed = TRUE))
 })
+
+test_that("step 1 of Tutorial 5 shows own_dir (O1)", {
+  f <- system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus")
+  skip_if(!nzchar(f), "Tutorial 5 not installed")
+  calls <- as.list(parse(f))
+  step1 <- Filter(function(e) is.call(e) && identical(e[[1]], as.name("assemble_barcoding_dataset")) &&
+                    identical(e$wd_path, "0_phylotaR_raw_Ingroup"), calls)
+  expect_length(step1, 1L)
+  expect_true("own_dir" %in% names(step1[[1]]))
+})
