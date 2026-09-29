@@ -448,3 +448,45 @@ test_that("the naming at the cut and the final naming both take a variant to its
   b <- paste(deparse(.cp_enrich_cluster_summary), collapse = "\n")
   expect_match(b, "marker_lookup", fixed = TRUE)
 })
+
+# Request of BMM (29-09): step 1 sends an email when it ends, finished or failed, as step 7 does;
+# the email of the mining (L4) is kept.
+
+test_that("the email of step 1 says finished and names the registry (step 1 notification)", {
+  sent <- list()
+  .bc_notify_step(ok = TRUE, analysis = "barcoding assembly (step 1)", started = Sys.time() - 60,
+                  outputs = c("Registry" = "11_barcoding/1_assembly/TABLE_barcoding_accession_registry.csv"),
+                  error_message = "", to = "a@b.c", credentials = "x",
+                  send_fn = function(subject, body, to, credentials) sent <<- list(subject = subject, body = body, to = to))
+  expect_match(sent$subject, "finished: barcoding assembly (step 1)", fixed = TRUE)
+  expect_match(sent$body, "TABLE_barcoding_accession_registry.csv", fixed = TRUE)
+  expect_identical(sent$to, "a@b.c")
+})
+
+test_that("the email of step 1 says FAILED and carries the error (step 1 notification)", {
+  sent <- list()
+  .bc_notify_step(ok = FALSE, analysis = "barcoding assembly (step 1)", started = Sys.time(),
+                  outputs = character(0), error_message = "Input file not found: x.csv",
+                  to = NULL, credentials = NULL,
+                  send_fn = function(subject, body, to, credentials) sent <<- list(subject = subject, body = body))
+  expect_match(sent$subject, "FAILED", fixed = TRUE)
+  expect_match(sent$body, "Input file not found: x.csv", fixed = TRUE)
+})
+
+test_that("an email that cannot be sent never fails step 1 (step 1 notification)", {
+  expect_message(
+    .bc_notify_step(ok = TRUE, analysis = "a", started = Sys.time(), outputs = character(0), error_message = "",
+                    to = NULL, credentials = NULL, send_fn = function(...) stop("smtp down")),
+    "smtp down")
+})
+
+test_that("step 1 sends its email on exit when notify is on, and Tutorial 5 passes notify_email (step 1 notification)", {
+  b <- paste(deparse(body(assemble_barcoding_dataset)), collapse = "\n")
+  expect_match(b, "on.exit(", fixed = TRUE)
+  expect_match(b, ".bc_notify_step(", fixed = TRUE)
+  f <- system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus")
+  skip_if(!nzchar(f), "Tutorial 5 not installed")
+  step1 <- Filter(function(e) is.call(e) && identical(e[[1]], as.name("assemble_barcoding_dataset")) &&
+                    identical(e$wd_path, "0_phylotaR_raw_Ingroup"), as.list(parse(f)))
+  expect_identical(step1[[1]]$notify, as.name("notify_email"))
+})
