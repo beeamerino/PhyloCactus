@@ -495,10 +495,14 @@ assemble_barcoding_dataset <- function(wd_path,
   # in assemble_ingroup_phylotar(); the records are then taken from the unreduced clusters.
   species_reduced <- phylotaR::drop_by_rank(phylota, rnk = "species", n = 1)
   cluster_ids <- species_reduced@cids
-  ntaxa <- phylotaR::get_ntaxa(species_reduced, cid = cluster_ids, rnk = "species")
-  keep_clusters <- cluster_ids[ntaxa > min_species]
+  # Y1 (BMM, 29-09): the clusters of one locus pooled before the cut, as in the phylogeny
+  cluster_locus <- .cp_cluster_loci(phylota, pattern, genes_map_df, marker_lookup)
+  by_locus <- .cp_select_clusters_by_locus(.cp_cluster_species(species_reduced), cluster_locus, min_species)
+  utils::write.csv(by_locus$table, file.path(dir_asm, "TABLE_barcoding_loci_over_min_species.csv"), row.names = FALSE)
+  keep_clusters <- intersect(cluster_ids, as.character(by_locus$keep))
   selected <- phylotaR::drop_clstrs(phylota, cid = keep_clusters)
-  log_message("Clusters with more than ", min_species, " species: ", length(selected@cids))
+  log_message("Clusters of loci with more than ", min_species, " species (clusters of one locus pooled): ",
+              length(selected@cids))
 
   records <- do.call(rbind, lapply(selected@cids, function(cid) {
     data.frame(cluster_id = as.integer(cid), sid = as.character(selected@clstrs[[cid]]@sids),
@@ -514,8 +518,11 @@ assemble_barcoding_dataset <- function(wd_path,
   kept <- dd$kept
   counts_manual <- NULL
   if (isTRUE(apply_manual_exclusions) && nzchar(manual_exclusions_file) && file.exists(manual_exclusions_file)) {
-    exclusions <- utils::read.csv(manual_exclusions_file, stringsAsFactors = FALSE)
-    me <- .bc_apply_manual_exclusions(records, exclusions, removed_auto = dd$removed)
+    # X2 (BMM, 29-09): the list is keyed by (locus, sid); its pairs in this workspace
+    ex_pairs <- .cp_exclusion_pairs(utils::read.csv(manual_exclusions_file, stringsAsFactors = FALSE), records, cluster_locus)
+    log_message("Manual exclusions: ", ex_pairs$counts$n_file, " (locus, accession) rows in the list; ",
+                ex_pairs$counts$n_matched, " found in the selected clusters.")
+    me <- .bc_apply_manual_exclusions(records, ex_pairs$pairs, removed_auto = dd$removed)
     kept <- kept[!paste(kept$cluster_id, kept$sid) %in% me$excluded_keys, , drop = FALSE]
     counts_manual <- me$counts
     log_message("Manual exclusions: ", me$counts$n_file, " in the file; ", me$counts$n_in_clusters,
