@@ -1,0 +1,12 @@
+name,locus
+trnK,matK
+"maturase K, matK, trnK",matK
+"trnK, maturase K",matK
+trnL-rpl32,rpl32-trnL
+"atpB-rbcL, ribulose-1,5-bisphosphate carboxylase, rbcL",atpB-rbcL
+"atpB, atpB-rbcL",atpB-rbcL
+"atpB, atpB-rbcL, ribulose-1,5-bisphosphate carboxylase, rbcL",atpB-rbcL
+"trnS, trnS-trnG",trnS-trnG
+"trnS, trnS-trnG, trnG",trnS-trnG
+"psbJ, psbJ-petA, petA",psbJ-petA
+"trnT, trnT-psbD",trnT-psbD

@@ -5,6 +5,7 @@ CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx,,input,curated,,none,TRUE,Caryo
 cactus_constraints.csv,,input,curated,,none,TRUE,Taxonomic scaffold mapping species to clades subfamilies and families
 calibrations_bounds.csv,,input,curated,,none,TRUE,Secondary calibration bounds with node_type and provenance per row
 genes_map.csv,,input,curated,,none,TRUE,Locus name harmonisation map for GenBank annotations
+locus_name_variants.csv,,input,curated,,none,TRUE,Variant names of a locus pooled with it before the cut of min_species (Y3; the table fixed before probe X3)
 target_genes.txt,,input,curated,,none,TRUE,Target locus list mined by the assembly modules
 manual_exclusions_ingroup.csv,,input,curated,,none,TRUE,Expert-curated ingroup accessions removed before alignment
 manual_exclusions_outgroup.csv,,input,curated,,none,TRUE,Expert-curated outgroup accessions removed before alignment
