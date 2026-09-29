@@ -76,8 +76,9 @@ with the sid \verb{own:<sample>:<locus>} and \code{source = "own"}; a record who
 sheet, whose species is not in the checklist or whose locus is not in the registry is left out and
 listed in \code{TABLE_barcoding_own_left_out.csv}. \code{NULL}, the default, leaves the step as it was.}
 
-\item{notify}{Logical. Send an email through \code{\link[=send_run_notification]{send_run_notification()}} when a mining ends or fails;
-reading an existing workspace sends nothing. Defaults to \code{FALSE}.}
+\item{notify}{Logical. Send an email through \code{\link[=send_run_notification]{send_run_notification()}} when step 1 ends, finished
+or failed, and another when a mining ends or fails (reading an existing workspace mines nothing).
+A notification that cannot be sent is reported and never fails the step. Defaults to \code{FALSE}.}
 
 \item{notify_to, notify_credentials}{Passed to \code{\link[=send_run_notification]{send_run_notification()}} as \code{to} and \code{credentials}.}
 }

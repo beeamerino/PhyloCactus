@@ -406,8 +406,9 @@ barcoding_outgroup_taxids <- function() {
 #' @param ncbi_dr Character or `NULL`. Directory of the BLAST+ binaries, used only when the workspace
 #'   has to be created.
 #' @param force_download Logical. Mine GenBank again even if the workspace exists. Defaults to `FALSE`.
-#' @param notify Logical. Send an email through [send_run_notification()] when a mining ends or fails;
-#'   reading an existing workspace sends nothing. Defaults to `FALSE`.
+#' @param notify Logical. Send an email through [send_run_notification()] when step 1 ends, finished
+#'   or failed, and another when a mining ends or fails (reading an existing workspace mines nothing).
+#'   A notification that cannot be sent is reported and never fails the step. Defaults to `FALSE`.
 #' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
 #' @param phylogeny_map_file Character or `NULL`. Cluster-to-locus table of the phylogeny, compared
 #'   with the branch's own when it exists. Defaults to
@@ -450,6 +451,16 @@ assemble_barcoding_dataset <- function(wd_path,
                                        notify_to = NULL,
                                        notify_credentials = NULL) {
   .bc_assert_output_dir(output_dir)
+  # Email when step 1 ends, finished or failed (BMM, 29-09); the email of the mining (L4) is apart
+  step_done <- FALSE
+  if (isTRUE(notify)) {
+    started <- Sys.time()
+    on.exit(.bc_notify_step(ok = step_done, analysis = "barcoding assembly (step 1)", started = started,
+                            outputs = c("Registry" = file.path(output_dir, "1_assembly", "TABLE_barcoding_accession_registry.csv"),
+                                        "Log" = file.path(output_dir, "logs", "LOG_barcoding_assembly.txt")),
+                            error_message = if (step_done) "" else geterrmessage(),
+                            to = notify_to, credentials = notify_credentials), add = TRUE)
+  }
 
   if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "PhyloCactus")
   if (is.null(genes_map_file)) genes_map_file <- system.file("extdata", "genes_map.csv", package = "PhyloCactus")
@@ -654,6 +665,7 @@ assemble_barcoding_dataset <- function(wd_path,
   utils::write.csv(summary_tab, file.path(dir_asm, "TABLE_barcoding_replication_summary_assembly.csv"), row.names = FALSE)
   log_message("Registry: ", nrow(registry), " accessions of ", length(unique(registry$species)), " species in ",
               length(unique(registry$locus)), " loci.")
+  step_done <- TRUE
 
   invisible(list(
     registry = registry,
@@ -665,4 +677,16 @@ assemble_barcoding_dataset <- function(wd_path,
                   sids = length(unique(records$sid)), redundant_removed = nrow(dd$removed),
                   manual = counts_manual, discarded_accessions = nrow(discarded))
   ))
+}
+
+#' The email of step 1, composed and sent; a failure to send is reported, never raised
+#' @noRd
+.bc_notify_step <- function(ok, analysis, started, outputs, error_message, to, credentials,
+                            send_fn = send_run_notification) {
+  note <- .compose_run_notification(analysis = analysis, status = if (isTRUE(ok)) "finished" else "failed",
+                                    started = started, outputs = outputs,
+                                    error_message = if (isTRUE(ok)) NULL else trimws(error_message))
+  tryCatch(send_fn(note$subject, note$body, to = to, credentials = credentials),
+           error = function(e) message("The email of step 1 was not sent: ", conditionMessage(e)))
+  invisible(NULL)
 }
