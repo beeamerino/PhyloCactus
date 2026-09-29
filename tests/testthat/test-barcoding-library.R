@@ -245,3 +245,61 @@ test_that("the final library says which earlier step is missing when an input fi
     "assemble_barcoding_dataset"
   )
 })
+
+# K3 (BMM, 28-09): masking removes alignment columns, so a library sequence can lose internal
+# sites and no longer be contained in its own GenBank record. The library keeps, beside each
+# LIB_<locus>.fasta, the step 1 sequence of every accession it represents.
+test_that("the library writes the step 1 sequence of every accession it represents (K3)", {
+  skip_if_not_installed("Biostrings")
+  tmp <- withr::local_tempdir()
+
+  # Aligned and masked: A1 and A3 are identical after masking; B3 is non-homologous.
+  matk <- c(`Opuntia_robusta|A1.1` = "ACGTACGTAC", `Opuntia_robusta|A2.1` = "ACGTACGTAA",
+            `Opuntia_robusta|A3.1` = "ACGTACGTAC",
+            `Opuntia_stricta|B1.1` = "TCGTACGTAC", `Opuntia_stricta|B2.1` = "TCGTACGTCC",
+            `Opuntia_stricta|B3.1` = "GGGGCCCCTT")
+  # Step 1: longer, and A1 and A3 differ in the masked columns
+  raw <- c(`Opuntia_robusta|A1.1` = "TTACGTAAACGTACTT", `Opuntia_robusta|A2.1` = "TTACGTACGTAATT",
+           `Opuntia_robusta|A3.1` = "TTACGTAGGGCGTACTT",
+           `Opuntia_stricta|B1.1` = "TTTCGTACGTACTT", `Opuntia_stricta|B2.1` = "TTTCGTACGTCCTT",
+           `Opuntia_stricta|B3.1` = "GGGGCCCCTT")
+  cur <- .lib_fixture(tmp, list(matK = matk), list(matK = .strand_log(names(matk), "Opuntia_stricta|B3.1")))
+  dirs <- .lib_step_files(tmp, .lib_registry(names(matk), "matK"), data.frame(locus = "matK", enters = TRUE))
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(raw), file.path(dirs$assembly_dir, "matK.fasta"))
+
+  suppressMessages(finalize_barcoding_library(
+    assembly_dir = dirs$assembly_dir, curated_dir = cur, screening_dir = dirs$screening_dir,
+    output_dir = file.path(tmp, "4_library"), metadata_file = NULL, min_species_with_replica = 2L
+  ))
+
+  f <- file.path(tmp, "4_library", "UNMASKED_matK.fasta")
+  expect_true(file.exists(f))
+  u <- Biostrings::readDNAStringSet(f)
+  # Representatives and the accessions collapsed onto them; not the non-homologous one
+  expect_setequal(names(u), setdiff(names(raw), "Opuntia_stricta|B3.1"))
+  expect_identical(as.character(u)[names(raw)[1:5]], raw[1:5])
+  # LIB_<locus>.fasta is unchanged and the library is still read as one locus
+  expect_setequal(names(Biostrings::readDNAStringSet(file.path(tmp, "4_library", "LIB_matK.fasta"))),
+                  c("Opuntia_robusta|A1.1", "Opuntia_robusta|A2.1", "Opuntia_stricta|B1.1", "Opuntia_stricta|B2.1"))
+  expect_setequal(unique(.bc_library_from_dir(file.path(tmp, "4_library"))$locus), "matK")
+})
+
+test_that("without the step 1 FASTA the library is written as before and says so (K3)", {
+  skip_if_not_installed("Biostrings")
+  tmp <- withr::local_tempdir()
+  matk <- c(`Opuntia_robusta|A1.1` = "ACGTACGTAC", `Opuntia_robusta|A2.1` = "ACGTACGTAA",
+            `Opuntia_stricta|B1.1` = "TCGTACGTAC", `Opuntia_stricta|B2.1` = "TCGTACGTCC")
+  cur <- .lib_fixture(tmp, list(matK = matk), list(matK = .strand_log(names(matk))))
+  dirs <- .lib_step_files(tmp, .lib_registry(names(matk), "matK"), data.frame(locus = "matK", enters = TRUE))
+
+  msg <- character(0)
+  withCallingHandlers(
+    finalize_barcoding_library(assembly_dir = dirs$assembly_dir, curated_dir = cur, screening_dir = dirs$screening_dir,
+                               output_dir = file.path(tmp, "4_library"), metadata_file = NULL,
+                               min_species_with_replica = 2L),
+    message = function(m) { msg <<- c(msg, conditionMessage(m)); invokeRestart("muffleMessage") })
+
+  expect_true(file.exists(file.path(tmp, "4_library", "LIB_matK.fasta")))
+  expect_false(file.exists(file.path(tmp, "4_library", "UNMASKED_matK.fasta")))
+  expect_true(any(grepl("matK", msg) & grepl("UNMASKED", msg)))
+})

@@ -560,3 +560,33 @@ test_that("a region identical to a library sequence names that accession (K1)", 
   expect_identical(r$identical_to_library[r$query == "q1"], sub("^[^|]*[|]", "", names(f$seqs$matK)[1]))
   expect_true(is.na(r$identical_to_library[r$query == "q2"]))
 })
+
+# K3 (BMM, 28-09): a library sequence that lost internal columns to masking is still recognised
+# as the query itself, through the step 1 sequence kept in UNMASKED_<locus>.fasta.
+test_that("a query equal to a masked library accession is named through UNMASKED_<locus>.fasta (K3)", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  x <- f$seqs$matK
+  raw <- unname(x[1])
+  masked <- x
+  substr(masked[1], 101, 110) <- "----------"
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(masked), file.path(f$library_dir, "LIB_matK.fasta"))
+  sid <- sub("^[^|]*[|]", "", names(x)[1])
+
+  # Without the file: the masked sequence is not contained in the query, K1 misses it
+  r0 <- .idn_run(f, c(q1 = raw), locus = "matK")$tab
+  expect_true(is.na(r0$identical_to_library))
+
+  unlink(f$out, recursive = TRUE)
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), file.path(f$library_dir, "UNMASKED_matK.fasta"))
+  r1 <- .idn_run(f, c(q1 = raw), locus = "matK")$tab
+  expect_identical(r1$identical_to_library, sid)
+  # On the other strand too
+  unlink(f$out, recursive = TRUE)
+  r2 <- .idn_run(f, c(q1 = .idn_rc(raw)), locus = "matK")$tab
+  expect_identical(r2$identical_to_library, sid)
+  # The run record holds the md5 of the file K1 used
+  run <- utils::read.csv(list.files(f$out, "^RUN_.*[.]csv$", full.names = TRUE)[1], stringsAsFactors = FALSE)
+  expect_identical(run$value[run$kind == "library" & run$name == "UNMASKED_matK.fasta"],
+                   unname(tools::md5sum(file.path(f$library_dir, "UNMASKED_matK.fasta"))))
+})
