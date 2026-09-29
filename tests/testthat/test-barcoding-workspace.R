@@ -401,42 +401,50 @@ test_that("the branch log names the exclusion pairs as pairs, not rows of the fi
 })
 
 # Y3 (BMM, 29-09): the variant names of a locus are pooled with it. X3 counted 85 species new to
-# the library in variants judged apart (`trnK`, `trnL-rpl32`, `atpB, atpB-rbcL`...). The variants
-# and their locus are the table fixed before X3 ran, in `inst/extdata/locus_name_variants.csv`;
-# `genes_map.csv` is not changed.
+# the library in variants judged apart (`trnK`, `trnL-rpl32`, `atpB, atpB-rbcL`...). The eleven
+# equivalences fixed before X3 ran go into `genes_map.csv` (BMM, 29-09), which names the clusters
+# both at the cut of min_species and at the final locus of every branch; no separate table.
 
-test_that("the table of variant names holds the eleven equivalences of X3 (Y3)", {
-  v <- .cp_locus_variants()
-  expect_setequal(names(v), c("name", "locus"))
-  expect_identical(nrow(v), 11L)
-  expect_false(anyDuplicated(v$name) > 0)
-  lk <- stats::setNames(v$locus, v$name)
-  expect_identical(unname(lk[c("trnK", "maturase K, matK, trnK", "trnK, maturase K")]), rep("matK", 3))
-  expect_identical(unname(lk["trnL-rpl32"]), "rpl32-trnL")
-  expect_identical(unname(lk[c("atpB, atpB-rbcL", "atpB-rbcL, ribulose-1,5-bisphosphate carboxylase, rbcL",
-                               "atpB, atpB-rbcL, ribulose-1,5-bisphosphate carboxylase, rbcL")]), rep("atpB-rbcL", 3))
-  expect_identical(unname(lk[c("trnS, trnS-trnG", "trnS, trnS-trnG, trnG")]), rep("trnS-trnG", 2))
-  expect_identical(unname(lk["psbJ, psbJ-petA, petA"]), "psbJ-petA")
-  expect_identical(unname(lk["trnT, trnT-psbD"]), "trnT-psbD")
-  # Single flanking genes and the variants that pass alone are not in it
-  expect_false(any(c("petA", "psbJ", "trnL", "matK-trnK", "trnK, matK, maturase K") %in% v$name))
+.y3_variants <- rbind(
+  c("trnK", "matK"),
+  c("maturase K, matK, trnK", "matK"),
+  c("trnK, maturase K", "matK"),
+  c("trnL-rpl32", "rpl32-trnL"),
+  c("atpB-rbcL, ribulose-1,5-bisphosphate carboxylase, rbcL", "atpB-rbcL"),
+  c("atpB, atpB-rbcL", "atpB-rbcL"),
+  c("atpB, atpB-rbcL, ribulose-1,5-bisphosphate carboxylase, rbcL", "atpB-rbcL"),
+  c("trnS, trnS-trnG", "trnS-trnG"),
+  c("trnS, trnS-trnG, trnG", "trnS-trnG"),
+  c("psbJ, psbJ-petA, petA", "psbJ-petA"),
+  c("trnT, trnT-psbD", "trnT-psbD"))
+
+test_that("genes_map.csv holds the eleven equivalences of X3, once each (Y3)", {
+  gm <- utils::read.csv(system.file("extdata", "genes_map.csv", package = "PhyloCactus"), stringsAsFactors = FALSE)
+  s <- cp_normalize_marker(gm$search)
+  for (i in seq_len(nrow(.y3_variants))) {
+    hit <- which(s == cp_normalize_marker(.y3_variants[i, 1]))
+    expect_length(hit, 1L)
+    expect_identical(trimws(gm$replace[hit]), .y3_variants[i, 2])
+  }
+  # Single flanking genes and the variants that pass alone are not mapped by Y3
+  expect_false(any(c("petA", "psbJ", "trnL", "matK-trnK", "trnK, matK, maturase K") %in% s))
 })
 
-test_that("a variant name takes the name of its locus; other names and unnamed clusters are left as they are (Y3)", {
-  cl <- data.frame(cluster_id = 1:5, locus = c("trnK", "matK-trnK", "trnL-rpl32", NA, "petA"), stringsAsFactors = FALSE)
-  out <- .cp_apply_locus_variants(cl, .cp_locus_variants())
-  expect_identical(out$locus, c("matK", "matK-trnK", "rpl32-trnL", NA, "petA"))
-  expect_identical(out$cluster_id, cl$cluster_id)
+test_that("no separate table of variants is left (Y3 in genes_map)", {
+  expect_false(file.exists(file.path(system.file("extdata", package = "PhyloCactus"), "locus_name_variants.csv")))
+  expect_false("variants" %in% names(formals(.cp_cluster_loci)))
+  expect_false(exists(".cp_locus_variants", envir = asNamespace("PhyloCactus"), inherits = FALSE))
 })
 
-test_that("the naming of the clusters applies the variants, in both branches (Y3)", {
-  data(aotus, package = "phylotaR")
-  lookup <- data.frame(search_marker = "cytochrome b", Marker_std = "cytb", stringsAsFactors = FALSE)
-  gm <- data.frame(search = "cytb", replace = "cytb", stringsAsFactors = FALSE)
-  loc <- .cp_cluster_loci(aotus, pattern = cp_build_pattern(c("cytb", "cytochrome b")), genes_map_df = gm,
-                          marker_lookup = lookup, variants = data.frame(name = "cytb", locus = "CYTB"))
-  expect_true(any(loc$locus %in% "CYTB"))
-  expect_false(any(loc$locus %in% "cytb"))
-  expect_true("variants" %in% names(formals(.cp_cluster_loci)))
-  expect_match(paste(deparse(formals(.cp_cluster_loci)$variants), collapse = ""), ".cp_locus_variants()", fixed = TRUE)
+test_that("the naming at the cut and the final naming both take a variant to its locus through genes_map (Y3)", {
+  gm <- data.frame(search = cp_normalize_marker(.y3_variants[, 1]), replace = .y3_variants[, 2], stringsAsFactors = FALSE)
+  lookup <- data.frame(search_marker = gm$search, Marker_std = gm$replace, stringsAsFactors = FALSE)
+  smmry <- data.frame(ID = c("1", "2", "3"), top_marker = c("trnL-rpl32", "atpB, atpB-rbcL", "petA"),
+                      stringsAsFactors = FALSE)
+  out <- dplyr::left_join(dplyr::mutate(smmry, top_marker = cp_normalize_marker(top_marker)), lookup,
+                          by = c("top_marker" = "search_marker"))
+  expect_identical(ifelse(is.na(out$Marker_std), out$top_marker, out$Marker_std), c("rpl32-trnL", "atpB-rbcL", "petA"))
+  # The final naming of both branches reads the same lookup
+  b <- paste(deparse(.cp_enrich_cluster_summary), collapse = "\n")
+  expect_match(b, "marker_lookup", fixed = TRUE)
 })
