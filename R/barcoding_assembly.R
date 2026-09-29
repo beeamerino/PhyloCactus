@@ -530,7 +530,7 @@ assemble_barcoding_dataset <- function(wd_path,
     me <- .bc_apply_manual_exclusions(records, ex_pairs$pairs, removed_auto = dd$removed)
     kept <- kept[!paste(kept$cluster_id, kept$sid) %in% me$excluded_keys, , drop = FALSE]
     counts_manual <- me$counts
-    log_message("Manual exclusions: ", me$counts$n_file, " in the file; ", me$counts$n_in_clusters,
+    log_message("Manual exclusions: ", me$counts$n_file, " (cluster, accession) pairs from the list; ", me$counts$n_in_clusters,
                 " in the selected clusters; ", me$counts$n_existing, " whose (cluster, sid) pair exists; ",
                 me$counts$n_effective, " effective.")
     if (length(me$missing_pairs) > 0) {
