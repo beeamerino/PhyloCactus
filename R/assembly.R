@@ -102,7 +102,14 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   # Y1 (BMM, 29-09): the clusters of one locus are pooled before the cut, so that a locus split into
   # small clusters by the mining is not lost; a cluster with no locus name is judged alone
   cluster_locus <- .cp_cluster_loci(phylota, pattern, genes_map_df, marker_lookup)
-  by_locus <- .cp_select_clusters_by_locus(.cp_cluster_species(species_reduced), cluster_locus, min_species)
+  cluster_species <- .cp_cluster_species(species_reduced)
+  # Y2: only the clusters that overlap the main cluster of their locus are pooled
+  overlap <- .cp_cluster_overlap(phylota, cluster_locus, cluster_species)
+  by_locus <- .cp_select_clusters_by_locus(cluster_species, cluster_locus, min_species, overlap = overlap)
+  if (nrow(by_locus$fragments) > 0) {
+    log_message("Clusters not pooled with their locus (no overlap with its main cluster): ",
+                paste(by_locus$fragments$cluster_id, by_locus$fragments$locus, sep = " ", collapse = "; "))
+  }
   keep_clusters <- intersect(cluster_ids, as.character(by_locus$keep))
   selected <- phylotaR::drop_clstrs(species_reduced, cid = keep_clusters)
   
@@ -997,7 +1004,17 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
 #' @return A list with `keep` (cluster ids) and `table` (per locus or unnamed cluster: clusters and
 #'   species).
 #' @noRd
-.cp_select_clusters_by_locus <- function(cluster_species, cluster_locus, min_species) {
+.cp_select_clusters_by_locus <- function(cluster_species, cluster_locus, min_species, overlap = NULL) {
+  fragments <- data.frame(cluster_id = integer(0), locus = character(0))
+  if (!is.null(overlap)) {
+    # Y2 (BMM, 29-09): a named cluster that does not overlap the main cluster of its locus is not pooled
+    out <- overlap$cluster_id[!overlap$overlaps_main]
+    loc_all <- cluster_locus$locus[match(out, cluster_locus$cluster_id)]
+    out <- out[!is.na(loc_all) & nzchar(loc_all)]
+    fragments <- data.frame(cluster_id = as.integer(out),
+                            locus = cluster_locus$locus[match(out, cluster_locus$cluster_id)], stringsAsFactors = FALSE)
+    cluster_species <- cluster_species[!cluster_species$cluster_id %in% out, , drop = FALSE]
+  }
   loc <- cluster_locus$locus[match(cluster_species$cluster_id, cluster_locus$cluster_id)]
   named <- !is.na(loc) & nzchar(loc)
   unit <- ifelse(named, loc, paste0("cluster_", cluster_species$cluster_id))
@@ -1007,7 +1024,45 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
                       clusters = as.integer(cl[names(sp)]), species = as.integer(sp), stringsAsFactors = FALSE)
   table$kept <- table$species > min_species
   keep <- sort(unique(cluster_species$cluster_id[unit %in% table$locus[table$kept]]))
-  list(keep = as.integer(keep), table = table)
+  list(keep = as.integer(keep), table = table, fragments = fragments)
+}
+
+#' Whether a cluster overlaps the main cluster of its locus (Y2)
+#'
+#' TRUE when at least `min_fraction` of `seqs` share `min_shared` or more 20-mers with the sequences
+#' of the main cluster, on either strand.
+#' @noRd
+.cp_overlaps_main <- function(seqs, main_seqs, k = 20L, min_shared = 5L, min_fraction = 0.5) {
+  kmers <- function(x) { x <- toupper(x); n <- nchar(x); if (n < k) character(0) else unique(substring(x, 1:(n - k + 1L), k:n)) }
+  rc <- function(x) as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(x)))
+  pool <- unique(unlist(lapply(c(main_seqs, rc(main_seqs)), kmers), use.names = FALSE))
+  shared <- vapply(seqs, function(x) sum(kmers(x) %in% pool), 0L)
+  length(seqs) > 0 && mean(shared >= min_shared) >= min_fraction
+}
+
+#' For every cluster, whether it overlaps the main cluster (most species) of its locus (Y2)
+#'
+#' Unnamed clusters are judged alone and marked TRUE. At most `max_seqs` sequences of a cluster are
+#' read, the first by sid, so that the check stays fast on large clusters.
+#' @noRd
+.cp_cluster_overlap <- function(phylota, cluster_locus, cluster_species, max_seqs = 100L) {
+  seqs_of <- function(cid) {
+    sids <- sort(phylota@clstrs[[as.character(cid)]]@sids, method = "radix")
+    sids <- utils::head(sids, max_seqs)
+    vapply(sids, function(s) rawToChar(phylota@sqs[[s]]@sq), "", USE.NAMES = FALSE)
+  }
+  n_sp <- tapply(cluster_species$species, cluster_species$cluster_id, function(x) length(unique(x)))
+  out <- data.frame(cluster_id = as.integer(cluster_locus$cluster_id), overlaps_main = TRUE)
+  loci <- unique(stats::na.omit(cluster_locus$locus[nzchar(cluster_locus$locus)]))
+  for (l in loci) {
+    cids <- cluster_locus$cluster_id[cluster_locus$locus %in% l]
+    if (length(cids) < 2L) next
+    sp <- as.integer(n_sp[as.character(cids)]); sp[is.na(sp)] <- 0L
+    main <- cids[order(-sp, cids)][1]
+    main_seqs <- seqs_of(main)
+    for (cid in setdiff(cids, main)) out$overlaps_main[out$cluster_id == cid] <- .cp_overlaps_main(seqs_of(cid), main_seqs)
+  }
+  out
 }
 
 #' The curated exclusions keyed by (locus, sid) as the (cluster, sid) pairs of this workspace (X2)

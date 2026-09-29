@@ -497,8 +497,13 @@ assemble_barcoding_dataset <- function(wd_path,
   cluster_ids <- species_reduced@cids
   # Y1 (BMM, 29-09): the clusters of one locus pooled before the cut, as in the phylogeny
   cluster_locus <- .cp_cluster_loci(phylota, pattern, genes_map_df, marker_lookup)
-  by_locus <- .cp_select_clusters_by_locus(.cp_cluster_species(species_reduced), cluster_locus, min_species)
+  cluster_species <- .cp_cluster_species(species_reduced)
+  # Y2 (BMM, 29-09): only the clusters that overlap the main cluster of their locus are pooled
+  overlap <- .cp_cluster_overlap(phylota, cluster_locus, cluster_species)
+  by_locus <- .cp_select_clusters_by_locus(cluster_species, cluster_locus, min_species, overlap = overlap)
   utils::write.csv(by_locus$table, file.path(dir_asm, "TABLE_barcoding_loci_over_min_species.csv"), row.names = FALSE)
+  utils::write.csv(by_locus$fragments, file.path(dir_asm, "TABLE_barcoding_clusters_not_pooled.csv"), row.names = FALSE)
+  log_message("Clusters not pooled with their locus (no overlap with its main cluster): ", nrow(by_locus$fragments))
   keep_clusters <- intersect(cluster_ids, as.character(by_locus$keep))
   selected <- phylotaR::drop_clstrs(phylota, cid = keep_clusters)
   log_message("Clusters of loci with more than ", min_species, " species (clusters of one locus pooled): ",
