@@ -18,7 +18,10 @@ assemble_barcoding_dataset(
   ncbi_dr = NULL,
   force_download = FALSE,
   phylogeny_map_file = NULL,
-  extra_records_dir = NULL
+  extra_records_dir = NULL,
+  notify = FALSE,
+  notify_to = NULL,
+  notify_credentials = NULL
 )
 }
 \arguments{
@@ -64,6 +67,11 @@ with the branch's own when it exists. Defaults to
 its records are appended to their loci and the registry gains a \code{source} column (\code{phylotaR} or
 \code{genbank_plastome}). \code{NULL}, the default, leaves the step as it was.
 Defaults to \code{50}, as in the phylogeny.}
+
+\item{notify}{Logical. Send an email through \code{\link[=send_run_notification]{send_run_notification()}} when a mining ends or fails;
+reading an existing workspace sends nothing. Defaults to \code{FALSE}.}
+
+\item{notify_to, notify_credentials}{Passed to \code{\link[=send_run_notification]{send_run_notification()}} as \code{to} and \code{credentials}.}
 }
 \value{
 Invisibly, a list with \code{registry}, \code{summary}, \code{marker_map}, \code{comparison} and \code{counts}.

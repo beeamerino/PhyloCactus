@@ -43,7 +43,7 @@
   version <- tryCatch(as.character(utils::packageVersion("PhyloCactus")),
                       error = function(e) "unknown")
 
-  subject <- paste0("PhyloCactus ",
+  subject <- paste0("PhyloCactus \U0001f335 ",
                     if (status == "finished") "finished" else "FAILED",
                     ": ", analysis)
 

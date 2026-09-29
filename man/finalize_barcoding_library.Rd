@@ -38,7 +38,9 @@ species keep two or more distinct sequences. Defaults to \code{20L} (decision of
 }
 \value{
 Invisibly, a list with \code{summary}, \code{excluded} and \code{collapsed}. Writes \verb{LIB_<locus>.fasta}
-for every locus that enters, \code{TABLE_barcoding_library_summary.csv},
+for every locus that enters, \verb{UNMASKED_<locus>.fasta} beside it (the sequence of step 1, before
+masking, of every accession the locus represents, collapsed ones included; used to recognise a
+query that is itself a library accession), \code{TABLE_barcoding_library_summary.csv},
 \code{TABLE_barcoding_excluded_nonhomologous.csv}, \code{TABLE_barcoding_collapsed_identical.csv} and
 \code{TABLE_barcoding_funnel.csv} (per locus: accessions assembled, curated, excluded, collapsed and
 kept, species with replica, and whether the locus entered the screening and the library).

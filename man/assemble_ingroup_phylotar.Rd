@@ -14,7 +14,10 @@ assemble_ingroup_phylotar(
   preferred_parent = "3593",
   ncbi_dr = NULL,
   force_download = FALSE,
-  out_dir = "1_phylotaR_out_Ingroup"
+  out_dir = "1_phylotaR_out_Ingroup",
+  notify = FALSE,
+  notify_to = NULL,
+  notify_credentials = NULL
 )
 }
 \arguments{
@@ -37,6 +40,11 @@ assemble_ingroup_phylotar(
 \item{force_download}{Logical. Force fresh database retrieval instead of using local cache? Defaults to \code{FALSE}.}
 
 \item{out_dir}{Character. Output directory path to save cluster summaries, FASTA sequence matrices, and log reports.}
+
+\item{notify}{Logical. Send an email through \code{\link[=send_run_notification]{send_run_notification()}} when a mining ends or fails;
+reading an existing workspace sends nothing. Defaults to \code{FALSE}.}
+
+\item{notify_to, notify_credentials}{Passed to \code{\link[=send_run_notification]{send_run_notification()}} as \code{to} and \code{credentials}.}
 }
 \value{
 A data frame summarizing sequence occupancy, taxon representation, and cluster characteristics across retained loci.
