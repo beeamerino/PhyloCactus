@@ -12,7 +12,10 @@ assemble_outgroup_phylotar(
   apply_manual_exclusions = TRUE,
   outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"),
   force_download = FALSE,
-  out_dir = "1_phylotaR_out_Outgroup"
+  out_dir = "1_phylotaR_out_Outgroup",
+  notify = FALSE,
+  notify_to = NULL,
+  notify_credentials = NULL
 )
 }
 \arguments{
@@ -31,6 +34,11 @@ assemble_outgroup_phylotar(
 \item{force_download}{Logical. Force fresh database retrieval instead of using local cache? Defaults to \code{FALSE}.}
 
 \item{out_dir}{Character. Output directory path to save outgroup cluster tables and FASTA sequence files.}
+
+\item{notify}{Logical. Send an email through \code{\link[=send_run_notification]{send_run_notification()}} when a mining ends or fails;
+reading an existing workspace sends nothing. Defaults to \code{FALSE}.}
+
+\item{notify_to, notify_credentials}{Passed to \code{\link[=send_run_notification]{send_run_notification()}} as \code{to} and \code{credentials}.}
 }
 \value{
 A list containing the processed outgroup cluster objects and retained cluster IDs.

@@ -141,6 +141,9 @@
 #' @param output_dir Character. Where the downloads and the extra records are written.
 #' @param checklist_path Character. The checklist (a path, or a vector of accepted names).
 #' @param min_region Integer. Shortest region written. Defaults to 100.
+#' @param keep_genera Character. Genera outside the checklist whose plastomes are kept under the
+#'   NCBI binomial (for the outgroup: Portulacaceae and Talinaceae, decision L5 of 28-09). A name
+#'   without an epithet (`sp.`, `cf.`, `aff.`) is still left out. Defaults to none.
 #' @param fetch Function `(query, ids)` returning GenBank flat text; defaults to a fetcher through
 #'   `rentrez`.
 #' @return Invisibly, a list with `records`, `skipped` and `unmatched`.
@@ -157,6 +160,7 @@ extract_barcoding_plastome_loci <- function(query = paste0("Cactaceae[Organism] 
                                             checklist_path = system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx",
                                                                          package = "PhyloCactus"),
                                             min_region = 100L,
+                                            keep_genera = character(0),
                                             fetch = .bc_fetch_genbank) {
   .bc_assert_output_dir(output_dir)
   dir.create(file.path(output_dir, "downloads"), recursive = TRUE, showWarnings = FALSE)
@@ -183,6 +187,13 @@ extract_barcoding_plastome_loci <- function(query = paste0("Cactaceae[Organism] 
   pl <- pl[!dup, , drop = FALSE]
 
   matched <- .bc_resolve_names(pl$organism, checklist_path)
+  # L5 (BMM, 28-09): genera outside the checklist (Portulacaceae, Talinaceae) keep the NCBI binomial,
+  # provided it names a species
+  w <- strsplit(trimws(pl$organism), "[[:space:]]+")
+  epithet <- vapply(w, function(v) if (length(v) >= 2L) v[2] else NA_character_, "")
+  keep <- is.na(matched) & vapply(w, `[`, "", 1) %in% keep_genera & !is.na(epithet) & grepl("^[a-z-]+$", epithet) &
+    !epithet %in% c("sp", "spp", "cf", "aff", "x")
+  matched[keep] <- paste(vapply(w[keep], `[`, "", 1), epithet[keep], sep = "_")
   pl$species <- sub("_(subsp|ssp|var|subvar|f|fo|forma)[.]?_.*$", "", matched)
   unmatched <- pl[is.na(pl$species), c("accession", "organism"), drop = FALSE]
   pl <- pl[!is.na(pl$species), , drop = FALSE]

@@ -400,6 +400,9 @@ barcoding_outgroup_taxids <- function() {
 #' @param ncbi_dr Character or `NULL`. Directory of the BLAST+ binaries, used only when the workspace
 #'   has to be created.
 #' @param force_download Logical. Mine GenBank again even if the workspace exists. Defaults to `FALSE`.
+#' @param notify Logical. Send an email through [send_run_notification()] when a mining ends or fails;
+#'   reading an existing workspace sends nothing. Defaults to `FALSE`.
+#' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
 #' @param phylogeny_map_file Character or `NULL`. Cluster-to-locus table of the phylogeny, compared
 #'   with the branch's own when it exists. Defaults to
 #'   `1_phylotaR_out_Ingroup/TABLE_CLUSTER_MARKER_ASSIGNMENT_INGROUP.csv` next to `wd_path`.
@@ -435,7 +438,10 @@ assemble_barcoding_dataset <- function(wd_path,
                                        ncbi_dr = NULL,
                                        force_download = FALSE,
                                        phylogeny_map_file = NULL,
-                                       extra_records_dir = NULL) {
+                                       extra_records_dir = NULL,
+                                       notify = FALSE,
+                                       notify_to = NULL,
+                                       notify_credentials = NULL) {
   .bc_assert_output_dir(output_dir)
 
   if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "PhyloCactus")
@@ -481,7 +487,8 @@ assemble_barcoding_dataset <- function(wd_path,
   # 1. Workspace, shared with the phylogeny
   phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = preferred_parent,
                                     txid = .bc_mining_taxids(taxids, preferred_parent), ncbi_dr = ncbi_dr,
-                                    force_download = force_download, log_message = log_message)
+                                    force_download = force_download, log_message = log_message,
+                                    notify = notify, notify_to = notify_to, notify_credentials = notify_credentials)
   log_message("Workspace: ", length(phylota@cids), " clusters, ", length(phylota@sids), " sequences in clusters.")
 
   # 2. Clusters, with the phylogeny's criterion. The species count is taken on the reduced object, as

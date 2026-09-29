@@ -12,6 +12,7 @@ extract_barcoding_plastome_loci(
   checklist_path = system.file("extdata",
     "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus"),
   min_region = 100L,
+  keep_genera = character(0),
   fetch = .bc_fetch_genbank
 )
 }
@@ -25,6 +26,10 @@ extract_barcoding_plastome_loci(
 \item{checklist_path}{Character. The checklist (a path, or a vector of accepted names).}
 
 \item{min_region}{Integer. Shortest region written. Defaults to 100.}
+
+\item{keep_genera}{Character. Genera outside the checklist whose plastomes are kept under the
+NCBI binomial (for the outgroup: Portulacaceae and Talinaceae, decision L5 of 28-09). A name
+without an epithet (\code{sp.}, \code{cf.}, \code{aff.}) is still left out. Defaults to none.}
 
 \item{fetch}{Function \verb{(query, ids)} returning GenBank flat text; defaults to a fetcher through
 \code{rentrez}.}

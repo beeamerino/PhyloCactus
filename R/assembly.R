@@ -15,6 +15,9 @@
 #' @param ncbi_dr Character. Path to local `BLAST+` binaries directory. If `NULL`, attempts system environment auto-detection.
 #' @param force_download Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.
 #' @param out_dir Character. Output directory path to save cluster summaries, FASTA sequence matrices, and log reports.
+#' @param notify Logical. Send an email through [send_run_notification()] when a mining ends or fails;
+#'   reading an existing workspace sends nothing. Defaults to `FALSE`.
+#' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
 #' @return A data frame summarizing sequence occupancy, taxon representation, and cluster characteristics across retained loci.
 #' @references
 #' Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. (2018).
@@ -29,7 +32,7 @@
 #' )
 #' }
 #' @export
-assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, min_species = 50, preferred_parent = "3593", ncbi_dr = NULL, force_download = FALSE, out_dir = "1_phylotaR_out_Ingroup") {
+assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, min_species = 50, preferred_parent = "3593", ncbi_dr = NULL, force_download = FALSE, out_dir = "1_phylotaR_out_Ingroup", notify = FALSE, notify_to = NULL, notify_credentials = NULL) {
   
   
   # Resolve inputs
@@ -90,7 +93,8 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   # Setup / Load phylotaR. Shared with assemble_barcoding_dataset(), so that both branches make the
   # same phylotaR call and share the same raw workspace, whichever of them runs first.
   phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = preferred_parent, ncbi_dr = ncbi_dr,
-                                    force_download = force_download, log_message = log_message)
+                                    force_download = force_download, log_message = log_message,
+                                    notify = notify, notify_to = notify_to, notify_credentials = notify_credentials)
   
   # 8. SPECIES REDUCTION AND CLUSTER FILTERING
   species_reduced <- phylotaR::drop_by_rank(phylota, rnk = "species", n = 1)
@@ -351,6 +355,9 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
 #' @param outgroups Character vector of NCBI Taxonomy IDs for outgroup lineages. Defaults to `c("107598", "107617", "107583", "3582", "107600", "108056")`.
 #' @param force_download Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.
 #' @param out_dir Character. Output directory path to save outgroup cluster tables and FASTA sequence files.
+#' @param notify Logical. Send an email through [send_run_notification()] when a mining ends or fails;
+#'   reading an existing workspace sends nothing. Defaults to `FALSE`.
+#' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
 #' @return A list containing the processed outgroup cluster objects and retained cluster IDs.
 #' @references
 #' Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. (2018).
@@ -364,7 +371,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
 #' )
 #' }
 #' @export
-assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"), force_download = FALSE, out_dir = "1_phylotaR_out_Outgroup") {
+assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"), force_download = FALSE, out_dir = "1_phylotaR_out_Outgroup", notify = FALSE, notify_to = NULL, notify_credentials = NULL) {
   
   
   if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "PhyloCactus")
@@ -414,48 +421,11 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
   gene_lookup <- genes_map_df |> dplyr::select(search_gene = search, Gene_std = replace)
   marker_lookup <- genes_map_df |> dplyr::select(search_marker = search, Marker_std = replace)
   
-  phylota <- tryCatch({
-    if (force_download) stop("Force download enabled")
-    phylotaR::read_phylota(wd_path)
-  }, error = function(e) {
-    log_message("No valid phylota object found or force_download=TRUE. Running setup and phylotaR pipeline...")
-    ncbi_dr_local <- NULL
-    env_blast <- Sys.getenv("BLAST_PATH")
-    if (env_blast != "") {
-      ncbi_dr_local <- env_blast
-    } else {
-      blastn_path <- Sys.which("blastn")
-      if (blastn_path != "") ncbi_dr_local <- dirname(blastn_path)
-    }
-    
-    phylotaR::setup(
-      wd = wd_path, txid = outgroups, ncbi_dr = ncbi_dr_local, v = TRUE, ncps = 1, mncvrg = 80,
-      srch_trm = paste0(
-        "NOT predicted[TI] NOT \"whole genome shotgun\"[TI] NOT unverified[TI] ",
-        "NOT \"synthetic construct\"[Organism] NOT refseq[filter] NOT TSA[Keyword] ",
-        "NOT \"sp.\"[TI] NOT \"sp.\"[Organism] NOT \"sp\"[Organism] NOT \"aff.\"[TI] ",
-        "NOT \"aff\"[Organism] NOT \"cf.\"[TI] NOT \"cf\"[Organism] NOT \"var.\"[TI] ",
-        "NOT \"var\"[TI] NOT \"var\"[Organism] NOT \"var.\"[Organism] NOT \"variety\"[TI] ",
-        "NOT \"subsp.\"[TI] NOT \"subsp\"[TI] NOT \"subsp.\"[Organism] ",
-        "NOT \"subsp\"[Organism] NOT \"subspecies\"[Organism] NOT \"x\"[Organism] NOT \" x \"[Organism]"
-      )
-    )
-    
-    log_message("Executing phylotaR::run() for outgroups...")
-    tryCatch({
-      phylotaR::run(wd = wd_path)
-    }, error = function(erun) {
-      log_message("Error in outgroup phylotaR::run(): ", erun$message)
-    })
-    
-    log_message("Attempting to load outgroup phylota object after run()...")
-    tryCatch({
-      phylotaR::read_phylota(wd_path)
-    }, error = function(e2) {
-      log_message("read_phylota error: ", e2$message)
-      stop("Could not load outgroup phylota object from ", wd_path)
-    })
-  })
+  # Workspace through the function shared with the ingroup and the barcoding branch: one set of
+  # parameters for both halves of folder 0 (E1, BMM, 28-09)
+  phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = outgroups[1], txid = outgroups,
+                                    force_download = force_download, log_message = log_message,
+                                    notify = notify, notify_to = notify_to, notify_credentials = notify_credentials)
   
   # 8. SPECIES REDUCTION AND CLUSTER FILTERING
   species_reduced <- phylotaR::drop_by_rank(phylota, rnk = "species", n = 1)
@@ -903,6 +873,9 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
 #' @noRd
 .phylotar_load_or_mine <- function(wd_path, preferred_parent = "3593", txid = NULL, ncbi_dr = NULL,
                                    force_download = FALSE, log_message = function(...) {},
+                                   mnsql = 100L, mxsql = 5000L,
+                                   notify = FALSE, notify_to = NULL, notify_credentials = NULL,
+                                   notify_fn = send_run_notification,
                                    reader = phylotaR::read_phylota,
                                    setup_fn = phylotaR::setup,
                                    run_fn = phylotaR::run) {
@@ -911,10 +884,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
   # CN2 is several clades and has no preferred parent, so `txid` carries what to mine and defaults
   # to `preferred_parent`, which leaves every existing call doing exactly what it did.
   if (is.null(txid)) txid <- preferred_parent
-  tryCatch({
-    if (force_download) stop("Force download enabled")
-    reader(wd_path)
-  }, error = function(e) {
+  mine <- function() {
     log_message("No valid phylota object found or force_download=TRUE. Running setup and phylotaR pipeline...")
     if (is.null(ncbi_dr)) {
       env_blast <- Sys.getenv("BLAST_PATH")
@@ -928,7 +898,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
 
     setup_fn(
       wd = wd_path, txid = txid, ncbi_dr = ncbi_dr, v = TRUE, ncps = 1, mncvrg = 80,
-      srch_trm = .phylotar_search_terms()
+      mnsql = mnsql, mxsql = mxsql, srch_trm = .phylotar_search_terms()
     )
 
     log_message("Executing phylotaR::run()...")
@@ -945,6 +915,24 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
       log_message("read_phylota error: ", e2$message)
       stop("Could not load phylota object from ", wd_path)
     })
+  }
+  tryCatch({
+    if (force_download) stop("Force download enabled")
+    reader(wd_path)
+  }, error = function(e) {
+    if (!isTRUE(notify)) return(mine())
+    # L4 (BMM, 28-09): the mining takes hours on the Mac; it says when it ends or fails
+    started <- Sys.time()
+    analysis <- paste0("phylotaR mining of ", paste(txid, collapse = ", "))
+    res <- tryCatch(mine(), error = function(err) {
+      note <- .compose_run_notification(analysis, status = "failed", started = started,
+                                        outputs = c(Workspace = wd_path), error_message = conditionMessage(err))
+      notify_fn(note$subject, note$body, to = notify_to, credentials = notify_credentials)
+      stop(err)
+    })
+    note <- .compose_run_notification(analysis, status = "finished", started = started, outputs = c(Workspace = wd_path))
+    notify_fn(note$subject, note$body, to = notify_to, credentials = notify_credentials)
+    res
   })
 }
 
