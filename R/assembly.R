@@ -9,7 +9,7 @@
 #' @param target_genes_file Character. Path to the target locus list text file. If `NULL`, defaults to package `inst/extdata/target_genes.txt`.
 #' @param genes_map_file Character. Path to the gene synonymy mapping CSV file. If `NULL`, defaults to package `inst/extdata/genes_map.csv`.
 #' @param manual_exclusions_file Character. Path to the accession exclusion CSV file. If `NULL`, defaults to package `inst/extdata/manual_exclusions_ingroup.csv`.
-#' @param apply_manual_exclusions Logical. Apply the curated accession exclusion list? **Defaults to `TRUE`.** The lists shipped with the package are the product of manual curation by the expert team supporting `PhyloCactus`: each excluded accession was inspected and removed on taxonomic or sequence-quality grounds that are not recoverable from GenBank metadata alone. Across both lists they cover 99 unique accessions in 113 records, spanning 16 ingroup clusters and 24 outgroup clusters, and they live in `inst/extdata/manual_exclusions_ingroup.csv` and `inst/extdata/manual_exclusions_outgroup.csv`. Setting this to `FALSE` reproduces the uncurated cluster set, which is the way to quantify what the curation actually removes; the applied list is always written to `TABLE_MANUAL_EXCLUSIONS_*.csv` in the output directory, so any run documents its own curation state.
+#' @param apply_manual_exclusions Logical. Apply the curated accession exclusion list? **Defaults to `TRUE`.** The lists shipped with the package are the product of manual curation by the expert team supporting `PhyloCactus`: each excluded accession was inspected and removed on taxonomic or sequence-quality grounds that are not recoverable from GenBank metadata alone. The lists are keyed by locus and accession (`locus`, `sid`, `reason`, `source`), so that they survive a new mining that renumbers the clusters: an accession is removed from every cluster of the locus named (decision X2 of 29-09). Across both lists they hold 81 accessions, in 5 ingroup loci and 13 outgroup loci, and they live in `inst/extdata/manual_exclusions_ingroup.csv` and `inst/extdata/manual_exclusions_outgroup.csv`. Setting this to `FALSE` reproduces the uncurated cluster set, which is the way to quantify what the curation actually removes; the applied list is always written to `TABLE_MANUAL_EXCLUSIONS_*.csv` in the output directory, so any run documents its own curation state.
 #' @param min_species Integer. Species-richness threshold for cluster retention. Clusters are retained when they contain **strictly more than** `min_species` distinct species, so `min_species = 50` keeps clusters with 51 species or more. Defaults to `50`.
 #' @param preferred_parent Character. NCBI Taxonomy ID of the focal ingroup parent node. Defaults to `"3593"` (Cactaceae).
 #' @param ncbi_dr Character. Path to local `BLAST+` binaries directory. If `NULL`, attempts system environment auto-detection.
@@ -99,12 +99,16 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   # 8. SPECIES REDUCTION AND CLUSTER FILTERING
   species_reduced <- phylotaR::drop_by_rank(phylota, rnk = "species", n = 1)
   cluster_ids <- species_reduced@cids
-  ntaxa <- phylotaR::get_ntaxa(species_reduced, cid = cluster_ids, rnk = "species")
-  keep_clusters <- cluster_ids[ntaxa > min_species]
+  # Y1 (BMM, 29-09): the clusters of one locus are pooled before the cut, so that a locus split into
+  # small clusters by the mining is not lost; a cluster with no locus name is judged alone
+  cluster_locus <- .cp_cluster_loci(phylota, pattern, genes_map_df, marker_lookup)
+  by_locus <- .cp_select_clusters_by_locus(.cp_cluster_species(species_reduced), cluster_locus, min_species)
+  keep_clusters <- intersect(cluster_ids, as.character(by_locus$keep))
   selected <- phylotaR::drop_clstrs(species_reduced, cid = keep_clusters)
   
   log_message("Clusters before >", min_species, " filter: ", length(cluster_ids))
-  log_message("Clusters retained after >", min_species, " filter: ", length(selected@cids))
+  log_message("Clusters retained after >", min_species, " filter (clusters of one locus pooled): ", length(selected@cids),
+              " in ", sum(by_locus$table$kept), " loci or unnamed clusters")
   
   # 9. RAW CLUSTER TABLES AND METADATA
   df_species_clusters <- cp_extract_cluster_species_sid(selected)
@@ -181,13 +185,8 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
     dplyr::select(cluster_id, sid) |>
     dplyr::distinct()
     
-  manual_rows <- tibble::tibble(cluster_id = integer(), sid = character(), reason = character())
-  if (isTRUE(apply_manual_exclusions) && !is.null(manual_exclusions_file) && file.exists(manual_exclusions_file)) {
-    manual_rows <- readr::read_csv(manual_exclusions_file, show_col_types = FALSE) |> dplyr::mutate(cluster_id = as.integer(cluster_id))
-    readr::write_csv(manual_rows, path_table_manual_exclusions)
-  } else if (!isTRUE(apply_manual_exclusions)) {
-    log_message("Manual exclusions DISABLED (apply_manual_exclusions = FALSE): the expert-curated accession list is not applied.")
-  }
+  manual_rows <- .cp_read_manual_exclusions(apply_manual_exclusions, manual_exclusions_file, path_table_manual_exclusions,
+                                            df_species_clusters_metadata, cluster_locus, log_message)
   
   rows_to_delete <- dplyr::bind_rows(
     rows_to_delete_auto |> dplyr::mutate(reason = "automatic duplicate resolution"),
@@ -504,13 +503,9 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
     dplyr::distinct()
   rows_to_delete_auto <- dup_records |> dplyr::anti_join(keepers, by = c("cluster_id", "sid")) |> dplyr::select(cluster_id, sid) |> dplyr::distinct()
   
-  manual_rows <- tibble::tibble(cluster_id = integer(), sid = character(), reason = character())
-  if (isTRUE(apply_manual_exclusions) && !is.null(manual_exclusions_file) && file.exists(manual_exclusions_file)) {
-    manual_rows <- readr::read_csv(manual_exclusions_file, show_col_types = FALSE) |> dplyr::mutate(cluster_id = as.integer(cluster_id))
-    readr::write_csv(manual_rows, path_table_manual_exclusions)
-  } else if (!isTRUE(apply_manual_exclusions)) {
-    log_message("Manual exclusions DISABLED (apply_manual_exclusions = FALSE): the expert-curated accession list is not applied.")
-  }
+  manual_rows <- .cp_read_manual_exclusions(apply_manual_exclusions, manual_exclusions_file, path_table_manual_exclusions,
+                                            df_species_clusters_metadata, .cp_cluster_loci(phylota, pattern, genes_map_df, marker_lookup),
+                                            log_message)
   
   rows_to_delete <- dplyr::bind_rows(rows_to_delete_auto |> dplyr::mutate(reason = "auto"), manual_rows) |> dplyr::distinct(cluster_id, sid, .keep_all = TRUE)
   log_message("Automatic duplicate removals: ", nrow(rows_to_delete_auto))
@@ -965,4 +960,102 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
       Gene_std = ifelse(is.na(Gene_std), Genes_text, Gene_std),
       Marker_std = ifelse(is.na(Marker_std), top_marker, Marker_std)
     )
+}
+
+#' The locus of every cluster, read from the definition lines of its sequences
+#'
+#' The same reading as the naming of the kept clusters (`cp_annotate_marker_text()`, the dominant
+#' marker of `cp_summarise_cluster_markers()`, `marker_lookup`), on the definition lines the
+#' workspace already holds, so that every cluster can be named before the cut of min_species
+#' (decision Y1 of BMM, 29-09) without downloading metadata.
+#' @return A data frame with `cluster_id` and `locus` (`NA` when no gene is recognised).
+#' @noRd
+.cp_cluster_loci <- function(phylota, pattern, genes_map_df, marker_lookup) {
+  cids <- phylota@cids
+  if (length(cids) == 0) return(data.frame(cluster_id = integer(0), locus = character(0)))
+  df <- do.call(rbind, lapply(cids, function(cid) {
+    sids <- phylota@clstrs[[cid]]@sids
+    data.frame(cluster_id = as.integer(cid), sid = sids, species = "",
+               Description_gb = vapply(sids, function(s) phylota@sqs[[s]]@dfln, "", USE.NAMES = FALSE),
+               stringsAsFactors = FALSE)
+  }))
+  s <- cp_summarise_cluster_markers(cp_annotate_marker_text(df, pattern = pattern, genes_map_df = genes_map_df))
+  top <- cp_normalize_marker(s$top_marker)
+  locus <- marker_lookup$Marker_std[match(top, marker_lookup$search_marker)]
+  locus <- ifelse(is.na(locus), top, locus)
+  locus[!nzchar(locus)] <- NA_character_
+  data.frame(cluster_id = as.integer(s$cluster_id), locus = locus, stringsAsFactors = FALSE)
+}
+
+#' Clusters over the cut of min_species, the clusters of one locus pooled (decision Y1 of BMM, 29-09)
+#'
+#' A locus is kept when its clusters together hold more than `min_species` species; a cluster with
+#' no locus name is judged alone, as before.
+#' @param cluster_species Data frame with `cluster_id` and `species` (one row per species of a
+#'   cluster, counted on the workspace reduced to one sequence per species).
+#' @param cluster_locus Data frame with `cluster_id` and `locus`.
+#' @return A list with `keep` (cluster ids) and `table` (per locus or unnamed cluster: clusters and
+#'   species).
+#' @noRd
+.cp_select_clusters_by_locus <- function(cluster_species, cluster_locus, min_species) {
+  loc <- cluster_locus$locus[match(cluster_species$cluster_id, cluster_locus$cluster_id)]
+  named <- !is.na(loc) & nzchar(loc)
+  unit <- ifelse(named, loc, paste0("cluster_", cluster_species$cluster_id))
+  sp <- tapply(cluster_species$species, unit, function(x) length(unique(x)))
+  cl <- tapply(cluster_species$cluster_id, unit, function(x) length(unique(x)))
+  table <- data.frame(locus = names(sp), named = !startsWith(names(sp), "cluster_") | names(sp) %in% loc[named],
+                      clusters = as.integer(cl[names(sp)]), species = as.integer(sp), stringsAsFactors = FALSE)
+  table$kept <- table$species > min_species
+  keep <- sort(unique(cluster_species$cluster_id[unit %in% table$locus[table$kept]]))
+  list(keep = as.integer(keep), table = table)
+}
+
+#' The curated exclusions keyed by (locus, sid) as the (cluster, sid) pairs of this workspace (X2)
+#'
+#' An accession is removed from every cluster of the locus named in the list; its clusters of other
+#' loci are left alone.
+#' @return A list with `pairs` (cluster_id, sid, reason), `unmatched` (rows of the list with no
+#'   pair) and `counts` (`n_file`, `n_matched` rows of the list, `n_pairs`).
+#' @noRd
+.cp_exclusion_pairs <- function(exclusions, records, cluster_locus) {
+  rec <- data.frame(cluster_id = as.integer(records$cluster_id), sid = as.character(records$sid), stringsAsFactors = FALSE)
+  rec$locus <- cluster_locus$locus[match(rec$cluster_id, cluster_locus$cluster_id)]
+  key_exc <- paste(exclusions$locus, exclusions$sid)
+  hit <- paste(rec$locus, rec$sid) %in% key_exc
+  pairs <- rec[hit, c("cluster_id", "sid"), drop = FALSE]
+  pairs$reason <- exclusions$reason[match(paste(rec$locus[hit], rec$sid[hit]), key_exc)]
+  pairs <- pairs[!duplicated(paste(pairs$cluster_id, pairs$sid)), , drop = FALSE]
+  rownames(pairs) <- NULL
+  matched <- key_exc %in% paste(rec$locus, rec$sid)
+  list(pairs = pairs, unmatched = exclusions[!matched, , drop = FALSE],
+       counts = list(n_file = nrow(exclusions), n_matched = sum(matched), n_pairs = nrow(pairs)))
+}
+
+#' Species of every cluster on the workspace reduced to one sequence per species
+#' @noRd
+.cp_cluster_species <- function(species_reduced) {
+  do.call(rbind, lapply(species_reduced@cids, function(cid) {
+    tx <- unique(as.character(phylotaR::get_txids(species_reduced, cid = cid, rnk = "species")))
+    data.frame(cluster_id = rep(as.integer(cid), length(tx)), species = tx, stringsAsFactors = FALSE)
+  }))
+}
+
+#' Read the curated exclusions, keyed by (locus, sid), as the (cluster, sid) pairs to remove (X2)
+#'
+#' The list is written to `path_table` as read; the log says how many of its rows are found in this
+#' workspace, so that a run reports the curation it actually applied.
+#' @noRd
+.cp_read_manual_exclusions <- function(apply, file, path_table, records, cluster_locus, log_message) {
+  empty <- tibble::tibble(cluster_id = integer(), sid = character(), reason = character())
+  if (!isTRUE(apply)) {
+    log_message("Manual exclusions DISABLED (apply_manual_exclusions = FALSE): the expert-curated accession list is not applied.")
+    return(empty)
+  }
+  if (is.null(file) || !file.exists(file)) return(empty)
+  exc <- utils::read.csv(file, stringsAsFactors = FALSE)
+  utils::write.csv(exc, path_table, row.names = FALSE)
+  mp <- .cp_exclusion_pairs(exc, records, cluster_locus)
+  log_message("Manual exclusions: ", mp$counts$n_file, " (locus, accession) rows in the list; ", mp$counts$n_matched,
+              " found in this workspace, as ", mp$counts$n_pairs, " cluster memberships.")
+  tibble::as_tibble(mp$pairs) |> dplyr::mutate(cluster_id = as.integer(cluster_id))
 }

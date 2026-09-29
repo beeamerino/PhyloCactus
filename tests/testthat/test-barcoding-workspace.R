@@ -295,7 +295,7 @@ test_that("clusters of one locus are pooled before the cut of min_species (Y1)",
 test_that("the locus of every cluster is read from the definition lines of its sequences (Y1)", {
   skip_if_not_installed("phylotaR")
   data("aotus", package = "phylotaR", envir = environment())
-  lookup <- data.frame(search_marker = "cytb", Marker_std = "cytb", stringsAsFactors = FALSE)
+  lookup <- data.frame(search_marker = "cytochrome b", Marker_std = "cytb", stringsAsFactors = FALSE)
   gm <- data.frame(search = "cytb", replace = "cytb", stringsAsFactors = FALSE)
   loc <- .cp_cluster_loci(aotus, pattern = cp_build_pattern(c("cytb", "cytochrome b")), genes_map_df = gm,
                           marker_lookup = lookup)
@@ -308,7 +308,7 @@ test_that("both branches select clusters by locus and translate the manual exclu
   for (f in list(assemble_ingroup_phylotar, assemble_barcoding_dataset)) {
     b <- paste(deparse(body(f)), collapse = "\n")
     expect_match(b, ".cp_select_clusters_by_locus(", fixed = TRUE)
-    expect_match(b, ".cp_exclusion_pairs(", fixed = TRUE)
+    expect_match(b, "\\.cp_(exclusion_pairs|read_manual_exclusions)\\(")
     expect_false(grepl("ntaxa > min_species", b, fixed = TRUE))
   }
 })
