@@ -54,7 +54,11 @@ assemble_barcoding_dataset(
   checklist_path = system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus"),
   min_species = 50,
   preferred_parent = "3593",
-  force_download = FALSE
+  force_download = FALSE,
+  # Own data (O1): NULL leaves them out; "0_own" adds the records of 0_own/ (SAMPLES.csv and one
+  # FASTA per locus, headers >sample). What cannot enter is listed in
+  # 11_barcoding/1_assembly/TABLE_barcoding_own_left_out.csv.
+  own_dir = NULL
 )
 
 # -------------------------------------------------------------
