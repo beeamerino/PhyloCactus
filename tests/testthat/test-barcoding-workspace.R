@@ -399,3 +399,44 @@ test_that("the branch log names the exclusion pairs as pairs, not rows of the fi
   expect_false(grepl(" in the file; ", b, fixed = TRUE))
   expect_match(b, " (cluster, accession) pairs from the list; ", fixed = TRUE)
 })
+
+# Y3 (BMM, 29-09): the variant names of a locus are pooled with it. X3 counted 85 species new to
+# the library in variants judged apart (`trnK`, `trnL-rpl32`, `atpB, atpB-rbcL`...). The variants
+# and their locus are the table fixed before X3 ran, in `inst/extdata/locus_name_variants.csv`;
+# `genes_map.csv` is not changed.
+
+test_that("the table of variant names holds the eleven equivalences of X3 (Y3)", {
+  v <- .cp_locus_variants()
+  expect_setequal(names(v), c("name", "locus"))
+  expect_identical(nrow(v), 11L)
+  expect_false(anyDuplicated(v$name) > 0)
+  lk <- stats::setNames(v$locus, v$name)
+  expect_identical(unname(lk[c("trnK", "maturase K, matK, trnK", "trnK, maturase K")]), rep("matK", 3))
+  expect_identical(unname(lk["trnL-rpl32"]), "rpl32-trnL")
+  expect_identical(unname(lk[c("atpB, atpB-rbcL", "atpB-rbcL, ribulose-1,5-bisphosphate carboxylase, rbcL",
+                               "atpB, atpB-rbcL, ribulose-1,5-bisphosphate carboxylase, rbcL")]), rep("atpB-rbcL", 3))
+  expect_identical(unname(lk[c("trnS, trnS-trnG", "trnS, trnS-trnG, trnG")]), rep("trnS-trnG", 2))
+  expect_identical(unname(lk["psbJ, psbJ-petA, petA"]), "psbJ-petA")
+  expect_identical(unname(lk["trnT, trnT-psbD"]), "trnT-psbD")
+  # Single flanking genes and the variants that pass alone are not in it
+  expect_false(any(c("petA", "psbJ", "trnL", "matK-trnK", "trnK, matK, maturase K") %in% v$name))
+})
+
+test_that("a variant name takes the name of its locus; other names and unnamed clusters are left as they are (Y3)", {
+  cl <- data.frame(cluster_id = 1:5, locus = c("trnK", "matK-trnK", "trnL-rpl32", NA, "petA"), stringsAsFactors = FALSE)
+  out <- .cp_apply_locus_variants(cl, .cp_locus_variants())
+  expect_identical(out$locus, c("matK", "matK-trnK", "rpl32-trnL", NA, "petA"))
+  expect_identical(out$cluster_id, cl$cluster_id)
+})
+
+test_that("the naming of the clusters applies the variants, in both branches (Y3)", {
+  data(aotus, package = "phylotaR")
+  lookup <- data.frame(search_marker = "cytochrome b", Marker_std = "cytb", stringsAsFactors = FALSE)
+  gm <- data.frame(search = "cytb", replace = "cytb", stringsAsFactors = FALSE)
+  loc <- .cp_cluster_loci(aotus, pattern = cp_build_pattern(c("cytb", "cytochrome b")), genes_map_df = gm,
+                          marker_lookup = lookup, variants = data.frame(name = "cytb", locus = "CYTB"))
+  expect_true(any(loc$locus %in% "CYTB"))
+  expect_false(any(loc$locus %in% "cytb"))
+  expect_true("variants" %in% names(formals(.cp_cluster_loci)))
+  expect_match(paste(deparse(formals(.cp_cluster_loci)$variants), collapse = ""), ".cp_locus_variants()", fixed = TRUE)
+})
