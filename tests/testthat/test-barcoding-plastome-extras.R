@@ -201,3 +201,31 @@ test_that("each extra record carries the md5 of the library file that set its ex
                      unname(tools::md5sum(file.path(f$dir, paste0("LIB_", l, ".fasta")))))
   }
 })
+
+# Phase 10, L5 (BMM, 28-09): Anacampserotaceae is in the checklist; for Portulacaceae and
+# Talinaceae, outside it, every plastome that passes the filters is kept with its NCBI binomial.
+test_that("names of genera outside the checklist are kept as the NCBI binomial when asked (L5)", {
+  tmp <- withr::local_tempdir()
+  f <- .pex_library(tmp)
+  base <- .pex_plastome(f)
+  set.seed(63L)
+  gb <- c(.pex_gb("PQ000001.1", "Portulaca oleracea", .pex_vary(base, 50)),
+          .pex_gb("PQ000002.1", "Talinum paniculatum var. x", .pex_vary(base, 50)),
+          .pex_gb("PQ000003.1", "Portulaca sp. X1", .pex_vary(base, 50)),
+          .pex_gb("PQ000004.1", "Opuntia alpha", .pex_vary(base, 50)))
+  out <- file.path(tmp, "kept")
+  suppressMessages(invisible(utils::capture.output(
+    r <- extract_barcoding_plastome_loci(library_dir = f$dir, output_dir = out, checklist_path = .pex_checklist,
+                                         keep_genera = c("Portulaca", "Talinum", "Talinella"), fetch = .pex_fetch(gb)))))
+  expect_setequal(unique(r$records$species), c("Portulaca_oleracea", "Talinum_paniculatum", "Opuntia_alpha"))
+  # A name without an epithet is not a species, as in the search terms of the mining
+  expect_identical(r$unmatched$organism, "Portulaca sp. X1")
+
+  # Without the argument nothing changes: the names outside the checklist are left out and listed
+  out2 <- file.path(tmp, "default")
+  suppressMessages(invisible(utils::capture.output(
+    r2 <- extract_barcoding_plastome_loci(library_dir = f$dir, output_dir = out2, checklist_path = .pex_checklist,
+                                          fetch = .pex_fetch(gb)))))
+  expect_setequal(unique(r2$records$species), "Opuntia_alpha")
+  expect_setequal(r2$unmatched$organism, c("Portulaca oleracea", "Talinum paniculatum var. x", "Portulaca sp. X1"))
+})

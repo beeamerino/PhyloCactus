@@ -210,3 +210,62 @@ test_that("the branch holds its own copy of the outgroup taxids, and notices if 
   expect_true("taxids" %in% names(formals(assemble_barcoding_dataset)))
   expect_null(formals(assemble_barcoding_dataset)$taxids)
 })
+
+# Phase 10 (decisions L1, L4 and E1 of BMM, 28-09)
+.ws_reader_once_missing <- function() {
+  n_read <- 0L
+  function(wd) { n_read <<- n_read + 1L; if (n_read == 1L) stop("no workspace") else "PHYLOTA" }
+}
+
+test_that("the mining keeps records of 100 to 5000 bases (L1)", {
+  setup_args <- NULL
+  .phylotar_load_or_mine("wd", reader = .ws_reader_once_missing(),
+                         setup_fn = function(...) setup_args <<- list(...), run_fn = function(...) NULL)
+  expect_identical(setup_args$mnsql, 100L)
+  expect_identical(setup_args$mxsql, 5000L)
+})
+
+test_that("the outgroup of the phylogeny is mined through the shared function, with the same parameters (E1)", {
+  b <- paste(deparse(body(assemble_outgroup_phylotar)), collapse = "\n")
+  expect_match(b, ".phylotar_load_or_mine(", fixed = TRUE)
+  expect_false(grepl("phylotaR::setup(", b, fixed = TRUE))
+})
+
+test_that("a mining sends one notification when it ends, and none when the workspace is only read (L4)", {
+  sent <- list()
+  nf <- function(subject, body, ...) { sent[[length(sent) + 1L]] <<- list(subject = subject, body = body, ...); invisible(TRUE) }
+  .phylotar_load_or_mine("0_phylotaR_raw_Ingroup", notify = TRUE, notify_fn = nf, reader = .ws_reader_once_missing(),
+                         setup_fn = function(...) NULL, run_fn = function(...) NULL)
+  expect_length(sent, 1L)
+  expect_match(sent[[1]]$subject, "finished", fixed = TRUE)
+  expect_match(sent[[1]]$subject, "phylotaR mining", fixed = TRUE)
+  expect_match(sent[[1]]$subject, "\U0001f335", fixed = TRUE)
+  expect_match(sent[[1]]$body, "0_phylotaR_raw_Ingroup", fixed = TRUE)
+
+  sent <- list()
+  .phylotar_load_or_mine("wd", notify = TRUE, notify_fn = nf, reader = function(wd) "PHYLOTA",
+                         setup_fn = function(...) NULL, run_fn = function(...) NULL)
+  expect_length(sent, 0L)
+  # notify = FALSE, the default, sends nothing
+  .phylotar_load_or_mine("wd", notify_fn = nf, reader = .ws_reader_once_missing(),
+                         setup_fn = function(...) NULL, run_fn = function(...) NULL)
+  expect_length(sent, 0L)
+})
+
+test_that("a mining that fails sends the failure and still stops (L4)", {
+  sent <- list()
+  nf <- function(subject, body, ...) { sent[[length(sent) + 1L]] <<- list(subject = subject, body = body); invisible(TRUE) }
+  expect_error(
+    .phylotar_load_or_mine("wd", notify = TRUE, notify_fn = nf, reader = function(wd) stop("no workspace"),
+                           setup_fn = function(...) NULL, run_fn = function(...) NULL),
+    "Could not load")
+  expect_length(sent, 1L)
+  expect_match(sent[[1]]$subject, "FAILED", fixed = TRUE)
+})
+
+test_that("the three mining functions take the notification arguments (L4)", {
+  for (f in list(assemble_ingroup_phylotar, assemble_outgroup_phylotar, assemble_barcoding_dataset)) {
+    expect_true(all(c("notify", "notify_to", "notify_credentials") %in% names(formals(f))))
+    expect_false(eval(formals(f)$notify))
+  }
+})
