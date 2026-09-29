@@ -22,7 +22,7 @@ setwd(tutorial_dir)
 # -------------------------------------------------------------
 # Switches of the long steps, declared once so the whole script is changed from one place.
 # -------------------------------------------------------------
-# Email when step 7 ends, whether it finished or failed. FALSE sends nothing and needs no
+# Email when steps 1 and 7 end, whether they finished or failed. FALSE sends nothing and needs no
 # configuration. TRUE needs MY_EMAIL in your .Renviron and a blastula credentials file created once
 # with blastula::create_smtp_creds_file(). The package reads neither: it hands the path to blastula.
 # A notification that cannot be sent is reported and ignored, so it never fails a run.
@@ -55,6 +55,7 @@ assemble_barcoding_dataset(
   min_species = 50,
   preferred_parent = "3593",
   force_download = FALSE,
+  notify = notify_email,
   # Own data (O1): NULL leaves them out; "0_own" adds the records of 0_own/ (SAMPLES.csv and one
   # FASTA per locus, headers >sample). What cannot enter is listed in
   # 11_barcoding/1_assembly/TABLE_barcoding_own_left_out.csv.
