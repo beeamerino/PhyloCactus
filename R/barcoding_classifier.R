@@ -316,6 +316,14 @@
 #'   720 queries and 4 answers changed. `"add"` writes its own tables, with the suffix `_add`, and
 #'   never touches those of `"library"`.
 #' @param mafft_exec,mafft_opts Command of the `MAFFT` binary and its options, for `alignment = "add"`.
+#' @param workers Integer. `1`, the default, runs in this R session. More than 1 splits the folds into
+#'   that many chunks (as `chunk` and `n_chunks` do) and runs them as parallel R processes of this
+#'   machine, each writing its log in `chunks/` of `output_dir`; the progress is written to
+#'   `PROGRESS_<method>.txt` of `output_dir` every minute and printed; when every worker has finished
+#'   the chunks are merged with [merge_barcoding_chunks()], into the same tables as a run of one
+#'   process, and `notify` sends one email. A worker that fails stops the others and the run. On
+#'   macOS the machine is kept awake with `caffeinate` while the run lasts. The workers load the
+#'   installed package. Cannot be combined with `chunk`.
 #' @param notify Logical. Send an email when the run ends, whether it finished or failed. Intended
 #'   for `method = "idtaxa"`, which retrains once per fold and is measured in hours. A notification
 #'   that cannot be sent is reported and ignored: it never fails the run. See
@@ -353,11 +361,19 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
                                      alignment = c("library", "add"),
                                      mafft_exec = "mafft",
                                      mafft_opts = "--auto",
+                                     workers = 1L,
                                      notify = FALSE,
                                      notify_to = NULL,
                                      notify_credentials = NULL) {
   method <- match.arg(method)
   alignment <- match.arg(alignment)
+  if (!is.numeric(workers) || length(workers) != 1L || is.na(workers) || workers < 1) {
+    stop("workers must be one whole number of 1 or more.", call. = FALSE)
+  }
+  if (workers > 1 && !is.null(chunk)) {
+    stop("workers runs every chunk on this machine and cannot be combined with chunk; give one or the other.",
+         call. = FALSE)
+  }
   .bc_check_chunk(chunk, n_chunks)
   if (alignment == "add" && method != "nn") {
     stop("alignment = \"add\" measures the distance of the nearest neighbour and applies only to ",
@@ -366,6 +382,14 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
   # MAFFT is checked before anything is read or written, so a missing binary costs nothing
   if (alignment == "add") .bc_assert_mafft(mafft_exec)
   suffix <- paste0(method, if (alignment == "add") "_add" else "")
+  if (workers > 1) {
+    # PA1 to PA3 (BMM, 29-09): the chunks of 6B run as parallel processes of this machine and are merged
+    args <- list(library_dir = library_dir, folds_dir = folds_dir, output_dir = output_dir, method = method,
+                 model = model, min_comparable = min_comparable, schemes = schemes, loci = loci,
+                 max_folds = max_folds, seed = seed, threshold = threshold, alignment = alignment,
+                 mafft_exec = mafft_exec, mafft_opts = mafft_opts)
+    return(.bc_classify_workers(args, as.integer(workers), suffix, notify, notify_to, notify_credentials))
+  }
   chunk_tag <- if (is.null(chunk)) "" else paste0("_chunk", as.integer(chunk), "of", as.integer(n_chunks))
   started <- Sys.time()
   call_run <- function() {
