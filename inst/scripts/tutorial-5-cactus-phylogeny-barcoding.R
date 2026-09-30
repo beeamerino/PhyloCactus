@@ -39,6 +39,12 @@ notify_email <- FALSE
 # then include IdTaxa.
 idtaxa_tables <- NULL
 
+# Parallel processes of this machine for the longest step of the laptop, the nearest neighbour
+# through MAFFT --add (step 7). Two cores are left free. Each process writes its log in
+# 11_barcoding/7_classifier/chunks/, the progress is in 11_barcoding/7_classifier/PROGRESS_nn_add.txt
+# (from a terminal: cat or watch that file), and one email is sent at the end.
+n_workers <- max(1L, parallel::detectCores() - 2L)
+
 # -------------------------------------------------------------
 # Step 1: Assembly. Clusters with more than min_species species; every accession kept; clusters
 # whose gene is not recognised are kept as cluster_<id>. Headers Genus_species|sid.
@@ -144,14 +150,16 @@ classify_barcoding_folds(
 
 # The same classifier, with every query measured the way a query of a user is measured: stripped of
 # gaps, oriented against the training set of its fold and added to it with MAFFT --add --keeplength,
-# one call per query. Writes the tables with the suffix _add and the running time per locus; hours
-# on a laptop, so run it overnight. Step 9 reads these tables.
+# one call per query. Writes the tables with the suffix _add and the running time per locus. The
+# folds are split among n_workers processes and merged into the same tables as one process would
+# write. Step 9 reads these tables.
 classify_barcoding_folds(
   library_dir = "11_barcoding/4_library",
   folds_dir = "11_barcoding/5_folds",
   output_dir = "11_barcoding/7_classifier",
   method = "nn",
   alignment = "add",
+  workers = n_workers,
   notify = notify_email
 )
 

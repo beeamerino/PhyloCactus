@@ -21,6 +21,7 @@ classify_barcoding_folds(
   alignment = c("library", "add"),
   mafft_exec = "mafft",
   mafft_opts = "--auto",
+  workers = 1L,
   notify = FALSE,
   notify_to = NULL,
   notify_credentials = NULL
@@ -72,6 +73,15 @@ and of a query brought by a user. The probe of 2026-09-25 found the two paths ag
 never touches those of \code{"library"}.}
 
 \item{mafft_exec, mafft_opts}{Command of the \code{MAFFT} binary and its options, for \code{alignment = "add"}.}
+
+\item{workers}{Integer. \code{1}, the default, runs in this R session. More than 1 splits the folds into
+that many chunks (as \code{chunk} and \code{n_chunks} do) and runs them as parallel R processes of this
+machine, each writing its log in \verb{chunks/} of \code{output_dir}; the progress is written to
+\verb{PROGRESS_<method>.txt} of \code{output_dir} every minute and printed; when every worker has finished
+the chunks are merged with \code{\link[=merge_barcoding_chunks]{merge_barcoding_chunks()}}, into the same tables as a run of one
+process, and \code{notify} sends one email. A worker that fails stops the others and the run. On
+macOS the machine is kept awake with \code{caffeinate} while the run lasts. The workers load the
+installed package. Cannot be combined with \code{chunk}.}
 
 \item{notify}{Logical. Send an email when the run ends, whether it finished or failed. Intended
 for \code{method = "idtaxa"}, which retrains once per fold and is measured in hours. A notification
