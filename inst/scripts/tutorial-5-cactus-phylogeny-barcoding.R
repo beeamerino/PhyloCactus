@@ -1,9 +1,10 @@
 # -------------------------------------------------------------
 # PhyloCactus: Tutorial 5 - Molecular Diagnostic Branch (11_barcoding/)
 # -------------------------------------------------------------
-# Phases 2 to 6A of PhyloCactus 0.5.0: assembly, curation, screening, reference library,
-# validation folds, barcode gap, classification of those folds, negative controls and the
-# threshold of remoteness. The controls of step 8 come before any real figure is read.
+# Phases 2 to 11 of PhyloCactus 0.5.0: assembly (with own data, if any), curation, screening,
+# reference library, validation folds, barcode gap, classification of those folds, negative
+# controls, the threshold of remoteness and the metrics per class. The controls of step 8 come
+# before any real figure is read.
 #
 # The branch reads the same phylotaR workspace as the phylogeny (0_phylotaR_raw_Ingroup/)
 # and writes only under 11_barcoding/. The first run downloads GenBank metadata for the
@@ -28,17 +29,15 @@ setwd(tutorial_dir)
 # A notification that cannot be sent is reported and ignored, so it never fails a run.
 notify_email <- FALSE
 
-# Folds per locus and scheme for the IdTaxa contrast, sampled with a fixed seed; loci with fewer
-# folds run complete. NULL runs all 5928 folds.
-#
-# Measured on this machine (Apple M2 Pro), seconds per fold, scheme species: trnS-trnG 3.0,
-# pepC_like 3.0, phyC 3.1, rbcL 5.5, psbJ-petA 5.5, ITS 6.1, atpB-rbcL 6.1, psbA-trnH 6.3,
-# trnL-trnF 11.9, ndhF-rpl32 26.2, matK 28.4, rpL16 47.0. The cost does not follow the size of the
-# library: ndhF-rpl32 is one of the smallest and takes eight times what phyC takes.
-#
-# With 100 the two schemes took 9 h 11 min and wrote 2773 predictions. All 5928 folds project to
-# about 34 h at these rates. The nearest neighbour needs no sample: it runs in seconds.
-idtaxa_max_folds <- 100
+# IdTaxa retrains once per fold, which on the whole library takes tens of core-hours: it is run
+# once, on a computing cluster, on the frozen library (generate_barcoding_job_scripts() and
+# merge_barcoding_chunks(); CN2 with run_barcoding_controls(method = "idtaxa", controls = "CN2")),
+# and its merged tables are the result, since LearnTaxa() differs between machines in floating
+# point. This script never trains IdTaxa. NULL leaves IdTaxa out; the path of the folder holding
+# the merged tables (TABLE_barcoding_predictions_<scheme>_idtaxa.csv, TABLE_barcoding_timing_idtaxa.csv
+# and TABLE_barcoding_cn2_queries_idtaxa.csv) copies them into steps 7 and 8, and steps 9 and 10
+# then include IdTaxa.
+idtaxa_tables <- NULL
 
 # -------------------------------------------------------------
 # Step 1: Assembly. Clusters with more than min_species species; every accession kept; clusters
@@ -145,8 +144,8 @@ classify_barcoding_folds(
 
 # The same classifier, with every query measured the way a query of a user is measured: stripped of
 # gaps, oriented against the training set of its fold and added to it with MAFFT --add --keeplength,
-# one call per query. Writes the tables with the suffix _add and the running time per locus. About
-# 8 h on this machine (29 475 s on 2026-09-26); step 9 reads these tables.
+# one call per query. Writes the tables with the suffix _add and the running time per locus; hours
+# on a laptop, so run it overnight. Step 9 reads these tables.
 classify_barcoding_folds(
   library_dir = "11_barcoding/4_library",
   folds_dir = "11_barcoding/5_folds",
@@ -157,16 +156,12 @@ classify_barcoding_folds(
 )
 
 # The classifier of the real use: IdTaxa needs no alignment, so it is the one that can answer a
-# query a user brings. It retrains once per fold, hence the sample declared in the SETUP block.
-classify_barcoding_folds(
-  library_dir = "11_barcoding/4_library",
-  folds_dir = "11_barcoding/5_folds",
-  output_dir = "11_barcoding/7_classifier",
-  method = "idtaxa",
-  max_folds = idtaxa_max_folds,
-  seed = 1L,
-  notify = notify_email
-)
+# query a user brings. Its tables come from the cluster run (see idtaxa_tables in the SETUP block).
+if (!is.null(idtaxa_tables)) {
+  file.copy(list.files(idtaxa_tables, pattern = "^TABLE_barcoding_(predictions_(species|genus)|timing)_idtaxa\\.csv$",
+                       full.names = TRUE),
+            "11_barcoding/7_classifier", overwrite = FALSE)
+}
 
 # -------------------------------------------------------------
 # Step 8: Negative controls, before any real accuracy is read. CN1 permutes the labels and asks
@@ -201,6 +196,11 @@ run_barcoding_controls(
   permutations = 10L,
   seed = 1L
 )
+# CN2 with IdTaxa comes from the cluster run, with the tables of step 7
+if (!is.null(idtaxa_tables)) {
+  file.copy(file.path(idtaxa_tables, "TABLE_barcoding_cn2_queries_idtaxa.csv"), "11_barcoding/8_controls",
+            overwrite = FALSE)
+}
 
 # -------------------------------------------------------------
 # Step 9: Threshold of remoteness. A query whose distance to its nearest neighbour exceeds the
@@ -215,6 +215,30 @@ sweep_barcoding_threshold(
   alignment = "add",
   q = 0.99,
   quantile_type = 1L
+)
+# IdTaxa: the curve runs over its confidence; the operating threshold is the quantile 0.01 of the
+# genus confidence of scheme G, reported next to 60, DECIPHER's default
+if (!is.null(idtaxa_tables)) {
+  sweep_barcoding_threshold(
+    classifier_dir = "11_barcoding/7_classifier",
+    controls_dir = "11_barcoding/8_controls",
+    output_dir = "11_barcoding/9_threshold",
+    method = "idtaxa",
+    quantile_type = 1L
+  )
+}
+
+# -------------------------------------------------------------
+# Step 10: Metrics per class (6D): per locus and scheme, precision and recall per class and the shares
+# of correct, honest genus, wrong and unassigned answers, never summed into one error; for the nearest
+# neighbour at its operating threshold and, with the cluster tables, for IdTaxa at 60.
+# -------------------------------------------------------------
+summarise_barcoding_metrics(
+  classifier_dir = "11_barcoding/7_classifier",
+  threshold_dir = "11_barcoding/9_threshold",
+  library_dir = "11_barcoding/4_library",
+  output_dir = "11_barcoding/11_metrics",
+  methods = if (is.null(idtaxa_tables)) "nn_add" else c("nn_add", "idtaxa")
 )
 
 # -------------------------------------------------------------
@@ -234,3 +258,5 @@ print(utils::read.csv("11_barcoding/8_controls/TABLE_barcoding_cn2_outgroup.csv"
 
 # Threshold of remoteness per locus and scheme, with the outgroup rejection where it is measured
 print(utils::read.csv("11_barcoding/9_threshold/TABLE_barcoding_threshold_operating.csv"))
+# Metrics per locus and scheme
+print(utils::read.csv("11_barcoding/11_metrics/TABLE_barcoding_metrics_summary_nn_add.csv"))
