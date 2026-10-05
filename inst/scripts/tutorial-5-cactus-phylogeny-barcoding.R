@@ -225,8 +225,9 @@ sweep_barcoding_threshold(
   q = 0.99,
   quantile_type = 1L
 )
-# IdTaxa: the curve runs over its confidence; the operating threshold is the quantile 0.01 of the
-# genus confidence of scheme G, reported next to 60, DECIPHER's default
+# IdTaxa: the curve runs over its confidence. The operating threshold is 60, DECIPHER's default
+# (decision K7 of 26-09), and step 10 reads that row; the quantile 0.01 of the genus confidence of
+# scheme G is reported next to it, not used
 if (!is.null(idtaxa_tables)) {
   sweep_barcoding_threshold(
     classifier_dir = "11_barcoding/7_classifier",
