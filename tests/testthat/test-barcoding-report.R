@@ -547,3 +547,40 @@ test_that("a run record without the machine still gives a report, saying it was 
   top <- sub("id=\"section-2\".*", "", .rep_html(f))
   expect_true(grepl("machine not recorded", top, fixed = TRUE))
 })
+
+# ---- R-c in the report (Phase 11, C5) ---------------------------------------------------------------
+
+test_that("the report gives the species threshold of each locus and lists a species under it as an alternative", {
+  skip_if_not_installed("Biostrings")
+  t <- .rep_table()
+  t$species_threshold <- c(60, 85, 60, 60)
+  # matK: IdTaxa reached Opuntia_alpha at 80, under 85: named at genus rank
+  i <- t$locus == "matK"
+  t$state[i] <- 2L; t$predicted_species[i] <- NA; t$reason[i] <- "below_species_threshold"
+  f <- .rep_fixture(withr::local_tempdir(), table = t)
+  .rep_run(f)
+  a <- .rep_csv(f, "answer")
+  expect_true("species_threshold" %in% names(a))
+  expect_equal(a$species_threshold[a$locus == "matK"], 85)
+  al <- .rep_csv(f, "alternatives")
+  b <- al[al$kind == "best_path_under_threshold" & al$locus == "matK", ]
+  expect_equal(nrow(b), 1L)
+  expect_identical(b$species, "Opuntia_alpha")
+  expect_equal(b$species_confidence, 80)
+  expect_equal(b$species_threshold, 85)
+  h <- .rep_html(f)
+  s2 <- sub(".*id=\"section-2\"(.*?)id=\"section-3\".*", "\\1", h)
+  expect_true(grepl("species threshold", s2, fixed = TRUE))
+  expect_true(grepl("below_species_threshold", s2, fixed = TRUE))
+})
+
+test_that("a table written before the species threshold still gives a report, read at the threshold of the run", {
+  skip_if_not_installed("Biostrings")
+  f <- .rep_fixture(withr::local_tempdir())
+  .rep_run(f)
+  al <- .rep_csv(f, "alternatives")
+  b <- al[al$kind == "best_path_under_threshold", ]
+  expect_setequal(b$locus, c("rbcL", "trnL-trnF"))
+  expect_true("species_threshold" %in% names(al))
+  expect_equal(b$species_threshold, c(60, 60))
+})
