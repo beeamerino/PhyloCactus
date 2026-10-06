@@ -208,6 +208,11 @@
 #' @param quantile_type Integer. Type of [stats::quantile()]. Defaults to `1L`, whose result is always
 #'   a distance observed in the data.
 #' @param figures Logical. Write one figure per locus, PDF and PNG at 300 dpi, 180 mm wide.
+#' @param species_q Numeric. With `"idtaxa"` only: the quantile of the species confidence of the
+#'   scheme G queries of each locus (species absent from the library) that sets its species
+#'   threshold, never under 60 (rule R-c, Phase 11, decisions 1a and C4 of BMM, 05-10 and 06-10).
+#'   Written to `TABLE_barcoding_species_threshold_idtaxa.csv` and read by the identification
+#'   functions through `threshold_dir`; the validation (step 10) stays at 60. Defaults to `0.95`.
 #' @return Invisibly, a list with `curve` and `operating`. Writes
 #'   `TABLE_barcoding_threshold_curve.csv`, `TABLE_barcoding_threshold_operating.csv` and, with
 #'   `figures = TRUE`, `FIG_barcoding_threshold_<locus>.pdf` and `.png`.
@@ -227,14 +232,15 @@ sweep_barcoding_threshold <- function(classifier_dir = file.path("11_barcoding",
                                       q = NULL,
                                       quantile_type = 1L,
                                       figures = TRUE,
-                                      method = c("nn", "idtaxa")) {
+                                      method = c("nn", "idtaxa"),
+                                      species_q = 0.95) {
   alignment <- match.arg(alignment)
   method <- match.arg(method)
   .bc_assert_output_dir(output_dir)
   if (method == "idtaxa") {
     return(.bc_sweep_idtaxa(classifier_dir, controls_dir, output_dir,
                             q = if (is.null(q)) 0.01 else q, quantile_type = quantile_type,
-                            figures = figures))
+                            figures = figures, species_q = species_q))
   }
   if (is.null(q)) q <- 0.99
   suffix <- if (alignment == "add") "nn_add" else "nn"
@@ -301,7 +307,7 @@ sweep_barcoding_threshold <- function(classifier_dir = file.path("11_barcoding",
 
 #' Step 9 with IdTaxa (Phase 6B, K7)
 #' @noRd
-.bc_sweep_idtaxa <- function(classifier_dir, controls_dir, output_dir, q, quantile_type, figures) {
+.bc_sweep_idtaxa <- function(classifier_dir, controls_dir, output_dir, q, quantile_type, figures, species_q = 0.95) {
   files <- file.path(classifier_dir, paste0("TABLE_barcoding_predictions_", c("species", "genus"), "_idtaxa.csv"))
   missing <- files[!file.exists(files)]
   if (length(missing) > 0L) {
@@ -363,6 +369,18 @@ sweep_barcoding_threshold <- function(classifier_dir = file.path("11_barcoding",
   rownames(oper_tab) <- NULL
   utils::write.csv(curve_tab, file.path(output_dir, "TABLE_barcoding_threshold_curve_idtaxa.csv"), row.names = FALSE)
   utils::write.csv(oper_tab, file.path(output_dir, "TABLE_barcoding_threshold_operating_idtaxa.csv"), row.names = FALSE)
+  # R-c: the species threshold of each locus for the identification path, from the species
+  # confidence of scheme G (species absent), never under 60; the validation stays at 60 (K7)
+  sp_tab <- do.call(rbind, lapply(loci, function(l) {
+    sc <- pred$genus$species_confidence[pred$genus$locus == l]
+    sc <- sc[!is.na(sc)]
+    qv <- if (length(sc) == 0L) NA_real_ else unname(stats::quantile(sc, species_q, type = quantile_type))
+    data.frame(locus = l, q = species_q, quantile_type = as.integer(quantile_type), queries = length(sc),
+               quantile = qv, floor = 60, species_threshold = if (is.na(qv)) 60 else max(60, qv),
+               stringsAsFactors = FALSE)
+  }))
+  rownames(sp_tab) <- NULL
+  utils::write.csv(sp_tab, file.path(output_dir, "TABLE_barcoding_species_threshold_idtaxa.csv"), row.names = FALSE)
   if (isTRUE(figures)) {
     for (l in unique(curve_tab$locus)) {
       o_l <- oper_tab[oper_tab$locus == l & oper_tab$rule == "quantile", , drop = FALSE]

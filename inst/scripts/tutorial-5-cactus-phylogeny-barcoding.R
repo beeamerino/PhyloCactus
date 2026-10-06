@@ -227,7 +227,10 @@ sweep_barcoding_threshold(
 )
 # IdTaxa: the curve runs over its confidence. The operating threshold is 60, DECIPHER's default
 # (decision K7 of 26-09), and step 10 reads that row; the quantile 0.01 of the genus confidence of
-# scheme G is reported next to it, not used
+# scheme G is reported next to it, not used. The sweep also writes
+# TABLE_barcoding_species_threshold_idtaxa.csv: for each locus, the quantile 0.95 of the species
+# confidence of scheme G (species absent from the library), never under 60. The identification of
+# a user query names a species only above it (rule R-c, Phase 11); the validation stays at 60
 if (!is.null(idtaxa_tables)) {
   sweep_barcoding_threshold(
     classifier_dir = "11_barcoding/7_classifier",

@@ -60,7 +60,7 @@
 #'
 #' @param assembly Character. Path to the assembly, FASTA, plain or gzipped.
 #' @param locus Character or `NULL`. Loci to look for; `NULL`, every locus of the library.
-#' @param library_dir,metrics_dir,output_dir,threshold,min_overlap,seed As in
+#' @param library_dir,metrics_dir,threshold_dir,output_dir,threshold,min_overlap,seed As in
 #'   [identify_barcoding_query()].
 #' @param run_name Character. The table is `TABLE_barcoding_identify_<run_name>.csv`.
 #' @param flank Integer. Bases added on each side of the hit. Defaults to 500.
@@ -82,6 +82,7 @@ identify_barcoding_assembly <- function(assembly,
                                         locus = NULL,
                                         library_dir = file.path("11_barcoding", "4_library"),
                                         metrics_dir = file.path("11_barcoding", "11_metrics"),
+                                        threshold_dir = file.path("11_barcoding", "9_threshold"),
                                         output_dir = file.path("11_barcoding", "10_identify"),
                                         run_name = "assembly",
                                         flank = 500L,
@@ -157,7 +158,8 @@ identify_barcoding_assembly <- function(assembly,
   for (l in loci) {
     if (l %in% names(regions) && nzchar(regions[[l]])) {
       q <- stats::setNames(regions[[l]], paste0(run_name, "__", l))
-      r <- .bc_identify_table(q, l, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed)
+      r <- .bc_identify_table(q, l, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed,
+                              threshold_dir = threshold_dir)
       h <- top[top$locus == l, ]
       r$scaffold <- h$tname
       r$scaffold_length <- as.integer(h$tlen)
@@ -174,7 +176,7 @@ identify_barcoding_assembly <- function(assembly,
     } else {
       # No hit: the empty query of step 10 gives the row of a locus without overlap
       r <- .bc_identify_table(stats::setNames("", paste0(run_name, "__", l)), l, lib, library_dir, metrics_dir,
-                              output_dir, threshold, min_overlap, seed)
+                              output_dir, threshold, min_overlap, seed, threshold_dir = threshold_dir)
       r$scaffold <- NA_character_
       r$scaffold_length <- NA_integer_
       r$hit_start <- NA_integer_

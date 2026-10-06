@@ -9,6 +9,7 @@ identify_barcoding_reads(
   reads2,
   library_dir = file.path("11_barcoding", "4_library"),
   metrics_dir = file.path("11_barcoding", "11_metrics"),
+  threshold_dir = file.path("11_barcoding", "9_threshold"),
   output_dir = file.path("11_barcoding", "10_identify"),
   run_name = "reads",
   threads = 4L,
@@ -26,7 +27,7 @@ identify_barcoding_reads(
 \arguments{
 \item{reads1, reads2}{Character. The two FASTQ files of the run; \code{reads2 = NULL} (single-end) stops.}
 
-\item{library_dir, metrics_dir, output_dir, threshold, min_overlap, seed}{As in
+\item{library_dir, metrics_dir, threshold_dir, output_dir, threshold, min_overlap, seed}{As in
 \code{\link[=identify_barcoding_query]{identify_barcoding_query()}}.}
 
 \item{run_name}{Character. Name of the run folder and of the table.}
