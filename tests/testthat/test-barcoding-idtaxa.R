@@ -426,3 +426,54 @@ test_that("step 9 with IdTaxa fixes t* at the 0.01 quantile of scheme G genus co
   cat5 <- table(factor(.bc_outcome_category(h$e, "species"), levels = .bc_outcome_levels()))
   expect_equal(unname(unlist(e60[, .bc_outcome_levels()])), as.integer(cat5))
 })
+
+# ---- R-c (Phase 11, decisions 1a and C1 to C4 of BMM, 05-10 and 06-10) ----------------------------
+
+test_that("step 9 with IdTaxa writes the species threshold of each locus, the quantile 0.95 of scheme G, never under 60", {
+  tmp <- withr::local_tempdir()
+  h <- .idt_hand_tables(tmp)
+  out_dir <- file.path(tmp, "9_threshold")
+  suppressMessages(utils::capture.output(
+    sweep_barcoding_threshold(classifier_dir = h$cls, controls_dir = h$ctl, output_dir = out_dir,
+                              method = "idtaxa", figures = FALSE)))
+  f <- file.path(out_dir, "TABLE_barcoding_species_threshold_idtaxa.csv")
+  expect_true(file.exists(f))
+  st <- utils::read.csv(f, stringsAsFactors = FALSE)
+  expect_identical(names(st), c("locus", "q", "quantile_type", "queries", "quantile", "floor", "species_threshold"))
+  expect_identical(st$locus, "matK")
+  expect_equal(st$q, 0.95)
+  expect_equal(st$quantile_type, 1L)
+  expect_equal(st$queries, nrow(h$g))
+  q95 <- unname(stats::quantile(h$g$species_confidence, 0.95, type = 1))
+  expect_equal(st$quantile, q95)
+  expect_equal(st$floor, 60)
+  expect_equal(st$species_threshold, max(60, q95))
+})
+
+test_that("the species threshold follows species_q and stays at 60 when the quantile falls under it", {
+  tmp <- withr::local_tempdir()
+  h <- .idt_hand_tables(tmp)
+  out_dir <- file.path(tmp, "9_threshold")
+  suppressMessages(utils::capture.output(
+    sweep_barcoding_threshold(classifier_dir = h$cls, controls_dir = h$ctl, output_dir = out_dir,
+                              method = "idtaxa", figures = FALSE, species_q = 0.5)))
+  st <- utils::read.csv(file.path(out_dir, "TABLE_barcoding_species_threshold_idtaxa.csv"), stringsAsFactors = FALSE)
+  q50 <- unname(stats::quantile(h$g$species_confidence, 0.5, type = 1))
+  expect_lt(q50, 60)
+  expect_equal(st$q, 0.5)
+  expect_equal(st$quantile, q50)
+  expect_equal(st$species_threshold, 60)
+})
+
+test_that("the operating table of IdTaxa is not changed by the species threshold", {
+  tmp <- withr::local_tempdir()
+  h <- .idt_hand_tables(tmp)
+  a <- file.path(tmp, "a"); b <- file.path(tmp, "b")
+  suppressMessages(utils::capture.output({
+    sweep_barcoding_threshold(classifier_dir = h$cls, controls_dir = h$ctl, output_dir = a, method = "idtaxa", figures = FALSE)
+    sweep_barcoding_threshold(classifier_dir = h$cls, controls_dir = h$ctl, output_dir = b, method = "idtaxa", figures = FALSE,
+                              species_q = 0.5)
+  }))
+  expect_identical(readLines(file.path(a, "TABLE_barcoding_threshold_operating_idtaxa.csv")),
+                   readLines(file.path(b, "TABLE_barcoding_threshold_operating_idtaxa.csv")))
+})

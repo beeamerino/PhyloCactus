@@ -590,3 +590,95 @@ test_that("a query equal to a masked library accession is named through UNMASKED
   expect_identical(run$value[run$kind == "library" & run$name == "UNMASKED_matK.fasta"],
                    unname(tools::md5sum(file.path(f$library_dir, "UNMASKED_matK.fasta"))))
 })
+
+# ---- R-c: the species threshold of each locus in the identification (Phase 11, C1 to C4) ---------
+
+.idn_rc_rows <- function() {
+  data.frame(query = c("q1", "q1", "q1", "q1"), locus = c("matK", "rbcL", "ITS", "trnL-trnF"),
+             state = c(1L, 1L, 2L, 3L),
+             predicted_species = c("Opuntia_alpha", "Cereus_beta", NA, NA),
+             predicted_genus = c("Opuntia", "Cereus", "Opuntia", NA),
+             genus_idtaxa = c("Opuntia", "Cereus", "Opuntia", "Cereus"),
+             species_idtaxa = c("Opuntia_alpha", "Cereus_beta", "Opuntia_beta", "Cereus_alpha"),
+             genus_confidence = c(95, 92, 80, 40), species_confidence = c(70, 90, 50, 30),
+             reason = c(NA, NA, NA, "low_confidence"), stringsAsFactors = FALSE)
+}
+
+test_that("a row named at species rank under the species threshold of its locus is named at genus rank", {
+  tab <- .idn_rc_rows()
+  thr <- data.frame(locus = c("matK", "rbcL", "ITS", "trnL-trnF"), species_threshold = c(80, 85, 60, 60))
+  r <- .bc_apply_species_threshold(tab, thr)
+  # matK: 70 under 80, moved; its genus and what IdTaxa reached are kept
+  m <- r[r$locus == "matK", ]
+  expect_identical(m$state, 2L)
+  expect_true(is.na(m$predicted_species))
+  expect_identical(m$predicted_genus, "Opuntia")
+  expect_identical(m$reason, "below_species_threshold")
+  expect_identical(m$species_idtaxa, "Opuntia_alpha")
+  expect_equal(m$species_confidence, 70)
+  # rbcL: 90 over 85, kept
+  expect_identical(r$state[r$locus == "rbcL"], 1L)
+  expect_identical(r$predicted_species[r$locus == "rbcL"], "Cereus_beta")
+  expect_true(is.na(r$reason[r$locus == "rbcL"]))
+  # States 2 and 3 are never touched
+  expect_identical(r[r$locus %in% c("ITS", "trnL-trnF"), names(tab)], tab[tab$locus %in% c("ITS", "trnL-trnF"), ])
+  # Every row carries the threshold used
+  expect_equal(r$species_threshold, c(80, 85, 60, 60))
+})
+
+test_that("the species thresholds are read from step 9, with 60 and a message where they are missing", {
+  tmp <- withr::local_tempdir()
+  d <- file.path(tmp, "9_threshold"); dir.create(d)
+  # No table: 60 everywhere, with a message
+  expect_message(t0 <- .bc_species_thresholds(d, c("matK", "rbcL"), 60), "species threshold")
+  expect_equal(t0$species_threshold, c(60, 60))
+  expect_message(tn <- .bc_species_thresholds(NULL, c("matK"), 60), "species threshold")
+  expect_equal(tn$species_threshold, 60)
+  # A table with matK only: rbcL takes 60, with a message naming it
+  utils::write.csv(data.frame(locus = "matK", q = 0.95, quantile_type = 1L, queries = 10L, quantile = 67.4, floor = 60,
+                              species_threshold = 67.4),
+                   file.path(d, "TABLE_barcoding_species_threshold_idtaxa.csv"), row.names = FALSE)
+  expect_message(t1 <- .bc_species_thresholds(d, c("matK", "rbcL"), 60), "rbcL")
+  expect_equal(t1$species_threshold, c(67.4, 60))
+  expect_identical(t1$locus, c("matK", "rbcL"))
+  # A complete table gives no message
+  expect_silent(t2 <- .bc_species_thresholds(d, "matK", 60))
+  expect_equal(t2$species_threshold, 67.4)
+})
+
+test_that("the three identification functions take threshold_dir, at 11_barcoding/9_threshold by default", {
+  for (fn in list(identify_barcoding_query, identify_barcoding_reads, identify_barcoding_assembly)) {
+    a <- formals(fn)
+    expect_true("threshold_dir" %in% names(a))
+    expect_identical(eval(a$threshold_dir), file.path("11_barcoding", "9_threshold"))
+  }
+})
+
+test_that("the identification applies the species threshold of step 9 and writes it in every row", {
+  .idn_skip()
+  tmp <- withr::local_tempdir()
+  f <- .idn_fixture(tmp)
+  q <- c(probe = unname(f$seqs$matK[1]))
+  d <- file.path(tmp, "9_threshold"); dir.create(d)
+  # Without the table: the species threshold is 60
+  a <- .idn_run(f, q, run_name = "a", locus = "matK", threshold_dir = d, report = FALSE)
+  expect_equal(a$tab$species_threshold, 60)
+  expect_true(any(grepl("species threshold", a$text)))
+  # With a threshold over every confidence: nothing is named at species rank, and what IdTaxa reached stays
+  utils::write.csv(data.frame(locus = "matK", q = 0.95, quantile_type = 1L, queries = 1L, quantile = 100.5, floor = 60,
+                              species_threshold = 100.5),
+                   file.path(d, "TABLE_barcoding_species_threshold_idtaxa.csv"), row.names = FALSE)
+  b <- .idn_run(f, q, run_name = "b", locus = "matK", threshold_dir = d, report = FALSE)
+  expect_equal(b$tab$species_threshold, 100.5)
+  expect_false(any(b$tab$state == 1L))
+  moved <- a$tab$state == 1L
+  if (any(moved)) {
+    expect_true(all(b$tab$state[moved] == 2L))
+    expect_true(all(b$tab$reason[moved] == "below_species_threshold"))
+    expect_identical(b$tab$species_idtaxa[moved], a$tab$species_idtaxa[moved])
+    expect_equal(b$tab$species_confidence[moved], a$tab$species_confidence[moved])
+  }
+  # The written table is the returned one
+  w <- utils::read.csv(file.path(f$out, "TABLE_barcoding_identify_b.csv"), stringsAsFactors = FALSE)
+  expect_true("species_threshold" %in% names(w))
+})

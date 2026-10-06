@@ -54,3 +54,10 @@ test_that("Tutorial 5 no longer quotes the running times of the library of the 0
   txt <- paste(.t5_calls()$text, collapse = "\n")
   for (s in c("9 h 11 min", "34 h", "29 475 s", "5928 folds")) expect_false(grepl(s, txt, fixed = TRUE))
 })
+
+test_that("the comment of step 9 says that the IdTaxa sweep writes the species threshold of each locus (R-c, C6)", {
+  tut <- system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus")
+  skip_if(!nzchar(tut), "Tutorial 5 is not installed")
+  txt <- paste(readLines(tut, warn = FALSE), collapse = "\n")
+  expect_true(grepl("TABLE_barcoding_species_threshold_idtaxa.csv", txt, fixed = TRUE))
+})
