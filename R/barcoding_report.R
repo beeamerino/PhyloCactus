@@ -418,32 +418,36 @@ report_barcoding_identification <- function(run_name,
 
   # Answer
   if (!"identical_to_library" %in% names(tab)) tab$identical_to_library <- NA_character_
+  # R-c (Phase 11): a table written before the species threshold is read at the threshold of the run
+  if (!"species_threshold" %in% names(tab)) tab$species_threshold <- threshold
   extra <- intersect(c("identical_to_library", "scaffold", "scaffold_length", "mapq", "scaffolds_hit", "low_mapq", "contig", "organelle"),
                      names(tab))
   answer <- tab[, c("query", "locus", "compartment", "state", "predicted_species", "predicted_genus", "genus_confidence",
-                    "species_confidence", "reason", "region_length", "validation_ws_rate_species_present",
+                    "species_confidence", "species_threshold", "reason", "region_length", "validation_ws_rate_species_present",
                     "validation_ws_rate_species_absent", extra)]
 
   # Alternatives, never assigned
   alt <- list()
   for (i in seq_len(nrow(tab))) {
     r <- tab[i, ]
-    if (r$state %in% 2:3 && !is.na(r$species_idtaxa) && (is.na(r$species_confidence) || r$species_confidence < threshold)) {
+    st <- if (is.na(r$species_threshold)) threshold else r$species_threshold
+    if (r$state %in% 2:3 && !is.na(r$species_idtaxa) && (is.na(r$species_confidence) || r$species_confidence < st)) {
       alt[[length(alt) + 1L]] <- data.frame(query = r$query, locus = r$locus, kind = "best_path_under_threshold",
                                             genus = r$genus_idtaxa, species = r$species_idtaxa,
                                             genus_confidence = r$genus_confidence, species_confidence = r$species_confidence,
-                                            assigned = FALSE, stringsAsFactors = FALSE)
+                                            species_threshold = st, assigned = FALSE, stringsAsFactors = FALSE)
     }
     if (r$state %in% 2L && !is.na(r$candidates) && nzchar(r$candidates)) {
       cs <- strsplit(r$candidates, "|", fixed = TRUE)[[1]]
       alt[[length(alt) + 1L]] <- data.frame(query = r$query, locus = r$locus, kind = "candidate_of_named_genus",
                                             genus = r$predicted_genus, species = cs, genus_confidence = NA_real_,
-                                            species_confidence = NA_real_, assigned = FALSE, stringsAsFactors = FALSE)
+                                            species_confidence = NA_real_, species_threshold = NA_real_, assigned = FALSE,
+                                            stringsAsFactors = FALSE)
     }
   }
   alternatives <- if (length(alt)) do.call(rbind, alt) else
     data.frame(query = character(0), locus = character(0), kind = character(0), genus = character(0), species = character(0),
-               genus_confidence = numeric(0), species_confidence = numeric(0), assigned = logical(0))
+               genus_confidence = numeric(0), species_confidence = numeric(0), species_threshold = numeric(0), assigned = logical(0))
 
   # Reading across loci, descriptive
   agree <- list()
@@ -547,7 +551,10 @@ report_barcoding_identification <- function(run_name,
     af <- answer[paste(answer$query, answer$locus) %in% paste(tf$query, tf$locus), if (per_run) names(answer) else setdiff(names(answer), "query"),
                  drop = FALSE]
     s2 <- paste0("<p>One answer per locus, each from its own model; state 1 names a species, state 2 a genus, state 3 ",
-                 "is not assignable. The dashed line is the threshold of ", threshold, ".</p>",
+                 "is not assignable. The dashed line is the threshold of ", threshold, ". A species is named only when its ",
+                 "confidence also reaches the species threshold of its locus (column species_threshold, set in step 9 from the ",
+                 "queries of the validation whose species was absent from the library); under it the locus is named at genus ",
+                 "rank, with reason below_species_threshold, and the species IdTaxa reached is listed in section 4.</p>",
                  if (nrow(tf)) .bc_html_plot(.bc_report_answer_plot(tf, threshold)) else "<p>No locus of the library was found.</p>",
                  .bc_html_table(af),
                  "<p>Loci not found in the ", if (per_run) "sample" else "query", ": ",
@@ -558,7 +565,8 @@ report_barcoding_identification <- function(run_name,
                  "assign it at the threshold. Loci with no answer are listed under rank <em>none</em>.</p>", .bc_html_table(ag))
     al <- alternatives[alternatives$query %in% t$query, if (per_run) names(alternatives) else setdiff(names(alternatives), "query"),
                        drop = FALSE]
-    s4 <- paste0("<p>Alternatives under the threshold of ", threshold, ", not assigned. IdTaxa gives one path per query and ",
+    s4 <- paste0("<p>Alternatives under the threshold of ", threshold, " (for a species, under the species threshold of its ",
+                 "locus), not assigned. IdTaxa gives one path per query and ",
                  "locus: the alternatives are that path when it falls under the threshold, and in state 2 the species of the ",
                  "named genus in the library. They are not identifications; they say where the data point when they do not ",
                  "decide.</p>",

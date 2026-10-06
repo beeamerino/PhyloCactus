@@ -53,7 +53,7 @@
 #' are never touched. The identification models are cached in `output_dir/models`.
 #'
 #' @param reads1,reads2 Character. The two FASTQ files of the run; `reads2 = NULL` (single-end) stops.
-#' @param library_dir,metrics_dir,output_dir,threshold,min_overlap,seed As in
+#' @param library_dir,metrics_dir,threshold_dir,output_dir,threshold,min_overlap,seed As in
 #'   [identify_barcoding_query()].
 #' @param run_name Character. Name of the run folder and of the table.
 #' @param threads Integer. Threads of `fastp` and GetOrganelle.
@@ -77,6 +77,7 @@ identify_barcoding_reads <- function(reads1,
                                      reads2,
                                      library_dir = file.path("11_barcoding", "4_library"),
                                      metrics_dir = file.path("11_barcoding", "11_metrics"),
+                                     threshold_dir = file.path("11_barcoding", "9_threshold"),
                                      output_dir = file.path("11_barcoding", "10_identify"),
                                      run_name = "reads",
                                      threads = 4L,
@@ -163,10 +164,11 @@ identify_barcoding_reads <- function(reads1,
 
   # Step 10 on the contigs; per locus, the row with the longest region
   if (length(contigs)) {
-    tab <- .bc_identify_table(contigs, loci, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed)
+    tab <- .bc_identify_table(contigs, loci, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed,
+                              threshold_dir = threshold_dir)
   } else {
     tab <- .bc_identify_table(stats::setNames("", paste0(run_name, "__none")), loci, lib, library_dir, metrics_dir,
-                              output_dir, threshold, min_overlap, seed)
+                              output_dir, threshold, min_overlap, seed, threshold_dir = threshold_dir)
   }
   tab$contig <- ifelse(tab$reason %in% "no_overlap", NA_character_, tab$query)
   tab$organelle <- ifelse(is.na(tab$contig), NA_character_, sub("_[0-9]+$", "", tab$contig))

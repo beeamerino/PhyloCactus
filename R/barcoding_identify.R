@@ -270,6 +270,42 @@
   na
 }
 
+#' The species threshold of each locus, from step 9 (rule R-c, Phase 11, decisions C1 and C2 of BMM)
+#'
+#' Read from `TABLE_barcoding_species_threshold_idtaxa.csv` of `threshold_dir`; a missing table or
+#' locus takes `threshold`, with a message. Never under `threshold`.
+#' @noRd
+.bc_species_thresholds <- function(threshold_dir, loci, threshold) {
+  out <- data.frame(locus = loci, species_threshold = rep(threshold, length(loci)), stringsAsFactors = FALSE)
+  f <- if (is.null(threshold_dir)) NA_character_ else file.path(threshold_dir, "TABLE_barcoding_species_threshold_idtaxa.csv")
+  if (is.na(f) || !file.exists(f)) {
+    message("No species threshold table (", if (is.na(f)) "threshold_dir = NULL" else f, "): the species threshold of every ",
+            "locus is ", threshold, ".")
+    return(out)
+  }
+  st <- utils::read.csv(f, stringsAsFactors = FALSE)
+  v <- st$species_threshold[match(loci, st$locus)]
+  miss <- is.na(v)
+  if (any(miss)) {
+    message("No species threshold for ", paste(loci[miss], collapse = ", "), " in ", f, ": ", threshold, " is used.")
+  }
+  out$species_threshold <- ifelse(miss, threshold, pmax(v, threshold))
+  out
+}
+
+#' Rule R-c: a row named at species rank under the species threshold of its locus is named at genus
+#' rank, keeping what IdTaxa reached
+#' @noRd
+.bc_apply_species_threshold <- function(tab, thr) {
+  tab$species_threshold <- thr$species_threshold[match(tab$locus, thr$locus)]
+  hit <- tab$state %in% 1L & !is.na(tab$species_confidence) & !is.na(tab$species_threshold) &
+    tab$species_confidence < tab$species_threshold
+  tab$state[hit] <- 2L
+  tab$predicted_species[hit] <- NA_character_
+  tab$reason[hit] <- "below_species_threshold"
+  tab
+}
+
 #' Aligned reads are not accepted (decision Z2 of BMM, 28-09)
 #' @noRd
 .bc_stop_aligned_reads <- function(path) {
@@ -396,6 +432,14 @@
 #' @param library_dir Character. Directory of step 4, with the `LIB_<locus>.fasta` files.
 #' @param metrics_dir Character. Directory of step 11, with
 #'   `TABLE_barcoding_metrics_summary_idtaxa.csv`.
+#' @param threshold_dir Character or `NULL`. Directory of step 9, with
+#'   `TABLE_barcoding_species_threshold_idtaxa.csv`, written by
+#'   `sweep_barcoding_threshold(method = "idtaxa")`: the species threshold of each locus (rule R-c,
+#'   Phase 11). A row that IdTaxa names at species rank keeps the species only when its species
+#'   confidence reaches that threshold; otherwise it is named at genus rank, with reason
+#'   `below_species_threshold`, and keeps in `species_idtaxa` and `species_confidence` what IdTaxa
+#'   reached. The value used is in the column `species_threshold`. Without the table, or for a locus
+#'   it lacks, the species threshold is `threshold`, with a message.
 #' @param output_dir Character. Where the table and the model cache are written.
 #' @param run_name Character. Suffix of the output table, `TABLE_barcoding_identify_<run_name>.csv`.
 #' @param threshold Numeric. IdTaxa confidence threshold. Defaults to 60, the operating threshold of
@@ -421,6 +465,7 @@ identify_barcoding_query <- function(query,
                                      locus = NULL,
                                      library_dir = file.path("11_barcoding", "4_library"),
                                      metrics_dir = file.path("11_barcoding", "11_metrics"),
+                                     threshold_dir = file.path("11_barcoding", "9_threshold"),
                                      output_dir = file.path("11_barcoding", "10_identify"),
                                      run_name = "query",
                                      threshold = 60,
@@ -452,7 +497,8 @@ identify_barcoding_query <- function(query,
   }
   restore_rng <- .bc_rng_state()
   on.exit(restore_rng(), add = TRUE)
-  tab <- .bc_identify_table(q, loci, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed)
+  tab <- .bc_identify_table(q, loci, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed,
+                            threshold_dir = threshold_dir)
 
   for (nm in unique(tab$query)) {
     if (all(tab$reason[tab$query == nm] %in% "no_overlap")) {
@@ -480,7 +526,8 @@ identify_barcoding_query <- function(query,
 #' Shared by [identify_barcoding_query()] and [identify_barcoding_assembly()]; the caller fixes and
 #' restores the random state.
 #' @noRd
-.bc_identify_table <- function(q, loci, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed) {
+.bc_identify_table <- function(q, loci, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed,
+                               threshold_dir = NULL) {
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   models_dir <- file.path(output_dir, "models")
   ids <- .bc_parse_header(names(q))$sid
@@ -518,13 +565,15 @@ identify_barcoding_query <- function(query,
   tab <- do.call(rbind, rows)
   tab <- tab[order(tab$.qi, tab$locus, method = "radix"), , drop = FALSE]
   tab$threshold <- threshold
+  tab <- .bc_apply_species_threshold(tab, .bc_species_thresholds(threshold_dir, loci, threshold))
   ctx <- .bc_identify_context(metrics_dir, loci, threshold)
   tab <- cbind(tab, ctx[match(tab$locus, ctx$locus), c("validation_ws_rate_species_present",
                                                         "validation_ws_rate_species_absent")])
   cols <- c("query", "locus", "query_length", "path", "region_start", "region_end",
             "region_length", "other_windows", "orientation", "state", "predicted_species",
             "predicted_genus", "candidates", "genus_idtaxa", "species_idtaxa", "genus_confidence",
-            "species_confidence", "reason", "core_trimmed", "genus_core_trimmed", "identical_to_library", "threshold", "validation_ws_rate_species_present",
+            "species_confidence", "reason", "core_trimmed", "genus_core_trimmed", "identical_to_library", "threshold",
+            "species_threshold", "validation_ws_rate_species_present",
             "validation_ws_rate_species_absent")
   tab <- tab[, cols]
   tab$query_length <- as.integer(tab$query_length)

@@ -12,7 +12,8 @@ sweep_barcoding_threshold(
   q = NULL,
   quantile_type = 1L,
   figures = TRUE,
-  method = c("nn", "idtaxa")
+  method = c("nn", "idtaxa"),
+  species_q = 0.95
 )
 }
 \arguments{
@@ -43,6 +44,12 @@ operating threshold of a locus is the quantile \code{q} of \code{genus_confidenc
 (the rule of D1 turned around, since confidence rises where distance falls), and it is reported
 next to 60, DECIPHER's default, in the column \code{rule}. The tables written carry the suffix
 \verb{_idtaxa}.}
+
+\item{species_q}{Numeric. With \code{"idtaxa"} only: the quantile of the species confidence of the
+scheme G queries of each locus (species absent from the library) that sets its species
+threshold, never under 60 (rule R-c, Phase 11, decisions 1a and C4 of BMM, 05-10 and 06-10).
+Written to \code{TABLE_barcoding_species_threshold_idtaxa.csv} and read by the identification
+functions through \code{threshold_dir}; the validation (step 10) stays at 60. Defaults to \code{0.95}.}
 }
 \value{
 Invisibly, a list with \code{curve} and \code{operating}. Writes

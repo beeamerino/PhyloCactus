@@ -9,6 +9,7 @@ identify_barcoding_query(
   locus = NULL,
   library_dir = file.path("11_barcoding", "4_library"),
   metrics_dir = file.path("11_barcoding", "11_metrics"),
+  threshold_dir = file.path("11_barcoding", "9_threshold"),
   output_dir = file.path("11_barcoding", "10_identify"),
   run_name = "query",
   threshold = 60,
@@ -29,6 +30,15 @@ identify_barcoding_query(
 
 \item{metrics_dir}{Character. Directory of step 11, with
 \code{TABLE_barcoding_metrics_summary_idtaxa.csv}.}
+
+\item{threshold_dir}{Character or \code{NULL}. Directory of step 9, with
+\code{TABLE_barcoding_species_threshold_idtaxa.csv}, written by
+\code{sweep_barcoding_threshold(method = "idtaxa")}: the species threshold of each locus (rule R-c,
+Phase 11). A row that IdTaxa names at species rank keeps the species only when its species
+confidence reaches that threshold; otherwise it is named at genus rank, with reason
+\code{below_species_threshold}, and keeps in \code{species_idtaxa} and \code{species_confidence} what IdTaxa
+reached. The value used is in the column \code{species_threshold}. Without the table, or for a locus
+it lacks, the species threshold is \code{threshold}, with a message.}
 
 \item{output_dir}{Character. Where the table and the model cache are written.}
 
