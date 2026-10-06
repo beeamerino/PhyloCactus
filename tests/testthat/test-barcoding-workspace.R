@@ -341,6 +341,22 @@ test_that("the shipped exclusion lists are keyed by locus and accession (X2)", {
   }
 })
 
+# Phase 11 follow-up, E1 (BMM, 06-10): the ITS records annotated in GenBank as pseudogenes (5.8S
+# rRNA) are excluded, read by probe-its-pseudogenes.R of the audit repository
+test_that("the ITS records annotated as pseudogenes in GenBank are in the ingroup exclusions (E1)", {
+  x <- utils::read.csv(system.file("extdata", "manual_exclusions_ingroup.csv", package = "PhyloCactus"), stringsAsFactors = FALSE)
+  pseudo <- c("AJ829735.2", "AJ829736.2", "AJ829737.2", "AJ829738.2", "AJ829739.2", "AJ829740.2", "AJ829745.2",
+              "AJ829746.2", "AJ829747.2", "AJ829748.2", "AJ829749.2", "AJ829750.2", "AJ829751.2", "AJ829752.2",
+              "AJ829756.2", "AJ829757.2", "AM050548.2", "AM050549.2", "AM157757.1", "AM160789.1", "AF328632.1")
+  e <- x[x$locus == "ITS" & x$sid %in% pseudo, , drop = FALSE]
+  expect_setequal(e$sid, pseudo)
+  expect_true(all(e$reason == "ITS pseudogene annotated in GenBank (5.8S rRNA)"))
+  expect_true(all(grepl("Non-concerted ITS evolution in Mammillaria", e$source[e$sid != "AF328632.1"], fixed = TRUE)))
+  expect_true(grepl("Lophocereus", e$source[e$sid == "AF328632.1"], fixed = TRUE))
+  # The functional copies of the same study stay in the library
+  expect_false(any(c("AM157758.1", "AM157751.2", "AJ971719.3") %in% x$sid))
+})
+
 # Phase 10, Y2 (BMM, 29-09): only the clusters that overlap the largest cluster of their locus are
 # pooled; a fragment of another region of the same gene is left out and listed.
 .y2_random <- function(n) paste(sample(c("A", "C", "G", "T"), n, replace = TRUE), collapse = "")
