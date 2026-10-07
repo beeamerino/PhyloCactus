@@ -75,6 +75,41 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `get_iucn_data()` | Retrieves the IUCN Red List assessment of a species through `rredlist`: category, criteria, population trend, countries of occurrence, endemism, habitats and threats. | IUCN (2026) |
 | `scale_fill_iucn()` | `ggplot2` fill scale with the standard IUCN Red List category colors. | IUCN (2026) |
 
+### Molecular Identification: the Library (Tutorial 5, Steps 1 to 4)
+
+| Function | Description | Reference |
+|:---|:---|:---|
+| `assemble_barcoding_dataset()` | Names the clusters of the phylotaR mining of the phylogeny by locus, cuts records over 2000 bases to the extent of the shorter records of their locus, reconciles every name against the checklist and, optionally, adds the user's own sequences. | Bennett et al. (2018); Korotkova et al. (2021) |
+| `curate_barcoding_markers()` | Aligns each locus with `MAFFT`, puts every sequence on one strand and masks poorly aligned columns, with the parameters of the phylogeny's ingroup. | Katoh & Standley (2013); Wright (2024) |
+| `screen_barcoding_markers()` | Decides which loci enter the library by the number of species with two or more sequences, and flags saturation and possible paralogy without excluding. | |
+| `finalize_barcoding_library()` | Excludes and declares non-homologous sequences, collapses identical sequences of one species and writes the library, one alignment per locus. | |
+| `extract_barcoding_plastome_loci()` | Crops the library loci from GenBank plastomes as extra records; a plastome does not add a locus that a library record of the same specimen already holds. | |
+| `barcoding_outgroup_taxids()` | The NCBI Taxonomy IDs of the six genera of Anacampserotaceae, Portulacaceae and Talinaceae that the negative control CN2 asks the library about. | |
+
+### Molecular Identification: Validation (Tutorial 5, Steps 5 to 10)
+
+| Function | Description | Reference |
+|:---|:---|:---|
+| `build_barcoding_folds()` | Builds the validation folds: scheme E leaves one sequence out and asks for its species, scheme G leaves a whole species out and asks for its genus. | |
+| `analyze_barcode_gap()` | Intraspecific distances and the distance to the nearest neighbour of another species, per locus, uncorrected and K80, with a candidate threshold reported, never imposed. | Meyer & Paulay (2005); Kimura (1980) |
+| `classify_barcoding_folds()` | Classifies the folds by nearest neighbour (each query added to the training alignment with `MAFFT --add`) or by IdTaxa, in three states, in parallel processes of one machine. | Katoh & Frith (2012); Murali et al. (2018) |
+| `generate_barcoding_job_scripts()` | Writes the SLURM job array and the R script that classify the folds in chunks on a computing cluster. | |
+| `merge_barcoding_chunks()` | Merges the chunks of a cluster run into the tables one process would write, and checks that every query appears once. | |
+| `run_barcoding_controls()` | Negative controls: label permutation for leakage (CN1), outgroup queries from the sister lineages (CN2) and resubstitution bias (CN3). | |
+| `sweep_barcoding_threshold()` | Sweeps the threshold of remoteness of the nearest neighbour, or the confidence of IdTaxa, and writes the species threshold of each locus used by the identification (rule R-c). | |
+| `summarise_barcoding_metrics()` | Per locus and scheme: species correct, genus correct, wrong species, wrong genus and unassigned, and precision and recall per class. | |
+| `summarise_barcoding_genus_discrimination()` | How well each locus tells apart the species of each genus in the folds, shown in the identification report beside the answer. | |
+
+### Molecular Identification: Identifying a Sample (Tutorial 5, Step 11)
+
+| Function | Description | Reference |
+|:---|:---|:---|
+| `identify_barcoding_query()` | Identifies sequences (FASTA, GenBank flat file or character vector) against the library, locus by locus, with IdTaxa, in three states, and writes the report. | Murali et al. (2018) |
+| `identify_barcoding_samples()` | Identifies every sample of a sample sheet through the route its input type requires. | |
+| `identify_barcoding_assembly()` | Maps the library loci onto an assembly with `minimap2`, extracts them with `samtools` and identifies them. | Li (2018); Danecek et al. (2021) |
+| `identify_barcoding_reads()` | Assembles the plastome and the nuclear ribosomal DNA from paired Illumina reads with `fastp` and GetOrganelle, then identifies them. | Chen et al. (2018); Jin et al. (2020) |
+| `report_barcoding_identification()` | Writes the self-contained HTML report of a run: answer per locus, agreement between loci, alternatives, sampling of the genus and provenance. | |
+
 ### Help Pages
 
 ```{r, eval = FALSE}
@@ -90,18 +125,25 @@ The functions used for checks within the tutorials, such as `check_calibration_c
 ## References
 
 - Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. 2018. phylotaR: An automated pipeline for retrieving orthologous DNA sequences from GenBank in R. *Life*, 8(2), 20. <https://doi.org/10.3390/life8020020>
+- Chen, S., Zhou, Y., Chen, Y., & Gu, J. 2018. fastp: an ultra-fast all-in-one FASTQ preprocessor. *Bioinformatics*, 34(17), i884-i890. <https://doi.org/10.1093/bioinformatics/bty560>
+- Danecek, P., Bonfield, J. K., Liddle, J., Marshall, J., Ohan, V., Pollard, M. O., Whitwham, A., Keane, T., McCarthy, S. A., Davies, R. M., & Li, H. 2021. Twelve years of SAMtools and BCFtools. *GigaScience*, 10(2), giab008. <https://doi.org/10.1093/gigascience/giab008>
 - Darriba, D., Posada, D., Kozlov, A. M., Stamatakis, A., Morel, B., & Flouri, T. 2020. ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291-294. <https://doi.org/10.1093/molbev/msz189>
 - Felsenstein, J. 1985. Confidence limits on phylogenies: an approach using the bootstrap. *Evolution*, 39(4), 783-791. <https://doi.org/10.1111/j.1558-5646.1985.tb00420.x>
 - Guerrero, P. C., Majure, L. C., Cornejo-Romero, A., & Hernández-Hernández, T. 2019. Phylogenetic Relationships and Evolutionary Trends in the Cactus Family. *Journal of Heredity*, 110(1), 4-21. <https://doi.org/10.1093/jhered/esy064>
 - Hillis, D. M., & Bull, J. J. 1993. An empirical test of bootstrapping as a method for assessing confidence in phylogenetic analysis. *Systematic Biology*, 42(2), 182-192. <https://doi.org/10.1093/sysbio/42.2.182>
 - IUCN. 2026. *The IUCN Red List of Threatened Species*. Version 2026-1. Accessed 2026-09-19. <https://www.iucnredlist.org>
 - Jin, L., & Nei, M. 1990. Limitations of the evolutionary parsimony method of phylogenetic analysis. *Molecular Biology and Evolution*, 7(1), 82-102. <https://doi.org/10.1093/oxfordjournals.molbev.a040588>
+- Jin, J.-J., Yu, W.-B., Yang, J.-B., Song, Y., dePamphilis, C. W., Yi, T.-S., & Li, D.-Z. 2020. GetOrganelle: a fast and versatile toolkit for accurate de novo assembly of organelle genomes. *Genome Biology*, 21, 241. <https://doi.org/10.1186/s13059-020-02154-5>
+- Katoh, K., & Frith, M. C. 2012. Adding unaligned sequences into an existing alignment using MAFFT and LAST. *Bioinformatics*, 28(23), 3144-3146. <https://doi.org/10.1093/bioinformatics/bts578>
 - Katoh, K., & Standley, D. M. 2013. MAFFT multiple sequence alignment software version 7: Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772-780. <https://doi.org/10.1093/molbev/mst010>
 - Kimura, M. 1980. A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. *Journal of Molecular Evolution*, 16(2), 111-120. <https://doi.org/10.1007/BF01731581>
 - Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D., Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G. 2021. Cactaceae at Caryophyllales.org, a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251-270. <https://doi.org/10.3372/wi.51.51208>
 - Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. 2019. RAxML-NG: a fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455. <https://doi.org/10.1093/bioinformatics/btz305>
 - Lemoine, F., Domelevo Entfellner, J. B., Wilkinson, E., Correia, D., Dávila Felipe, M., De Oliveira, T., & Gascuel, O. 2018. Renewing Felsenstein's phylogenetic bootstrap in the era of big data. *Nature*, 556(7702), 452-456. <https://doi.org/10.1038/s41586-018-0043-0>
+- Li, H. 2018. Minimap2: pairwise alignment for nucleotide sequences. *Bioinformatics*, 34(18), 3094-3100. <https://doi.org/10.1093/bioinformatics/bty191>
 - Maurin, K. J. L. 2020. An empirical guide for producing a dated phylogeny with treePL in a maximum likelihood framework. *arXiv*:2008.07054. <https://doi.org/10.48550/arXiv.2008.07054>
+- Meyer, C. P., & Paulay, G. 2005. DNA barcoding: error rates based on comprehensive sampling. *PLoS Biology*, 3(12), e422. <https://doi.org/10.1371/journal.pbio.0030422>
+- Murali, A., Bhargava, A., & Wright, E. S. 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. *Microbiome*, 6. <https://doi.org/10.1186/s40168-018-0521-5>
 - Paradis, E., & Schliep, K. 2019. ape 5.0: an environment for modern phylogenetics and evolutionary analyses in R. *Bioinformatics*, 35(3), 526-528. <https://doi.org/10.1093/bioinformatics/bty633>
 - Robinson, D. F., & Foulds, L. R. 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1-2), 131-147. <https://doi.org/10.1016/0025-5564(81)90043-2>
 - Sanderson, M. J. 2002. Estimating absolute rates of molecular evolution and divergence times: a penalized likelihood approach. *Molecular Biology and Evolution*, 19(1), 101-109. <https://doi.org/10.1093/oxfordjournals.molbev.a003974>

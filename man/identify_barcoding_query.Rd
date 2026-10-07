@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_identify.R
 \name{identify_barcoding_query}
 \alias{identify_barcoding_query}
-\title{Identify user sequences against the barcoding library (step 10)}
+\title{Identify user sequences against the barcoding library (step 11 of Tutorial 5)}
 \usage{
 identify_barcoding_query(
   query,

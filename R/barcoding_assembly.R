@@ -47,8 +47,6 @@
   unique(trimws(pure[!is.na(pure)]))
 }
 
-#' Accepted name for each GenBank name, with the rule of clean_taxonomic_names()
-#'
 #' Taxonomic IDs of the Outgroup of the Molecular Diagnostic Branch
 #'
 #' The six genus-level NCBI Taxonomy IDs that CN2 queries the library with (validation plan, sec. 4):
