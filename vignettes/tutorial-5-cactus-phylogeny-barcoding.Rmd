@@ -1,10 +1,10 @@
 ---
-title: "Tutorial 5: DNA Barcoding, Section Manifest"
+title: "Tutorial 5: Molecular Identification of Cacti (DNA Barcoding)"
 author: "Beatriz M. Meriño"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Tutorial 5: DNA Barcoding, Section Manifest}
+  %\VignetteIndexEntry{Tutorial 5: Molecular Identification of Cacti (DNA Barcoding)}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,40 +16,83 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Abstract
+## Overview
 
-This section of `PhyloCactus` is under construction and contains no implementation.
-This document sets out what the molecular diagnostic section is intended to do, the design decisions already taken, the questions that remain open, and the conditions for implementing it.
+The barcoding branch of `PhyloCactus` builds a reference library of Cactaceae from Sanger marker records of GenBank (and, optionally, the user's own sequences), measures how well that library tells genera and species apart, and identifies a sample against it.
+It answers one question: given a sample of a cactus, to which genus and species does it belong, according to the loci the library holds, and how much can that answer be trusted?
 
-## Scope
+The answer is given locus by locus, in one of three states: a species (state 1), a genus without a species (state 2), or no answer (state 3, with its reason).
+Loci are never combined into one verdict; agreement or conflict between loci is reported as such.
+The branch identifies against a library of multilocus sequence data; it does not place a sample in a phylogeny.
 
-The section is intended to answer one question: given a curated multilocus reference library for Cactaceae, how reliably can a single locus, or a combination of loci, assign an unknown sample to genus and to species, and in which groups does that assignment fail?
+The complete script is `inst/scripts/tutorial-5-cactus-phylogeny-barcoding.R`.
+It runs from the tutorial folder of Tutorials 1 to 4 and writes only under `11_barcoding/`.
 
-The planned components are:
+```{r, eval = FALSE}
+file.edit(system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus"))
+```
 
-1. **Empirical barcode gap per locus.** Intraspecific and interspecific pairwise distance distributions for each marker, with the gap reported as an observed quantity and not tested against a fixed cutoff.
-2. **Probabilistic classification with cross-validation.** A taxonomic classifier trained on sequences of accepted species and evaluated by cross-validation stratified by species. Species represented by a single accession cannot be evaluated by leaving one sequence out, and are reported separately.
-3. **Monophyly in single-locus gene trees.** Recovery of species and genus monophyly for each marker. Non-monophyly is interpreted in terms of incomplete lineage sorting, hybridization and plastid capture, and paraphyletic assemblages are reported as grades.
+## Inputs
 
-## Decisions Taken
+- **The phylotaR workspace of the phylogeny** (`0_phylotaR_raw_Ingroup/`, Tutorial 1). Both branches read the same mining; the barcoding branch adds no download of sequences, only the GenBank metadata of the accessions the phylogeny's cache does not hold.
+- **The curated files of the package:** the target loci (`target_genes.txt`), the dictionary of locus names (`genes_map.csv`), the manual exclusions (`manual_exclusions_ingroup.csv`, which include 21 `ITS` records annotated in GenBank as pseudogenes) and the checklist of Cactaceae of Caryophyllales.org (Korotkova *et al*. 2021), against which every name is reconciled.
+- **Own sequences, optional.** `own_dir = "0_own"` in step 1 adds the records of `0_own/`: a sample sheet (`SAMPLES.csv`: sample, species of the checklist, voucher, publication status) and one FASTA file per locus. What cannot enter is listed with its reason. The default, `own_dir = NULL`, builds the library from GenBank alone.
 
-- **Taxonomic backbone.** Names are reconciled against the Cactaceae checklist of Caryophyllales.org (Korotkova *et al*. 2021), the same backbone used in the assembly modules.
-- **Input.** The section uses the curated ingroup alignments in `4_Cleaned/cleaned_markers_ingroup` (Module 4) and the phylogenetic products of Modules 7 to 10. It does not query GenBank again.
-- **No fixed distance thresholds.** Any decision rule must be derived from the observed distance distributions of the family, and its derivation must be reported with the result. In a family with recent radiations and low plastid divergence, a fixed threshold assumes a level of divergence that is not uniform across genera.
-- **Validation.** Classification accuracy is reported only from cross-validation stratified by species. Accuracy measured on the training sequences reflects how well the model fits those sequences, not its performance on new samples.
+The library is not distributed with the package: the user builds it with steps 1 to 4.
 
-## Open Questions
+## Building the Library (Steps 1 to 4)
 
-1. **Loci and combinations.** Whether resolution is assessed per locus, on concatenated subsets, or both, and whether the standard plant barcode combination is evaluated as a unit for comparison with published surveys.
-2. **Unit of assignment.** Whether the target is assignment to species, assignment to genus with an explicit statement of ambiguity at species level, or a graded output. Many plant species are not monophyletic in single-locus trees, so the output must allow for justified non-assignment.
-3. **Reporting ambiguity.** Whether a sample that cannot be separated from a set of candidates is reported as a candidate set, as an assignment to genus, or as a failure, and how this affects the conservation applications of the package.
-4. **Genome skims and other reads.** Decided (BMM, 2026-10-07): the library is built from Sanger marker records of GenBank and own sequences, and genome skims are not a source of it. Illumina reads that a user brings (skim or whole-genome sequencing) are a query: `identify_barcoding_reads()` assembles their plastome and nrDNA and identifies them against the library, locus by locus.
-5. **Paralogy and organelle capture.** Whether loci with cytonuclear conflict are excluded from diagnostic use, flagged, or reported as evidence of reticulation.
+1. **Assembly** (`assemble_barcoding_dataset()`). The clusters of the mining are named by locus, records over 2000 bases are cut to the extent the shorter records of their locus cover (most of them trnK-matK records cut to `matK`), and every accession is kept with its name reconciled against the checklist.
+2. **Curation** (`curate_barcoding_markers()`). Each locus is aligned with `MAFFT`, put on one strand and masked with `DECIPHER`, with the parameters of the phylogeny's ingroup.
+3. **Screening** (`screen_barcoding_markers()`). A locus enters the library when 20 or more species hold two or more sequences of it. Saturation and possible paralogy (`pepC_like`) are flagged, never used to exclude.
+4. **Final library** (`finalize_barcoding_library()`). Non-homologous sequences are excluded and declared, identical sequences of one species are collapsed, and the replication rule is evaluated again on distinct sequences.
+
+The library of this version holds 15 loci: `atpB-rbcL`, `ITS`, `matK`, `ndhF-rpl32`, `pepC_like`, `phyC`, `psbA-trnH`, `psbE-petL`, `psbJ-petA`, `rbcL`, `rpL16`, `rpl32-trnL`, `trnL-trnF`, `trnQ-rps16` and `trnS-trnG`.
+Built with the author's own data it holds 7738 sequences of 1209 species in 139 genera, 131 of them own sequences of `matK` and `rbcL`; built from GenBank alone it lacks those 131 sequences and four species.
+In every locus most species hold a single sequence, which limits what a species answer can rest on.
+
+## Validating the Library (Steps 5 to 10)
+
+5. **Folds** (`build_barcoding_folds()`). Scheme E leaves one sequence out and asks for its species, which stays in the library; scheme G leaves a whole species out and asks for its genus. The folds are deterministic and checked for leakage.
+6. **Barcode gap** (`analyze_barcode_gap()`). Intraspecific distances and the distance to the nearest neighbour of another species, per locus, uncorrected and K80. No locus shows a gap, so no fixed distance threshold is used anywhere in the branch.
+7. **Classification of the folds** (`classify_barcoding_folds()`). Two classifiers: the nearest neighbour, with each query added to the training alignment of its fold by `MAFFT --add` (hours on a laptop, in parallel processes), and IdTaxa (Murali *et al*. 2018), which retrains once per fold and takes tens of core-hours. IdTaxa is run once, on a computing cluster, on the frozen library (`generate_barcoding_job_scripts()`, `merge_barcoding_chunks()`); the script reads its merged tables through the switch `idtaxa_tables` and never trains it.
+8. **Negative controls** (`run_barcoding_controls()`), before any accuracy is read. CN1 permutes the labels and asks whether the folds leak; CN2 asks the library about sequences of the sister lineages (Anacampserotaceae, Portulacaceae, Talinaceae); CN3 measures the bias of classifying a sequence still in the library. IdTaxa rejects every comparable outgroup query; the rule of remoteness of the nearest neighbour rejects them in six loci but not in `ITS`, where cactus and outgroup distances overlap.
+9. **Thresholds** (`sweep_barcoding_threshold()`). For the nearest neighbour, a threshold of remoteness per locus (quantile 0.99 of scheme G). For IdTaxa, the operating threshold is 60, DECIPHER's default, and a species threshold per locus is written for the identification (rule R-c: the quantile 0.95 of the species confidence of scheme G, never under 60, from 60 in `rbcL` to 91.6 in `trnS-trnG`). A species is named only above it.
+10. **Metrics** (`summarise_barcoding_metrics()`). Per locus and scheme: species correct, genus correct, wrong species, wrong genus and unassigned, never summed into one error, and precision and recall per class.
+
+The script then draws the figures of the library and its validation into `11_barcoding/figures/`: the alignment of each locus, species by locus, the funnel from assembly to library, lengths and replicates, accuracy against the sampling of each genus and against missing data, taxonomic coverage against the checklist, and the genera native to Chile against *Opuntia* and *Mammillaria*.
+The figures of the folds describe the library classifying its own sequences: they are more favourable than the identification of new samples (next sections).
+
+## Identifying a Sample (Step 11)
+
+```{r, eval = FALSE}
+identify_barcoding_query(
+  system.file("extdata", "barcoding_example_plastome_MN517611.1.gb", package = "PhyloCactus"),
+  run_name = "MN517611.1"
+)
+```
+
+`identify_barcoding_query()` takes one or more sequences (FASTA, a GenBank flat file, a `DNAStringSet` or a character vector) and, for each locus of the library:
+
+1. finds the locus in the query by its 20-mers, on both strands, and crops it from a long query such as a plastome;
+2. cuts the region to the core of the locus, so that segments held by one or two references cannot name them;
+3. classifies it with IdTaxa trained on the whole library of the locus, and, when a genus is reached, again on the core of that genus;
+4. returns state 1 only above the species threshold of the locus (R-c), state 2 when the genus confidence reaches 60, and state 3 otherwise, with its reason (`no_overlap`, `short_overlap` or `low_confidence`).
+
+A self-contained HTML report is written beside the table, with the answer per locus, the agreement between loci, the alternatives under the thresholds, the sampling of the genus in the library and the provenance of the run (input, software, library checksums).
+The example is the plastome of *Mammillaria zephyranthoides* (GenBank MN517611.1), distributed with the package: it is named to species from `matK`, and the other loci give no answer.
+
+The same answer is available for other kinds of input:
+
+- **Several samples** from a sample sheet: `identify_barcoding_samples()`.
+- **An assembly** (FASTA): `identify_barcoding_assembly()`, which maps the library loci with `minimap2` and `samtools`.
+- **Paired Illumina reads** (genome skim or whole-genome sequencing): `identify_barcoding_reads()`, which assembles the plastome and the nuclear ribosomal DNA with `fastp` and GetOrganelle, then identifies them locus by locus. Reads are a query, not a source of the library.
 
 ## How Well This Version Identifies
 
-The figures below were measured on the library of this development version (frozen on 2026-10-06; manifest md5 `48be326e9ce4f1b779a175e149d509d1`), with the species thresholds of step 9 (quantile 0.95 of the species confidence of the genus scheme, floor 60).
-They belong to this library: as GenBank and own sequences enrich it in later versions, the probes that produced them are rerun and the rates are expected to change.
+The figures below were measured on the library of this development version built with the author's own data (frozen on 2026-10-06; manifest md5 `48be326e9ce4f1b779a175e149d509d1`), with the species thresholds of step 9.
+A library built from GenBank alone lacks the 131 own sequences of `matK` and `rbcL` (mostly of *Eriosyce* and *Copiapoa*), and an answer that rested on them can differ.
+The figures belong to this library: as GenBank and own sequences enrich it in later versions, the probes that produced them are rerun and the rates are expected to change.
 
 Outcomes of real queries, in the order species correct / genus correct / abstention / conflict / wrong species / wrong genus.
 A species is "present" when the library holds it once the records of the query's own specimen are set aside.
@@ -65,7 +108,8 @@ For single records and sets of records, the records of the query's specimen (and
 The single-record rows include 55 own records among 4860.
 Plastomes and reads were identified against the full library.
 
-Abstention is the most common answer of this version, and a wrong species is rare but possible.
+Abstention is the most common answer of this version, and a wrong species is rare but possible: no rule tested brings it to zero.
+Real records abstain far more often than the folds of step 7 suggest (three quarters of single records with the species present, against a fifth of the scheme E folds of IdTaxa at 60).
 Six public examples, one per kind of answer, show why:
 
 | Answer | Input | Accession | True species | What the package answered |
@@ -84,29 +128,33 @@ Six public examples, one per kind of answer, show why:
 
 The same limitation weighs on the Chilean genera: in the single-record probe, the `matK` record MT792775.1 of *Eulychnia acida*, with its species absent from the reduced library, was named *E. iquiquensis*, the only congener left (confidence 77.9, threshold 67.4).
 
-The examples are reproduced from the tutorial folder, with the library of step 4 and the thresholds of step 9:
-
 ```{r, eval = FALSE}
-library(PhyloCactus)
-
-# A plastome downloaded from GenBank as a flat file
-identify_barcoding_query("MN517611.1.gb", run_name = "MN517611.1")
-
-# Illumina reads downloaded from ENA (fastp and GetOrganelle required)
+# The examples identified from reads, downloaded from ENA (fastp and GetOrganelle required)
 identify_barcoding_reads("SRR26398994_1.fastq.gz", "SRR26398994_2.fastq.gz",
                          run_name = "SRR26398994")
 ```
 
-## Conditions for Implementation
+## Limitations
 
-Two conditions are met in version 0.4.5: a dated and supported phylogeny is available (Modules 7 to 10), so monophyly per locus can be assessed against a reference topology, and the metadata and visualization modules are available (Modules 11 and 12), so diagnostic results can be related to conservation status and distribution.
-Two conditions remain:
+- **Wrong species.** Rare, not absent: 0.6 % of single records with the species present and 1.9 % with it absent, 4 of 358 specimens and 2 of 93 plastomes. Most are congeners named with high confidence when the true species is absent from the library or shares its haplotype.
+- **Abstention.** The common answer of this version. Plastid loci of closely related cacti differ little, most species are represented by one sequence per locus, and IdTaxa withholds an answer rather than guess.
+- **One locus, one answer.** A species answer usually rests on a single locus, mostly `matK`. The agreement between loci, given in the report, is the main check a user has.
+- **`ITS` and the nearest neighbour.** The rule of remoteness of the nearest neighbour does not reject the sister lineages in `ITS`. The identification runs IdTaxa, which rejects them; the nearest neighbour is used only in the internal validation.
+- **Coverage.** The library holds 1209 of the accepted species of the checklist; a sample of a species or genus outside a locus library can only be named as something else in that locus (examples of conflict and wrong genus).
 
-- the five open questions above are answered and recorded;
-- a validation plan is written before any code, specifying the cross-validation scheme, the treatment of species with a single accession, and the negative controls.
+## Design Decisions
+
+The manifest of this section in version 0.4.5 left five questions open. The phases of version 0.5.0 answered them:
+
+1. **Loci and combinations.** Each locus is classified on its own; loci are not concatenated and no combination of loci is evaluated as a unit (amendment E8 of the validation plan).
+2. **Unit of assignment.** A graded answer per locus: species, genus or none, with the reason for none. A species is named only above the species threshold of its locus (R-c, 2026-10-06).
+3. **Reporting ambiguity.** The candidates under the thresholds are listed as alternatives in the report, never promoted to an answer; disagreement between loci is reported as a conflict.
+4. **Genome skims and other reads.** The library is built from Sanger marker records of GenBank and own sequences, and genome skims are not a source of it (2026-10-07). Illumina reads that a user brings are a query: `identify_barcoding_reads()` assembles their plastome and nuclear ribosomal DNA and identifies them against the library, locus by locus.
+5. **Paralogy and organelle capture.** Possible paralogs (`pepC_like`) and saturation are flagged and kept; conflict between plastid and nuclear loci is reported as disagreement between loci, not resolved. Per-locus monophyly and the cytonuclear diagnosis are planned for version 0.6.
 
 [Continue to Tutorial 6: Core Pipeline Functions and Methodological Dictionary](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html)
 
 ## References
 
 - Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
+- Murali, A., Bhargava, A. & Wright, E. S. 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. *Microbiome*, 6, 140. <https://doi.org/10.1186/s40168-018-0521-5>
