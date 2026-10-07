@@ -42,7 +42,7 @@ The library is not distributed with the package: the user builds it with steps 1
 
 ## Building the Library (Steps 1 to 4)
 
-1. **Assembly** (`assemble_barcoding_dataset()`). The clusters of the mining are named by locus, records over 2000 bases are cut to the extent the shorter records of their locus cover (most of them trnK-matK records cut to `matK`), and every accession is kept with its name reconciled against the checklist.
+1. **Assembly** (`assemble_barcoding_dataset()`). The clusters of the mining are named by locus, records over 2000 bases are cut to the extent the shorter records of their locus cover (most of them trnK-matK records cut to `matK`), and every accession is kept with its name reconciled against the checklist (Korotkova *et al*. 2021).
 2. **Curation** (`curate_barcoding_markers()`). Each locus is aligned with `MAFFT`, put on one strand and masked with `DECIPHER`, with the parameters of the phylogeny's ingroup.
 3. **Screening** (`screen_barcoding_markers()`). A locus enters the library when 20 or more species hold two or more sequences of it. Saturation and possible paralogy (`pepC_like`) are flagged, never used to exclude.
 4. **Final library** (`finalize_barcoding_library()`). Non-homologous sequences are excluded and declared, identical sequences of one species are collapsed, and the replication rule is evaluated again on distinct sequences.
@@ -60,7 +60,7 @@ In every locus most species hold a single sequence, which limits what a species 
 9. **Thresholds** (`sweep_barcoding_threshold()`). For the nearest neighbour, a threshold of remoteness per locus (quantile 0.99 of scheme G). For IdTaxa, the operating threshold is 60, DECIPHER's default, and a species threshold per locus is written for the identification (rule R-c: the quantile 0.95 of the species confidence of scheme G, never under 60, from 60 in `rbcL` to 91.6 in `trnS-trnG`). A species is named only above it.
 10. **Metrics** (`summarise_barcoding_metrics()`). Per locus and scheme: species correct, genus correct, wrong species, wrong genus and unassigned, never summed into one error, and precision and recall per class.
 
-The script then draws the figures of the library and its validation into `11_barcoding/figures/`: the alignment of each locus, species by locus, the funnel from assembly to library, lengths and replicates, accuracy against the sampling of each genus and against missing data, taxonomic coverage against the checklist, and the genera native to Chile against *Opuntia* and *Mammillaria*.
+The script then draws the figures of the library and its validation into `11_barcoding/figures/`: the alignment of each locus, species by locus, the funnel from assembly to library, lengths and replicates, accuracy against the sampling of each genus and against missing data, taxonomic coverage against the checklist (Korotkova *et al*. 2021), and the genera native to Chile against *Opuntia* and *Mammillaria*.
 The figures of the folds describe the library classifying its own sequences: they are more favourable than the identification of new samples (next sections).
 
 ## Identifying a Sample (Step 11)
@@ -140,7 +140,7 @@ identify_barcoding_reads("SRR26398994_1.fastq.gz", "SRR26398994_2.fastq.gz",
 - **Abstention.** The common answer of this version. Plastid loci of closely related cacti differ little, most species are represented by one sequence per locus, and IdTaxa withholds an answer rather than guess.
 - **One locus, one answer.** A species answer usually rests on a single locus, mostly `matK`. The agreement between loci, given in the report, is the main check a user has.
 - **`ITS` and the nearest neighbour.** The rule of remoteness of the nearest neighbour does not reject the sister lineages in `ITS`. The identification runs IdTaxa, which rejects them; the nearest neighbour is used only in the internal validation.
-- **Coverage.** The library holds 1209 of the accepted species of the checklist; a sample of a species or genus outside a locus library can only be named as something else in that locus (examples of conflict and wrong genus).
+- **Coverage.** The library holds 1209 of the accepted species of the checklist (Korotkova *et al*. 2021); a sample of a species or genus outside a locus library can only be named as something else in that locus (examples of conflict and wrong genus).
 
 ## Design Decisions
 
