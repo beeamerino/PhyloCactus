@@ -46,6 +46,57 @@ The planned components are:
 4. **Genome skims and other reads.** Decided (BMM, 2026-10-07): the library is built from Sanger marker records of GenBank and own sequences, and genome skims are not a source of it. Illumina reads that a user brings (skim or whole-genome sequencing) are a query: `identify_barcoding_reads()` assembles their plastome and nrDNA and identifies them against the library, locus by locus.
 5. **Paralogy and organelle capture.** Whether loci with cytonuclear conflict are excluded from diagnostic use, flagged, or reported as evidence of reticulation.
 
+## How Well This Version Identifies
+
+The figures below were measured on the library of this development version (frozen on 2026-10-06; manifest md5 `48be326e9ce4f1b779a175e149d509d1`), with the species thresholds of step 9 (quantile 0.95 of the species confidence of the genus scheme, floor 60).
+They belong to this library: as GenBank and own sequences enrich it in later versions, the probes that produced them are rerun and the rates are expected to change.
+
+Outcomes of real queries, in the order species correct / genus correct / abstention / conflict / wrong species / wrong genus.
+A species is "present" when the library holds it once the records of the query's own specimen are set aside.
+
+| Input | Unit | Species present | Species absent |
+|---|---|---|---|
+| One Sanger record | locus | 168 / 405 / 1733 / n.a. / 15 / 4 (2325) | 0 / 286 / 2181 / n.a. / 48 / 20 (2535) |
+| Sanger records of one GenBank specimen | specimen | 6 / 52 / 101 / 0 / 3 / 0 (162) | 0 / 20 / 17 / 0 / 1 / 0 (38) |
+| Assembled plastome from GenBank | plastome | 5 / 51 / 30 / 0 / 2 / 5 (93) | 0 / 2 / 0 / 1 / 0 / 1 (4) |
+| Illumina reads from SRA | run | 1 / 1 / 2 / 0 / 0 / 0 (4) | 0 / 1 / 2 / 0 / 0 / 0 (3) |
+
+For single records and sets of records, the records of the query's specimen (and, for single records, of the other queries identified with it) were removed from the library before identification.
+The single-record rows include 55 own records among 4860.
+Plastomes and reads were identified against the full library.
+
+Abstention is the most common answer of this version, and a wrong species is rare but possible.
+Six public examples, one per kind of answer, show why:
+
+| Answer | Input | Accession | True species | What the package answered |
+|---|---|---|---|---|
+| Species correct | plastome | MN517611.1 | *Mammillaria zephyranthoides* (in the library) | the species from `matK` (confidence 80.7, threshold 67.4), among 114 species of *Mammillaria* in the `matK` library |
+| Genus correct | reads | SRR26398994 | *Opuntia comonduensis* (not in the library) | *Opuntia* from `ndhF-rpl32` (genus confidence 80.8); the species confidence stays low among 71 congeners |
+| Abstention | reads | SRR12935164 | *Ariocarpus retusus* (in the library) | no answer: 13 loci assembled, all below 60; the best rows point to *Ariocarpus* (48.7 and 48.0) |
+| Conflict | plastome | OQ458704.1 | *Cleistocactus hyalacanthus* (not in the library) | *Cleistocactus* from `trnS-trnG` against *Cereus* from `psbJ-petA`, whose library holds no *Cleistocactus* |
+| Wrong species | plastome | MT387452.1 | *Rhipsalis teres* (in the library) | *Lepismium lumbricoides* from `matK`: the region is identical to FN669720.1, a record under that name |
+| Wrong genus | plastome | OR807739.1 | *Parodia microsperma* (in the `matK` library) | *Eriosyce* from `rbcL`, whose library holds no *Parodia* |
+
+- A species is named only when one locus clears the species threshold of that locus.
+- A species absent from the library is answered at genus rank when its congeners keep the species confidence low.
+- A locus whose library lacks the true genus can only name another genus; when other loci disagree, the answer is a conflict, not a choice. The coverage of each locus library tells which genera it holds.
+- An identical sequence under two names (a misidentified voucher or a haplotype shared across genera) yields a confident wrong answer. The report lists the identical library record so that it can be inspected.
+
+The same limitation weighs on the Chilean genera: in the single-record probe, the `matK` record MT792775.1 of *Eulychnia acida*, with its species absent from the reduced library, was named *E. iquiquensis*, the only congener left (confidence 77.9, threshold 67.4).
+
+The examples are reproduced from the tutorial folder, with the library of step 4 and the thresholds of step 9:
+
+```{r, eval = FALSE}
+library(PhyloCactus)
+
+# A plastome downloaded from GenBank as a flat file
+identify_barcoding_query("MN517611.1.gb", run_name = "MN517611.1")
+
+# Illumina reads downloaded from ENA (fastp and GetOrganelle required)
+identify_barcoding_reads("SRR26398994_1.fastq.gz", "SRR26398994_2.fastq.gz",
+                         run_name = "SRR26398994")
+```
+
 ## Conditions for Implementation
 
 Two conditions are met in version 0.4.5: a dated and supported phylogeny is available (Modules 7 to 10), so monophyly per locus can be assessed against a reference topology, and the metadata and visualization modules are available (Modules 11 and 12), so diagnostic results can be related to conservation status and distribution.
