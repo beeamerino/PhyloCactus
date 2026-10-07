@@ -61,3 +61,32 @@ test_that("the comment of step 9 says that the IdTaxa sweep writes the species t
   txt <- paste(readLines(tut, warn = FALSE), collapse = "\n")
   expect_true(grepl("TABLE_barcoding_species_threshold_idtaxa.csv", txt, fixed = TRUE))
 })
+
+# Phase D (decisions D3 and D4 of BMM, 07-10): step 11 identifies the example plastome of extdata,
+# the routes that need the user's own data are shown but not run, and the script draws the figures
+# TB1 to TB7 and TB9 into 11_barcoding/figures/ (TB8 is drawn once, outside the script).
+
+test_that("step 11 identifies the example plastome distributed in extdata (D3, D5)", {
+  t5 <- .t5_calls()
+  calls <- .t5_find(t5$exprs, "identify_barcoding_query")
+  expect_gte(length(calls), 1L)
+  txt <- paste(vapply(calls, function(e) paste(deparse(e), collapse = ""), ""), collapse = "\n")
+  expect_match(txt, "barcoding_example_plastome_MN517611.1.gb", fixed = TRUE)
+  expect_match(txt, "system.file", fixed = TRUE)
+})
+
+test_that("the routes that need the user's data are shown as comments, not run (D3)", {
+  t5 <- .t5_calls()
+  for (fun in c("identify_barcoding_samples", "identify_barcoding_assembly", "identify_barcoding_reads")) {
+    expect_length(.t5_find(t5$exprs, fun), 0L)
+    expect_true(any(grepl(paste0("^#.*", fun, "\\("), t5$text)))
+  }
+})
+
+test_that("the script draws TB1 to TB7 and TB9 into 11_barcoding/figures (D4)", {
+  t5 <- .t5_calls()
+  txt <- paste(t5$text, collapse = "\n")
+  expect_match(txt, "11_barcoding/figures", fixed = TRUE)
+  for (k in c(1:7, 9)) expect_match(txt, sprintf("Figure_TB%d_", k), fixed = TRUE)
+  expect_false(grepl("Figure_TB8_", txt, fixed = TRUE))
+})
