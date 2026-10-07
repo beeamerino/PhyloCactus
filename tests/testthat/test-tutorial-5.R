@@ -13,7 +13,9 @@
   walk <- function(e) {
     if (is.call(e)) {
       if (identical(e[[1]], as.name(fun))) out[[length(out) + 1L]] <<- e
-      for (a in as.list(e)[-1]) walk(a)
+      # An empty argument, as in x[i, ], is the missing symbol: only calls are walked into
+      args <- as.list(e)[-1]
+      for (i in seq_along(args)) if (is.call(args[[i]])) walk(args[[i]])
     }
   }
   for (e in exprs) walk(e)
