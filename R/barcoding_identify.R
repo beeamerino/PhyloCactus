@@ -359,7 +359,7 @@
     if (grepl("\\.(fastq|fq)(\\.gz)?$", query, ignore.case = TRUE) ||
         (length(first) == 1L && startsWith(first, "@"))) {
       stop("This is a FASTQ file of raw reads. Raw reads need assembly first: paired Illumina reads go to ",
-           "identify_barcoding_reads(); step 10 takes sequences (FASTA, GenBank, a DNAStringSet or a ",
+           "identify_barcoding_reads(); identify_barcoding_query() takes sequences (FASTA, GenBank, a DNAStringSet or a ",
            "character vector).", call. = FALSE)
     }
     if (grepl("\\.(gb|gbk|gbff|genbank)$", query, ignore.case = TRUE) ||
@@ -380,7 +380,7 @@
   stats::setNames(gsub("[^ACGTRYSWKMBDHVN]", "", toupper(unname(query))), names(query))
 }
 
-#' Identify user sequences against the barcoding library (step 10)
+#' Identify user sequences against the barcoding library (step 11 of Tutorial 5)
 #'
 #' Classifies each query against the IdTaxa model of each locus of the library, or of the one
 #' declared, and answers locus by locus with the three states of the branch. It never combines

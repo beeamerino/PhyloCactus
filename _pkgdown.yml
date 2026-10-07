@@ -28,7 +28,7 @@ navbar:
         href: articles/tutorial-3-cactus-phylogeny-visualization.html
       - text: 4. Phylogenetic Validation
         href: articles/tutorial-4-cactus-phylogeny-validation.html
-      - text: '5. DNA Barcoding: Section Manifest'
+      - text: 5. DNA Barcoding
         href: articles/tutorial-5-cactus-phylogeny-barcoding.html
       - text: 6. Core Functions Dictionary
         href: articles/tutorial-6-cactus-phylogeny-functions.html
@@ -109,6 +109,39 @@ reference:
   contents:
   - get_iucn_data
   - scale_fill_iucn
+- title: Barcoding Library
+  desc: Build the reference library of the barcoding branch from the phylotaR mining of the
+    phylogeny and, optionally, own sequences (Tutorial 5, steps 1 to 4).
+  contents:
+  - assemble_barcoding_dataset
+  - curate_barcoding_markers
+  - screen_barcoding_markers
+  - finalize_barcoding_library
+  - extract_barcoding_plastome_loci
+  - barcoding_outgroup_taxids
+- title: Barcoding Validation
+  desc: Validation folds, barcode gap, classification of the folds by nearest neighbour and
+    IdTaxa (on one machine or a computing cluster), negative controls, thresholds and metrics
+    (Tutorial 5, steps 5 to 10).
+  contents:
+  - build_barcoding_folds
+  - analyze_barcode_gap
+  - classify_barcoding_folds
+  - generate_barcoding_job_scripts
+  - merge_barcoding_chunks
+  - run_barcoding_controls
+  - sweep_barcoding_threshold
+  - summarise_barcoding_metrics
+  - summarise_barcoding_genus_discrimination
+- title: Molecular Identification
+  desc: Identify a sample against the library, locus by locus, from sequences, a sample sheet,
+    an assembly or Illumina reads, and write its report (Tutorial 5, step 11).
+  contents:
+  - identify_barcoding_query
+  - identify_barcoding_samples
+  - identify_barcoding_assembly
+  - identify_barcoding_reads
+  - report_barcoding_identification
 - title: Internal Tools and Visualization Helpers
   desc: Internal functions for phylogenetic visualization and data preparation.
   contents:

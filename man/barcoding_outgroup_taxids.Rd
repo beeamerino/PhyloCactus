@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_assembly.R
 \name{barcoding_outgroup_taxids}
 \alias{barcoding_outgroup_taxids}
-\title{Accepted name for each GenBank name, with the rule of clean_taxonomic_names()}
+\title{Taxonomic IDs of the Outgroup of the Molecular Diagnostic Branch}
 \usage{
 barcoding_outgroup_taxids()
 }
