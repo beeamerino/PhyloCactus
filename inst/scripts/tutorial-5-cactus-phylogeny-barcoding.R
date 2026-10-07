@@ -422,8 +422,11 @@ p_len <- ggplot(lengths, aes(locus, length, fill = stage)) + geom_boxplot(outlie
   theme_minimal(base_size = 9) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 replicates <- as.data.frame(table(locus = lib_records$locus, species = lib_records$species))
 replicates <- replicates[replicates$Freq > 0, ]
-p_rep <- ggplot(replicates, aes(locus, Freq)) + geom_boxplot(outlier.size = 0.4) + scale_y_log10() +
-  labs(x = NULL, y = "Sequences per species") +
+replicates$class <- factor(cut(replicates$Freq, breaks = c(0, 1, 2, 5, Inf), labels = c("1", "2", "3 to 5", "6 or more")),
+                           levels = c("6 or more", "3 to 5", "2", "1"))
+p_rep <- ggplot(replicates, aes(locus, fill = class)) + geom_bar() +
+  scale_fill_viridis_d(direction = -1) +
+  labs(x = NULL, y = "Species", fill = "Sequences per species") +
   theme_minimal(base_size = 9) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 save_fig(patchwork::wrap_plots(p_len, p_rep, ncol = 1), "Figure_TB4_lengths_and_replicates", 9, 8)
 
