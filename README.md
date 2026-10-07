@@ -18,6 +18,8 @@ The difficulty increases in plant lineages that diversified recently and rapidly
 
 `PhyloCactus` is an R package that implements this assembly and analysis as a reproducible workflow. It links established software in four stages: orthology-based sequence retrieval (`phylotaR`), multiple sequence alignment (`MAFFT`), alignment masking (`DECIPHER`), a saturation screen, substitution model selection (`ModelTest-NG`), constrained maximum-likelihood inference (`RAxML-NG`), Felsenstein bootstrap proportions (FBP), penalized likelihood dating (`treePL`), retrieval of IUCN Red List assessments (`rredlist`), and comparison with published phylogenies, one of which can be summarized under the multispecies coalescent with `ASTRAL-III`.
 
+A second branch identifies samples of cacti by DNA barcoding: from the same mining it builds a reference library of Sanger marker records, validates it, and identifies a sample (sequences, an assembly or Illumina reads) against it, locus by locus (Tutorial 5).
+
 ## Workflow
 
 The workflow comprises thirteen modules grouped in four stages.
@@ -35,6 +37,8 @@ The workflow comprises thirteen modules grouped in four stages.
 
 4.  **Stage 4: Validation (Module 13)**\
     Compares the focal tree with published phylogenies (Amaral *et al*. 2022; Thompson *et al*. 2024; Zuntini *et al*. 2024; de Vos *et al*. 2025) by Robinson-Foulds and information-theoretic distances and by multidimensional scaling (MDS) of tree space (`validate_phylogenies()`). The published gene trees of de Vos *et al*. (2025) can optionally be summarized into a species tree with `ASTRAL-III`, which then enters the comparison as a further reference; by default the distributed summary tree is used. `PhyloCactus` does not infer gene trees from its own supermatrix and does not quantify gene tree discordance.
+
+**Molecular identification (Tutorial 5).** Builds a reference library of 15 loci from the same phylotaR mining, validates it with folds that ask for the species or, with the species left out, for the genus, with negative controls, and identifies a sample locus by locus with IdTaxa (Murali *et al*. 2018) in three states: species, genus or no answer. Each identification writes an HTML report.
 
 ## Installation
 
@@ -83,6 +87,10 @@ The following programs must be installed and available on the system `PATH`, or 
 | [`ModelTest-NG`](https://github.com/ddarriba/modeltest) | Substitution model selection for partitioned data | Darriba *et al*. (2020) *Mol. Biol. Evol.* |
 | [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | Constrained maximum-likelihood inference and bootstrap support | Kozlov *et al*. (2019) *Bioinformatics* |
 | [`treePL`](https://github.com/blackrim/treePL) | Penalized likelihood divergence time estimation | Smith & O'Meara (2012) *Bioinformatics* |
+| [`fastp`](https://github.com/OpenGene/fastp) | Read trimming before organelle assembly (identification from Illumina reads only) | Chen *et al*. (2018) *Bioinformatics* |
+| [`GetOrganelle`](https://github.com/Kinggerm/GetOrganelle) | Assembly of the plastome and nuclear ribosomal DNA from reads (identification from Illumina reads only) | Jin *et al*. (2020) *Genome Biol.* |
+| [`minimap2`](https://github.com/lh3/minimap2) | Mapping of the library loci onto an assembly (identification from an assembly only) | Li (2018) *Bioinformatics* |
+| [`samtools`](https://github.com/samtools/samtools) | Extraction of the mapped regions (identification from an assembly only) | Danecek *et al*. (2021) *GigaScience* |
 
 ## Documentation
 
@@ -93,7 +101,7 @@ The following programs must be installed and available on the system `PATH`, or 
 | [**Tutorial 2**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html) | Stage 2: substitution models, constrained maximum-likelihood search, bootstrap support and `treePL` dating |
 | [**Tutorial 3**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html) | Stage 3: IUCN Red List data, collapse of weakly supported nodes and figures |
 | [**Tutorial 4**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html) | Stage 4: tree distances, MDS of tree space and the optional `ASTRAL-III` reference summary |
-| [**Tutorial 5**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html) | Section manifest: scope, decisions taken, open questions and reopening criteria for the molecular diagnostic section |
+| [**Tutorial 5**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html) | Molecular identification: reference library, its validation, identification of a sample and the rates measured with this version |
 | [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html) | Package functions and the methods they implement |
 
 ## Citation
@@ -114,6 +122,7 @@ citation("PhyloCactus")
 - Jin, L., & Nei, M. 1990. Limitations of the evolutionary parsimony method of phylogenetic analysis. *Molecular Biology and Evolution*, 7(1), 82-102. <https://doi.org/10.1093/oxfordjournals.molbev.a040588>
 - Kimura, M. 1980. A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. *Journal of Molecular Evolution*, 16(2), 111-120. <https://doi.org/10.1007/BF01731581>
 - Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org, a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251-270. <https://doi.org/10.3372/wi.51.51208>
+- Murali *et al*. 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. *Microbiome*, 6. <https://doi.org/10.1186/s40168-018-0521-5>
 - Thompson *et al*. 2024. Identifying the multiple drivers of cactus diversification. *Nature Communications*, 15(1), 7114. <https://doi.org/10.1038/s41467-024-51666-2>
 - Zuntini *et al*. 2024. Phylogenomics and the rise of the angiosperms. *Nature*, 629, 843-850. <https://doi.org/10.1038/s41586-024-07324-0>
 
