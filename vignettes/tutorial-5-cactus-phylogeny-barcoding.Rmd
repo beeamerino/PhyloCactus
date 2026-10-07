@@ -43,7 +43,7 @@ The planned components are:
 1. **Loci and combinations.** Whether resolution is assessed per locus, on concatenated subsets, or both, and whether the standard plant barcode combination is evaluated as a unit for comparison with published surveys.
 2. **Unit of assignment.** Whether the target is assignment to species, assignment to genus with an explicit statement of ambiguity at species level, or a graded output. Many plant species are not monophyletic in single-locus trees, so the output must allow for justified non-assignment.
 3. **Reporting ambiguity.** Whether a sample that cannot be separated from a set of candidates is reported as a candidate set, as an assignment to genus, or as a failure, and how this affects the conservation applications of the package.
-4. **Relationship to genome skimming.** Whether the section remains an evaluation of Sanger markers or becomes the reference-library component of a plastome-based (super-barcoding) workflow. The two designs require different outputs and different validation.
+4. **Genome skims and other reads.** Decided (BMM, 2026-10-07): the library is built from Sanger marker records of GenBank and own sequences, and genome skims are not a source of it. Illumina reads that a user brings (skim or whole-genome sequencing) are a query: `identify_barcoding_reads()` assembles their plastome and nrDNA and identifies them against the library, locus by locus.
 5. **Paralogy and organelle capture.** Whether loci with cytonuclear conflict are excluded from diagnostic use, flagged, or reported as evidence of reticulation.
 
 ## Conditions for Implementation
