@@ -85,3 +85,28 @@ test_that("both phylogeny assemblies merge their marker FASTA files through the 
     expect_match(body_txt, "TABLE_LONG_RECORDS_CUT_", fixed = TRUE)
   }
 })
+
+# Decision M2a of BMM (13-10, Phase 12): a marker whose records are all over 2000 bases has nothing to
+# cut against (in the 29-09 workspace: "trnK, matK, maturase K" of the ingroup, matK-trnK and
+# pepC_like of the outgroup). No FASTA is written for it, and its records are listed with the action
+# no_shorter_records, instead of an empty FASTA that stopped Module 2. Written before the code.
+test_that("a marker whose records are all over 2000 bases writes no FASTA and lists them as no_shorter_records (M2a)", {
+  skip_if_not_installed("Biostrings")
+  dir <- withr::local_tempdir()
+  long <- c(Genus_a = .lr_random_dna(2458, 8), Genus_b = .lr_random_dna(2300, 9), Genus_a = .lr_random_dna(2100, 10))
+  file <- .lr_write(long, file.path(dir, "CLUSTER_4.fasta"))
+  out <- file.path(dir, "trnK_matK.fasta")
+  tab <- PhyloCactus:::.cp_merge_marker_fasta(file, out)
+  expect_false(file.exists(out))
+  expect_equal(nrow(tab), 3L)
+  expect_true(all(tab$action == "no_shorter_records"))
+  expect_equal(sort(tab$length), sort(unname(nchar(long))))
+  expect_true(all(is.na(tab$region_start)))
+})
+
+test_that("both phylogeny assemblies report the markers left without a FASTA (M2a)", {
+  for (fun in c("assemble_ingroup_phylotar", "assemble_outgroup_phylotar")) {
+    body_txt <- paste(deparse(body(get(fun, envir = asNamespace("PhyloCactus")))), collapse = "\n")
+    expect_match(body_txt, "no_shorter_records", fixed = TRUE)
+  }
+})
