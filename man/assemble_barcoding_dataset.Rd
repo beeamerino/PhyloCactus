@@ -63,7 +63,7 @@ has to be created.}
 
 \item{force_download}{Logical. Mine GenBank again even if the workspace exists. Defaults to \code{FALSE}.}
 
-\item{mnsql,mxsql}{Integer. Shortest and longest sequence, in bases, that a new mining keeps
+\item{mnsql, mxsql}{Integer. Shortest and longest sequence, in bases, that a new mining keeps
 (\code{phylotaR::setup()}); 100 and 5000 by default (decision L1 of 28-09). Used only when GenBank is mined.}
 
 \item{phylogeny_map_file}{Character or \code{NULL}. Cluster-to-locus table of the phylogeny, compared

@@ -10,11 +10,10 @@ barcoding_outgroup_taxids()
 Character vector of six taxonomic IDs.
 }
 \description{
-Taxonomic IDs of the Outgroup of the Molecular Diagnostic Branch
-}
-\details{
 The six genus-level NCBI Taxonomy IDs that CN2 queries the library with (validation plan, sec. 4):
 the three families that surround Cactaceae.
+}
+\details{
 \itemize{
 \item \strong{Anacampserotaceae:} \emph{Talinopsis} (107598), \emph{Grahamia} (107617), \emph{Anacampseros} (107583).
 \item \strong{Portulacaceae:} \emph{Portulaca} (3582).

@@ -37,7 +37,7 @@ assemble_outgroup_phylotar(
 
 \item{out_dir}{Character. Output directory path to save outgroup cluster tables and FASTA sequence files.}
 
-\item{mnsql,mxsql}{Integer. Shortest and longest sequence, in bases, that a new mining keeps
+\item{mnsql, mxsql}{Integer. Shortest and longest sequence, in bases, that a new mining keeps
 (\code{phylotaR::setup()}); 100 and 5000 by default (decision L1 of 28-09). Used only when GenBank is mined.}
 
 \item{notify}{Logical. Send an email through \code{\link[=send_run_notification]{send_run_notification()}} when a mining ends or fails;
