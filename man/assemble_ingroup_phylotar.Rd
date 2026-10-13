@@ -15,6 +15,8 @@ assemble_ingroup_phylotar(
   ncbi_dr = NULL,
   force_download = FALSE,
   out_dir = "1_phylotaR_out_Ingroup",
+  mnsql = 100L,
+  mxsql = 5000L,
   notify = FALSE,
   notify_to = NULL,
   notify_credentials = NULL
@@ -40,6 +42,9 @@ assemble_ingroup_phylotar(
 \item{force_download}{Logical. Force fresh database retrieval instead of using local cache? Defaults to \code{FALSE}.}
 
 \item{out_dir}{Character. Output directory path to save cluster summaries, FASTA sequence matrices, and log reports.}
+
+\item{mnsql,mxsql}{Integer. Shortest and longest sequence, in bases, that a new mining keeps
+(\code{phylotaR::setup()}); 100 and 5000 by default (decision L1 of 28-09). Used only when GenBank is mined.}
 
 \item{notify}{Logical. Send an email through \code{\link[=send_run_notification]{send_run_notification()}} when a mining ends or fails;
 reading an existing workspace sends nothing. Defaults to \code{FALSE}.}
