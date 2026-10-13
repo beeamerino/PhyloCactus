@@ -321,6 +321,11 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   utils::write.csv(long_cut, file.path(dir_out_base, "TABLE_LONG_RECORDS_CUT_INGROUP.csv"), row.names = FALSE)
   log_message("Records over 2000 bases: ", sum(long_cut$action == "cut"), " cut to the extent of their marker, ",
               sum(long_cut$action == "no_overlap"), " left out (TABLE_LONG_RECORDS_CUT_INGROUP.csv)")
+  no_short <- unique(long_cut$marker[long_cut$action == "no_shorter_records"])
+  if (length(no_short)) {
+    log_message("Markers with no record of 2000 bases or fewer, no FASTA written (no_shorter_records): ",
+                paste(no_short, collapse = "; "))
+  }
   log_message("Marker FASTA export complete.")
   
   # 18. FINAL OCCUPANCY AND MARKER SUMMARIES
@@ -630,6 +635,11 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
   utils::write.csv(long_cut, file.path(dir_out_base, "TABLE_LONG_RECORDS_CUT_OUTGROUP.csv"), row.names = FALSE)
   log_message("Records over 2000 bases: ", sum(long_cut$action == "cut"), " cut to the extent of their marker, ",
               sum(long_cut$action == "no_overlap"), " left out (TABLE_LONG_RECORDS_CUT_OUTGROUP.csv)")
+  no_short <- unique(long_cut$marker[long_cut$action == "no_shorter_records"])
+  if (length(no_short)) {
+    log_message("Markers with no record of 2000 bases or fewer, no FASTA written (no_shorter_records): ",
+                paste(no_short, collapse = "; "))
+  }
   
   # 18. FINAL OCCUPANCY AND MARKER SUMMARIES
   df_species_clusters_metadata_final <- df_species_clusters_metadata_final |> dplyr::mutate(cluster_id = as.integer(cluster_id))
@@ -846,16 +856,25 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
 #' Reads the cluster files of a marker in the order given, cuts every record over `max_length`
 #' bases to the extent of the shorter records of the marker with the rule of step 1 of the barcoding
 #' branch (`.bc_cut_long_records()`, decision L2 of 28-09), leaves out a long record that shares
-#' nothing with them, keeps the first record of each species and writes `out_file`. Folder 0 is
-#' not touched.
+#' nothing with them, keeps the first record of each species and writes `out_file`. A marker whose
+#' records are all over `max_length` has no extent to cut to: no file is written and its records are
+#' listed with the action `no_shorter_records` (M2a). Folder 0 is not touched.
 #' @return The table of the long records: header, file, length, region_start, region_end,
-#'   region_length and action (`cut` or `no_overlap`); no rows when no record is long.
+#'   region_length and action (`cut`, `no_overlap` or `no_shorter_records`); no rows when no record is long.
 #' @noRd
 .cp_merge_marker_fasta <- function(files, out_file, max_length = 2000L) {
   seqs_list <- lapply(files, Biostrings::readDNAStringSet)
   seqs_all <- do.call(c, seqs_list)
   src <- rep(files, vapply(seqs_list, length, 1L))
   headers <- names(seqs_all)
+  # M2a (BMM, 13-10): with no record of max_length or fewer there is no extent to cut to; the marker
+  # gets no FASTA, and its records are listed, instead of an empty FASTA that stops Module 2
+  if (length(seqs_all) && all(Biostrings::width(seqs_all) > max_length)) {
+    n <- length(seqs_all)
+    return(data.frame(header = headers, file = basename(src), length = Biostrings::width(seqs_all),
+                      region_start = rep(NA_integer_, n), region_end = rep(NA_integer_, n),
+                      region_length = rep(NA_integer_, n), action = "no_shorter_records", stringsAsFactors = FALSE))
+  }
   ids <- paste0("r", seq_along(seqs_all))
   chars <- stats::setNames(as.character(seqs_all), ids)
   cut <- .bc_cut_long_records(data.frame(sid = ids, locus = "marker", stringsAsFactors = FALSE), chars,

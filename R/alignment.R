@@ -296,6 +296,18 @@ build_marker_consolidated_row <- function(marker_id, summary_all, filter_info, f
   )
 }
 
+# Row of a marker that failed in Module 2 (decision M1 of BMM, 13-10): the columns of a processed
+# marker, every count NA and the message in status, so that do.call(rbind, ...) in
+# run_alignment_pipeline() keeps the other markers and the manifest says which marker failed and why.
+.alignment_error_row <- function(marker_id, masking_applied, message) {
+  row <- build_marker_consolidated_row(marker_id, data.frame(stage = character(0)), NULL, FALSE,
+                                       masking_applied, paste("ERROR:", message))
+  removed <- c("n_sequences_removed_low_coverage", "n_sequences_removed_high_missingness",
+               "n_sequences_removed_by_filtering")
+  row[removed] <- NA_integer_
+  row
+}
+
 # Parameter stamp appended to every per-marker summary CSV. It is what makes the cache in
 # process_marker_file() parameter-aware: reusing an alignment produced under different masking
 # or occupancy settings silently invalidates the whole stage, which is exactly how the
@@ -726,25 +738,8 @@ run_alignment_pipeline <- function(
       process_marker_file(f, output_aln_dir, output_table_dir, mafft_exec, mafft_opts,
                           mask_alignment_regions, min_non_gap_fraction, max_missing_fraction,
                           min_masked_alignment_length, preserve_iupac, fix_strand),
-      error = function(e) {
-        data.frame(
-          marker = tools::file_path_sans_ext(basename(f)),
-          n_sequences_raw_input = NA_integer_, n_sequences_mafft_aligned = NA_integer_, n_sequences_common_gap_removed = NA_integer_,
-          n_sequences_masked_alignment = NA_integer_, n_sequences_final_filtered = NA_integer_,
-          alignment_length_raw_input = NA_integer_, alignment_length_mafft_aligned = NA_integer_, alignment_length_common_gap_removed = NA_integer_,
-          alignment_length_masked_alignment = NA_integer_, alignment_length_final_filtered = NA_integer_,
-          mean_fraction_missing_raw_input = NA_real_, mean_fraction_missing_mafft_aligned = NA_real_, mean_fraction_missing_common_gap_removed = NA_real_,
-          mean_fraction_missing_masked_alignment = NA_real_, mean_fraction_missing_final_filtered = NA_real_,
-          mean_fraction_gaps_raw_input = NA_real_, mean_fraction_gaps_mafft_aligned = NA_real_, mean_fraction_gaps_common_gap_removed = NA_real_,
-          mean_fraction_gaps_masked_alignment = NA_real_, mean_fraction_gaps_final_filtered = NA_real_,
-          n_sequences_removed_total = NA_integer_, n_sequences_removed_low_coverage = NA_integer_, n_sequences_removed_high_missingness = NA_integer_,
-          n_sequences_removed_by_filtering = NA_integer_, n_sites_removed_by_common_gap_removal = NA_integer_, n_sites_removed_by_masking = NA_integer_,
-          n_sites_removed_total_from_mafft = NA_integer_, pct_sequences_retained_after_mafft = NA_real_, pct_sequences_retained_after_common_gap_removal = NA_real_,
-          pct_sequences_retained_after_masking = NA_real_, pct_sequences_retained_final = NA_real_, pct_sites_retained_after_common_gap_removal = NA_real_,
-          pct_sites_retained_after_masking = NA_real_, pct_sites_retained_final_vs_mafft = NA_real_,
-          masking_applied = mask_alignment_regions, final_alignment_written = FALSE, status = paste("ERROR:", conditionMessage(e)), stringsAsFactors = FALSE
-        )
-      }
+      error = function(e) .alignment_error_row(tools::file_path_sans_ext(basename(f)), mask_alignment_regions,
+                                                conditionMessage(e))
     )
   }
   
