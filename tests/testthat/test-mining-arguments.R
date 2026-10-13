@@ -13,12 +13,18 @@ test_that("the three mining functions take mnsql and mxsql, 100 and 5000 by defa
 })
 
 test_that("each mining function passes its limits to the shared phylotaR call (P11)", {
+  find_call <- function(e) {
+    if (!is.call(e)) return(NULL)
+    if (identical(e[[1]], as.name(".phylotar_load_or_mine"))) return(e)
+    args <- as.list(e)[-1]
+    for (i in seq_along(args)) if (is.call(args[[i]])) { r <- find_call(args[[i]]); if (!is.null(r)) return(r) }
+    NULL
+  }
   for (fun in c("assemble_ingroup_phylotar", "assemble_outgroup_phylotar", "assemble_barcoding_dataset")) {
-    body_txt <- paste(deparse(body(get(fun, envir = asNamespace("PhyloCactus"))), width.cutoff = 500L), collapse = "\n")
-    call_txt <- regmatches(body_txt, regexpr("\\.phylotar_load_or_mine\\([^)]*\\)", body_txt))
-    expect_length(call_txt, 1L)
-    expect_match(call_txt, "mnsql = mnsql", fixed = TRUE, info = fun)
-    expect_match(call_txt, "mxsql = mxsql", fixed = TRUE, info = fun)
+    cl <- find_call(body(get(fun, envir = asNamespace("PhyloCactus"))))
+    expect_false(is.null(cl), info = fun)
+    expect_identical(cl$mnsql, as.name("mnsql"), info = fun)
+    expect_identical(cl$mxsql, as.name("mxsql"), info = fun)
   }
 })
 
