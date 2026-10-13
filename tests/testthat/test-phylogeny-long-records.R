@@ -19,7 +19,7 @@
   long <- paste0(.lr_random_dna(700, 2), core, .lr_random_dna(700, 3))
   stray <- .lr_random_dna(2500, 4)
   c1 <- c(short[1:6], Genus_longcut = long)
-  c2 <- c(short[7:10], Genus_stray = stray, Genus_stray = short[1])
+  c2 <- c(short[7:10], Genus_stray = stray, Genus_stray = unname(short[1]))
   list(core = core, long = long,
        files = c(.lr_write(c1, file.path(dir, "CLUSTER_1.fasta")), .lr_write(c2, file.path(dir, "CLUSTER_2.fasta"))))
 }

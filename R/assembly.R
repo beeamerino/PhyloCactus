@@ -15,6 +15,8 @@
 #' @param ncbi_dr Character. Path to local `BLAST+` binaries directory. If `NULL`, attempts system environment auto-detection.
 #' @param force_download Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.
 #' @param out_dir Character. Output directory path to save cluster summaries, FASTA sequence matrices, and log reports.
+#' @param mnsql,mxsql Integer. Shortest and longest sequence, in bases, that a new mining keeps
+#'   (`phylotaR::setup()`); 100 and 5000 by default (decision L1 of 28-09). Used only when GenBank is mined.
 #' @param notify Logical. Send an email through [send_run_notification()] when a mining ends or fails;
 #'   reading an existing workspace sends nothing. Defaults to `FALSE`.
 #' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
@@ -32,7 +34,7 @@
 #' )
 #' }
 #' @export
-assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, min_species = 50, preferred_parent = "3593", ncbi_dr = NULL, force_download = FALSE, out_dir = "1_phylotaR_out_Ingroup", notify = FALSE, notify_to = NULL, notify_credentials = NULL) {
+assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, min_species = 50, preferred_parent = "3593", ncbi_dr = NULL, force_download = FALSE, out_dir = "1_phylotaR_out_Ingroup", mnsql = 100L, mxsql = 5000L, notify = FALSE, notify_to = NULL, notify_credentials = NULL) {
   
   
   # Resolve inputs
@@ -94,6 +96,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   # same phylotaR call and share the same raw workspace, whichever of them runs first.
   phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = preferred_parent, ncbi_dr = ncbi_dr,
                                     force_download = force_download, log_message = log_message,
+                                    mnsql = mnsql, mxsql = mxsql,
                                     notify = notify, notify_to = notify_to, notify_credentials = notify_credentials)
   
   # 8. SPECIES REDUCTION AND CLUSTER FILTERING
@@ -302,16 +305,22 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   df_joined <- df_joined |> dplyr::filter(!is.na(Marker_std), nzchar(Marker_std))
   markers_final <- sort(unique(df_joined$Marker_std))
   
+  # P10a (BMM, 13-10): records over 2000 bases cut to the extent of the shorter records of their
+  # marker, as in step 1 of the barcoding branch (L2), before one record per species is kept
+  long_cut <- list()
   for (mk in markers_final) {
     log_message("Processing marker FASTA merge: ", mk)
     files_mk <- df_joined |> dplyr::filter(Marker_std == mk) |> dplyr::arrange(file) |> dplyr::pull(file)
-    seqs_list <- lapply(files_mk, Biostrings::readDNAStringSet)
-    seqs_all <- do.call(c, seqs_list)
-    sp_names <- sub("^([^ ]+_[^ ]+).*", "\\1", names(seqs_all))
-    seqs_clean <- seqs_all[!duplicated(sp_names)]
     out_file <- file.path(dir_out_base, paste0(mk, ".fasta"))
-    Biostrings::writeXStringSet(seqs_clean, out_file)
+    cut_mk <- .cp_merge_marker_fasta(files_mk, out_file)
+    if (nrow(cut_mk) > 0) long_cut[[mk]] <- cbind(marker = mk, cut_mk, stringsAsFactors = FALSE)
   }
+  long_cut <- if (length(long_cut)) do.call(rbind, long_cut) else
+    data.frame(marker = character(0), header = character(0), file = character(0), length = integer(0),
+               region_start = integer(0), region_end = integer(0), region_length = integer(0), action = character(0))
+  utils::write.csv(long_cut, file.path(dir_out_base, "TABLE_LONG_RECORDS_CUT_INGROUP.csv"), row.names = FALSE)
+  log_message("Records over 2000 bases: ", sum(long_cut$action == "cut"), " cut to the extent of their marker, ",
+              sum(long_cut$action == "no_overlap"), " left out (TABLE_LONG_RECORDS_CUT_INGROUP.csv)")
   log_message("Marker FASTA export complete.")
   
   # 18. FINAL OCCUPANCY AND MARKER SUMMARIES
@@ -361,6 +370,8 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
 #' @param outgroups Character vector of NCBI Taxonomy IDs for outgroup lineages. Defaults to `c("107598", "107617", "107583", "3582", "107600", "108056")`.
 #' @param force_download Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.
 #' @param out_dir Character. Output directory path to save outgroup cluster tables and FASTA sequence files.
+#' @param mnsql,mxsql Integer. Shortest and longest sequence, in bases, that a new mining keeps
+#'   (`phylotaR::setup()`); 100 and 5000 by default (decision L1 of 28-09). Used only when GenBank is mined.
 #' @param notify Logical. Send an email through [send_run_notification()] when a mining ends or fails;
 #'   reading an existing workspace sends nothing. Defaults to `FALSE`.
 #' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
@@ -377,7 +388,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
 #' )
 #' }
 #' @export
-assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"), force_download = FALSE, out_dir = "1_phylotaR_out_Outgroup", notify = FALSE, notify_to = NULL, notify_credentials = NULL) {
+assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"), force_download = FALSE, out_dir = "1_phylotaR_out_Outgroup", mnsql = 100L, mxsql = 5000L, notify = FALSE, notify_to = NULL, notify_credentials = NULL) {
   
   
   if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "PhyloCactus")
@@ -431,6 +442,7 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
   # parameters for both halves of folder 0 (E1, BMM, 28-09)
   phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = outgroups[1], txid = outgroups,
                                     force_download = force_download, log_message = log_message,
+                                    mnsql = mnsql, mxsql = mxsql,
                                     notify = notify, notify_to = notify_to, notify_credentials = notify_credentials)
   
   # 8. SPECIES REDUCTION AND CLUSTER FILTERING
@@ -602,16 +614,22 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
   df_joined <- df_joined |> dplyr::filter(!is.na(Marker_std), nzchar(Marker_std))
   markers_final <- sort(unique(df_joined$Marker_std))
   
+  # P10a (BMM, 13-10): records over 2000 bases cut to the extent of the shorter records of their
+  # marker, as in step 1 of the barcoding branch (L2), before one record per species is kept
+  long_cut <- list()
   for (mk in markers_final) {
     log_message("Processing marker FASTA merge: ", mk)
     files_mk <- df_joined |> dplyr::filter(Marker_std == mk) |> dplyr::arrange(file) |> dplyr::pull(file)
-    seqs_list <- lapply(files_mk, Biostrings::readDNAStringSet)
-    seqs_all <- do.call(c, seqs_list)
-    sp_names <- sub("^([^ ]+_[^ ]+).*", "\\1", names(seqs_all))
-    seqs_clean <- seqs_all[!duplicated(sp_names)]
     out_file <- file.path(dir_out_base, paste0(mk, ".fasta"))
-    Biostrings::writeXStringSet(seqs_clean, out_file)
+    cut_mk <- .cp_merge_marker_fasta(files_mk, out_file)
+    if (nrow(cut_mk) > 0) long_cut[[mk]] <- cbind(marker = mk, cut_mk, stringsAsFactors = FALSE)
   }
+  long_cut <- if (length(long_cut)) do.call(rbind, long_cut) else
+    data.frame(marker = character(0), header = character(0), file = character(0), length = integer(0),
+               region_start = integer(0), region_end = integer(0), region_length = integer(0), action = character(0))
+  utils::write.csv(long_cut, file.path(dir_out_base, "TABLE_LONG_RECORDS_CUT_OUTGROUP.csv"), row.names = FALSE)
+  log_message("Records over 2000 bases: ", sum(long_cut$action == "cut"), " cut to the extent of their marker, ",
+              sum(long_cut$action == "no_overlap"), " left out (TABLE_LONG_RECORDS_CUT_OUTGROUP.csv)")
   
   # 18. FINAL OCCUPANCY AND MARKER SUMMARIES
   df_species_clusters_metadata_final <- df_species_clusters_metadata_final |> dplyr::mutate(cluster_id = as.integer(cluster_id))
@@ -821,6 +839,37 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
     }
     phylotaR::write_sqs(phylota_obj, sid = sids, sq_nm = scientific_names, outfile = file.path(outdir, paste0("CLUSTER_", cid, ".fasta")))
   }
+}
+
+#' Merge the cluster FASTA files of one marker, with the cut of long records (P10a)
+#'
+#' Reads the cluster files of a marker in the order given, cuts every record over `max_length`
+#' bases to the extent of the shorter records of the marker with the rule of step 1 of the barcoding
+#' branch (`.bc_cut_long_records()`, decision L2 of 28-09), leaves out a long record that shares
+#' nothing with them, keeps the first record of each species and writes `out_file`. Folder 0 is
+#' not touched.
+#' @return The table of the long records: header, file, length, region_start, region_end,
+#'   region_length and action (`cut` or `no_overlap`); no rows when no record is long.
+#' @noRd
+.cp_merge_marker_fasta <- function(files, out_file, max_length = 2000L) {
+  seqs_list <- lapply(files, Biostrings::readDNAStringSet)
+  seqs_all <- do.call(c, seqs_list)
+  src <- rep(files, vapply(seqs_list, length, 1L))
+  headers <- names(seqs_all)
+  ids <- paste0("r", seq_along(seqs_all))
+  chars <- stats::setNames(as.character(seqs_all), ids)
+  cut <- .bc_cut_long_records(data.frame(sid = ids, locus = "marker", stringsAsFactors = FALSE), chars,
+                              max_length = max_length)
+  kept <- ids[ids %in% names(cut$sequences)]
+  out <- Biostrings::DNAStringSet(unname(cut$sequences[kept]))
+  names(out) <- headers[match(kept, ids)]
+  sp_names <- sub("^([^ ]+_[^ ]+).*", "\\1", names(out))
+  Biostrings::writeXStringSet(out[!duplicated(sp_names)], out_file)
+  tab <- cut$table
+  idx <- match(tab$sid, ids)
+  data.frame(header = headers[idx], file = basename(src[idx]), length = tab$length, region_start = tab$region_start,
+             region_end = tab$region_end, region_length = tab$region_length, action = tab$action,
+             stringsAsFactors = FALSE)
 }
 
 # ------------------------------------------------------------------------------

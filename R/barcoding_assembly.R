@@ -404,6 +404,8 @@ barcoding_outgroup_taxids <- function() {
 #' @param ncbi_dr Character or `NULL`. Directory of the BLAST+ binaries, used only when the workspace
 #'   has to be created.
 #' @param force_download Logical. Mine GenBank again even if the workspace exists. Defaults to `FALSE`.
+#' @param mnsql,mxsql Integer. Shortest and longest sequence, in bases, that a new mining keeps
+#'   (`phylotaR::setup()`); 100 and 5000 by default (decision L1 of 28-09). Used only when GenBank is mined.
 #' @param notify Logical. Send an email through [send_run_notification()] when step 1 ends, finished
 #'   or failed, and another when a mining ends or fails (reading an existing workspace mines nothing).
 #'   A notification that cannot be sent is reported and never fails the step. Defaults to `FALSE`.
@@ -442,6 +444,8 @@ assemble_barcoding_dataset <- function(wd_path,
                                        taxids = NULL,
                                        ncbi_dr = NULL,
                                        force_download = FALSE,
+                                       mnsql = 100L,
+                                       mxsql = 5000L,
                                        phylogeny_map_file = NULL,
                                        extra_records_dir = NULL,
                                        own_dir = NULL,
@@ -504,6 +508,7 @@ assemble_barcoding_dataset <- function(wd_path,
   phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = preferred_parent,
                                     txid = .bc_mining_taxids(taxids, preferred_parent), ncbi_dr = ncbi_dr,
                                     force_download = force_download, log_message = log_message,
+                                    mnsql = mnsql, mxsql = mxsql,
                                     notify = notify, notify_to = notify_to, notify_credentials = notify_credentials)
   log_message("Workspace: ", length(phylota@cids), " clusters, ", length(phylota@sids), " sequences in clusters.")
 
