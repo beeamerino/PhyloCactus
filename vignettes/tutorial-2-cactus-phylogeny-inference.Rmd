@@ -230,8 +230,8 @@ if (run_local_ml) {
     cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
     cluster_nodes = 1L,                               # Number of compute nodes requested
     threads = 75,                                     # CPU cores requested (--cpus-per-task)
-    cluster_mem = "16G",                              # RAM memory allocation (--mem, ~11 GB max used)
-    cluster_time = "02:00:00",                        # Walltime limit (--time HH:MM:SS, ~41 min real runtime)
+    cluster_mem = "24G",                              # RAM memory allocation (--mem; 15.5 GB used, 1208 terminals)
+    cluster_time = "02:00:00",                        # Walltime limit (--time HH:MM:SS; 1 h 15 min used, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
     load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
@@ -325,14 +325,14 @@ if (run_local_bs) {
     cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
     cluster_nodes = 1L,                               # Number of compute nodes requested
     threads = 40,                                     # CPU cores per array task (--cpus-per-task)
-    cluster_mem = "10G",                              # RAM memory allocation per task (--mem, ~5.3 GB max used)
-    cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS, ~17 h real runtime)
+    cluster_mem = "16G",                              # RAM memory allocation per task (--mem)
+    cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
     load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
     # --- Bootstrap Array Settings ---
-    bs_per_rep = 500,                                 # Bootstrap replicates per array task
-    max_reps = 2,                                     # Number of array tasks (2 x 500 = 1000 total replicates)
+    bs_per_rep = 250,                                 # Bootstrap replicates per array task
+    max_reps = 4,                                     # Number of array tasks (4 x 250 = 1000 total replicates)
     workers = 10,
     output_dir = file.path(output_dir)
   )
@@ -438,7 +438,7 @@ if (run_local_temporal_bs) {
     cluster_job_name = "cactus_temp_bs",
     cluster_partition = "main",
     cluster_nodes = 1L,
-    cluster_mem = "16G",
+    cluster_mem = "24G",
     cluster_time = "04:00:00",
     cluster_mail_user = Sys.getenv("MY_EMAIL", "")
   )
