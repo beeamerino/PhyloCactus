@@ -682,3 +682,97 @@ test_that("the identification applies the species threshold of step 9 and writes
   w <- utils::read.csv(file.path(f$out, "TABLE_barcoding_identify_b.csv"), stringsAsFactors = FALSE)
   expect_true("species_threshold" %in% names(w))
 })
+
+# ---- R2 of Phase 12: rbcL at genus rank only (decision of BMM, 14-10) ---------------------------------
+
+# Calls to a function anywhere in an expression, so that the tests can check what an exported function
+# passes to an internal one without running it
+.idn_calls_to <- function(e, name) {
+  out <- list()
+  walk <- function(x) {
+    if (is.call(x)) {
+      if (identical(x[[1]], as.name(name))) out[[length(out) + 1L]] <<- x
+      for (i in seq_along(x)[-1]) {
+        y <- x[[i]]
+        if (!missing(y)) walk(y)
+      }
+    }
+  }
+  walk(e)
+  out
+}
+
+test_that("a row of a genus-only locus named at species rank is named at genus rank, keeping what IdTaxa reached", {
+  tab <- .idn_rc_rows()
+  thr <- data.frame(locus = c("matK", "rbcL", "ITS", "trnL-trnF"), species_threshold = c(60, 85, 60, 60))
+  rc <- .bc_apply_species_threshold(tab, thr)
+  r <- .bc_apply_genus_only(rc, "rbcL")
+  # rbcL: 90 over 85, kept by R-c, then named at genus rank by R2
+  b <- r[r$locus == "rbcL", ]
+  expect_identical(b$state, 2L)
+  expect_true(is.na(b$predicted_species))
+  expect_identical(b$predicted_genus, "Cereus")
+  expect_identical(b$reason, "genus_only_locus")
+  expect_identical(b$species_idtaxa, "Cereus_beta")
+  expect_equal(b$species_confidence, 90)
+  expect_equal(b$species_threshold, 85)
+  # The other loci stay as R-c left them: matK keeps its species
+  expect_identical(r[r$locus != "rbcL", ], rc[rc$locus != "rbcL", ])
+  expect_identical(r$predicted_species[r$locus == "matK"], "Opuntia_alpha")
+})
+
+test_that("rows of a genus-only locus in states 2 and 3, or already moved by R-c, are left as they are", {
+  tab <- data.frame(query = c("q1", "q2", "q3"), locus = "rbcL", state = c(1L, 2L, 3L),
+                    predicted_species = c("Cereus_beta", NA, NA), predicted_genus = c("Cereus", "Cereus", NA),
+                    genus_idtaxa = c("Cereus", "Cereus", "Opuntia"),
+                    species_idtaxa = c("Cereus_beta", "Cereus_alpha", "Opuntia_alpha"),
+                    genus_confidence = c(95, 80, 40), species_confidence = c(70, 50, 30),
+                    reason = c(NA, NA, "low_confidence"), stringsAsFactors = FALSE)
+  rc <- .bc_apply_species_threshold(tab, data.frame(locus = "rbcL", species_threshold = 80))
+  r <- .bc_apply_genus_only(rc, "rbcL")
+  expect_identical(r, rc)
+  # q1: 70 under 80, moved by R-c, which keeps its reason
+  expect_identical(r$reason[1], "below_species_threshold")
+  expect_identical(r$state, c(2L, 2L, 3L))
+})
+
+test_that("no genus-only locus leaves the table as R-c left it", {
+  thr <- data.frame(locus = c("matK", "rbcL", "ITS", "trnL-trnF"), species_threshold = c(60, 85, 60, 60))
+  rc <- .bc_apply_species_threshold(.idn_rc_rows(), thr)
+  expect_identical(.bc_apply_genus_only(rc, character(0)), rc)
+  expect_identical(.bc_apply_genus_only(rc, NULL), rc)
+})
+
+test_that("the three identification functions take genus_only_loci, rbcL by default, and pass it to the table", {
+  expect_true("genus_only_loci" %in% names(formals(.bc_identify_table)))
+  for (nm in c("identify_barcoding_query", "identify_barcoding_reads", "identify_barcoding_assembly")) {
+    fn <- get(nm, envir = asNamespace("PhyloCactus"))
+    a <- formals(fn)
+    expect_true("genus_only_loci" %in% names(a), info = nm)
+    expect_identical(eval(a$genus_only_loci), "rbcL", info = nm)
+    calls <- .idn_calls_to(body(fn), ".bc_identify_table")
+    expect_true(length(calls) > 0L, info = nm)
+    for (cl in calls) expect_true("genus_only_loci" %in% names(as.list(cl)), info = nm)
+  }
+})
+
+test_that("the identification names a genus-only locus at genus rank and writes the reason", {
+  .idn_skip()
+  tmp <- withr::local_tempdir()
+  f <- .idn_fixture(tmp)
+  q <- c(probe = unname(f$seqs$matK[1]))
+  # matK stands for the genus-only locus here: the fixture names it at species rank
+  a <- .idn_run(f, q, run_name = "a", locus = "matK", threshold_dir = NULL, genus_only_loci = character(0), report = FALSE)
+  b <- .idn_run(f, q, run_name = "b", locus = "matK", threshold_dir = NULL, genus_only_loci = "matK", report = FALSE)
+  expect_false(any(b$tab$state == 1L))
+  moved <- a$tab$state == 1L
+  if (any(moved)) {
+    expect_true(all(b$tab$state[moved] == 2L))
+    expect_true(all(b$tab$reason[moved] == "genus_only_locus"))
+    expect_identical(b$tab$predicted_genus[moved], a$tab$predicted_genus[moved])
+    expect_identical(b$tab$species_idtaxa[moved], a$tab$species_idtaxa[moved])
+    expect_equal(b$tab$species_confidence[moved], a$tab$species_confidence[moved])
+  }
+  w <- utils::read.csv(file.path(f$out, "TABLE_barcoding_identify_b.csv"), stringsAsFactors = FALSE)
+  expect_identical(w$reason[moved], b$tab$reason[moved])
+})

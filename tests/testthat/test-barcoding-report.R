@@ -584,3 +584,40 @@ test_that("a table written before the species threshold still gives a report, re
   expect_true("species_threshold" %in% names(al))
   expect_equal(b$species_threshold, c(60, 60))
 })
+
+# ---- R2 of Phase 12 in the report: rbcL at genus rank only --------------------------------------------
+
+test_that("the report shows a locus named at genus rank only and lists the species IdTaxa reached (R2)", {
+  skip_if_not_installed("Biostrings")
+  t <- .rep_table()
+  t$species_threshold <- 60
+  # rbcL: IdTaxa reached Opuntia_beta at 75, over 60; named at genus rank by R2
+  i <- t$locus == "rbcL"
+  t$species_confidence[i] <- 75
+  t$reason[i] <- "genus_only_locus"
+  f <- .rep_fixture(withr::local_tempdir(), table = t)
+  .rep_run(f)
+  a <- .rep_csv(f, "answer")
+  expect_identical(a$reason[a$locus == "rbcL"], "genus_only_locus")
+  expect_identical(a$state[a$locus == "rbcL"], 2L)
+  al <- .rep_csv(f, "alternatives")
+  b <- al[al$kind == "species_of_genus_only_locus" & al$locus == "rbcL", ]
+  expect_equal(nrow(b), 1L)
+  expect_identical(b$species, "Opuntia_beta")
+  expect_equal(b$species_confidence, 75)
+  expect_false(b$assigned)
+  h <- .rep_html(f)
+  s2 <- sub(".*id=\"section-2\"(.*?)id=\"section-3\".*", "\\1", h)
+  expect_true(grepl("genus_only_locus", s2, fixed = TRUE))
+  expect_true(grepl("answers at genus rank only", s2, fixed = TRUE))
+  expect_true(grepl("11 of 34", s2, fixed = TRUE))
+})
+
+test_that("a report without a genus-only row does not carry the sentence of R2", {
+  skip_if_not_installed("Biostrings")
+  f <- .rep_fixture(withr::local_tempdir())
+  .rep_run(f)
+  expect_false(grepl("answers at genus rank only", .rep_html(f), fixed = TRUE))
+  al <- .rep_csv(f, "alternatives")
+  expect_false(any(al$kind == "species_of_genus_only_locus"))
+})
