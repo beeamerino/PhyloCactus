@@ -287,6 +287,17 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
                                          strip.text.y = ggplot2::element_text(angle = 0, face = "italic"))
 }
 
+#' The sentence of R2 (Phase 12) for the loci of a report named at genus rank only; empty when none is
+#' @noRd
+.bc_report_genus_only_words <- function(t) {
+  g <- sort(unique(t$locus[t$reason %in% "genus_only_locus"]), method = "radix")
+  if (!length(g)) return("")
+  paste0("<p>", paste(g, collapse = ", "), if (length(g) == 1L) " answers" else " answer",
+         " at genus rank only in this version (reason genus_only_locus, argument genus_only_loci): in the probes of ",
+         "Phase 12 the species answers of rbcL were right in 11 of 34. The species IdTaxa reached is listed in ",
+         "section 4.</p>")
+}
+
 #' The kind of data of a query, named at the start of the report
 #' @noRd
 .bc_report_data_kind <- function(input_type, query_length, query = NULL) {
@@ -437,6 +448,14 @@ report_barcoding_identification <- function(run_name,
                                             genus_confidence = r$genus_confidence, species_confidence = r$species_confidence,
                                             species_threshold = st, assigned = FALSE, stringsAsFactors = FALSE)
     }
+    # R2 (Phase 12): a locus that answers at genus rank only; the species IdTaxa reached is over the
+    # species threshold, so it is listed under a kind of its own, never assigned
+    if (r$state %in% 2L && r$reason %in% "genus_only_locus" && !is.na(r$species_idtaxa)) {
+      alt[[length(alt) + 1L]] <- data.frame(query = r$query, locus = r$locus, kind = "species_of_genus_only_locus",
+                                            genus = r$genus_idtaxa, species = r$species_idtaxa,
+                                            genus_confidence = r$genus_confidence, species_confidence = r$species_confidence,
+                                            species_threshold = st, assigned = FALSE, stringsAsFactors = FALSE)
+    }
     if (r$state %in% 2L && !is.na(r$candidates) && nzchar(r$candidates)) {
       cs <- strsplit(r$candidates, "|", fixed = TRUE)[[1]]
       alt[[length(alt) + 1L]] <- data.frame(query = r$query, locus = r$locus, kind = "candidate_of_named_genus",
@@ -555,6 +574,7 @@ report_barcoding_identification <- function(run_name,
                  "confidence also reaches the species threshold of its locus (column species_threshold, set in step 9 from the ",
                  "queries of the validation whose species was absent from the library); under it the locus is named at genus ",
                  "rank, with reason below_species_threshold, and the species IdTaxa reached is listed in section 4.</p>",
+                 .bc_report_genus_only_words(tf),
                  if (nrow(tf)) .bc_html_plot(.bc_report_answer_plot(tf, threshold)) else "<p>No locus of the library was found.</p>",
                  .bc_html_table(af),
                  "<p>Loci not found in the ", if (per_run) "sample" else "query", ": ",

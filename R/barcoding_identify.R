@@ -306,6 +306,21 @@
   tab
 }
 
+#' Rule R2 (Phase 12, decision of BMM, 14-10): a locus that answers at genus rank only
+#'
+#' A row of a locus of `genus_only_loci` that is still named at species rank after R-c is named at
+#' genus rank, with reason `genus_only_locus`, keeping what IdTaxa reached. Rows in states 2 and 3,
+#' and rows moved by R-c, are left as they are.
+#' @noRd
+.bc_apply_genus_only <- function(tab, genus_only_loci) {
+  if (!length(genus_only_loci)) return(tab)
+  hit <- tab$state %in% 1L & tab$locus %in% genus_only_loci
+  tab$state[hit] <- 2L
+  tab$predicted_species[hit] <- NA_character_
+  tab$reason[hit] <- "genus_only_locus"
+  tab
+}
+
 #' Aligned reads are not accepted (decision Z2 of BMM, 28-09)
 #' @noRd
 .bc_stop_aligned_reads <- function(path) {
@@ -440,6 +455,13 @@
 #'   `below_species_threshold`, and keeps in `species_idtaxa` and `species_confidence` what IdTaxa
 #'   reached. The value used is in the column `species_threshold`. Without the table, or for a locus
 #'   it lacks, the species threshold is `threshold`, with a message.
+#' @param genus_only_loci Character. Loci that answer at genus rank only (rule R2, Phase 12): a row of
+#'   one of them that IdTaxa names at species rank, over its species threshold, is named at genus rank,
+#'   with reason `genus_only_locus`, and keeps in `species_idtaxa` and `species_confidence` what IdTaxa
+#'   reached. Defaults to `"rbcL"`: in the probes of Phase 12, on the library built from GenBank, the
+#'   species answers of `rbcL` were right in 11 of 34 (single records, sets of records and plastomes),
+#'   and its species threshold of step 9 is the floor of 60. `character(0)` lets every locus name a
+#'   species.
 #' @param output_dir Character. Where the table and the model cache are written.
 #' @param run_name Character. Suffix of the output table, `TABLE_barcoding_identify_<run_name>.csv`.
 #' @param threshold Numeric. IdTaxa confidence threshold. Defaults to 60, the operating threshold of
@@ -466,6 +488,7 @@ identify_barcoding_query <- function(query,
                                      library_dir = file.path("11_barcoding", "4_library"),
                                      metrics_dir = file.path("11_barcoding", "11_metrics"),
                                      threshold_dir = file.path("11_barcoding", "9_threshold"),
+                                     genus_only_loci = "rbcL",
                                      output_dir = file.path("11_barcoding", "10_identify"),
                                      run_name = "query",
                                      threshold = 60,
@@ -498,7 +521,7 @@ identify_barcoding_query <- function(query,
   restore_rng <- .bc_rng_state()
   on.exit(restore_rng(), add = TRUE)
   tab <- .bc_identify_table(q, loci, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed,
-                            threshold_dir = threshold_dir)
+                            threshold_dir = threshold_dir, genus_only_loci = genus_only_loci)
 
   for (nm in unique(tab$query)) {
     if (all(tab$reason[tab$query == nm] %in% "no_overlap")) {
@@ -527,7 +550,7 @@ identify_barcoding_query <- function(query,
 #' restores the random state.
 #' @noRd
 .bc_identify_table <- function(q, loci, lib, library_dir, metrics_dir, output_dir, threshold, min_overlap, seed,
-                               threshold_dir = NULL) {
+                               threshold_dir = NULL, genus_only_loci = "rbcL") {
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   models_dir <- file.path(output_dir, "models")
   ids <- .bc_parse_header(names(q))$sid
@@ -566,6 +589,7 @@ identify_barcoding_query <- function(query,
   tab <- tab[order(tab$.qi, tab$locus, method = "radix"), , drop = FALSE]
   tab$threshold <- threshold
   tab <- .bc_apply_species_threshold(tab, .bc_species_thresholds(threshold_dir, loci, threshold))
+  tab <- .bc_apply_genus_only(tab, genus_only_loci)
   ctx <- .bc_identify_context(metrics_dir, loci, threshold)
   tab <- cbind(tab, ctx[match(tab$locus, ctx$locus), c("validation_ws_rate_species_present",
                                                         "validation_ws_rate_species_absent")])

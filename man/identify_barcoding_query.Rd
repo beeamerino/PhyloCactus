@@ -10,6 +10,7 @@ identify_barcoding_query(
   library_dir = file.path("11_barcoding", "4_library"),
   metrics_dir = file.path("11_barcoding", "11_metrics"),
   threshold_dir = file.path("11_barcoding", "9_threshold"),
+  genus_only_loci = "rbcL",
   output_dir = file.path("11_barcoding", "10_identify"),
   run_name = "query",
   threshold = 60,
@@ -39,6 +40,14 @@ confidence reaches that threshold; otherwise it is named at genus rank, with rea
 \code{below_species_threshold}, and keeps in \code{species_idtaxa} and \code{species_confidence} what IdTaxa
 reached. The value used is in the column \code{species_threshold}. Without the table, or for a locus
 it lacks, the species threshold is \code{threshold}, with a message.}
+
+\item{genus_only_loci}{Character. Loci that answer at genus rank only (rule R2, Phase 12): a row of
+one of them that IdTaxa names at species rank, over its species threshold, is named at genus rank,
+with reason \code{genus_only_locus}, and keeps in \code{species_idtaxa} and \code{species_confidence} what IdTaxa
+reached. Defaults to \code{"rbcL"}: in the probes of Phase 12, on the library built from GenBank, the
+species answers of \code{rbcL} were right in 11 of 34 (single records, sets of records and plastomes),
+and its species threshold of step 9 is the floor of 60. \code{character(0)} lets every locus name a
+species.}
 
 \item{output_dir}{Character. Where the table and the model cache are written.}
 

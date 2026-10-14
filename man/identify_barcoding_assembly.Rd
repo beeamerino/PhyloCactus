@@ -10,6 +10,7 @@ identify_barcoding_assembly(
   library_dir = file.path("11_barcoding", "4_library"),
   metrics_dir = file.path("11_barcoding", "11_metrics"),
   threshold_dir = file.path("11_barcoding", "9_threshold"),
+  genus_only_loci = "rbcL",
   output_dir = file.path("11_barcoding", "10_identify"),
   run_name = "assembly",
   flank = 500L,
@@ -28,7 +29,7 @@ identify_barcoding_assembly(
 
 \item{locus}{Character or \code{NULL}. Loci to look for; \code{NULL}, every locus of the library.}
 
-\item{library_dir, metrics_dir, threshold_dir, output_dir, threshold, min_overlap, seed}{As in
+\item{library_dir, metrics_dir, threshold_dir, genus_only_loci, output_dir, threshold, min_overlap, seed}{As in
 \code{\link[=identify_barcoding_query]{identify_barcoding_query()}}.}
 
 \item{run_name}{Character. The table is \verb{TABLE_barcoding_identify_<run_name>.csv}.}
