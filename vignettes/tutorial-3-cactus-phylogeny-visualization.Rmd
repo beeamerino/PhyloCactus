@@ -586,7 +586,7 @@ treeio::write.beast(annotated_treedata, file = "9_Visualization/figures/annotate
 Chronogram estimated with penalized likelihood in `treePL`.
 Node bars are 95% HPD intervals summarized from the 100 bootstrap chronograms, and the axis shows geological periods.
 
-```{r figure_8_chronogram, eval = has_data, fig.width = 8.5, fig.height = 11, message = FALSE, warning = FALSE, fig.cap = "**Figure 7.** Time-calibrated chronogram with HPD intervals. Grey bars: 95% HPD intervals of the node ages."}
+```{r figure_8_chronogram, eval = has_data, fig.width = 8.5, fig.height = 11, message = FALSE, warning = FALSE, fig.cap = "**Figure 8.** Time-calibrated chronogram with HPD intervals. Grey bars: 95% HPD intervals of the node ages."}
 # Load summary chronogram from Module 10
 chrono_file <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")
 
@@ -680,7 +680,7 @@ treeio::write.beast(annotated_chrono, file = "9_Visualization/figures/annotated_
 
 Status of the 2,003 species in the registry: sampled and dated in the tree (986), sequenced but removed by `RAxML-NG` as identical duplicates (36), accepted species without sequences (943), and outgroups (38).
 
-```{r figure_10_species_composition, eval = has_data, fig.cap = "**Figure 8.** Species composition."}
+```{r figure_10_species_composition, eval = has_data, fig.cap = "**Figure 10.** Species composition."}
 p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(status_pipeline, n), y = n)) +
   geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
   coord_flip() +
@@ -698,7 +698,7 @@ p10
 
 Number of ingroup species in the tree in each IUCN Red List category.
 
-```{r figure_11_iucn_categories, eval = has_data, fig.cap = "**Figure 9.** IUCN categories. Colours of the IUCN Red List categories."}
+```{r figure_11_iucn_categories, eval = has_data, fig.cap = "**Figure 11.** IUCN categories. Colours of the IUCN Red List categories."}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   TABLE_iucn_categories <- species_summary_iucn %>%
     filter(iucn_found == TRUE, in_ml_tree == TRUE, is_ingroup == TRUE) %>%
@@ -720,7 +720,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 Number of loci per species in each IUCN category, for the ingroup species in the chronogram.
 The figure shows whether threatened species are represented by fewer loci.
 
-```{r figure_12_completeness_vs_iucn, eval = has_data, fig.width = 7, fig.height = 5, fig.cap = "**Figure 10.** Molecular completeness against IUCN category. Colours of the IUCN Red List categories."}
+```{r figure_12_completeness_vs_iucn, eval = has_data, fig.width = 7, fig.height = 5, fig.cap = "**Figure 12.** Molecular completeness against IUCN category. Colours of the IUCN Red List categories."}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   p12 <- ggplot(
     species_summary_iucn %>%
@@ -747,7 +747,7 @@ Threatened species (CR, EN, VU) among the 943 accepted species without sequence 
 *Parodia* (24 species), *Mammillaria* (22) and *Melocactus* (14) have the most.
 The species are listed in `TABLE_conservation_prioritization_gaps.csv`, which can guide field collecting and sequencing.
 
-```{r figure_13_conservation_prioritization_gaps, eval = has_data, fig.height = 5, fig.cap = "**Figure 11.** Threatened species without sequence data by genus. Colours of the IUCN Red List categories."}
+```{r figure_13_conservation_prioritization_gaps, eval = has_data, fig.height = 5, fig.cap = "**Figure 13.** Threatened species without sequence data by genus. Colours of the IUCN Red List categories."}
 plot_gaps_genus <- TABLE_conservation_prioritization_gaps %>%
   count(genus, iucn_category) %>%
   mutate(iucn_category = factor(iucn_category, levels = c("CR", "EN", "VU")))
@@ -775,7 +775,7 @@ p13
 
 Countries ranked by the number of endemic ingroup species in the tree, based on IUCN records of endemism.
 
-```{r figure_14_endemism_by_country, eval = has_data, fig.cap = "**Figure 12.** Endemic species by country."}
+```{r figure_14_endemism_by_country, eval = has_data, fig.cap = "**Figure 14.** Endemic species by country."}
 if (any(species_summary_iucn$iucn_is_endemic, na.rm = TRUE)) {
   plot_data_endemism <- species_summary_iucn %>%
     filter(iucn_is_endemic == TRUE, in_ml_tree == TRUE, is_ingroup == TRUE) %>%
@@ -798,7 +798,7 @@ if (any(species_summary_iucn$iucn_is_endemic, na.rm = TRUE)) {
 
 IUCN categories of the endemic ingroup species in the tree, for the countries with the most endemics.
 
-```{r figure_15_iucn_by_country, eval = has_data, fig.cap = "**Figure 13.** Endemic species by country and IUCN category. Colours of the IUCN Red List categories."}
+```{r figure_15_iucn_by_country, eval = has_data, fig.cap = "**Figure 15.** Endemic species by country and IUCN category. Colours of the IUCN Red List categories."}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   plot_iucn_country <- species_summary_iucn %>%
     filter(iucn_is_endemic == TRUE, in_ml_tree == TRUE, is_ingroup == TRUE, !is.na(iucn_endemic_locations)) %>%
@@ -826,7 +826,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 
 Threat classes recorded by the IUCN Red List for the ingroup species in the tree, ranked by frequency.
 
-```{r figure_16_threats, eval = has_data, fig.cap = "**Figure 14.** Primary ecological threats."}
+```{r figure_16_threats, eval = has_data, fig.cap = "**Figure 16.** Primary ecological threats."}
 if (any(!is.na(species_summary_iucn$iucn_threat_names))) {
   plot_threats <- species_summary_iucn %>%
     filter(!is.na(iucn_threat_names), in_ml_tree == TRUE, is_ingroup == TRUE) %>%
@@ -851,7 +851,7 @@ if (any(!is.na(species_summary_iucn$iucn_threat_names))) {
 
 Habitat classes recorded by the IUCN Red List for the ingroup species in the tree.
 
-```{r figure_17_habitats, eval = has_data, fig.cap = "**Figure 15.** Primary ecological habitats."}
+```{r figure_17_habitats, eval = has_data, fig.cap = "**Figure 17.** Primary ecological habitats."}
 if (any(!is.na(species_summary_iucn$iucn_habitat_names))) {
   plot_habitats <- species_summary_iucn %>%
     filter(!is.na(iucn_habitat_names), in_ml_tree == TRUE, is_ingroup == TRUE) %>%
