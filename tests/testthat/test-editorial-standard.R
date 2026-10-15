@@ -247,3 +247,23 @@ test_that("Tutorials 1 to 7 open with Abstract and close with References (E5)", 
     expect_identical(h2[length(h2)], "## References", info = basename(f))
   }
 })
+
+# BMM (15-10): Tutorial 3 is the reference of the style, and running it must not change its figures.
+# The titles and subtitles drawn inside its plots are kept as they were before 15-10.
+test_that("the figures of Tutorial 3 keep their titles and subtitles (Tutorial 3 is the reference)", {
+  titles <- c("Marker Coverage Across Species", "Distribution of Marker Completeness", "Marker Presence Heatmap",
+              "Supermatrix Structure", "Marker Informativeness", "Species Composition",
+              "Methodological status across checklist, supermatrix, and tree", "IUCN Categories",
+              "Molecular Completeness vs IUCN Category",
+              "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 986)",
+              "Threatened Unsampled Species by Genus", "Priority Cactaceae taxa (CR, EN, VU) lacking molecular sequences",
+              "Endemic Species by Country", "Endemic Species by Country and IUCN Category", "Most Common Threats",
+              "Most Common Habitats")
+  s <- paste(readLines(system.file("scripts", "tutorial-3-cactus-phylogeny-visualization.R", package = "PhyloCactus")),
+             collapse = "\n")
+  v <- paste(readLines(.es_tree("vignettes", "tutorial-3-cactus-phylogeny-visualization.Rmd")), collapse = "\n")
+  for (t in titles) {
+    expect_true(grepl(paste0("title = \"", t, "\""), s, fixed = TRUE), info = paste("script:", t))
+    expect_true(grepl(paste0("title = \"", t, "\""), v, fixed = TRUE), info = paste("vignette:", t))
+  }
+})
