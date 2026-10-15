@@ -33,6 +33,12 @@ The script, `tutorial-5-cactus-phylogeny-barcoding.R`, runs the eleven steps in 
 file.edit(system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus"))
 ```
 
+The branch runs in four stages: a reference library built from the multilocus sequence data of the phylogeny (steps 1 to 4), its validation (steps 5 to 8), the thresholds and metrics read from that validation (steps 9 and 10), and the identification of a sample (step 11).
+
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 1.** The molecular identification branch, from the reference library to the answer for a sample. Steps are numbered as in this tutorial."}
+knitr::include_graphics("figures/Figure_TB8_barcoding_workflow.png")
+```
+
 ### Setup: Creating a Clean Workspace
 
 The branch reads:
@@ -159,23 +165,23 @@ The library of this version holds 15 loci: `atpB-rbcL`, `ITS`, `matK`, `ndhF-rpl
 Built from GenBank records, as a user builds it, it holds 7607 sequences of 1205 species in 139 genera; own sequences can be added through `own_dir` (step 1).
 In every locus most species hold a single sequence, which limits what a species answer can rest on.
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 1.** Alignments of `matK` and `ITS` in the library (TB1; the script draws one per locus)."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 2.** Alignments of `matK` and `ITS` in the library (TB1; the script draws one per locus)."}
 knitr::include_graphics(c("figures/Figure_TB1_alignment_matK.png", "figures/Figure_TB1_alignment_ITS.png"))
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 2.** Presence of each locus in each species of the library, species ordered by genus (TB2)."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 3.** Presence of each locus in each species of the library, species ordered by genus (TB2)."}
 knitr::include_graphics("figures/Figure_TB2_species_by_locus.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 3.** From assembly to library, per locus (TB3)."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 4.** From assembly to library, per locus (TB3)."}
 knitr::include_graphics("figures/Figure_TB3_funnel.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 4.** Lengths and replicates per locus (TB4)."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 5.** Lengths and replicates per locus (TB4)."}
 knitr::include_graphics("figures/Figure_TB4_lengths_and_replicates.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 5.** Taxonomic coverage of the library against the checklist (TB7; Korotkova et al. 2021)."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 6.** Taxonomic coverage of the library against the checklist (TB7; Korotkova et al. 2021)."}
 knitr::include_graphics("figures/Figure_TB7_taxonomic_coverage.png")
 ```
 
@@ -353,15 +359,15 @@ summarise_barcoding_metrics(
 The script then draws the figures of the library and its validation into `11_barcoding/figures/`: the alignment of each locus, species by locus, the funnel from assembly to library, lengths and replicates, accuracy against the sampling of each genus and against missing data, taxonomic coverage against the checklist (Korotkova *et al*. 2021), and the genera native to Chile against *Opuntia* and *Mammillaria*.
 The figures of the folds describe the library classifying its own sequences: they are more favourable than the identification of new samples (step 11 and Tutorial 6).
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 6.** Accuracy of the folds against the sampling of each genus (TB5)."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 7.** Accuracy of the folds against the sampling of each genus (TB5)."}
 knitr::include_graphics("figures/Figure_TB5_accuracy_against_sampling.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 7.** Accuracy of the folds against missing data (TB6)."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 8.** Accuracy of the folds against missing data (TB6)."}
 knitr::include_graphics("figures/Figure_TB6_accuracy_against_missing_data.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 8.** Genera native to Chile against Opuntia and Mammillaria in the folds (TB9)."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 9.** Genera native to Chile against Opuntia and Mammillaria in the folds (TB9)."}
 knitr::include_graphics("figures/Figure_TB9_chilean_genera.png")
 ```
 
