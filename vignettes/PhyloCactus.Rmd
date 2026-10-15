@@ -42,7 +42,7 @@ knitr::include_graphics("figures/Fig1_PhyloCactus_Workflow.png")
 
 Each stage can be run on its own, from the outputs of the previous one.
 
-A second branch, molecular identification by DNA barcoding (Tutorial 5), builds a reference library of 15 loci from the same phylotaR mining, validates it, and identifies a sample (sequences, an assembly or Illumina reads) against it, locus by locus, in three states: species, genus or no answer.
+A second branch, molecular identification by DNA barcoding (Tutorials 5 and 6), builds a reference library of 15 loci from the same phylotaR mining, validates it, and identifies a sample (sequences, an assembly or Illumina reads) against it, locus by locus, in three states: species, genus or no answer.
 
 ## Installation
 
@@ -175,8 +175,9 @@ The tutorials follow the order of the workflow:
 | [**Tutorial 2**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html) | Phylogenetic Inference and Divergence Time Estimation |
 | [**Tutorial 3**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html) | Visualization and Metadata Integration |
 | [**Tutorial 4**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html) | Phylogenetic Validation and Comparative Analyses |
-| [**Tutorial 5**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html) | Molecular identification (DNA barcoding) |
-| [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html) | Core pipeline functions and methodological dictionary |
+| [**Tutorial 5**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html) | Molecular identification (DNA barcoding): the reference library and its validation |
+| [**Tutorial 6**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html) | Identifying a sample: worked examples and rates |
+| [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-7-cactus-phylogeny-functions.html) | Core pipeline functions and methodological dictionary |
 
 ## Next Steps
 

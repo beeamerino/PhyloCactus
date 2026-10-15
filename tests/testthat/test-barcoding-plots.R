@@ -34,7 +34,9 @@ test_that("plot_barcoding_identification() draws the threshold given as a dashed
   g <- if (inherits(p, "patchwork")) p[[1]] else p
   hl <- Filter(function(l) inherits(l$geom, "GeomHline"), g$layers)
   expect_gte(length(hl), 1L)
-  expect_true(any(vapply(hl, function(l) isTRUE(all.equal(l$data$yintercept %||% l$aes_params$yintercept, 60)), logical(1))))
+  # The intercept is in the layer data or in its fixed parameters (base %||% needs R 4.4)
+  yi <- function(l) if (!is.null(l$data$yintercept)) l$data$yintercept else l$aes_params$yintercept
+  expect_true(any(vapply(hl, function(l) isTRUE(all.equal(yi(l), 60)), logical(1))))
 })
 
 test_that("plot_barcoding_identification() stops with the name of a missing column", {
@@ -93,4 +95,23 @@ test_that("neither function writes a file", {
   plot_barcoding_identification(.plt_answer(), sampling = .plt_sampling())
   plot_barcoding_identification_summary(list(first = .plt_answer()))
   expect_length(list.files(tmp, recursive = TRUE, all.files = TRUE, no.. = TRUE), 0L)
+})
+
+# Added during the code (15-10), declared in the log: drawn from the real tables of MN517611.1, the
+# sampling of Mammillaria (more than 100 species) was unreadable; above max_species, the species not
+# named are gathered into one row per genus that counts them.
+test_that("above max_species, the species not named are gathered into one row per genus", {
+  s <- data.frame(genus = "Opuntia", species = rep(sprintf("Opuntia_sp%02d", 1:30), each = 2),
+                  locus = rep(c("matK", "rbcL"), 30), sequences = rep(c(1L, 0L), 30), stringsAsFactors = FALSE)
+  s$species[1:2] <- "Opuntia_alpha"
+  q <- plot_barcoding_identification(.plt_answer(), sampling = s, max_species = 10)
+  d <- q[[2]]$data
+  expect_true("Opuntia_alpha" %in% d$species)
+  other <- d[grepl("other species", d$species), , drop = FALSE]
+  expect_equal(nrow(other), 2L)
+  expect_equal(other$sequences[other$locus == "matK"], 29)
+  expect_equal(other$sequences[other$locus == "rbcL"], 0)
+  # Under max_species nothing is gathered
+  q2 <- plot_barcoding_identification(.plt_answer(), sampling = s, max_species = 100)
+  expect_false(any(grepl("other species", q2[[2]]$data$species)))
 })

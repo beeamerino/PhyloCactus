@@ -51,8 +51,10 @@ test_that("every query of the example tables is a public accession, and no own s
   ex <- list.files(.df_extdata(), pattern = "^barcoding_example_.*_answer\\.csv$", full.names = TRUE)
   skip_if(length(ex) == 0L, "no example table of Tutorial 6 yet")
   q <- unique(unlist(lapply(ex, function(f) utils::read.csv(f, stringsAsFactors = FALSE)$query)))
-  # Contigs of an assembly or of reads carry the run in their name (run__contig)
+  # The regions of an assembly carry the run in their name (run__locus); the contigs that GetOrganelle
+  # assembles from reads are named by their organelle (plastome_<n>, nrdna_<n>)
   q <- sub("__.*$", "", q)
+  q <- q[!grepl("^(plastome|nrdna)_[0-9]+$", q)]
   expect_true(all(grepl(.df_accession, q)), info = paste(q[!grepl(.df_accession, q)], collapse = ", "))
 })
 

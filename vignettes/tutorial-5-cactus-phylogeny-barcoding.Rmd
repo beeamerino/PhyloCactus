@@ -88,51 +88,7 @@ The same answer is available for other kinds of input:
 - **An assembly** (FASTA): `identify_barcoding_assembly()`, which maps the library loci with `minimap2` and `samtools`.
 - **Paired Illumina reads** (genome skim or whole-genome sequencing): `identify_barcoding_reads()`, which assembles the plastome and the nuclear ribosomal DNA with `fastp` and GetOrganelle, then identifies them locus by locus. Reads are a query, not a source of the library.
 
-## How Well This Version Identifies
-
-The figures below were measured on the library of this development version built with the author's own data (frozen on 2026-10-06; manifest md5 `48be326e9ce4f1b779a175e149d509d1`), with the species thresholds of step 9.
-A library built from GenBank alone lacks the 131 own sequences of `matK` and `rbcL` (mostly of *Eriosyce* and *Copiapoa*), and an answer that rested on them can differ.
-The figures belong to this library: as GenBank and own sequences enrich it in later versions, the probes that produced them are rerun and the rates are expected to change.
-
-Outcomes of real queries, in the order species correct / genus correct / abstention / conflict / wrong species / wrong genus.
-A species is "present" when the library holds it once the records of the query's own specimen are set aside.
-
-| Input | Unit | Species present | Species absent |
-|---|---|---|---|
-| One Sanger record | locus | 168 / 405 / 1733 / n.a. / 15 / 4 (2325) | 0 / 286 / 2181 / n.a. / 48 / 20 (2535) |
-| Sanger records of one GenBank specimen | specimen | 6 / 52 / 101 / 0 / 3 / 0 (162) | 0 / 20 / 17 / 0 / 1 / 0 (38) |
-| Assembled plastome from GenBank | plastome | 5 / 51 / 30 / 0 / 2 / 5 (93) | 0 / 2 / 0 / 1 / 0 / 1 (4) |
-| Illumina reads from SRA | run | 1 / 1 / 2 / 0 / 0 / 0 (4) | 0 / 1 / 2 / 0 / 0 / 0 (3) |
-
-For single records and sets of records, the records of the query's specimen (and, for single records, of the other queries identified with it) were removed from the library before identification.
-The single-record rows include 55 own records among 4860.
-Plastomes and reads were identified against the full library.
-
-Abstention is the most common answer of this version, and a wrong species is rare but possible: no rule tested brings it to zero.
-Real records abstain far more often than the folds of step 7 suggest (three quarters of single records with the species present, against a fifth of the scheme E folds of IdTaxa at 60).
-Six public examples, one per kind of answer, show why:
-
-| Answer | Input | Accession | True species | What the package answered |
-|---|---|---|---|---|
-| Species correct | plastome | MN517611.1 | *Mammillaria zephyranthoides* (in the library) | the species from `matK` (confidence 80.7, threshold 67.4), among 114 species of *Mammillaria* in the `matK` library |
-| Genus correct | reads | SRR26398994 | *Opuntia comonduensis* (not in the library) | *Opuntia* from `ndhF-rpl32` (genus confidence 80.8); the species confidence stays low among 71 congeners |
-| Abstention | reads | SRR12935164 | *Ariocarpus retusus* (in the library) | no answer: 13 loci assembled, all below 60; the best rows point to *Ariocarpus* (48.7 and 48.0) |
-| Conflict | plastome | OQ458704.1 | *Cleistocactus hyalacanthus* (not in the library) | *Cleistocactus* from `trnS-trnG` against *Cereus* from `psbJ-petA`, whose library holds no *Cleistocactus* |
-| Wrong species | plastome | MT387452.1 | *Rhipsalis teres* (in the library) | *Lepismium lumbricoides* from `matK`: the region is identical to FN669720.1, a record under that name |
-| Wrong genus | plastome | OR807739.1 | *Parodia microsperma* (in the `matK` library) | *Eriosyce* from `rbcL`, whose library holds no *Parodia* |
-
-- A species is named only when one locus clears the species threshold of that locus.
-- A species absent from the library is answered at genus rank when its congeners keep the species confidence low.
-- A locus whose library lacks the true genus can only name another genus; when other loci disagree, the answer is a conflict, not a choice. The coverage of each locus library tells which genera it holds.
-- An identical sequence under two names (a misidentified voucher or a haplotype shared across genera) yields a confident wrong answer. The report lists the identical library record so that it can be inspected.
-
-The same limitation weighs on the Chilean genera: in the single-record probe, the `matK` record MT792775.1 of *Eulychnia acida*, with its species absent from the reduced library, was named *E. iquiquensis*, the only congener left (confidence 77.9, threshold 67.4).
-
-```{r, eval = FALSE}
-# The examples identified from reads, downloaded from ENA (fastp and GetOrganelle required)
-identify_barcoding_reads("SRR26398994_1.fastq.gz", "SRR26398994_2.fastq.gz",
-                         run_name = "SRR26398994")
-```
+[Tutorial 6](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html) identifies public samples of each of these kinds of input, shows their reports, and gives the rates measured with this version.
 
 ## Limitations
 
@@ -140,7 +96,7 @@ identify_barcoding_reads("SRR26398994_1.fastq.gz", "SRR26398994_2.fastq.gz",
 - **Abstention.** The common answer of this version. Plastid loci of closely related cacti differ little, most species are represented by one sequence per locus, and IdTaxa withholds an answer rather than guess.
 - **One locus, one answer.** A species answer usually rests on a single locus, mostly `matK`. The agreement between loci, given in the report, is the main check a user has.
 - **`ITS` and the nearest neighbour.** The rule of remoteness of the nearest neighbour does not reject the sister lineages in `ITS`. The identification runs IdTaxa, which rejects them; the nearest neighbour is used only in the internal validation.
-- **Coverage.** The library holds 1209 of the accepted species of the checklist (Korotkova *et al*. 2021); a sample of a species or genus outside a locus library can only be named as something else in that locus (examples of conflict and wrong genus).
+- **Coverage.** The library holds 1209 of the accepted species of the checklist (Korotkova *et al*. 2021); a sample of a species or genus outside a locus library can only be named as something else in that locus (Tutorial 6 gives examples).
 
 ## Design Decisions
 
@@ -152,7 +108,7 @@ The manifest of this section in version 0.4.5 left five questions open. The phas
 4. **Genome skims and other reads.** The library is built from Sanger marker records of GenBank and own sequences, and genome skims are not a source of it (2026-10-07). Illumina reads that a user brings are a query: `identify_barcoding_reads()` assembles their plastome and nuclear ribosomal DNA and identifies them against the library, locus by locus.
 5. **Paralogy and organelle capture.** Possible paralogs (`pepC_like`) and saturation are flagged and kept; conflict between plastid and nuclear loci is reported as disagreement between loci, not resolved. Per-locus monophyly and the cytonuclear diagnosis are planned for version 0.6.
 
-[Continue to Tutorial 6: Core Pipeline Functions and Methodological Dictionary](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html)
+[Continue to Tutorial 6: Identifying a Sample](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html)
 
 ## References
 

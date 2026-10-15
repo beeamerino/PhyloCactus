@@ -18,7 +18,7 @@ The difficulty increases in plant lineages that diversified recently and rapidly
 
 `PhyloCactus` is an R package that implements this assembly and analysis as a reproducible workflow. It links established software in four stages: orthology-based sequence retrieval (`phylotaR`), multiple sequence alignment (`MAFFT`), alignment masking (`DECIPHER`), a saturation screen, substitution model selection (`ModelTest-NG`), constrained maximum-likelihood inference (`RAxML-NG`), Felsenstein bootstrap proportions (FBP), penalized likelihood dating (`treePL`), retrieval of IUCN Red List assessments (`rredlist`), and comparison with published phylogenies, one of which can be summarized under the multispecies coalescent with `ASTRAL-III`.
 
-A second branch identifies samples of cacti by DNA barcoding: from the same mining it builds a reference library of Sanger marker records, validates it, and identifies a sample (sequences, an assembly or Illumina reads) against it, locus by locus (Tutorial 5).
+A second branch identifies samples of cacti by DNA barcoding: from the same mining it builds a reference library of Sanger marker records, validates it, and identifies a sample (sequences, an assembly or Illumina reads) against it, locus by locus (Tutorials 5 and 6).
 
 ## Workflow
 
@@ -38,7 +38,7 @@ The workflow comprises thirteen modules grouped in four stages.
 4.  **Stage 4: Validation (Module 13)**\
     Compares the focal tree with published phylogenies (Amaral *et al*. 2022; Thompson *et al*. 2024; Zuntini *et al*. 2024; de Vos *et al*. 2025) by Robinson-Foulds and information-theoretic distances and by multidimensional scaling (MDS) of tree space (`validate_phylogenies()`). The published gene trees of de Vos *et al*. (2025) can optionally be summarized into a species tree with `ASTRAL-III`, which then enters the comparison as a further reference; by default the distributed summary tree is used. `PhyloCactus` does not infer gene trees from its own supermatrix and does not quantify gene tree discordance.
 
-**Molecular identification (Tutorial 5).** Builds a reference library of 15 loci from the same phylotaR mining, validates it with folds that ask for the species or, with the species left out, for the genus, with negative controls, and identifies a sample locus by locus with IdTaxa (Murali *et al*. 2018) in three states: species, genus or no answer. Each identification writes an HTML report.
+**Molecular identification (Tutorial 5).** Builds a reference library of 15 loci from the same phylotaR mining, validates it with folds that ask for the species or, with the species left out, for the genus, with negative controls, and identifies a sample locus by locus with IdTaxa (Murali *et al*. 2018) in three states: species, genus or no answer. Each identification writes an HTML report (Tutorial 6 identifies public samples of each kind of input).
 
 ## Installation
 
@@ -101,8 +101,9 @@ The following programs must be installed and available on the system `PATH`, or 
 | [**Tutorial 2**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html) | Stage 2: substitution models, constrained maximum-likelihood search, bootstrap support and `treePL` dating |
 | [**Tutorial 3**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html) | Stage 3: IUCN Red List data, collapse of weakly supported nodes and figures |
 | [**Tutorial 4**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html) | Stage 4: tree distances, MDS of tree space and the optional `ASTRAL-III` reference summary |
-| [**Tutorial 5**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html) | Molecular identification: reference library, its validation, identification of a sample and the rates measured with this version |
-| [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html) | Package functions and the methods they implement |
+| [**Tutorial 5**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html) | Molecular identification: the reference library and its validation |
+| [**Tutorial 6**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html) | Identifying a sample: worked examples of each kind of input, the report, and the rates measured with this version |
+| [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-7-cactus-phylogeny-functions.html) | Package functions and the methods they implement |
 
 ## Citation
 

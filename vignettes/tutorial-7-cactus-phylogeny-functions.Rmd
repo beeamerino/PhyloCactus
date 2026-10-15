@@ -1,10 +1,10 @@
 ---
-title: "Tutorial 6: Core Pipeline Functions and Methodological Dictionary"
+title: "Tutorial 7: Core Pipeline Functions and Methodological Dictionary"
 author: "Beatriz M. Meriño"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Tutorial 6: Core Pipeline Functions and Methodological Dictionary}
+  %\VignetteIndexEntry{Tutorial 7: Core Pipeline Functions and Methodological Dictionary}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -109,6 +109,8 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `identify_barcoding_assembly()` | Maps the library loci onto an assembly with `minimap2`, extracts them with `samtools` and identifies them. | Li (2018); Danecek et al. (2021) |
 | `identify_barcoding_reads()` | Assembles the plastome and the nuclear ribosomal DNA from paired Illumina reads with `fastp` and GetOrganelle, then identifies them. | Chen et al. (2018); Jin et al. (2020) |
 | `report_barcoding_identification()` | Writes the self-contained HTML report of a run: answer per locus, agreement between loci, alternatives, sampling of the genus and provenance. | |
+| `plot_barcoding_identification()` | Draws the answer per locus of an identification, and the sampling of the named genera, from the tables of its report. | |
+| `plot_barcoding_identification_summary()` | Draws the answers of several identifications side by side, one row per identification and one column per locus. | |
 
 ### Help Pages
 

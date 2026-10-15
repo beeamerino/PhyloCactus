@@ -30,8 +30,10 @@ navbar:
         href: articles/tutorial-4-cactus-phylogeny-validation.html
       - text: 5. DNA Barcoding
         href: articles/tutorial-5-cactus-phylogeny-barcoding.html
-      - text: 6. Core Functions Dictionary
-        href: articles/tutorial-6-cactus-phylogeny-functions.html
+      - text: 6. Identifying a Sample
+        href: articles/tutorial-6-cactus-barcoding-identification.html
+      - text: 7. Core Functions Dictionary
+        href: articles/tutorial-7-cactus-phylogeny-functions.html
 reference:
 - title: Sequence Assemblies & phylotaR Import
   desc: Setup local taxonomic databases, pull orthologous sequence clusters via `phylotaR`,
@@ -135,13 +137,15 @@ reference:
   - summarise_barcoding_genus_discrimination
 - title: Molecular Identification
   desc: Identify a sample against the library, locus by locus, from sequences, a sample sheet,
-    an assembly or Illumina reads, and write its report (Tutorial 5, step 11).
+    an assembly or Illumina reads, write its report, and draw its answer (Tutorials 5 and 6).
   contents:
   - identify_barcoding_query
   - identify_barcoding_samples
   - identify_barcoding_assembly
   - identify_barcoding_reads
   - report_barcoding_identification
+  - plot_barcoding_identification
+  - plot_barcoding_identification_summary
 - title: Internal Tools and Visualization Helpers
   desc: Internal functions for phylogenetic visualization and data preparation.
   contents:
@@ -161,4 +165,5 @@ reference:
   - get_tree_max_depth
   - format_age_labels
   - add_chronogram_axis
-
+redirects:
+- ["articles/tutorial-6-cactus-phylogeny-functions.html", "articles/tutorial-7-cactus-phylogeny-functions.html"]
