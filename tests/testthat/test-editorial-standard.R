@@ -57,12 +57,16 @@ test_that("the palette gives the colours of E1 by role, in their fixed order", {
   expect_identical(pc("state"), c("1" = "#1c5cab", "2" = "#86b6ef", "3" = "#a8a79f"))
   # Magnitudes in greys, light to dark, from the neutral fill to the text grey (amendment of BMM, 15-10:
   # colour only for categories; everything else in grey)
-  expect_identical(unname(pc("sequential")), c("#f0efec", "#d6d5cf", "#bdbcb5", "#a8a79f", "#8a8983", "#6b6a65", "#52514e"))
-  expect_identical(pc("support"), c(">= 90" = "#0b0b0b", "70-89" = "#a8a79f", "< 70" = "#ffffff", "Constrained" = "#2a78d6"))
+  # The greys of the phylogeny figures of Tutorial 3 before 15-10 are the reference (BMM, 15-10: "toda la parte
+  # del vignette de visualizacion de la filogenia estaba bien en colores"): grey95 to grey25 for magnitudes
+  expect_identical(unname(pc("sequential")), c("#F2F2F2", "#D9D9D9", "#BFBFBF", "#999999", "#7F7F7F", "#595959", "#404040"))
+  # Node support exactly as Tutorial 3 drew it (white, grey, black, steelblue)
+  expect_identical(pc("support"), c(">= 90" = "#FFFFFF", "70-89" = "#BEBEBE", "< 70" = "#000000", "Constrained" = "#4682B4"))
   # Lines, text and backgrounds of the figures take the neutral greys of the palette, not R colour names;
   # marks of a single series take the mark grey (amendment of E1 by BMM, 15-10: "gris como relleno, no azul")
-  expect_identical(pc("neutral"), c(text = "#52514e", line = "#a8a79f", rule = "#d6d5cf", fill = "#f0efec",
-                                    mark = "#6b6a65"))
+  # Tutorial 3: text grey20, HPD bars gray60, strips grey90, absence grey95, bars and points grey35
+  expect_identical(pc("neutral"), c(text = "#333333", line = "#999999", rule = "#E5E5E5", fill = "#F2F2F2",
+                                    mark = "#595959"))
   iucn <- pc("iucn")
   expect_identical(names(iucn), c("EX", "EW", "CR", "EN", "VU", "NT", "LC", "DD", "NE"))
   expect_identical(unname(iucn[c("CR", "EN", "VU", "LC")]), c("#D81E05", "#FC7F3F", "#F9E814", "#60C659"))
@@ -80,17 +84,58 @@ test_that("the state colours of the report and of the plotting functions are the
   expect_identical(unname(sc[[1]]$palette(3)), unname(PhyloCactus::phylocactus_colours("state")))
 })
 
-test_that("presence and absence: mark grey against the neutral fill, in every panel (E1, amendment of 15-10)", {
+test_that("presence and absence: grey25 against grey95 as in Tutorial 3, in every panel (E1, amendment of 15-10)", {
   n <- PhyloCactus::phylocactus_colours("neutral")
   s <- data.frame(genus = "Opuntia", species = c("Opuntia_a", "Opuntia_b"), locus = "matK", sequences = c(2L, 0L),
                   stringsAsFactors = FALSE)
   p <- PhyloCactus:::.bc_report_sampling_plot(s, "Opuntia_a")
   sc <- Filter(function(x) "fill" %in% x$aesthetics, p$scales$scales)[[1]]
-  expect_identical(unname(sc$palette(2)[c("TRUE", "FALSE")]), unname(c(n[["mark"]], n[["fill"]])))
+  present <- PhyloCactus::phylocactus_colours("sequential")[["700"]]
+  expect_identical(unname(sc$palette(2)[c("TRUE", "FALSE")]), unname(c(present, n[["fill"]])))
   t <- data.frame(path = "crop", core_trimmed = 0, genus_core_trimmed = 0, stringsAsFactors = FALSE)
   q <- PhyloCactus:::.bc_report_route_plot("plastome", t)
   sq <- Filter(function(x) "fill" %in% x$aesthetics, q$scales$scales)[[1]]
-  expect_identical(unname(sq$palette(2)[c("run", "not run")]), unname(c(n[["mark"]], n[["fill"]])))
+  expect_identical(unname(sq$palette(2)[c("run", "not run")]), unname(c(present, n[["fill"]])))
+})
+
+test_that("composite figures carry panel tags from one place, so their style changes in one line", {
+  # A, B by default; options(phylocactus.tag_suffix = ")") gives A), B) in every composite figure
+  a <- PhyloCactus::phylocactus_panel_tags()
+  expect_identical(a$tag_levels, "A")
+  expect_identical(a$tag_suffix, "")
+  withr::local_options(phylocactus.tag_suffix = ")")
+  expect_identical(PhyloCactus::phylocactus_panel_tags()$tag_suffix, ")")
+  expect_identical(PhyloCactus:::.phylocactus_tag_labels(3), c("A)", "B)", "C)"))
+})
+
+test_that("every composite figure of R/ and of the scripts takes its tags from phylocactus_panel_tags()", {
+  composite <- c("wrap_plots", "plot_grid")
+  tagged <- c("phylocactus_panel_tags", ".phylocactus_tag_labels")
+  units <- function(f) {
+    ex <- as.list(parse(f, keep.source = FALSE))
+    # In R/, a unit is a function definition; in a script, a top-level expression
+    unlist(lapply(ex, function(e) if (is.call(e) && identical(e[[1]], as.name("<-")) && is.call(e[[3]]) &&
+                                       identical(e[[3]][[1]], as.name("function"))) list(e[[3]]) else list(e)),
+           recursive = FALSE)
+  }
+  for (f in c(setdiff(.es_r_files(), .es_r_files()[basename(.es_r_files()) == "palette.R"]), .es_scripts())) {
+    for (u in units(f)) {
+      nm <- all.names(u)
+      if (any(composite %in% nm)) expect_true(any(tagged %in% nm), info = paste(basename(f), paste(deparse(u)[1], collapse = "")))
+    }
+    expect_false(any(grepl("tag_levels\\s*=", .es_code_lines(f))), info = paste(basename(f), "tag_levels written by hand"))
+  }
+})
+
+test_that("points are filled with the grey of the bars, and TB4 tells its classes apart with the outcome colours", {
+  for (f in c(.es_scripts(), .es_vignettes())) {
+    x <- .es_code_lines(f)
+    pts <- grep("geom_point\\(", x, value = TRUE)
+    pts <- pts[!grepl("aes\\(|data\\s*=", pts)]
+    expect_true(all(grepl("mark", pts)), info = paste(basename(f), paste(pts[!grepl("mark", pts)], collapse = " | ")))
+  }
+  s <- paste(readLines(system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus")), collapse = "\n")
+  expect_true(grepl('phylocactus_colours("outcome")[c("species correct", "genus correct", "wrong species", "wrong genus")]', s, fixed = TRUE))
 })
 
 test_that("no colour literal outside the palette module (E1)", {
