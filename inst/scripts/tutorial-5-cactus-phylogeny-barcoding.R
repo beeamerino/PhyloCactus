@@ -420,7 +420,7 @@ lengths <- do.call(rbind, lapply(lib_loci, function(l) {
 lengths$stage <- factor(lengths$stage, levels = c("before the cut", "after the cut"))
 p_len <- ggplot(lengths, aes(locus, length, fill = stage)) + geom_boxplot(outlier.size = 0.4) +
   scale_fill_manual(values = c("before the cut" = neutral[["fill"]],
-                               "after the cut" = phylocactus_colours("categorical")[["blue"]])) +
+                               "after the cut" = neutral[["mark"]])) +
   scale_y_log10() + labs(x = NULL, y = "Sequence length (bases)", fill = NULL) +
   theme_phylocactus() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 replicates <- as.data.frame(table(locus = lib_records$locus, species = lib_records$species))
@@ -492,7 +492,7 @@ cover_locus <- data.frame(locus = c(lib_loci, "any locus"),
                                       length(unique(lib_records$species))))
 cover_locus$fraction <- cover_locus$species / length(accepted)
 cover_locus$locus <- factor(cover_locus$locus, levels = cover_locus$locus[order(cover_locus$species)])
-p_tb7a <- ggplot(cover_locus, aes(fraction, locus)) + geom_col(fill = phylocactus_colours("categorical")[["blue"]]) +
+p_tb7a <- ggplot(cover_locus, aes(fraction, locus)) + geom_col(fill = neutral[["mark"]]) +
   geom_text(aes(label = species), hjust = -0.2, size = 2.5) + scale_x_continuous(limits = c(0, 1)) +
   labs(x = paste0("Fraction of the ", length(accepted), " accepted species"), y = NULL) + theme_phylocactus()
 cover_genus <- data.frame(genus = names(accepted_genus), accepted = as.integer(accepted_genus))

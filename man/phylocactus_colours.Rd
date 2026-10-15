@@ -23,7 +23,8 @@ in a fixed order that is never cycled; \code{"outcome"} and \code{"state"} give 
 identification on a diverging scale, blue for a right answer, grey for none, red for a wrong
 one; \code{"sequential"} encodes a magnitude from light to dark blue; \code{"support"} gives the classes
 of bootstrap support of a node, filled for strong support, with constrained nodes apart;
-\code{"neutral"} holds the greys of text, lines, rules and backgrounds; \code{"iucn"} keeps the colours of
+\code{"neutral"} holds the greys of text, lines, rules, backgrounds and the marks of a single series
+(bars, histograms, segments, points); \code{"iucn"} keeps the colours of
 the IUCN Red List categories.
 }
 \examples{

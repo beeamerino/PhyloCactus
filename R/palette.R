@@ -18,7 +18,8 @@
 #' identification on a diverging scale, blue for a right answer, grey for none, red for a wrong
 #' one; `"sequential"` encodes a magnitude from light to dark blue; `"support"` gives the classes
 #' of bootstrap support of a node, filled for strong support, with constrained nodes apart;
-#' `"neutral"` holds the greys of text, lines, rules and backgrounds; `"iucn"` keeps the colours of
+#' `"neutral"` holds the greys of text, lines, rules, backgrounds and the marks of a single series
+#' (bars, histograms, segments, points); `"iucn"` keeps the colours of
 #' the IUCN Red List categories.
 #'
 #' @param role Character. One of `"categorical"`, `"outcome"`, `"state"`, `"sequential"`,
@@ -41,7 +42,7 @@ phylocactus_colours <- function(role = c("categorical", "outcome", "state", "seq
     sequential = c("100" = "#cde2fb", "200" = "#9ec5f4", "300" = "#6da7ec", "400" = "#3987e5",
                    "500" = "#256abf", "600" = "#184f95", "700" = "#0d366b"),
     support = c(">= 90" = "#0b0b0b", "70-89" = "#a8a79f", "< 70" = "#ffffff", "Constrained" = "#2a78d6"),
-    neutral = c(text = "#52514e", line = "#a8a79f", rule = "#d6d5cf", fill = "#f0efec"),
+    neutral = c(text = "#52514e", line = "#a8a79f", rule = "#d6d5cf", fill = "#f0efec", mark = "#6b6a65"),
     iucn = c("EX" = "#000000", "EW" = "#5C155A", "CR" = "#D81E05", "EN" = "#FC7F3F", "VU" = "#F9E814",
              "NT" = "#CCE226", "LC" = "#60C659", "DD" = "#D1D1C6", "NE" = "#FFFFFF"))
 }
