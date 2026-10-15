@@ -1,4 +1,4 @@
-# PhyloCactus (development version)
+# PhyloCactus 0.5.0
 
 ## Molecular diagnostic section (DNA barcoding)
 
