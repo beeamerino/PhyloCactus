@@ -116,16 +116,16 @@ citation("PhyloCactus")
 ## References
 
 - Amaral *et al*. 2022. Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. *Biological Conservation*, 273, 109677. <https://doi.org/10.1016/j.biocon.2022.109677>
-- Arakaki *et al*. 2011. Contemporaneous and recent radiations of the world's major succulent plant lineages. *PNAS*, 108(20), 8379-8384. <https://doi.org/10.1073/pnas.1100628108>
+- Arakaki *et al*. 2011. Contemporaneous and recent radiations of the world's major succulent plant lineages. *PNAS*, 108(20), 8379–8384. <https://doi.org/10.1073/pnas.1100628108>
 - de Vos *et al*. 2025. Phylogenomics and classification of Cactaceae based on hundreds of nuclear genes. *Plant Systematics and Evolution*, 311(5), 28. <https://doi.org/10.1007/s00606-025-01948-z>
-- Guerrero *et al*. 2019. Phylogenetic relationships and evolutionary trends in the cactus family. *Journal of Heredity*, 110(1), 4-21. <https://doi.org/10.1093/jhered/esy064>
-- Hernández-Hernández *et al*. 2014. Beyond aridification: multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. *New Phytologist*, 202(4), 1382-1397. <https://doi.org/10.1111/nph.12752>
-- Jin, L., & Nei, M. 1990. Limitations of the evolutionary parsimony method of phylogenetic analysis. *Molecular Biology and Evolution*, 7(1), 82-102. <https://doi.org/10.1093/oxfordjournals.molbev.a040588>
-- Kimura, M. 1980. A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. *Journal of Molecular Evolution*, 16(2), 111-120. <https://doi.org/10.1007/BF01731581>
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org, a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251-270. <https://doi.org/10.3372/wi.51.51208>
+- Guerrero *et al*. 2019. Phylogenetic relationships and evolutionary trends in the cactus family. *Journal of Heredity*, 110(1), 4–21. <https://doi.org/10.1093/jhered/esy064>
+- Hernández-Hernández *et al*. 2014. Beyond aridification: multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. *New Phytologist*, 202(4), 1382–1397. <https://doi.org/10.1111/nph.12752>
+- Jin & Nei 1990. Limitations of the evolutionary parsimony method of phylogenetic analysis. *Molecular Biology and Evolution*, 7(1), 82–102. <https://doi.org/10.1093/oxfordjournals.molbev.a040588>
+- Kimura 1980. A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. *Journal of Molecular Evolution*, 16(2), 111–120. <https://doi.org/10.1007/BF01731581>
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 - Murali *et al*. 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. *Microbiome*, 6. <https://doi.org/10.1186/s40168-018-0521-5>
 - Thompson *et al*. 2024. Identifying the multiple drivers of cactus diversification. *Nature Communications*, 15(1), 7114. <https://doi.org/10.1038/s41467-024-51666-2>
-- Zuntini *et al*. 2024. Phylogenomics and the rise of the angiosperms. *Nature*, 629, 843-850. <https://doi.org/10.1038/s41586-024-07324-0>
+- Zuntini *et al*. 2024. Phylogenomics and the rise of the angiosperms. *Nature*, 629, 843–850. <https://doi.org/10.1038/s41586-024-07324-0>
 
 ## License
 

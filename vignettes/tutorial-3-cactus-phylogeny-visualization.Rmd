@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 
 ## Abstract
 
-This tutorial covers the last stage of the core workflow: integration of species metadata, figures of the phylogenetic products, and summaries of conservation status.
+This tutorial covers the third stage of the phylogenetic workflow: integration of species metadata, figures of the phylogenetic products, and summaries of conservation status.
 It uses the supermatrix, maximum-likelihood tree, bootstrap support values and chronogram produced in [Tutorial 1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) and [Tutorial 2](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
 
 **Module 11** reconciles the species in the supermatrix with the accepted checklist of Cactaceae (Korotkova *et al*. 2021) and retrieves species-level assessments from the IUCN Red List.
@@ -51,7 +51,7 @@ if(length(new_pkgs)) install.packages(new_pkgs)
 
 **IUCN Red List API token.** The IUCN queries require a personal API token. Run `rredlist::rl_use_iucn()` to open the registration page, store the token in `.Renviron` (opened with `usethis::edit_r_environ()`) as `IUCN_REDLIST_KEY="your_api_key"`, and restart R.
 
-### Data Setup & Pre-processing
+### Data Setup and Preprocessing
 
 To run the module as a script, copy the executable script to the tutorial directory:
 
@@ -236,7 +236,7 @@ All ingroup names in the supermatrix match the checklist, so every query uses an
 The output table (`TABLE_species_all_data.csv`) is used by all figures in Module 12.
 The chunk also writes `TABLE_conservation_prioritization_gaps.csv`, which lists the threatened species without sequence data.
 If the table already exists, it is read from disk and the API is not queried.
-IUCN assessments change between Red List versions; record the version used with `rredlist::rl_version()`.
+IUCN assessments change between Red List versions. The reference run used Red List version 2026-1 (IUCN 2026), reported by `rredlist::rl_version()`.
 
 ```{r, eval = FALSE}
 # ============================================================
@@ -716,7 +716,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 }
 ```
 
-Number of loci per species in each IUCN category, for the ingroup species in the chronogram.
+Share of the loci sampled for each species in each IUCN category, for the ingroup species in the chronogram.
 The figure shows whether threatened species are represented by fewer loci.
 
 ```{r figure_12_completeness_vs_iucn, eval = has_data, fig.width = 7, fig.height = 5, fig.cap = "**Figure 12.** Molecular completeness against IUCN category. Colours of the IUCN Red List categories."}
@@ -887,4 +887,5 @@ Tutorial 4 compares the tree with published phylogenies of Cactaceae using Robin
 ## References
 
 - Isaac *et al*. 2007. Mammals on the EDGE: conservation priorities based on threat and phylogeny. *PLoS ONE*, 2(3), e296. <https://doi.org/10.1371/journal.pone.0000296>
+- IUCN 2026. *The IUCN Red List of Threatened Species*. Version 2026-1. Accessed 2026-10-15. <https://www.iucnredlist.org>
 - Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>

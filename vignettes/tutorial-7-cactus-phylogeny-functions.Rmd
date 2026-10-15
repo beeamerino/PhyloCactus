@@ -63,7 +63,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `rescale_tree()` | Multiplies all branch lengths by a constant before dating with `treePL`. The factor changes the scale of the rate parameters and the numerical conditioning of the optimization; it does not change which branches `treePL` treats as too short. | Smith & O'Meara (2012) |
 | `run_treePL_direct()` | Runs the `treePL` binary on a configuration file, after checking that the tree is rooted. | Smith & O'Meara (2012) |
 | `run_treePL_cv()` | Selects the rate-smoothing parameter by cross-validation, classifies the shape of the cross-validation curve, and dates the tree. | Sanderson (2002); Maurin (2020) |
-| `automate_treePL()` | Runs cross-validation, smoothing selection and dating on the maximum-likelihood tree and on each bootstrap replicate. | Smith & O'Meara (2012); Maurin (2020) |
+| `automate_treePL()` | Selects the optimization parameters and the smoothing value by cross-validation on the maximum-likelihood tree, dates it, and applies them to every temporal bootstrap replicate. | Smith & O'Meara (2012); Maurin (2020) |
 | `send_run_notification()` | Sends an email when a long analysis ends, reporting status, timings and output paths. A failure to send does not stop the analysis. | `blastula` R package, <https://github.com/rstudio/blastula> |
 
 ### Comparison, Figures and IUCN Data
@@ -71,7 +71,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | Function | Description | Reference |
 |:---|:---|:---|
 | `validate_phylogenies()` | Compares the focal tree with published trees using the Robinson-Foulds and Different Phylogenetic Information distances, and projects the distances into tree space by multidimensional scaling. | Robinson & Foulds (1981); Smith (2020) |
-| `integrate_publication_tree()` | Maps support values onto the chronogram and the maximum-likelihood tree and collapses nodes with FBP below 70 into polytomies for the publication figures. | Hillis & Bull (1993) |
+| `integrate_publication_tree()` | Maps support values onto the chronogram and the maximum-likelihood tree and collapses nodes with FBP below 0.70 into polytomies for the publication figures. | Hillis & Bull (1993) |
 | `get_iucn_data()` | Retrieves the IUCN Red List assessment of a species through `rredlist`: category, criteria, population trend, countries of occurrence, endemism, habitats and threats. | IUCN (2026) |
 | `scale_fill_iucn()` | `ggplot2` fill scale with the standard IUCN Red List category colors. | IUCN (2026) |
 
@@ -133,7 +133,7 @@ The functions used for checks within the tutorials, such as `check_calibration_c
 - Felsenstein, J. 1985. Confidence limits on phylogenies: an approach using the bootstrap. *Evolution*, 39(4), 783-791. <https://doi.org/10.1111/j.1558-5646.1985.tb00420.x>
 - Guerrero, P. C., Majure, L. C., Cornejo-Romero, A., & Hernández-Hernández, T. 2019. Phylogenetic Relationships and Evolutionary Trends in the Cactus Family. *Journal of Heredity*, 110(1), 4-21. <https://doi.org/10.1093/jhered/esy064>
 - Hillis, D. M., & Bull, J. J. 1993. An empirical test of bootstrapping as a method for assessing confidence in phylogenetic analysis. *Systematic Biology*, 42(2), 182-192. <https://doi.org/10.1093/sysbio/42.2.182>
-- IUCN. 2026. *The IUCN Red List of Threatened Species*. Version 2026-1. Accessed 2026-09-19. <https://www.iucnredlist.org>
+- IUCN. 2026. *The IUCN Red List of Threatened Species*. Version 2026-1. Accessed 2026-10-15. <https://www.iucnredlist.org>
 - Jin, L., & Nei, M. 1990. Limitations of the evolutionary parsimony method of phylogenetic analysis. *Molecular Biology and Evolution*, 7(1), 82-102. <https://doi.org/10.1093/oxfordjournals.molbev.a040588>
 - Jin, J.-J., Yu, W.-B., Yang, J.-B., Song, Y., dePamphilis, C. W., Yi, T.-S., & Li, D.-Z. 2020. GetOrganelle: a fast and versatile toolkit for accurate de novo assembly of organelle genomes. *Genome Biology*, 21, 241. <https://doi.org/10.1186/s13059-020-02154-5>
 - Katoh, K., & Frith, M. C. 2012. Adding unaligned sequences into an existing alignment using MAFFT and LAST. *Bioinformatics*, 28(23), 3144-3146. <https://doi.org/10.1093/bioinformatics/bts578>
