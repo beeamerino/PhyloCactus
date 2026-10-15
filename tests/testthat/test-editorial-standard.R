@@ -133,6 +133,8 @@ test_that("points are filled with the grey of the bars, and TB4 tells its classe
     pts <- grep("geom_point\\(", x, value = TRUE)
     pts <- pts[!grepl("aes\\(|data\\s*=", pts)]
     expect_true(all(grepl("mark", pts)), info = paste(basename(f), paste(pts[!grepl("mark", pts)], collapse = " | ")))
+    # The same grey as the bars: no transparency on points (BMM, 15-10)
+    expect_false(any(grepl("alpha", pts)), info = paste(basename(f), "points with alpha"))
   }
   s <- paste(readLines(system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus")), collapse = "\n")
   expect_true(grepl('phylocactus_colours("outcome")[c("species correct", "genus correct", "wrong species", "wrong genus")]', s, fixed = TRUE))
