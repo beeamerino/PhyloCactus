@@ -267,3 +267,35 @@ test_that("the figures of Tutorial 3 keep their titles and subtitles (Tutorial 3
     expect_true(grepl(paste0("title = \"", t, "\""), v, fixed = TRUE), info = paste("vignette:", t))
   }
 })
+
+# Decision TB2-a of BMM (15-10): TB2 of Tutorial 5 is drawn as the marker presence heatmap of Tutorial 3
+# (Figure 3): the whole grid of species and loci, absent in grey95 and present in grey25, no ticks on
+# the species axis, loci in italics, no grid, base size 10. The number of sequences stays in the table.
+test_that("TB2 is drawn as the marker presence heatmap of Tutorial 3 (TB2-a)", {
+  x <- readLines(system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus"), warn = FALSE)
+  from <- grep("^# TB2\\.", x); to <- grep("save_fig\\(p_tb2", x)
+  expect_length(from, 1L); expect_length(to, 1L)
+  b <- paste(x[from:to], collapse = "\n")
+  # The whole grid: table() gives every species and locus; no row dropped
+  expect_false(grepl("Freq\\s*>\\s*0\\s*,\\s*\\]", b), info = "absent cells dropped")
+  expect_true(grepl("present", b, fixed = TRUE))
+  expect_true(grepl("fill = present", b, fixed = TRUE))
+  expect_true(grepl(paste0('scale_fill_manual(values = c(phylocactus_colours("neutral")[["fill"]], ',
+                           'phylocactus_colours("sequential")[["700"]]),'), b, fixed = TRUE))
+  expect_true(grepl('name = "Present", labels = c("No", "Yes")', b, fixed = TRUE))
+  expect_false(grepl("gradient|trans\\s*=", b), info = "a gradient of counts")
+  expect_true(grepl("theme_phylocactus(base_size = 10)", b, fixed = TRUE))
+  for (el in c("axis.text.y = element_blank()", "axis.ticks.y = element_blank()",
+               "panel.grid.major = element_blank()", "panel.grid.minor = element_blank()",
+               'axis.text.x = element_text(angle = 45, hjust = 1, face = "italic")'))
+    expect_true(grepl(el, b, fixed = TRUE), info = el)
+})
+
+# BMM (15-10): the figures of Tutorial 5 carry no caption inside the plot; the caption of a figure is
+# the one of the vignette (E3).
+test_that("no caption inside the plots of the tutorial scripts (E3, TB5, TB6, TB9)", {
+  for (f in .es_scripts()) {
+    x <- .es_code_lines(f)
+    expect_false(any(grepl("caption\\s*=", x)), info = paste(basename(f), paste(grep("caption\\s*=", x, value = TRUE), collapse = " | ")))
+  }
+})
