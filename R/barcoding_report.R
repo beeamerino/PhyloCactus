@@ -221,10 +221,11 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
                           arrow = grid::arrow(length = grid::unit(0.08, "in"))) +
     ggplot2::geom_tile(ggplot2::aes(fill = .data$run), width = 0.8, height = 0.6, colour = phylocactus_colours("neutral")[["text"]]) +
     ggplot2::geom_text(ggplot2::aes(label = gsub(" ", "\n", .data$step)), size = 2.6) +
-    ggplot2::scale_fill_manual(values = c(run = phylocactus_colours("sequential")[["200"]],
+    ggplot2::scale_fill_manual(values = c(run = phylocactus_colours("neutral")[["mark"]],
                                           `not run` = phylocactus_colours("neutral")[["fill"]]), name = NULL) +
     theme_phylocactus() + ggplot2::theme(axis.text = ggplot2::element_blank(), axis.title = ggplot2::element_blank(),
-                                         panel.grid = ggplot2::element_blank())
+                                         panel.grid = ggplot2::element_blank(),
+                                         legend.position = "bottom")
 }
 
 #' Answer per locus: species as a solid bar, genus as a striped bar, colour by state (Fig. 3c style)
@@ -282,7 +283,7 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
   ggplot2::ggplot(s, ggplot2::aes(x = .data$locus, y = .data$species)) +
     ggplot2::geom_tile(ggplot2::aes(fill = .data$sequences > 0), colour = "white") +
     ggplot2::geom_text(ggplot2::aes(label = .data$label, fontface = ifelse(.data$named, "bold", "plain")), size = 2.6) +
-    ggplot2::scale_fill_manual(values = c(`TRUE` = phylocactus_colours("sequential")[["200"]],
+    ggplot2::scale_fill_manual(values = c(`TRUE` = phylocactus_colours("neutral")[["mark"]],
                                           `FALSE` = phylocactus_colours("neutral")[["fill"]]), labels = c(`TRUE` = "sequences",
                                `FALSE` = "none"), name = NULL) +
     ggplot2::facet_grid(genus ~ ., scales = "free_y", space = "free_y") +
@@ -565,7 +566,7 @@ report_barcoding_identification <- function(run_name,
     sec <- function(i, title, body) sprintf("<h2 id=\"section-%d\">%d. %s</h2>\n%s", i, i, title, body)
     s1 <- paste0(.bc_html_table(data.frame(item = c("Query", "Input", "Input type", "md5 of the input", "Run"),
                                            value = c(q, get("path"), .bc_report_data_kind(input_type, t$query_length, t$query), get("md5"), run_name))),
-                 "<p>Steps of the route: ", if (is.na(get("steps"))) "not recorded" else .bc_html_escape(get("steps")), ". Steps in grey were not needed for this query.</p>",
+                 "<p>Steps of the route: ", if (is.na(get("steps"))) "not recorded" else .bc_html_escape(get("steps")), ". Steps in light grey were not needed for this query.</p>",
                  .bc_html_plot(.bc_report_route_plot(input_type, t), width = 9, height = 1.8))
     # The loci found only; the loci absent from the query are named once (every row stays in the CSV)
     fnd <- !t$reason %in% c("no_overlap", "assembly_failed", "single_species_library")

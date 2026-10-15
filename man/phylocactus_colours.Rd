@@ -5,12 +5,13 @@
 \title{Colours of the Figures of PhyloCactus}
 \usage{
 phylocactus_colours(
-  role = c("categorical", "outcome", "state", "sequential", "support", "neutral", "iucn")
+  role = c("categorical", "outcome", "state", "sequential", "support", "neutral", "theme",
+    "iucn")
 )
 }
 \arguments{
 \item{role}{Character. One of \code{"categorical"}, \code{"outcome"}, \code{"state"}, \code{"sequential"},
-\code{"support"}, \code{"neutral"} or \code{"iucn"}.}
+\code{"support"}, \code{"neutral"}, \code{"theme"} or \code{"iucn"}.}
 }
 \value{
 A character vector of hexadecimal colours, named by category where the role has
@@ -21,10 +22,11 @@ Returns the colours of one role of the palette the package uses for every figure
 one job: \code{"categorical"} tells unordered things apart (trees compared, methods, loci, nucleotides),
 in a fixed order that is never cycled; \code{"outcome"} and \code{"state"} give the answers of an
 identification on a diverging scale, blue for a right answer, grey for none, red for a wrong
-one; \code{"sequential"} encodes a magnitude from light to dark blue; \code{"support"} gives the classes
+one; \code{"sequential"} encodes a magnitude in greys, from light to dark; \code{"support"} gives the classes
 of bootstrap support of a node, filled for strong support, with constrained nodes apart;
 \code{"neutral"} holds the greys of text, lines, rules, backgrounds and the marks of a single series
-(bars, histograms, segments, points); \code{"iucn"} keeps the colours of
+(bars, histograms, segments, points); \code{"theme"} holds the colours of \code{\link[=theme_phylocactus]{theme_phylocactus()}};
+\code{"iucn"} keeps the colours of
 the IUCN Red List categories.
 }
 \examples{

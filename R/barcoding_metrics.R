@@ -217,7 +217,7 @@ summarise_barcoding_metrics <- function(classifier_dir = file.path("11_barcoding
                                                              c("Nearest neighbour (t*)", "IdTaxa (60)"))) +
       ggplot2::labs(title = l, x = "Unassigned share", y = "Correct at the rank of the scheme",
                     colour = NULL, caption = "Circles: operating points. Correct: species in E, genus in G.") +
-      theme_phylocactus()
+      theme_phylocactus(base_size = 9) + ggplot2::theme(legend.position = "bottom")
     .bc_gap_save(g, file.path(output_dir, paste0("FIG_barcoding_metrics_curve_", l)), width = 180, height = 100)
   }
   invisible(NULL)

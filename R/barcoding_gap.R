@@ -157,7 +157,9 @@
       plot.title = ggplot2::element_text(face = "bold", size = base_size + 1, hjust = 0,
                                          margin = ggplot2::margin(t = 0, r = 0, b = 2, l = 14)),
       plot.subtitle = ggplot2::element_text(size = base_size - 1, colour = phylocactus_colours("neutral")[["text"]],
-                                            margin = ggplot2::margin(t = 0, r = 0, b = 4, l = 14))
+                                            margin = ggplot2::margin(t = 0, r = 0, b = 4, l = 14)),
+      legend.position = "bottom",
+      plot.tag = ggplot2::element_text(face = "bold", size = base_size + 2)
     )
 }
 

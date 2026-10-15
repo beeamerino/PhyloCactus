@@ -4,10 +4,10 @@
 \alias{theme_phylocactus}
 \title{Theme of the Figures of PhyloCactus}
 \usage{
-theme_phylocactus(base_size = 9, base_family = "")
+theme_phylocactus(base_size = 12, base_family = "")
 }
 \arguments{
-\item{base_size}{Numeric. Base font size in points. Defaults to \code{9}.}
+\item{base_size}{Numeric. Base font size in points. Defaults to \code{12}.}
 
 \item{base_family}{Character. Base font family. Defaults to \code{""}.}
 }
@@ -15,10 +15,11 @@ theme_phylocactus(base_size = 9, base_family = "")
 A \code{ggplot2} theme.
 }
 \description{
-The one theme of the package figures: \code{theme_minimal()} with a recessive major grid, no minor
-grid, black axis text, the legend at the bottom and no title inside the plot (the title of a
-figure is its caption). Sizes are set for a double-column figure (180 mm), where the base size
-lands between 8 and 10 points once printed. Trees use \code{ggtree::theme_tree()} instead.
+The one theme of the package figures, the theme of BMM written in the script of Tutorial 3 and
+moved into the package as it was (decisions T1 to T3 of 2026-10-15): \code{theme_minimal()} with a light
+grey panel and a white grid, italic axis titles, bold legend and strip titles. Its colours come
+from \code{phylocactus_colours("theme")}. The title of a figure is its caption, not a title inside the
+plot. Trees use \code{ggtree::theme_tree()} instead.
 }
 \examples{
 \dontrun{

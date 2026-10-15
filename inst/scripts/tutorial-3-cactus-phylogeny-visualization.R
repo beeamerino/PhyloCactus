@@ -277,7 +277,7 @@ p3 <- ggplot(heatmap_data, aes(x = marker, y = fct_rev(species), fill = present)
   scale_fill_manual(values = c(phylocactus_colours("neutral")[["fill"]], phylocactus_colours("neutral")[["mark"]]),
                     name = "Present", labels = c("No", "Yes")) +
   geom_tile() +
-  theme_phylocactus() +
+  theme_phylocactus(base_size = 10) +
   labs(x = "Marker", y = "Species") +
   theme(
     axis.text.y = element_blank(),
