@@ -155,7 +155,7 @@ The maximum-likelihood tree is the topology that maximizes the likelihood of the
 
 The **`build_constraint_scaffold()`** function builds the constraint tree from `cactus_constraints.csv`, which assigns the sampled species to subfamilies and major clades of **Cactaceae** following published phylogenies, principally Guerrero *et al*. (2019).
 
-The constraint does not impose a complete topology. In the reference dataset it fixes 34 of the 1021 internal bipartitions, the relationships among 21 named clades, and leaves the other 987 to be estimated from the data, including the placement of every species within its clade.
+The constraint does not impose a complete topology. In the reference dataset it fixes 34 of the 1205 internal bipartitions, the relationships among 21 named clades, and leaves the other 1171 to be estimated from the data, including the placement of every species within its clade.
 
 The **`calculate_ml_tree()`** function runs the constrained search in `RAxML-NG` (Kozlov *et al*., 2019) with the partition models selected in Module 7.
 
@@ -268,7 +268,7 @@ The **`generate_bootstrap_script()`** and **`run_local_bootstraps()`** functions
 
 The **`collect_bootstraps()`** function gathers the replicates, and **`check_bs_convergence()`** tests whether their number is sufficient with the autoMRE bootstopping criterion (Pattengale *et al*., 2010) on Felsenstein bootstrap proportions (FBP), with a cutoff of 0.03. In the reference run the criterion was met after 650 of 1000 replicates.
 
-The **`map_branch_supports()`** function maps the bootstrap support onto the maximum-likelihood tree. FBP is the primary measure, as in published phylogenies of Cactaceae, which report bipartition frequencies or posterior probabilities (Arakaki *et al*., 2011; Hernández-Hernández *et al*., 2014). The transfer bootstrap expectation (TBE; Lemoine *et al*., 2018) is computed as a secondary measure. TBE is less sensitive to unstable terminals in large matrices with missing data, but it is higher than FBP on large clades: on the 987 unconstrained nodes of the reference tree, clades of 51 to 200 terminals have a median FBP of 0.220 and a median TBE of 0.952. FBP is reported for comparability with published studies, and TBE as a measure of the stability of taxon placement.
+The **`map_branch_supports()`** function maps the bootstrap support onto the maximum-likelihood tree. FBP is the primary measure, as in published phylogenies of Cactaceae, which report bipartition frequencies or posterior probabilities (Arakaki *et al*., 2011; Hernández-Hernández *et al*., 2014). The transfer bootstrap expectation (TBE; Lemoine *et al*., 2018) is computed as a secondary measure. TBE is less sensitive to unstable terminals in large matrices with missing data, but it is higher than FBP on large clades: on the 1171 unconstrained nodes of the reference tree, clades of 51 to 200 terminals have a median FBP of 0.080 and a median TBE of 0.930. FBP is reported for comparability with published studies, and TBE as a measure of the stability of taxon placement.
 
 Nodes imposed by the constraint (`cactus_constraints.tree`) are recovered in every bootstrap replicate by construction and receive a support of 1.000. That value reproduces the constraint and does not measure support from the data; these nodes are reported as constrained in publication tables.
 
@@ -325,8 +325,8 @@ if (run_local_bs) {
     cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
     cluster_nodes = 1L,                               # Number of compute nodes requested
     threads = 40,                                     # CPU cores per array task (--cpus-per-task)
-    cluster_mem = "16G",                              # RAM memory allocation per task (--mem)
-    cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS)
+    cluster_mem = "16G",                              # RAM memory allocation per task (--mem; 6.0 GiB used, 250 replicates, 1208 terminals)
+    cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS; 13 h 05 min used at most, 250 replicates, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
     load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH

@@ -48,8 +48,28 @@ The library is not distributed with the package: the user builds it with steps 1
 4. **Final library** (`finalize_barcoding_library()`). Non-homologous sequences are excluded and declared, identical sequences of one species are collapsed, and the replication rule is evaluated again on distinct sequences.
 
 The library of this version holds 15 loci: `atpB-rbcL`, `ITS`, `matK`, `ndhF-rpl32`, `pepC_like`, `phyC`, `psbA-trnH`, `psbE-petL`, `psbJ-petA`, `rbcL`, `rpL16`, `rpl32-trnL`, `trnL-trnF`, `trnQ-rps16` and `trnS-trnG`.
-Built with the author's own data it holds 7738 sequences of 1209 species in 139 genera, 131 of them own sequences of `matK` and `rbcL`; built from GenBank alone it lacks those 131 sequences and four species.
+Built from GenBank records, as a user builds it, it holds 7607 sequences of 1205 species in 139 genera; own sequences can be added through `own_dir` (step 1).
 In every locus most species hold a single sequence, which limits what a species answer can rest on.
+
+```{r, echo = FALSE, out.width = "100%", fig.cap = "Alignments of `matK` and `ITS` in the library (TB1; the script draws one per locus)."}
+knitr::include_graphics(c("figures/Figure_TB1_alignment_matK.png", "figures/Figure_TB1_alignment_ITS.png"))
+```
+
+```{r, echo = FALSE, out.width = "100%", fig.cap = "Species by locus in the library (TB2)."}
+knitr::include_graphics("figures/Figure_TB2_species_by_locus.png")
+```
+
+```{r, echo = FALSE, out.width = "100%", fig.cap = "From assembly to library, per locus (TB3)."}
+knitr::include_graphics("figures/Figure_TB3_funnel.png")
+```
+
+```{r, echo = FALSE, out.width = "100%", fig.cap = "Lengths and replicates per locus (TB4)."}
+knitr::include_graphics("figures/Figure_TB4_lengths_and_replicates.png")
+```
+
+```{r, echo = FALSE, out.width = "100%", fig.cap = "Taxonomic coverage of the library against the checklist (TB7; Korotkova et al. 2021)."}
+knitr::include_graphics("figures/Figure_TB7_taxonomic_coverage.png")
+```
 
 ## Validating the Library (Steps 5 to 10)
 
@@ -62,6 +82,18 @@ In every locus most species hold a single sequence, which limits what a species 
 
 The script then draws the figures of the library and its validation into `11_barcoding/figures/`: the alignment of each locus, species by locus, the funnel from assembly to library, lengths and replicates, accuracy against the sampling of each genus and against missing data, taxonomic coverage against the checklist (Korotkova *et al*. 2021), and the genera native to Chile against *Opuntia* and *Mammillaria*.
 The figures of the folds describe the library classifying its own sequences: they are more favourable than the identification of new samples (next sections).
+
+```{r, echo = FALSE, out.width = "100%", fig.cap = "Accuracy of the folds against the sampling of each genus (TB5)."}
+knitr::include_graphics("figures/Figure_TB5_accuracy_against_sampling.png")
+```
+
+```{r, echo = FALSE, out.width = "100%", fig.cap = "Accuracy of the folds against missing data (TB6)."}
+knitr::include_graphics("figures/Figure_TB6_accuracy_against_missing_data.png")
+```
+
+```{r, echo = FALSE, out.width = "100%", fig.cap = "Genera native to Chile against Opuntia and Mammillaria in the folds (TB9)."}
+knitr::include_graphics("figures/Figure_TB9_chilean_genera.png")
+```
 
 ## Identifying a Sample (Step 11)
 
@@ -92,11 +124,11 @@ The same answer is available for other kinds of input:
 
 ## Limitations
 
-- **Wrong species.** Rare, not absent: 0.6 % of single records with the species present and 1.9 % with it absent, 4 of 358 specimens and 2 of 93 plastomes. Most are congeners named with high confidence when the true species is absent from the library or shares its haplotype.
+- **Wrong species.** Rare, not absent; [Tutorial 6](tutorial-6-cactus-barcoding-identification.html#how-well-this-version-identifies) gives the rates of this version for each kind of input. Most are congeners named with high confidence when the true species is absent from the library or shares its haplotype.
 - **Abstention.** The common answer of this version. Plastid loci of closely related cacti differ little, most species are represented by one sequence per locus, and IdTaxa withholds an answer rather than guess.
 - **One locus, one answer.** A species answer usually rests on a single locus, mostly `matK`. The agreement between loci, given in the report, is the main check a user has.
 - **`ITS` and the nearest neighbour.** The rule of remoteness of the nearest neighbour does not reject the sister lineages in `ITS`. The identification runs IdTaxa, which rejects them; the nearest neighbour is used only in the internal validation.
-- **Coverage.** The library holds 1209 of the accepted species of the checklist (Korotkova *et al*. 2021); a sample of a species or genus outside a locus library can only be named as something else in that locus (Tutorial 6 gives examples).
+- **Coverage.** The library holds 1205 of the accepted species of the checklist (Korotkova *et al*. 2021); a sample of a species or genus outside a locus library can only be named as something else in that locus (Tutorial 6 gives examples).
 
 ## Design Decisions
 

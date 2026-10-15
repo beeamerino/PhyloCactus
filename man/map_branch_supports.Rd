@@ -45,11 +45,11 @@ be compared. Transfer Bootstrap Expectation (TBE; Lemoine \emph{et al.}, 2018) i
 \code{metric = "tbe"} and belongs in a clearly labelled secondary column.
 
 The two are not on a common scale and TBE must never be reported as though it were a bootstrap
-percentage. TBE is bounded below by FBP and its inflation grows with clade size. Measured on the
-987 unconstrained nodes of the 1024-terminal reference tree: median TBE 0.783
-against median FBP 0.470, with the gap reaching 0.732 for clades of 51 to 200 terminals (median FBP 0.220,
-median TBE 0.952). Reporting TBE places 61 percent of nodes above 0.70; FBP places 29 percent (703 nodes
-collapsing below 0.70).
+percentage. TBE is bounded below by FBP and its inflation is largest on clades of intermediate size.
+Measured on the 1171 unconstrained nodes of the 1208-terminal reference tree of version 0.5.0: median
+TBE 0.772 against median FBP 0.450, with the gap reaching 0.850 for clades of 51 to 200 terminals
+(median FBP 0.080, median TBE 0.930). Reporting TBE places 59 percent of nodes at 0.70 or above; FBP
+places 28 percent (840 nodes below 0.70).
 
 Support values are meaningless for any bipartition imposed through \code{--tree-constraint}, because
 every replicate reproduces it by construction. Those nodes must be reported as constrained rather

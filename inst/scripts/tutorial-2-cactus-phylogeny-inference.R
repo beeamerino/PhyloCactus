@@ -268,8 +268,8 @@ if (run_local_bs) {
     cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
     cluster_nodes = 1L,                               # Number of compute nodes requested
     threads = 40,                                     # CPU cores per array task (--cpus-per-task)
-    cluster_mem = "16G",                              # RAM memory allocation per task (--mem)
-    cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS)
+    cluster_mem = "16G",                              # RAM memory allocation per task (--mem; 6.0 GiB used, 250 replicates, 1208 terminals)
+    cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS; 13 h 05 min used at most, 250 replicates, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
     load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
@@ -327,8 +327,8 @@ print(converge_log)
 # EDITORIAL & METHODOLOGICAL NOTE:
 # 1. Primary metric: Felsenstein's Bootstrap Proportions (FBP). This is the canonical metric
 #    reported across published Cactaceae phylogenies (e.g. Hernandez-Hernandez et al. 2014,
-#    Arakaki et al. 2011). TBE systematically inflates support on large clades (median FBP 0.470
-#    vs median TBE 0.783 in unconstrained nodes).
+#    Arakaki et al. 2011). TBE systematically inflates support on large clades (median FBP 0.450
+#    vs median TBE 0.772 in unconstrained nodes).
 # 2. Secondary metric: Transfer Bootstrap Expectation (TBE; Lemoine et al. 2018), retained as a
 #    complementary assessment of stability in supermatrices with missing data.
 # 3. Constrained nodes warning: The 34 nodes enforced by cactus_constraints.tree exhibit 1.000
