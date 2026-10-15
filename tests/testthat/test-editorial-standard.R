@@ -267,7 +267,6 @@ test_that("the figures of Tutorial 3 keep their titles and subtitles (Tutorial 3
               "Supermatrix Structure", "Marker Informativeness", "Species Composition",
               "Methodological status across checklist, supermatrix, and tree", "IUCN Categories",
               "Molecular Completeness vs IUCN Category",
-              "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 986)",
               "Threatened Unsampled Species by Genus", "Priority Cactaceae taxa (CR, EN, VU) lacking molecular sequences",
               "Endemic Species by Country", "Endemic Species by Country and IUCN Category", "Most Common Threats",
               "Most Common Habitats")
@@ -278,6 +277,11 @@ test_that("the figures of Tutorial 3 keep their titles and subtitles (Tutorial 3
     expect_true(grepl(paste0("title = \"", t, "\""), s, fixed = TRUE), info = paste("script:", t))
     expect_true(grepl(paste0("title = \"", t, "\""), v, fixed = TRUE), info = paste("vignette:", t))
   }
+  # The subtitle of Figure 12 keeps its words; its N is computed from the data (decision of BMM, 15-10,
+  # D-b part 2: test-documentation-db-part2.R)
+  n12 <- 'subtitle = paste0("Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = ",'
+  expect_true(grepl(n12, s, fixed = TRUE), info = "script: subtitle of Figure 12")
+  expect_true(grepl(n12, v, fixed = TRUE), info = "vignette: subtitle of Figure 12")
 })
 
 # Decision TB2-a of BMM (15-10): TB2 of Tutorial 5 is drawn as the marker presence heatmap of Tutorial 3
