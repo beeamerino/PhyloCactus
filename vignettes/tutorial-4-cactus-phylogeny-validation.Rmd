@@ -152,7 +152,7 @@ Because RF and DPI are computed on unrooted trees, the rooting affects only the 
 
 **Trees compared.** The four reference trees are read from `inst/extdata/`, where they are distributed with the package. The focal tree is the chronogram produced in Module 10, `8_Dating/dated_summary_hpd.tree`. When that file is absent, as when this tutorial is run on its own, the reference chronogram distributed with the package (`phylocactus_chronogram_hpd.tree`) is used instead.
 
-```{r, fig.width=11.69, fig.height=8.27, warning=FALSE, message=FALSE}
+```{r, fig.width=11.69, fig.height=8.27, warning=FALSE, message=FALSE, fig.cap="**Figure 1.** Tree space of the focal chronogram and the four published phylogenies: classical MDS of the normalized Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4); trees close together have similar topologies."}
 library(PhyloCactus)
 
 # The focal tree is the chronogram of this run; the reference trees are distributed with the package.
@@ -200,7 +200,7 @@ plot_to_show
 
 ```{r, echo=FALSE}
 if (!is.null(table_to_show)) {
-  knitr::kable(table_to_show, caption = "Pairwise tree distances")
+  knitr::kable(table_to_show, caption = "Table 1. Pairwise tree distances: normalized RF and DPI for each pair of trees and taxon set (first rows).")
 }
 ```
 

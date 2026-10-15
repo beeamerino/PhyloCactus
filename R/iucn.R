@@ -181,16 +181,6 @@ get_iucn_data <- function(sp_name) {
 #' }
 #' @export
 scale_fill_iucn <- function(...) {
-  iucn_colors <- c(
-    "EX" = "#000000",
-    "EW" = "#5C155A",
-    "CR" = "#D81E05",
-    "EN" = "#FC7F3F",
-    "VU" = "#F9E814",
-    "NT" = "#CCE226",
-    "LC" = "#60C659",
-    "DD" = "#D1D1C6",
-    "NE" = "#FFFFFF"
-  )
-  ggplot2::scale_fill_manual(values = iucn_colors, drop = FALSE, na.value = "grey50", ...)
+  ggplot2::scale_fill_manual(values = phylocactus_colours("iucn"), drop = FALSE,
+                             na.value = phylocactus_colours("neutral")[["line"]], ...)
 }

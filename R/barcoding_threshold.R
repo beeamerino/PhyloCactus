@@ -436,7 +436,7 @@ sweep_barcoding_threshold <- function(classifier_dir = file.path("11_barcoding",
                   y = "Proportion of queries",
                   colour = NULL, caption = "Dashed: operating threshold.") +
     .bc_gap_theme() +
-    ggplot2::theme(plot.caption = ggplot2::element_text(size = 7, colour = "grey30", hjust = 0))
+    ggplot2::theme(plot.caption = ggplot2::element_text(size = 7, colour = col[["text"]], hjust = 0))
 }
 
 #' Closing banner of step 9

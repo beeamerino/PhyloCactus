@@ -156,6 +156,6 @@ plot_barcoding_identification_summary <- function(answers) {
                                labels = c("1" = "1 species", "2" = "2 genus", "3" = "3 no answer")) +
     ggplot2::scale_y_discrete(labels = ylab) +
     ggplot2::labs(x = NULL, y = NULL, caption = "Cross: locus named at genus rank only (genus_only_locus).") +
-    ggplot2::theme_minimal(base_size = 10) +
+    theme_phylocactus(base_size = 10) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1), panel.grid = ggplot2::element_blank())
 }

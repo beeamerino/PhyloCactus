@@ -31,7 +31,7 @@ Each analytical step relies on established software, but chaining those programs
 
 The workflow comprises thirteen modules grouped in four stages.
 
-```{r workflow-fig, echo=FALSE, out.width="100%", fig.align="center", fig.cap="Conceptual framework of the PhyloCactus pipeline"}
+```{r workflow-fig, echo=FALSE, out.width="100%", fig.align="center", fig.cap="**Figure 1.** Conceptual framework of the PhyloCactus pipeline: the phylogenetic branch (Modules 1 to 13) and the molecular diagnostic branch (Tutorials 5 and 6) on the same phylotaR mining."}
 knitr::include_graphics("figures/Fig1_PhyloCactus_Workflow.png") 
 ```
 

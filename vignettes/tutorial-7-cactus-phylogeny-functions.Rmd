@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Overview
+## Abstract
 
 This page lists the main functions of the `PhyloCactus` workflow, grouped by stage, with the method each one implements and its primary reference.
 Arguments and return values are documented in the manual pages and in the `pkgdown` reference index.

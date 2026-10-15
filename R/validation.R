@@ -142,13 +142,9 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
   dir.create(OUT_TREES, recursive = TRUE, showWarnings = FALSE)
   dir.create(OUT_LOGS, recursive = TRUE, showWarnings = FALSE)
   
-  tree_palette <- c(
-    FocalTree = "#1b9e77",
-    Zuntini   = "#66a61e",
-    Thompson  = "#d95f02",
-    Amaral    = "#7570b3",
-    deVos     = "#e7298a"
-  )
+  # The first five categorical colours of the package palette (decision E1), in their fixed order
+  tree_palette <- stats::setNames(unname(phylocactus_colours("categorical")[1:5]),
+                                  c("FocalTree", "Zuntini", "Thompson", "Amaral", "deVos"))
   # Shapes as well as colours, so that the five trees remain distinguishable in greyscale print and
   # when two points overlap.
   tree_shapes <- c(FocalTree = 16, Zuntini = 17, Thompson = 15, Amaral = 18, deVos = 4)
@@ -168,7 +164,7 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
   }
   legend_labels <- .format_reference_labels(reference_labels[names(tree_palette)])
   
-  base_theme <- ggplot2::theme_minimal(base_size = 12) +
+  base_theme <- theme_phylocactus(base_size = 12) +
     ggplot2::theme(
       plot.title = ggplot2::element_text(face = "bold", hjust = 0.5),
       axis.title = ggplot2::element_text(face = "bold"),

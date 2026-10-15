@@ -137,36 +137,27 @@
 
 #' Editorial palette of the branch figures
 #'
-#' The two series of the barcode gap, in the Dark2 hues the package already uses for its figures
-#' (`R/validation.R`). Checked for colour vision deficiency: the adjacent pair keeps a separation of
-#' 11.6 in deuteranopia, above the threshold of 8, and both hold contrast over a light surface.
+#' The two series of the barcode gap: the first two categorical colours of the package palette
+#' (phylocactus_colours(), decision E1), which pass every colour-vision check as a pair.
 #' @noRd
 .bc_gap_colors <- function() {
-  c(intra = "#1b9e77", inter = "#d95f02", highlight = "#7570b3", neutral = "grey35")
+  k <- phylocactus_colours("categorical"); n <- phylocactus_colours("neutral")
+  c(intra = k[["blue"]], inter = k[["orange"]], highlight = k[["violet"]], neutral = n[["line"]],
+    text = n[["text"]], line = n[["line"]], rule = n[["rule"]])
 }
 
 #' Editorial theme of the branch figures
 #'
-#' The style the package uses elsewhere: `theme_minimal`, bold titles, black axis text, no minor
-#' grid and the legend at the bottom. Sizes are set for a double column figure (180 mm), where the
-#' base size lands between 8 and 10 points once printed.
+#' The theme of the package (theme_phylocactus(), decision E2), with the title and subtitle aligned
+#' to the panel of the composite figures of this branch.
 #' @noRd
 .bc_gap_theme <- function(base_size = 9) {
-  ggplot2::theme_minimal(base_size = base_size) +
+  theme_phylocactus(base_size = base_size) +
     ggplot2::theme(
       plot.title = ggplot2::element_text(face = "bold", size = base_size + 1, hjust = 0,
                                          margin = ggplot2::margin(t = 0, r = 0, b = 2, l = 14)),
-      plot.subtitle = ggplot2::element_text(size = base_size - 1, colour = "grey25",
-                                            margin = ggplot2::margin(t = 0, r = 0, b = 4, l = 14)),
-      plot.title.position = "plot",
-      axis.title = ggplot2::element_text(size = base_size),
-      axis.text = ggplot2::element_text(size = base_size - 1, colour = "black"),
-      panel.grid.minor = ggplot2::element_blank(),
-      panel.grid.major = ggplot2::element_line(linewidth = 0.25, colour = "grey88"),
-      legend.position = "bottom",
-      legend.key.size = grid::unit(3.5, "mm"),
-      legend.text = ggplot2::element_text(size = base_size - 1),
-      plot.tag = ggplot2::element_text(face = "bold", size = base_size + 2)
+      plot.subtitle = ggplot2::element_text(size = base_size - 1, colour = phylocactus_colours("neutral")[["text"]],
+                                            margin = ggplot2::margin(t = 0, r = 0, b = 4, l = 14))
     )
 }
 
@@ -266,7 +257,7 @@
   no_gap <- if (nrow(d) == 0) NA_real_ else mean(d$no_gap)
 
   ggplot2::ggplot(d, ggplot2::aes(x = .data$intra_max * 100, y = .data$inter_min * 100)) +
-    ggplot2::geom_abline(slope = 1, intercept = 0, colour = "grey55", linewidth = 0.4) +
+    ggplot2::geom_abline(slope = 1, intercept = 0, colour = col[["line"]], linewidth = 0.4) +
     ggplot2::geom_point(shape = 21, size = 1.6, stroke = 0.3, colour = "white",
                         fill = col[["neutral"]], alpha = 0.75) +
     ggplot2::coord_equal(xlim = lim, ylim = lim, expand = FALSE) +
@@ -299,7 +290,7 @@
       tag_levels = "A",
       caption = paste0("Dashed: P95 intra. Dotted: P5 inter. Below the 1:1 line: no gap. Pairs under ",
                        min_sites, " shared sites excluded."),
-      theme = ggplot2::theme(plot.caption = ggplot2::element_text(size = 7, colour = "grey30", hjust = 0))
+      theme = ggplot2::theme(plot.caption = ggplot2::element_text(size = 7, colour = .bc_gap_colors()[["text"]], hjust = 0))
     ) +
     patchwork::plot_layout(guides = "collect") &
     ggplot2::theme(legend.position = "bottom")
@@ -329,7 +320,7 @@
   )
   p1 <- ggplot2::ggplot(long_tab, ggplot2::aes(x = .data$value, y = .data$locus)) +
     ggplot2::geom_line(ggplot2::aes(group = interaction(.data$locus, .data$model)),
-                       colour = "grey70", linewidth = 0.4) +
+                       colour = col[["line"]], linewidth = 0.4) +
     ggplot2::geom_point(ggplot2::aes(colour = .data$series), size = 1.8) +
     ggplot2::facet_wrap(~ .data$model, nrow = 1) +
     ggplot2::scale_colour_manual(values = stats::setNames(c(col[["intra"]], col[["inter"]]),
@@ -342,7 +333,7 @@
   p2 <- ggplot2::ggplot(z, ggplot2::aes(x = .data$prop_inter_zero * 100, y = .data$locus)) +
     ggplot2::geom_segment(ggplot2::aes(x = 0, xend = .data$prop_inter_zero * 100,
                                        y = .data$locus, yend = .data$locus),
-                          colour = "grey80", linewidth = 0.5) +
+                          colour = col[["rule"]], linewidth = 0.5) +
     ggplot2::geom_point(colour = col[["inter"]], size = 1.8) +
     ggplot2::scale_x_continuous(limits = c(0, 100)) +
     ggplot2::labs(title = "Identical to another species",
@@ -352,7 +343,7 @@
 
   patchwork::wrap_plots(p1, p2, widths = c(2, 1)) +
     patchwork::plot_annotation(tag_levels = "A",
-      theme = ggplot2::theme(plot.caption = ggplot2::element_text(size = 7, colour = "grey30", hjust = 0)))
+      theme = ggplot2::theme(plot.caption = ggplot2::element_text(size = 7, colour = col[["text"]], hjust = 0)))
 }
 
 #' Barcode Gap of the Molecular Diagnostic Branch

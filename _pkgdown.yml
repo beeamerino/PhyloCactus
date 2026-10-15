@@ -111,6 +111,8 @@ reference:
   contents:
   - get_iucn_data
   - scale_fill_iucn
+  - phylocactus_colours
+  - theme_phylocactus
 - title: Barcoding Library
   desc: Build the reference library of the barcoding branch from the phylotaR mining of the
     phylogeny and, optionally, own sequences (Tutorial 5, steps 1 to 4).

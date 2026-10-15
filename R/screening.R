@@ -266,7 +266,7 @@ run_marker_screening <- function(
     df <- data.frame(dist = as.numeric(d), index = seq_along(as.numeric(d)))
     ggplot2::ggplot(df, ggplot2::aes(index, dist)) +
       ggplot2::geom_point(size = 1.2) +
-      ggplot2::theme_minimal(base_size = 10) +
+      theme_phylocactus(base_size = 10) +
       ggplot2::ggtitle(paste(marker, title_suffix)) +
       ggplot2::xlab("Pair index") + ggplot2::ylab("ML distance") +
       ggplot2::theme(plot.title = ggplot2::element_text(size = 11, face = "bold"), axis.title = ggplot2::element_text(size = 9))
@@ -290,7 +290,7 @@ run_marker_screening <- function(
     ggplot2::ggplot(df, ggplot2::aes(x, y)) +
       ggplot2::geom_point(size = 1.2) +
       ggplot2::geom_abline(slope = 1, intercept = 0, linetype = 2) +
-      ggplot2::theme_minimal(base_size = 10) +
+      theme_phylocactus(base_size = 10) +
       ggplot2::ggtitle(paste(marker, title_suffix)) +
       ggplot2::xlab(xlab_txt) + ggplot2::ylab(ylab_txt) +
       ggplot2::theme(plot.title = ggplot2::element_text(size = 11, face = "bold"), axis.title = ggplot2::element_text(size = 9))

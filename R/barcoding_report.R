@@ -62,9 +62,9 @@
   paste0("<img alt=\"figure\" src=\"data:image/png;base64,", .bc_base64(readBin(f, "raw", file.size(f))), "\"/>")
 }
 
-#' Colours of the three states, used in every panel
+#' Colours of the three states, used in every panel: the state role of the package palette (E1)
 #' @noRd
-.bc_state_colours <- function() c("1" = "#1B7837", "2" = "#2166AC", "3" = "#9E9E9E")
+.bc_state_colours <- function() phylocactus_colours("state")
 
 #' Nuclear loci of the library; every other locus is plastid
 #' @noRd
@@ -219,10 +219,12 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
   ggplot2::ggplot(d, ggplot2::aes(x = .data$x, y = 1)) +
     ggplot2::geom_segment(data = d[-nrow(d), ], ggplot2::aes(x = .data$x + 0.42, xend = .data$x + 0.58, y = 1, yend = 1),
                           arrow = grid::arrow(length = grid::unit(0.08, "in"))) +
-    ggplot2::geom_tile(ggplot2::aes(fill = .data$run), width = 0.8, height = 0.6, colour = "grey30") +
+    ggplot2::geom_tile(ggplot2::aes(fill = .data$run), width = 0.8, height = 0.6, colour = phylocactus_colours("neutral")[["text"]]) +
     ggplot2::geom_text(ggplot2::aes(label = gsub(" ", "\n", .data$step)), size = 2.6) +
-    ggplot2::scale_fill_manual(values = c(run = "#D9F0D3", `not run` = "#F0F0F0"), name = NULL) +
-    ggplot2::theme_void() + ggplot2::theme(legend.position = "bottom")
+    ggplot2::scale_fill_manual(values = c(run = phylocactus_colours("sequential")[["200"]],
+                                          `not run` = phylocactus_colours("neutral")[["fill"]]), name = NULL) +
+    theme_phylocactus() + ggplot2::theme(axis.text = ggplot2::element_blank(), axis.title = ggplot2::element_blank(),
+                                         panel.grid = ggplot2::element_blank())
 }
 
 #' Answer per locus: species as a solid bar, genus as a striped bar, colour by state (Fig. 3c style)
@@ -256,7 +258,8 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
     ggplot2::geom_rect(data = keys, ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax, ymin = 0, ymax = .data$ymax,
                                                  fill = .data$state)) +
     ggplot2::geom_rect(data = bars[bars$rank == "species", ], ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax, ymin = 0,
-                                                                           ymax = .data$ymax, fill = .data$state), colour = "grey20") +
+                                                                           ymax = .data$ymax, fill = .data$state),
+                       colour = phylocactus_colours("neutral")[["text"]]) +
     ggplot2::geom_rect(data = gen, ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax, ymin = 0, ymax = .data$ymax,
                                                 colour = .data$state), fill = "white", linewidth = 0.6) +
     ggplot2::geom_segment(data = stripes, ggplot2::aes(x = .data$x, xend = .data$xend, y = .data$y, yend = .data$y,
@@ -268,7 +271,7 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
     ggplot2::coord_cartesian(ylim = c(0, 100)) +
     ggplot2::facet_grid(. ~ compartment, scales = "free_x", space = "free_x") +
     ggplot2::labs(x = NULL, y = "IdTaxa confidence", caption = "Striped bar: genus. Solid bar: species. Dashed line: threshold.") +
-    ggplot2::theme_bw() + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+    theme_phylocactus() + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 }
 
 #' Sampling of the named genera in the library: species by locus (Fig. 4c style)
@@ -279,11 +282,12 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
   ggplot2::ggplot(s, ggplot2::aes(x = .data$locus, y = .data$species)) +
     ggplot2::geom_tile(ggplot2::aes(fill = .data$sequences > 0), colour = "white") +
     ggplot2::geom_text(ggplot2::aes(label = .data$label, fontface = ifelse(.data$named, "bold", "plain")), size = 2.6) +
-    ggplot2::scale_fill_manual(values = c(`TRUE` = "#A6DBA0", `FALSE` = "#F7F7F7"), labels = c(`TRUE` = "sequences",
+    ggplot2::scale_fill_manual(values = c(`TRUE` = phylocactus_colours("sequential")[["200"]],
+                                          `FALSE` = phylocactus_colours("neutral")[["fill"]]), labels = c(`TRUE` = "sequences",
                                `FALSE` = "none"), name = NULL) +
     ggplot2::facet_grid(genus ~ ., scales = "free_y", space = "free_y") +
     ggplot2::labs(x = NULL, y = NULL) +
-    ggplot2::theme_bw() + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
+    theme_phylocactus() + ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1),
                                          strip.text.y = ggplot2::element_text(angle = 0, face = "italic"))
 }
 

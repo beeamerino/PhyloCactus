@@ -352,8 +352,9 @@ folds$outcome <- ifelse(folds$state %in% 1L & same(folds$predicted_species, fold
 folds$genus_right <- folds$state %in% c(1L, 2L) & same(folds$predicted_genus, folds$true_genus)
 folds$scheme <- factor(folds$scheme, levels = c("species", "genus"))
 outcome_levels <- c("species correct", "genus correct", "abstention", "wrong species", "wrong genus")
-outcome_colours <- c("species correct" = "#1b7837", "genus correct" = "#a6dba0", "abstention" = "#bdbdbd",
-                     "wrong species" = "#f4a582", "wrong genus" = "#b2182b")
+# Colours of the package palette (decision E1): outcomes on the diverging scale, blue to red
+outcome_colours <- phylocactus_colours("outcome")
+neutral <- phylocactus_colours("neutral")
 
 # TB1. Alignment overview of each locus: one row per sequence, ordered by genus, coloured by base,
 # gaps blank, with the occupancy of each column above
@@ -367,13 +368,13 @@ for (l in lib_loci) {
   cells <- cells[!is.na(cells$base), ]
   occupancy <- data.frame(column = seq_len(ncol(m)), occupancy = colMeans(m != "-" & m != "N"))
   p_aln <- ggplot(cells, aes(column, row, fill = base)) + geom_raster() +
-    scale_fill_manual(values = c(A = "#4daf4a", C = "#377eb8", G = "#ff7f00", T = "#e41a1c")) +
+    scale_fill_manual(values = stats::setNames(unname(phylocactus_colours("categorical")[1:4]), c("A", "C", "G", "T"))) +
     scale_y_reverse(expand = c(0, 0)) + scale_x_continuous(expand = c(0, 0)) +
-    labs(x = "Alignment column", y = "Sequences, ordered by genus", fill = "Base") + theme_minimal(base_size = 9)
-  p_occ <- ggplot(occupancy, aes(column, occupancy)) + geom_area(fill = "grey60") +
+    labs(x = "Alignment column", y = "Sequences, ordered by genus", fill = "Base") + theme_phylocactus()
+  p_occ <- ggplot(occupancy, aes(column, occupancy)) + geom_area(fill = neutral[["line"]]) +
     scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(limits = c(0, 1)) +
     labs(x = NULL, y = "Occupancy", title = paste0(l, ": ", nrow(m), " sequences, ", ncol(m), " columns")) +
-    theme_minimal(base_size = 9)
+    theme_phylocactus()
   save_fig(patchwork::wrap_plots(p_occ, p_aln, ncol = 1, heights = c(1, 5)), paste0("Figure_TB1_alignment_", l), 10, 8)
 }
 
@@ -382,9 +383,9 @@ species_locus <- as.data.frame(table(species = lib_records$species, locus = lib_
 species_locus <- species_locus[species_locus$Freq > 0, ]
 species_locus$species <- factor(species_locus$species, levels = rev(sort(unique(lib_records$species), method = "radix")))
 p_tb2 <- ggplot(species_locus, aes(locus, species, fill = Freq)) + geom_tile() +
-  scale_fill_viridis_c(trans = "log10", name = "Sequences") +
+  scale_fill_gradientn(colours = phylocactus_colours("sequential"), trans = "log10", name = "Sequences") +
   labs(x = NULL, y = paste0(length(unique(lib_records$species)), " species, ordered by genus")) +
-  theme_minimal(base_size = 9) + theme(axis.text.y = element_blank(), panel.grid = element_blank(),
+  theme_phylocactus() + theme(axis.text.y = element_blank(), panel.grid = element_blank(),
                                        axis.text.x = element_text(angle = 45, hjust = 1))
 save_fig(p_tb2, "Figure_TB2_species_by_locus", 7, 12)
 
@@ -398,9 +399,9 @@ funnel_long <- data.frame(
                  levels = c("assembled", "curated", "homologous", "library")),
   accessions = c(funnel$accessions_assembled, funnel$accessions_curated, funnel$after_exclusion,
                  funnel$accessions_after_collapse))
-p_tb3 <- ggplot(funnel_long, aes(stage, accessions, group = locus)) + geom_line(colour = "grey40") + geom_point() +
+p_tb3 <- ggplot(funnel_long, aes(stage, accessions, group = locus)) + geom_line(colour = neutral[["line"]]) + geom_point() +
   facet_wrap(~ locus, scales = "free_y") + labs(x = NULL, y = "Accessions") +
-  theme_minimal(base_size = 9) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_phylocactus() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 save_fig(p_tb3, "Figure_TB3_funnel", 10, 8)
 
 # TB4. Length of the sequences of each locus before and after the cut of records over 2000 bases
@@ -418,16 +419,19 @@ lengths <- do.call(rbind, lapply(lib_loci, function(l) {
 }))
 lengths$stage <- factor(lengths$stage, levels = c("before the cut", "after the cut"))
 p_len <- ggplot(lengths, aes(locus, length, fill = stage)) + geom_boxplot(outlier.size = 0.4) +
+  scale_fill_manual(values = c("before the cut" = neutral[["fill"]],
+                               "after the cut" = phylocactus_colours("categorical")[["blue"]])) +
   scale_y_log10() + labs(x = NULL, y = "Sequence length (bases)", fill = NULL) +
-  theme_minimal(base_size = 9) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_phylocactus() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 replicates <- as.data.frame(table(locus = lib_records$locus, species = lib_records$species))
 replicates <- replicates[replicates$Freq > 0, ]
 replicates$class <- factor(cut(replicates$Freq, breaks = c(0, 1, 2, 5, Inf), labels = c("1", "2", "3 to 5", "6 or more")),
                            levels = c("6 or more", "3 to 5", "2", "1"))
 p_rep <- ggplot(replicates, aes(locus, fill = class)) + geom_bar() +
-  scale_fill_viridis_d(direction = -1) +
+  scale_fill_manual(values = stats::setNames(unname(phylocactus_colours("sequential")[c("700", "500", "400", "300")]),
+                                             c("6 or more", "3 to 5", "2", "1"))) +
   labs(x = NULL, y = "Species", fill = "Sequences per species") +
-  theme_minimal(base_size = 9) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_phylocactus() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 save_fig(patchwork::wrap_plots(p_len, p_rep, ncol = 1), "Figure_TB4_lengths_and_replicates", 9, 8)
 
 # TB5. Answers of the folds per genus against its sampling: species of the genus in the library and
@@ -452,13 +456,13 @@ p_tb5a <- ggplot(genus_rates[!is.na(genus_rates$species_correct_E), ],
                  aes(species_in_library, species_correct_E, size = queries)) +
   geom_point(alpha = 0.5) + scale_x_log10() + scale_size_area(max_size = 5) +
   labs(x = "Species of the genus in the library", y = "Species correct, scheme E", size = "Queries") +
-  theme_minimal(base_size = 9)
+  theme_phylocactus()
 p_tb5b <- ggplot(genus_rates[!is.na(genus_rates$expected_genus) & !is.na(genus_rates$fraction), ],
                  aes(fraction, expected_genus, size = queries)) +
   geom_point(alpha = 0.5) + scale_size_area(max_size = 5) +
   labs(x = "Fraction of the accepted species of the genus in the library",
        y = "Expected rate of a correct genus", size = "Queries") +
-  theme_minimal(base_size = 9)
+  theme_phylocactus()
 save_fig(patchwork::wrap_plots(p_tb5a, p_tb5b, ncol = 2) +
            patchwork::plot_annotation(caption = paste0("Folds classified by ", fold_method, "; one point per genus.")),
          "Figure_TB5_accuracy_against_sampling", 10, 4.5)
@@ -478,7 +482,7 @@ p_tb6 <- ggplot(folds_cov, aes(coverage_bin, fill = outcome)) + geom_bar(positio
   scale_fill_manual(values = outcome_colours) +
   labs(x = "Share of the alignment columns covered by the query", y = "Share of queries", fill = NULL,
        caption = paste0("Folds classified by ", fold_method, ".")) +
-  theme_minimal(base_size = 9)
+  theme_phylocactus()
 save_fig(p_tb6, "Figure_TB6_accuracy_against_missing_data", 9, 4.5)
 
 # TB7. Taxonomic coverage against the checklist: species of each locus and of the library over the
@@ -488,14 +492,14 @@ cover_locus <- data.frame(locus = c(lib_loci, "any locus"),
                                       length(unique(lib_records$species))))
 cover_locus$fraction <- cover_locus$species / length(accepted)
 cover_locus$locus <- factor(cover_locus$locus, levels = cover_locus$locus[order(cover_locus$species)])
-p_tb7a <- ggplot(cover_locus, aes(fraction, locus)) + geom_col(fill = "grey40") +
+p_tb7a <- ggplot(cover_locus, aes(fraction, locus)) + geom_col(fill = phylocactus_colours("categorical")[["blue"]]) +
   geom_text(aes(label = species), hjust = -0.2, size = 2.5) + scale_x_continuous(limits = c(0, 1)) +
-  labs(x = paste0("Fraction of the ", length(accepted), " accepted species"), y = NULL) + theme_minimal(base_size = 9)
+  labs(x = paste0("Fraction of the ", length(accepted), " accepted species"), y = NULL) + theme_phylocactus()
 cover_genus <- data.frame(genus = names(accepted_genus), accepted = as.integer(accepted_genus))
 cover_genus$in_library <- as.integer(ifelse(is.na(lib_genus[cover_genus$genus]), 0L, lib_genus[cover_genus$genus]))
 cover_genus$fraction <- pmin(1, cover_genus$in_library / cover_genus$accepted)
 p_tb7b <- ggplot(cover_genus, aes(accepted, fraction)) + geom_point(alpha = 0.5) + scale_x_log10() +
-  labs(x = "Accepted species of the genus", y = "Fraction in the library") + theme_minimal(base_size = 9)
+  labs(x = "Accepted species of the genus", y = "Fraction in the library") + theme_phylocactus()
 save_fig(patchwork::wrap_plots(p_tb7a, p_tb7b, ncol = 2), "Figure_TB7_taxonomic_coverage", 10, 4.5)
 
 # TB9. The genera native to Chile read against two large, well sampled genera
@@ -509,5 +513,5 @@ p_tb9 <- ggplot(folds, aes(region, fill = outcome)) + geom_bar(position = "fill"
   labs(x = NULL, y = "Share of queries", fill = NULL,
        caption = paste(strwrap(paste0("Folds classified by ", fold_method, "; Chilean genera: ",
                                        paste(sort(chilean_genera), collapse = ", "), "."), 120), collapse = "\n")) +
-  theme_minimal(base_size = 9) + theme(axis.text.x = element_text(angle = 30, hjust = 1))
+  theme_phylocactus() + theme(axis.text.x = element_text(angle = 30, hjust = 1))
 save_fig(p_tb9, "Figure_TB9_chilean_genera", 9, 4.5)

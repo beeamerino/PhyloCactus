@@ -14,7 +14,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 8, fig.height
 library(PhyloCactus)
 ```
 
-## Overview
+## Abstract
 
 Tutorial 5 builds the reference library of 15 loci and validates it. This tutorial uses that library to identify samples: one worked example for each kind of input the package accepts, all of them public records that are **not** in the library, so that each answer is what a user would get for a sample of their own.
 
@@ -67,7 +67,7 @@ writeLines(rentrez::entrez_fetch("nuccore", id = "LT745702.1", rettype = "gb", r
 identify_barcoding_query("examples/LT745702.1.gb", run_name = "LT745702.1")
 ```
 
-```{r, eval = has_data, echo = FALSE}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 1.** Answer of the Sanger record LT745702.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_LT745702.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_LT745702.1_sampling.csv", package = "PhyloCactus"))
 ```
 
@@ -83,7 +83,7 @@ writeLines(rentrez::entrez_fetch("nuccore", id = "PZ714536.1", rettype = "gb", r
 identify_barcoding_query("examples/PZ714536.1.gb", run_name = "PZ714536.1")
 ```
 
-```{r, eval = has_data, echo = FALSE}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 2.** Answer of the Sanger record PZ714536.1 (*Opuntia* sp.). IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_PZ714536.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_PZ714536.1_sampling.csv", package = "PhyloCactus"))
 ```
 
@@ -100,7 +100,7 @@ identify_barcoding_query("examples/OK340410.1_specimen.gb", sample = "Coryphanth
                          run_name = "OK340410.1")
 ```
 
-```{r, eval = has_data, echo = FALSE}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 3.** Answer of the specimen of *Coryphantha elephantidens* subsp. *bumamma* (four loci). IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_OK340410.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_OK340410.1_sampling.csv", package = "PhyloCactus"))
 ```
 
@@ -116,7 +116,7 @@ writeLines(rentrez::entrez_fetch("nuccore", id = c("OP189074.1", "OP188885.1", "
 identify_barcoding_query("examples/OP189074.1_specimen.gb", sample = "Xiquexique_gounellei", run_name = "OP189074.1")
 ```
 
-```{r, eval = has_data, echo = FALSE}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 4.** Answer of the specimen of *Xiquexique gounellei* (four loci). IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_OP189074.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_OP189074.1_sampling.csv", package = "PhyloCactus"))
 ```
 
@@ -132,7 +132,7 @@ writeLines(rentrez::entrez_fetch("nuccore", id = "MN517611.1", rettype = "gb", r
 identify_barcoding_query("examples/MN517611.1.gb", run_name = "MN517611.1")
 ```
 
-```{r, eval = has_data, echo = FALSE}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 5.** Answer of the plastome MN517611.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_MN517611.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_MN517611.1_sampling.csv", package = "PhyloCactus"))
 ```
 
@@ -148,7 +148,7 @@ writeLines(rentrez::entrez_fetch("nuccore", id = "MT387452.1", rettype = "gb", r
 identify_barcoding_query("examples/MT387452.1.gb", run_name = "MT387452.1")
 ```
 
-```{r, eval = has_data, echo = FALSE}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 6.** Answer of the plastome MT387452.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_MT387452.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_MT387452.1_sampling.csv", package = "PhyloCactus"))
 ```
 
@@ -173,7 +173,7 @@ The index, `11_barcoding/10_identify/samples/TABLE_barcoding_samples_index.csv`,
 idx <- utils::read.csv(system.file("extdata", "barcoding_example_samples_index.csv", package = "PhyloCactus"), stringsAsFactors = FALSE)
 idx$species_named <- gsub("_", " ", idx$species_named)
 options(knitr.kable.NA = "")
-knitr::kable(idx[, c("sample_id", "loci_found", "state1", "state2", "state3", "genera_named", "species_named",
+knitr::kable(caption = "Table 1. Index of the sample sheet of Example 7: loci found, rows per state, the genera and species named, and the answer against the declared species.", idx[, c("sample_id", "loci_found", "state1", "state2", "state3", "genera_named", "species_named",
                      "declared_species", "declared_comparison")],
              col.names = c("Sample", "Loci found", "State 1", "State 2", "State 3", "Genera named", "Species named",
                            "Declared species", "Answer vs declared"))
@@ -193,7 +193,7 @@ utils::download.file(paste0(ftp, "/", basename(ftp), "_genomic.fna.gz"), asm, mo
 identify_barcoding_assembly(asm, run_name = "GCA_024363205.1")
 ```
 
-```{r, eval = has_data, echo = FALSE}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 7.** Answer of the assembly GCA_024363205.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_GCA_024363205.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_GCA_024363205.1_sampling.csv", package = "PhyloCactus"))
 ```
 
@@ -213,7 +213,7 @@ stopifnot(unname(tools::md5sum(fq)) == strsplit(ena$fastq_md5, ";")[[1]])
 identify_barcoding_reads(fq[1], fq[2], run_name = "SRR26398994", threads = 4)
 ```
 
-```{r, eval = has_data, echo = FALSE}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 8.** Answer of the reads SRR26398994. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_SRR26398994_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_SRR26398994_sampling.csv", package = "PhyloCactus"))
 ```
 
@@ -221,7 +221,7 @@ plot_barcoding_identification(system.file("extdata", "barcoding_example_SRR26398
 
 ## The Examples Side by Side
 
-```{r, eval = has_data, echo = FALSE, fig.height = 4.5}
+```{r, eval = has_data, echo = FALSE, fig.height = 4.5, fig.cap = "**Figure 9.** The answers of the eight examples with a figure, side by side: one row per example and one column per locus found, coloured by state; a cross marks a locus named at genus rank only (`genus_only_locus`)."}
 plot_barcoding_identification_summary(list(
   "LT745702.1 (Sanger)" = system.file("extdata", "barcoding_example_LT745702.1_answer.csv", package = "PhyloCactus"),
   "PZ714536.1 (Sanger, Opuntia sp.)" = system.file("extdata", "barcoding_example_PZ714536.1_answer.csv", package = "PhyloCactus"),

@@ -312,8 +312,9 @@ test_that("the figures use the palette of the package and both models, with the 
 
   expect_s3_class(p, "patchwork")
   expect_equal(length(p$patches$plots) + 1L, 4L)
-  expect_true(all(c(.bc_gap_colors()[["intra"]], .bc_gap_colors()[["inter"]]) %in%
-                    c("#1b9e77", "#d95f02")))
+  # The first two categorical colours of the package palette (decision E1 of BMM, 15-10; Dark2 before)
+  expect_identical(unname(c(.bc_gap_colors()[["intra"]], .bc_gap_colors()[["inter"]])),
+                   unname(phylocactus_colours("categorical")[1:2]))
 })
 
 # Editorial review of 2026-09-22 (BMM): the figures were written in Spanish, with long descriptions

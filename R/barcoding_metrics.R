@@ -213,10 +213,11 @@ summarise_barcoding_metrics <- function(classifier_dir = file.path("11_barcoding
       ggplot2::geom_point(data = pt, size = 2.5, shape = 21, fill = "white", stroke = 1) +
       ggplot2::facet_wrap(~ scheme) +
       ggplot2::scale_x_continuous(limits = c(0, 1)) + ggplot2::scale_y_continuous(limits = c(0, 1)) +
-      ggplot2::scale_colour_manual(values = c("Nearest neighbour (t*)" = "#1b6ca8", "IdTaxa (60)" = "#c0392b")) +
+      ggplot2::scale_colour_manual(values = stats::setNames(unname(phylocactus_colours("categorical")[1:2]),
+                                                             c("Nearest neighbour (t*)", "IdTaxa (60)"))) +
       ggplot2::labs(title = l, x = "Unassigned share", y = "Correct at the rank of the scheme",
                     colour = NULL, caption = "Circles: operating points. Correct: species in E, genus in G.") +
-      ggplot2::theme_bw(base_size = 9) + ggplot2::theme(legend.position = "bottom")
+      theme_phylocactus()
     .bc_gap_save(g, file.path(output_dir, paste0("FIG_barcoding_metrics_curve_", l)), width = 180, height = 100)
   }
   invisible(NULL)

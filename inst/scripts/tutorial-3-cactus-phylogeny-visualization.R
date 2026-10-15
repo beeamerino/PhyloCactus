@@ -235,30 +235,8 @@ TABLE_dataset_summary <- tibble(
 )
 write_csv(TABLE_dataset_summary, "9_Visualization/tables/TABLE_dataset_summary.csv")
 
-# ============================================================
-# HARMONIZED PLOT THEME
-# ============================================================
-theme_phylocactus <- function(base_size = 12, base_family = "") {
-  theme_minimal(base_size = base_size, base_family = base_family) +
-    theme(
-      panel.background = element_rect(fill = "#F5F5F5", color = NA),
-      plot.background = element_rect(fill = "white", color = NA),
-      panel.grid.major = element_line(color = "white", linewidth = 0.6),
-      panel.grid.minor = element_line(color = "white", linewidth = 0.3),
-      axis.ticks = element_line(color = "grey70", linewidth = 0.4),
-      axis.title = element_text(face = "italic", color = "grey20"),
-      axis.title.x = element_text(face = "italic", margin = margin(t = 8)),
-      axis.title.y = element_text(face = "italic", margin = margin(r = 8)),
-      axis.text = element_text(color = "grey30"),
-      plot.title = element_text(face = "bold", color = "grey15", hjust = 0),
-      plot.subtitle = element_text(color = "grey40", hjust = 0, margin = margin(b = 8)),
-      legend.background = element_rect(fill = "transparent", color = NA),
-      legend.key = element_rect(fill = "transparent", color = NA),
-      legend.title = element_text(face = "bold", size = rel(0.9)),
-      strip.background = element_rect(fill = "grey90", color = NA),
-      strip.text = element_text(face = "bold", color = "grey20", size = rel(0.95))
-    )
-}
+# Theme and colours of every figure: theme_phylocactus() and phylocactus_colours() of the package
+# (decisions E1 and E2)
 
 # ============================================================
 # Module 12: FIGURES 1 TO 17
@@ -270,21 +248,21 @@ theme_phylocactus <- function(base_size = 12, base_family = "") {
 # FIGURE 1: Marker Coverage Across Species
 message("Rendering Figure 1 (Marker Coverage)...")
 p1 <- ggplot(marker_stats, aes(x = reorder(marker, n_taxa), y = n_taxa)) +
-  geom_col(fill = "grey35", width = 0.7) +
+  geom_col(fill = phylocactus_colours("categorical")[["blue"]], width = 0.7) +
   coord_flip() +
-  theme_phylocactus(base_size = 12) +
+  theme_phylocactus() +
   theme(axis.text.y = element_text(face = "italic")) +
-  labs(title = "Marker Coverage Across Species", x = "Marker", y = "Number of species")
+  labs(x = "Marker", y = "Number of species")
 ggsave("9_Visualization/figures/Figure_1_marker_coverage.pdf", p1, width = 7, height = 5)
 
 # FIGURE 2: Distribution of Marker Completeness
 message("Rendering Figure 2 (Marker Completeness)...")
 if ("retained_markers" %in% names(species_summary_iucn)) {
   p2 <- ggplot(species_summary_iucn %>% filter(in_ml_tree == TRUE), aes(x = retained_markers)) +
-    geom_histogram(binwidth = 1, fill = "grey35", color = "white") +
+    geom_histogram(binwidth = 1, fill = phylocactus_colours("categorical")[["blue"]], color = "white") +
     scale_x_continuous(breaks = seq(1, 11, 1)) +
-    theme_phylocactus(base_size = 12) +
-    labs(title = "Distribution of Marker Completeness", x = "Number of retained markers", y = "Number of species")
+    theme_phylocactus() +
+    labs(x = "Number of retained markers", y = "Number of species")
   ggsave("9_Visualization/figures/Figure_2_marker_completeness.pdf", p2, width = 7, height = 5)
 }
 
@@ -296,10 +274,11 @@ heatmap_data <- species_summary_iucn %>%
   pivot_longer(cols = all_of(marker_cols), names_to = "marker", values_to = "accession") %>%
   mutate(present = accession != "-")
 p3 <- ggplot(heatmap_data, aes(x = marker, y = fct_rev(species), fill = present)) +
-  scale_fill_grey(start = 0.95, end = 0.25, name = "Present", labels = c("No", "Yes")) +
+  scale_fill_manual(values = c(phylocactus_colours("neutral")[["fill"]], phylocactus_colours("sequential")[["600"]]),
+                    name = "Present", labels = c("No", "Yes")) +
   geom_tile() +
-  theme_phylocactus(base_size = 10) +
-  labs(title = "Marker Presence Heatmap", x = "Marker", y = "Species") +
+  theme_phylocactus() +
+  labs(x = "Marker", y = "Species") +
   theme(
     axis.text.y = element_blank(),
     axis.ticks.y = element_blank(),
@@ -317,10 +296,10 @@ message("Rendering Figure 4 (Supermatrix Structure)...")
 if (exists("marker_ranges") && nrow(marker_ranges) > 0) {
   marker_ranges <- marker_ranges %>% mutate(length = end - start + 1)
   p4 <- ggplot(marker_ranges) +
-    geom_segment(aes(x = start, xend = end, y = marker, yend = marker), linewidth = 6, color = "grey35") +
-    theme_phylocactus(base_size = 12) +
+    geom_segment(aes(x = start, xend = end, y = marker, yend = marker), linewidth = 6, color = phylocactus_colours("categorical")[["blue"]]) +
+    theme_phylocactus() +
     theme(axis.text.y = element_text(face = "italic")) +
-    labs(title = "Supermatrix Structure", x = "Alignment position (bp)", y = "Marker")
+    labs(x = "Alignment position (bp)", y = "Marker")
   ggsave("9_Visualization/figures/Figure_4_supermatrix_structure.pdf", p4, width = 10, height = 5)
 }
 
@@ -328,10 +307,10 @@ if (exists("marker_ranges") && nrow(marker_ranges) > 0) {
 message("Rendering Figure 5 (Marker Informativeness)...")
 if ("parsimony_informative" %in% names(marker_stats)) {
   p5 <- ggplot(marker_stats, aes(x = alignment_length, y = parsimony_informative, label = marker)) +
-    geom_point(size = 3.5, color = "grey35") +
-    geom_text(nudge_y = 20, size = 3.2, fontface = "italic", color = "grey20") +
-    theme_phylocactus(base_size = 12) +
-    labs(title = "Marker Informativeness", x = "Alignment length (bp)", y = "Parsimony informative sites")
+    geom_point(size = 3.5, color = phylocactus_colours("categorical")[["blue"]]) +
+    geom_text(nudge_y = 20, size = 3.2, fontface = "italic", color = phylocactus_colours("neutral")[["text"]]) +
+    theme_phylocactus() +
+    labs(x = "Alignment length (bp)", y = "Parsimony informative sites")
   ggsave("9_Visualization/figures/Figure_5_marker_informativeness.pdf", p5, width = 7, height = 5)
 }
 
@@ -403,7 +382,7 @@ if (file.exists(supp_tree_file)) {
       theme_tree() +
       geom_nodepoint(aes(fill = support_class), shape = 21, size = 2, stroke = 0.2, na.rm = TRUE) +
       scale_fill_manual(
-        values = c(">= 90" = "white", "70-89" = "grey", "< 70" = "black", "Constrained" = "steelblue"),
+        values = phylocactus_colours("support"),
         name = "Support (FBP)",
         na.translate = FALSE
       ) +
@@ -425,7 +404,7 @@ if (file.exists(supp_tree_file)) {
     )
     p7_supp <- ggtree(ml_tree_plot, linewidth = 0.2) +
       theme_tree() +
-      geom_tiplab(size = 0.70, align = FALSE, linetype = "solid", linesize = 0.15, colour = "grey20") +
+      geom_tiplab(size = 0.70, align = FALSE, linetype = "solid", linesize = 0.15, colour = phylocactus_colours("neutral")[["text"]]) +
       geom_nodelab(aes(label = support_label), size = 0.70, hjust = 0.7, colour = "black", na.rm = TRUE) +
       theme(legend.position = "none")
     p7_supp <- PhyloCactus::apply_clade_label_layers(p7_supp, registry, ML_SUPP_LAYER_SPECS)
@@ -469,7 +448,7 @@ if (file.exists(chrono_file)) {
 
     p8 <- ggtree(chrono_beast, linewidth = 0.3) +
       theme_tree2() + 
-      geom_range(range = 'height_0.95_HPD', color = 'gray60', alpha = 0.4, linewidth = 1.5) +
+      geom_range(range = 'height_0.95_HPD', color = phylocactus_colours("categorical")[["blue"]], alpha = 0.4, linewidth = 1.5) +
       theme_tree()
     
     p8 <- PhyloCactus::apply_clade_label_layers(p8, registry_chrono, CHRONO_MAIN_LAYER_SPECS)
@@ -490,8 +469,8 @@ if (file.exists(chrono_file)) {
     )
     p9_supp <- ggtree(chrono_beast, linewidth = 0.2) +
       theme_tree2() +
-      geom_tiplab(size = 0.85, align = FALSE, linetype = "solid", linesize = 0.15, colour = "grey20") +
-      geom_range(range = 'height_0.95_HPD', color = 'gray60', alpha = 0.4, linewidth = 0.8) +
+      geom_tiplab(size = 0.85, align = FALSE, linetype = "solid", linesize = 0.15, colour = phylocactus_colours("neutral")[["text"]]) +
+      geom_range(range = 'height_0.95_HPD', color = phylocactus_colours("categorical")[["blue"]], alpha = 0.4, linewidth = 0.8) +
       theme_tree()
     p9_supp <- PhyloCactus::apply_clade_label_layers(p9_supp, registry_chrono, CHRONO_SUPP_LAYER_SPECS)
     p9_supp <- PhyloCactus::add_chronogram_axis(p9_supp, tree_phy, by = 5, digits = 0L, segment_size = 10, title_margin_top = 28, bar_size = 30)
@@ -510,14 +489,12 @@ if (file.exists(chrono_file)) {
 # FIGURE 10: Species Composition by Pipeline Status
 message("Rendering Figure 10 (Species Composition across Pipeline)...")
 p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(status_pipeline, n), y = n)) +
-  geom_col(fill = "grey35", width = 0.7) +
+  geom_col(fill = phylocactus_colours("categorical")[["blue"]], width = 0.7) +
   coord_flip() +
-  geom_text(aes(label = scales::comma(n)), hjust = -0.15, size = 3.8, color = "grey20") +
+  geom_text(aes(label = scales::comma(n)), hjust = -0.15, size = 3.8, color = phylocactus_colours("neutral")[["text"]]) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
-  theme_phylocactus(base_size = 12) +
+  theme_phylocactus() +
   labs(
-    title = "Species Composition",
-    subtitle = "Methodological status across checklist, supermatrix, and tree",
     x = NULL,
     y = "Number of species"
   )
@@ -537,8 +514,8 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   p11 <- ggplot(TABLE_iucn_categories, aes(x = reorder(iucn_category, n), y = n, fill = iucn_category)) +
     PhyloCactus::scale_fill_iucn(name = "IUCN Category") +
     geom_col(width = 0.7) +
-    theme_phylocactus(base_size = 12) +
-    labs(title = "IUCN Categories", x = "Category", y = "Number of species")
+    theme_phylocactus() +
+    labs(x = "Category", y = "Number of species")
   ggsave("9_Visualization/figures/Figure_11_iucn_categories.pdf", p11, width = 6, height = 4)
     
   # FIGURE 12: Completeness vs IUCN
@@ -553,10 +530,8 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     geom_violin(trim = FALSE, alpha = 0.5) +
     geom_boxplot(width = 0.2, outlier.size = 0.6, alpha = 0.8) +
     PhyloCactus::scale_fill_iucn(name = "IUCN Category") +
-    theme_phylocactus(base_size = 12) +
+    theme_phylocactus() +
     labs(
-      title = "Molecular Completeness vs IUCN Category",
-      subtitle = "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 986)",
       x = "IUCN Category",
       y = "Marker completeness (%)"
     )
@@ -578,11 +553,9 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     geom_col(width = 0.7) +
     coord_flip() +
     PhyloCactus::scale_fill_iucn(name = "Threat Category") +
-    theme_phylocactus(base_size = 12) +
+    theme_phylocactus() +
     theme(axis.text.y = element_text(face = "italic")) +
     labs(
-      title = "Threatened Unsampled Species by Genus",
-      subtitle = "Priority Cactaceae taxa (CR, EN, VU) lacking molecular sequences",
       x = "Genus",
       y = "Number of threatened unsequenced species"
     )
@@ -602,10 +575,10 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     slice_max(n, n = 20)
 
   p14 <- ggplot(plot_data_endimism, aes(x = reorder(iucn_endemic_locations, n), y = n)) +
-    geom_col(fill = "grey35", width = 0.7) +
+    geom_col(fill = phylocactus_colours("categorical")[["blue"]], width = 0.7) +
     coord_flip() +
-    theme_phylocactus(base_size = 12) +
-    labs(title = "Endemic Species by Country", x = "Country", y = "Number of endemic species")
+    theme_phylocactus() +
+    labs(x = "Country", y = "Number of endemic species")
   ggsave("9_Visualization/figures/Figure_14_endemism_by_country.pdf", p14, width = 8, height = 6)
   
   # FIGURE 15: IUCN Categories by Country (Endemic)
@@ -621,8 +594,8 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
       geom_col(width = 0.7) +
       coord_flip() +
       PhyloCactus::scale_fill_iucn(name = "IUCN Category") +
-      theme_phylocactus(base_size = 12) +
-      labs(title = "Endemic Species by Country and IUCN Category", x = "Country", y = "Number of endemic species")
+      theme_phylocactus() +
+      labs(x = "Country", y = "Number of endemic species")
     ggsave("9_Visualization/figures/Figure_15_iucn_categories_by_country.pdf", p15, width = 8, height = 6)
   }
 
@@ -635,10 +608,10 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     slice_max(n, n = 15)
   if (nrow(plot_threats) > 0) {
     p16 <- ggplot(plot_threats, aes(x = reorder(iucn_threat_names, n), y = n)) +
-      geom_col(fill = "grey35", width = 0.7) +
+      geom_col(fill = phylocactus_colours("categorical")[["blue"]], width = 0.7) +
       coord_flip() +
-      theme_phylocactus(base_size = 12) +
-      labs(title = "Most Common Threats", x = "Threat", y = "Number of species")
+      theme_phylocactus() +
+      labs(x = "Threat", y = "Number of species")
     ggsave("9_Visualization/figures/Figure_16_common_threats.pdf", p16, width = 9, height = 6)
   }
     
@@ -651,10 +624,10 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     slice_max(n, n = 15)
   if (nrow(plot_habitats) > 0) {
     p17 <- ggplot(plot_habitats, aes(x = reorder(iucn_habitat_names, n), y = n)) +
-      geom_col(fill = "grey35", width = 0.7) +
+      geom_col(fill = phylocactus_colours("categorical")[["blue"]], width = 0.7) +
       coord_flip() +
-      theme_phylocactus(base_size = 12) +
-      labs(title = "Most Common Habitats", x = "Habitat", y = "Number of species")
+      theme_phylocactus() +
+      labs(x = "Habitat", y = "Number of species")
     ggsave("9_Visualization/figures/Figure_17_common_habitats.pdf", p17, width = 9, height = 6)
   }
 }
