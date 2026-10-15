@@ -522,11 +522,14 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     
   # FIGURE 12: Completeness vs IUCN
   message("Rendering Figure 12 (Completeness vs IUCN)...")
+  # The species the figure plots, counted for its subtitle
+  fig12_data <- species_summary_iucn %>%
+    filter(status_pipeline == "sampled_and_dated",
+           iucn_found == TRUE,
+           !is.na(iucn_category))
+  n_fig12 <- nrow(fig12_data)
   p12 <- ggplot(
-    species_summary_iucn %>%
-      filter(status_pipeline == "sampled_and_dated",
-             iucn_found == TRUE,
-             !is.na(iucn_category)),
+    fig12_data,
     aes(x = iucn_category, y = pct_markers, fill = iucn_category)
   ) +
     geom_violin(trim = FALSE, alpha = 0.5) +
@@ -535,7 +538,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     theme_phylocactus(base_size = 12) +
     labs(
       title = "Molecular Completeness vs IUCN Category",
-      subtitle = "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 986)",
+      subtitle = paste0("Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = ", n_fig12, ")"),
       x = "IUCN Category",
       y = "Marker completeness (%)"
     )

@@ -391,8 +391,8 @@ if (run_local_temporal_bs) {
     cluster_job_name = "cactus_temp_bs",
     cluster_partition = "main",
     cluster_nodes = 1L,
-    cluster_mem = "24G",
-    cluster_time = "04:00:00",
+    cluster_mem = "24G",                              # RAM memory allocation (--mem; 6.0 GiB used, 500 replicates, 1208 terminals)
+    cluster_time = "04:00:00",                        # Walltime limit (--time HH:MM:SS; 1 h 08 min used, 500 replicates, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", "")
   )
   cat("   Temporal bootstrap HPC script generated at:", hpc_temp_bs_script, "\n")
@@ -578,8 +578,8 @@ if (file.exists(cv_file)) {
 # -------------------------------------------------------------
 # 10.4 Smoothing sensitivity
 # -------------------------------------------------------------
-# The same tree dated across the plateau and beyond it. Read the range of each node across 1e-14
-# to 1e-06, the plateau of the reference run. At 1 and 10 the calibrated nodes sit on their upper
+# The same tree dated across the grid and beyond it. Read the range of each node from 1e-14 to
+# 1e-02; the reference run selects 1e-05, an interior minimum. At 1 and 10 the calibrated nodes sit on their upper
 # bounds; that end of the table lies outside the range supported by cross-validation.
 
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")

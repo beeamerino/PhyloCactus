@@ -53,7 +53,7 @@ test_that("the temporal bootstrap call of Tutorial 2 states the resources of Pha
   for (x in list(vignette = v, script = s)) {
     from <- grep("generate_temporal_bootstrap_script(", x, fixed = TRUE)
     expect_length(from, 1L)
-    blk <- x[from:(from + 15L)]
+    blk <- x[from:min(length(x), from + 25L)]
     mem <- grep("cluster_mem =", blk, fixed = TRUE, value = TRUE)
     tim <- grep("cluster_time =", blk, fixed = TRUE, value = TRUE)
     expect_length(mem, 1L); expect_length(tim, 1L)

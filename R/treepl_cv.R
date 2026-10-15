@@ -206,8 +206,8 @@
 #' @param cvstart,cvstop Ends of the smoothing grid, evaluated at one value per order of magnitude.
 #'   The defaults span 1e+03 down to 1e-14. Maurin (2020) reports optima between 1e-06 and 1e-08
 #'   for trees whose branch lengths are rescaled as this package rescales them; the reference
-#'   Cactaceae dataset reaches a plateau below 1e-06, which only a grid extending well below that
-#'   range can show. See the section on curve shapes below.
+#'   Cactaceae dataset has an interior minimum at 1e-05. Only a grid extending well beyond that
+#'   range tells an interior minimum from an edge or a plateau. See the section on curve shapes below.
 #' @param cv_nthreads Integer. Number of threads for the cross-validation stage. Defaults to `1L`.
 #'   `treePL` evaluates cross-validation replicates in an OpenMP loop, inside which simulated
 #'   annealing calls the non-reentrant C `rand()`; the chi-square sum is also accumulated through an

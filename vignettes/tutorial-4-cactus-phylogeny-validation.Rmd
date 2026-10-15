@@ -131,7 +131,7 @@ if (run_astral_locally && nzchar(astral_jar) && file.exists(astral_jar) &&
 
 ### Topological Comparison
 
-The focal tree is the chronogram from Module 10, whose topology is that of the maximum-likelihood tree (all 1021 bipartitions shared).
+The focal tree is the chronogram from Module 10, whose topology is that of the maximum-likelihood tree (all 1205 bipartitions shared).
 `validate_phylogenies()` restricts every tree to Cactaceae and to the names accepted in the checklist, then computes pairwise distances on four taxon sets:
 
 - **A1:** species shared by all trees;

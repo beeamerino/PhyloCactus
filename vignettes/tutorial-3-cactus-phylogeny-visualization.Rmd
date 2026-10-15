@@ -77,10 +77,10 @@ With these data, threatened species without sequence data can be listed, and the
 The registry can also serve as input for phylogeny-based conservation metrics such as EDGE scores (Isaac *et al*. 2007), which are not computed in this tutorial.
 
 Names are reconciled against the Cactaceae checklist of Caryophyllales.org (Korotkova *et al*. 2021; export of 1 July 2026), which lists 1,965 accepted species.
-With 38 outgroup species from Anacampserotaceae, Portulacaceae and Talinaceae, the registry contains 2,003 species.
-The supermatrix includes 1,060 of them (1,022 ingroup, 38 outgroup).
-The maximum-likelihood tree and the chronogram have 1,024 tips (986 ingroup, 38 outgroup), because `RAxML-NG` removed 36 ingroup species whose sequences were identical to those of another species.
-The other 943 accepted species have no sequence data, and 134 of them are listed as threatened (CR, EN or VU) by the IUCN Red List.
+With 28 outgroup species from Anacampserotaceae, Portulacaceae and Talinaceae, the registry contains 1,993 species.
+The supermatrix includes 1,218 of them (1,190 ingroup, 28 outgroup).
+The maximum-likelihood tree and the chronogram have 1,208 tips (1,180 ingroup, 28 outgroup), because `RAxML-NG` removed 10 ingroup species whose sequences were identical to those of another species.
+The other 775 accepted species have no sequence data, and 102 of them are listed as threatened (CR, EN or VU) by the IUCN Red List.
 
 Load the libraries and the outputs of the previous modules:
 
@@ -230,7 +230,7 @@ species_summary <- species_summary %>%
 
 `get_iucn_data()` retrieves the latest IUCN assessment of one species through the `rredlist` interface to the IUCN Red List API.
 It returns the category, criteria, population trend, countries of occurrence, endemism, habitats, threats, and use and trade.
-The query covers the 1,965 checklist species and the 38 outgroups.
+The query covers the 1,965 checklist species and the 28 outgroups.
 All ingroup names in the supermatrix match the checklist, so every query uses an accepted name.
 
 The output table (`TABLE_species_all_data.csv`) is used by all figures in Module 12.
@@ -542,7 +542,7 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
 
 **Full-size maximum-likelihood tree.**
 
-All 1,024 tips with species names and FBP values, on a 36 × 48 in (91.4 × 121.9 cm) page.
+All 1,208 tips with species names and FBP values, on a 36 × 48 in (91.4 × 121.9 cm) page.
 
 ```{r figure_7_ml_tree_extended, eval = FALSE}
 if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
@@ -636,7 +636,7 @@ if (file.exists(chrono_file) && nzchar(chrono_file)) {
 
 **Full-size chronogram.**
 
-All 1,024 tips with 95% HPD intervals and period boundaries, on a 36 × 48 in (91.4 × 121.9 cm) page.
+All 1,208 tips with 95% HPD intervals and period boundaries, on a 36 × 48 in (91.4 × 121.9 cm) page.
 
 ```{r figure_9_chronogram_extended, eval = FALSE}
 if (file.exists(chrono_file) && nzchar(chrono_file)) {
@@ -678,7 +678,7 @@ treeio::write.beast(annotated_chrono, file = "9_Visualization/figures/annotated_
 >
 > The same files are in the [`extended_trees/`](https://github.com/beeamerino/PhyloCactus/tree/master/extended_trees) directory of the repository: [Figure_9_Chronogram_Extended.pdf](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/Figure_9_Chronogram_Extended.pdf) and [annotated_chronogram.tree](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/annotated_chronogram.tree).
 
-Status of the 2,003 species in the registry: sampled and dated in the tree (986), sequenced but removed by `RAxML-NG` as identical duplicates (36), accepted species without sequences (943), and outgroups (38).
+Status of the 1,993 species in the registry: sampled and dated in the tree (1,180), sequenced but removed by `RAxML-NG` as identical duplicates (10), accepted species without sequences (775), and outgroups (28).
 
 ```{r figure_10_species_composition, eval = has_data, fig.cap = "**Figure 10.** Species composition."}
 p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(status_pipeline, n), y = n)) +
@@ -722,11 +722,14 @@ The figure shows whether threatened species are represented by fewer loci.
 
 ```{r figure_12_completeness_vs_iucn, eval = has_data, fig.width = 7, fig.height = 5, fig.cap = "**Figure 12.** Molecular completeness against IUCN category. Colours of the IUCN Red List categories."}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
+  # The species the figure plots, counted for its subtitle
+  fig12_data <- species_summary_iucn %>%
+    filter(status_pipeline == "sampled_and_dated",
+           iucn_found == TRUE,
+           !is.na(iucn_category))
+  n_fig12 <- nrow(fig12_data)
   p12 <- ggplot(
-    species_summary_iucn %>%
-      filter(status_pipeline == "sampled_and_dated",
-             iucn_found == TRUE,
-             !is.na(iucn_category)),
+    fig12_data,
     aes(x = iucn_category, y = pct_markers, fill = iucn_category)
   ) +
     geom_violin(trim = FALSE, alpha = 0.5) +
@@ -735,7 +738,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     theme_phylocactus(base_size = 12) +
     labs(
       title = "Molecular Completeness vs IUCN Category",
-      subtitle = "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 986)",
+      subtitle = paste0("Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = ", n_fig12, ")"),
       x = "IUCN Category",
       y = "Marker completeness (%)"
     )
@@ -743,8 +746,8 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 }
 ```
 
-Threatened species (CR, EN, VU) among the 943 accepted species without sequence data, by genus.
-*Parodia* (24 species), *Mammillaria* (22) and *Melocactus* (14) have the most.
+Threatened species (CR, EN, VU) among the 775 accepted species without sequence data, by genus.
+*Parodia* (18 species), *Melocactus* (14) and *Coleocephalocereus* (7) have the most.
 The species are listed in `TABLE_conservation_prioritization_gaps.csv`, which can guide field collecting and sequencing.
 
 ```{r figure_13_conservation_prioritization_gaps, eval = has_data, fig.height = 5, fig.cap = "**Figure 13.** Threatened species without sequence data by genus. Colours of the IUCN Red List categories."}
