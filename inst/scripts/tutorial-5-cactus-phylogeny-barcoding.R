@@ -458,12 +458,12 @@ genus_rates$fraction <- pmin(1, genus_rates$species_in_library / genus_rates$acc
 genus_rates$expected_genus <- with(genus_rates, fraction * genus_right_E + (1 - fraction) * genus_right_G)
 p_tb5a <- ggplot(genus_rates[!is.na(genus_rates$species_correct_E), ],
                  aes(species_in_library, species_correct_E, size = queries)) +
-  geom_point(alpha = 0.5, colour = neutral[["mark"]]) + scale_x_log10() + scale_size_area(max_size = 5) +
+  geom_point(colour = neutral[["mark"]]) + scale_x_log10() + scale_size_area(max_size = 5) +
   labs(x = "Species of the genus in the library", y = "Species correct, scheme E", size = "Queries") +
   theme_phylocactus()
 p_tb5b <- ggplot(genus_rates[!is.na(genus_rates$expected_genus) & !is.na(genus_rates$fraction), ],
                  aes(fraction, expected_genus, size = queries)) +
-  geom_point(alpha = 0.5, colour = neutral[["mark"]]) + scale_size_area(max_size = 5) +
+  geom_point(colour = neutral[["mark"]]) + scale_size_area(max_size = 5) +
   labs(x = "Fraction of the accepted species of the genus in the library",
        y = "Expected rate of a correct genus", size = "Queries") +
   theme_phylocactus()
@@ -502,7 +502,7 @@ p_tb7a <- ggplot(cover_locus, aes(fraction, locus)) + geom_col(fill = neutral[["
 cover_genus <- data.frame(genus = names(accepted_genus), accepted = as.integer(accepted_genus))
 cover_genus$in_library <- as.integer(ifelse(is.na(lib_genus[cover_genus$genus]), 0L, lib_genus[cover_genus$genus]))
 cover_genus$fraction <- pmin(1, cover_genus$in_library / cover_genus$accepted)
-p_tb7b <- ggplot(cover_genus, aes(accepted, fraction)) + geom_point(alpha = 0.5, colour = neutral[["mark"]]) + scale_x_log10() +
+p_tb7b <- ggplot(cover_genus, aes(accepted, fraction)) + geom_point(colour = neutral[["mark"]]) + scale_x_log10() +
   labs(x = "Accepted species of the genus", y = "Fraction in the library") + theme_phylocactus()
 save_fig(patchwork::wrap_plots(p_tb7a, p_tb7b, ncol = 2) + phylocactus_panel_tags(), "Figure_TB7_taxonomic_coverage", 10, 4.5)
 

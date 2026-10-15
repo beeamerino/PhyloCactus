@@ -353,9 +353,10 @@ Number of species with sequence data for each locus in the final dataset.
 p1 <- ggplot(marker_stats, aes(x = reorder(marker, n_taxa), y = n_taxa)) +
   geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
   coord_flip() +
-  theme_phylocactus() +
+  theme_phylocactus(base_size = 12) +
   theme(axis.text.y = element_text(face = "italic")) +
   labs(
+    title = "Marker Coverage Across Species",
     x = "Marker",
     y = "Number of species"
   )
@@ -369,8 +370,9 @@ if ("retained_markers" %in% names(species_summary_iucn)) {
   p2 <- ggplot(species_summary_iucn %>% filter(in_ml_tree == TRUE), aes(x = retained_markers)) +
     geom_histogram(binwidth = 1, fill = phylocactus_colours("neutral")[["mark"]], color = "white") +
     scale_x_continuous(breaks = seq(1, 11, 1)) +
-    theme_phylocactus() +
+    theme_phylocactus(base_size = 12) +
     labs(
+      title = "Distribution of Marker Completeness",
       x = "Number of retained markers",
       y = "Number of species"
     )
@@ -393,6 +395,7 @@ p3 <- ggplot(heatmap_data, aes(x = marker, y = fct_rev(species), fill = present)
   geom_tile() +
   theme_phylocactus(base_size = 10) +
   labs(
+    title = "Marker Presence Heatmap",
     x = "Marker",
     y = "Species"
   ) +
@@ -416,9 +419,10 @@ if (file.exists(ranges_file)) {
     TABLE_marker_ranges <- TABLE_marker_ranges %>% mutate(length = end - start + 1)
     p4 <- ggplot(TABLE_marker_ranges) +
       geom_segment(aes(x = start, xend = end, y = marker, yend = marker), linewidth = 6, color = phylocactus_colours("neutral")[["mark"]]) +
-      theme_phylocactus() +
+      theme_phylocactus(base_size = 12) +
       theme(axis.text.y = element_text(face = "italic")) +
       labs(
+        title = "Supermatrix Structure",
         x = "Alignment position (bp)",
         y = "Marker"
       )
@@ -434,8 +438,9 @@ if ("parsimony_informative" %in% names(marker_stats)) {
   p5 <- ggplot(marker_stats, aes(x = alignment_length, y = parsimony_informative, label = marker)) +
     geom_point(size = 3.5, color = phylocactus_colours("neutral")[["mark"]]) +
     geom_text(nudge_y = 20, size = 3.2, fontface = "italic", color = phylocactus_colours("neutral")[["text"]]) +
-    theme_phylocactus() +
+    theme_phylocactus(base_size = 12) +
     labs(
+      title = "Marker Informativeness",
       x = "Alignment length (bp)",
       y = "Parsimony informative sites"
     )
@@ -681,8 +686,10 @@ p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(s
   coord_flip() +
   geom_text(aes(label = scales::comma(n)), hjust = -0.15, size = 3.8, color = phylocactus_colours("neutral")[["text"]]) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
-  theme_phylocactus() +
+  theme_phylocactus(base_size = 12) +
   labs(
+    title = "Species Composition",
+    subtitle = "Methodological status across checklist, supermatrix, and tree",
     x = NULL,
     y = "Number of species"
   )
@@ -700,8 +707,9 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   p11 <- ggplot(TABLE_iucn_categories, aes(x = reorder(iucn_category, n), y = n, fill = iucn_category)) +
     PhyloCactus::scale_fill_iucn(name = "IUCN Category") +
     geom_col(width = 0.7) +
-    theme_phylocactus() +
+    theme_phylocactus(base_size = 12) +
     labs(
+      title = "IUCN Categories",
       x = "Category",
       y = "Number of species"
     )
@@ -724,8 +732,10 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     geom_violin(trim = FALSE, alpha = 0.5) +
     geom_boxplot(width = 0.2, outlier.size = 0.6, alpha = 0.8) +
     PhyloCactus::scale_fill_iucn(name = "IUCN Category") +
-    theme_phylocactus() +
+    theme_phylocactus(base_size = 12) +
     labs(
+      title = "Molecular Completeness vs IUCN Category",
+      subtitle = "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 986)",
       x = "IUCN Category",
       y = "Marker completeness (%)"
     )
@@ -752,9 +762,11 @@ p13 <- ggplot(plot_gaps_genus %>% filter(genus %in% top_gap_genera),
   geom_col(width = 0.7) +
   coord_flip() +
   PhyloCactus::scale_fill_iucn(name = "Threat Category") +
-  theme_phylocactus() +
+  theme_phylocactus(base_size = 12) +
   theme(axis.text.y = element_text(face = "italic")) +
   labs(
+    title = "Threatened Unsampled Species by Genus",
+    subtitle = "Priority Cactaceae taxa (CR, EN, VU) lacking molecular sequences",
     x = "Genus",
     y = "Number of threatened unsequenced species"
   )
@@ -774,8 +786,9 @@ if (any(species_summary_iucn$iucn_is_endemic, na.rm = TRUE)) {
   p14 <- ggplot(plot_data_endemism, aes(x = reorder(iucn_endemic_locations, n), y = n)) +
     geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
     coord_flip() +
-    theme_phylocactus() +
+    theme_phylocactus(base_size = 12) +
     labs(
+      title = "Endemic Species by Country",
       x = "Country",
       y = "Number of endemic species"
     )
@@ -800,8 +813,9 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
       geom_col(width = 0.7) +
       coord_flip() +
       PhyloCactus::scale_fill_iucn(name = "IUCN Category") +
-      theme_phylocactus() +
+      theme_phylocactus(base_size = 12) +
       labs(
+        title = "Endemic Species by Country and IUCN Category",
         x = "Country",
         y = "Number of endemic species"
       )
@@ -824,8 +838,9 @@ if (any(!is.na(species_summary_iucn$iucn_threat_names))) {
     p16 <- ggplot(plot_threats, aes(x = reorder(iucn_threat_names, n), y = n)) +
       geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
       coord_flip() +
-      theme_phylocactus() +
+      theme_phylocactus(base_size = 12) +
       labs(
+        title = "Most Common Threats",
         x = "Threat",
         y = "Number of species"
       )
@@ -848,8 +863,9 @@ if (any(!is.na(species_summary_iucn$iucn_habitat_names))) {
     p17 <- ggplot(plot_habitats, aes(x = reorder(iucn_habitat_names, n), y = n)) +
       geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
       coord_flip() +
-      theme_phylocactus() +
+      theme_phylocactus(base_size = 12) +
       labs(
+        title = "Most Common Habitats",
         x = "Habitat",
         y = "Number of species"
       )
