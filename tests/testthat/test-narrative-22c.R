@@ -77,6 +77,8 @@ test_that("the strings the functions print or write hold no internal code (N2)",
 })
 
 test_that("pkgdown/extra.css draws captions above figures and spaces the sections with a rule (N3, N4-b)", {
+  # pkgdown/ is not part of the built package: under R CMD check the test skips, as the others do
+  skip_if(!dir.exists(.n_root("pkgdown")), "pkgdown is not in this tree")
   f <- .n_root("pkgdown", "extra.css")
   expect_true(file.exists(f))
   skip_if(!file.exists(f))
