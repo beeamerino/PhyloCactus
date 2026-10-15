@@ -382,15 +382,24 @@ for (l in lib_loci) {
   save_fig(patchwork::wrap_plots(p_occ, p_aln, ncol = 1, heights = c(1, 5)) + phylocactus_panel_tags(), paste0("Figure_TB1_alignment_", l), 10, 8)
 }
 
-# TB2. Sequences of each species in each locus, species ordered by genus
+# TB2. Presence of each locus in each species, species ordered by genus, drawn as the marker presence
+# heatmap of Tutorial 3 (decision TB2-a, 15-10); the number of sequences is in the library table
 species_locus <- as.data.frame(table(species = lib_records$species, locus = lib_records$locus))
-species_locus <- species_locus[species_locus$Freq > 0, ]
+species_locus$present <- species_locus$Freq > 0
 species_locus$species <- factor(species_locus$species, levels = rev(sort(unique(lib_records$species), method = "radix")))
-p_tb2 <- ggplot(species_locus, aes(locus, species, fill = Freq)) + geom_tile() +
-  scale_fill_gradientn(colours = phylocactus_colours("sequential"), trans = "log10", name = "Sequences") +
+p_tb2 <- ggplot(species_locus, aes(locus, species, fill = present)) +
+  scale_fill_manual(values = c(phylocactus_colours("neutral")[["fill"]], phylocactus_colours("sequential")[["700"]]),
+                    name = "Present", labels = c("No", "Yes")) +
+  geom_tile() +
+  theme_phylocactus(base_size = 10) +
   labs(x = NULL, y = paste0(length(unique(lib_records$species)), " species, ordered by genus")) +
-  theme_phylocactus() + theme(axis.text.y = element_blank(), panel.grid = element_blank(),
-                                       axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "italic"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
 save_fig(p_tb2, "Figure_TB2_species_by_locus", 7, 12)
 
 # TB3. Accessions of each locus from assembly to library
@@ -467,8 +476,7 @@ p_tb5b <- ggplot(genus_rates[!is.na(genus_rates$expected_genus) & !is.na(genus_r
   labs(x = "Fraction of the accepted species of the genus in the library",
        y = "Expected rate of a correct genus", size = "Queries") +
   theme_phylocactus()
-save_fig(patchwork::wrap_plots(p_tb5a, p_tb5b, ncol = 2) +
-           phylocactus_panel_tags(caption = paste0("Folds classified by ", fold_method, "; one point per genus.")),
+save_fig(patchwork::wrap_plots(p_tb5a, p_tb5b, ncol = 2) + phylocactus_panel_tags(),
          "Figure_TB5_accuracy_against_sampling", 10, 4.5)
 
 # TB6. Answers of the folds against the missing data of the query: the share of the alignment
@@ -484,8 +492,7 @@ folds_cov$outcome <- factor(folds_cov$outcome, levels = outcome_levels)
 p_tb6 <- ggplot(folds_cov, aes(coverage_bin, fill = outcome)) + geom_bar(position = "fill") +
   facet_wrap(~ scheme, labeller = labeller(scheme = c(species = "Scheme E (species present)", genus = "Scheme G (species absent)"))) +
   scale_fill_manual(values = outcome_colours) +
-  labs(x = "Share of the alignment columns covered by the query", y = "Share of queries", fill = NULL,
-       caption = paste0("Folds classified by ", fold_method, ".")) +
+  labs(x = "Share of the alignment columns covered by the query", y = "Share of queries", fill = NULL) +
   theme_phylocactus()
 save_fig(p_tb6, "Figure_TB6_accuracy_against_missing_data", 9, 4.5)
 
@@ -514,8 +521,6 @@ folds$outcome <- factor(folds$outcome, levels = outcome_levels)
 p_tb9 <- ggplot(folds, aes(region, fill = outcome)) + geom_bar(position = "fill") +
   facet_wrap(~ scheme, labeller = labeller(scheme = c(species = "Scheme E (species present)", genus = "Scheme G (species absent)"))) +
   scale_fill_manual(values = outcome_colours) +
-  labs(x = NULL, y = "Share of queries", fill = NULL,
-       caption = paste(strwrap(paste0("Folds classified by ", fold_method, "; Chilean genera: ",
-                                       paste(sort(chilean_genera), collapse = ", "), "."), 120), collapse = "\n")) +
+  labs(x = NULL, y = "Share of queries", fill = NULL) +
   theme_phylocactus() + theme(axis.text.x = element_text(angle = 30, hjust = 1))
 save_fig(p_tb9, "Figure_TB9_chilean_genera", 9, 4.5)
