@@ -7,7 +7,9 @@
 # of the dataviz method on a light surface (#fcfcfb): the categorical order passes every adjacent
 # check (worst colour-vision-deficiency Delta E 9.1, normal vision 19.6; the first three slots pass
 # all pairs); colour is kept for categories, and magnitudes, presence and single series are
-# drawn in greys (amendment of BMM, 15-10); each arm of the outcome scale passes the ordinal check (one hue, monotone lightness,
+# drawn in the greys of the phylogeny figures of Tutorial 3, the reference of BMM (15-10): grey35
+# for bars and points, grey95 against grey25 for absence and presence, gray60 for HPD bars,
+# steelblue for constrained nodes; each arm of the outcome scale passes the ordinal check (one hue, monotone lightness,
 # light end over 2:1); the neutral midpoint stands at 2.35:1.
 # ------------------------------------------------------------------------------
 
@@ -18,7 +20,7 @@
 #' in a fixed order that is never cycled; `"outcome"` and `"state"` give the answers of an
 #' identification on a diverging scale, blue for a right answer, grey for none, red for a wrong
 #' one; `"sequential"` encodes a magnitude in greys, from light to dark; `"support"` gives the classes
-#' of bootstrap support of a node, filled for strong support, with constrained nodes apart;
+#' of bootstrap support of a node as Tutorial 3 draws them, with constrained nodes apart;
 #' `"neutral"` holds the greys of text, lines, rules, backgrounds and the marks of a single series
 #' (bars, histograms, segments, points); `"theme"` holds the colours of [theme_phylocactus()];
 #' `"iucn"` keeps the colours of
@@ -42,10 +44,10 @@ phylocactus_colours <- function(role = c("categorical", "outcome", "state", "seq
     outcome = c("species correct" = "#1c5cab", "genus correct" = "#86b6ef", "abstention" = "#a8a79f",
                 "wrong species" = "#ee8a85", "wrong genus" = "#b2182b"),
     state = c("1" = "#1c5cab", "2" = "#86b6ef", "3" = "#a8a79f"),
-    sequential = c("100" = "#f0efec", "200" = "#d6d5cf", "300" = "#bdbcb5", "400" = "#a8a79f",
-                   "500" = "#8a8983", "600" = "#6b6a65", "700" = "#52514e"),
-    support = c(">= 90" = "#0b0b0b", "70-89" = "#a8a79f", "< 70" = "#ffffff", "Constrained" = "#2a78d6"),
-    neutral = c(text = "#52514e", line = "#a8a79f", rule = "#d6d5cf", fill = "#f0efec", mark = "#6b6a65"),
+    sequential = c("100" = "#F2F2F2", "200" = "#D9D9D9", "300" = "#BFBFBF", "400" = "#999999",
+                   "500" = "#7F7F7F", "600" = "#595959", "700" = "#404040"),
+    support = c(">= 90" = "#FFFFFF", "70-89" = "#BEBEBE", "< 70" = "#000000", "Constrained" = "#4682B4"),
+    neutral = c(text = "#333333", line = "#999999", rule = "#E5E5E5", fill = "#F2F2F2", mark = "#595959"),
     theme = c(panel = "#F5F5F5", grid = "#FFFFFF", ticks = "#B3B3B3", axis_title = "#333333", axis_text = "#4D4D4D",
               title = "#262626", subtitle = "#666666", strip = "#E5E5E5"),
     iucn = c("EX" = "#000000", "EW" = "#5C155A", "CR" = "#D81E05", "EN" = "#FC7F3F", "VU" = "#F9E814",
@@ -90,4 +92,34 @@ theme_phylocactus <- function(base_size = 12, base_family = "") {
       strip.background = ggplot2::element_rect(fill = th[["strip"]], color = NA),
       strip.text = ggplot2::element_text(face = "bold", color = th[["axis_title"]], size = ggplot2::rel(0.95))
     )
+}
+
+#' Panel Tags of the Composite Figures of PhyloCactus
+#'
+#' Every composite figure of the package and of the tutorial scripts takes its panel tags from this
+#' function, so that their style is changed in one place when a journal asks for it: `A`, `B` by
+#' default; `options(phylocactus.tag_suffix = ")")` gives `A)`, `B)`, and
+#' `options(phylocactus.tag_levels = "a")` gives lower-case letters.
+#'
+#' @param ... Further arguments of `patchwork::plot_annotation()` (a caption, a theme).
+#' @return A `patchwork` annotation to add to a composite figure.
+#' @seealso [theme_phylocactus()].
+#' @examples
+#' \dontrun{
+#' patchwork::wrap_plots(p1, p2) + phylocactus_panel_tags()
+#' options(phylocactus.tag_suffix = ")")
+#' }
+#' @export
+phylocactus_panel_tags <- function(...) {
+  patchwork::plot_annotation(tag_levels = getOption("phylocactus.tag_levels", "A"),
+                             tag_prefix = getOption("phylocactus.tag_prefix", ""),
+                             tag_suffix = getOption("phylocactus.tag_suffix", ""), ...)
+}
+
+#' The first n panel tags, in the style of phylocactus_panel_tags(), for the labels of cowplot
+#' @noRd
+.phylocactus_tag_labels <- function(n) {
+  lev <- getOption("phylocactus.tag_levels", "A")
+  base <- switch(lev, a = letters, A = LETTERS, "1" = as.character(seq_len(26L)), LETTERS)
+  paste0(getOption("phylocactus.tag_prefix", ""), base[seq_len(n)], getOption("phylocactus.tag_suffix", ""))
 }

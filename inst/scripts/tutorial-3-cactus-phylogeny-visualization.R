@@ -274,7 +274,7 @@ heatmap_data <- species_summary_iucn %>%
   pivot_longer(cols = all_of(marker_cols), names_to = "marker", values_to = "accession") %>%
   mutate(present = accession != "-")
 p3 <- ggplot(heatmap_data, aes(x = marker, y = fct_rev(species), fill = present)) +
-  scale_fill_manual(values = c(phylocactus_colours("neutral")[["fill"]], phylocactus_colours("neutral")[["mark"]]),
+  scale_fill_manual(values = c(phylocactus_colours("neutral")[["fill"]], phylocactus_colours("sequential")[["700"]]),
                     name = "Present", labels = c("No", "Yes")) +
   geom_tile() +
   theme_phylocactus(base_size = 10) +
@@ -448,7 +448,7 @@ if (file.exists(chrono_file)) {
 
     p8 <- ggtree(chrono_beast, linewidth = 0.3) +
       theme_tree2() + 
-      geom_range(range = 'height_0.95_HPD', color = phylocactus_colours("neutral")[["mark"]], alpha = 0.4, linewidth = 1.5) +
+      geom_range(range = 'height_0.95_HPD', color = phylocactus_colours("neutral")[["line"]], alpha = 0.4, linewidth = 1.5) +
       theme_tree()
     
     p8 <- PhyloCactus::apply_clade_label_layers(p8, registry_chrono, CHRONO_MAIN_LAYER_SPECS)
@@ -470,7 +470,7 @@ if (file.exists(chrono_file)) {
     p9_supp <- ggtree(chrono_beast, linewidth = 0.2) +
       theme_tree2() +
       geom_tiplab(size = 0.85, align = FALSE, linetype = "solid", linesize = 0.15, colour = phylocactus_colours("neutral")[["text"]]) +
-      geom_range(range = 'height_0.95_HPD', color = phylocactus_colours("neutral")[["mark"]], alpha = 0.4, linewidth = 0.8) +
+      geom_range(range = 'height_0.95_HPD', color = phylocactus_colours("neutral")[["line"]], alpha = 0.4, linewidth = 0.8) +
       theme_tree()
     p9_supp <- PhyloCactus::apply_clade_label_layers(p9_supp, registry_chrono, CHRONO_SUPP_LAYER_SPECS)
     p9_supp <- PhyloCactus::add_chronogram_axis(p9_supp, tree_phy, by = 5, digits = 0L, segment_size = 10, title_margin_top = 28, bar_size = 30)

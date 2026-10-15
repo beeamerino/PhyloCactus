@@ -73,7 +73,8 @@ plot_barcoding_identification <- function(answer, sampling = NULL, threshold = 6
   if (length(named_genera) && any(s$genus %in% named_genera)) s <- s[s$genus %in% named_genera, , drop = FALSE]
   s <- .bc_plot_gather_sampling(s, named_species, max_species)
   n_rows <- length(unique(s$species))
-  patchwork::wrap_plots(p, .bc_report_sampling_plot(s, named_species), ncol = 1, heights = c(1, max(0.5, n_rows / 20)))
+  patchwork::wrap_plots(p, .bc_report_sampling_plot(s, named_species), ncol = 1, heights = c(1, max(0.5, n_rows / 20))) +
+    phylocactus_panel_tags()
 }
 
 #' Sampling of many species: the species not named gathered into one row per genus

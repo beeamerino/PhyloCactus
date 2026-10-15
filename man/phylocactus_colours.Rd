@@ -23,7 +23,7 @@ one job: \code{"categorical"} tells unordered things apart (trees compared, meth
 in a fixed order that is never cycled; \code{"outcome"} and \code{"state"} give the answers of an
 identification on a diverging scale, blue for a right answer, grey for none, red for a wrong
 one; \code{"sequential"} encodes a magnitude in greys, from light to dark; \code{"support"} gives the classes
-of bootstrap support of a node, filled for strong support, with constrained nodes apart;
+of bootstrap support of a node as Tutorial 3 draws them, with constrained nodes apart;
 \code{"neutral"} holds the greys of text, lines, rules, backgrounds and the marks of a single series
 (bars, histograms, segments, points); \code{"theme"} holds the colours of \code{\link[=theme_phylocactus]{theme_phylocactus()}};
 \code{"iucn"} keeps the colours of

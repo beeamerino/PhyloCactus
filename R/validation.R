@@ -796,7 +796,7 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
     }
     
     legend_grob <- cowplot::get_legend(p_legend)
-    panels <- cowplot::plot_grid(plotlist = plot_list, ncol = 2)
+    panels <- cowplot::plot_grid(plotlist = plot_list, ncol = 2, labels = .phylocactus_tag_labels(length(plot_list)))
     
     FIG_tree_space_main <- cowplot::plot_grid(
       panels,

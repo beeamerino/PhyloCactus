@@ -45,6 +45,10 @@ idtaxa_tables <- NULL
 # (from a terminal: cat or watch that file), and one email is sent at the end.
 n_workers <- max(1L, parallel::detectCores() - 2L)
 
+# Panel tags of the composite figures (TB1, TB4, TB5, TB7), from phylocactus_panel_tags(): A, B by
+# default. A journal that asks for A), B) is served by changing this one line to ")".
+options(phylocactus.tag_suffix = "")
+
 # -------------------------------------------------------------
 # Step 1: Assembly. Clusters with more than min_species species; every accession kept; clusters
 # whose gene is not recognised are kept as cluster_<id>. Headers Genus_species|sid.
@@ -375,7 +379,7 @@ for (l in lib_loci) {
     scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(limits = c(0, 1)) +
     labs(x = NULL, y = "Occupancy", title = paste0(l, ": ", nrow(m), " sequences, ", ncol(m), " columns")) +
     theme_phylocactus()
-  save_fig(patchwork::wrap_plots(p_occ, p_aln, ncol = 1, heights = c(1, 5)), paste0("Figure_TB1_alignment_", l), 10, 8)
+  save_fig(patchwork::wrap_plots(p_occ, p_aln, ncol = 1, heights = c(1, 5)) + phylocactus_panel_tags(), paste0("Figure_TB1_alignment_", l), 10, 8)
 }
 
 # TB2. Sequences of each species in each locus, species ordered by genus
@@ -399,7 +403,7 @@ funnel_long <- data.frame(
                  levels = c("assembled", "curated", "homologous", "library")),
   accessions = c(funnel$accessions_assembled, funnel$accessions_curated, funnel$after_exclusion,
                  funnel$accessions_after_collapse))
-p_tb3 <- ggplot(funnel_long, aes(stage, accessions, group = locus)) + geom_line(colour = neutral[["line"]]) + geom_point() +
+p_tb3 <- ggplot(funnel_long, aes(stage, accessions, group = locus)) + geom_line(colour = neutral[["line"]]) + geom_point(colour = neutral[["mark"]]) +
   facet_wrap(~ locus, scales = "free_y") + labs(x = NULL, y = "Accessions") +
   theme_phylocactus() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 save_fig(p_tb3, "Figure_TB3_funnel", 10, 8)
@@ -428,11 +432,11 @@ replicates <- replicates[replicates$Freq > 0, ]
 replicates$class <- factor(cut(replicates$Freq, breaks = c(0, 1, 2, 5, Inf), labels = c("1", "2", "3 to 5", "6 or more")),
                            levels = c("6 or more", "3 to 5", "2", "1"))
 p_rep <- ggplot(replicates, aes(locus, fill = class)) + geom_bar() +
-  scale_fill_manual(values = stats::setNames(unname(phylocactus_colours("sequential")[c("700", "500", "400", "300")]),
+  scale_fill_manual(values = stats::setNames(unname(phylocactus_colours("outcome")[c("species correct", "genus correct", "wrong species", "wrong genus")]),
                                              c("6 or more", "3 to 5", "2", "1"))) +
   labs(x = NULL, y = "Species", fill = "Sequences per species") +
   theme_phylocactus() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
-save_fig(patchwork::wrap_plots(p_len, p_rep, ncol = 1), "Figure_TB4_lengths_and_replicates", 9, 8)
+save_fig(patchwork::wrap_plots(p_len, p_rep, ncol = 1) + phylocactus_panel_tags(), "Figure_TB4_lengths_and_replicates", 9, 8)
 
 # TB5. Answers of the folds per genus against its sampling: species of the genus in the library and
 # the fraction of its accepted species they cover. For a sample of an accepted species of the genus,
@@ -454,17 +458,17 @@ genus_rates$fraction <- pmin(1, genus_rates$species_in_library / genus_rates$acc
 genus_rates$expected_genus <- with(genus_rates, fraction * genus_right_E + (1 - fraction) * genus_right_G)
 p_tb5a <- ggplot(genus_rates[!is.na(genus_rates$species_correct_E), ],
                  aes(species_in_library, species_correct_E, size = queries)) +
-  geom_point(alpha = 0.5) + scale_x_log10() + scale_size_area(max_size = 5) +
+  geom_point(alpha = 0.5, colour = neutral[["mark"]]) + scale_x_log10() + scale_size_area(max_size = 5) +
   labs(x = "Species of the genus in the library", y = "Species correct, scheme E", size = "Queries") +
   theme_phylocactus()
 p_tb5b <- ggplot(genus_rates[!is.na(genus_rates$expected_genus) & !is.na(genus_rates$fraction), ],
                  aes(fraction, expected_genus, size = queries)) +
-  geom_point(alpha = 0.5) + scale_size_area(max_size = 5) +
+  geom_point(alpha = 0.5, colour = neutral[["mark"]]) + scale_size_area(max_size = 5) +
   labs(x = "Fraction of the accepted species of the genus in the library",
        y = "Expected rate of a correct genus", size = "Queries") +
   theme_phylocactus()
 save_fig(patchwork::wrap_plots(p_tb5a, p_tb5b, ncol = 2) +
-           patchwork::plot_annotation(caption = paste0("Folds classified by ", fold_method, "; one point per genus.")),
+           phylocactus_panel_tags(caption = paste0("Folds classified by ", fold_method, "; one point per genus.")),
          "Figure_TB5_accuracy_against_sampling", 10, 4.5)
 
 # TB6. Answers of the folds against the missing data of the query: the share of the alignment
@@ -498,9 +502,9 @@ p_tb7a <- ggplot(cover_locus, aes(fraction, locus)) + geom_col(fill = neutral[["
 cover_genus <- data.frame(genus = names(accepted_genus), accepted = as.integer(accepted_genus))
 cover_genus$in_library <- as.integer(ifelse(is.na(lib_genus[cover_genus$genus]), 0L, lib_genus[cover_genus$genus]))
 cover_genus$fraction <- pmin(1, cover_genus$in_library / cover_genus$accepted)
-p_tb7b <- ggplot(cover_genus, aes(accepted, fraction)) + geom_point(alpha = 0.5) + scale_x_log10() +
+p_tb7b <- ggplot(cover_genus, aes(accepted, fraction)) + geom_point(alpha = 0.5, colour = neutral[["mark"]]) + scale_x_log10() +
   labs(x = "Accepted species of the genus", y = "Fraction in the library") + theme_phylocactus()
-save_fig(patchwork::wrap_plots(p_tb7a, p_tb7b, ncol = 2), "Figure_TB7_taxonomic_coverage", 10, 4.5)
+save_fig(patchwork::wrap_plots(p_tb7a, p_tb7b, ncol = 2) + phylocactus_panel_tags(), "Figure_TB7_taxonomic_coverage", 10, 4.5)
 
 # TB9. The genera native to Chile read against two large, well sampled genera
 folds$region <- ifelse(folds$true_genus %in% chilean_genera, "Chilean genera",

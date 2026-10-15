@@ -75,6 +75,10 @@ idtaxa_tables <- NULL
 # 11_barcoding/7_classifier/chunks/, the progress is in 11_barcoding/7_classifier/PROGRESS_nn_add.txt
 # (from a terminal: cat or watch that file), and one email is sent at the end.
 n_workers <- max(1L, parallel::detectCores() - 2L)
+
+# Panel tags of the composite figures (TB1, TB4, TB5, TB7), from phylocactus_panel_tags(): A, B by
+# default. A journal that asks for A), B) is served by changing this one line to ")".
+options(phylocactus.tag_suffix = "")
 ```
 
 ### Step 1: Assembly

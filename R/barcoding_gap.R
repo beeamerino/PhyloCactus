@@ -288,8 +288,7 @@
   }
   min_sites <- if (!is.null(summary_df$min_comparable)) summary_df$min_comparable[1] else 100L
   patchwork::wrap_plots(paneles, ncol = length(unique(summary_df$model))) +
-    patchwork::plot_annotation(
-      tag_levels = "A",
+    phylocactus_panel_tags(
       caption = paste0("Dashed: P95 intra. Dotted: P5 inter. Below the 1:1 line: no gap. Pairs under ",
                        min_sites, " shared sites excluded."),
       theme = ggplot2::theme(plot.caption = ggplot2::element_text(size = 7, colour = .bc_gap_colors()[["text"]], hjust = 0))
@@ -344,7 +343,7 @@
     .bc_gap_theme()
 
   patchwork::wrap_plots(p1, p2, widths = c(2, 1)) +
-    patchwork::plot_annotation(tag_levels = "A",
+    phylocactus_panel_tags(
       theme = ggplot2::theme(plot.caption = ggplot2::element_text(size = 7, colour = col[["text"]], hjust = 0)))
 }
 

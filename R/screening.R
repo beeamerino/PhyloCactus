@@ -443,7 +443,7 @@ run_marker_screening <- function(
       grid::grid.newpage(); grid::grid.text(paste("No plots available:", top_title), gp = grid::gpar(fontsize = 16, fontface = "bold"))
       return(invisible(NULL))
     }
-    print(patchwork::wrap_plots(plots, ncol = ncol) + patchwork::plot_annotation(title = top_title, theme = ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5))))
+    print(patchwork::wrap_plots(plots, ncol = ncol) + phylocactus_panel_tags(title = top_title, theme = ggplot2::theme(plot.title = ggplot2::element_text(size = 16, face = "bold", hjust = 0.5))))
   }
   arrange_plots_on_page(pw_before_list, ncol = 3, top_title = "Pairwise ML distances (before outlier filtering)")
   arrange_plots_on_page(pw_after_list, ncol = 3, top_title = "Pairwise ML distances (after outlier filtering)")
