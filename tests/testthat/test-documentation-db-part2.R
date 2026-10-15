@@ -87,3 +87,25 @@ test_that("Tutorial 4 states the bipartitions of the Phase 12 run (T4)", {
   .db2_absent(v, "1021 bipartitions", "Tutorial 4 vignette")
   .db2_present(v, "all 1205 bipartitions shared", "Tutorial 4 vignette")
 })
+
+# Decision W1 of BMM (15-10, D-b T5-e): the schema of the barcoding branch (TB8) is a figure of its own,
+# drawn once by the script of the audit repository with the visual language of Fig1, and shown first in
+# the Complete Pipeline Execution Workflow of Tutorial 5, before the Setup; Fig1 does not change.
+test_that("Tutorial 5 opens its workflow with the schema of the branch, TB8 (W1, T5-e)", {
+  f <- system.file("doc", "tutorial-5-cactus-phylogeny-barcoding.Rmd", package = "PhyloCactus")
+  if (!nzchar(f)) f <- testthat::test_path("..", "..", "vignettes", "tutorial-5-cactus-phylogeny-barcoding.Rmd")
+  skip_if(!file.exists(f), "Tutorial 5 vignette not found")
+  v <- readLines(f, warn = FALSE)
+  wf <- grep("^## Complete Pipeline Execution Workflow", v)
+  setup <- grep("^### Setup", v)
+  inc <- grep("figures/Figure_TB8_barcoding_workflow.png", v, fixed = TRUE)
+  expect_length(wf, 1L); expect_length(setup, 1L); expect_length(inc, 1L)
+  if (length(inc) == 1L && length(wf) == 1L && length(setup) == 1L) {
+    expect_true(inc > wf && inc < setup, info = "TB8 between the workflow heading and the Setup")
+    hdr <- v[max(grep("^```\\{r", v[seq_len(inc)]))]
+    expect_match(hdr, 'fig.cap = "**Figure 1.** ', fixed = TRUE)
+  }
+  png <- testthat::test_path("..", "..", "vignettes", "figures", "Figure_TB8_barcoding_workflow.png")
+  skip_if(!dir.exists(dirname(png)), "vignettes/figures is not in this tree")
+  expect_true(file.exists(png))
+})
