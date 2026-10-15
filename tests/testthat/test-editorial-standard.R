@@ -131,9 +131,24 @@ test_that("a single series is drawn in the mark grey, never in a categorical col
 })
 
 test_that("one theme: theme_phylocactus() in the package, no other base theme (E2)", {
+  # The theme of BMM written in the script of Tutorial 3 before 15-10, moved into the package as it was
+  # (T1 to T3 of BMM, 15-10): theme_minimal at base size 12, a light grey panel with a white grid, italic
+  # axis titles; its colours come from the theme role of the palette
+  expect_identical(PhyloCactus::phylocactus_colours("theme"),
+                   c(panel = "#F5F5F5", grid = "#FFFFFF", ticks = "#B3B3B3", axis_title = "#333333", axis_text = "#4D4D4D",
+                     title = "#262626", subtitle = "#666666", strip = "#E5E5E5"))
   th <- PhyloCactus::theme_phylocactus()
   expect_s3_class(th, "theme")
-  expect_identical(th$text$size, 9)
+  expect_identical(th$text$size, 12)
+  expect_identical(th$panel.background$fill, "#F5F5F5")
+  expect_identical(th$panel.grid.major$colour, "#FFFFFF")
+  expect_identical(th$panel.grid.major$linewidth, 0.6)
+  expect_identical(th$panel.grid.minor$linewidth, 0.3)
+  expect_identical(th$axis.title$face, "italic")
+  expect_identical(th$axis.title$colour, "#333333")
+  expect_identical(th$axis.text$colour, "#4D4D4D")
+  expect_identical(th$strip.background$fill, "#E5E5E5")
+  expect_identical(th$strip.text$face, "bold")
   other <- "\\btheme_(minimal|bw|classic|light|void|gray|grey|linedraw|dark)\\("
   files <- c(setdiff(.es_r_files(), .es_r_files()[basename(.es_r_files()) == "palette.R"]), .es_scripts(), .es_vignettes())
   for (f in files) {
