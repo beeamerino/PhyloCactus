@@ -315,9 +315,9 @@ test_that("the banner of CN2 with IdTaxa has no line of the nearest neighbour", 
     run_barcoding_controls(library_dir = f$library_dir, folds_dir = f$folds_dir,
                            output_dir = file.path(tmp, "8_controls"), outgroup_dir = og,
                            method = "idtaxa", controls = "CN2", loci = "matK"))))
-  expect_false(any(grepl("^  CN2: ", txt)))
+  expect_false(any(grepl("^  Outgroup queries ('CN2'): ", txt, fixed = TRUE)))
   expect_false(any(grepl("reversed before aligning", txt)))
-  expect_true(any(grepl("^  CN2 with IdTaxa: 2 comparable outgroup queries of 3", txt)))
+  expect_true(any(startsWith(txt, "  Outgroup queries with IdTaxa ('CN2'): 2 comparable outgroup queries of 3")))
 })
 
 test_that("CN1 and CN3 are not run with IdTaxa", {

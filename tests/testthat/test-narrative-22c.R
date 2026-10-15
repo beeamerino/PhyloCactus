@@ -24,7 +24,7 @@
 
 # Lines with a hit, after removing the quoted values of `controls`
 .n_hits <- function(x) {
-  y <- gsub("\"CN[1-3]\"", "\"\"", x)
+  y <- gsub("\\\\?[\"']CN[1-3]\\\\?[\"']", "\"\"", x)
   y <- gsub("Apple M2", "Apple", y, fixed = TRUE)
   x[grepl(.n_codes, y, perl = TRUE)]
 }
