@@ -66,7 +66,7 @@ test_that("every call of the steps of the script is in the vignette with the sam
 test_that("the Setup of the vignette sets the three switches of the script, and the IdTaxa blocks are shown (DB6)", {
   f <- system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus")
   skip_if(!nzchar(f), "Tutorial 5 script not installed")
-  sw <- Filter(function(e) is.call(e) && identical(e[[1]], as.name("<-")) &&
+  sw <- Filter(function(e) is.call(e) && identical(e[[1]], as.name("<-")) && is.name(e[[2]]) &&
                  as.character(e[[2]]) %in% c("notify_email", "idtaxa_tables", "n_workers"), as.list(parse(f)))
   expect_length(sw, 3L)
   vx <- .t5v_exprs_vignette()$exprs
