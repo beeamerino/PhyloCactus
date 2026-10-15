@@ -37,7 +37,7 @@ a distance observed in the data.}
 \item{figures}{Logical. Write one figure per locus, PDF and PNG at 300 dpi, 180 mm wide.}
 
 \item{method}{Character. \code{"nn"}, the nearest neighbour and its rule of remoteness, or \code{"idtaxa"},
-IdTaxa and its confidence threshold (Phase 6B, decision K7 of BMM). With \code{"idtaxa"} the tables
+IdTaxa and its confidence threshold. With \code{"idtaxa"} the tables
 read are \verb{TABLE_barcoding_predictions_<scheme>_idtaxa.csv} and
 \code{TABLE_barcoding_cn2_queries_idtaxa.csv}, the curve runs over the confidence threshold, the
 operating threshold of a locus is the quantile \code{q} of \code{genus_confidence} of its scheme G queries
@@ -47,7 +47,7 @@ next to 60, DECIPHER's default, in the column \code{rule}. The tables written ca
 
 \item{species_q}{Numeric. With \code{"idtaxa"} only: the quantile of the species confidence of the
 scheme G queries of each locus (species absent from the library) that sets its species
-threshold, never under 60 (rule R-c, Phase 11, decisions 1a and C4 of BMM, 05-10 and 06-10).
+threshold, never under 60.
 Written to \code{TABLE_barcoding_species_threshold_idtaxa.csv} and read by the identification
 functions through \code{threshold_dir}; the validation (step 10) stays at 60. Defaults to \code{0.95}.}
 }
@@ -58,7 +58,7 @@ Invisibly, a list with \code{curve} and \code{operating}. Writes
 }
 \description{
 Step 9 of the branch. Without a rule of remoteness the nearest neighbour names a cactus species
-for any query: in the negative control CN2, 288 of 312 outgroup queries came out in state 1. This
+for any query: in the outgroup control, 288 of 312 outgroup queries came out in state 1. This
 step applies the rule (a query whose distance to its nearest neighbour exceeds a threshold is
 state 3, reason \code{remoteness}) over every threshold observed, and fixes an operating threshold per
 locus.
@@ -66,7 +66,7 @@ locus.
 \details{
 For every locus and scheme the curve reports the legitimate queries in five disjoint outcomes
 (correct species, wrong species, correct genus, wrong genus, not assigned; a wrong species and an
-honest genus are never summed) and, when CN2 has comparable outgroup queries for the locus, how
+honest genus are never summed) and, when the outgroup control has comparable outgroup queries for the locus, how
 many of them the rule rejects. Outgroup queries that match the locus in neither direction are not
 comparable and stay out.
 

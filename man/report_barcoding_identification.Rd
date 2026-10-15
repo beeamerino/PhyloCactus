@@ -19,7 +19,7 @@ report_barcoding_identification(
 
 \item{library_dir}{Character. Directory of step 4, with the \verb{LIB_<locus>.fasta} files.}
 
-\item{metrics_dir}{Character or \code{NULL}. Directory of step 11, where
+\item{metrics_dir}{Character or \code{NULL}. Directory of step 10, where
 \code{TABLE_barcoding_genus_discrimination_idtaxa.csv} is looked for.}
 
 \item{output_dir}{Character. Where the report is written; \code{results_dir} by default.}
@@ -38,10 +38,10 @@ them together. For the run, a set of CSV files: \verb{REPORT_<run_name>_answer.c
 }
 \details{
 The report has nine sections: (1) query and route; (2) answer per locus; (3) reading across loci,
-descriptive only, since the loci are never combined into one call (rule E8 of the validation
+descriptive only, since the loci are never combined into one call
 plan); (4) alternatives under the threshold, marked not assigned: IdTaxa gives one path per query,
 so the alternatives are that path when it falls under the threshold and, in state 2, the species
-of the named genus in the library; (5) how far to trust each locus: the 6D wrong-species rates and
+of the named genus in the library; (5) how far to trust each locus: the wrong-species rates of the validation and
 the per-genus discrimination of \code{\link[=summarise_barcoding_genus_discrimination]{summarise_barcoding_genus_discrimination()}}; (6) sampling of the
 named genera in the library; (7) reads; (8) library, models and software; (9) limits. The figures
 follow Zeng et al. (2026, New Phytologist). The three identification functions call it at the end;

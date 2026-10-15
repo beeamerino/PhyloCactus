@@ -46,8 +46,8 @@ has_data <- nzchar(system.file("extdata", "barcoding_example_LT745702.1_answer.c
 
 Every locus of the library is looked for in the sample and answered on its own, in one of three states:
 
-- **State 1, species.** IdTaxa names a species and its species confidence reaches the species threshold of the locus (rule R-c, set in step 9 from the validation queries whose species was absent from the library).
-- **State 2, genus.** The genus confidence reaches 60. A species reached under the species threshold is kept as an alternative, never assigned, with reason `below_species_threshold`. `rbcL` answers at genus rank only in this version (reason `genus_only_locus`, argument `genus_only_loci`): in the probes of this version its species answers were right in 11 of 34.
+- **State 1, species.** IdTaxa names a species and its species confidence reaches the species threshold of the locus (set in step 9 of Tutorial 5 from the validation queries whose species was absent from the library).
+- **State 2, genus.** The genus confidence reaches 60. A species reached under the species threshold is kept as an alternative, never assigned, with reason `below_species_threshold`. `rbcL` answers at genus rank only in this version (reason `genus_only_locus`, argument `genus_only_loci`): on the library of this version its species answers were right in 11 of 34.
 - **State 3, no answer**, with its reason: `no_overlap` (the locus is not in the sample), `short_overlap`, or `low_confidence`.
 
 Loci are never combined into one verdict. When several loci answer, the report shows whether they agree; when they name different taxa, the answer of the sample is a conflict.
@@ -237,7 +237,7 @@ A plastome or an assembly holds most loci of the library, a Sanger record one; y
 
 ## How Well This Version Identifies
 
-The rates below were measured with the library of this version, built from GenBank alone (frozen on 2026-10-13), with the species thresholds of step 9 and `rbcL` at genus rank only. They belong to this library: as GenBank enriches it, the probes that measured them are run again and the rates are expected to change.
+The rates below were measured with the library of this version, built from GenBank alone (frozen on 2026-10-13), with the species thresholds of step 9 and `rbcL` at genus rank only. They belong to this library: as GenBank enriches it, they are measured again and are expected to change.
 
 Outcomes, in the order species correct / genus correct / no answer / conflict / wrong species / wrong genus (number of queries). A species is "present" when the library holds it once the records of the query's own specimen are set aside.
 
@@ -261,6 +261,6 @@ The genus is the answer to expect from this version. A species is named rarely, 
 ## References
 
 - Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
-- Murali, A., Bhargava, A. & Wright, E. S. 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. *Microbiome*, 6. <https://doi.org/10.1186/s40168-018-0521-5>
+- Murali *et al*. 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. *Microbiome*, 6. <https://doi.org/10.1186/s40168-018-0521-5>
 
 [Continue to Tutorial 7: Core Pipeline Functions and Methodological Dictionary](https://beeamerino.github.io/PhyloCactus/articles/tutorial-7-cactus-phylogeny-functions.html)

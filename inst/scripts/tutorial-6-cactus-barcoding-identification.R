@@ -8,7 +8,7 @@
 # identified with the path of its file, as with a sample of your own.
 #
 # It needs the library of Tutorial 5 in this folder: 11_barcoding/4_library/ (step 4),
-# 11_barcoding/9_threshold/ (step 9, the species thresholds of rule R-c) and 11_barcoding/11_metrics/
+# 11_barcoding/9_threshold/ (step 9, the species threshold of each locus) and 11_barcoding/11_metrics/
 # (step 10). The downloads need a network connection and the package rentrez. The assembly needs
 # minimap2 and samtools, the reads need fastp and GetOrganelle (with its seed databases embplant_pt and
 # embplant_nr); in a conda environment, activate it before starting R from the same terminal.

@@ -42,14 +42,14 @@
 
 #' Identify a genome assembly against the library
 #'
-#' Step 10 for a genome assembly (input type T3). For each locus of the library, its sequences
+#' Step 11 for a genome assembly. For each locus of the library, its sequences
 #' (without gaps) are mapped to the assembly with `minimap2 -x asm20`; the hit with the most matching
 #' bases is kept, cut with `samtools faidx` with `flank` bases on each side (within the scaffold) and
 #' identified with the rules of [identify_barcoding_query()] for that locus: crop, cut to the core of
-#' the locus (J1) and of the genus (J3b), IdTaxa, three states. A locus with no hit is state 3,
+#' the locus and of the genus, IdTaxa, three states. A locus with no hit is state 3,
 #' `no_overlap`.
 #'
-#' The best hit is kept even when the locus has more than one copy in the assembly (decision T3a):
+#' The best hit is kept even when the locus has more than one copy in the assembly:
 #' the table gives the scaffold, its length, the mapping quality and the number of scaffolds hit, and
 #' a mapping quality under `low_mapq` is flagged and reported, since the region may be a second copy
 #' (for instance a plastid insertion in the nucleus) rather than the locus. In the real-file test of
@@ -196,8 +196,8 @@ identify_barcoding_assembly <- function(assembly,
   utils::write.csv(tab, out_file, row.names = FALSE)
   .bc_write_run_record(output_dir, run_name, input_path = assembly, input_md5 = unname(tools::md5sum(assembly)),
                        input_type = "assembly",
-                       route = c("minimap2 -x asm20", "samtools faidx", "crop", "cut to locus core (J1)", "IdTaxa",
-                                 "cut to genus core (J3b)"),
+                       route = c("minimap2 -x asm20", "samtools faidx", "crop", "cut to locus core", "IdTaxa",
+                                 "cut to genus core"),
                        library_dir = library_dir, loci = loci, models_dir = file.path(output_dir, "models"),
                        threshold = threshold, seed = seed, min_overlap = min_overlap,
                        tools = c(minimap2 = .bc_tool_version(exe[[1]]), samtools = .bc_tool_version(exe[[2]])),

@@ -351,7 +351,7 @@
 #'
 #' Step 6 of the branch. For every locus of the library, computes the intraspecific distances by
 #' pairs and, for every sequence, the distance to its nearest neighbour of another species, with the
-#' `raw` and K80 models. Derives the candidate threshold with the rule of the validation plan: the
+#' `raw` and K80 models. Derives the candidate threshold with this rule: the
 #' 95th percentile of the intraspecific distribution, published next to the 5th percentile of the
 #' interspecific one. When the first is above the second the locus is declared to have no gap.
 #'
@@ -359,7 +359,7 @@
 #' @param output_dir Character. Destination; refused inside a directory of the phylogeny.
 #' @param models Character vector. Distance models of [ape::dist.dna()]; both are reported.
 #' @param min_comparable Integer. Minimum number of positions where both sequences carry A, C, G or
-#'   T for a pair to have a value (E13 of the validation plan, 2026-09-22). Pairs below it are counted
+#'   T for a pair to have a value. Pairs below it are counted
 #'   apart and left out of every distribution and percentile; they are never imputed.
 #' @param paralog_loci Character vector. Loci flagged in `possible_paralog`.
 #' @param figures Logical. Write one figure per locus, with one panel per model.

@@ -31,16 +31,16 @@ run_barcoding_controls(
 \item{output_dir}{Character. Destination; refused inside a directory of the phylogeny.}
 
 \item{outgroup_dir}{Character or \code{NULL}. Directory with \verb{<locus>.fasta} of the outgroup, as the
-assembly writes them. \code{NULL} skips CN2 and says so.}
+assembly writes them. \code{NULL} skips the outgroup control and says so.}
 
-\item{method}{Character. \code{"nn"} or \code{"idtaxa"}. With \code{"idtaxa"} only CN2 runs (decision K6 of
-BMM, 2026-09-26): CN1 would retrain IdTaxa once per fold and permutation, and CN3 measures a
+\item{method}{Character. \code{"nn"} or \code{"idtaxa"}. With \code{"idtaxa"} only the outgroup control ("CN2") runs:
+the label permutation would retrain IdTaxa once per fold and permutation, and the resubstitution measures a
 bias of the nearest neighbour. The outgroup queries are oriented against the library with the
 rule of the nearest neighbour, classified by IdTaxa trained on the whole locus at threshold 0
 with a seed per query, and written to \code{TABLE_barcoding_cn2_queries_idtaxa.csv}; the tables of
 the nearest neighbour are not touched. MAFFT is not needed.}
 
-\item{permutations}{Integer. Permutations of CN1; at least 10 in a real run.}
+\item{permutations}{Integer. Permutations of the label permutation control; at least 10 in a real run.}
 
 \item{seed}{Integer. Seed of the permutations, declared so they are reproducible.}
 
@@ -52,7 +52,7 @@ the nearest neighbour are not touched. MAFFT is not needed.}
 
 \item{controls}{Character vector. Which of \code{"CN1"}, \code{"CN2"} and \code{"CN3"} to run.}
 
-\item{mafft_exec}{Character. Command or path of the \code{MAFFT} binary. CN2 adds every outgroup
+\item{mafft_exec}{Character. Command or path of the \code{MAFFT} binary. The outgroup control adds every outgroup
 query to the alignment of the library with \code{--add --keeplength}, one call per query, so the
 columns of the library stay fixed and the distance of one query is comparable with the
 distance of another. Without \code{outgroup_dir} MAFFT is never called.}
@@ -69,27 +69,27 @@ Invisibly, a list with the tables. Writes \code{TABLE_barcoding_cn1_permutations
 \code{TABLE_barcoding_cn3_resubstitution.csv}.
 }
 \description{
-Step 8 of the branch, and the gate in front of every real figure (validation plan, sec. 4). Three
+Step 8 of the branch, and the gate in front of every real figure. Three
 controls, none of which is a result of the method: the three are the condition for a result of
 the method to be interpretable.
 }
 \details{
-\strong{CN1, permuted labels.} The whole procedure is repeated with the species labels permuted inside
+\strong{Label permutation ("CN1").} The whole procedure is repeated with the species labels permuted inside
 the training set. The accuracy must fall to the base rate; if it does not, there is leakage.
 Written as one row per permutation plus its verdict.
 
-\strong{CN2, a query alien to the clade.} Sequences of the outgroup, which are not in the library, are
+\strong{Outgroup queries ("CN2"), alien to the clade.} Sequences of the outgroup, which are not in the library, are
 passed as queries. The table publishes how many outgroup \strong{species} each locus had, and how many
 sequences, zeros included. The size of the control is the species count: GenBank holds population
 level studies, so a locus can carry dozens of sequences of a single species and control almost
 nothing. A control over one species is an anecdote and has to be read as one.
 
-\strong{CN3, resubstitution.} The same queries as the folds, in both schemes, each one classified
+\strong{Resubstitution ("CN3").} The same queries as the folds, in both schemes, each one classified
 against its own training set with the query put back into it. Nothing else changes between this
 figure and the honest one, which is what makes the two comparable: until 2026-09-25 this control
 ran over the whole library instead, a different set of queries, and the two figures could not be
 subtracted. Written with the label \code{irreproducible_resubstitution} in the table itself, so the
-figure cannot travel without it. \strong{Its value is published in Phase 6 and only next to the honest
+figure cannot travel without it. \strong{Its value is published only next to the honest
 figure}, which does not exist yet.
 }
 \examples{

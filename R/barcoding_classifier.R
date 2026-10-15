@@ -276,10 +276,10 @@
 #'
 #' Step 7 of the branch. Reads the library of step 4 and the folds of step 5, classifies every query
 #' of every fold and writes the raw predictions, one row per query. It aggregates nothing: no
-#' accuracy, no rate, no mean. The negative controls (Phase 5B) and the real metrics (Phase 6) read
+#' accuracy, no rate, no mean. The negative controls (step 8) and the metrics (step 10) read
 #' these tables afterwards.
 #'
-#' The output has three states (validation plan, sec. 1): species, genus with the specific ambiguity
+#' The output has three states: species, genus with the specific ambiguity
 #' declared, and not assignable. The state comes from the structure of the tie at the minimum
 #' distance, not from a threshold, so the threshold can be swept later over `nn_distance`,
 #' `margin` and `confidence` without classifying again.
@@ -290,7 +290,7 @@
 #' @param method Character. `"nn"`, the branch classifier, or `"idtaxa"`, the contrast.
 #' @param model Character. Distance model of [ape::dist.dna()], for `"nn"`.
 #' @param min_comparable Integer. Minimum number of comparable positions for a pair to have a value
-#'   (E13 of the validation plan). Pairs below it are left without value, never imputed.
+#'   Pairs below it are left without value, never imputed.
 #' @param schemes Character vector. `"species"` (scheme E) and `"genus"` (scheme G).
 #' @param loci Character vector or `NULL` for every locus of the library.
 #' @param max_folds Integer or `NULL`. Folds per locus and scheme; a declared random subset, for the
@@ -311,8 +311,8 @@
 #' @param alignment Character. How the distance of a query is measured, for `"nn"`. `"library"`,
 #'   the default, reads it from the joint alignment of the library, in which the query took part.
 #'   `"add"` removes the query's gaps, orients it against the training set of its fold and adds it
-#'   to that training alignment with `MAFFT --add --keeplength`, one call per query: the path of CN2
-#'   and of a query brought by a user. The probe of 2026-09-25 found the two paths agreeing on 699 of
+#'   to that training alignment with `MAFFT --add --keeplength`, one call per query: the path of the outgroup control
+#'   and of a query brought by a user. On 2026-09-25 the two paths agreed on 699 of
 #'   720 queries and 4 answers changed. `"add"` writes its own tables, with the suffix `_add`, and
 #'   never touches those of `"library"`.
 #' @param mafft_exec,mafft_opts Command of the `MAFFT` binary and its options, for `alignment = "add"`.

@@ -236,7 +236,6 @@ TABLE_dataset_summary <- tibble(
 write_csv(TABLE_dataset_summary, "9_Visualization/tables/TABLE_dataset_summary.csv")
 
 # Theme and colours of every figure: theme_phylocactus() and phylocactus_colours() of the package
-# (decisions E1 and E2)
 
 # ============================================================
 # Module 12: FIGURES 1 TO 17

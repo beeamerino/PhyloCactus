@@ -215,7 +215,7 @@ The previous modules retrieve, align and evaluate ingroup and outgroup sequences
 
 So that outgroup divergence does not inflate the informativeness metrics of the ingroup (parsimony informative sites, alignment length), `integrate_and_clean_markers()` writes its outputs to separate subdirectories:
 
-1.  `4_Cleaned/cleaned_markers_ingroup`: Contains curated sequences exclusively for accepted **Cactaceae** taxa, preserved for single-locus analyses. These are the inputs the molecular diagnostic section will consume once its strategy is defined; see the section manifest in Tutorial 5.
+1.  `4_Cleaned/cleaned_markers_ingroup`: Contains curated sequences exclusively for accepted **Cactaceae** taxa, preserved for single-locus analyses. The molecular identification branch of Tutorial 5 does not read them: it assembles its own library from the `phylotaR` workspace of Module 1.
 2.  `4_Cleaned/cleaned_markers_outgroup`: Contains corresponding outgroup sequences (*Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*, *Talinum*, *Talinella*).
 3.  `4_Cleaned/cleaned_markers_joint`: Contains the integrated ingroup and outgroup sequences prepared for joint realignment in Module 5.
 4.  `4_Cleaned/tables`: Contains the complete taxonomic synthesis and curation table suite:
@@ -317,6 +317,6 @@ Tutorial 2 infers the maximum-likelihood phylogeny with `RAxML-NG`, estimates br
 ## References
 
 - Guerrero *et al*. 2019. Phylogenetic relationships and evolutionary trends in the cactus family. *Journal of Heredity*, 110(1), 4–21. <https://doi.org/10.1093/jhered/esy064>
-- Katoh, K., & Standley, D. M. 2013. MAFFT multiple sequence alignment software version 7: improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772–780. <https://doi.org/10.1093/molbev/mst010>
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org, a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
-- Wright, E. 2024. Fast and flexible search for homologous biological sequences with DECIPHER v3. *The R Journal*, 16(2), 191-200. <https://doi.org/10.18129/B9.bioc.DECIPHER>
+- Katoh & Standley 2013. MAFFT multiple sequence alignment software version 7: improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772–780. <https://doi.org/10.1093/molbev/mst010>
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
+- Wright 2024. Fast and flexible search for homologous biological sequences with DECIPHER v3. *The R Journal*, 16(2), 191–200. <https://doi.org/10.18129/B9.bioc.DECIPHER>

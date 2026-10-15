@@ -51,15 +51,15 @@ Invisibly, the table of \code{\link[=identify_barcoding_query]{identify_barcodin
 \code{scaffolds_hit} and \code{low_mapq}.
 }
 \description{
-Step 10 for a genome assembly (input type T3). For each locus of the library, its sequences
+Step 11 for a genome assembly. For each locus of the library, its sequences
 (without gaps) are mapped to the assembly with \verb{minimap2 -x asm20}; the hit with the most matching
 bases is kept, cut with \verb{samtools faidx} with \code{flank} bases on each side (within the scaffold) and
 identified with the rules of \code{\link[=identify_barcoding_query]{identify_barcoding_query()}} for that locus: crop, cut to the core of
-the locus (J1) and of the genus (J3b), IdTaxa, three states. A locus with no hit is state 3,
+the locus and of the genus, IdTaxa, three states. A locus with no hit is state 3,
 \code{no_overlap}.
 }
 \details{
-The best hit is kept even when the locus has more than one copy in the assembly (decision T3a):
+The best hit is kept even when the locus has more than one copy in the assembly:
 the table gives the scaffold, its length, the mapping quality and the number of scaffolds hit, and
 a mapping quality under \code{low_mapq} is flagged and reported, since the region may be a second copy
 (for instance a plastid insertion in the nucleus) rather than the locus. In the real-file test of

@@ -29,22 +29,22 @@ identify_barcoding_query(
 
 \item{library_dir}{Character. Directory of step 4, with the \verb{LIB_<locus>.fasta} files.}
 
-\item{metrics_dir}{Character. Directory of step 11, with
+\item{metrics_dir}{Character. Directory of step 10, with
 \code{TABLE_barcoding_metrics_summary_idtaxa.csv}.}
 
 \item{threshold_dir}{Character or \code{NULL}. Directory of step 9, with
 \code{TABLE_barcoding_species_threshold_idtaxa.csv}, written by
-\code{sweep_barcoding_threshold(method = "idtaxa")}: the species threshold of each locus (rule R-c,
-Phase 11). A row that IdTaxa names at species rank keeps the species only when its species
+\code{sweep_barcoding_threshold(method = "idtaxa")}: the species threshold of each locus
+(step 9). A row that IdTaxa names at species rank keeps the species only when its species
 confidence reaches that threshold; otherwise it is named at genus rank, with reason
 \code{below_species_threshold}, and keeps in \code{species_idtaxa} and \code{species_confidence} what IdTaxa
 reached. The value used is in the column \code{species_threshold}. Without the table, or for a locus
 it lacks, the species threshold is \code{threshold}, with a message.}
 
-\item{genus_only_loci}{Character. Loci that answer at genus rank only (rule R2, Phase 12): a row of
+\item{genus_only_loci}{Character. Loci that answer at genus rank only: a row of
 one of them that IdTaxa names at species rank, over its species threshold, is named at genus rank,
 with reason \code{genus_only_locus}, and keeps in \code{species_idtaxa} and \code{species_confidence} what IdTaxa
-reached. Defaults to \code{"rbcL"}: in the probes of Phase 12, on the library built from GenBank, the
+reached. Defaults to \code{"rbcL"}: on the library of this version, built from GenBank, the
 species answers of \code{rbcL} were right in 11 of 34 (single records, sets of records and plastomes),
 and its species threshold of step 9 is the floor of 60. \code{character(0)} lets every locus name a
 species.}
@@ -54,7 +54,7 @@ species.}
 \item{run_name}{Character. Suffix of the output table, \verb{TABLE_barcoding_identify_<run_name>.csv}.}
 
 \item{threshold}{Numeric. IdTaxa confidence threshold. Defaults to 60, the operating threshold of
-Phase 6B.}
+the validation folds.}
 
 \item{min_overlap}{Integer. Minimum length of the region to classify. Defaults to 100.}
 
@@ -75,7 +75,7 @@ Invisibly, the table of answers: one row per query and locus tested.
 \description{
 Classifies each query against the IdTaxa model of each locus of the library, or of the one
 declared, and answers locus by locus with the three states of the branch. It never combines
-loci into one answer (amendment E8 of the validation plan).
+loci into one answer.
 }
 \details{
 For each locus:
@@ -102,12 +102,12 @@ shorter than \code{min_overlap}) or \code{low_confidence} (IdTaxa's genus confid
 }
 
 The model of each locus is IdTaxa trained on the whole library of the locus with a fixed seed,
-the same model as CN2 in step 8. It is cached in \verb{output_dir/models/} with the md5 of its
+the same model as the outgroup control of step 8. It is cached in \verb{output_dir/models/} with the md5 of its
 library file and trained again only when the library or the seed change. Each query has its own
 seed, from \code{seed}, the locus and its identifier (the accession of a \code{Genus_species|accession}
 name, the whole name otherwise). The random state of the session is left as it was.
 
-Each row carries, for its locus, the wrong-species rate of IdTaxa measured in step 11 with the
+Each row carries, for its locus, the wrong-species rate of IdTaxa measured in step 10 with the
 species present (\code{validation_ws_rate_species_present}, scheme E) and absent
 (\code{validation_ws_rate_species_absent}, scheme G), when that table exists and was measured at the
 same threshold.

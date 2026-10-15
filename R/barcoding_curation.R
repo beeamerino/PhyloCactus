@@ -141,7 +141,7 @@ curate_barcoding_markers <- function(input_dir = file.path("11_barcoding", "1_as
 
 #' Screen the Curated Loci of the Molecular Diagnostic Branch
 #'
-#' For each curated locus, recomputes the five context columns of the validation plan on the
+#' For each curated locus, recomputes the five context columns (species, species with a replicate, accessions, genera, genera with two or more species) on the
 #' accessions that survived curation, applies the branch's replication threshold to them, flags
 #' saturation (which never excludes a locus), and counts identical aligned sequences per species.
 #' Inputs are read from the directories of the earlier steps, so the screening runs on its own

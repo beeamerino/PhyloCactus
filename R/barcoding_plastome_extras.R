@@ -108,7 +108,7 @@
        sequence = substr(oriented, t[1], t[2]), other = as.integer(other))
 }
 
-#' Extra library records cropped from GenBank plastomes (step 1, Phase 8)
+#' Extra library records cropped from GenBank plastomes (step 1)
 #'
 #' Downloads complete plastomes of Cactaceae from GenBank, crops from each the loci of the library
 #' and writes them as extra records that [assemble_barcoding_dataset()] can take with
@@ -142,7 +142,7 @@
 #' @param checklist_path Character. The checklist (a path, or a vector of accepted names).
 #' @param min_region Integer. Shortest region written. Defaults to 100.
 #' @param keep_genera Character. Genera outside the checklist whose plastomes are kept under the
-#'   NCBI binomial (for the outgroup: Portulacaceae and Talinaceae, decision L5 of 28-09). A name
+#'   NCBI binomial (for the outgroup: Portulacaceae and Talinaceae). A name
 #'   without an epithet (`sp.`, `cf.`, `aff.`) is still left out. Defaults to none.
 #' @param fetch Function `(query, ids)` returning GenBank flat text; defaults to a fetcher through
 #'   `rentrez`.

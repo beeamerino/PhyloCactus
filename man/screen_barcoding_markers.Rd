@@ -39,7 +39,7 @@ Invisibly, a list with \code{screening} and \code{identical}. Writes
 \code{TABLE_barcoding_marker_screening.csv} and \code{TABLE_barcoding_identical_sequences.csv}.
 }
 \description{
-For each curated locus, recomputes the five context columns of the validation plan on the
+For each curated locus, recomputes the five context columns (species, species with a replicate, accessions, genera, genera with two or more species) on the
 accessions that survived curation, applies the branch's replication threshold to them, flags
 saturation (which never excludes a locus), and counts identical aligned sequences per species.
 Inputs are read from the directories of the earlier steps, so the screening runs on its own

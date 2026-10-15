@@ -132,7 +132,7 @@ if (run_astral_locally && nzchar(astral_jar) && file.exists(astral_jar) &&
 ### Topological Comparison
 
 The focal tree is the chronogram from Module 10, whose topology is that of the maximum-likelihood tree (all 1205 bipartitions shared).
-`validate_phylogenies()` restricts every tree to Cactaceae and to the names accepted in the checklist, then computes pairwise distances on four taxon sets:
+`validate_phylogenies()` restricts every tree to Cactaceae and to the names accepted in the checklist (Korotkova *et al*. 2021), then computes pairwise distances on four taxon sets:
 
 - **A1:** species shared by all trees;
 - **A2:** species shared by the focal tree and the trees of Thompson *et al*. (2024) and Amaral *et al*. (2022);
@@ -221,6 +221,7 @@ Tutorial 5 describes its scope, the design decisions taken, the open questions, 
 
 - Amaral *et al*. 2022. Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. *Biological Conservation*, 273, 109677. <https://doi.org/10.1016/j.biocon.2022.109677>
 - de Vos *et al*. 2025. Phylogenomics and classification of Cactaceae based on hundreds of nuclear genes. *Plant Systematics and Evolution*, 311(5), 28. <https://doi.org/10.1007/s00606-025-01948-z>
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 - Kubatko & Degnan 2007. Inconsistency of phylogenetic estimates from concatenated data under coalescence. *Systematic Biology*, 56(1), 17–24. <https://doi.org/10.1080/10635150601146041>
 - Robinson & Foulds 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1–2), 131–147. <https://doi.org/10.1016/0025-5564(81)90043-2>
 - Smith 2020. Information theoretic generalized Robinson–Foulds metrics for comparing phylogenetic trees. *Bioinformatics*, 36(20), 5007–5013. <https://doi.org/10.1093/bioinformatics/btaa614>

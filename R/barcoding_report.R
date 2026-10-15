@@ -119,13 +119,13 @@
   invisible(d)
 }
 
-#' Per-genus discrimination of each locus in the 6B folds
+#' Per-genus discrimination of each locus in the validation folds
 #'
 #' From the IdTaxa predictions of the validation folds (step 7), cut at the operating threshold of
 #' step 9 (60 by default), counts per locus, scheme and true genus the queries whose species was
 #' named correctly, the wrong species, the right and wrong genera, and the unassigned, with their
 #' rates. It says how well each locus tells the species of one genus apart in the library, which the
-#' identification report shows beside the answer (decision IR4 of BMM, 28-09).
+#' identification report shows beside the answer.
 #'
 #' @param classifier_dir Character. Directory of step 7, with
 #'   `TABLE_barcoding_predictions_{species,genus}_idtaxa.csv`.
@@ -212,7 +212,7 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
                   genbank = c("GenBank record", "Strand rule"),
                   c("Sequences", "Strand rule"))
   has_region <- any(!t$path %in% "none")
-  steps <- c(first, "Crop", "Cut to locus core (J1)", "IdTaxa", "Cut to genus core (J3b)", "State per locus")
+  steps <- c(first, "Crop", "Cut to locus core", "IdTaxa", "Cut to genus core", "State per locus")
   run <- c(rep(TRUE, length(first)), any(t$path %in% "crop"), any(t$core_trimmed > 0 & !is.na(t$core_trimmed)),
            has_region, any(t$genus_core_trimmed > 0 & !is.na(t$genus_core_trimmed)), TRUE)
   d <- data.frame(x = seq_along(steps), step = steps, run = ifelse(run, "run", "not run"), stringsAsFactors = FALSE)
@@ -301,8 +301,8 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
   g <- sort(unique(t$locus[t$reason %in% "genus_only_locus"]), method = "radix")
   if (!length(g)) return("")
   paste0("<p>", paste(g, collapse = ", "), if (length(g) == 1L) " answers" else " answer",
-         " at genus rank only in this version (reason genus_only_locus, argument genus_only_loci): in the probes of ",
-         "Phase 12 the species answers of rbcL were right in 11 of 34. The species IdTaxa reached is listed in ",
+         " at genus rank only in this version (reason genus_only_locus, argument genus_only_loci): on the library of ",
+         "this version, built from GenBank, the species answers of rbcL were right in 11 of 34. The species IdTaxa reached is listed in ",
          "section 4.</p>")
 }
 
@@ -391,10 +391,10 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
 #' `REPORT_<run_name>_checksums.csv` with the md5 of the table, the run record and every file written.
 #'
 #' The report has nine sections: (1) query and route; (2) answer per locus; (3) reading across loci,
-#' descriptive only, since the loci are never combined into one call (rule E8 of the validation
+#' descriptive only, since the loci are never combined into one call
 #' plan); (4) alternatives under the threshold, marked not assigned: IdTaxa gives one path per query,
 #' so the alternatives are that path when it falls under the threshold and, in state 2, the species
-#' of the named genus in the library; (5) how far to trust each locus: the 6D wrong-species rates and
+#' of the named genus in the library; (5) how far to trust each locus: the wrong-species rates of the validation and
 #' the per-genus discrimination of [summarise_barcoding_genus_discrimination()]; (6) sampling of the
 #' named genera in the library; (7) reads; (8) library, models and software; (9) limits. The figures
 #' follow Zeng et al. (2026, New Phytologist). The three identification functions call it at the end;
@@ -403,7 +403,7 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
 #' @param run_name Character. The run.
 #' @param results_dir Character. Where the table and the run record are.
 #' @param library_dir Character. Directory of step 4, with the `LIB_<locus>.fasta` files.
-#' @param metrics_dir Character or `NULL`. Directory of step 11, where
+#' @param metrics_dir Character or `NULL`. Directory of step 10, where
 #'   `TABLE_barcoding_genus_discrimination_idtaxa.csv` is looked for.
 #' @param output_dir Character. Where the report is written; `results_dir` by default.
 #' @return Invisibly, the paths of the HTML reports.
@@ -588,7 +588,7 @@ report_barcoding_identification <- function(run_name,
                  "<p>Loci not found in the ", if (per_run) "sample" else "query", ": ",
                  if (length(nf)) .bc_html_escape(paste(nf, collapse = ", ")) else "none", ".</p>")
     ag <- agreement[agreement$query == q, setdiff(names(agreement), "query"), drop = FALSE]
-    s3 <- paste0("<p>The loci are read side by side; no call is made across them (rule E8 of the validation plan). ",
+    s3 <- paste0("<p>The loci are read side by side; no call is made across them. ",
                  "For each genus and species named by any locus, at any confidence: the loci that name it and how many of them ",
                  "assign it at the threshold. Loci with no answer are listed under rank <em>none</em>.</p>", .bc_html_table(ag))
     al <- alternatives[alternatives$query %in% t$query, if (per_run) names(alternatives) else setdiff(names(alternatives), "query"),
@@ -605,7 +605,7 @@ report_barcoding_identification <- function(run_name,
                  .bc_html_table(.bc_report_candidates_summary(al)))
     rates <- unique(t[, c("locus", "validation_ws_rate_species_present", "validation_ws_rate_species_absent")])
     gd_q <- if (is.null(gd)) NULL else gd[gd$genus %in% named_genera, , drop = FALSE]
-    s5 <- paste0("<p>Wrong-species rate of each locus in the validation (6D): with the species of the query in the library ",
+    s5 <- paste0("<p>Wrong-species rate of each locus in the validation folds: with the species of the query in the library ",
                  "(scheme E) and without it (scheme G).</p>", .bc_html_table(rates),
                  if (is.null(gd)) "<p>Per-genus discrimination not available: run summarise_barcoding_genus_discrimination().</p>"
                  else paste0("<p>Per-genus discrimination of each locus in the validation folds, for the genera named above.</p>",

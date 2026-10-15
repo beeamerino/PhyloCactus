@@ -10,7 +10,7 @@ barcoding_outgroup_taxids()
 Character vector of six taxonomic IDs.
 }
 \description{
-The six genus-level NCBI Taxonomy IDs that CN2 queries the library with (validation plan, sec. 4):
+The six genus-level NCBI Taxonomy IDs that the outgroup control queries the library with:
 the three families that surround Cactaceae.
 }
 \details{
@@ -24,7 +24,7 @@ the three families that surround Cactaceae.
 \emph{Amphipetalum} (1835425) is not requested: GenBank holds no nucleotide records for it, so the
 request would only produce an empty download.
 
-\strong{This is the branch's own copy} (decision of BMM, 2026-09-23). The phylogeny keeps its list in
+\strong{This is the branch's own copy}. The phylogeny keeps its list in
 \code{assemble_outgroup_phylotar()} and is not touched, so the branch runs without it. A test compares
 the two and fails if they ever drift apart.
 }

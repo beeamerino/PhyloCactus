@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_plastome_extras.R
 \name{extract_barcoding_plastome_loci}
 \alias{extract_barcoding_plastome_loci}
-\title{Extra library records cropped from GenBank plastomes (step 1, Phase 8)}
+\title{Extra library records cropped from GenBank plastomes (step 1)}
 \usage{
 extract_barcoding_plastome_loci(
   query = paste0("Cactaceae[Organism] AND 100000:170000[SLEN] AND ",
@@ -28,7 +28,7 @@ extract_barcoding_plastome_loci(
 \item{min_region}{Integer. Shortest region written. Defaults to 100.}
 
 \item{keep_genera}{Character. Genera outside the checklist whose plastomes are kept under the
-NCBI binomial (for the outgroup: Portulacaceae and Talinaceae, decision L5 of 28-09). A name
+NCBI binomial (for the outgroup: Portulacaceae and Talinaceae). A name
 without an epithet (\code{sp.}, \code{cf.}, \code{aff.}) is still left out. Defaults to none.}
 
 \item{fetch}{Function \verb{(query, ids)} returning GenBank flat text; defaults to a fetcher through

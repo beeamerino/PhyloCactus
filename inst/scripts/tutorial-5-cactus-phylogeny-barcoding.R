@@ -31,7 +31,8 @@ notify_email <- FALSE
 
 # IdTaxa retrains once per fold, which on the whole library takes tens of core-hours: it is run
 # once, on a computing cluster, on the frozen library (generate_barcoding_job_scripts() and
-# merge_barcoding_chunks(); CN2 with run_barcoding_controls(method = "idtaxa", controls = "CN2")),
+# merge_barcoding_chunks(); the outgroup control with run_barcoding_controls(method = "idtaxa",
+# controls = "CN2")),
 # and its merged tables are the result, since LearnTaxa() differs between machines in floating
 # point. This script never trains IdTaxa. NULL leaves IdTaxa out; the path of the folder holding
 # the merged tables (TABLE_barcoding_predictions_<scheme>_idtaxa.csv, TABLE_barcoding_timing_idtaxa.csv
@@ -65,7 +66,7 @@ assemble_barcoding_dataset(
   preferred_parent = "3593",
   force_download = FALSE,
   notify = notify_email,
-  # Own data (O1): NULL leaves them out; "0_own" adds the records of 0_own/ (SAMPLES.csv and one
+  # Own data: NULL leaves them out; "0_own" adds the records of 0_own/ (SAMPLES.csv and one
   # FASTA per locus, headers >sample). What cannot enter is listed in
   # 11_barcoding/1_assembly/TABLE_barcoding_own_left_out.csv.
   own_dir = NULL
@@ -138,7 +139,7 @@ analyze_barcode_gap(
 
 # -------------------------------------------------------------
 # Step 7: Classification of the folds. Three states from the structure of the tie at the minimum
-# distance, never from a threshold: the threshold is swept in Phase 6 over the scores this step
+# distance, never from a threshold: the threshold is swept in step 9 over the scores this step
 # writes. One row per query and nothing aggregated.
 # -------------------------------------------------------------
 # The branch classifier of the internal validation: exact leave-one-out over the distance matrix
@@ -177,11 +178,12 @@ if (!is.null(idtaxa_tables)) {
 }
 
 # -------------------------------------------------------------
-# Step 8: Negative controls, before any real accuracy is read. CN1 permutes the labels and asks
-# whether the folds leak; CN2 asks the library about sequences that are not cacti; CN3 measures the
-# resubstitution bias on the same queries as step 7.
+# Step 8: Negative controls, before any real accuracy is read. The label permutation (controls =
+# "CN1") asks whether the folds leak; the outgroup control ("CN2") asks the library about sequences
+# that are not cacti; the resubstitution control ("CN3") measures the bias of classifying the same
+# queries as step 7 with their own sequences in the library.
 # -------------------------------------------------------------
-# CN2 needs an outgroup, assembled from the raw phylotaR workspace of the outgroup with the filters
+# The outgroup control needs an outgroup, assembled from the raw phylotaR workspace of the outgroup with the filters
 # of step 1. checklist_path = NA applies no checklist: NULL would load the checklist of Cactaceae
 # and discard every outgroup name. No manual exclusions, and no minimum of species per cluster.
 # The comparison table is written against the outgroup's own cluster-to-locus assignment.
@@ -198,7 +200,7 @@ assemble_barcoding_dataset(
   phylogeny_map_file = "1_phylotaR_out_Outgroup/TABLE_CLUSTER_MARKER_ASSIGNMENT_OUTGROUP.csv"
 )
 
-# CN2 aligns each outgroup query to the library with MAFFT --add --keeplength, one call per query,
+# The outgroup control aligns each outgroup query to the library with MAFFT --add --keeplength, one call per query,
 # so MAFFT has to be available. The three controls take about 11 minutes.
 run_barcoding_controls(
   library_dir = "11_barcoding/4_library",
@@ -209,7 +211,7 @@ run_barcoding_controls(
   permutations = 10L,
   seed = 1L
 )
-# CN2 with IdTaxa comes from the cluster run, with the tables of step 7
+# The outgroup control with IdTaxa comes from the cluster run, with the tables of step 7
 if (!is.null(idtaxa_tables)) {
   file.copy(file.path(idtaxa_tables, "TABLE_barcoding_cn2_queries_idtaxa.csv"), "11_barcoding/8_controls",
             overwrite = FALSE)
@@ -229,12 +231,12 @@ sweep_barcoding_threshold(
   q = 0.99,
   quantile_type = 1L
 )
-# IdTaxa: the curve runs over its confidence. The operating threshold is 60, DECIPHER's default
-# (decision K7 of 26-09), and step 10 reads that row; the quantile 0.01 of the genus confidence of
+# IdTaxa: the curve runs over its confidence. The operating threshold is 60, DECIPHER's default,
+# and step 10 reads that row; the quantile 0.01 of the genus confidence of
 # scheme G is reported next to it, not used. The sweep also writes
 # TABLE_barcoding_species_threshold_idtaxa.csv: for each locus, the quantile 0.95 of the species
 # confidence of scheme G (species absent from the library), never under 60. The identification of
-# a user query names a species only above it (rule R-c, Phase 11); the validation stays at 60
+# a user query names a species only above it; the validation stays at 60
 if (!is.null(idtaxa_tables)) {
   sweep_barcoding_threshold(
     classifier_dir = "11_barcoding/7_classifier",
@@ -246,7 +248,7 @@ if (!is.null(idtaxa_tables)) {
 }
 
 # -------------------------------------------------------------
-# Step 10: Metrics per class (6D): per locus and scheme, precision and recall per class and the shares
+# Step 10: Metrics per class: per locus and scheme, precision and recall per class and the shares
 # of correct, honest genus, wrong and unassigned answers, never summed into one error; for the nearest
 # neighbour at its operating threshold and, with the cluster tables, for IdTaxa at 60.
 # -------------------------------------------------------------
@@ -262,7 +264,7 @@ summarise_barcoding_metrics(
 # Step 11: Identification of a sample. Each locus of the library is cut from the query, classified
 # with IdTaxa against the library and given one of three states: a species (state 1), a genus
 # (state 2) or no answer (state 3). A species is named only above the species threshold of its locus,
-# written by step 9 when the IdTaxa tables are present (rule R-c); without them every locus uses 60.
+# written by step 9 when the IdTaxa tables are present; without them every locus uses 60.
 # The example is the plastome of Mammillaria zephyranthoides (GenBank MN517611.1) distributed with
 # the package. The table and a self-contained HTML report are written in 11_barcoding/10_identify/.
 # -------------------------------------------------------------
@@ -356,7 +358,7 @@ folds$outcome <- ifelse(folds$state %in% 1L & same(folds$predicted_species, fold
 folds$genus_right <- folds$state %in% c(1L, 2L) & same(folds$predicted_genus, folds$true_genus)
 folds$scheme <- factor(folds$scheme, levels = c("species", "genus"))
 outcome_levels <- c("species correct", "genus correct", "abstention", "wrong species", "wrong genus")
-# Colours of the package palette (decision E1): outcomes on the diverging scale, blue to red
+# Colours of the package palette: outcomes on the diverging scale, blue to red
 outcome_colours <- phylocactus_colours("outcome")
 neutral <- phylocactus_colours("neutral")
 
@@ -418,7 +420,7 @@ p_tb3 <- ggplot(funnel_long, aes(stage, accessions, group = locus)) + geom_line(
 save_fig(p_tb3, "Figure_TB3_funnel", 10, 8)
 
 # TB4. Length of the sequences of each locus before and after the cut of records over 2000 bases
-# (L2), and sequences per species in the library
+# at step 1, and sequences per species in the library
 cut_records <- utils::read.csv("11_barcoding/1_assembly/TABLE_barcoding_long_records_cut.csv")
 lengths <- do.call(rbind, lapply(lib_loci, function(l) {
   s <- Biostrings::readDNAStringSet(file.path("11_barcoding/4_library", paste0("UNMASKED_", l, ".fasta")))

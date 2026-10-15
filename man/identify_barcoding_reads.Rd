@@ -53,7 +53,7 @@ Invisibly, the table of \code{\link[=identify_barcoding_query]{identify_barcodin
 \code{contig} and \code{organelle} (\code{plastome} or \code{nrdna}).
 }
 \description{
-Step 10 for genome-skim or WGS reads (input type T4, route A of the route probe of Phase 8).
+Step 11 for genome-skim or WGS reads.
 The reads are cleaned with \code{fastp}; the plastome (\code{embplant_pt}) and the nrDNA (\code{embplant_nr}) are
 assembled with GetOrganelle (\verb{-R 15} and \verb{-R 10}, \verb{-k 21,45,65,85,105}); the path sequences of each
 (the \code{graph1.1} path first) are identified with \code{\link[=identify_barcoding_query]{identify_barcoding_query()}}, and for each locus the

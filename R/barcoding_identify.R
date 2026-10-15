@@ -251,13 +251,13 @@
   }
   f <- file.path(metrics_dir, "TABLE_barcoding_metrics_summary_idtaxa.csv")
   if (!file.exists(f)) {
-    message("No 6D metrics table (", f, "): the validation columns are NA.")
+    message("No table of validation metrics (", f, "): the validation columns are NA.")
     return(na)
   }
   m <- utils::read.csv(f, stringsAsFactors = FALSE)
   m <- m[m$method == "idtaxa" & m$locus %in% loci, , drop = FALSE]
   if (nrow(m) > 0L && any(m$threshold != threshold)) {
-    message("The 6D rates were measured at threshold ", paste(unique(m$threshold), collapse = ", "),
+    message("The validation rates were measured at threshold ", paste(unique(m$threshold), collapse = ", "),
             " and this call uses threshold ", threshold, ": the validation columns are NA.")
     return(na)
   }
@@ -399,7 +399,7 @@
 #'
 #' Classifies each query against the IdTaxa model of each locus of the library, or of the one
 #' declared, and answers locus by locus with the three states of the branch. It never combines
-#' loci into one answer (amendment E8 of the validation plan).
+#' loci into one answer.
 #'
 #' @details
 #' For each locus:
@@ -424,12 +424,12 @@
 #'    shorter than `min_overlap`) or `low_confidence` (IdTaxa's genus confidence under `threshold`).
 #'
 #' The model of each locus is IdTaxa trained on the whole library of the locus with a fixed seed,
-#' the same model as CN2 in step 8. It is cached in `output_dir/models/` with the md5 of its
+#' the same model as the outgroup control of step 8. It is cached in `output_dir/models/` with the md5 of its
 #' library file and trained again only when the library or the seed change. Each query has its own
 #' seed, from `seed`, the locus and its identifier (the accession of a `Genus_species|accession`
 #' name, the whole name otherwise). The random state of the session is left as it was.
 #'
-#' Each row carries, for its locus, the wrong-species rate of IdTaxa measured in step 11 with the
+#' Each row carries, for its locus, the wrong-species rate of IdTaxa measured in step 10 with the
 #' species present (`validation_ws_rate_species_present`, scheme E) and absent
 #' (`validation_ws_rate_species_absent`, scheme G), when that table exists and was measured at the
 #' same threshold.
@@ -445,27 +445,27 @@
 #'   `Biostrings::DNAStringSet` or a named character vector of sequences.
 #' @param locus Character or `NULL`. Loci to test; `NULL` tests every locus of the library.
 #' @param library_dir Character. Directory of step 4, with the `LIB_<locus>.fasta` files.
-#' @param metrics_dir Character. Directory of step 11, with
+#' @param metrics_dir Character. Directory of step 10, with
 #'   `TABLE_barcoding_metrics_summary_idtaxa.csv`.
 #' @param threshold_dir Character or `NULL`. Directory of step 9, with
 #'   `TABLE_barcoding_species_threshold_idtaxa.csv`, written by
-#'   `sweep_barcoding_threshold(method = "idtaxa")`: the species threshold of each locus (rule R-c,
-#'   Phase 11). A row that IdTaxa names at species rank keeps the species only when its species
+#'   `sweep_barcoding_threshold(method = "idtaxa")`: the species threshold of each locus
+#'   (step 9). A row that IdTaxa names at species rank keeps the species only when its species
 #'   confidence reaches that threshold; otherwise it is named at genus rank, with reason
 #'   `below_species_threshold`, and keeps in `species_idtaxa` and `species_confidence` what IdTaxa
 #'   reached. The value used is in the column `species_threshold`. Without the table, or for a locus
 #'   it lacks, the species threshold is `threshold`, with a message.
-#' @param genus_only_loci Character. Loci that answer at genus rank only (rule R2, Phase 12): a row of
+#' @param genus_only_loci Character. Loci that answer at genus rank only: a row of
 #'   one of them that IdTaxa names at species rank, over its species threshold, is named at genus rank,
 #'   with reason `genus_only_locus`, and keeps in `species_idtaxa` and `species_confidence` what IdTaxa
-#'   reached. Defaults to `"rbcL"`: in the probes of Phase 12, on the library built from GenBank, the
+#'   reached. Defaults to `"rbcL"`: on the library of this version, built from GenBank, the
 #'   species answers of `rbcL` were right in 11 of 34 (single records, sets of records and plastomes),
 #'   and its species threshold of step 9 is the floor of 60. `character(0)` lets every locus name a
 #'   species.
 #' @param output_dir Character. Where the table and the model cache are written.
 #' @param run_name Character. Suffix of the output table, `TABLE_barcoding_identify_<run_name>.csv`.
 #' @param threshold Numeric. IdTaxa confidence threshold. Defaults to 60, the operating threshold of
-#'   Phase 6B.
+#'   the validation folds.
 #' @param min_overlap Integer. Minimum length of the region to classify. Defaults to 100.
 #' @param seed Integer. Seed of the models and of the queries. Defaults to 1, as in Tutorial 5.
 #' @param processors Integer. Processors for `DECIPHER::IdTaxa()`.
@@ -532,8 +532,8 @@ identify_barcoding_query <- function(query,
   utils::write.csv(tab, out_file, row.names = FALSE)
   .bc_write_run_record(output_dir, run_name, input_path = if (is_file) query else "(sequences given in R)",
                        input_md5 = if (is_file) unname(tools::md5sum(query)) else NA_character_, input_type = input_type,
-                       route = c(if (input_type == "genbank") "GenBank flat file read", "strand rule", "crop", "cut to locus core (J1)",
-                                 "IdTaxa", "cut to genus core (J3b)"),
+                       route = c(if (input_type == "genbank") "GenBank flat file read", "strand rule", "crop", "cut to locus core",
+                                 "IdTaxa", "cut to genus core"),
                        library_dir = library_dir, loci = loci, models_dir = file.path(output_dir, "models"),
                        threshold = threshold, seed = seed, min_overlap = min_overlap, loci_declared = locus,
                        extra = if (!is.null(sample)) data.frame(kind = "setting", name = "sample", value = as.character(sample)))

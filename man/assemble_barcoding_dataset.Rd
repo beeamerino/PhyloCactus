@@ -44,7 +44,7 @@ distributed with the package, as in \code{\link[=assemble_ingroup_phylotar]{asse
 
 \item{checklist_path}{Character. Accepted checklist (Korotkova \emph{et al}. 2021); \code{NULL}, the default,
 uses the checklist distributed with the package. \code{NA} applies no checklist and keeps every
-GenBank name, cleaned to \code{Genus_species}: that is what the outgroup of CN2 needs, since a
+GenBank name, cleaned to \code{Genus_species}: that is what the outgroup of the outgroup control needs, since a
 checklist of Cactaceae would discard every outgroup name.}
 
 \item{min_species}{Integer. A cluster is retained when it holds more than this number of species.
@@ -55,8 +55,8 @@ cluster keeps a sid that sits in two. Defaults to \code{"3593"}.}
 
 \item{taxids}{Character vector or \code{NULL}. What to mine from GenBank when the workspace of
 \code{wd_path} does not exist yet, which is what lets the branch run without the phylogeny having
-run first. \code{NULL} mines \code{preferred_parent}, the behaviour since Phase 2. Several IDs are mined
-together, as \code{\link[=barcoding_outgroup_taxids]{barcoding_outgroup_taxids()}} returns them for CN2.}
+run first. \code{NULL} mines \code{preferred_parent}, the behaviour of earlier versions. Several IDs are mined
+together, as \code{\link[=barcoding_outgroup_taxids]{barcoding_outgroup_taxids()}} returns them for the outgroup control.}
 
 \item{ncbi_dr}{Character or \code{NULL}. Directory of the BLAST+ binaries, used only when the workspace
 has to be created.}
@@ -64,7 +64,7 @@ has to be created.}
 \item{force_download}{Logical. Mine GenBank again even if the workspace exists. Defaults to \code{FALSE}.}
 
 \item{mnsql, mxsql}{Integer. Shortest and longest sequence, in bases, that a new mining keeps
-(\code{phylotaR::setup()}); 100 and 5000 by default (decision L1 of 28-09). Used only when GenBank is mined.}
+(\code{phylotaR::setup()}); 100 and 5000 by default. Used only when GenBank is mined.}
 
 \item{phylogeny_map_file}{Character or \code{NULL}. Cluster-to-locus table of the phylogeny, compared
 with the branch's own when it exists. Defaults to

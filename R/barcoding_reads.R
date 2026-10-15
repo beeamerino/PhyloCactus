@@ -28,7 +28,7 @@
 
 #' Identify paired Illumina reads through route A
 #'
-#' Step 10 for genome-skim or WGS reads (input type T4, route A of the route probe of Phase 8).
+#' Step 11 for genome-skim or WGS reads.
 #' The reads are cleaned with `fastp`; the plastome (`embplant_pt`) and the nrDNA (`embplant_nr`) are
 #' assembled with GetOrganelle (`-R 15` and `-R 10`, `-k 21,45,65,85,105`); the path sequences of each
 #' (the `graph1.1` path first) are identified with [identify_barcoding_query()], and for each locus the
@@ -204,8 +204,8 @@ identify_barcoding_reads <- function(reads1,
   utils::write.csv(tab, out_file, row.names = FALSE)
   .bc_write_run_record(rdir, run_name, input_path = paste(c(reads1, reads2), collapse = "; "),
                        input_md5 = paste(unname(tools::md5sum(c(reads1, reads2))), collapse = "; "), input_type = "reads",
-                       route = c("fastp", "GetOrganelle embplant_pt", "GetOrganelle embplant_nr", "crop", "cut to locus core (J1)",
-                                 "IdTaxa", "cut to genus core (J3b)", "longest region per locus"),
+                       route = c("fastp", "GetOrganelle embplant_pt", "GetOrganelle embplant_nr", "crop", "cut to locus core",
+                                 "IdTaxa", "cut to genus core", "longest region per locus"),
                        library_dir = library_dir, loci = loci, models_dir = file.path(output_dir, "models"),
                        threshold = threshold, seed = seed, min_overlap = min_overlap,
                        extra = manifest[manifest$kind != "input", , drop = FALSE])

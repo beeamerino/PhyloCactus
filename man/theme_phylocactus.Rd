@@ -15,8 +15,8 @@ theme_phylocactus(base_size = 12, base_family = "")
 A \code{ggplot2} theme.
 }
 \description{
-The one theme of the package figures, the theme of BMM written in the script of Tutorial 3 and
-moved into the package as it was (decisions T1 to T3 of 2026-10-15): \code{theme_minimal()} with a light
+The one theme of the package figures, the theme written for the figures of Tutorial 3 and
+moved into the package as it was: \code{theme_minimal()} with a light
 grey panel and a white grid, italic axis titles, bold legend and strip titles. Its colours come
 from \code{phylocactus_colours("theme")}. The title of a figure is its caption, not a title inside the
 plot. Trees use \code{ggtree::theme_tree()} instead.

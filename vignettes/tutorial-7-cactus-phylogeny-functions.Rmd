@@ -84,7 +84,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `screen_barcoding_markers()` | Decides which loci enter the library by the number of species with two or more sequences, and flags saturation and possible paralogy without excluding. | |
 | `finalize_barcoding_library()` | Excludes and declares non-homologous sequences, collapses identical sequences of one species and writes the library, one alignment per locus. | |
 | `extract_barcoding_plastome_loci()` | Crops the library loci from GenBank plastomes as extra records; a plastome does not add a locus that a library record of the same specimen already holds. | |
-| `barcoding_outgroup_taxids()` | The NCBI Taxonomy IDs of the six genera of Anacampserotaceae, Portulacaceae and Talinaceae that the negative control CN2 asks the library about. | |
+| `barcoding_outgroup_taxids()` | The NCBI Taxonomy IDs of the six genera of Anacampserotaceae, Portulacaceae and Talinaceae that the outgroup control asks the library about. | |
 
 ### Molecular Identification: Validation (Tutorial 5, Steps 5 to 10)
 
@@ -95,8 +95,8 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `classify_barcoding_folds()` | Classifies the folds by nearest neighbour (each query added to the training alignment with `MAFFT --add`) or by IdTaxa, in three states, in parallel processes of one machine. | Katoh & Frith (2012); Murali et al. (2018) |
 | `generate_barcoding_job_scripts()` | Writes the SLURM job array and the R script that classify the folds in chunks on a computing cluster. | |
 | `merge_barcoding_chunks()` | Merges the chunks of a cluster run into the tables one process would write, and checks that every query appears once. | |
-| `run_barcoding_controls()` | Negative controls: label permutation for leakage (CN1), outgroup queries from the sister lineages (CN2) and resubstitution bias (CN3). | |
-| `sweep_barcoding_threshold()` | Sweeps the threshold of remoteness of the nearest neighbour, or the confidence of IdTaxa, and writes the species threshold of each locus used by the identification (rule R-c). | |
+| `run_barcoding_controls()` | Negative controls: label permutation for leakage (`"CN1"`), outgroup queries from the sister lineages (`"CN2"`) and resubstitution bias (`"CN3"`). | |
+| `sweep_barcoding_threshold()` | Sweeps the threshold of remoteness of the nearest neighbour, or the confidence of IdTaxa, and writes the species threshold of each locus used by the identification. | |
 | `summarise_barcoding_metrics()` | Per locus and scheme: species correct, genus correct, wrong species, wrong genus and unassigned, and precision and recall per class. | |
 | `summarise_barcoding_genus_discrimination()` | How well each locus tells apart the species of each genus in the folds, shown in the identification report beside the answer. | |
 
@@ -139,7 +139,7 @@ The functions used for checks within the tutorials, such as `check_calibration_c
 - Katoh, K., & Frith, M. C. 2012. Adding unaligned sequences into an existing alignment using MAFFT and LAST. *Bioinformatics*, 28(23), 3144-3146. <https://doi.org/10.1093/bioinformatics/bts578>
 - Katoh, K., & Standley, D. M. 2013. MAFFT multiple sequence alignment software version 7: Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772-780. <https://doi.org/10.1093/molbev/mst010>
 - Kimura, M. 1980. A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. *Journal of Molecular Evolution*, 16(2), 111-120. <https://doi.org/10.1007/BF01731581>
-- Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D., Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G. 2021. Cactaceae at Caryophyllales.org, a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251-270. <https://doi.org/10.3372/wi.51.51208>
+- Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D., Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251-270. <https://doi.org/10.3372/wi.51.51208>
 - Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. 2019. RAxML-NG: a fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455. <https://doi.org/10.1093/bioinformatics/btz305>
 - Lemoine, F., Domelevo Entfellner, J. B., Wilkinson, E., Correia, D., Dávila Felipe, M., De Oliveira, T., & Gascuel, O. 2018. Renewing Felsenstein's phylogenetic bootstrap in the era of big data. *Nature*, 556(7702), 452-456. <https://doi.org/10.1038/s41586-018-0043-0>
 - Li, H. 2018. Minimap2: pairwise alignment for nucleotide sequences. *Bioinformatics*, 34(18), 3094-3100. <https://doi.org/10.1093/bioinformatics/bty191>

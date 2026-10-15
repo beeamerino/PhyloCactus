@@ -9,14 +9,14 @@
 #' @param target_genes_file Character. Path to the target locus list text file. If `NULL`, defaults to package `inst/extdata/target_genes.txt`.
 #' @param genes_map_file Character. Path to the gene synonymy mapping CSV file. If `NULL`, defaults to package `inst/extdata/genes_map.csv`.
 #' @param manual_exclusions_file Character. Path to the accession exclusion CSV file. If `NULL`, defaults to package `inst/extdata/manual_exclusions_ingroup.csv`.
-#' @param apply_manual_exclusions Logical. Apply the curated accession exclusion list? **Defaults to `TRUE`.** The lists shipped with the package are the product of manual curation by the expert team supporting `PhyloCactus`: each excluded accession was inspected and removed on taxonomic or sequence-quality grounds that are not recoverable from GenBank metadata alone. The lists are keyed by locus and accession (`locus`, `sid`, `reason`, `source`), so that they survive a new mining that renumbers the clusters: an accession is removed from every cluster of the locus named (decision X2 of 29-09). Across both lists they hold 81 accessions, in 5 ingroup loci and 13 outgroup loci, and they live in `inst/extdata/manual_exclusions_ingroup.csv` and `inst/extdata/manual_exclusions_outgroup.csv`. Setting this to `FALSE` reproduces the uncurated cluster set, which is the way to quantify what the curation actually removes; the applied list is always written to `TABLE_MANUAL_EXCLUSIONS_*.csv` in the output directory, so any run documents its own curation state.
+#' @param apply_manual_exclusions Logical. Apply the curated accession exclusion list? **Defaults to `TRUE`.** The lists shipped with the package are the product of manual curation by the expert team supporting `PhyloCactus`: each excluded accession was inspected and removed on taxonomic or sequence-quality grounds that are not recoverable from GenBank metadata alone. The lists are keyed by locus and accession (`locus`, `sid`, `reason`, `source`), so that they survive a new mining that renumbers the clusters: an accession is removed from every cluster of the locus named. Across both lists they hold 102 accessions, 60 in 5 ingroup loci and 42 in 13 outgroup loci, and they live in `inst/extdata/manual_exclusions_ingroup.csv` and `inst/extdata/manual_exclusions_outgroup.csv`. Setting this to `FALSE` reproduces the uncurated cluster set, which is the way to quantify what the curation actually removes; the applied list is always written to `TABLE_MANUAL_EXCLUSIONS_*.csv` in the output directory, so any run documents its own curation state.
 #' @param min_species Integer. Species-richness threshold for cluster retention. Clusters are retained when they contain **strictly more than** `min_species` distinct species, so `min_species = 50` keeps clusters with 51 species or more. Defaults to `50`.
 #' @param preferred_parent Character. NCBI Taxonomy ID of the focal ingroup parent node. Defaults to `"3593"` (Cactaceae).
 #' @param ncbi_dr Character. Path to local `BLAST+` binaries directory. If `NULL`, attempts system environment auto-detection.
 #' @param force_download Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.
 #' @param out_dir Character. Output directory path to save cluster summaries, FASTA sequence matrices, and log reports.
 #' @param mnsql,mxsql Integer. Shortest and longest sequence, in bases, that a new mining keeps
-#'   (`phylotaR::setup()`); 100 and 5000 by default (decision L1 of 28-09). Used only when GenBank is mined.
+#'   (`phylotaR::setup()`); 100 and 5000 by default. Used only when GenBank is mined.
 #' @param notify Logical. Send an email through [send_run_notification()] when a mining ends or fails;
 #'   reading an existing workspace sends nothing. Defaults to `FALSE`.
 #' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
@@ -376,7 +376,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
 #' @param force_download Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.
 #' @param out_dir Character. Output directory path to save outgroup cluster tables and FASTA sequence files.
 #' @param mnsql,mxsql Integer. Shortest and longest sequence, in bases, that a new mining keeps
-#'   (`phylotaR::setup()`); 100 and 5000 by default (decision L1 of 28-09). Used only when GenBank is mined.
+#'   (`phylotaR::setup()`); 100 and 5000 by default. Used only when GenBank is mined.
 #' @param notify Logical. Send an email through [send_run_notification()] when a mining ends or fails;
 #'   reading an existing workspace sends nothing. Defaults to `FALSE`.
 #' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.

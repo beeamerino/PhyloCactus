@@ -160,7 +160,7 @@
 #' @noRd
 .bc_operating_point <- function(pred_genus, q = 0.99, type = 1L) {
   if (!all(pred_genus$scheme == "genus")) {
-    stop("The operating threshold is derived from scheme genus (G) only (decision D1).", call. = FALSE)
+    stop("The operating threshold is derived from scheme genus (G) only.", call. = FALSE)
   }
   d <- pred_genus$nn_distance[!is.na(pred_genus$nn_distance)]
   if (length(d) == 0L) return(NA_real_)
@@ -170,7 +170,7 @@
 #' Sweep the Threshold of Remoteness of the Molecular Diagnostic Branch
 #'
 #' Step 9 of the branch. Without a rule of remoteness the nearest neighbour names a cactus species
-#' for any query: in the negative control CN2, 288 of 312 outgroup queries came out in state 1. This
+#' for any query: in the outgroup control, 288 of 312 outgroup queries came out in state 1. This
 #' step applies the rule (a query whose distance to its nearest neighbour exceeds a threshold is
 #' state 3, reason `remoteness`) over every threshold observed, and fixes an operating threshold per
 #' locus.
@@ -178,7 +178,7 @@
 #' @details
 #' For every locus and scheme the curve reports the legitimate queries in five disjoint outcomes
 #' (correct species, wrong species, correct genus, wrong genus, not assigned; a wrong species and an
-#' honest genus are never summed) and, when CN2 has comparable outgroup queries for the locus, how
+#' honest genus are never summed) and, when the outgroup control has comparable outgroup queries for the locus, how
 #' many of them the rule rejects. Outgroup queries that match the locus in neither direction are not
 #' comparable and stay out.
 #'
@@ -196,7 +196,7 @@
 #'   the tables of `alignment = "add"`, measured the way a user query is measured; `"library"` reads
 #'   those of the joint alignment.
 #' @param method Character. `"nn"`, the nearest neighbour and its rule of remoteness, or `"idtaxa"`,
-#'   IdTaxa and its confidence threshold (Phase 6B, decision K7 of BMM). With `"idtaxa"` the tables
+#'   IdTaxa and its confidence threshold. With `"idtaxa"` the tables
 #'   read are `TABLE_barcoding_predictions_<scheme>_idtaxa.csv` and
 #'   `TABLE_barcoding_cn2_queries_idtaxa.csv`, the curve runs over the confidence threshold, the
 #'   operating threshold of a locus is the quantile `q` of `genus_confidence` of its scheme G queries
@@ -210,7 +210,7 @@
 #' @param figures Logical. Write one figure per locus, PDF and PNG at 300 dpi, 180 mm wide.
 #' @param species_q Numeric. With `"idtaxa"` only: the quantile of the species confidence of the
 #'   scheme G queries of each locus (species absent from the library) that sets its species
-#'   threshold, never under 60 (rule R-c, Phase 11, decisions 1a and C4 of BMM, 05-10 and 06-10).
+#'   threshold, never under 60.
 #'   Written to `TABLE_barcoding_species_threshold_idtaxa.csv` and read by the identification
 #'   functions through `threshold_dir`; the validation (step 10) stays at 60. Defaults to `0.95`.
 #' @return Invisibly, a list with `curve` and `operating`. Writes
@@ -319,7 +319,7 @@ sweep_barcoding_threshold <- function(classifier_dir = file.path("11_barcoding",
   need <- c("genus_idtaxa", "species_idtaxa", "genus_confidence", "species_confidence")
   if (!all(need %in% names(pred$genus))) {
     stop("The IdTaxa tables of ", classifier_dir, " have no confidence columns: they were written ",
-         "before Phase 6B. Run classify_barcoding_folds(method = \"idtaxa\") again.", call. = FALSE)
+         "before the IdTaxa classification wrote confidences. Run classify_barcoding_folds(method = \"idtaxa\") again.", call. = FALSE)
   }
   f_cn2 <- file.path(controls_dir, "TABLE_barcoding_cn2_queries_idtaxa.csv")
   outgroup <- if (file.exists(f_cn2)) utils::read.csv(f_cn2, stringsAsFactors = FALSE) else NULL

@@ -31,7 +31,7 @@ assemble_ingroup_phylotar(
 
 \item{manual_exclusions_file}{Character. Path to the accession exclusion CSV file. If \code{NULL}, defaults to package \code{inst/extdata/manual_exclusions_ingroup.csv}.}
 
-\item{apply_manual_exclusions}{Logical. Apply the curated accession exclusion list? \strong{Defaults to \code{TRUE}.} The lists shipped with the package are the product of manual curation by the expert team supporting \code{PhyloCactus}: each excluded accession was inspected and removed on taxonomic or sequence-quality grounds that are not recoverable from GenBank metadata alone. The lists are keyed by locus and accession (\code{locus}, \code{sid}, \code{reason}, \code{source}), so that they survive a new mining that renumbers the clusters: an accession is removed from every cluster of the locus named (decision X2 of 29-09). Across both lists they hold 81 accessions, in 5 ingroup loci and 13 outgroup loci, and they live in \code{inst/extdata/manual_exclusions_ingroup.csv} and \code{inst/extdata/manual_exclusions_outgroup.csv}. Setting this to \code{FALSE} reproduces the uncurated cluster set, which is the way to quantify what the curation actually removes; the applied list is always written to \code{TABLE_MANUAL_EXCLUSIONS_*.csv} in the output directory, so any run documents its own curation state.}
+\item{apply_manual_exclusions}{Logical. Apply the curated accession exclusion list? \strong{Defaults to \code{TRUE}.} The lists shipped with the package are the product of manual curation by the expert team supporting \code{PhyloCactus}: each excluded accession was inspected and removed on taxonomic or sequence-quality grounds that are not recoverable from GenBank metadata alone. The lists are keyed by locus and accession (\code{locus}, \code{sid}, \code{reason}, \code{source}), so that they survive a new mining that renumbers the clusters: an accession is removed from every cluster of the locus named. Across both lists they hold 102 accessions, 60 in 5 ingroup loci and 42 in 13 outgroup loci, and they live in \code{inst/extdata/manual_exclusions_ingroup.csv} and \code{inst/extdata/manual_exclusions_outgroup.csv}. Setting this to \code{FALSE} reproduces the uncurated cluster set, which is the way to quantify what the curation actually removes; the applied list is always written to \code{TABLE_MANUAL_EXCLUSIONS_*.csv} in the output directory, so any run documents its own curation state.}
 
 \item{min_species}{Integer. Species-richness threshold for cluster retention. Clusters are retained when they contain \strong{strictly more than} \code{min_species} distinct species, so \code{min_species = 50} keeps clusters with 51 species or more. Defaults to \code{50}.}
 
@@ -44,7 +44,7 @@ assemble_ingroup_phylotar(
 \item{out_dir}{Character. Output directory path to save cluster summaries, FASTA sequence matrices, and log reports.}
 
 \item{mnsql, mxsql}{Integer. Shortest and longest sequence, in bases, that a new mining keeps
-(\code{phylotaR::setup()}); 100 and 5000 by default (decision L1 of 28-09). Used only when GenBank is mined.}
+(\code{phylotaR::setup()}); 100 and 5000 by default. Used only when GenBank is mined.}
 
 \item{notify}{Logical. Send an email through \code{\link[=send_run_notification]{send_run_notification()}} when a mining ends or fails;
 reading an existing workspace sends nothing. Defaults to \code{FALSE}.}

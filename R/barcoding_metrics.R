@@ -51,11 +51,11 @@
 
 #' Summarise the Per-Class Metrics of the Molecular Diagnostic Branch
 #'
-#' Step 11 of the branch (Phase 6D). For each classifier at its operating point of step 9, per locus
-#' and per scheme, it writes the metrics of section 5 of the validation plan: per-class recall and
+#' Step 10 of the branch. For each classifier at its operating point of step 9, per locus
+#' and per scheme, it writes the metrics of the validation: per-class recall and
 #' precision as distributions (median, interquartile range, the classes with recall 0 and the
 #' classes never assigned), the unassigned rate and the two kinds of misassignment as separate
-#' figures, and the five context columns of section 3 of the plan on every row. It runs no
+#' figures, and the five context columns of the locus on every row. It runs no
 #' classifier and computes no operating point: both come from steps 7 and 9.
 #'
 #' @details

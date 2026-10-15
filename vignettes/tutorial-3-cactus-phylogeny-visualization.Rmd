@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 This tutorial covers the last stage of the core workflow: integration of species metadata, figures of the phylogenetic products, and summaries of conservation status.
 It uses the supermatrix, maximum-likelihood tree, bootstrap support values and chronogram produced in [Tutorial 1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) and [Tutorial 2](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
 
-**Module 11** reconciles the species in the supermatrix with the accepted checklist of Cactaceae and retrieves species-level assessments from the IUCN Red List.
+**Module 11** reconciles the species in the supermatrix with the accepted checklist of Cactaceae (Korotkova *et al*. 2021) and retrieves species-level assessments from the IUCN Red List.
 The result is one table that records, for each species, its taxonomic status, molecular sampling, placement in the tree, distribution and conservation category.
 
 **Module 12** produces seventeen figures in five groups: coverage of the molecular dataset, structure of the supermatrix, the tree and the chronogram, the species accounting across pipeline stages, and summaries of IUCN categories, endemism, threats and habitats.
@@ -230,7 +230,7 @@ species_summary <- species_summary %>%
 
 `get_iucn_data()` retrieves the latest IUCN assessment of one species through the `rredlist` interface to the IUCN Red List API.
 It returns the category, criteria, population trend, countries of occurrence, endemism, habitats, threats, and use and trade.
-The query covers the 1,965 checklist species and the 28 outgroups.
+The query covers the 1,965 species of the checklist (Korotkova *et al*. 2021) and the 28 outgroups.
 All ingroup names in the supermatrix match the checklist, so every query uses an accepted name.
 
 The output table (`TABLE_species_all_data.csv`) is used by all figures in Module 12.
@@ -294,7 +294,6 @@ library(purrr)
 library(scales)
 
 # Theme and colours of every figure: theme_phylocactus() and phylocactus_colours() of the package
-# (decisions E1 and E2)
 
 # Reference outputs distributed with the package. The script in inst/scripts reads the same
 # tables from the run directory.

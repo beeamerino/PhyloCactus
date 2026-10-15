@@ -60,48 +60,48 @@
 
 #' Negative Controls of the Molecular Diagnostic Branch
 #'
-#' Step 8 of the branch, and the gate in front of every real figure (validation plan, sec. 4). Three
+#' Step 8 of the branch, and the gate in front of every real figure. Three
 #' controls, none of which is a result of the method: the three are the condition for a result of
 #' the method to be interpretable.
 #'
-#' **CN1, permuted labels.** The whole procedure is repeated with the species labels permuted inside
+#' **Label permutation ("CN1").** The whole procedure is repeated with the species labels permuted inside
 #' the training set. The accuracy must fall to the base rate; if it does not, there is leakage.
 #' Written as one row per permutation plus its verdict.
 #'
-#' **CN2, a query alien to the clade.** Sequences of the outgroup, which are not in the library, are
+#' **Outgroup queries ("CN2"), alien to the clade.** Sequences of the outgroup, which are not in the library, are
 #' passed as queries. The table publishes how many outgroup **species** each locus had, and how many
 #' sequences, zeros included. The size of the control is the species count: GenBank holds population
 #' level studies, so a locus can carry dozens of sequences of a single species and control almost
 #' nothing. A control over one species is an anecdote and has to be read as one.
 #'
-#' **CN3, resubstitution.** The same queries as the folds, in both schemes, each one classified
+#' **Resubstitution ("CN3").** The same queries as the folds, in both schemes, each one classified
 #' against its own training set with the query put back into it. Nothing else changes between this
 #' figure and the honest one, which is what makes the two comparable: until 2026-09-25 this control
 #' ran over the whole library instead, a different set of queries, and the two figures could not be
 #' subtracted. Written with the label `irreproducible_resubstitution` in the table itself, so the
-#' figure cannot travel without it. **Its value is published in Phase 6 and only next to the honest
+#' figure cannot travel without it. **Its value is published only next to the honest
 #' figure**, which does not exist yet.
 #'
 #' @param library_dir Character. Output directory of [finalize_barcoding_library()].
 #' @param folds_dir Character. Output directory of [build_barcoding_folds()].
 #' @param output_dir Character. Destination; refused inside a directory of the phylogeny.
 #' @param outgroup_dir Character or `NULL`. Directory with `<locus>.fasta` of the outgroup, as the
-#'   assembly writes them. `NULL` skips CN2 and says so.
-#' @param method Character. `"nn"` or `"idtaxa"`. With `"idtaxa"` only CN2 runs (decision K6 of
-#'   BMM, 2026-09-26): CN1 would retrain IdTaxa once per fold and permutation, and CN3 measures a
+#'   assembly writes them. `NULL` skips the outgroup control and says so.
+#' @param method Character. `"nn"` or `"idtaxa"`. With `"idtaxa"` only the outgroup control ("CN2") runs:
+#'   the label permutation would retrain IdTaxa once per fold and permutation, and the resubstitution measures a
 #'   bias of the nearest neighbour. The outgroup queries are oriented against the library with the
 #'   rule of the nearest neighbour, classified by IdTaxa trained on the whole locus at threshold 0
 #'   with a seed per query, and written to `TABLE_barcoding_cn2_queries_idtaxa.csv`; the tables of
 #'   the nearest neighbour are not touched. MAFFT is not needed.
 #' @param threshold Numeric. Confidence threshold applied to IdTaxa's output, for `"idtaxa"`, as in
 #'   [classify_barcoding_folds()].
-#' @param permutations Integer. Permutations of CN1; at least 10 in a real run.
+#' @param permutations Integer. Permutations of the label permutation control; at least 10 in a real run.
 #' @param seed Integer. Seed of the permutations, declared so they are reproducible.
 #' @param model,min_comparable Distance model and minimum of comparable positions, as in step 7.
 #' @param schemes,loci Schemes and loci; `NULL` for every locus of the library.
 #' @param max_folds Integer or `NULL`. Declared subset of folds, for the expensive method.
 #' @param controls Character vector. Which of `"CN1"`, `"CN2"` and `"CN3"` to run.
-#' @param mafft_exec Character. Command or path of the `MAFFT` binary. CN2 adds every outgroup
+#' @param mafft_exec Character. Command or path of the `MAFFT` binary. The outgroup control adds every outgroup
 #'   query to the alignment of the library with `--add --keeplength`, one call per query, so the
 #'   columns of the library stay fixed and the distance of one query is comparable with the
 #'   distance of another. Without `outgroup_dir` MAFFT is never called.
@@ -138,8 +138,9 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
                                    threshold = 60) {
   method <- match.arg(method)
   if (method == "idtaxa" && any(c("CN1", "CN3") %in% controls)) {
-    stop("CN1 and CN3 run with the nearest neighbour only (decision K6); with method = \"idtaxa\" ",
-         "ask for controls = \"CN2\".", call. = FALSE)
+    stop("The label permutation ('CN1') and the resubstitution ('CN3') run with the nearest neighbour only: ",
+         "IdTaxa would be retrained once per fold and permutation. With method = \"idtaxa\" ask for controls = \"CN2\".",
+         call. = FALSE)
   }
   .bc_assert_output_dir(output_dir)
   lib <- .bc_library_from_dir(library_dir)
@@ -196,7 +197,7 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
           m <- .bc_metric_accuracy(pred)
           rows[[length(rows) + 1L]] <- cbind(data.frame(permutation = k, stringsAsFactors = FALSE), m)
         }
-        message(sprintf("CN1, locus '%s', scheme %s: %d permutations over %d folds.",
+        message(sprintf("Label permutation, locus '%s', scheme %s: %d permutations over %d folds.",
                         l, sc, permutations, length(folds)))
       }
     }
@@ -313,7 +314,7 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
     rownames(cn3) <- NULL
     out$cn3 <- cn3
     utils::write.csv(cn3, file.path(output_dir, "TABLE_barcoding_cn3_resubstitution.csv"), row.names = FALSE)
-    message("CN3 written with its label. Its figure is published in Phase 6, and never without the honest one beside it.")
+    message("Resubstitution written with its label. Its accuracy is reported only beside that of the validation folds, never alone.")
   }
 
   .bc_controls_banner(out, output_dir, method)
@@ -336,7 +337,7 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   ok <- tryCatch(length(check_mafft_available(mafft_exec)) > 0L,
                  error = function(e) FALSE, warning = function(w) FALSE)
   if (!isTRUE(ok)) {
-    stop("CN2 aligns every outgroup query against the library and needs MAFFT. ",
+    stop("The outgroup control aligns every outgroup query against the library and needs MAFFT. ",
          "It is not available as '", mafft_exec, "'.", call. = FALSE)
   }
   invisible(TRUE)
@@ -514,13 +515,13 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   cat("====================================================\n")
   cat("  Method:                ", method, "\n")
   if (!is.null(out[["cn1_verdict"]])) {
-    cat("  CN1: ", nrow(out$cn1_verdict), " locus-scheme pairs, leakage flagged in ",
+    cat("  Label permutation ('CN1'): ", nrow(out$cn1_verdict), " locus-scheme pairs, leakage flagged in ",
         sum(out$cn1_verdict$leakage), "\n", sep = "")
   }
   # `[[` and not `$`: `$` matches partially, and with IdTaxa `out$cn2` found `cn2_queries_idtaxa`
   cn2 <- out[["cn2"]]
   if (!is.null(cn2)) {
-    cat("  CN2: ", sum(cn2$n_species), " outgroup species (", sum(cn2$comparable),
+    cat("  Outgroup queries ('CN2'): ", sum(cn2$n_species), " outgroup species (", sum(cn2$comparable),
         " comparable sequences of ", sum(cn2$queries), ") over ",
         sum(cn2$comparable > 0), " loci\n", sep = "")
     cat("       ", sum(cn2$reversed), " reversed before aligning; ",
@@ -528,10 +529,10 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   }
   if (!is.null(out$cn2_queries_idtaxa)) {
     q <- out$cn2_queries_idtaxa
-    cat("  CN2 with IdTaxa: ", sum(q$orientation != "no_match"), " comparable outgroup queries of ",
+    cat("  Outgroup queries with IdTaxa ('CN2'): ", sum(q$orientation != "no_match"), " comparable outgroup queries of ",
         nrow(q), "; ", sum(q$orientation == "no_match"), " match the locus in neither direction\n", sep = "")
   }
-  if (!is.null(out[["cn3"]])) cat("  CN3: written and labelled; its figure belongs to Phase 6\n")
+  if (!is.null(out[["cn3"]])) cat("  Resubstitution ('CN3'): written and labelled; read only beside the validation folds\n")
   cat("  Output directory:      ", output_dir, "\n")
   cat("====================================================\n\n")
   invisible(TRUE)

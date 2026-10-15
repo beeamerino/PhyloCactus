@@ -39,7 +39,7 @@ classify_barcoding_folds(
 \item{model}{Character. Distance model of \code{\link[ape:dist.dna]{ape::dist.dna()}}, for \code{"nn"}.}
 
 \item{min_comparable}{Integer. Minimum number of comparable positions for a pair to have a value
-(E13 of the validation plan). Pairs below it are left without value, never imputed.}
+Pairs below it are left without value, never imputed.}
 
 \item{schemes}{Character vector. \code{"species"} (scheme E) and \code{"genus"} (scheme G).}
 
@@ -67,8 +67,8 @@ run are then written by \code{\link[=merge_barcoding_chunks]{merge_barcoding_chu
 \item{alignment}{Character. How the distance of a query is measured, for \code{"nn"}. \code{"library"},
 the default, reads it from the joint alignment of the library, in which the query took part.
 \code{"add"} removes the query's gaps, orients it against the training set of its fold and adds it
-to that training alignment with \code{MAFFT --add --keeplength}, one call per query: the path of CN2
-and of a query brought by a user. The probe of 2026-09-25 found the two paths agreeing on 699 of
+to that training alignment with \code{MAFFT --add --keeplength}, one call per query: the path of the outgroup control
+and of a query brought by a user. On 2026-09-25 the two paths agreed on 699 of
 720 queries and 4 answers changed. \code{"add"} writes its own tables, with the suffix \verb{_add}, and
 never touches those of \code{"library"}.}
 
@@ -102,11 +102,11 @@ one row per locus and scheme with the folds, the queries and the seconds they to
 \description{
 Step 7 of the branch. Reads the library of step 4 and the folds of step 5, classifies every query
 of every fold and writes the raw predictions, one row per query. It aggregates nothing: no
-accuracy, no rate, no mean. The negative controls (Phase 5B) and the real metrics (Phase 6) read
+accuracy, no rate, no mean. The negative controls (step 8) and the metrics (step 10) read
 these tables afterwards.
 }
 \details{
-The output has three states (validation plan, sec. 1): species, genus with the specific ambiguity
+The output has three states: species, genus with the specific ambiguity
 declared, and not assignable. The state comes from the structure of the tie at the minimum
 distance, not from a threshold, so the threshold can be swept later over \code{nn_distance},
 \code{margin} and \code{confidence} without classifying again.

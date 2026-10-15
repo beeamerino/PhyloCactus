@@ -24,7 +24,7 @@ Invisibly, a list with \code{folds} (by scheme) and \code{summary}. Writes
 }
 \description{
 Step 5 of the branch. Reads the library written by \code{\link[=finalize_barcoding_library]{finalize_barcoding_library()}}, builds the two
-partition schemes of the validation plan, checks the hard rule on every fold and writes the fold
+partition schemes (E and G), checks the hard rule on every fold and writes the fold
 tables and their summary. The training set is not written: it is the rest of the library of the
 locus, and writing it would multiply the size of the tables without adding information.
 }

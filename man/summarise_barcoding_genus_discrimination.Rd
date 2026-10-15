@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_report.R
 \name{summarise_barcoding_genus_discrimination}
 \alias{summarise_barcoding_genus_discrimination}
-\title{Per-genus discrimination of each locus in the 6B folds}
+\title{Per-genus discrimination of each locus in the validation folds}
 \usage{
 summarise_barcoding_genus_discrimination(
   classifier_dir = file.path("11_barcoding", "7_classifier"),
@@ -30,7 +30,7 @@ From the IdTaxa predictions of the validation folds (step 7), cut at the operati
 step 9 (60 by default), counts per locus, scheme and true genus the queries whose species was
 named correctly, the wrong species, the right and wrong genera, and the unassigned, with their
 rates. It says how well each locus tells the species of one genus apart in the library, which the
-identification report shows beside the answer (decision IR4 of BMM, 28-09).
+identification report shows beside the answer.
 }
 \examples{
 \dontrun{

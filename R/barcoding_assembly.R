@@ -49,7 +49,7 @@
 
 #' Taxonomic IDs of the Outgroup of the Molecular Diagnostic Branch
 #'
-#' The six genus-level NCBI Taxonomy IDs that CN2 queries the library with (validation plan, sec. 4):
+#' The six genus-level NCBI Taxonomy IDs that the outgroup control queries the library with:
 #' the three families that surround Cactaceae.
 #'
 #' - **Anacampserotaceae:** *Talinopsis* (107598), *Grahamia* (107617), *Anacampseros* (107583).
@@ -60,7 +60,7 @@
 #' *Amphipetalum* (1835425) is not requested: GenBank holds no nucleotide records for it, so the
 #' request would only produce an empty download.
 #'
-#' **This is the branch's own copy** (decision of BMM, 2026-09-23). The phylogeny keeps its list in
+#' **This is the branch's own copy**. The phylogeny keeps its list in
 #' `assemble_outgroup_phylotar()` and is not touched, so the branch runs without it. A test compares
 #' the two and fails if they ever drift apart.
 #'
@@ -382,7 +382,7 @@ barcoding_outgroup_taxids <- function() {
 #' @param apply_manual_exclusions Logical. Apply the curated exclusions? Defaults to `TRUE`.
 #' @param checklist_path Character. Accepted checklist (Korotkova *et al*. 2021); `NULL`, the default,
 #'   uses the checklist distributed with the package. `NA` applies no checklist and keeps every
-#'   GenBank name, cleaned to `Genus_species`: that is what the outgroup of CN2 needs, since a
+#'   GenBank name, cleaned to `Genus_species`: that is what the outgroup of the outgroup control needs, since a
 #'   checklist of Cactaceae would discard every outgroup name.
 #' @param min_species Integer. A cluster is retained when it holds more than this number of species.
 #'   Defaults to `50`, as in the phylogeny.
@@ -399,13 +399,13 @@ barcoding_outgroup_taxids <- function() {
 #'   cluster keeps a sid that sits in two. Defaults to `"3593"`.
 #' @param taxids Character vector or `NULL`. What to mine from GenBank when the workspace of
 #'   `wd_path` does not exist yet, which is what lets the branch run without the phylogeny having
-#'   run first. `NULL` mines `preferred_parent`, the behaviour since Phase 2. Several IDs are mined
-#'   together, as [barcoding_outgroup_taxids()] returns them for CN2.
+#'   run first. `NULL` mines `preferred_parent`, the behaviour of earlier versions. Several IDs are mined
+#'   together, as [barcoding_outgroup_taxids()] returns them for the outgroup control.
 #' @param ncbi_dr Character or `NULL`. Directory of the BLAST+ binaries, used only when the workspace
 #'   has to be created.
 #' @param force_download Logical. Mine GenBank again even if the workspace exists. Defaults to `FALSE`.
 #' @param mnsql,mxsql Integer. Shortest and longest sequence, in bases, that a new mining keeps
-#'   (`phylotaR::setup()`); 100 and 5000 by default (decision L1 of 28-09). Used only when GenBank is mined.
+#'   (`phylotaR::setup()`); 100 and 5000 by default. Used only when GenBank is mined.
 #' @param notify Logical. Send an email through [send_run_notification()] when step 1 ends, finished
 #'   or failed, and another when a mining ends or fails (reading an existing workspace mines nothing).
 #'   A notification that cannot be sent is reported and never fails the step. Defaults to `FALSE`.
