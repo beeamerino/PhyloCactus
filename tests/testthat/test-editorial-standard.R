@@ -55,7 +55,9 @@ test_that("the palette gives the colours of E1 by role, in their fixed order", {
   expect_identical(pc("outcome"), c("species correct" = "#1c5cab", "genus correct" = "#86b6ef", "abstention" = "#a8a79f",
                                     "wrong species" = "#ee8a85", "wrong genus" = "#b2182b"))
   expect_identical(pc("state"), c("1" = "#1c5cab", "2" = "#86b6ef", "3" = "#a8a79f"))
-  expect_identical(unname(pc("sequential")), c("#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"))
+  # Magnitudes in greys, light to dark, from the neutral fill to the text grey (amendment of BMM, 15-10:
+  # colour only for categories; everything else in grey)
+  expect_identical(unname(pc("sequential")), c("#f0efec", "#d6d5cf", "#bdbcb5", "#a8a79f", "#8a8983", "#6b6a65", "#52514e"))
   expect_identical(pc("support"), c(">= 90" = "#0b0b0b", "70-89" = "#a8a79f", "< 70" = "#ffffff", "Constrained" = "#2a78d6"))
   # Lines, text and backgrounds of the figures take the neutral greys of the palette, not R colour names;
   # marks of a single series take the mark grey (amendment of E1 by BMM, 15-10: "gris como relleno, no azul")
@@ -76,6 +78,19 @@ test_that("the state colours of the report and of the plotting functions are the
   sc <- Filter(function(s) "fill" %in% s$aesthetics, p$scales$scales)
   expect_length(sc, 1L)
   expect_identical(unname(sc[[1]]$palette(3)), unname(PhyloCactus::phylocactus_colours("state")))
+})
+
+test_that("presence and absence: mark grey against the neutral fill, in every panel (E1, amendment of 15-10)", {
+  n <- PhyloCactus::phylocactus_colours("neutral")
+  s <- data.frame(genus = "Opuntia", species = c("Opuntia_a", "Opuntia_b"), locus = "matK", sequences = c(2L, 0L),
+                  stringsAsFactors = FALSE)
+  p <- PhyloCactus:::.bc_report_sampling_plot(s, "Opuntia_a")
+  sc <- Filter(function(x) "fill" %in% x$aesthetics, p$scales$scales)[[1]]
+  expect_identical(unname(sc$palette(2)[c("TRUE", "FALSE")]), unname(c(n[["mark"]], n[["fill"]])))
+  t <- data.frame(path = "crop", core_trimmed = 0, genus_core_trimmed = 0, stringsAsFactors = FALSE)
+  q <- PhyloCactus:::.bc_report_route_plot("plastome", t)
+  sq <- Filter(function(x) "fill" %in% x$aesthetics, q$scales$scales)[[1]]
+  expect_identical(unname(sq$palette(2)[c("run", "not run")]), unname(c(n[["mark"]], n[["fill"]])))
 })
 
 test_that("no colour literal outside the palette module (E1)", {
