@@ -673,8 +673,8 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
 #' Reference timing illustrating worker parallelization: on an Apple M2 Pro (8 threads, `--workers 1`,
 #' `RAxML-NG` 1.2.2, SSE3 kernels), searching 50 starting trees sequentially on an earlier version of the
 #' supermatrix required 47115 s (~938 s per tree). The production run on an HPC cluster node (AMD EPYC 9754, 75 threads, `--workers 25`) over the
-#' full supermatrix (1024 terminals, 12809 sites, 5959 patterns, 11 partitions) completed 50 starting trees in
-#' 2739 s (~46 minutes), executing two parallel rounds.
+#' full supermatrix (1208 terminals, 13 700 sites, 7899 patterns, 13 partitions) completed 50 starting trees in
+#' 4468 s (about 75 minutes), executing two parallel rounds.
 #'
 #' `workers` is derived automatically and constrained to a divisor of the starting tree
 #' count, so that no worker sits idle in the final round.
@@ -890,8 +890,8 @@ generate_ml_search_script <- function(alignment_file, partition_file, constraint
 #' places 28 percent (840 nodes below 0.70).
 #'
 #' Support values are meaningless for any bipartition imposed through `--tree-constraint`, because
-#' every replicate reproduces it by construction. Those nodes must be reported as constrained rather
-#' than supported. Use `classify_constrained_nodes()` to separate them before tabulating support.
+#' every replicate reproduces it by construction. Those nodes are reported as constrained,
+#' not as supported. Use `classify_constrained_nodes()` to separate them before tabulating support.
 #'
 #' @param raxml_bin Character. System command or full path to executable `RAxML-NG` binary.
 #' @param best_tree Character. Path to reference maximum-likelihood tree file.
@@ -1019,8 +1019,7 @@ calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = d
 #'
 #' Unlike `generate_bootstrap_script()`'s HPC-oriented default (empirically calibrated on a 128-core AMD EPYC node),
 #' the `threads_per_worker = 4L` default here has not been empirically validated for bootstrap workloads on Apple
-#' Silicon specifically (only single-threaded, non-coarse-grained ML tree search timings are currently available for
-#' that hardware). Treat this default as a reasonable starting heuristic and re-validate empirically (e.g., time a
+#' Silicon specifically (the only timings measured on that hardware are of single-threaded maximum-likelihood searches). Treat this default as a reasonable starting heuristic and re-validate empirically (e.g., time a
 #' short run with `bs_trees` set low, at a couple of `threads_per_worker` values) before committing to a long local run.
 #'
 #' @param raxml_bin_path Character. System command or full path to executable `RAxML-NG` binary.
@@ -1137,10 +1136,10 @@ run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, con
 #' @param bs_per_rep Integer. Number of bootstrap trees generated per chunk replicate. Defaults to `500`.
 #' @param max_reps Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (`1-max_reps`). Defaults to `2`,
 #'   giving a total array target of `bs_per_rep * max_reps = 1000` bootstrap trees. This provides a safety margin over the autoMRE
-#'   convergence point observed in the reference run (1024 taxa, 11 partitions), which converged (`bs-cutoff = 0.03`,
-#'   FBP) after 650 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
-#'   sampling scheme. Always confirm convergence with `check_bs_convergence()` on the collected trees (via `collect_bootstraps()`) rather
-#'   than assuming `bs_per_rep * max_reps` is sufficient; increase `max_reps` and re-run `collect_bootstraps()` if it is not.
+#'   convergence point observed in the reference run (1208 taxa, 13 partitions), which converged (`bs-cutoff = 0.03`,
+#'   FBP) after 550 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
+#'   sampling scheme. Always confirm convergence with `check_bs_convergence()` on the collected trees (via `collect_bootstraps()`): `bs_per_rep * max_reps`
+#'   is not sufficient by itself; increase `max_reps` and re-run `collect_bootstraps()` if it is not.
 #' @param base_seed Integer. Base random seed for dynamic seed calculation (`SEED=$(( SLURM_ARRAY_TASK_ID * base_seed ))`). Defaults to `NULL` (random).
 #' @param threads Integer. Number of CPU cores requested per SLURM task (`--cpus-per-task`). Defaults to `40`.
 #' @param workers Integer. Number of RAxML-NG worker processes. If `NULL` (default), calculated dynamically as `max(1L, as.integer(threads / threads_per_worker))`.

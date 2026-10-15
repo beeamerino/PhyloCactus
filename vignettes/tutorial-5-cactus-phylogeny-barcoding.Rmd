@@ -67,7 +67,7 @@ setwd(tutorial_dir)
 notify_email <- FALSE
 
 # IdTaxa retrains once per fold, which on the whole library takes tens of core-hours: it is run
-# once, on a computing cluster, on the frozen library (generate_barcoding_job_scripts() and
+# once, on a computing cluster, on the final library (generate_barcoding_job_scripts() and
 # merge_barcoding_chunks(); the outgroup control with run_barcoding_controls(method = "idtaxa",
 # controls = "CN2")),
 # and its merged tables are the result, since LearnTaxa() differs between machines in floating
@@ -214,7 +214,7 @@ analyze_barcode_gap(
 
 ### Step 7: Classification of the Folds
 
-**`classify_barcoding_folds()`**. Two classifiers: the nearest neighbour, with each query added to the training alignment of its fold by `MAFFT --add` (hours on a laptop, in parallel processes), and IdTaxa (Murali *et al*. 2018), which retrains once per fold and takes tens of core-hours. IdTaxa is run once, on a computing cluster, on the frozen library (`generate_barcoding_job_scripts()`, `merge_barcoding_chunks()`); the script reads its merged tables through the switch `idtaxa_tables` and never trains it.
+**`classify_barcoding_folds()`**. Two classifiers: the nearest neighbour, with each query added to the training alignment of its fold by `MAFFT --add` (hours on a laptop, in parallel processes), and IdTaxa (Murali *et al*. 2018), which retrains once per fold and takes tens of core-hours. IdTaxa is run once, on a computing cluster, on the final library (`generate_barcoding_job_scripts()`, `merge_barcoding_chunks()`); the script reads its merged tables through the switch `idtaxa_tables` and never trains it.
 
 ```{r, eval = FALSE}
 # The branch classifier of the internal validation: exact leave-one-out over the distance matrix
@@ -445,19 +445,19 @@ print(utils::read.csv("11_barcoding/11_metrics/TABLE_barcoding_metrics_summary_n
 ## Limitations
 
 - **Wrong species.** Rare, not absent; [Tutorial 6](tutorial-6-cactus-barcoding-identification.html#how-well-this-version-identifies) gives the rates of this version for each kind of input. Most are congeners named with high confidence when the true species is absent from the library or shares its haplotype.
-- **Abstention.** The common answer of this version. Plastid loci of closely related cacti differ little, most species are represented by one sequence per locus, and IdTaxa withholds an answer rather than guess.
+- **Abstention.** The common answer of this version. Plastid loci of closely related cacti differ little, most species are represented by one sequence per locus, and IdTaxa withholds an answer when its confidence does not reach the threshold.
 - **One locus, one answer.** A species answer usually rests on a single locus, mostly `matK`. The agreement between loci, given in the report, is the main check a user has.
 - **`ITS` and the nearest neighbour.** The rule of remoteness of the nearest neighbour does not reject the sister lineages in `ITS`. The identification runs IdTaxa, which rejects them; the nearest neighbour is used only in the internal validation.
 - **Coverage.** The library holds 1205 of the accepted species of the checklist (Korotkova *et al*. 2021); a sample of a species or genus outside a locus library can only be named as something else in that locus (Tutorial 6 gives examples).
 
 ## Design Decisions
 
-The manifest of this section in version 0.4.5 left five questions open. The phases of version 0.5.0 answered them:
+The branch rests on five design decisions:
 
 1. **Loci and combinations.** Each locus is classified on its own; loci are not concatenated and no combination of loci is evaluated as a unit.
 2. **Unit of assignment.** A graded answer per locus: species, genus or none, with the reason for none. A species is named only above the species threshold of its locus.
 3. **Reporting ambiguity.** The candidates under the thresholds are listed as alternatives in the report, never promoted to an answer; disagreement between loci is reported as a conflict.
-4. **Genome skims and other reads.** The library is built from Sanger marker records of GenBank and own sequences, and genome skims are not a source of it (2026-10-07). Illumina reads that a user brings are a query: `identify_barcoding_reads()` assembles their plastome and nuclear ribosomal DNA and identifies them against the library, locus by locus.
+4. **Genome skims and other reads.** The library is built from Sanger marker records of GenBank and own sequences, and genome skims are not a source of it. Illumina reads that a user brings are a query: `identify_barcoding_reads()` assembles their plastome and nuclear ribosomal DNA and identifies them against the library, locus by locus.
 5. **Paralogy and organelle capture.** Possible paralogs (`pepC_like`) and saturation are flagged and kept; conflict between plastid and nuclear loci is reported as disagreement between loci, not resolved. Per-locus monophyly and the cytonuclear diagnosis are planned for version 0.6.
 
 [Continue to Tutorial 6: Identifying a Sample](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html)

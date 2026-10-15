@@ -188,7 +188,7 @@ stopifnot(all(!outgroup_alignment_manifest$masking_applied))
 
 Although orthologous loci can be accurately aligned, not all markers contribute equally to phylogenetic inference. Differences in evolutionary rate, substitution saturation, sequence completeness, and structural anomalies may reduce the phylogenetic information contained within individual loci or introduce systematic bias into concatenated analyses. Consequently, each marker should be evaluated before inclusion in the final multilocus dataset.
 
-The `run_marker_screening()` function performs an automated quality assessment of the ingroup alignments generated in Module 2. Passing `outgroup_folder` records `n_outgroup` and `n_total` in the summary table for diagnostic visibility, though retention decisions remain strictly based on ingroup thresholds to prevent distant outgroup divergence from distorting saturation regressions. For example, `trnT-psbD` possessed 50 ingroup sequences and was filtered out by `min_nseq_to_retain = 100`, despite carrying extensive outgroup representation. First, substitution saturation is evaluated using regression-based statistics to identify loci in which multiple substitutions may have eroded the underlying phylogenetic signal. The function then detects sequence length outliers using the interquartile range (IQR), identifying sequences that may represent incomplete assemblies, sequencing artifacts, or annotation errors.
+The `run_marker_screening()` function performs an automated quality assessment of the ingroup alignments generated in Module 2. Passing `outgroup_folder` records `n_outgroup` and `n_total` in the summary table for diagnostic visibility, though retention decisions remain strictly based on ingroup thresholds to prevent distant outgroup divergence from distorting saturation regressions. For example, `trnT-psbD` held 57 ingroup sequences and was filtered out by `min_nseq_to_retain = 100`, despite carrying extensive outgroup representation. First, substitution saturation is evaluated using regression-based statistics to identify loci in which multiple substitutions may have eroded the underlying phylogenetic signal. The function then detects sequence length outliers using the interquartile range (IQR), identifying sequences that may represent incomplete assemblies, sequencing artifacts, or annotation errors.
 
 Loci and sequences that fail the thresholds are excluded from the following modules. The function writes the retained markers and a diagnostic table with the saturation statistics, sequence length distributions, outliers and filtering decision for each locus. The retained markers are combined with the corresponding outgroup sequences in Module 4.
 
@@ -241,8 +241,8 @@ integrate_and_clean_markers(
   # amplicon contains that intron. Verified before aliasing: outgroup ndhF shares none with
   # ndhF-rpl32 despite the resemblance, and is not aliased.
   marker_aliases = c(trnL = "trnL_trnF"),
-  # readmit_markers overrides the Module 3 verdict for a locus kept on outgroup grounds rather
-  # than ingroup resolution. Left empty; see the note below.
+  # readmit_markers overrides the Module 3 verdict for a locus kept on outgroup grounds, not for
+  # its ingroup resolution. Left empty; see the note below.
   readmit_markers = NULL,
   readmit_dir = NULL,
   # Alignment-free homology check, ingroup against outgroup, per marker.

@@ -62,8 +62,7 @@ the locus and of the genus, IdTaxa, three states. A locus with no hit is state 3
 The best hit is kept even when the locus has more than one copy in the assembly:
 the table gives the scaffold, its length, the mapping quality and the number of scaffolds hit, and
 a mapping quality under \code{low_mapq} is flagged and reported, since the region may be a second copy
-(for instance a plastid insertion in the nucleus) rather than the locus. In the real-file test of
-28-09 no locus of two assemblies was named to species; the answers are mostly state 3.
+(for instance a plastid insertion in the nucleus) and not the locus.
 
 Requires \code{minimap2} and \code{samtools} on the PATH (for instance from bioconda). The assembly may be
 gzipped; its folder is not written to (the index goes to a temporary folder).

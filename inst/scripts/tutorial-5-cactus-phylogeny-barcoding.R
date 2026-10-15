@@ -30,7 +30,7 @@ setwd(tutorial_dir)
 notify_email <- FALSE
 
 # IdTaxa retrains once per fold, which on the whole library takes tens of core-hours: it is run
-# once, on a computing cluster, on the frozen library (generate_barcoding_job_scripts() and
+# once, on a computing cluster, on the final library (generate_barcoding_job_scripts() and
 # merge_barcoding_chunks(); the outgroup control with run_barcoding_controls(method = "idtaxa",
 # controls = "CN2")),
 # and its merged tables are the result, since LearnTaxa() differs between machines in floating

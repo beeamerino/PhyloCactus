@@ -55,7 +55,7 @@ A region identical to library sequences is reported in `identical_to_library`, s
 
 ## Example 1. One Sanger Record
 
-`LT745702.1`, `matK` of *Pseudorhipsalis amazonica* subsp. *panamensis*. The record is named at subspecies rank, so the mining of folder 0 left it out; the library holds its binomial.
+`LT745702.1`, `matK` of *Pseudorhipsalis amazonica* subsp. *panamensis*. The record is named at subspecies rank, so the mining of Tutorial 1 left it out; the library holds its binomial.
 
 ```{r, eval = FALSE}
 # Download (GenBank, 1 record)
@@ -75,7 +75,7 @@ plot_barcoding_identification(system.file("extdata", "barcoding_example_LT745702
 
 ## Example 2. A Specimen of Unknown Species
 
-`PZ714536.1`, `matK` of *Opuntia* sp., published after the mining of folder 0.
+`PZ714536.1`, `matK` of *Opuntia* sp., published after the mining of Tutorial 1.
 
 ```{r, eval = FALSE}
 writeLines(rentrez::entrez_fetch("nuccore", id = "PZ714536.1", rettype = "gb", retmode = "text"),
@@ -237,7 +237,7 @@ A plastome or an assembly holds most loci of the library, a Sanger record one; y
 
 ## How Well This Version Identifies
 
-The rates below were measured with the library of this version, built from GenBank alone (frozen on 2026-10-13), with the species thresholds of step 9 and `rbcL` at genus rank only. They belong to this library: as GenBank enriches it, they are measured again and are expected to change.
+The rates below were measured with the library of this version, built from GenBank alone on 2026-10-13, with the species thresholds of step 9 and `rbcL` at genus rank only. They belong to this library: as GenBank enriches it, they are measured again and are expected to change.
 
 Outcomes, in the order species correct / genus correct / no answer / conflict / wrong species / wrong genus (number of queries). A species is "present" when the library holds it once the records of the query's own specimen are set aside.
 

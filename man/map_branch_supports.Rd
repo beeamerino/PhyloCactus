@@ -52,8 +52,8 @@ TBE 0.772 against median FBP 0.450, with the gap reaching 0.850 for clades of 51
 places 28 percent (840 nodes below 0.70).
 
 Support values are meaningless for any bipartition imposed through \code{--tree-constraint}, because
-every replicate reproduces it by construction. Those nodes must be reported as constrained rather
-than supported. Use \code{classify_constrained_nodes()} to separate them before tabulating support.
+every replicate reproduces it by construction. Those nodes are reported as constrained,
+not as supported. Use \code{classify_constrained_nodes()} to separate them before tabulating support.
 }
 \examples{
 \dontrun{

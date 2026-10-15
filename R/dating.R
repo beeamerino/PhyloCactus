@@ -1099,7 +1099,7 @@ report_bound_adherence <- function(chronogram, calibs, constraints, tol = 0.05,
   if (is.null(bs)) {
     pinned <- out[out$status %in% c("at_min", "at_max"), , drop = FALSE]
     if (nrow(pinned) > 0L) {
-      warning("These calibrated nodes returned their own bound rather than an estimate: ",
+      warning("These calibrated nodes returned their own bound, not an estimate: ",
               paste(sprintf("%s (%.2f Ma, %s)", pinned$mrca, pinned$age, pinned$status),
                     collapse = "; "),
               ". Their ages are dictated by the calibration and must not be reported as inferred ",

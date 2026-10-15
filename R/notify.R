@@ -87,8 +87,8 @@
 #' **Credentials are never read by this package.** The path is handed to `blastula::creds_file()`,
 #' which opens it. Nothing from that file is read, printed, logged or written anywhere by
 #' `PhyloCactus`, and the file belongs outside the repository. Create it once with
-#' `blastula::create_smtp_creds_file()`, and for a Gmail account use an application password rather
-#' than the account password.
+#' `blastula::create_smtp_creds_file()`, and for a Gmail account use an application password,
+#' not the account password.
 #'
 #' @param subject Character. Subject line.
 #' @param body Character. Message body, interpreted as Markdown by `blastula::md()`.

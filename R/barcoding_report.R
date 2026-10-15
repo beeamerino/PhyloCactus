@@ -623,7 +623,7 @@ report_barcoding_identification <- function(run_name,
                  .bc_html_table(lib_sum), .bc_html_table(rec[rec$kind %in% c("library", "model", "software", "setting"), , drop = FALSE]))
     s9 <- paste0("<p>Standard plant barcodes resolve about half of the species, complete plastomes a little more, and a part of ",
                  "species is not resolvable by any of them, because of hybridisation, incomplete lineage sorting and species that ",
-                 "are evolutionary grades rather than clades (Zeng et al., 2026, New Phytologist). In Cactaceae the plastid loci ",
+                 "are evolutionary grades, not clades (Zeng et al., 2026, New Phytologist). In Cactaceae the plastid loci ",
                  "vary little within genera and many species have one sequence or none in the library (section 6). A state 3 is ",
                  "not evidence that the species is absent from the library; a state 1 relies on the species being in it. If the ",
                  "query comes from a specimen already in the library, its answer is not an independent test.</p>")

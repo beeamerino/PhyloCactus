@@ -58,8 +58,7 @@ Efficiency cores (E-cores).
 \details{
 Unlike \code{generate_bootstrap_script()}'s HPC-oriented default (empirically calibrated on a 128-core AMD EPYC node),
 the \code{threads_per_worker = 4L} default here has not been empirically validated for bootstrap workloads on Apple
-Silicon specifically (only single-threaded, non-coarse-grained ML tree search timings are currently available for
-that hardware). Treat this default as a reasonable starting heuristic and re-validate empirically (e.g., time a
+Silicon specifically (the only timings measured on that hardware are of single-threaded maximum-likelihood searches). Treat this default as a reasonable starting heuristic and re-validate empirically (e.g., time a
 short run with \code{bs_trees} set low, at a couple of \code{threads_per_worker} values) before committing to a long local run.
 }
 \references{

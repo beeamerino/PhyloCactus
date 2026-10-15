@@ -211,11 +211,9 @@ The distances summarize overall agreement between topologies; they do not identi
 
 This tutorial completes the core workflow of `PhyloCactus`: assembly of a multilocus supermatrix from GenBank, maximum-likelihood inference with bootstrap support, divergence time estimation with penalized likelihood, integration of IUCN Red List data, figures, and comparison with published phylogenies.
 
-The next section of the workflow will assess how well individual markers discriminate species.
-It is under construction and contains no implementation.
-Tutorial 5 describes its scope, the design decisions taken, the open questions, and the conditions for reopening it.
+The second branch of the package, molecular identification by DNA barcoding, builds a reference library of Cactaceae from the same `phylotaR` mining, measures how well it tells genera and species apart, and identifies a sample against it (Tutorials 5 and 6).
 
-[Continue to Tutorial 5: DNA Barcoding, Section Manifest](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html)
+[Continue to Tutorial 5: Molecular Identification of Cacti (DNA Barcoding)](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html)
 
 ## References
 
