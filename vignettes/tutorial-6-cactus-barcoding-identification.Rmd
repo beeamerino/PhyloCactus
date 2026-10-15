@@ -167,7 +167,19 @@ utils::write.csv(sheet, "examples/samples.csv", row.names = FALSE)
 identify_barcoding_samples("examples/samples.csv")
 ```
 
-The index, `11_barcoding/10_identify/samples/TABLE_barcoding_samples_index.csv`, compares each answer with the declared species: `genus agrees`, `species agrees`, `disagrees` or `not assigned`.
+The index, `11_barcoding/10_identify/samples/TABLE_barcoding_samples_index.csv`, compares each answer with the declared species: `species agrees`, `genus agrees`, `disagrees`, `not assigned`, or `not declared` when the sheet gives none. The three samples are the records of Examples 1, 2 and 5, and their answers per locus are the figures of those examples; what the sheet adds is the index:
+
+```{r, eval = nzchar(system.file("extdata", "barcoding_example_samples_index.csv", package = "PhyloCactus")), echo = FALSE}
+idx <- utils::read.csv(system.file("extdata", "barcoding_example_samples_index.csv", package = "PhyloCactus"), stringsAsFactors = FALSE)
+idx$species_named <- gsub("_", " ", idx$species_named)
+options(knitr.kable.NA = "")
+knitr::kable(idx[, c("sample_id", "loci_found", "state1", "state2", "state3", "genera_named", "species_named",
+                     "declared_species", "declared_comparison")],
+             col.names = c("Sample", "Loci found", "State 1", "State 2", "State 3", "Genera named", "Species named",
+                           "Declared species", "Answer vs declared"))
+```
+
+**Reading.** `LT745702.1` names the genus *Pseudorhipsalis* and its declared species is not reached (`genus agrees`). `PZ714536.1` names *Opuntia* and declares no species (`not declared`). `MN517611.1` names *Mammillaria zephyranthoides* at one of its 12 loci found (`species agrees`). The sheet gives no voucher, so `voucher_missing` is `TRUE` in the three rows: a sample without a voucher is identified and flagged, since the leakage rule per specimen cannot be applied to it (its report says so).
 
 ## Example 8. A Genome Assembly
 
