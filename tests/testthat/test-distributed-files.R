@@ -74,3 +74,14 @@ test_that("the reports of the website hold no local path and no host name", {
     expect_false(grepl("\\.local\\b", x), info = basename(f))
   }
 })
+
+# Decision E7-a of BMM (15-10): the index of the sample sheet of Tutorial 6 is distributed too.
+test_that("the index of the sample sheet of Tutorial 6 names public accessions only", {
+  f <- file.path(.df_extdata(), "barcoding_example_samples_index.csv")
+  skip_if(!file.exists(f), "no index of the sample sheet of Tutorial 6 yet")
+  x <- utils::read.csv(f, stringsAsFactors = FALSE)
+  expect_true(all(c("sample_id", "status", "genera_named", "species_named", "declared_species",
+                    "declared_comparison") %in% names(x)))
+  expect_true(all(grepl(.df_accession, x$sample_id)), info = paste(x$sample_id, collapse = ", "))
+  expect_true(all(x$status == "identified"))
+})

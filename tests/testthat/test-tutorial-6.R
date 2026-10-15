@@ -139,3 +139,18 @@ test_that("README and Get Started link the two tutorials at their new addresses 
     expect_false(grepl("tutorial-6-cactus-phylogeny-functions.html", x, fixed = TRUE), info = f)
   }
 })
+
+# Decision E7-a of BMM (15-10): Example 7 had no figure and no result; the index of its sample sheet
+# is distributed and shown as a table, and the text says that the figures of its three samples are
+# those of Examples 1, 2 and 5. Written before the vignette is changed.
+test_that("Example 7 shows the index of its sample sheet from extdata, as a table (E7-a)", {
+  v <- .t6_vignette()
+  i <- grep("^## Example 7", v); j <- grep("^## Example 8", v)
+  expect_length(i, 1L); expect_length(j, 1L)
+  e7 <- paste(v[i:(j - 1L)], collapse = "\n")
+  expect_true(grepl("barcoding_example_samples_index.csv", e7, fixed = TRUE))
+  expect_true(grepl("kable(", e7, fixed = TRUE))
+  expect_true(grepl("Examples 1, 2 and 5", e7, fixed = TRUE))
+  m <- utils::read.csv(system.file("extdata", "MANIFEST.csv", package = "PhyloCactus"), stringsAsFactors = FALSE)
+  expect_true("barcoding_example_samples_index.csv" %in% m$canonical)
+})
