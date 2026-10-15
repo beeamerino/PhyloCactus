@@ -210,6 +210,11 @@ test_that("figures: a caption below, numbered, and no heading naming a figure or
   for (f in .es_vignettes()) {
     v <- readLines(f, warn = FALSE)
     expect_false(any(grepl("^#+ .*\\b(Figure|Table)\\b", v)), info = paste(basename(f), "heading"))
+    # Tutorial 3 is the reference (BMM, 15-10): its captions keep the numbers of its text and of the
+    # files its script writes (Figure_1 to Figure_17); Figures 7 and 9, the full-size trees, are not
+    # rendered and have no caption. The other vignettes number their figures 1, 2, ...
+    t3 <- grepl("^tutorial-3-", basename(f))
+    expected <- if (t3) c(1:6, 8, 10:17) else NULL
     n <- 0L
     for (ch in Filter(.es_evaluated, .es_chunks(f))) {
       is_fig <- any(grepl(draws, ch$code)) || grepl("fig\\.(width|height)", ch$header)
@@ -217,8 +222,15 @@ test_that("figures: a caption below, numbered, and no heading naming a figure or
       if (is_fig) expect_true(has_cap, info = paste(basename(f), ch$header))
       if (has_cap) {
         n <- n + 1L
-        expect_match(ch$header, paste0("fig\\.cap\\s*=\\s*\"\\*\\*Figure ", n, "\\.\\*\\* [A-Z]"), info = paste(basename(f), ch$header))
+        k <- if (t3) expected[n] else n
+        expect_match(ch$header, paste0("fig\\.cap\\s*=\\s*\"\\*\\*Figure ", k, "\\.\\*\\* [A-Z]"), info = paste(basename(f), ch$header))
+        lab <- regmatches(ch$header, regexpr("figure_[0-9]+_", ch$header))
+        if (t3 && length(lab)) expect_identical(as.integer(gsub("\\D", "", lab)), as.integer(k), info = ch$header)
       }
+    }
+    if (t3) {
+      expect_identical(n, length(expected), info = "Tutorial 3: 15 captions")
+      for (k in c(7L, 9L)) expect_true(any(grepl(paste0("Figure ", k, " is not rendered on this page"), v, fixed = TRUE)), info = k)
     }
   }
 })
