@@ -5,8 +5,8 @@
 \title{Colours of the Figures of PhyloCactus}
 \usage{
 phylocactus_colours(
-  role = c("categorical", "outcome", "state", "sequential", "support", "neutral", "theme",
-    "iucn")
+  role = c("categorical", "outcome", "state", "sequential", "support", "neutral",
+    "theme", "iucn")
 )
 }
 \arguments{
