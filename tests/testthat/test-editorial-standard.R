@@ -57,8 +57,10 @@ test_that("the palette gives the colours of E1 by role, in their fixed order", {
   expect_identical(pc("state"), c("1" = "#1c5cab", "2" = "#86b6ef", "3" = "#a8a79f"))
   expect_identical(unname(pc("sequential")), c("#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"))
   expect_identical(pc("support"), c(">= 90" = "#0b0b0b", "70-89" = "#a8a79f", "< 70" = "#ffffff", "Constrained" = "#2a78d6"))
-  # Lines, text and backgrounds of the figures take the neutral greys of the palette, not R colour names
-  expect_identical(pc("neutral"), c(text = "#52514e", line = "#a8a79f", rule = "#d6d5cf", fill = "#f0efec"))
+  # Lines, text and backgrounds of the figures take the neutral greys of the palette, not R colour names;
+  # marks of a single series take the mark grey (amendment of E1 by BMM, 15-10: "gris como relleno, no azul")
+  expect_identical(pc("neutral"), c(text = "#52514e", line = "#a8a79f", rule = "#d6d5cf", fill = "#f0efec",
+                                    mark = "#6b6a65"))
   iucn <- pc("iucn")
   expect_identical(names(iucn), c("EX", "EW", "CR", "EN", "VU", "NT", "LC", "DD", "NE"))
   expect_identical(unname(iucn[c("CR", "EN", "VU", "LC")]), c("#D81E05", "#FC7F3F", "#F9E814", "#60C659"))
@@ -101,6 +103,15 @@ test_that("no colour scale or named colour outside the palette (E1)", {
     x <- .es_code_lines(f)
     expect_false(any(grepl(bad_scale, x)), info = paste(basename(f), "colour scale"))
     expect_identical(colour_args(x), character(0), info = basename(f))
+  }
+})
+
+test_that("a single series is drawn in the mark grey, never in a categorical colour (E1, amendment of 15-10)", {
+  # A categorical colour tells categories apart; given as the constant fill or colour of a geom it
+  # names no category. Single bars, histograms, segments, points and HPD bars take neutral grey.
+  constant <- "\\b(fill|colou?r)\\s*=\\s*phylocactus_colours\\(\"categorical\"\\)"
+  for (f in c(.es_r_files(), .es_scripts(), .es_vignettes())) {
+    expect_false(any(grepl(constant, .es_code_lines(f))), info = basename(f))
   }
 })
 
