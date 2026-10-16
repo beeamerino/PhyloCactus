@@ -24,7 +24,9 @@ test_that("the package is version 0.5.1 and NEWS opens with it", {
 })
 
 test_that("DESCRIPTION names both branches and the external programs (M1, m5)", {
-  d <- read.dcf(.r51_root("DESCRIPTION"))
+  f <- .r51_root("DESCRIPTION")
+  skip_if(!file.exists(f), "DESCRIPTION is not in this tree")
+  d <- read.dcf(f)
   title <- d[1, "Title"]
   desc <- .r51_flat(d[1, "Description"])
   expect_match(title, "Identification", fixed = TRUE)
@@ -41,7 +43,9 @@ test_that("DESCRIPTION names both branches and the external programs (M1, m5)", 
 })
 
 test_that("NEWS of 0.5.0 records the changes it left out (M2)", {
-  news <- readLines(.r51_root("NEWS.md"), warn = FALSE, encoding = "UTF-8")
+  f <- .r51_root("NEWS.md")
+  skip_if(!file.exists(f), "NEWS.md is not in this tree")
+  news <- readLines(f, warn = FALSE, encoding = "UTF-8")
   from <- grep("^# PhyloCactus 0\\.5\\.0", news)
   to <- grep("^# PhyloCactus 0\\.4\\.5", news)
   expect_length(from, 1L)
