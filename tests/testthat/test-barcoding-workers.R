@@ -80,6 +80,25 @@ test_that("a worker that fails stops the run with its error and the notification
   expect_false(file.exists(file.path(out, "TABLE_barcoding_predictions_species_nn.csv")))
 })
 
+# The temporary folders of Windows hold backslashes (C:\Users\...). The paths the workers read must
+# reach them intact; a backslash in the folder name gives the same case on every system. The time
+# limit turns a wait without end into an error. Written before the code (Windows CI, 16-10).
+test_that("with workers, step 7 finishes when the paths hold a backslash, as the temporary folders of Windows do", {
+  .wk_skip()
+  withr::local_options(PhyloCactus.poll_seconds = 1)
+  tmp <- file.path(withr::local_tempdir(), "run\\Users")
+  dir.create(tmp, recursive = TRUE)
+  f <- .wk_fixture(tmp)
+  out <- file.path(tmp, "7_par")
+  setTimeLimit(elapsed = 300, transient = TRUE)
+  withr::defer(setTimeLimit(elapsed = Inf))
+  suppressMessages(utils::capture.output(classify_barcoding_folds(library_dir = f$library_dir, folds_dir = f$folds_dir,
+                                                                  output_dir = out, method = "nn", workers = 2L)))
+  setTimeLimit(elapsed = Inf)
+  expect_match(paste(readLines(file.path(out, "PROGRESS_nn.txt")), collapse = "\n"), "2 of 2 workers finished", fixed = TRUE)
+  expect_true(file.exists(file.path(out, "TABLE_barcoding_predictions_species_nn.csv")))
+})
+
 test_that("workers = 1 is the run of one process, and workers cannot be combined with chunk (PA1)", {
   expect_identical(formals(classify_barcoding_folds)$workers, 1L)
   expect_error(classify_barcoding_folds(workers = 2L, chunk = 1L, n_chunks = 2L), "workers")
