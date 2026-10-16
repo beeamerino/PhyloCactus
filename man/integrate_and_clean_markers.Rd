@@ -45,7 +45,7 @@ The two \code{phylotaR} runs cluster independently, so the same region can be na
 
 \item{homology_check}{Logical. For every marker present on both sides, measure the fraction of outgroup k-mers that occur in the ingroup sequences of the same name, write \code{tables/TABLE_marker_homology_check.csv}, and warn about the markers that share almost none. The measure is alignment-free, so it distinguishes sequences that are hard to align from sequences that are not the same region. Reported, never blocking. Defaults to \code{TRUE}.}
 
-\item{homology_k20_min, homology_k10_min}{Numeric. A marker is flagged \code{no_detectable_homology} when it falls below \strong{both}, at \code{k = 20} and \code{k = 10} respectively. In the reference dataset \code{trnL_trnF}, \code{matK}, \code{phyC} and \code{rbcL} return 0.26 to 0.59 at \code{k = 20}; \code{trnT-psbD} returns 0.040 (ingroup median 605 bp against outgroup 1347 bp). Default to \code{0.05} and \code{0.15}.}
+\item{homology_k20_min, homology_k10_min}{Numeric. A marker is flagged \code{no_detectable_homology} when it falls below \strong{both}, at \code{k = 20} and \code{k = 10} respectively. In the reference dataset the markers that pass (\code{rpL16}, \code{trnL_trnF}, \code{matK} and \code{rbcL}) return 0.26 to 0.58 at \code{k = 20}; the lowest, \code{trnS_trnG}, returns 0.013 at \code{k = 20} and 0.22 at \code{k = 10}, so it is not flagged. Default to \code{0.05} and \code{0.15}.}
 }
 \value{
 A data frame with the marker summary, with separate ingroup and joint metrics.

@@ -112,12 +112,12 @@
 #' of one family, a gene against the spacer beside it, or an amplicon that a second study placed
 #' elsewhere. Aligners do not refuse such a pair. MAFFT will return a block, the block will look
 #' like a marker with coverage on both sides of the root, and its columns will carry no positional
-#' homology. In the reference dataset this occurs in `trnT-psbD` (0.040 of 20-mers shared).
+#' homology. No marker of the reference dataset is in that case.
 #'
 #' The measure is alignment-free, which is the point: it cannot be rescued by a better alignment,
 #' so it separates "these sequences are hard to align" from "these sequences are not the same
-#' region". In the reference dataset, `trnL_trnF`, `matK`, `phyC` and `rbcL` return 0.26 to 0.59 at
-#' `k = 20`, and `trnT-psbD` returns 0.040.
+#' region". In the reference dataset, `rpL16`, `trnL_trnF`, `matK` and `rbcL` return 0.26 to 0.58 at
+#' `k = 20`.
 #'
 #' Orientation is not guaranteed to agree between two independent phylotaR runs, so an outgroup
 #' k-mer counts as shared when either it or its reverse complement occurs in the ingroup pool.
@@ -484,7 +484,7 @@ run_marker_screening <- function(
 #' @param readmit_dir Character or `NULL`. Directory holding the pre-screening ingroup alignments, normally `2_MAFFT_Cactaceae/alignments`. Required when `readmit_markers` is supplied. Defaults to `NULL`.
 #' @param drop_report Logical. Write `tables/TABLE_outgroup_markers_dropped.csv` listing the outgroup markers that have no ingroup counterpart, with their sequence counts, and warn about them. The joint marker set is the ingroup's, so those markers leave the analysis at this point; a run takes hours and a console warning alone scrolls away. Defaults to `TRUE`.
 #' @param homology_check Logical. For every marker present on both sides, measure the fraction of outgroup k-mers that occur in the ingroup sequences of the same name, write `tables/TABLE_marker_homology_check.csv`, and warn about the markers that share almost none. The measure is alignment-free, so it distinguishes sequences that are hard to align from sequences that are not the same region. Reported, never blocking. Defaults to `TRUE`.
-#' @param homology_k20_min,homology_k10_min Numeric. A marker is flagged `no_detectable_homology` when it falls below **both**, at `k = 20` and `k = 10` respectively. In the reference dataset `trnL_trnF`, `matK`, `phyC` and `rbcL` return 0.26 to 0.59 at `k = 20`; `trnT-psbD` returns 0.040 (ingroup median 605 bp against outgroup 1347 bp). Default to `0.05` and `0.15`.
+#' @param homology_k20_min,homology_k10_min Numeric. A marker is flagged `no_detectable_homology` when it falls below **both**, at `k = 20` and `k = 10` respectively. In the reference dataset the markers that pass (`rpL16`, `trnL_trnF`, `matK` and `rbcL`) return 0.26 to 0.58 at `k = 20`; the lowest, `trnS_trnG`, returns 0.013 at `k = 20` and 0.22 at `k = 10`, so it is not flagged. Default to `0.05` and `0.15`.
 #' @return A data frame with the marker summary, with separate ingroup and joint metrics.
 #' @section Alias collisions:
 #' `marker_aliases` can point two source files at the same `marker_key`. When both carry a record for
@@ -837,9 +837,9 @@ integrate_and_clean_markers <- function(
                 "counterpart, so their aligned columns cannot carry positional homology: ",
                 paste(sprintf("%s (k20 %.3f, k10 %.3f)", bad$marker_key, bad$share_k20,
                               bad$share_k10), collapse = ", "),
-                # Measured on the reference run of 0.4.5: 0.26 to 0.59 is the interval of trnL_trnF,
-                # matK, phyC and rbcL in TABLE_marker_homology_check.csv.
-                ". Genuine counterparts in this dataset return 0.26 to 0.59 at k = 20. Such a ",
+                # The reference run: 0.26 to 0.58 is the interval of the markers with verdict ok
+                # (rpL16, trnL_trnF, matK, rbcL) in TABLE_marker_homology_check.csv.
+                ". Genuine counterparts in the reference dataset return 0.26 to 0.58 at k = 20. Such a ",
                 "locus places non-homologous characters on the terminals that define the root, ",
                 "which is where the outgroup branch is estimated. See ",
                 "tables/TABLE_marker_homology_check.csv.", call. = FALSE)
