@@ -510,10 +510,9 @@ test_that("run_concatenation_pipeline() refuses a marker with duplicated termina
 })
 
 
-# Added on 2026-09-25, closing the carry-over declared on 2026-09-19. The interval the warning
-# quotes was recomputed that day over the current run: it is 0.26 to 0.59 at k = 20, the value of
-# trnL_trnF, matK, phyC and rbcL in TABLE_marker_homology_check.csv, and not the 0.28 to 0.60 of the
-# matrix of 2026-09-01. The tutorials were corrected then; the text inside the code was not.
+# The interval the warning quotes is that of the reference run: 0.26 to 0.58 at k = 20, the markers
+# with verdict ok (rpL16, trnL_trnF, matK, rbcL) in TABLE_marker_homology_check.csv of 0.5.0, not the
+# 0.26 to 0.59 of 0.4.5 nor the 0.28 to 0.60 of an earlier matrix.
 #
 # Structural, and declared as such: reaching this warning needs a full screening run with an
 # outgroup that shares no region with its ingroup, which is a fixture built to check a sentence.
@@ -523,6 +522,7 @@ test_that("the homology warning quotes the interval of the current run", {
   # version of this test looked in the wrong function on 2026-09-25 and half of it passed for that
   # reason, which is what gave it away
   cuerpo <- paste(deparse(body(integrate_and_clean_markers)), collapse = " ")
-  expect_match(cuerpo, "0\\.26 to 0\\.59 at k = 20", fixed = FALSE)
+  expect_match(cuerpo, "0\\.26 to 0\\.58 at k = 20", fixed = FALSE)
   expect_false(grepl("0\\.28 to 0\\.60", cuerpo))
+  expect_false(grepl("0\\.26 to 0\\.59", cuerpo))
 })
