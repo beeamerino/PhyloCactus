@@ -42,10 +42,10 @@ generate_bootstrap_script(
 
 \item{max_reps}{Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (\code{1-max_reps}). Defaults to \code{2},
 giving a total array target of \code{bs_per_rep * max_reps = 1000} bootstrap trees. This provides a safety margin over the autoMRE
-convergence point observed in the reference run (1024 taxa, 11 partitions), which converged (\code{bs-cutoff = 0.03},
-FBP) after 650 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
-sampling scheme. Always confirm convergence with \code{check_bs_convergence()} on the collected trees (via \code{collect_bootstraps()}) rather
-than assuming \code{bs_per_rep * max_reps} is sufficient; increase \code{max_reps} and re-run \code{collect_bootstraps()} if it is not.}
+convergence point observed in the reference run (1208 taxa, 13 partitions), which converged (\code{bs-cutoff = 0.03},
+FBP) after 550 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
+sampling scheme. Always confirm convergence with \code{check_bs_convergence()} on the collected trees (via \code{collect_bootstraps()}): \code{bs_per_rep * max_reps}
+is not sufficient by itself; increase \code{max_reps} and re-run \code{collect_bootstraps()} if it is not.}
 
 \item{base_seed}{Integer. Base random seed for dynamic seed calculation (\verb{SEED=$(( SLURM_ARRAY_TASK_ID * base_seed ))}). Defaults to \code{NULL} (random).}
 

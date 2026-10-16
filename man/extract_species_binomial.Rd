@@ -11,6 +11,8 @@ extract_species_binomial(header)
 }
 \value{
 Standardized species binomial formatted with underscores (e.g., \code{Copiapoa_cinerea}).
+A hyphenated epithet is kept whole, so \code{Opuntia_ficus-indica|KJ773783.1} returns
+\code{Opuntia_ficus-indica} and not \code{Opuntia_ficus}.
 }
 \description{
 Internal helper to parse species binomials from FASTA headers formatted as

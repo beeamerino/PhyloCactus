@@ -20,7 +20,11 @@ validate_phylogenies(
 
 \item{checklist_csv}{Character. Path to accepted botanical checklist CSV or Excel file for taxon name standardization (Korotkova \emph{et al.}, 2021).}
 
-\item{constraints_map}{Character. Path to taxonomy mapping CSV file.}
+\item{constraints_map}{Character. Path to the taxonomy mapping CSV file (the constraint table). It
+lists, in \code{SUPP_missing_species_constraints.csv}, the species of each tree absent from the table;
+it does not decide which species are compared. The family filter keeps the species of
+\strong{Cactaceae} in \code{checklist_csv} (Korotkova \emph{et al.}, 2021): the sheet named Cactaceae of an
+Excel checklist, or the rows whose \code{Family} column is Cactaceae in a CSV checklist.}
 
 \item{out_dir}{Character. Destination directory path to save validation output tables, tree-space plots, and logs.}
 

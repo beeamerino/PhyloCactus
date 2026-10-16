@@ -4,7 +4,7 @@
 \alias{run_treePL_direct}
 \title{Run treePL Executable Directly}
 \usage{
-run_treePL_direct(cfg_file, label, cwd = NULL)
+run_treePL_direct(cfg_file, label, cwd = NULL, treepl_bin = "treePL")
 }
 \arguments{
 \item{cfg_file}{Character. Path to \code{treePL} configuration file.}
@@ -12,6 +12,11 @@ run_treePL_direct(cfg_file, label, cwd = NULL)
 \item{label}{Character. Descriptive run label identifier.}
 
 \item{cwd}{Character. Optional working directory context. Defaults to \code{NULL}.}
+
+\item{treepl_bin}{Character. Name or path of the \code{treePL} binary. Defaults to \code{"treePL"}, which
+is what this function used to run with the name written into the code: a run on a machine
+where the binary is not on the path failed with exit status 127 even when the caller had been
+given another path.}
 }
 \value{
 Invisible NULL upon system command execution.

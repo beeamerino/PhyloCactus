@@ -1,3 +1,26 @@
+# PhyloCactus 0.5.0
+
+## Molecular diagnostic section (DNA barcoding)
+
+* A new branch builds a reference library of Cactaceae from the Sanger marker records of the phylotaR mining of the phylogeny, and optionally the user's own sequences (`assemble_barcoding_dataset()`, `curate_barcoding_markers()`, `screen_barcoding_markers()`, `finalize_barcoding_library()`). Names are reconciled against the checklist of Caryophyllales.org (Korotkova et al. 2021); records over 2000 bases are cut to the extent of the shorter records of their locus; identical sequences of a species are collapsed. The library of this version holds 15 loci.
+* The library is validated before it is used: folds that ask for the species (scheme E) or, with the species left out, for the genus (scheme G) (`build_barcoding_folds()`); the barcode gap per locus (`analyze_barcode_gap()`); classification of the folds by nearest neighbour and by IdTaxa, on one machine in parallel processes or on a computing cluster (`classify_barcoding_folds()`, `generate_barcoding_job_scripts()`, `merge_barcoding_chunks()`); negative controls for leakage, outgroup queries and resubstitution (`run_barcoding_controls()`); thresholds (`sweep_barcoding_threshold()`); metrics per class (`summarise_barcoding_metrics()`, `summarise_barcoding_genus_discrimination()`).
+* A sample is identified locus by locus, in three states (species, genus, no answer), never combined into one verdict, from sequences or a GenBank flat file (`identify_barcoding_query()`), a sample sheet (`identify_barcoding_samples()`), an assembly (`identify_barcoding_assembly()`, with `minimap2` and `samtools`) or paired Illumina reads (`identify_barcoding_reads()`, with `fastp` and GetOrganelle). A species is named only above a species threshold per locus, set from the folds of scheme G; `rbcL` answers at genus rank only (argument `genus_only_loci`), because its species answers were right in 11 of 34 on the library of this version. Each run writes a self-contained HTML report (`report_barcoding_identification()`).
+* Tutorial 5 is now the tutorial of the branch: the script runs steps 1 to 11 and draws the figures of the library and its validation, with its limitations. The plastome MN517611.1 is distributed in `extdata` as the example query.
+* Tutorial 6 identifies public samples of each kind of input (a Sanger record, specimens of several loci, GenBank plastomes, a sample sheet, a genome assembly and Illumina reads) with the library of this version, and gives the rates measured with it; Tutorial 5 keeps the library and its validation. Two new functions draw an identification from the tables of its report: `plot_barcoding_identification()` (the answer per locus and the sampling of the named genus) and `plot_barcoding_identification_summary()` (several identifications side by side). The function reference is now Tutorial 7; its former address is redirected.
+
+## Changes that also reach the phylogeny
+
+* The phylotaR mining of both branches keeps sequences of 100 to 5000 bases, and the outgroup of the phylogeny is mined through the same function as the ingroup.
+* The manual exclusions are keyed by locus and accession instead of cluster number, which a new mining renumbers; the logs report the exclusions actually applied.
+* 21 `ITS` records annotated in GenBank as pseudogenes are added to `manual_exclusions_ingroup.csv`, read by both branches.
+* `genes_map.csv` gains variant names of loci found in the new mining.
+* The subject of every email notification of the package carries a cactus emoji.
+
+## Removals
+
+* Removed `infer_gene_trees()`. No stage of the pipeline, no tutorial script and no test called it, and on its documented input (one sequence per species) its species monophyly table was always empty. Its `checklist_path` argument had no effect. Per-locus monophyly is planned for version 0.6. `extract_species_binomial()`, which it shared with the marker integration step, is kept.
+* Removed the placeholder `evaluate_dna_barcoding()` and the `barcoding` documentation topic. The placeholder only signalled an error, and its arguments belonged to the implementation withdrawn in 0.4.2. The molecular diagnostic section was rebuilt as a separate branch with its own functions (above).
+
 # PhyloCactus 0.4.5
 
 * Corrected the default rooting pattern of `resolve_rooting_outgroup()` to the Talinaceae terminals that form a clade of the reference topology; the previous default spanned Portulacaceae and Talinaceae, which is not a clade of that tree and could not root it.

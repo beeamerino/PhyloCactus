@@ -35,7 +35,14 @@ ingroup_assembly <- assemble_ingroup_phylotar(
   # Set to FALSE to reproduce the uncurated cluster set and measure what curation removes.
   apply_manual_exclusions = TRUE,
   min_species = 50,
-  force_download = FALSE
+  force_download = FALSE,
+  # The length limits of a new mining: records of 100 to 5000 bases (the defaults). The workspace
+  # of 0_phylotaR_raw_Ingroup/ is read as it is when it exists, so they act only on a first mining.
+  mnsql = 100L,
+  mxsql = 5000L,
+  # Email when a mining ends or fails; TRUE needs MY_EMAIL and a blastula credentials file, as in
+  # Tutorial 2. The mining of 2026-09-29 took 50 minutes for the ingroup and 10 for the outgroup.
+  notify = FALSE
 )
 
 # Mine outgroup taxonomic database
@@ -62,7 +69,10 @@ outgroup_assembly <- assemble_outgroup_phylotar(
   # Amphipetalum (1835425) is not requested: GenBank holds no nucleotide records for it, so the
   # request would only produce an empty download.
   outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"),
-  force_download = FALSE
+  force_download = FALSE,
+  mnsql = 100L,
+  mxsql = 5000L,
+  notify = FALSE
 )
 
 # -------------------------------------------------------------

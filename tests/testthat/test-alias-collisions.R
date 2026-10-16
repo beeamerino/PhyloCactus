@@ -93,3 +93,51 @@ test_that("the resolution does not depend on the order the files were listed in"
   expect_equal(res_a$collisions$source_file[res_a$collisions$retained],
                res_b$collisions$source_file[res_b$collisions$retained])
 })
+
+
+# Added on 2026-09-25, closing the carry-over declared on 2026-09-21. extract_species_binomial()
+# turned every hyphen into an underscore and then kept the first two fields, so
+# "Opuntia_ficus-indica" came back as "Opuntia_ficus". Counted over the files on 2026-09-25: 13 of
+# the 1065 species of the library and 11 of the 1024 tips of the tree carry a hyphenated epithet.
+#
+# The note of 2026-09-21 said those species would be fused with others. That was wrong and is
+# corrected here: applying the old rule to the 1065 species gives 1065 distinct names, no collision.
+# The damage is a truncated and false name, not a merge.
+#
+# The function is not exported and reaches the pipeline only as the default of species_fn in
+# .resolve_alias_collisions(), whose single real call passes extract_species(). That is why nothing
+# downstream changes, and why this is a latent defect rather than a wrong result already published.
+
+test_that("extract_species_binomial keeps a hyphenated epithet whole", {
+  expect_equal(extract_species_binomial("Opuntia_ficus-indica|KJ773783.1"), "Opuntia_ficus-indica")
+  expect_equal(extract_species_binomial("Astrophytum_caput-medusae|X1.1"), "Astrophytum_caput-medusae")
+  expect_equal(extract_species_binomial("Pachycereus pecten-aboriginum"), "Pachycereus_pecten-aboriginum")
+})
+
+test_that("extract_species_binomial still does everything else it did", {
+  # Two fields, with a space or with an underscore
+  expect_equal(extract_species_binomial("Opuntia robusta|AY1.1"), "Opuntia_robusta")
+  expect_equal(extract_species_binomial("Opuntia_robusta|AY1.1"), "Opuntia_robusta")
+  # Anything past the epithet is dropped, which is what makes it a binomial
+  expect_equal(extract_species_binomial("Opuntia_robusta_var_algo|AY1.1"), "Opuntia_robusta")
+  # A single field comes back as it is
+  expect_equal(extract_species_binomial("Opuntia|AY1.1"), "Opuntia")
+  # Empty and missing
+  expect_true(is.na(extract_species_binomial(NA_character_)))
+  expect_true(is.na(extract_species_binomial("")))
+  expect_true(is.na(extract_species_binomial("|AY1.1")))
+  # Vectorised, without names
+  expect_equal(extract_species_binomial(c("Opuntia_ficus-indica|A", "Opuntia robusta|B")),
+               c("Opuntia_ficus-indica", "Opuntia_robusta"))
+})
+
+test_that("the rule separates the thirteen hyphenated species instead of truncating them", {
+  trece <- c("Astrophytum_caput-medusae", "Cephalocereus_columna-trajani", "Cereus_pierre-braunianus",
+             "Coryphantha_maiz-tablasensis", "Eulychnia_saint-pieana", "Opuntia_ficus-indica",
+             "Opuntia_santa-rita", "Pachycereus_pecten-aboriginum", "Peniocereus_lazaro-cardenasii",
+             "Pereskia_diaz-romeroana", "Rhipsalis_campos-portoana", "Rhipsalis_neves-armondii",
+             "Rhipsalis_pacheco-leonis")
+  salida <- extract_species_binomial(paste0(trece, "|sid.1"))
+  expect_equal(salida, trece)
+  expect_equal(length(unique(salida)), 13L)
+})

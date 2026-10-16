@@ -26,7 +26,8 @@ test_that(".compose_run_notification() reports a finished run with its times and
     host = "test-host"
   )
 
-  expect_match(note$subject, "^PhyloCactus finished: treePL")
+  # The cactus after the name, as in the banner of the report (L4, BMM, 28-09)
+  expect_match(note$subject, "^PhyloCactus \U0001f335 finished: treePL")
   expect_match(note$body, "16h 10m 30s", fixed = TRUE)
   expect_match(note$body, "8_Dating/BestTree_treePL.tree", fixed = TRUE)
   expect_match(note$body, "Best maximum-likelihood chronogram", fixed = TRUE)
@@ -95,4 +96,10 @@ test_that("automate_treePL() still fails with its own error when notify is on", 
       notify = TRUE
     ))
   )
+})
+
+test_that("the subject of a failed run carries the cactus too (L4)", {
+  note <- .compose_run_notification("phylotaR mining", status = "failed",
+                                    started = Sys.time(), host = "test-host")
+  expect_match(note$subject, "^PhyloCactus \U0001f335 FAILED: phylotaR mining")
 })

@@ -44,8 +44,8 @@ connection at the end of it.
 \strong{Credentials are never read by this package.} The path is handed to \code{blastula::creds_file()},
 which opens it. Nothing from that file is read, printed, logged or written anywhere by
 \code{PhyloCactus}, and the file belongs outside the repository. Create it once with
-\code{blastula::create_smtp_creds_file()}, and for a Gmail account use an application password rather
-than the account password.
+\code{blastula::create_smtp_creds_file()}, and for a Gmail account use an application password,
+not the account password.
 }
 \examples{
 \dontrun{

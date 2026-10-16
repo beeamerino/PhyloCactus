@@ -1,0 +1,4 @@
+"sample_id","input_type","status","message","loci_found","state1","state2","state3","species_named","genera_named","declared_species","declared_comparison","voucher_missing","report"
+"LT745702.1","genbank","identified","",2,0,1,1,"","Pseudorhipsalis","Pseudorhipsalis amazonica","genus agrees",TRUE,"11_barcoding/10_identify/samples/LT745702.1/REPORT_LT745702.1.html"
+"PZ714536.1","genbank","identified","",1,0,1,0,"","Opuntia",NA,"not declared",TRUE,"11_barcoding/10_identify/samples/PZ714536.1/REPORT_PZ714536.1.html"
+"MN517611.1","genbank","identified","",12,1,0,11,"Mammillaria_zephyranthoides","Mammillaria","Mammillaria zephyranthoides","species agrees",TRUE,"11_barcoding/10_identify/samples/MN517611.1/REPORT_MN517611.1.html"

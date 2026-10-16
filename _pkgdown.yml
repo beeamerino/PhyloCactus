@@ -28,10 +28,12 @@ navbar:
         href: articles/tutorial-3-cactus-phylogeny-visualization.html
       - text: 4. Phylogenetic Validation
         href: articles/tutorial-4-cactus-phylogeny-validation.html
-      - text: '5. DNA Barcoding: Section Manifest'
+      - text: 5. DNA Barcoding
         href: articles/tutorial-5-cactus-phylogeny-barcoding.html
-      - text: 6. Core Functions Dictionary
-        href: articles/tutorial-6-cactus-phylogeny-functions.html
+      - text: 6. Identifying a Sample
+        href: articles/tutorial-6-cactus-barcoding-identification.html
+      - text: 7. Core Functions Dictionary
+        href: articles/tutorial-7-cactus-phylogeny-functions.html
 reference:
 - title: Sequence Assemblies & phylotaR Import
   desc: Setup local taxonomic databases, pull orthologous sequence clusters via `phylotaR`,
@@ -46,12 +48,6 @@ reference:
   contents:
   - clean_taxonomic_names
   - integrate_and_clean_markers
-- title: DNA Barcoding (section under construction)
-  desc: Molecular diagnostic section. No implementation is shipped while its analytical
-    strategy is being defined; see the section manifest in Tutorial 5.
-  contents:
-  - barcoding
-  - evaluate_dna_barcoding
 - title: Multiple Alignment, DECIPHER Cleaners, & Masking
   desc: Infer positional homology using `MAFFT` and refine nucleotide alignments with
     `DECIPHER` automated masking.
@@ -87,7 +83,6 @@ reference:
   - calculate_temporal_bootstraps
   - map_branch_supports
   - classify_constrained_nodes
-  - infer_gene_trees
 - title: Divergence Time Estimation & treePL Automation
   desc: Automate `treePL` penalized-likelihood cross-validation and estimate divergence
     time chronograms over temporal bootstrap cohorts.
@@ -116,6 +111,44 @@ reference:
   contents:
   - get_iucn_data
   - scale_fill_iucn
+  - phylocactus_colours
+  - phylocactus_panel_tags
+  - theme_phylocactus
+- title: Barcoding Library
+  desc: Build the reference library of the barcoding branch from the phylotaR mining of the
+    phylogeny and, optionally, own sequences (Tutorial 5, steps 1 to 4).
+  contents:
+  - assemble_barcoding_dataset
+  - curate_barcoding_markers
+  - screen_barcoding_markers
+  - finalize_barcoding_library
+  - extract_barcoding_plastome_loci
+  - barcoding_outgroup_taxids
+- title: Barcoding Validation
+  desc: Validation folds, barcode gap, classification of the folds by nearest neighbour and
+    IdTaxa (on one machine or a computing cluster), negative controls, thresholds and metrics
+    (Tutorial 5, steps 5 to 10).
+  contents:
+  - build_barcoding_folds
+  - analyze_barcode_gap
+  - classify_barcoding_folds
+  - generate_barcoding_job_scripts
+  - merge_barcoding_chunks
+  - run_barcoding_controls
+  - sweep_barcoding_threshold
+  - summarise_barcoding_metrics
+  - summarise_barcoding_genus_discrimination
+- title: Molecular Identification
+  desc: Identify a sample against the library, locus by locus, from sequences, a sample sheet,
+    an assembly or Illumina reads, write its report, and draw its answer (Tutorials 5 and 6).
+  contents:
+  - identify_barcoding_query
+  - identify_barcoding_samples
+  - identify_barcoding_assembly
+  - identify_barcoding_reads
+  - report_barcoding_identification
+  - plot_barcoding_identification
+  - plot_barcoding_identification_summary
 - title: Internal Tools and Visualization Helpers
   desc: Internal functions for phylogenetic visualization and data preparation.
   contents:
@@ -135,4 +168,5 @@ reference:
   - get_tree_max_depth
   - format_age_labels
   - add_chronogram_axis
-
+redirects:
+- ["articles/tutorial-6-cactus-phylogeny-functions.html", "articles/tutorial-7-cactus-phylogeny-functions.html"]

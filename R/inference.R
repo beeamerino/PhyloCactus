@@ -673,8 +673,8 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
 #' Reference timing illustrating worker parallelization: on an Apple M2 Pro (8 threads, `--workers 1`,
 #' `RAxML-NG` 1.2.2, SSE3 kernels), searching 50 starting trees sequentially on an earlier version of the
 #' supermatrix required 47115 s (~938 s per tree). The production run on an HPC cluster node (AMD EPYC 9754, 75 threads, `--workers 25`) over the
-#' full supermatrix (1024 terminals, 12809 sites, 5959 patterns, 11 partitions) completed 50 starting trees in
-#' 2739 s (~46 minutes), executing two parallel rounds.
+#' full supermatrix (1208 terminals, 13 700 sites, 7899 patterns, 13 partitions) completed 50 starting trees in
+#' 4468 s (about 75 minutes), executing two parallel rounds.
 #'
 #' `workers` is derived automatically and constrained to a divisor of the starting tree
 #' count, so that no worker sits idle in the final round.
@@ -883,15 +883,15 @@ generate_ml_search_script <- function(alignment_file, partition_file, constraint
 #' `metric = "tbe"` and belongs in a clearly labelled secondary column.
 #'
 #' The two are not on a common scale and TBE must never be reported as though it were a bootstrap
-#' percentage. TBE is bounded below by FBP and its inflation grows with clade size. Measured on the
-#' 987 unconstrained nodes of the 1024-terminal reference tree: median TBE 0.783
-#' against median FBP 0.470, with the gap reaching 0.732 for clades of 51 to 200 terminals (median FBP 0.220,
-#' median TBE 0.952). Reporting TBE places 61 percent of nodes above 0.70; FBP places 29 percent (703 nodes
-#' collapsing below 0.70).
+#' percentage. TBE is bounded below by FBP and its inflation is largest on clades of intermediate size.
+#' Measured on the 1171 unconstrained nodes of the 1208-terminal reference tree of version 0.5.0: median
+#' TBE 0.772 against median FBP 0.450, with the gap reaching 0.850 for clades of 51 to 200 terminals
+#' (median FBP 0.080, median TBE 0.930). Reporting TBE places 59 percent of nodes at 0.70 or above; FBP
+#' places 28 percent (840 nodes below 0.70).
 #'
 #' Support values are meaningless for any bipartition imposed through `--tree-constraint`, because
-#' every replicate reproduces it by construction. Those nodes must be reported as constrained rather
-#' than supported. Use `classify_constrained_nodes()` to separate them before tabulating support.
+#' every replicate reproduces it by construction. Those nodes are reported as constrained,
+#' not as supported. Use `classify_constrained_nodes()` to separate them before tabulating support.
 #'
 #' @param raxml_bin Character. System command or full path to executable `RAxML-NG` binary.
 #' @param best_tree Character. Path to reference maximum-likelihood tree file.
@@ -1019,8 +1019,7 @@ calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = d
 #'
 #' Unlike `generate_bootstrap_script()`'s HPC-oriented default (empirically calibrated on a 128-core AMD EPYC node),
 #' the `threads_per_worker = 4L` default here has not been empirically validated for bootstrap workloads on Apple
-#' Silicon specifically (only single-threaded, non-coarse-grained ML tree search timings are currently available for
-#' that hardware). Treat this default as a reasonable starting heuristic and re-validate empirically (e.g., time a
+#' Silicon specifically (the only timings measured on that hardware are of single-threaded maximum-likelihood searches). Treat this default as a reasonable starting heuristic and re-validate empirically (e.g., time a
 #' short run with `bs_trees` set low, at a couple of `threads_per_worker` values) before committing to a long local run.
 #'
 #' @param raxml_bin_path Character. System command or full path to executable `RAxML-NG` binary.
@@ -1137,10 +1136,10 @@ run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, con
 #' @param bs_per_rep Integer. Number of bootstrap trees generated per chunk replicate. Defaults to `500`.
 #' @param max_reps Integer. Total number of parallel chunk replicates (tasks) to spawn in the SLURM array (`1-max_reps`). Defaults to `2`,
 #'   giving a total array target of `bs_per_rep * max_reps = 1000` bootstrap trees. This provides a safety margin over the autoMRE
-#'   convergence point observed in the reference run (1024 taxa, 11 partitions), which converged (`bs-cutoff = 0.03`,
-#'   FBP) after 650 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
-#'   sampling scheme. Always confirm convergence with `check_bs_convergence()` on the collected trees (via `collect_bootstraps()`) rather
-#'   than assuming `bs_per_rep * max_reps` is sufficient; increase `max_reps` and re-run `collect_bootstraps()` if it is not.
+#'   convergence point observed in the reference run (1208 taxa, 13 partitions), which converged (`bs-cutoff = 0.03`,
+#'   FBP) after 550 of 1000 collected trees, i.e. convergence is not guaranteed at a fixed replicate count for every dataset or taxon
+#'   sampling scheme. Always confirm convergence with `check_bs_convergence()` on the collected trees (via `collect_bootstraps()`): `bs_per_rep * max_reps`
+#'   is not sufficient by itself; increase `max_reps` and re-run `collect_bootstraps()` if it is not.
 #' @param base_seed Integer. Base random seed for dynamic seed calculation (`SEED=$(( SLURM_ARRAY_TASK_ID * base_seed ))`). Defaults to `NULL` (random).
 #' @param threads Integer. Number of CPU cores requested per SLURM task (`--cpus-per-task`). Defaults to `40`.
 #' @param workers Integer. Number of RAxML-NG worker processes. If `NULL` (default), calculated dynamically as `max(1L, as.integer(threads / threads_per_worker))`.
@@ -1807,10 +1806,9 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
                                           
 
 # ------------------------------------------------------------------------------
-# Single-locus gene tree inference. Relocated from R/barcoding.R in v0.4.2: the
-# individual gene trees produced here feed the gene tree / species tree discordance
-# analyses of Module 13 (ASTRAL-III, Stage 4), which are independent of the DNA
-# barcoding strategy that remains under design.
+# Species binomial from a FASTA header. Used by .resolve_alias_collisions()
+# (R/screening.R). infer_gene_trees(), which lived here, was removed in 0.5.0: no
+# stage of the pipeline called it (see NEWS.md).
 # ------------------------------------------------------------------------------
 
 #' Extract Standardized Species Binomial from Sequence Header
@@ -1820,6 +1818,8 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
 #'
 #' @param header Character string of the sequence header.
 #' @return Standardized species binomial formatted with underscores (e.g., `Copiapoa_cinerea`).
+#'   A hyphenated epithet is kept whole, so `Opuntia_ficus-indica|KJ773783.1` returns
+#'   `Opuntia_ficus-indica` and not `Opuntia_ficus`.
 #' @keywords internal
 extract_species_binomial <- function(header) {
   vapply(header, function(h) {
@@ -1827,7 +1827,10 @@ extract_species_binomial <- function(header) {
     first_field <- stringr::str_split(h, "\\|", simplify = TRUE)[1]
     first_field <- stringr::str_trim(first_field)
     if (!nzchar(first_field)) return(NA_character_)
-    clean_field <- stringr::str_replace_all(first_field, "[ -]+", "_")
+    # Only whitespace becomes an underscore. Until 2026-09-25 the hyphen did too, and the two
+    # fields taken below then cut a hyphenated epithet in half: 13 of the 1065 species of the
+    # library and 11 of the 1024 tips of the tree carry one, and they came back truncated.
+    clean_field <- stringr::str_replace_all(first_field, "[ ]+", "_")
     parts <- strsplit(clean_field, "_", fixed = TRUE)[[1]]
     if (length(parts) >= 2) {
       paste0(parts[1], "_", parts[2])
@@ -1835,245 +1838,4 @@ extract_species_binomial <- function(header) {
       clean_field
     }
   }, character(1), USE.NAMES = FALSE)
-}
-
-#' Infer Single-Locus Maximum-Likelihood Gene Trees and Assess Species Monophyly
-#'
-#' Reconstructs individual gene trees for all curated marker alignments using `RAxML-NG`
-#' (with automated fallback to `phangorn` or `ape`), assesses reciprocal monophyly for
-#' all multi-accession species, and prepares gene tree collections for coalescent analyses (e.g., `ASTRAL-III`).
-#'
-#' @param fasta_dir Character. Directory containing curated aligned FASTA sequence files (e.g., `4_Cleaned/cleaned_markers_ingroup` or `5_MAFFT_Cleaned/aligned_markers`).
-#' @param output_dir Character. Root destination directory path to store Newick tree files and monophyly tables.
-#' @param include_outgroup Logical. Include outgroup taxa in single-locus gene tree reconstruction? Defaults to `FALSE`, so that species monophyly is assessed within the ingroup. Set to `TRUE` when preparing unrooted gene trees for `ASTRAL-III`.
-#' @param method Character. Phylogenetic inference method (`"auto"`, `"raxml"`, `"phangorn"`, or `"nj"`). Defaults to `"auto"`.
-#' @param model Character. Nucleotide substitution model for maximum-likelihood search. Defaults to `"GTR+G"`.
-#' @param threads Integer. Number of computational threads. Defaults to `2L`.
-#' @param checklist_path Character. Path to the accepted botanical checklist (e.g., `CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`).
-#' @return A list containing the species monophyly summary table and the per-marker tree paths.
-#' @references
-#' Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019).
-#' RAxML-NG: a fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference.
-#' *Bioinformatics*, 35(21), 4453–4455. \doi{10.1093/bioinformatics/btz305}
-#'
-#' Schliep, K. P. (2011). phangorn: phylogenetic analysis in R.
-#' *Bioinformatics*, 27(4), 592–593. \doi{10.1093/bioinformatics/btq706}
-#' @examples
-#' \dontrun{
-#' infer_gene_trees(
-#'   fasta_dir = "4_Cleaned/cleaned_markers_ingroup",
-#'   output_dir = "4_Gene_Trees",
-#'   include_outgroup = FALSE
-#' )
-#' }
-#' @export
-infer_gene_trees <- function(
-  fasta_dir,
-  output_dir,
-  include_outgroup = FALSE,
-  method = c("auto", "raxml", "phangorn", "nj"),
-  model = "GTR+G",
-  threads = 2L,
-  checklist_path = NULL
-) {
-  
-  method <- match.arg(method)
-  dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
-  trees_dir <- file.path(output_dir, "gene_trees")
-  dir.create(trees_dir, recursive = TRUE, showWarnings = FALSE)
-  
-  message("Starting single-locus gene tree inference... \U0001f335")
-  message("Input FASTA directory: ", fasta_dir)
-  message("Include outgroup: ", include_outgroup)
-  message("Output directory: ", output_dir)
-  
-  fasta_files <- sort(list.files(fasta_dir, pattern = "\\.fasta$", full.names = TRUE))
-  if (length(fasta_files) == 0) {
-    stop("No FASTA files found in: ", fasta_dir, call. = FALSE)
-  }
-  
-  # Check if raxml-ng is available
-  raxml_available <- FALSE
-  if (method %in% c("auto", "raxml")) {
-    chk <- suppressWarnings(system2("raxml-ng", args = "--version", stdout = FALSE, stderr = FALSE))
-    raxml_available <- identical(chk, 0L)
-    if (!raxml_available && method == "raxml") {
-      warning("raxml-ng binary not found in $PATH. Falling back to phangorn ML.", call. = FALSE)
-    }
-  }
-  
-  base_engine <- if (method == "nj") {
-    "nj"
-  } else if (method == "phangorn" || (!raxml_available && method %in% c("auto", "raxml"))) {
-    "phangorn"
-  } else {
-    "raxml"
-  }
-  message("Inference engine selected: ", base_engine)
-  
-  outgroup_genera <- c("Portulaca", "Anacampseros", "Talinopsis", "Grahamia", "Talinum", "Talinella")
-  
-  monophyly_rows <- list()
-  tree_paths <- character(0)
-  all_trees_list <- list()
-  
-  for (f in fasta_files) {
-    marker_name <- tools::file_path_sans_ext(basename(f))
-    message("Inferring gene tree for marker: ", marker_name)
-    current_engine <- base_engine
-    
-    dna_in <- Biostrings::readDNAStringSet(f)
-    if (length(dna_in) < 4) {
-      message("Skipping ", marker_name, " (fewer than 4 sequences).")
-      next
-    }
-    
-    # Filter outgroups if include_outgroup is FALSE
-    if (!include_outgroup) {
-      sp_names <- vapply(names(dna_in), extract_species_binomial, character(1))
-      genus_names <- sub("_.*", "", sp_names)
-      is_out <- genus_names %in% outgroup_genera
-      dna_in <- dna_in[!is_out]
-    }
-    
-    if (length(dna_in) < 4) {
-      message("Skipping ", marker_name, " (fewer than 4 sequences remaining after filtering).")
-      next
-    }
-    
-    # Standardize names to species binomials or unique tips
-    sp_vec <- vapply(names(dna_in), extract_species_binomial, character(1))
-    tip_names <- make.unique(sp_vec, sep = "_dup")
-    names(dna_in) <- tip_names
-    
-    tree_out_file <- file.path(trees_dir, paste0(marker_name, ".tree"))
-    tr <- NULL
-    
-    if (current_engine == "raxml") {
-      temp_phy <- file.path(output_dir, paste0("TEMP_", marker_name, ".phy"))
-      
-      # Convert to PHYLIP
-      seq_chars <- as.character(dna_in)
-      taxa <- names(dna_in)
-      header <- paste(length(taxa), nchar(seq_chars[1]))
-      writeLines(c(header, paste(taxa, seq_chars)), temp_phy)
-      
-      cmd_args <- c(
-        "--msa", temp_phy,
-        "--model", model,
-        "--threads", as.character(threads),
-        "--prefix", file.path(output_dir, paste0("TEMP_RAXML_", marker_name)),
-        "--seed", "111",
-        "--redo"
-      )
-      
-      status <- system2("raxml-ng", args = cmd_args, stdout = FALSE, stderr = FALSE)
-      best_tree_file <- file.path(output_dir, paste0("TEMP_RAXML_", marker_name, ".raxml.bestTree"))
-      
-      if (identical(status, 0L) && file.exists(best_tree_file)) {
-        tr <- ape::read.tree(best_tree_file)
-        ape::write.tree(tr, file = tree_out_file)
-      } else {
-        message("RAxML-NG failed for ", marker_name, ". Falling back to phangorn.")
-        current_engine <- "phangorn"
-      }
-      
-      # Clean temp files
-      temp_files <- list.files(output_dir, pattern = paste0("^TEMP_.*", marker_name), full.names = TRUE)
-      unlink(temp_files)
-    }
-    
-    if (current_engine == "phangorn" || (is.null(tr) && current_engine != "nj")) {
-      dna_char <- as.character(dna_in)
-      split_dna <- strsplit(toupper(dna_char), "", fixed = TRUE)
-      dna_mat <- do.call(rbind, split_dna)
-      dna_bin <- ape::as.DNAbin(dna_mat)
-      rownames(dna_bin) <- names(dna_in)
-      
-      phy_dat <- phangorn::as.phyDat(dna_bin)
-      dm <- phangorn::dist.ml(phy_dat)
-      tr_nj <- ape::nj(dm)
-      
-      tr <- tryCatch({
-        fit <- phangorn::pml(tr_nj, data = phy_dat)
-        fit_opt <- phangorn::optim.pml(fit, model = "GTR", optGamma = TRUE, rearrangement = "NNI", control = phangorn::pml.control(trace = 0))
-        fit_opt$tree
-      }, error = function(e) {
-        tr_nj
-      })
-      ape::write.tree(tr, file = tree_out_file)
-    } else if (current_engine == "nj" && is.null(tr)) {
-      dna_char <- as.character(dna_in)
-      split_dna <- strsplit(toupper(dna_char), "", fixed = TRUE)
-      dna_mat <- do.call(rbind, split_dna)
-      dna_bin <- ape::as.DNAbin(dna_mat)
-      rownames(dna_bin) <- names(dna_in)
-      
-      dm <- ape::dist.dna(dna_bin, model = "raw", pairwise.deletion = TRUE)
-      tr <- ape::nj(dm)
-      ape::write.tree(tr, file = tree_out_file)
-    }
-    
-    if (!is.null(tr)) {
-      tree_paths <- c(tree_paths, tree_out_file)
-      all_trees_list[[marker_name]] <- tr
-      
-      # Assess species monophyly
-      base_species <- sub("_dup.*", "", tr$tip.label)
-      sp_counts <- table(base_species)
-      multi_species <- names(sp_counts[sp_counts >= 2])
-      
-      n_mono <- 0L
-      n_poly <- 0L
-      mono_species_list <- character(0)
-      non_mono_species_list <- character(0)
-      
-      if (length(multi_species) > 0) {
-        for (sp in multi_species) {
-          tips_sp <- tr$tip.label[base_species == sp]
-          is_mono <- tryCatch(ape::is.monophyletic(tr, tips_sp), error = function(e) FALSE)
-          if (isTRUE(is_mono)) {
-            n_mono <- n_mono + 1L
-            mono_species_list <- c(mono_species_list, sp)
-          } else {
-            n_poly <- n_poly + 1L
-            non_mono_species_list <- c(non_mono_species_list, sp)
-          }
-        }
-      }
-      
-      pct_mono <- if (length(multi_species) > 0) round((n_mono / length(multi_species)) * 100, 2) else NA_real_
-      
-      monophyly_rows[[marker_name]] <- dplyr::tibble(
-        marker = marker_name,
-        engine = current_engine,
-        n_tips = length(tr$tip.label),
-        n_species_total = length(unique(base_species)),
-        n_multi_accession_species = length(multi_species),
-        n_monophyletic_species = n_mono,
-        n_non_monophyletic_species = n_poly,
-        species_monophyly_rate_pct = pct_mono,
-        monophyletic_species = paste(mono_species_list, collapse = ";"),
-        non_monophyletic_species = paste(non_mono_species_list, collapse = ";")
-      )
-    }
-  }
-  
-  # Concatenate all gene trees into one file for ASTRAL
-  all_trees_file <- file.path(output_dir, "all_gene_trees.tree")
-  if (length(all_trees_list) > 0) {
-    all_trees_obj <- do.call(c, all_trees_list)
-    class(all_trees_obj) <- "multiPhylo"
-    ape::write.tree(all_trees_obj, file = all_trees_file)
-  }
-  
-  compiled_monophyly <- dplyr::bind_rows(monophyly_rows)
-  readr::write_csv(compiled_monophyly, file.path(output_dir, "TABLE_gene_tree_species_monophyly.csv"))
-  
-  message("\nSingle-locus gene tree inference finalized. \U0001f335")
-  return(invisible(list(
-    monophyly_summary = compiled_monophyly,
-    tree_paths = tree_paths,
-    all_trees_file = all_trees_file
-  )))
 }

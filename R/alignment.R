@@ -296,6 +296,18 @@ build_marker_consolidated_row <- function(marker_id, summary_all, filter_info, f
   )
 }
 
+# Row of a marker that failed in Module 2 (decision M1 of BMM, 13-10): the columns of a processed
+# marker, every count NA and the message in status, so that do.call(rbind, ...) in
+# run_alignment_pipeline() keeps the other markers and the manifest says which marker failed and why.
+.alignment_error_row <- function(marker_id, masking_applied, message) {
+  row <- build_marker_consolidated_row(marker_id, data.frame(stage = character(0)), NULL, FALSE,
+                                       masking_applied, paste("ERROR:", message))
+  removed <- c("n_sequences_removed_low_coverage", "n_sequences_removed_high_missingness",
+               "n_sequences_removed_by_filtering")
+  row[removed] <- NA_integer_
+  row
+}
+
 # Parameter stamp appended to every per-marker summary CSV. It is what makes the cache in
 # process_marker_file() parameter-aware: reusing an alignment produced under different masking
 # or occupancy settings silently invalidates the whole stage, which is exactly how the
@@ -359,6 +371,43 @@ cached_params_match <- function(cached_summary, stamp) {
 #' @return A list with `dna` (the corrected set) and `log`, one row per sequence.
 #' @keywords internal
 #' @noRd
+# The k-mer parts of .normalise_strand(), pulled out on 2026-09-25 so that the barcoding branch can
+# orient one query against the library with the same rule instead of a second copy of it. The
+# extraction is behaviour preserving: what .normalise_strand() decides is pinned by a test written
+# before this change, and the ingroup of step 1 was re-run afterwards. Decision of BMM, 2026-09-25.
+.kmer_set <- function(s, k) {
+  m <- nchar(s) - k + 1L
+  if (m < 1L) return(character(0))
+  w <- substring(s, seq_len(m), seq_len(m) + k - 1L)
+  unique(w[!grepl("[^ACGTacgt]", w)])
+}
+
+.kmer_sets <- function(seqs, k) lapply(toupper(seqs), .kmer_set, k = k)
+
+.kmer_share <- function(s, pool) if (length(s) == 0L) 0 else length(intersect(s, pool)) / length(s)
+
+.strand_usable <- function(sets) vapply(sets, length, integer(1)) >= 5L
+
+# Seed on the longest sequence, then grow the reference with everything that already agrees with
+# it. Growing first matters: a single seed shares few k-mers with a divergent congener, and the
+# comparison has to be against the marker as a whole.
+.strand_reference_pool <- function(sets, lengths, usable, min_share) {
+  if (!any(usable)) return(character(0))
+  seed <- which.max(ifelse(usable, lengths, -1L))
+  pool <- sets[[seed]]
+  agree <- vapply(seq_along(sets),
+                  function(i) usable[i] && .kmer_share(sets[[i]], pool) >= min_share, logical(1))
+  if (sum(agree) > 1L) pool <- unique(unlist(sets[agree], use.names = FALSE))
+  pool
+}
+
+.strand_action <- function(fwd, rev, usable, min_share, ratio) {
+  flip <- usable & rev > min_share & rev > ratio * fwd
+  ifelse(!usable, "too_short",
+  ifelse(flip, "reverse_complemented",
+  ifelse(pmax(fwd, rev) < min_share, "no_match_either_direction", "kept")))
+}
+
 .normalise_strand <- function(dna, k = 20L, min_share = 0.15, ratio = 3) {
   n <- length(dna)
   empty_log <- data.frame(Seq = character(0), Length = integer(0), ShareForward = numeric(0),
@@ -367,34 +416,19 @@ cached_params_match <- function(cached_summary, stamp) {
   if (n < 3L) return(list(dna = dna, log = empty_log))
 
   seqs <- gsub("-", "", as.character(dna), fixed = TRUE)
-  kset <- function(s) {
-    m <- nchar(s) - k + 1L
-    if (m < 1L) return(character(0))
-    w <- substring(s, seq_len(m), seq_len(m) + k - 1L)
-    unique(w[!grepl("[^ACGTacgt]", w)])
-  }
-  sets <- lapply(toupper(seqs), kset)
+  sets <- .kmer_sets(seqs, k)
   rc <- as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(seqs)))
-  sets_rc <- lapply(toupper(rc), kset)
+  sets_rc <- .kmer_sets(rc, k)
 
-  # Seed on the longest sequence, then grow the reference with everything that already agrees with
-  # it. Growing first matters: a single seed shares few k-mers with a divergent congener, and the
-  # comparison has to be against the marker as a whole.
-  usable <- vapply(sets, length, integer(1)) >= 5L
+  usable <- .strand_usable(sets)
   if (!any(usable)) return(list(dna = dna, log = empty_log))
-  seed <- which.max(ifelse(usable, nchar(seqs), -1L))
-  pool <- sets[[seed]]
-  share <- function(s, p) if (length(s) == 0L) 0 else length(intersect(s, p)) / length(s)
-  agree <- vapply(seq_len(n), function(i) usable[i] && share(sets[[i]], pool) >= min_share, logical(1))
-  if (sum(agree) > 1L) pool <- unique(unlist(sets[agree], use.names = FALSE))
+  pool <- .strand_reference_pool(sets, nchar(seqs), usable, min_share)
 
-  fwd <- vapply(seq_len(n), function(i) share(sets[[i]], pool), numeric(1))
-  rev <- vapply(seq_len(n), function(i) share(sets_rc[[i]], pool), numeric(1))
+  fwd <- vapply(sets, .kmer_share, numeric(1), pool = pool)
+  rev <- vapply(sets_rc, .kmer_share, numeric(1), pool = pool)
 
-  flip <- usable & rev > min_share & rev > ratio * fwd
-  action <- ifelse(!usable, "too_short",
-            ifelse(flip, "reverse_complemented",
-            ifelse(pmax(fwd, rev) < min_share, "no_match_either_direction", "kept")))
+  action <- .strand_action(fwd, rev, usable, min_share, ratio)
+  flip <- action == "reverse_complemented"
 
   out <- dna
   if (any(flip)) out[flip] <- Biostrings::reverseComplement(dna[flip])
@@ -704,25 +738,8 @@ run_alignment_pipeline <- function(
       process_marker_file(f, output_aln_dir, output_table_dir, mafft_exec, mafft_opts,
                           mask_alignment_regions, min_non_gap_fraction, max_missing_fraction,
                           min_masked_alignment_length, preserve_iupac, fix_strand),
-      error = function(e) {
-        data.frame(
-          marker = tools::file_path_sans_ext(basename(f)),
-          n_sequences_raw_input = NA_integer_, n_sequences_mafft_aligned = NA_integer_, n_sequences_common_gap_removed = NA_integer_,
-          n_sequences_masked_alignment = NA_integer_, n_sequences_final_filtered = NA_integer_,
-          alignment_length_raw_input = NA_integer_, alignment_length_mafft_aligned = NA_integer_, alignment_length_common_gap_removed = NA_integer_,
-          alignment_length_masked_alignment = NA_integer_, alignment_length_final_filtered = NA_integer_,
-          mean_fraction_missing_raw_input = NA_real_, mean_fraction_missing_mafft_aligned = NA_real_, mean_fraction_missing_common_gap_removed = NA_real_,
-          mean_fraction_missing_masked_alignment = NA_real_, mean_fraction_missing_final_filtered = NA_real_,
-          mean_fraction_gaps_raw_input = NA_real_, mean_fraction_gaps_mafft_aligned = NA_real_, mean_fraction_gaps_common_gap_removed = NA_real_,
-          mean_fraction_gaps_masked_alignment = NA_real_, mean_fraction_gaps_final_filtered = NA_real_,
-          n_sequences_removed_total = NA_integer_, n_sequences_removed_low_coverage = NA_integer_, n_sequences_removed_high_missingness = NA_integer_,
-          n_sequences_removed_by_filtering = NA_integer_, n_sites_removed_by_common_gap_removal = NA_integer_, n_sites_removed_by_masking = NA_integer_,
-          n_sites_removed_total_from_mafft = NA_integer_, pct_sequences_retained_after_mafft = NA_real_, pct_sequences_retained_after_common_gap_removal = NA_real_,
-          pct_sequences_retained_after_masking = NA_real_, pct_sequences_retained_final = NA_real_, pct_sites_retained_after_common_gap_removal = NA_real_,
-          pct_sites_retained_after_masking = NA_real_, pct_sites_retained_final_vs_mafft = NA_real_,
-          masking_applied = mask_alignment_regions, final_alignment_written = FALSE, status = paste("ERROR:", conditionMessage(e)), stringsAsFactors = FALSE
-        )
-      }
+      error = function(e) .alignment_error_row(tools::file_path_sans_ext(basename(f)), mask_alignment_regions,
+                                                conditionMessage(e))
     )
   }
   

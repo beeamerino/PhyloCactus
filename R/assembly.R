@@ -9,12 +9,17 @@
 #' @param target_genes_file Character. Path to the target locus list text file. If `NULL`, defaults to package `inst/extdata/target_genes.txt`.
 #' @param genes_map_file Character. Path to the gene synonymy mapping CSV file. If `NULL`, defaults to package `inst/extdata/genes_map.csv`.
 #' @param manual_exclusions_file Character. Path to the accession exclusion CSV file. If `NULL`, defaults to package `inst/extdata/manual_exclusions_ingroup.csv`.
-#' @param apply_manual_exclusions Logical. Apply the curated accession exclusion list? **Defaults to `TRUE`.** The lists shipped with the package are the product of manual curation by the expert team supporting `PhyloCactus`: each excluded accession was inspected and removed on taxonomic or sequence-quality grounds that are not recoverable from GenBank metadata alone. Across both lists they cover 99 unique accessions in 113 records, spanning 16 ingroup clusters and 24 outgroup clusters, and they live in `inst/extdata/manual_exclusions_ingroup.csv` and `inst/extdata/manual_exclusions_outgroup.csv`. Setting this to `FALSE` reproduces the uncurated cluster set, which is the way to quantify what the curation actually removes; the applied list is always written to `TABLE_MANUAL_EXCLUSIONS_*.csv` in the output directory, so any run documents its own curation state.
+#' @param apply_manual_exclusions Logical. Apply the curated accession exclusion list? **Defaults to `TRUE`.** The lists shipped with the package are the product of manual curation by the expert team supporting `PhyloCactus`: each excluded accession was inspected and removed on taxonomic or sequence-quality grounds that are not recoverable from GenBank metadata alone. The lists are keyed by locus and accession (`locus`, `sid`, `reason`, `source`), so that they survive a new mining that renumbers the clusters: an accession is removed from every cluster of the locus named. Across both lists they hold 102 accessions, 60 in 5 ingroup loci and 42 in 13 outgroup loci, and they live in `inst/extdata/manual_exclusions_ingroup.csv` and `inst/extdata/manual_exclusions_outgroup.csv`. Setting this to `FALSE` reproduces the uncurated cluster set, which is the way to quantify what the curation actually removes; the applied list is always written to `TABLE_MANUAL_EXCLUSIONS_*.csv` in the output directory, so any run documents its own curation state.
 #' @param min_species Integer. Species-richness threshold for cluster retention. Clusters are retained when they contain **strictly more than** `min_species` distinct species, so `min_species = 50` keeps clusters with 51 species or more. Defaults to `50`.
 #' @param preferred_parent Character. NCBI Taxonomy ID of the focal ingroup parent node. Defaults to `"3593"` (Cactaceae).
 #' @param ncbi_dr Character. Path to local `BLAST+` binaries directory. If `NULL`, attempts system environment auto-detection.
 #' @param force_download Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.
 #' @param out_dir Character. Output directory path to save cluster summaries, FASTA sequence matrices, and log reports.
+#' @param mnsql,mxsql Integer. Shortest and longest sequence, in bases, that a new mining keeps
+#'   (`phylotaR::setup()`); 100 and 5000 by default. Used only when GenBank is mined.
+#' @param notify Logical. Send an email through [send_run_notification()] when a mining ends or fails;
+#'   reading an existing workspace sends nothing. Defaults to `FALSE`.
+#' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
 #' @return A data frame summarizing sequence occupancy, taxon representation, and cluster characteristics across retained loci.
 #' @references
 #' Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. (2018).
@@ -29,7 +34,7 @@
 #' )
 #' }
 #' @export
-assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, min_species = 50, preferred_parent = "3593", ncbi_dr = NULL, force_download = FALSE, out_dir = "1_phylotaR_out_Ingroup") {
+assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, min_species = 50, preferred_parent = "3593", ncbi_dr = NULL, force_download = FALSE, out_dir = "1_phylotaR_out_Ingroup", mnsql = 100L, mxsql = 5000L, notify = FALSE, notify_to = NULL, notify_credentials = NULL) {
   
   
   # Resolve inputs
@@ -87,79 +92,33 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   
   log_message("Inputs loaded successfully.")
   
-  # Setup / Load phylotaR
-  phylota <- tryCatch({
-    if (force_download) stop("Force download enabled")
-    phylotaR::read_phylota(wd_path)
-  }, error = function(e) {
-    log_message("No valid phylota object found or force_download=TRUE. Running setup and phylotaR pipeline...")
-    if (is.null(ncbi_dr)) {
-      env_blast <- Sys.getenv("BLAST_PATH")
-      if (env_blast != "") {
-        ncbi_dr <- env_blast
-      } else {
-        blastn_path <- Sys.which("blastn")
-        if (blastn_path != "") ncbi_dr <- dirname(blastn_path)
-      }
-    }
-    
-    phylotaR::setup(
-      wd = wd_path, txid = preferred_parent, ncbi_dr = ncbi_dr, v = TRUE, ncps = 1, mncvrg = 80,
-      srch_trm = paste0(
-        "NOT predicted[TI] ",
-        "NOT \"whole genome shotgun\"[TI] ",
-        "NOT unverified[TI] ",
-        "NOT \"synthetic construct\"[Organism] ",
-        "NOT refseq[filter] ",
-        "NOT TSA[Keyword] ",
-        "NOT \"sp.\"[TI] ",
-        "NOT \"sp.\"[Organism] ",
-        "NOT \"sp\"[Organism] ",
-        "NOT \"sp\"[Organism] ",
-        "NOT \"aff.\"[TI] ",
-        "NOT \"aff\"[Organism] ",
-        "NOT \"cf.\"[TI] ",
-        "NOT \"cf\"[Organism] ",
-        "NOT \"var.\"[TI] ",
-        "NOT \"var\"[TI] ",
-        "NOT \"var\"[Organism] ",
-        "NOT \"var.\"[Organism] ",
-        "NOT \"variety\"[TI] ",
-        "NOT \"subsp.\"[TI] ",
-        "NOT \"subsp\"[TI] ",
-        "NOT \"subsp.\"[Organism] ",
-        "NOT \"subsp\"[Organism] ",
-        "NOT \"subspecies\"[Organism] ",
-        "NOT \"x\"[Organism] ",
-        "NOT \" x \"[Organism]"
-      )
-    )
-    
-    log_message("Executing phylotaR::run()...")
-    tryCatch({
-      phylotaR::run(wd = wd_path)
-    }, error = function(erun) {
-      log_message("Error in phylotaR::run(): ", erun$message)
-    })
-    
-    log_message("Attempting to load phylota object after run()...")
-    tryCatch({
-      phylotaR::read_phylota(wd_path)
-    }, error = function(e2) {
-      log_message("read_phylota error: ", e2$message)
-      stop("Could not load phylota object from ", wd_path)
-    })
-  })
+  # Setup / Load phylotaR. Shared with assemble_barcoding_dataset(), so that both branches make the
+  # same phylotaR call and share the same raw workspace, whichever of them runs first.
+  phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = preferred_parent, ncbi_dr = ncbi_dr,
+                                    force_download = force_download, log_message = log_message,
+                                    mnsql = mnsql, mxsql = mxsql,
+                                    notify = notify, notify_to = notify_to, notify_credentials = notify_credentials)
   
   # 8. SPECIES REDUCTION AND CLUSTER FILTERING
   species_reduced <- phylotaR::drop_by_rank(phylota, rnk = "species", n = 1)
   cluster_ids <- species_reduced@cids
-  ntaxa <- phylotaR::get_ntaxa(species_reduced, cid = cluster_ids, rnk = "species")
-  keep_clusters <- cluster_ids[ntaxa > min_species]
+  # Y1 (BMM, 29-09): the clusters of one locus are pooled before the cut, so that a locus split into
+  # small clusters by the mining is not lost; a cluster with no locus name is judged alone
+  cluster_locus <- .cp_cluster_loci(phylota, pattern, genes_map_df, marker_lookup)
+  cluster_species <- .cp_cluster_species(species_reduced)
+  # Y2: only the clusters that overlap the main cluster of their locus are pooled
+  overlap <- .cp_cluster_overlap(phylota, cluster_locus, cluster_species)
+  by_locus <- .cp_select_clusters_by_locus(cluster_species, cluster_locus, min_species, overlap = overlap)
+  if (nrow(by_locus$fragments) > 0) {
+    log_message("Clusters not pooled with their locus (no overlap with its main cluster): ",
+                paste(by_locus$fragments$cluster_id, by_locus$fragments$locus, sep = " ", collapse = "; "))
+  }
+  keep_clusters <- intersect(cluster_ids, as.character(by_locus$keep))
   selected <- phylotaR::drop_clstrs(species_reduced, cid = keep_clusters)
   
   log_message("Clusters before >", min_species, " filter: ", length(cluster_ids))
-  log_message("Clusters retained after >", min_species, " filter: ", length(selected@cids))
+  log_message("Clusters retained after >", min_species, " filter (clusters of one locus pooled): ", length(selected@cids),
+              " in ", sum(by_locus$table$kept), " loci or unnamed clusters")
   
   # 9. RAW CLUSTER TABLES AND METADATA
   df_species_clusters <- cp_extract_cluster_species_sid(selected)
@@ -175,26 +134,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   
   seed_meta <- cp_fetch_seed_metadata(smmry_sel_enriched$Seed, log_message = log_message)
 
-  smmry_sel_enriched <- smmry_sel_enriched |>
-    dplyr::mutate(
-      Species = seed_meta$Species,
-      Description = cp_normalize_marker(seed_meta$Description)
-    ) |>
-    dplyr::mutate(
-      Genes_raw = stringr::str_extract_all(Description, pattern),
-      Genes_text = dplyr::if_else(
-        is.na(Description), NA_character_,
-        purrr::map_chr(Genes_raw, ~ paste(unique(cp_normalize_marker(.x)), collapse = ", "))
-      ),
-      top_marker = cp_normalize_marker(top_marker)
-    ) |>
-    dplyr::select(-Genes_raw) |>
-    dplyr::left_join(gene_lookup, by = c("Genes_text" = "search_gene")) |>
-    dplyr::left_join(marker_lookup, by = c("top_marker" = "search_marker")) |>
-    dplyr::mutate(
-      Gene_std = ifelse(is.na(Gene_std), Genes_text, Gene_std),
-      Marker_std = ifelse(is.na(Marker_std), top_marker, Marker_std)
-    )
+  smmry_sel_enriched <- .cp_enrich_cluster_summary(smmry_sel_enriched, seed_meta, pattern, gene_lookup, marker_lookup)
   
   readr::write_csv(tibble::as_tibble(smmry_sel_enriched), path_table_cluster_summary_raw)
   
@@ -255,13 +195,8 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
     dplyr::select(cluster_id, sid) |>
     dplyr::distinct()
     
-  manual_rows <- tibble::tibble(cluster_id = integer(), sid = character(), reason = character())
-  if (isTRUE(apply_manual_exclusions) && !is.null(manual_exclusions_file) && file.exists(manual_exclusions_file)) {
-    manual_rows <- readr::read_csv(manual_exclusions_file, show_col_types = FALSE) |> dplyr::mutate(cluster_id = as.integer(cluster_id))
-    readr::write_csv(manual_rows, path_table_manual_exclusions)
-  } else if (!isTRUE(apply_manual_exclusions)) {
-    log_message("Manual exclusions DISABLED (apply_manual_exclusions = FALSE): the expert-curated accession list is not applied.")
-  }
+  manual_rows <- .cp_read_manual_exclusions(apply_manual_exclusions, manual_exclusions_file, path_table_manual_exclusions,
+                                            df_species_clusters_metadata, cluster_locus, log_message)
   
   rows_to_delete <- dplyr::bind_rows(
     rows_to_delete_auto |> dplyr::mutate(reason = "automatic duplicate resolution"),
@@ -332,20 +267,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   smmry_final_enriched <- smmry_final |> dplyr::left_join(cluster_gene_summary_final, by = c("ID" = "cluster_id"))
   
   seed_meta_final <- cp_fetch_seed_metadata(smmry_final_enriched$Seed, log_message = log_message)
-  smmry_final_enriched <- smmry_final_enriched |>
-    dplyr::mutate(Species = seed_meta_final$Species, Description = cp_normalize_marker(seed_meta_final$Description)) |>
-    dplyr::mutate(
-      Genes_raw = stringr::str_extract_all(Description, pattern),
-      Genes_text = dplyr::if_else(
-        is.na(Description), NA_character_,
-        purrr::map_chr(Genes_raw, ~ paste(unique(cp_normalize_marker(.x)), collapse = ", "))
-      ),
-      top_marker = cp_normalize_marker(top_marker)
-    ) |>
-    dplyr::select(-Genes_raw) |>
-    dplyr::left_join(gene_lookup, by = c("Genes_text" = "search_gene")) |>
-    dplyr::left_join(marker_lookup, by = c("top_marker" = "search_marker")) |>
-    dplyr::mutate(Gene_std = ifelse(is.na(Gene_std), Genes_text, Gene_std), Marker_std = ifelse(is.na(Marker_std), top_marker, Marker_std))
+  smmry_final_enriched <- .cp_enrich_cluster_summary(smmry_final_enriched, seed_meta_final, pattern, gene_lookup, marker_lookup)
   
   species_sid_matrix_final <- df_species_clusters_metadata_final |> dplyr::select(species, cluster_id, sid) |> tidyr::pivot_wider(names_from = cluster_id, names_prefix = "cid_", values_from = sid, values_fill = "")
   species_genes_final <- df_species_clusters_metadata_final |> dplyr::group_by(species) |> dplyr::summarise(Genes_text = paste(unique(Genes_text), collapse = "; "), .groups = "drop")
@@ -383,15 +305,26 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   df_joined <- df_joined |> dplyr::filter(!is.na(Marker_std), nzchar(Marker_std))
   markers_final <- sort(unique(df_joined$Marker_std))
   
+  # P10a (BMM, 13-10): records over 2000 bases cut to the extent of the shorter records of their
+  # marker, as in step 1 of the barcoding branch (L2), before one record per species is kept
+  long_cut <- list()
   for (mk in markers_final) {
     log_message("Processing marker FASTA merge: ", mk)
     files_mk <- df_joined |> dplyr::filter(Marker_std == mk) |> dplyr::arrange(file) |> dplyr::pull(file)
-    seqs_list <- lapply(files_mk, Biostrings::readDNAStringSet)
-    seqs_all <- do.call(c, seqs_list)
-    sp_names <- sub("^([^ ]+_[^ ]+).*", "\\1", names(seqs_all))
-    seqs_clean <- seqs_all[!duplicated(sp_names)]
     out_file <- file.path(dir_out_base, paste0(mk, ".fasta"))
-    Biostrings::writeXStringSet(seqs_clean, out_file)
+    cut_mk <- .cp_merge_marker_fasta(files_mk, out_file)
+    if (nrow(cut_mk) > 0) long_cut[[mk]] <- cbind(marker = mk, cut_mk, stringsAsFactors = FALSE)
+  }
+  long_cut <- if (length(long_cut)) do.call(rbind, long_cut) else
+    data.frame(marker = character(0), header = character(0), file = character(0), length = integer(0),
+               region_start = integer(0), region_end = integer(0), region_length = integer(0), action = character(0))
+  utils::write.csv(long_cut, file.path(dir_out_base, "TABLE_LONG_RECORDS_CUT_INGROUP.csv"), row.names = FALSE)
+  log_message("Records over 2000 bases: ", sum(long_cut$action == "cut"), " cut to the extent of their marker, ",
+              sum(long_cut$action == "no_overlap"), " left out (TABLE_LONG_RECORDS_CUT_INGROUP.csv)")
+  no_short <- unique(long_cut$marker[long_cut$action == "no_shorter_records"])
+  if (length(no_short)) {
+    log_message("Markers with no record of 2000 bases or fewer, no FASTA written (no_shorter_records): ",
+                paste(no_short, collapse = "; "))
   }
   log_message("Marker FASTA export complete.")
   
@@ -442,6 +375,11 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
 #' @param outgroups Character vector of NCBI Taxonomy IDs for outgroup lineages. Defaults to `c("107598", "107617", "107583", "3582", "107600", "108056")`.
 #' @param force_download Logical. Force fresh database retrieval instead of using local cache? Defaults to `FALSE`.
 #' @param out_dir Character. Output directory path to save outgroup cluster tables and FASTA sequence files.
+#' @param mnsql,mxsql Integer. Shortest and longest sequence, in bases, that a new mining keeps
+#'   (`phylotaR::setup()`); 100 and 5000 by default. Used only when GenBank is mined.
+#' @param notify Logical. Send an email through [send_run_notification()] when a mining ends or fails;
+#'   reading an existing workspace sends nothing. Defaults to `FALSE`.
+#' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
 #' @return A list containing the processed outgroup cluster objects and retained cluster IDs.
 #' @references
 #' Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. (2018).
@@ -455,7 +393,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
 #' )
 #' }
 #' @export
-assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"), force_download = FALSE, out_dir = "1_phylotaR_out_Outgroup") {
+assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_map_file = NULL, manual_exclusions_file = NULL, apply_manual_exclusions = TRUE, outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"), force_download = FALSE, out_dir = "1_phylotaR_out_Outgroup", mnsql = 100L, mxsql = 5000L, notify = FALSE, notify_to = NULL, notify_credentials = NULL) {
   
   
   if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "PhyloCactus")
@@ -505,48 +443,12 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
   gene_lookup <- genes_map_df |> dplyr::select(search_gene = search, Gene_std = replace)
   marker_lookup <- genes_map_df |> dplyr::select(search_marker = search, Marker_std = replace)
   
-  phylota <- tryCatch({
-    if (force_download) stop("Force download enabled")
-    phylotaR::read_phylota(wd_path)
-  }, error = function(e) {
-    log_message("No valid phylota object found or force_download=TRUE. Running setup and phylotaR pipeline...")
-    ncbi_dr_local <- NULL
-    env_blast <- Sys.getenv("BLAST_PATH")
-    if (env_blast != "") {
-      ncbi_dr_local <- env_blast
-    } else {
-      blastn_path <- Sys.which("blastn")
-      if (blastn_path != "") ncbi_dr_local <- dirname(blastn_path)
-    }
-    
-    phylotaR::setup(
-      wd = wd_path, txid = outgroups, ncbi_dr = ncbi_dr_local, v = TRUE, ncps = 1, mncvrg = 80,
-      srch_trm = paste0(
-        "NOT predicted[TI] NOT \"whole genome shotgun\"[TI] NOT unverified[TI] ",
-        "NOT \"synthetic construct\"[Organism] NOT refseq[filter] NOT TSA[Keyword] ",
-        "NOT \"sp.\"[TI] NOT \"sp.\"[Organism] NOT \"sp\"[Organism] NOT \"aff.\"[TI] ",
-        "NOT \"aff\"[Organism] NOT \"cf.\"[TI] NOT \"cf\"[Organism] NOT \"var.\"[TI] ",
-        "NOT \"var\"[TI] NOT \"var\"[Organism] NOT \"var.\"[Organism] NOT \"variety\"[TI] ",
-        "NOT \"subsp.\"[TI] NOT \"subsp\"[TI] NOT \"subsp.\"[Organism] ",
-        "NOT \"subsp\"[Organism] NOT \"subspecies\"[Organism] NOT \"x\"[Organism] NOT \" x \"[Organism]"
-      )
-    )
-    
-    log_message("Executing phylotaR::run() for outgroups...")
-    tryCatch({
-      phylotaR::run(wd = wd_path)
-    }, error = function(erun) {
-      log_message("Error in outgroup phylotaR::run(): ", erun$message)
-    })
-    
-    log_message("Attempting to load outgroup phylota object after run()...")
-    tryCatch({
-      phylotaR::read_phylota(wd_path)
-    }, error = function(e2) {
-      log_message("read_phylota error: ", e2$message)
-      stop("Could not load outgroup phylota object from ", wd_path)
-    })
-  })
+  # Workspace through the function shared with the ingroup and the barcoding branch: one set of
+  # parameters for both halves of folder 0 (E1, BMM, 28-09)
+  phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = outgroups[1], txid = outgroups,
+                                    force_download = force_download, log_message = log_message,
+                                    mnsql = mnsql, mxsql = mxsql,
+                                    notify = notify, notify_to = notify_to, notify_credentials = notify_credentials)
   
   # 8. SPECIES REDUCTION AND CLUSTER FILTERING
   species_reduced <- phylotaR::drop_by_rank(phylota, rnk = "species", n = 1)
@@ -625,13 +527,9 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
     dplyr::distinct()
   rows_to_delete_auto <- dup_records |> dplyr::anti_join(keepers, by = c("cluster_id", "sid")) |> dplyr::select(cluster_id, sid) |> dplyr::distinct()
   
-  manual_rows <- tibble::tibble(cluster_id = integer(), sid = character(), reason = character())
-  if (isTRUE(apply_manual_exclusions) && !is.null(manual_exclusions_file) && file.exists(manual_exclusions_file)) {
-    manual_rows <- readr::read_csv(manual_exclusions_file, show_col_types = FALSE) |> dplyr::mutate(cluster_id = as.integer(cluster_id))
-    readr::write_csv(manual_rows, path_table_manual_exclusions)
-  } else if (!isTRUE(apply_manual_exclusions)) {
-    log_message("Manual exclusions DISABLED (apply_manual_exclusions = FALSE): the expert-curated accession list is not applied.")
-  }
+  manual_rows <- .cp_read_manual_exclusions(apply_manual_exclusions, manual_exclusions_file, path_table_manual_exclusions,
+                                            df_species_clusters_metadata, .cp_cluster_loci(phylota, pattern, genes_map_df, marker_lookup),
+                                            log_message)
   
   rows_to_delete <- dplyr::bind_rows(rows_to_delete_auto |> dplyr::mutate(reason = "auto"), manual_rows) |> dplyr::distinct(cluster_id, sid, .keep_all = TRUE)
   log_message("Automatic duplicate removals: ", nrow(rows_to_delete_auto))
@@ -721,15 +619,26 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
   df_joined <- df_joined |> dplyr::filter(!is.na(Marker_std), nzchar(Marker_std))
   markers_final <- sort(unique(df_joined$Marker_std))
   
+  # P10a (BMM, 13-10): records over 2000 bases cut to the extent of the shorter records of their
+  # marker, as in step 1 of the barcoding branch (L2), before one record per species is kept
+  long_cut <- list()
   for (mk in markers_final) {
     log_message("Processing marker FASTA merge: ", mk)
     files_mk <- df_joined |> dplyr::filter(Marker_std == mk) |> dplyr::arrange(file) |> dplyr::pull(file)
-    seqs_list <- lapply(files_mk, Biostrings::readDNAStringSet)
-    seqs_all <- do.call(c, seqs_list)
-    sp_names <- sub("^([^ ]+_[^ ]+).*", "\\1", names(seqs_all))
-    seqs_clean <- seqs_all[!duplicated(sp_names)]
     out_file <- file.path(dir_out_base, paste0(mk, ".fasta"))
-    Biostrings::writeXStringSet(seqs_clean, out_file)
+    cut_mk <- .cp_merge_marker_fasta(files_mk, out_file)
+    if (nrow(cut_mk) > 0) long_cut[[mk]] <- cbind(marker = mk, cut_mk, stringsAsFactors = FALSE)
+  }
+  long_cut <- if (length(long_cut)) do.call(rbind, long_cut) else
+    data.frame(marker = character(0), header = character(0), file = character(0), length = integer(0),
+               region_start = integer(0), region_end = integer(0), region_length = integer(0), action = character(0))
+  utils::write.csv(long_cut, file.path(dir_out_base, "TABLE_LONG_RECORDS_CUT_OUTGROUP.csv"), row.names = FALSE)
+  log_message("Records over 2000 bases: ", sum(long_cut$action == "cut"), " cut to the extent of their marker, ",
+              sum(long_cut$action == "no_overlap"), " left out (TABLE_LONG_RECORDS_CUT_OUTGROUP.csv)")
+  no_short <- unique(long_cut$marker[long_cut$action == "no_shorter_records"])
+  if (length(no_short)) {
+    log_message("Markers with no record of 2000 bases or fewer, no FASTA written (no_shorter_records): ",
+                paste(no_short, collapse = "; "))
   }
   
   # 18. FINAL OCCUPANCY AND MARKER SUMMARIES
@@ -940,4 +849,336 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
     }
     phylotaR::write_sqs(phylota_obj, sid = sids, sq_nm = scientific_names, outfile = file.path(outdir, paste0("CLUSTER_", cid, ".fasta")))
   }
+}
+
+#' Merge the cluster FASTA files of one marker, with the cut of long records (P10a)
+#'
+#' Reads the cluster files of a marker in the order given, cuts every record over `max_length`
+#' bases to the extent of the shorter records of the marker with the rule of step 1 of the barcoding
+#' branch (`.bc_cut_long_records()`, decision L2 of 28-09), leaves out a long record that shares
+#' nothing with them, keeps the first record of each species and writes `out_file`. A marker whose
+#' records are all over `max_length` has no extent to cut to: no file is written and its records are
+#' listed with the action `no_shorter_records` (M2a). Folder 0 is not touched.
+#' @return The table of the long records: header, file, length, region_start, region_end,
+#'   region_length and action (`cut`, `no_overlap` or `no_shorter_records`); no rows when no record is long.
+#' @noRd
+.cp_merge_marker_fasta <- function(files, out_file, max_length = 2000L) {
+  seqs_list <- lapply(files, Biostrings::readDNAStringSet)
+  seqs_all <- do.call(c, seqs_list)
+  src <- rep(files, vapply(seqs_list, length, 1L))
+  headers <- names(seqs_all)
+  # M2a (BMM, 13-10): with no record of max_length or fewer there is no extent to cut to; the marker
+  # gets no FASTA, and its records are listed, instead of an empty FASTA that stops Module 2
+  if (length(seqs_all) && all(Biostrings::width(seqs_all) > max_length)) {
+    n <- length(seqs_all)
+    return(data.frame(header = headers, file = basename(src), length = Biostrings::width(seqs_all),
+                      region_start = rep(NA_integer_, n), region_end = rep(NA_integer_, n),
+                      region_length = rep(NA_integer_, n), action = "no_shorter_records", stringsAsFactors = FALSE))
+  }
+  ids <- paste0("r", seq_along(seqs_all))
+  chars <- stats::setNames(as.character(seqs_all), ids)
+  cut <- .bc_cut_long_records(data.frame(sid = ids, locus = "marker", stringsAsFactors = FALSE), chars,
+                              max_length = max_length)
+  kept <- ids[ids %in% names(cut$sequences)]
+  out <- Biostrings::DNAStringSet(unname(cut$sequences[kept]))
+  names(out) <- headers[match(kept, ids)]
+  sp_names <- sub("^([^ ]+_[^ ]+).*", "\\1", names(out))
+  Biostrings::writeXStringSet(out[!duplicated(sp_names)], out_file)
+  tab <- cut$table
+  idx <- match(tab$sid, ids)
+  data.frame(header = headers[idx], file = basename(src[idx]), length = tab$length, region_start = tab$region_start,
+             region_end = tab$region_end, region_length = tab$region_length, action = tab$action,
+             stringsAsFactors = FALSE)
+}
+
+# ------------------------------------------------------------------------------
+# Shared by assemble_ingroup_phylotar() and assemble_barcoding_dataset(). Moved here in 0.5.0
+# without changing their behaviour, so that the phylogeny and the molecular diagnostic branch make
+# the same phylotaR call on the same workspace and assign clusters to loci with the same code.
+# ------------------------------------------------------------------------------
+
+#' phylotaR search term shared by both branches
+#'
+#' Excludes predicted, unverified, whole-genome shotgun, synthetic, RefSeq and TSA records, and
+#' records named at open nomenclature (sp., aff., cf.), below species (var., subsp.) or as hybrids.
+#' @return Character string passed to `phylotaR::setup(srch_trm = )`.
+#' @noRd
+.phylotar_search_terms <- function() {
+  paste0(
+    "NOT predicted[TI] ",
+    "NOT \"whole genome shotgun\"[TI] ",
+    "NOT unverified[TI] ",
+    "NOT \"synthetic construct\"[Organism] ",
+    "NOT refseq[filter] ",
+    "NOT TSA[Keyword] ",
+    "NOT \"sp.\"[TI] ",
+    "NOT \"sp.\"[Organism] ",
+    "NOT \"sp\"[Organism] ",
+    "NOT \"sp\"[Organism] ",
+    "NOT \"aff.\"[TI] ",
+    "NOT \"aff\"[Organism] ",
+    "NOT \"cf.\"[TI] ",
+    "NOT \"cf\"[Organism] ",
+    "NOT \"var.\"[TI] ",
+    "NOT \"var\"[TI] ",
+    "NOT \"var\"[Organism] ",
+    "NOT \"var.\"[Organism] ",
+    "NOT \"variety\"[TI] ",
+    "NOT \"subsp.\"[TI] ",
+    "NOT \"subsp\"[TI] ",
+    "NOT \"subsp.\"[Organism] ",
+    "NOT \"subsp\"[Organism] ",
+    "NOT \"subspecies\"[Organism] ",
+    "NOT \"x\"[Organism] ",
+    "NOT \" x \"[Organism]"
+  )
+}
+
+#' Read a phylotaR workspace, or mine GenBank into it when it does not exist
+#'
+#' Reads the workspace with `phylotaR::read_phylota()`. When that fails, or when
+#' `force_download = TRUE`, runs `phylotaR::setup()` and `phylotaR::run()` with the parameters of
+#' the phylogeny and reads the result. The reader and the two pipeline steps are arguments only so
+#' that the tests can stand in for them.
+#' @noRd
+.phylotar_load_or_mine <- function(wd_path, preferred_parent = "3593", txid = NULL, ncbi_dr = NULL,
+                                   force_download = FALSE, log_message = function(...) {},
+                                   mnsql = 100L, mxsql = 5000L,
+                                   notify = FALSE, notify_to = NULL, notify_credentials = NULL,
+                                   notify_fn = send_run_notification,
+                                   reader = phylotaR::read_phylota,
+                                   setup_fn = phylotaR::setup,
+                                   run_fn = phylotaR::run) {
+  # What is mined and which parent wins when a sid sits in two clusters are two different things.
+  # They coincided while only the ingroup used this, with its single focal clade. The outgroup of
+  # CN2 is several clades and has no preferred parent, so `txid` carries what to mine and defaults
+  # to `preferred_parent`, which leaves every existing call doing exactly what it did.
+  if (is.null(txid)) txid <- preferred_parent
+  mine <- function() {
+    log_message("No valid phylota object found or force_download=TRUE. Running setup and phylotaR pipeline...")
+    if (is.null(ncbi_dr)) {
+      env_blast <- Sys.getenv("BLAST_PATH")
+      if (env_blast != "") {
+        ncbi_dr <- env_blast
+      } else {
+        blastn_path <- Sys.which("blastn")
+        if (blastn_path != "") ncbi_dr <- dirname(blastn_path)
+      }
+    }
+
+    setup_fn(
+      wd = wd_path, txid = txid, ncbi_dr = ncbi_dr, v = TRUE, ncps = 1, mncvrg = 80,
+      mnsql = mnsql, mxsql = mxsql, srch_trm = .phylotar_search_terms()
+    )
+
+    log_message("Executing phylotaR::run()...")
+    tryCatch({
+      run_fn(wd = wd_path)
+    }, error = function(erun) {
+      log_message("Error in phylotaR::run(): ", erun$message)
+    })
+
+    log_message("Attempting to load phylota object after run()...")
+    tryCatch({
+      reader(wd_path)
+    }, error = function(e2) {
+      log_message("read_phylota error: ", e2$message)
+      stop("Could not load phylota object from ", wd_path)
+    })
+  }
+  tryCatch({
+    if (force_download) stop("Force download enabled")
+    reader(wd_path)
+  }, error = function(e) {
+    if (!isTRUE(notify)) return(mine())
+    # L4 (BMM, 28-09): the mining takes hours on the Mac; it says when it ends or fails
+    started <- Sys.time()
+    analysis <- paste0("phylotaR mining of ", paste(txid, collapse = ", "))
+    res <- tryCatch(mine(), error = function(err) {
+      note <- .compose_run_notification(analysis, status = "failed", started = started,
+                                        outputs = c(Workspace = wd_path), error_message = conditionMessage(err))
+      notify_fn(note$subject, note$body, to = notify_to, credentials = notify_credentials)
+      stop(err)
+    })
+    note <- .compose_run_notification(analysis, status = "finished", started = started, outputs = c(Workspace = wd_path))
+    notify_fn(note$subject, note$body, to = notify_to, credentials = notify_credentials)
+    res
+  })
+}
+
+#' Assign each cluster its standardised gene and marker names
+#'
+#' Adds the species and description of each cluster seed, extracts the gene names the description
+#' mentions, and maps the dominant marker of the cluster (`top_marker`) through `genes_map.csv`.
+#' A marker that `genes_map.csv` does not map keeps its own name.
+#' @param smmry Cluster summary with `Seed` and `top_marker`, one row per cluster.
+#' @param seed_meta Seed metadata (`Species`, `Description`), one row per row of `smmry`, same order.
+#' @noRd
+.cp_enrich_cluster_summary <- function(smmry, seed_meta, pattern, gene_lookup, marker_lookup) {
+  smmry |>
+    dplyr::mutate(
+      Species = seed_meta$Species,
+      Description = cp_normalize_marker(seed_meta$Description)
+    ) |>
+    dplyr::mutate(
+      Genes_raw = stringr::str_extract_all(Description, pattern),
+      Genes_text = dplyr::if_else(
+        is.na(Description), NA_character_,
+        purrr::map_chr(Genes_raw, ~ paste(unique(cp_normalize_marker(.x)), collapse = ", "))
+      ),
+      top_marker = cp_normalize_marker(top_marker)
+    ) |>
+    dplyr::select(-Genes_raw) |>
+    dplyr::left_join(gene_lookup, by = c("Genes_text" = "search_gene")) |>
+    dplyr::left_join(marker_lookup, by = c("top_marker" = "search_marker")) |>
+    dplyr::mutate(
+      Gene_std = ifelse(is.na(Gene_std), Genes_text, Gene_std),
+      Marker_std = ifelse(is.na(Marker_std), top_marker, Marker_std)
+    )
+}
+
+#' The locus of every cluster, read from the definition lines of its sequences
+#'
+#' The same reading as the naming of the kept clusters (`cp_annotate_marker_text()`, the dominant
+#' marker of `cp_summarise_cluster_markers()`, `marker_lookup`), on the definition lines the
+#' workspace already holds, so that every cluster can be named before the cut of min_species
+#' (decision Y1 of BMM, 29-09) without downloading metadata.
+#' @return A data frame with `cluster_id` and `locus` (`NA` when no gene is recognised).
+#' @noRd
+.cp_cluster_loci <- function(phylota, pattern, genes_map_df, marker_lookup) {
+  cids <- phylota@cids
+  if (length(cids) == 0) return(data.frame(cluster_id = integer(0), locus = character(0)))
+  df <- do.call(rbind, lapply(cids, function(cid) {
+    sids <- phylota@clstrs[[cid]]@sids
+    data.frame(cluster_id = as.integer(cid), sid = sids, species = "",
+               Description_gb = vapply(sids, function(s) phylota@sqs[[s]]@dfln, "", USE.NAMES = FALSE),
+               stringsAsFactors = FALSE)
+  }))
+  s <- cp_summarise_cluster_markers(cp_annotate_marker_text(df, pattern = pattern, genes_map_df = genes_map_df))
+  top <- cp_normalize_marker(s$top_marker)
+  locus <- marker_lookup$Marker_std[match(top, marker_lookup$search_marker)]
+  locus <- ifelse(is.na(locus), top, locus)
+  locus[!nzchar(locus)] <- NA_character_
+  data.frame(cluster_id = as.integer(s$cluster_id), locus = locus, stringsAsFactors = FALSE)
+}
+
+#' Clusters over the cut of min_species, the clusters of one locus pooled (decision Y1 of BMM, 29-09)
+#'
+#' A locus is kept when its clusters together hold more than `min_species` species; a cluster with
+#' no locus name is judged alone, as before.
+#' @param cluster_species Data frame with `cluster_id` and `species` (one row per species of a
+#'   cluster, counted on the workspace reduced to one sequence per species).
+#' @param cluster_locus Data frame with `cluster_id` and `locus`.
+#' @return A list with `keep` (cluster ids) and `table` (per locus or unnamed cluster: clusters and
+#'   species).
+#' @noRd
+.cp_select_clusters_by_locus <- function(cluster_species, cluster_locus, min_species, overlap = NULL) {
+  fragments <- data.frame(cluster_id = integer(0), locus = character(0))
+  if (!is.null(overlap)) {
+    # Y2 (BMM, 29-09): a named cluster that does not overlap the main cluster of its locus is not pooled
+    out <- overlap$cluster_id[!overlap$overlaps_main]
+    loc_all <- cluster_locus$locus[match(out, cluster_locus$cluster_id)]
+    out <- out[!is.na(loc_all) & nzchar(loc_all)]
+    fragments <- data.frame(cluster_id = as.integer(out),
+                            locus = cluster_locus$locus[match(out, cluster_locus$cluster_id)], stringsAsFactors = FALSE)
+    cluster_species <- cluster_species[!cluster_species$cluster_id %in% out, , drop = FALSE]
+  }
+  loc <- cluster_locus$locus[match(cluster_species$cluster_id, cluster_locus$cluster_id)]
+  named <- !is.na(loc) & nzchar(loc)
+  unit <- ifelse(named, loc, paste0("cluster_", cluster_species$cluster_id))
+  sp <- tapply(cluster_species$species, unit, function(x) length(unique(x)))
+  cl <- tapply(cluster_species$cluster_id, unit, function(x) length(unique(x)))
+  table <- data.frame(locus = names(sp), named = !startsWith(names(sp), "cluster_") | names(sp) %in% loc[named],
+                      clusters = as.integer(cl[names(sp)]), species = as.integer(sp), stringsAsFactors = FALSE)
+  table$kept <- table$species > min_species
+  keep <- sort(unique(cluster_species$cluster_id[unit %in% table$locus[table$kept]]))
+  list(keep = as.integer(keep), table = table, fragments = fragments)
+}
+
+#' Whether a cluster overlaps the main cluster of its locus (Y2)
+#'
+#' TRUE when at least `min_fraction` of `seqs` share `min_shared` or more 20-mers with the sequences
+#' of the main cluster, on either strand.
+#' @noRd
+.cp_overlaps_main <- function(seqs, main_seqs, k = 20L, min_shared = 5L, min_fraction = 0.5) {
+  kmers <- function(x) { x <- toupper(x); n <- nchar(x); if (n < k) character(0) else unique(substring(x, 1:(n - k + 1L), k:n)) }
+  rc <- function(x) as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(x)))
+  pool <- unique(unlist(lapply(c(main_seqs, rc(main_seqs)), kmers), use.names = FALSE))
+  shared <- vapply(seqs, function(x) sum(kmers(x) %in% pool), 0L)
+  length(seqs) > 0 && mean(shared >= min_shared) >= min_fraction
+}
+
+#' For every cluster, whether it overlaps the main cluster (most species) of its locus (Y2)
+#'
+#' Unnamed clusters are judged alone and marked TRUE. At most `max_seqs` sequences of a cluster are
+#' read, the first by sid, so that the check stays fast on large clusters.
+#' @noRd
+.cp_cluster_overlap <- function(phylota, cluster_locus, cluster_species, max_seqs = 100L) {
+  seqs_of <- function(cid) {
+    sids <- sort(phylota@clstrs[[as.character(cid)]]@sids, method = "radix")
+    sids <- utils::head(sids, max_seqs)
+    vapply(sids, function(s) rawToChar(phylota@sqs[[s]]@sq), "", USE.NAMES = FALSE)
+  }
+  n_sp <- tapply(cluster_species$species, cluster_species$cluster_id, function(x) length(unique(x)))
+  out <- data.frame(cluster_id = as.integer(cluster_locus$cluster_id), overlaps_main = TRUE)
+  loci <- unique(stats::na.omit(cluster_locus$locus[nzchar(cluster_locus$locus)]))
+  for (l in loci) {
+    cids <- cluster_locus$cluster_id[cluster_locus$locus %in% l]
+    if (length(cids) < 2L) next
+    sp <- as.integer(n_sp[as.character(cids)]); sp[is.na(sp)] <- 0L
+    main <- cids[order(-sp, cids)][1]
+    main_seqs <- seqs_of(main)
+    for (cid in setdiff(cids, main)) out$overlaps_main[out$cluster_id == cid] <- .cp_overlaps_main(seqs_of(cid), main_seqs)
+  }
+  out
+}
+
+#' The curated exclusions keyed by (locus, sid) as the (cluster, sid) pairs of this workspace (X2)
+#'
+#' An accession is removed from every cluster of the locus named in the list; its clusters of other
+#' loci are left alone.
+#' @return A list with `pairs` (cluster_id, sid, reason), `unmatched` (rows of the list with no
+#'   pair) and `counts` (`n_file`, `n_matched` rows of the list, `n_pairs`).
+#' @noRd
+.cp_exclusion_pairs <- function(exclusions, records, cluster_locus) {
+  rec <- data.frame(cluster_id = as.integer(records$cluster_id), sid = as.character(records$sid), stringsAsFactors = FALSE)
+  rec$locus <- cluster_locus$locus[match(rec$cluster_id, cluster_locus$cluster_id)]
+  key_exc <- paste(exclusions$locus, exclusions$sid)
+  hit <- paste(rec$locus, rec$sid) %in% key_exc
+  pairs <- rec[hit, c("cluster_id", "sid"), drop = FALSE]
+  pairs$reason <- exclusions$reason[match(paste(rec$locus[hit], rec$sid[hit]), key_exc)]
+  pairs <- pairs[!duplicated(paste(pairs$cluster_id, pairs$sid)), , drop = FALSE]
+  rownames(pairs) <- NULL
+  matched <- key_exc %in% paste(rec$locus, rec$sid)
+  list(pairs = pairs, unmatched = exclusions[!matched, , drop = FALSE],
+       counts = list(n_file = nrow(exclusions), n_matched = sum(matched), n_pairs = nrow(pairs)))
+}
+
+#' Species of every cluster on the workspace reduced to one sequence per species
+#' @noRd
+.cp_cluster_species <- function(species_reduced) {
+  do.call(rbind, lapply(species_reduced@cids, function(cid) {
+    tx <- unique(as.character(phylotaR::get_txids(species_reduced, cid = cid, rnk = "species")))
+    data.frame(cluster_id = rep(as.integer(cid), length(tx)), species = tx, stringsAsFactors = FALSE)
+  }))
+}
+
+#' Read the curated exclusions, keyed by (locus, sid), as the (cluster, sid) pairs to remove (X2)
+#'
+#' The list is written to `path_table` as read; the log says how many of its rows are found in this
+#' workspace, so that a run reports the curation it actually applied.
+#' @noRd
+.cp_read_manual_exclusions <- function(apply, file, path_table, records, cluster_locus, log_message) {
+  empty <- tibble::tibble(cluster_id = integer(), sid = character(), reason = character())
+  if (!isTRUE(apply)) {
+    log_message("Manual exclusions DISABLED (apply_manual_exclusions = FALSE): the expert-curated accession list is not applied.")
+    return(empty)
+  }
+  if (is.null(file) || !file.exists(file)) return(empty)
+  exc <- utils::read.csv(file, stringsAsFactors = FALSE)
+  utils::write.csv(exc, path_table, row.names = FALSE)
+  mp <- .cp_exclusion_pairs(exc, records, cluster_locus)
+  log_message("Manual exclusions: ", mp$counts$n_file, " (locus, accession) rows in the list; ", mp$counts$n_matched,
+              " found in this workspace, as ", mp$counts$n_pairs, " cluster memberships.")
+  tibble::as_tibble(mp$pairs) |> dplyr::mutate(cluster_id = as.integer(cluster_id))
 }

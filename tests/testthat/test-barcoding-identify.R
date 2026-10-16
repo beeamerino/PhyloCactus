@@ -1,0 +1,778 @@
+# Tests of step 10 of the molecular diagnostic branch: identification of a user query. Written
+# before the code. Phase 6 bis of PhyloCactus 0.5.0, decisions I1 to I9 of BMM (27-09).
+#
+# IdTaxa does not run under devtools::test() (5A minutes, section 4). These tests carry the same
+# probe as test-barcoding-idtaxa.R and run under R CMD check and with the installed package.
+
+.idn_runs <- function() {
+  tryCatch({
+    tr <- Biostrings::DNAStringSet(c(a = "ACGTACGTAACCGGTTAACC", b = "ACGTACGTACCCGGTTAACC",
+                                     c = "TTTTGGGGAATTCCGGAATT", d = "TTTTGGGGAATTCCGGAATG"))
+    lt <- DECIPHER::LearnTaxa(tr, c("Root;Opuntia;Opuntia_robusta", "Root;Opuntia;Opuntia_stricta",
+                                    "Root;Cereus;Cereus_jamacaru", "Root;Cereus;Cereus_horrida"),
+                              verbose = FALSE)
+    DECIPHER::IdTaxa(Biostrings::DNAStringSet("ACGTACGTAACCGGTTAACC"), lt, strand = "top",
+                     threshold = 60, processors = 1L, verbose = FALSE)
+    TRUE
+  }, error = function(e) FALSE)
+}
+
+.idn_skip <- function() {
+  skip_if_not_installed("DECIPHER")
+  skip_if_not_installed("Biostrings")
+  skip_if_not_installed("ape")
+  if (!suppressWarnings(suppressMessages(.idn_runs()))) {
+    skip("DECIPHER::IdTaxa() does not run in this loading context: match() over XStringSet fails to dispatch inside IdTaxa. The same call works in a plain R session.")
+  }
+}
+
+.idn_random <- function(n, gc = 0.5) {
+  paste(sample(c("A", "C", "G", "T"), n, replace = TRUE,
+               prob = c(1 - gc, gc, gc, 1 - gc) / 2), collapse = "")
+}
+
+.idn_vary <- function(s, k) {
+  for (p in sample(seq_len(nchar(s)), k)) substr(s, p, p) <- sample(c("A", "C", "G", "T"), 1)
+  s
+}
+
+.idn_rc <- function(s) as.character(Biostrings::reverseComplement(Biostrings::DNAStringSet(s)))
+
+# Three loci of 300 bases, each from its own random root, so that no locus shares 20-mers with
+# another; three genera, two species each, three accessions per species. The divergence within a
+# locus is kept at the scale of a cactus barcode (a few per cent): with 40 changes per genus, as in
+# the fixture of step 7, the k-mer pool of the strand rule holds the seed genus only.
+.idn_fixture <- function(tmp) {
+  lib_dir <- file.path(tmp, "4_library")
+  dir.create(lib_dir, showWarnings = FALSE, recursive = TRUE)
+  set.seed(41L)
+  genera <- c("Opuntia", "Cereus", "Mammillaria")
+  epithets <- c("alpha", "beta")
+  seqs <- list()
+  for (l in c("matK", "rbcL", "trnL-trnF")) {
+    root <- .idn_random(300)
+    x <- character(0)
+    for (g in seq_along(genera)) {
+      gb <- .idn_vary(root, 6)
+      for (e in seq_along(epithets)) {
+        sb <- .idn_vary(gb, 3)
+        for (r in 1:3) {
+          x[paste0(genera[g], "_", epithets[e], "|", l, "_", substr(genera[g], 1, 1), e, r, ".1")] <-
+            .idn_vary(sb, 1)
+        }
+      }
+    }
+    Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), file.path(lib_dir, paste0("LIB_", l, ".fasta")))
+    seqs[[l]] <- x
+  }
+  list(library_dir = lib_dir, seqs = seqs, out = file.path(tmp, "10_identify"))
+}
+
+# Messages are collected with a calling handler: test_that() muffles them before a message sink
+# would see them.
+.idn_run <- function(f, query, ...) {
+  res <- NULL
+  msg <- character(0)
+  txt <- suppressWarnings(utils::capture.output(withCallingHandlers(
+    res <- identify_barcoding_query(query, library_dir = f$library_dir,
+                                    metrics_dir = file.path(dirname(f$library_dir), "11_metrics"),
+                                    output_dir = f$out, ...),
+    message = function(m) {
+      msg <<- c(msg, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    })))
+  list(tab = res, text = c(txt, msg))
+}
+
+.idn_columns <- c("query", "locus", "query_length", "path", "region_start", "region_end",
+                  "region_length", "other_windows", "orientation", "state", "predicted_species",
+                  "predicted_genus", "candidates", "genus_idtaxa", "species_idtaxa",
+                  "genus_confidence", "species_confidence", "reason", "core_trimmed", "genus_core_trimmed", "threshold",
+                  "validation_ws_rate_species_present", "validation_ws_rate_species_absent")
+
+# ---- I3 to I5: the Sanger path --------------------------------------------------------------------
+
+test_that("a query of a library species gets one row per locus, with the three states only", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  q <- c(q1 = unname(f$seqs$matK[1]))
+  r <- .idn_run(f, q)$tab
+  expect_true(all(.idn_columns %in% names(r)))
+  expect_setequal(r$locus, c("matK", "rbcL", "trnL-trnF"))
+  expect_true(all(r$state %in% 1:3))
+  m <- r[r$locus == "matK", ]
+  expect_identical(m$path, "whole")
+  expect_identical(m$orientation, "forward")
+  expect_true(m$state %in% 1:2)
+  expect_identical(m$predicted_genus, "Opuntia")
+  expect_true(all(r$reason[r$locus != "matK"] == "no_overlap"))
+  expect_true(all(r$path[r$locus != "matK"] == "none"))
+  expect_true(file.exists(file.path(f$out, "TABLE_barcoding_identify_query.csv")))
+})
+
+test_that("the reverse complement of a query gets the same answer", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  s <- unname(f$seqs$rbcL[4])
+  a <- .idn_run(f, c(q = s), locus = "rbcL")$tab
+  b <- .idn_run(f, c(q = .idn_rc(s)), locus = "rbcL")$tab
+  expect_identical(b$orientation, "reverse")
+  for (col in c("state", "predicted_species", "predicted_genus", "genus_confidence",
+                "species_confidence")) {
+    expect_identical(b[[col]], a[[col]])
+  }
+})
+
+test_that("a sequence foreign to every locus is state 3, no_overlap, with the wording of section 3.6", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  set.seed(7L)
+  out <- .idn_run(f, c(alien = .idn_random(500)))
+  expect_true(all(out$tab$state == 3L))
+  expect_true(all(out$tab$reason == "no_overlap"))
+  expect_true(all(is.na(out$tab$predicted_genus)))
+  expect_true(any(grepl("Not assignable: no overlap with the library", out$text, fixed = TRUE)))
+})
+
+test_that("a fragment shorter than min_overlap is state 3, short_overlap", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  frag <- substr(unname(f$seqs$matK[7]), 101, 160)
+  r <- .idn_run(f, c(frag = frag), locus = "matK")$tab
+  expect_equal(nrow(r), 1L)
+  expect_equal(r$state, 3L)
+  expect_identical(r$reason, "short_overlap")
+  expect_equal(r$region_length, 60L)
+})
+
+# ---- I3: the crop -----------------------------------------------------------------------------------
+
+test_that("a locus inside 20 kb of flanks is cropped and answered as the bare locus", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  s <- unname(f$seqs$matK[10])
+  set.seed(8L)
+  contig <- paste0(.idn_random(20000, 0.37), s, .idn_random(20000, 0.37))
+  bare <- .idn_run(f, c(q = s), locus = "matK")$tab
+  crop <- .idn_run(f, c(q = contig), locus = "matK")$tab
+  expect_identical(crop$path, "crop")
+  expect_equal(crop$query_length, 40300L)
+  expect_gte(crop$region_start, 20001L)
+  expect_lte(crop$region_end, 20300L)
+  expect_equal(crop$other_windows, 0L)
+  for (col in c("state", "predicted_species", "predicted_genus")) {
+    expect_identical(crop[[col]], bare[[col]])
+  }
+})
+
+test_that("a contig with two loci gets one row per locus and no combined row", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  set.seed(9L)
+  contig <- paste0(.idn_random(5000, 0.37), unname(f$seqs$matK[13]), .idn_random(5000, 0.37),
+                   unname(f$seqs$rbcL[1]), .idn_random(5000, 0.37))
+  r <- .idn_run(f, c(contig = contig))$tab
+  expect_equal(nrow(r), 3L)
+  expect_false(anyDuplicated(r$locus) > 0L)
+  expect_identical(r$path[r$locus == "matK"], "crop")
+  expect_identical(r$path[r$locus == "rbcL"], "crop")
+  expect_identical(r$predicted_genus[r$locus == "matK"], "Mammillaria")
+  expect_identical(r$predicted_genus[r$locus == "rbcL"], "Opuntia")
+  expect_identical(r$reason[r$locus == "trnL-trnF"], "no_overlap")
+})
+
+test_that("the reverse complement of a contig gets the same answers", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  set.seed(10L)
+  contig <- paste0(.idn_random(5000, 0.37), unname(f$seqs$matK[13]), .idn_random(5000, 0.37),
+                   unname(f$seqs$rbcL[1]), .idn_random(5000, 0.37))
+  a <- .idn_run(f, c(contig = contig))$tab
+  b <- .idn_run(f, c(contig = .idn_rc(contig)))$tab
+  a <- a[order(a$locus), ]
+  b <- b[order(b$locus), ]
+  expect_identical(b$state, a$state)
+  expect_identical(b$predicted_species, a$predicted_species)
+  expect_identical(b$predicted_genus, a$predicted_genus)
+  expect_identical(b$region_length, a$region_length)
+})
+
+# ---- I7: inputs ------------------------------------------------------------------------------------
+
+test_that("a FASTQ file stops with the requirement of Phase 8", {
+  f <- .idn_fixture(withr::local_tempdir())
+  fq <- file.path(dirname(f$library_dir), "reads.fastq")
+  writeLines(c("@read1", "ACGTACGTACGT", "+", "IIIIIIIIIIII"), fq)
+  expect_error(identify_barcoding_query(fq, library_dir = f$library_dir, output_dir = f$out),
+               "raw reads")
+})
+
+test_that("a declared locus gives one row per query, for that locus only", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  q <- Biostrings::DNAStringSet(c(a = unname(f$seqs$rbcL[2]), b = unname(f$seqs$rbcL[5])))
+  r <- .idn_run(f, q, locus = "rbcL")$tab
+  expect_equal(nrow(r), 2L)
+  expect_true(all(r$locus == "rbcL"))
+  expect_identical(r$query, c("a", "b"))
+})
+
+# ---- I2: the model cache ---------------------------------------------------------------------------
+
+test_that("a second call reuses the model and a changed library retrains it", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  q <- c(q = unname(f$seqs$matK[1]))
+  .idn_run(f, q, locus = "matK")
+  model <- file.path(f$out, "models", "MODEL_idtaxa_matK.rds")
+  expect_true(file.exists(model))
+  md5_1 <- unname(tools::md5sum(model))
+  time_1 <- file.mtime(model)
+  Sys.sleep(1.1)
+  .idn_run(f, q, locus = "matK")
+  expect_identical(file.mtime(model), time_1)
+  lib <- file.path(f$library_dir, "LIB_matK.fasta")
+  x <- Biostrings::readDNAStringSet(lib)
+  Biostrings::writeXStringSet(x[-length(x)], lib)
+  .idn_run(f, q, locus = "matK")
+  expect_false(identical(unname(tools::md5sum(model)), md5_1))
+})
+
+# ---- I8: equivalence with CN2 ----------------------------------------------------------------------
+
+test_that("the identification reproduces the CN2 table with IdTaxa row by row", {
+  .idn_skip()
+  tmp <- withr::local_tempdir()
+  f <- .idn_fixture(tmp)
+  og <- file.path(tmp, "outgroup")
+  dir.create(og)
+  set.seed(11L)
+  s <- .idn_vary(unname(f$seqs$matK[1]), 30)
+  x <- stats::setNames(c(s, .idn_rc(s), .idn_random(300)),
+                       paste0(c("Portulaca_amilis", "Portulaca_amilis", "Talinum_paniculatum"),
+                              "|matK_h", 1:3, ".1"))
+  og_fasta <- file.path(og, "matK.fasta")
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), og_fasta)
+  folds_dir <- file.path(tmp, "5_folds")
+  suppressMessages(build_barcoding_folds(library_dir = f$library_dir, output_dir = folds_dir))
+  suppressWarnings(suppressMessages(utils::capture.output(
+    run_barcoding_controls(library_dir = f$library_dir, folds_dir = folds_dir,
+                           output_dir = file.path(tmp, "8_controls"), outgroup_dir = og,
+                           method = "idtaxa", controls = "CN2", loci = "matK"))))
+  cn2 <- utils::read.csv(file.path(tmp, "8_controls", "TABLE_barcoding_cn2_queries_idtaxa.csv"),
+                         stringsAsFactors = FALSE)
+  .idn_run(f, og_fasta, locus = "matK")
+  # Both tables are compared as written to disk, as the probe on the real CN2 table will compare them
+  r <- utils::read.csv(file.path(f$out, "TABLE_barcoding_identify_query.csv"), stringsAsFactors = FALSE)
+  expect_identical(r$query, names(x))
+  expect_identical(r$state, cn2$state)
+  expect_identical(r$predicted_species, cn2$predicted_species)
+  expect_identical(r$predicted_genus, cn2$predicted_genus)
+  expect_identical(r$genus_idtaxa, cn2$genus_idtaxa)
+  expect_identical(r$species_idtaxa, cn2$species_idtaxa)
+  expect_equal(r$genus_confidence, cn2$genus_confidence, tolerance = 0)
+  expect_equal(r$species_confidence, cn2$species_confidence, tolerance = 0)
+  expect_identical(r$orientation[1:2], cn2$orientation[1:2])
+  expect_identical(r$reason[3], "no_overlap")
+  expect_identical(cn2$reason[3], "no_match")
+})
+
+# ---- Reproducibility -------------------------------------------------------------------------------
+
+test_that("two runs are byte-identical and the random state of the session is left alone", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  q <- c(a = unname(f$seqs$matK[4]), b = unname(f$seqs[["trnL-trnF"]][1]))
+  set.seed(99L)
+  before <- .Random.seed
+  .idn_run(f, q, run_name = "one")
+  expect_identical(.Random.seed, before)
+  .idn_run(f, q, run_name = "two")
+  expect_identical(unname(tools::md5sum(file.path(f$out, "TABLE_barcoding_identify_one.csv"))),
+                   unname(tools::md5sum(file.path(f$out, "TABLE_barcoding_identify_two.csv"))))
+})
+
+# ---- I6: the context of 6D -------------------------------------------------------------------------
+
+test_that("each row carries the 6D wrong-species rates of its locus, or NA with the reason", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  md <- file.path(dirname(f$library_dir), "11_metrics")
+  dir.create(md)
+  utils::write.csv(data.frame(method = "idtaxa", locus = c("matK", "matK", "rbcL", "rbcL"),
+                              scheme = c("species", "genus", "species", "genus"), threshold = 60,
+                              wrong_species_rate = c(0.02, 0.04, 0.03, 0.02)),
+                   file.path(md, "TABLE_barcoding_metrics_summary_idtaxa.csv"), row.names = FALSE)
+  q <- c(q = unname(f$seqs$matK[1]))
+  r <- .idn_run(f, q)$tab
+  m <- r[r$locus == "matK", ]
+  expect_equal(m$validation_ws_rate_species_present, 0.02)
+  expect_equal(m$validation_ws_rate_species_absent, 0.04)
+  expect_true(is.na(r$validation_ws_rate_species_present[r$locus == "trnL-trnF"]))
+  out <- .idn_run(f, q, threshold = 50, run_name = "t50")
+  expect_true(all(is.na(out$tab$validation_ws_rate_species_present)))
+  expect_true(any(grepl("threshold", out$text)))
+})
+
+# ---- J1: the core of the locus -----------------------------------------------------------------------
+# The real-sequence probe (27-09) found queries that cover a segment held by one or two references
+# of a locus named after those references. The query is cut to the core: the span of alignment
+# columns covered by 50 % or more of the library sequences of the locus.
+
+# One aligned locus: 18 sequences over the 300 core columns and one reference that also covers 150
+# columns on each side, of another genus.
+.idn_core_fixture <- function(tmp) {
+  lib_dir <- file.path(tmp, "4_library")
+  dir.create(lib_dir, recursive = TRUE, showWarnings = FALSE)
+  set.seed(43L)
+  root <- .idn_random(300)
+  left <- .idn_random(150)
+  right <- .idn_random(150)
+  gaps <- strrep("-", 150)
+  x <- character(0)
+  core <- character(0)
+  for (g in c("Opuntia", "Cereus", "Mammillaria")) {
+    gb <- .idn_vary(root, 6)
+    for (e in c("alpha", "beta")) {
+      sb <- .idn_vary(gb, 3)
+      for (r in 1:3) {
+        s <- .idn_vary(sb, 1)
+        sid <- paste0("psbA_", substr(g, 1, 1), substr(e, 1, 1), r, ".1")
+        x[paste0(g, "_", e, "|", sid)] <- paste0(gaps, s, gaps)
+        core[sid] <- s
+      }
+    }
+  }
+  x["Calymmanthium_substerile|psbA_K1.1"] <- paste0(left, .idn_vary(root, 12), right)
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), file.path(lib_dir, "LIB_psbA-trnH.fasta"))
+  list(library_dir = lib_dir, core = core, left = left, right = right,
+       out = file.path(tmp, "10_identify"))
+}
+
+test_that("a query that runs beyond the core is cut to it and answered as the core alone", {
+  .idn_skip()
+  f <- .idn_core_fixture(withr::local_tempdir())
+  s <- unname(f$core["psbA_Oa1.1"])
+  long <- paste0(.idn_vary(f$left, 2), s, .idn_vary(f$right, 2))
+  bare <- .idn_run(f, c(q = s), locus = "psbA-trnH")$tab
+  r <- .idn_run(f, c(q = long), locus = "psbA-trnH")$tab
+  expect_identical(r$path, "whole")
+  expect_gte(r$region_start, 151L)
+  expect_lte(r$region_end, 450L)
+  expect_gte(r$region_length, 280L)
+  expect_gte(r$core_trimmed, 280L)
+  expect_identical(r$predicted_genus, "Opuntia")
+  for (col in c("state", "predicted_species", "predicted_genus")) {
+    expect_identical(r[[col]], bare[[col]])
+  }
+  expect_equal(bare$core_trimmed, 0L)
+})
+
+test_that("a query of the segments outside the core only is state 3 and never named", {
+  .idn_skip()
+  f <- .idn_core_fixture(withr::local_tempdir())
+  r <- .idn_run(f, c(q = paste0(.idn_vary(f$left, 2), .idn_vary(f$right, 2))), locus = "psbA-trnH")$tab
+  expect_equal(r$state, 3L)
+  expect_true(r$reason %in% c("no_overlap", "short_overlap"))
+  expect_true(is.na(r$predicted_genus))
+})
+
+# ---- J2: the core of the genus reached ---------------------------------------------------------------
+# After J1 the real-sequence probe still found, in matK, two Mammillaria references of about 1950
+# bases taking the queries of absent Mammillaria species of 1000 bases, while every other species of
+# the genus has about 800. The region is cut again to the core of the genus IdTaxa reaches.
+
+# One aligned locus of 1000 columns. Opuntia and Cereus cover all of it, so the core of the locus
+# (J1) is the whole alignment; Mammillaria has four species over the first 600 columns and two species
+# over all 1000.
+.idn_genus_fixture <- function(tmp) {
+  lib_dir <- file.path(tmp, "4_library")
+  dir.create(lib_dir, recursive = TRUE, showWarnings = FALSE)
+  set.seed(47L)
+  root <- .idn_random(1000)
+  x <- character(0)
+  for (g in c("Opuntia", "Cereus")) {
+    gb <- .idn_vary(root, 20)
+    for (e in c("alpha", "beta", "gamma")) {
+      sb <- .idn_vary(gb, 6)
+      for (r in 1:2) x[paste0(g, "_", e, "|m_", substr(g, 1, 1), substr(e, 1, 1), r, ".1")] <- .idn_vary(sb, 1)
+    }
+  }
+  mb <- .idn_vary(root, 20)
+  for (e in c("alpha", "beta", "gamma", "delta")) {
+    sb <- .idn_vary(mb, 6)
+    for (r in 1:2) {
+      x[paste0("Mammillaria_", e, "|m_M", substr(e, 1, 1), r, ".1")] <-
+        paste0(substr(.idn_vary(sb, 1), 1, 600), strrep("-", 400))
+    }
+  }
+  for (e in c("longa", "longior")) {
+    x[paste0("Mammillaria_", e, "|m_L", substr(e, 5, 5), "1.1")] <- .idn_vary(.idn_vary(mb, 6), 1)
+  }
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), file.path(lib_dir, "LIB_matK.fasta"))
+  list(library_dir = lib_dir, mb = mb, longa = unname(x["Mammillaria_longa|m_La1.1"]),
+       out = file.path(tmp, "10_identify"))
+}
+
+test_that("a query longer than the common extent of its genus is cut to the core of the genus (J2)", {
+  .idn_skip()
+  f <- .idn_genus_fixture(withr::local_tempdir())
+  # An absent Mammillaria species over the first 600 columns, with the last 400 of a long reference,
+  # as the matK records of the real probe
+  q <- paste0(substr(.idn_vary(.idn_vary(f$mb, 6), 1), 1, 600), substr(f$longa, 601, 1000))
+  r <- .idn_run(f, c(q = q), locus = "matK")$tab
+  expect_identical(r$path, "whole")
+  expect_equal(r$core_trimmed, 0L)
+  expect_gte(r$genus_core_trimmed, 380L)
+  expect_lte(r$region_length, 620L)
+  expect_false(r$predicted_species %in% c("Mammillaria_longa", "Mammillaria_longior"))
+  expect_identical(r$genus_idtaxa, "Mammillaria")
+})
+
+test_that("a query inside the common extent of its genus is not cut again", {
+  .idn_skip()
+  f <- .idn_genus_fixture(withr::local_tempdir())
+  s <- gsub("-", "", as.character(Biostrings::readDNAStringSet(file.path(f$library_dir, "LIB_matK.fasta")))[1])
+  r <- .idn_run(f, c(q = s), locus = "matK")$tab
+  expect_equal(r$genus_core_trimmed, 0L)
+  expect_equal(r$region_length, unname(nchar(s)))
+})
+
+# ---- J3: the second pass starts from the region before J1 --------------------------------------------
+# After J1 and J2 the real-sequence probe found Rhipsalis queries in rbcL (1339 bases, as every
+# Rhipsalis sequence of the library) cut by J1 to the core of the locus (545 bases, the extent of most
+# other genera) and then named after one Rhipsalis species. The second pass cuts the region as it was
+# before J1 to the core of the genus reached, which can be wider than the core of the locus.
+
+# One aligned locus of 800 columns: Opuntia and Cereus over columns 251 to 550 only, Rhipsalis over
+# all 800. The core of the locus is 251 to 550; the core of Rhipsalis is all 800.
+.idn_wide_genus_fixture <- function(tmp) {
+  lib_dir <- file.path(tmp, "4_library")
+  dir.create(lib_dir, recursive = TRUE, showWarnings = FALSE)
+  set.seed(53L)
+  root <- .idn_random(800)
+  x <- character(0)
+  for (g in c("Opuntia", "Cereus")) {
+    gb <- .idn_vary(root, 16)
+    for (e in c("alpha", "beta", "gamma")) {
+      sb <- .idn_vary(gb, 6)
+      for (r in 1:2) {
+        s <- .idn_vary(sb, 1)
+        x[paste0(g, "_", e, "|r_", substr(g, 1, 1), substr(e, 1, 1), r, ".1")] <-
+          paste0(strrep("-", 250), substr(s, 251, 550), strrep("-", 250))
+      }
+    }
+  }
+  rb <- .idn_vary(root, 16)
+  rsp <- list()
+  for (e in c("alpha", "beta", "gamma")) {
+    rsp[[e]] <- .idn_vary(rb, 6)
+    for (r in 1:2) x[paste0("Rhipsalis_", e, "|r_R", substr(e, 1, 1), r, ".1")] <- .idn_vary(rsp[[e]], 1)
+  }
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), file.path(lib_dir, "LIB_rbcL.fasta"))
+  list(library_dir = lib_dir, rsp = rsp, out = file.path(tmp, "10_identify"))
+}
+
+test_that("a query of a genus wider than the core of the locus is classified over the core of its genus (J3)", {
+  .idn_skip()
+  f <- .idn_wide_genus_fixture(withr::local_tempdir())
+  q <- .idn_vary(f$rsp$alpha, 1)
+  r <- .idn_run(f, c(q = q), locus = "rbcL")$tab
+  expect_identical(r$genus_idtaxa, "Rhipsalis")
+  expect_gte(r$core_trimmed, 480L)
+  expect_equal(r$genus_core_trimmed, 0L)
+  expect_gte(r$region_length, 780L)
+})
+
+test_that("the second pass follows only a genus the first pass assigns (J3b)", {
+  # After J3 a genus reached below the threshold (Carnegiea in matK, one species, all its sequences
+  # long) took back long queries that J1 had cut. With a threshold nothing reaches, the first pass
+  # is state 3 and the region stays as J1 cut it.
+  .idn_skip()
+  f <- .idn_wide_genus_fixture(withr::local_tempdir())
+  q <- .idn_vary(f$rsp$alpha, 1)
+  r <- .idn_run(f, c(q = q), locus = "rbcL", threshold = 101)$tab
+  expect_equal(r$state, 3L)
+  expect_equal(r$genus_core_trimmed, 0L)
+  expect_lte(r$region_length, 320L)
+})
+
+# ---- H5: GenBank flat files as queries (Phase 8, 28-09) -----------------------------------------------
+
+.idn_gb <- function(accession, organism, sequence) {
+  s <- tolower(sequence)
+  starts <- seq(1, nchar(s), by = 60)
+  origin <- vapply(starts, function(i) sprintf("%9d %s", i, substr(s, i, min(i + 59, nchar(s)))), "")
+  c(sprintf("LOCUS       %s %d bp    DNA     circular PLN 01-JAN-2026", sub("\\..*$", "", accession), nchar(s)),
+    sprintf("VERSION     %s", accession), "FEATURES             Location/Qualifiers",
+    sprintf("                     /organism=\"%s\"", organism), "ORIGIN", origin, "//")
+}
+
+test_that("a GenBank flat file is read as queries named by their accession", {
+  tmp <- withr::local_tempdir()
+  set.seed(71L)
+  a <- .idn_random(500); b <- .idn_random(700)
+  f <- file.path(tmp, "plastomes.gb")
+  writeLines(c(.idn_gb("OQ000010.1", "Opuntia alpha", a), .idn_gb("OQ000011.1", "Cereus beta", b)), f)
+  q <- .bc_identify_read_query(f)
+  expect_identical(names(q), c("OQ000010.1", "OQ000011.1"))
+  expect_identical(unname(q), toupper(c(a, b)))
+  # Recognised by its first line whatever the extension
+  f2 <- file.path(tmp, "plastomes.txt")
+  file.copy(f, f2)
+  expect_identical(.bc_identify_read_query(f2), q)
+})
+
+test_that("a plastome in a GenBank flat file is identified as the same plastome in FASTA", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  set.seed(72L)
+  s <- paste0(.idn_random(5000), unname(f$seqs$matK[13]), .idn_random(5000), unname(f$seqs$rbcL[1]), .idn_random(5000))
+  gb <- file.path(dirname(f$library_dir), "p.gbk")
+  writeLines(.idn_gb("OQ000012.1", "Mammillaria alpha", s), gb)
+  a <- .idn_run(f, gb, run_name = "gb")$tab
+  b <- .idn_run(f, c(OQ000012.1 = s), run_name = "fa")$tab
+  expect_identical(a[, setdiff(names(a), "validation_ws_rate_species_present")], b[, setdiff(names(b), "validation_ws_rate_species_present")])
+})
+
+test_that("a locus whose library holds a single species is state 3 with its reason, and the run goes on", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  x <- f$seqs$rbcL
+  one <- x[startsWith(names(x), "Opuntia_alpha|")]
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(one), file.path(f$library_dir, "LIB_rbcL.fasta"))
+  r <- .idn_run(f, c(q1 = unname(f$seqs$matK[1])))
+  expect_setequal(r$tab$locus, c("matK", "rbcL", "trnL-trnF"))
+  b <- r$tab[r$tab$locus == "rbcL", ]
+  expect_equal(b$state, 3L)
+  expect_identical(b$reason, "single_species_library")
+  expect_true(any(grepl("rbcL", r$text) & grepl("one species", r$text)))
+  expect_true(r$tab$state[r$tab$locus == "matK"] %in% 1:2)
+})
+
+test_that("a region identical to a library sequence names that accession (K1)", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  same <- unname(f$seqs$matK[1])
+  other <- .idn_vary(unname(f$seqs$matK[4]), 5)
+  r <- .idn_run(f, c(q1 = same, q2 = other), locus = "matK")$tab
+  expect_true("identical_to_library" %in% names(r))
+  expect_identical(r$identical_to_library[r$query == "q1"], sub("^[^|]*[|]", "", names(f$seqs$matK)[1]))
+  expect_true(is.na(r$identical_to_library[r$query == "q2"]))
+})
+
+# K3 (BMM, 28-09): a library sequence that lost internal columns to masking is still recognised
+# as the query itself, through the step 1 sequence kept in UNMASKED_<locus>.fasta.
+test_that("a query equal to a masked library accession is named through UNMASKED_<locus>.fasta (K3)", {
+  .idn_skip()
+  f <- .idn_fixture(withr::local_tempdir())
+  x <- f$seqs$matK
+  raw <- unname(x[1])
+  masked <- x
+  substr(masked[1], 101, 110) <- "----------"
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(masked), file.path(f$library_dir, "LIB_matK.fasta"))
+  sid <- sub("^[^|]*[|]", "", names(x)[1])
+
+  # Without the file: the masked sequence is not contained in the query, K1 misses it
+  r0 <- .idn_run(f, c(q1 = raw), locus = "matK")$tab
+  expect_true(is.na(r0$identical_to_library))
+
+  unlink(f$out, recursive = TRUE)
+  Biostrings::writeXStringSet(Biostrings::DNAStringSet(x), file.path(f$library_dir, "UNMASKED_matK.fasta"))
+  r1 <- .idn_run(f, c(q1 = raw), locus = "matK")$tab
+  expect_identical(r1$identical_to_library, sid)
+  # On the other strand too
+  unlink(f$out, recursive = TRUE)
+  r2 <- .idn_run(f, c(q1 = .idn_rc(raw)), locus = "matK")$tab
+  expect_identical(r2$identical_to_library, sid)
+  # The run record holds the md5 of the file K1 used
+  run <- utils::read.csv(list.files(f$out, "^RUN_.*[.]csv$", full.names = TRUE)[1], stringsAsFactors = FALSE)
+  expect_identical(run$value[run$kind == "library" & run$name == "UNMASKED_matK.fasta"],
+                   unname(tools::md5sum(file.path(f$library_dir, "UNMASKED_matK.fasta"))))
+})
+
+# ---- R-c: the species threshold of each locus in the identification (Phase 11, C1 to C4) ---------
+
+.idn_rc_rows <- function() {
+  data.frame(query = c("q1", "q1", "q1", "q1"), locus = c("matK", "rbcL", "ITS", "trnL-trnF"),
+             state = c(1L, 1L, 2L, 3L),
+             predicted_species = c("Opuntia_alpha", "Cereus_beta", NA, NA),
+             predicted_genus = c("Opuntia", "Cereus", "Opuntia", NA),
+             genus_idtaxa = c("Opuntia", "Cereus", "Opuntia", "Cereus"),
+             species_idtaxa = c("Opuntia_alpha", "Cereus_beta", "Opuntia_beta", "Cereus_alpha"),
+             genus_confidence = c(95, 92, 80, 40), species_confidence = c(70, 90, 50, 30),
+             reason = c(NA, NA, NA, "low_confidence"), stringsAsFactors = FALSE)
+}
+
+test_that("a row named at species rank under the species threshold of its locus is named at genus rank", {
+  tab <- .idn_rc_rows()
+  thr <- data.frame(locus = c("matK", "rbcL", "ITS", "trnL-trnF"), species_threshold = c(80, 85, 60, 60))
+  r <- .bc_apply_species_threshold(tab, thr)
+  # matK: 70 under 80, moved; its genus and what IdTaxa reached are kept
+  m <- r[r$locus == "matK", ]
+  expect_identical(m$state, 2L)
+  expect_true(is.na(m$predicted_species))
+  expect_identical(m$predicted_genus, "Opuntia")
+  expect_identical(m$reason, "below_species_threshold")
+  expect_identical(m$species_idtaxa, "Opuntia_alpha")
+  expect_equal(m$species_confidence, 70)
+  # rbcL: 90 over 85, kept
+  expect_identical(r$state[r$locus == "rbcL"], 1L)
+  expect_identical(r$predicted_species[r$locus == "rbcL"], "Cereus_beta")
+  expect_true(is.na(r$reason[r$locus == "rbcL"]))
+  # States 2 and 3 are never touched
+  expect_identical(r[r$locus %in% c("ITS", "trnL-trnF"), names(tab)], tab[tab$locus %in% c("ITS", "trnL-trnF"), ])
+  # Every row carries the threshold used
+  expect_equal(r$species_threshold, c(80, 85, 60, 60))
+})
+
+test_that("the species thresholds are read from step 9, with 60 and a message where they are missing", {
+  tmp <- withr::local_tempdir()
+  d <- file.path(tmp, "9_threshold"); dir.create(d)
+  # No table: 60 everywhere, with a message
+  expect_message(t0 <- .bc_species_thresholds(d, c("matK", "rbcL"), 60), "species threshold")
+  expect_equal(t0$species_threshold, c(60, 60))
+  expect_message(tn <- .bc_species_thresholds(NULL, c("matK"), 60), "species threshold")
+  expect_equal(tn$species_threshold, 60)
+  # A table with matK only: rbcL takes 60, with a message naming it
+  utils::write.csv(data.frame(locus = "matK", q = 0.95, quantile_type = 1L, queries = 10L, quantile = 67.4, floor = 60,
+                              species_threshold = 67.4),
+                   file.path(d, "TABLE_barcoding_species_threshold_idtaxa.csv"), row.names = FALSE)
+  expect_message(t1 <- .bc_species_thresholds(d, c("matK", "rbcL"), 60), "rbcL")
+  expect_equal(t1$species_threshold, c(67.4, 60))
+  expect_identical(t1$locus, c("matK", "rbcL"))
+  # A complete table gives no message
+  expect_silent(t2 <- .bc_species_thresholds(d, "matK", 60))
+  expect_equal(t2$species_threshold, 67.4)
+})
+
+test_that("the three identification functions take threshold_dir, at 11_barcoding/9_threshold by default", {
+  for (fn in list(identify_barcoding_query, identify_barcoding_reads, identify_barcoding_assembly)) {
+    a <- formals(fn)
+    expect_true("threshold_dir" %in% names(a))
+    expect_identical(eval(a$threshold_dir), file.path("11_barcoding", "9_threshold"))
+  }
+})
+
+test_that("the identification applies the species threshold of step 9 and writes it in every row", {
+  .idn_skip()
+  tmp <- withr::local_tempdir()
+  f <- .idn_fixture(tmp)
+  q <- c(probe = unname(f$seqs$matK[1]))
+  d <- file.path(tmp, "9_threshold"); dir.create(d)
+  # Without the table: the species threshold is 60
+  a <- .idn_run(f, q, run_name = "a", locus = "matK", threshold_dir = d, report = FALSE)
+  expect_equal(a$tab$species_threshold, 60)
+  expect_true(any(grepl("species threshold", a$text)))
+  # With a threshold over every confidence: nothing is named at species rank, and what IdTaxa reached stays
+  utils::write.csv(data.frame(locus = "matK", q = 0.95, quantile_type = 1L, queries = 1L, quantile = 100.5, floor = 60,
+                              species_threshold = 100.5),
+                   file.path(d, "TABLE_barcoding_species_threshold_idtaxa.csv"), row.names = FALSE)
+  b <- .idn_run(f, q, run_name = "b", locus = "matK", threshold_dir = d, report = FALSE)
+  expect_equal(b$tab$species_threshold, 100.5)
+  expect_false(any(b$tab$state == 1L))
+  moved <- a$tab$state == 1L
+  if (any(moved)) {
+    expect_true(all(b$tab$state[moved] == 2L))
+    expect_true(all(b$tab$reason[moved] == "below_species_threshold"))
+    expect_identical(b$tab$species_idtaxa[moved], a$tab$species_idtaxa[moved])
+    expect_equal(b$tab$species_confidence[moved], a$tab$species_confidence[moved])
+  }
+  # The written table is the returned one
+  w <- utils::read.csv(file.path(f$out, "TABLE_barcoding_identify_b.csv"), stringsAsFactors = FALSE)
+  expect_true("species_threshold" %in% names(w))
+})
+
+# ---- R2 of Phase 12: rbcL at genus rank only (decision of BMM, 14-10) ---------------------------------
+
+# Calls to a function anywhere in an expression, so that the tests can check what an exported function
+# passes to an internal one without running it
+.idn_calls_to <- function(e, name) {
+  out <- list()
+  walk <- function(x) {
+    if (is.call(x)) {
+      if (identical(x[[1]], as.name(name))) out[[length(out) + 1L]] <<- x
+      for (i in seq_along(x)[-1]) {
+        y <- x[[i]]
+        if (!missing(y)) walk(y)
+      }
+    }
+  }
+  walk(e)
+  out
+}
+
+test_that("a row of a genus-only locus named at species rank is named at genus rank, keeping what IdTaxa reached", {
+  tab <- .idn_rc_rows()
+  thr <- data.frame(locus = c("matK", "rbcL", "ITS", "trnL-trnF"), species_threshold = c(60, 85, 60, 60))
+  rc <- .bc_apply_species_threshold(tab, thr)
+  r <- .bc_apply_genus_only(rc, "rbcL")
+  # rbcL: 90 over 85, kept by R-c, then named at genus rank by R2
+  b <- r[r$locus == "rbcL", ]
+  expect_identical(b$state, 2L)
+  expect_true(is.na(b$predicted_species))
+  expect_identical(b$predicted_genus, "Cereus")
+  expect_identical(b$reason, "genus_only_locus")
+  expect_identical(b$species_idtaxa, "Cereus_beta")
+  expect_equal(b$species_confidence, 90)
+  expect_equal(b$species_threshold, 85)
+  # The other loci stay as R-c left them: matK keeps its species
+  expect_identical(r[r$locus != "rbcL", ], rc[rc$locus != "rbcL", ])
+  expect_identical(r$predicted_species[r$locus == "matK"], "Opuntia_alpha")
+})
+
+test_that("rows of a genus-only locus in states 2 and 3, or already moved by R-c, are left as they are", {
+  tab <- data.frame(query = c("q1", "q2", "q3"), locus = "rbcL", state = c(1L, 2L, 3L),
+                    predicted_species = c("Cereus_beta", NA, NA), predicted_genus = c("Cereus", "Cereus", NA),
+                    genus_idtaxa = c("Cereus", "Cereus", "Opuntia"),
+                    species_idtaxa = c("Cereus_beta", "Cereus_alpha", "Opuntia_alpha"),
+                    genus_confidence = c(95, 80, 40), species_confidence = c(70, 50, 30),
+                    reason = c(NA, NA, "low_confidence"), stringsAsFactors = FALSE)
+  rc <- .bc_apply_species_threshold(tab, data.frame(locus = "rbcL", species_threshold = 80))
+  r <- .bc_apply_genus_only(rc, "rbcL")
+  expect_identical(r, rc)
+  # q1: 70 under 80, moved by R-c, which keeps its reason
+  expect_identical(r$reason[1], "below_species_threshold")
+  expect_identical(r$state, c(2L, 2L, 3L))
+})
+
+test_that("no genus-only locus leaves the table as R-c left it", {
+  thr <- data.frame(locus = c("matK", "rbcL", "ITS", "trnL-trnF"), species_threshold = c(60, 85, 60, 60))
+  rc <- .bc_apply_species_threshold(.idn_rc_rows(), thr)
+  expect_identical(.bc_apply_genus_only(rc, character(0)), rc)
+  expect_identical(.bc_apply_genus_only(rc, NULL), rc)
+})
+
+test_that("the three identification functions take genus_only_loci, rbcL by default, and pass it to the table", {
+  expect_true("genus_only_loci" %in% names(formals(.bc_identify_table)))
+  for (nm in c("identify_barcoding_query", "identify_barcoding_reads", "identify_barcoding_assembly")) {
+    fn <- get(nm, envir = asNamespace("PhyloCactus"))
+    a <- formals(fn)
+    expect_true("genus_only_loci" %in% names(a), info = nm)
+    expect_identical(eval(a$genus_only_loci), "rbcL", info = nm)
+    calls <- .idn_calls_to(body(fn), ".bc_identify_table")
+    expect_true(length(calls) > 0L, info = nm)
+    for (cl in calls) expect_true("genus_only_loci" %in% names(as.list(cl)), info = nm)
+  }
+})
+
+test_that("the identification names a genus-only locus at genus rank and writes the reason", {
+  .idn_skip()
+  tmp <- withr::local_tempdir()
+  f <- .idn_fixture(tmp)
+  q <- c(probe = unname(f$seqs$matK[1]))
+  # matK stands for the genus-only locus here: the fixture names it at species rank
+  a <- .idn_run(f, q, run_name = "a", locus = "matK", threshold_dir = NULL, genus_only_loci = character(0), report = FALSE)
+  b <- .idn_run(f, q, run_name = "b", locus = "matK", threshold_dir = NULL, genus_only_loci = "matK", report = FALSE)
+  expect_false(any(b$tab$state == 1L))
+  moved <- a$tab$state == 1L
+  if (any(moved)) {
+    expect_true(all(b$tab$state[moved] == 2L))
+    expect_true(all(b$tab$reason[moved] == "genus_only_locus"))
+    expect_identical(b$tab$predicted_genus[moved], a$tab$predicted_genus[moved])
+    expect_identical(b$tab$species_idtaxa[moved], a$tab$species_idtaxa[moved])
+    expect_equal(b$tab$species_confidence[moved], a$tab$species_confidence[moved])
+  }
+  w <- utils::read.csv(file.path(f$out, "TABLE_barcoding_identify_b.csv"), stringsAsFactors = FALSE)
+  expect_identical(w$reason[moved], b$tab$reason[moved])
+})

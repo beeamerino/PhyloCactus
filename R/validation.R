@@ -84,7 +84,11 @@ compute_pairwise_metric <- function(tree_list, FUN, min_tips = 4L) {
 #'
 #' @param trees_mapping_list Named list of file paths pointing to Newick/Nexus reference trees and focal tree.
 #' @param checklist_csv Character. Path to accepted botanical checklist CSV or Excel file for taxon name standardization (Korotkova *et al.*, 2021).
-#' @param constraints_map Character. Path to taxonomy mapping CSV file.
+#' @param constraints_map Character. Path to the taxonomy mapping CSV file (the constraint table). It
+#'   lists, in `SUPP_missing_species_constraints.csv`, the species of each tree absent from the table;
+#'   it does not decide which species are compared. The family filter keeps the species of
+#'   **Cactaceae** in `checklist_csv` (Korotkova *et al.*, 2021): the sheet named Cactaceae of an
+#'   Excel checklist, or the rows whose `Family` column is Cactaceae in a CSV checklist.
 #' @param out_dir Character. Destination directory path to save validation output tables, tree-space plots, and logs.
 #' @param min_tips Integer. Minimum number of tips for comparisons. Defaults to 4L.
 #' @param pruning_strategy Character. Strategy for pruning trees before metric computation. Under `"common_set"`, the shared intersection across all trees is used for the multidimensional scaling (MDS) projection, whereas pairwise tables retain all shared tips between each pair. Defaults to `"common_set"`.
@@ -142,13 +146,9 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
   dir.create(OUT_TREES, recursive = TRUE, showWarnings = FALSE)
   dir.create(OUT_LOGS, recursive = TRUE, showWarnings = FALSE)
   
-  tree_palette <- c(
-    FocalTree = "#1b9e77",
-    Zuntini   = "#66a61e",
-    Thompson  = "#d95f02",
-    Amaral    = "#7570b3",
-    deVos     = "#e7298a"
-  )
+  # The first five categorical colours of the package palette (decision E1), in their fixed order
+  tree_palette <- stats::setNames(unname(phylocactus_colours("categorical")[1:5]),
+                                  c("FocalTree", "Zuntini", "Thompson", "Amaral", "deVos"))
   # Shapes as well as colours, so that the five trees remain distinguishable in greyscale print and
   # when two points overlap.
   tree_shapes <- c(FocalTree = 16, Zuntini = 17, Thompson = 15, Amaral = 18, deVos = 4)
@@ -168,7 +168,7 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
   }
   legend_labels <- .format_reference_labels(reference_labels[names(tree_palette)])
   
-  base_theme <- ggplot2::theme_minimal(base_size = 12) +
+  base_theme <- theme_phylocactus(base_size = 12) +
     ggplot2::theme(
       plot.title = ggplot2::element_text(face = "bold", hjust = 0.5),
       axis.title = ggplot2::element_text(face = "bold"),
@@ -400,6 +400,9 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
     unique() |>
     sort()
   
+  # The species of the family, from the checklist: the family filter keeps them whether or not the
+  # focal tree samples them
+  family_tips <- .checklist_family_names(checklist_csv, family = "Cactaceae")
   constraints <- readr::read_csv(constraints_map, show_col_types = FALSE)
   cactaceae_tips <- constraints |>
     dplyr::filter(Family == "Cactaceae") |>
@@ -482,8 +485,8 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
   for (nm in names(trees_checklist)) {
     tr_before <- trees_checklist[[nm]]
     
-    missing_in_constraint <- setdiff(tr_before$tip.label, cactaceae_tips)
-    tr_family <- safe_drop_tip(tr_before, missing_in_constraint)
+    not_in_family <- setdiff(tr_before$tip.label, family_tips)
+    tr_family <- safe_drop_tip(tr_before, not_in_family)
     
     genus_out <- outgroup_genus[[nm]]
     if (is.null(genus_out)) genus_out <- rooting_genus
@@ -517,7 +520,7 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
       n_outgroup_tips = length(genus_tips),
       species_before_family = length(tr_before$tip.label),
       species_after_family = length(tr_family$tip.label),
-      species_removed_family = length(missing_in_constraint),
+      species_removed_family = length(not_in_family),
       genera_before_family = length(unique(extract_genus(tr_before$tip.label))),
       genera_after_family = length(unique(extract_genus(tr_family$tip.label))),
       genera_removed_family = length(setdiff(unique(extract_genus(tr_before$tip.label)),
@@ -800,7 +803,7 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
     }
     
     legend_grob <- cowplot::get_legend(p_legend)
-    panels <- cowplot::plot_grid(plotlist = plot_list, ncol = 2)
+    panels <- cowplot::plot_grid(plotlist = plot_list, ncol = 2, labels = .phylocactus_tag_labels(length(plot_list)))
     
     FIG_tree_space_main <- cowplot::plot_grid(
       panels,
@@ -907,4 +910,24 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
     }
   }, character(1))
   parse(text = out)
+}
+
+#' The names of one family in the checklist, standardized as the tips of the trees
+#'
+#' An Excel checklist (Korotkova et al. 2021) holds one sheet per family: the names of the sheet named
+#' after the family, every rank. A CSV checklist needs a `Family` (or `family`) column.
+#' @noRd
+.checklist_family_names <- function(checklist, family = "Cactaceae") {
+  if (grepl("\\.xlsx?$", checklist, ignore.case = TRUE)) {
+    sheets <- readxl::excel_sheets(checklist)
+    if (!family %in% sheets) stop("The checklist has no sheet named '", family, "'.", call. = FALSE)
+    d <- readxl::read_excel(checklist, sheet = family)
+  } else {
+    d <- utils::read.csv(checklist, stringsAsFactors = FALSE)
+    fc <- intersect(c("Family", "family"), names(d))
+    if (!length(fc)) stop("The CSV checklist needs a Family column for the family filter.", call. = FALSE)
+    d <- d[d[[fc[1]]] %in% family, , drop = FALSE]
+  }
+  if (!"pureName" %in% names(d)) stop("The checklist has no pureName column.", call. = FALSE)
+  standardize_taxon(unique(d$pureName[!is.na(d$pureName)])) |> unique() |> sort()
 }

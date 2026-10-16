@@ -199,8 +199,8 @@ if (run_local_ml) {
     cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
     cluster_nodes = 1L,                               # Number of compute nodes requested
     threads = 75,                                     # CPU cores requested (--cpus-per-task)
-    cluster_mem = "16G",                              # RAM memory allocation (--mem, ~11 GB max used)
-    cluster_time = "02:00:00",                        # Walltime limit (--time HH:MM:SS, ~41 min real runtime)
+    cluster_mem = "24G",                              # RAM memory allocation (--mem; 15.5 GB used, 1208 terminals)
+    cluster_time = "02:00:00",                        # Walltime limit (--time HH:MM:SS; 1 h 15 min used, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
     load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
@@ -268,14 +268,14 @@ if (run_local_bs) {
     cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
     cluster_nodes = 1L,                               # Number of compute nodes requested
     threads = 40,                                     # CPU cores per array task (--cpus-per-task)
-    cluster_mem = "10G",                              # RAM memory allocation per task (--mem, ~5.3 GB max used)
-    cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS, ~17 h real runtime)
+    cluster_mem = "16G",                              # RAM memory allocation per task (--mem; 6.0 GiB used, 250 replicates, 1208 terminals)
+    cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS; 13 h 05 min used at most, 250 replicates, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
     load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
     # --- Bootstrap Array Settings ---
-    bs_per_rep = 500,                                 # Bootstrap replicates per array task
-    max_reps = 2,                                     # Number of array tasks (2 x 500 = 1000 total replicates)
+    bs_per_rep = 250,                                 # Bootstrap replicates per array task
+    max_reps = 4,                                     # Number of array tasks (4 x 250 = 1000 total replicates)
     workers = 10,
     output_dir = file.path(output_dir)
   )
@@ -327,8 +327,8 @@ print(converge_log)
 # EDITORIAL & METHODOLOGICAL NOTE:
 # 1. Primary metric: Felsenstein's Bootstrap Proportions (FBP). This is the canonical metric
 #    reported across published Cactaceae phylogenies (e.g. Hernandez-Hernandez et al. 2014,
-#    Arakaki et al. 2011). TBE systematically inflates support on large clades (median FBP 0.470
-#    vs median TBE 0.783 in unconstrained nodes).
+#    Arakaki et al. 2011). TBE systematically inflates support on large clades (median FBP 0.450
+#    vs median TBE 0.772 in unconstrained nodes).
 # 2. Secondary metric: Transfer Bootstrap Expectation (TBE; Lemoine et al. 2018), retained as a
 #    complementary assessment of stability in supermatrices with missing data.
 # 3. Constrained nodes warning: The 34 nodes enforced by cactus_constraints.tree exhibit 1.000
@@ -391,8 +391,8 @@ if (run_local_temporal_bs) {
     cluster_job_name = "cactus_temp_bs",
     cluster_partition = "main",
     cluster_nodes = 1L,
-    cluster_mem = "16G",
-    cluster_time = "04:00:00",
+    cluster_mem = "24G",                              # RAM memory allocation (--mem; 6.0 GiB used, 500 replicates, 1208 terminals)
+    cluster_time = "04:00:00",                        # Walltime limit (--time HH:MM:SS; 1 h 08 min used, 500 replicates, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", "")
   )
   cat("   Temporal bootstrap HPC script generated at:", hpc_temp_bs_script, "\n")
@@ -578,8 +578,8 @@ if (file.exists(cv_file)) {
 # -------------------------------------------------------------
 # 10.4 Smoothing sensitivity
 # -------------------------------------------------------------
-# The same tree dated across the plateau and beyond it. Read the range of each node across 1e-14
-# to 1e-06, the plateau of the reference run. At 1 and 10 the calibrated nodes sit on their upper
+# The same tree dated across the grid and beyond it. Read the range of each node from 1e-14 to
+# 1e-02; the reference run selects 1e-05, an interior minimum. At 1 and 10 the calibrated nodes sit on their upper
 # bounds; that end of the table lies outside the range supported by cross-validation.
 
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")

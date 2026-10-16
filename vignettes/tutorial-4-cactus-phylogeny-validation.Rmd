@@ -131,8 +131,8 @@ if (run_astral_locally && nzchar(astral_jar) && file.exists(astral_jar) &&
 
 ### Topological Comparison
 
-The focal tree is the chronogram from Module 10, whose topology is that of the maximum-likelihood tree (all 1021 bipartitions shared).
-`validate_phylogenies()` restricts every tree to Cactaceae and to the names accepted in the checklist, then computes pairwise distances on four taxon sets:
+The focal tree is the chronogram from Module 10, whose topology is that of the maximum-likelihood tree (all 1205 bipartitions shared).
+`validate_phylogenies()` restricts every tree to Cactaceae and to the names accepted in the checklist (Korotkova *et al*. 2021), then computes pairwise distances on four taxon sets:
 
 - **A1:** species shared by all trees;
 - **A2:** species shared by the focal tree and the trees of Thompson *et al*. (2024) and Amaral *et al*. (2022);
@@ -152,7 +152,7 @@ Because RF and DPI are computed on unrooted trees, the rooting affects only the 
 
 **Trees compared.** The four reference trees are read from `inst/extdata/`, where they are distributed with the package. The focal tree is the chronogram produced in Module 10, `8_Dating/dated_summary_hpd.tree`. When that file is absent, as when this tutorial is run on its own, the reference chronogram distributed with the package (`phylocactus_chronogram_hpd.tree`) is used instead.
 
-```{r, fig.width=11.69, fig.height=8.27, warning=FALSE, message=FALSE}
+```{r, fig.width=11.69, fig.height=8.27, warning=FALSE, message=FALSE, fig.cap="**Figure 1.** Tree space of the focal chronogram and the four published phylogenies: classical MDS of the normalized Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4); trees close together have similar topologies."}
 library(PhyloCactus)
 
 # The focal tree is the chronogram of this run; the reference trees are distributed with the package.
@@ -200,7 +200,7 @@ plot_to_show
 
 ```{r, echo=FALSE}
 if (!is.null(table_to_show)) {
-  knitr::kable(table_to_show, caption = "Pairwise tree distances")
+  knitr::kable(table_to_show, caption = "Table 1. Pairwise tree distances: normalized RF and DPI for each pair of trees and taxon set (first rows).")
 }
 ```
 
@@ -211,16 +211,15 @@ The distances summarize overall agreement between topologies; they do not identi
 
 This tutorial completes the core workflow of `PhyloCactus`: assembly of a multilocus supermatrix from GenBank, maximum-likelihood inference with bootstrap support, divergence time estimation with penalized likelihood, integration of IUCN Red List data, figures, and comparison with published phylogenies.
 
-The next section of the workflow will assess how well individual markers discriminate species.
-It is under construction and contains no implementation.
-Tutorial 5 describes its scope, the design decisions taken, the open questions, and the conditions for reopening it.
+The second branch of the package, molecular identification by DNA barcoding, builds a reference library of Cactaceae from the same `phylotaR` mining, measures how well it tells genera and species apart, and identifies a sample against it (Tutorials 5 and 6).
 
-[Continue to Tutorial 5: DNA Barcoding, Section Manifest](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html)
+[Continue to Tutorial 5: Molecular Identification of Cacti (DNA Barcoding)](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html)
 
 ## References
 
 - Amaral *et al*. 2022. Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. *Biological Conservation*, 273, 109677. <https://doi.org/10.1016/j.biocon.2022.109677>
 - de Vos *et al*. 2025. Phylogenomics and classification of Cactaceae based on hundreds of nuclear genes. *Plant Systematics and Evolution*, 311(5), 28. <https://doi.org/10.1007/s00606-025-01948-z>
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 - Kubatko & Degnan 2007. Inconsistency of phylogenetic estimates from concatenated data under coalescence. *Systematic Biology*, 56(1), 17–24. <https://doi.org/10.1080/10635150601146041>
 - Robinson & Foulds 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1–2), 131–147. <https://doi.org/10.1016/0025-5564(81)90043-2>
 - Smith 2020. Information theoretic generalized Robinson–Foulds metrics for comparing phylogenetic trees. *Bioinformatics*, 36(20), 5007–5013. <https://doi.org/10.1093/bioinformatics/btaa614>
