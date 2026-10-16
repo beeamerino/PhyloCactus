@@ -143,3 +143,16 @@ test_that("every prose line that names the checklist cites it (m4)", {
     if (length(h)) fail(paste0(basename(f), ": ", paste(substr(trimws(h), 1, 90), collapse = " | ")))
   }
 })
+
+test_that("the homology check states the figures of the reference run of 0.5.0", {
+  # TABLE_marker_homology_check.csv of the reference run: the markers with verdict ok (rpL16,
+  # trnL_trnF, matK, rbcL) share 0.26 to 0.58 of their outgroup 20-mers; trnT-psbD no longer
+  # enters the matrix. The help page, the internal documentation and the warning say so.
+  for (f in c(.r51_root("R", "screening.R"), .r51_root("man", "integrate_and_clean_markers.Rd"))) {
+    skip_if(!file.exists(f), paste(basename(f), "is not in this tree"))
+    x <- .r51_flat(paste(readLines(f, warn = FALSE), collapse = "\n"))
+    expect_false(grepl("0.26 to 0.59", x, fixed = TRUE), info = basename(f))
+    expect_false(grepl("returns 0.040", x, fixed = TRUE), info = basename(f))
+    expect_match(x, "0.26 to 0.58", fixed = TRUE, info = basename(f))
+  }
+})
