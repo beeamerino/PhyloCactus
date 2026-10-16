@@ -129,10 +129,10 @@ one species is an anecdote and has to be read as one.
 **Resubstitution ("CN3").** The same queries as the folds, in both
 schemes, each one classified against its own training set with the query
 put back into it. Nothing else changes between this figure and the
-honest one, which is what makes the two comparable: until 2026-09-25
-this control ran over the whole library instead, a different set of
-queries, and the two figures could not be subtracted. Written with the
-label `irreproducible_resubstitution` in the table itself, so the figure
+honest one, which is what makes the two comparable: run over the whole
+library, it would be a different set of queries, and the two figures
+could not be subtracted. Written with the label
+`irreproducible_resubstitution` in the table itself, so the figure
 cannot travel without it. **Its value is published only next to the
 honest figure**, which does not exist yet.
 

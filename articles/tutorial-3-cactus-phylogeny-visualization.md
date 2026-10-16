@@ -242,8 +242,8 @@ retrieves the latest IUCN assessment of one species through the
 criteria, population trend, countries of occurrence, endemism, habitats,
 threats, and use and trade. The query covers the 1,965 species of the
 checklist (Korotkova *et al*. 2021) and the 28 outgroups. All ingroup
-names in the supermatrix match the checklist, so every query uses an
-accepted name.
+names in the supermatrix match the checklist (Korotkova *et al*. 2021),
+so every query uses an accepted name.
 
 The output table (`TABLE_species_all_data.csv`) is used by all figures
 in Module 12. The chunk also writes

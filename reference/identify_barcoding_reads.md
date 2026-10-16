@@ -93,9 +93,9 @@ Single-end reads stop (not tested in 0.5.0), and so do long reads
 (median length above 600 bases over the first 10 000 reads; not admitted
 in 0.5.0). Aligned reads (BAM, CRAM, SAM) stop with the command that
 converts them to FASTQ. Target capture, RAD-seq and GBS, RNA-seq and
-mixed amplicons are rejected in 0.5.0 (matrix of accepted inputs of
-28-09) but cannot be told from the files; they should not be given to
-this function.
+mixed amplicons are rejected in 0.5.0 (`barcoding_accepted_inputs.csv`)
+but cannot be told from the files; they should not be given to this
+function.
 
 A GetOrganelle step that fails, or exits 0 without writing a path, is
 reported with a message and its stderr is kept; the loci not found then

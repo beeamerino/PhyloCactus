@@ -17,7 +17,7 @@ PartitionFinder2 and MrBayes are exported separately under their program names."
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,7 +84,7 @@ and a NEXUS SETS block (<code>PARTITION_nexus_charset.nex</code>). Configuration
 
 
 <dt id="arg-outgroup-pattern">outgroup_pattern<a class="anchor" aria-label="anchor" href="#arg-outgroup-pattern"></a></dt>
-<dd><p>Character, named character vector, or <code>NULL</code>. Regular expression identifying outgroup terminals, or a named character vector of expressions (e.g. <code>c(Anacampserotaceae = "...", Portulacaceae = "...", Talinaceae = "...")</code>) to additionally compute per-group coverage columns. When supplied, <code><a href="report_marker_group_coverage.html">report_marker_group_coverage()</a></code> runs before concatenation and its table is written to <code>logs_and_qc/SUPP_TABLE_marker_group_coverage.csv</code>. Defaults to <code>NULL</code>.</p></dd>
+<dd><p>Character, named character vector, or <code>NULL</code>. Regular expression identifying outgroup terminals, or a named character vector of expressions (e.g. <code>c(Anacampserotaceae = "...", Portulacaceae = "...", Talinaceae = "...")</code>), which also adds per-group coverage columns. When supplied, <code><a href="report_marker_group_coverage.html">report_marker_group_coverage()</a></code> runs before concatenation and its table is written to <code>logs_and_qc/SUPP_TABLE_marker_group_coverage.csv</code>. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-min-coverage">min_coverage<a class="anchor" aria-label="anchor" href="#arg-min-coverage"></a></dt>

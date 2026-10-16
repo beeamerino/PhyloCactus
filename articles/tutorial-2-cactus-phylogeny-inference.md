@@ -417,6 +417,16 @@ support of 1.000. That value reproduces the constraint and does not
 measure support from the data; these nodes are reported as constrained
 in publication tables.
 
+The weak support of the backbone is a lack of signal, not a finding
+about the history of the clades. Outside the 34 constrained nodes,
+clades of 51 to 200 terminals have a median FBP of 0.080; the
+supermatrix is 76.9% gaps, and 214 of the 1208 terminals are represented
+by a single locus, whose parent nodes have a median FBP of 0.52, against
+0.58 for terminals with two loci or more. These nodes are soft
+polytomies: the data do not resolve them, and they do not show a
+simultaneous divergence of lineages (a hard polytomy), which only more
+loci could test.
+
 #### Temporal Bootstrap Replicates for Divergence Time Estimation
 
 Following Maurin (2020), a second set of bootstrap replicates is

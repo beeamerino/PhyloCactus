@@ -13,7 +13,7 @@ not lost to gene-name synonyms or mislabeled records."><meta property="og:image"
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -136,6 +136,15 @@ reading an existing workspace sends nothing. Defaults to <code>FALSE</code>.</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame summarizing sequence occupancy, taxon representation, and cluster characteristics across retained loci.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Records of more than 2000 bases (for example <code>matK</code> records that carry the flanking <code>trnK</code>
+intron) are cut to the extent that the records of 2000 bases or fewer of the same marker cover,
+before one record per species is kept, so that the records of a partition span the same region.
+A long record that does not overlap that extent is left out, and a marker with no record of 2000
+bases or fewer gets no FASTA file. Every long record, with what was done to it, is written to
+<code>TABLE_LONG_RECORDS_CUT_INGROUP.csv</code> in <code>out_dir</code>, and the log gives the counts.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

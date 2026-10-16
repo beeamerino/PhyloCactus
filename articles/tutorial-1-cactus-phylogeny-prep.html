@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -200,6 +200,18 @@ sequence clusters are exported as individual FASTA files within the
 <code>1_phylotaR_out_ingroup</code> directory, together with an
 occupancy table summarizing taxonomic representation, cluster
 characteristics, and associated metadata.</p>
+<p>The mining keeps records of 100 to 5000 bases, but a record over 2000
+bases does not reach the alignment whole. Before one record per species
+is kept, it is cut to the extent that the records of 2000 bases or fewer
+of its marker cover: a <code>matK</code> record that carries the
+flanking <code>trnK</code> intron keeps only the region the other
+<code>matK</code> records share. A long record that does not overlap
+that extent is left out, and a marker with no record of 2000 bases or
+fewer gets no FASTA file. Each long record, with what was done to it, is
+written to <code>TABLE_LONG_RECORDS_CUT_INGROUP.csv</code>
+(<code>TABLE_LONG_RECORDS_CUT_OUTGROUP.csv</code> for the outgroup). In
+the reference run, 595 ingroup records were cut and 6 left out, and 51
+outgroup records were cut.</p>
 <p>The <code><a href="../reference/assemble_outgroup_phylotar.html">assemble_outgroup_phylotar()</a></code> function applies the
 same procedure to the outgroup taxa and retains only the loci of the
 standardized marker set recovered for the ingroup. The FASTA files and
@@ -485,31 +497,31 @@ synthesis and curation table suite:
 <ul>
 <li>
 <code>TABLE_taxonomic_backbone_molecular_matrix.csv</code>: Master
-taxonomic matrix anchored to all accepted species in the checklist
-(<strong>Cactaceae</strong> and <strong>Anacampserotaceae</strong>) plus
-outgroups. Features dynamic GenBank accession columns
-(<code>sid_&lt;marker&gt;</code>), Caryophyllales.org UUIDs, and
-standardized placeholder columns for phylogenetic inclusion
-(<code>retained_in_phylogeny</code>) and conservation status
-(<code>iucn_redlist_category</code>).</li>
+taxonomic matrix anchored to all accepted species in the checklist of
+Korotkova <em>et al</em>. 2021 (<strong>Cactaceae</strong> and
+<strong>Anacampserotaceae</strong>) plus outgroups. Features dynamic
+GenBank accession columns (<code>sid_&lt;marker&gt;</code>),
+Caryophyllales.org UUIDs, and standardized placeholder columns for
+phylogenetic inclusion (<code>retained_in_phylogeny</code>) and
+conservation status (<code>iucn_redlist_category</code>).</li>
 <li>
 <code>TABLE_dataset_species_summary.csv</code>: Global dataset-level
-synthesis reporting total species in the checklist, raw GenBank species
-recovered, accepted vs. rejected species counts, outgroups retained,
-total unique taxa in the joint dataset, and overall checklist recovery
-percentage, plus the number of standardized loci mined per taxonomic
-group (<strong>Cactaceae</strong>, <strong>Anacampserotaceae</strong>,
-<strong>Portulacaceae</strong>, <strong>Talinaceae</strong>) at Stage 1.
-Every row that depends on what survives the joint realignment, both the
-“Final loci retained” counts and the ingroup, outgroup and joint
-<strong>species</strong> counts, is written here as a provisional
-(pre-realignment) value and overwritten in place by
-<code><a href="../reference/run_concatenation_pipeline.html">run_concatenation_pipeline()</a></code> (Module 6) once the true
-post-realignment supermatrix exists. This single file therefore holds
-the definitive counts after Module 6 runs, and any row still labelled
-“Provisional” in its <code>details</code> column indicates that Module 6
-has not been executed against it. Do not quote figures from this table
-before Module 6 has run.</li>
+synthesis reporting total species in the checklist (Korotkova <em>et
+al</em>. 2021), raw GenBank species recovered, accepted vs. rejected
+species counts, outgroups retained, total unique taxa in the joint
+dataset, and overall checklist recovery percentage, plus the number of
+standardized loci mined per taxonomic group (<strong>Cactaceae</strong>,
+<strong>Anacampserotaceae</strong>, <strong>Portulacaceae</strong>,
+<strong>Talinaceae</strong>) at Stage 1. Every row that depends on what
+survives the joint realignment, both the “Final loci retained” counts
+and the ingroup, outgroup and joint <strong>species</strong> counts, is
+written here as a provisional (pre-realignment) value and overwritten in
+place by <code><a href="../reference/run_concatenation_pipeline.html">run_concatenation_pipeline()</a></code> (Module 6) once the
+true post-realignment supermatrix exists. This single file therefore
+holds the definitive counts after Module 6 runs, and any row still
+labelled “Provisional” in its <code>details</code> column indicates that
+Module 6 has not been executed against it. Do not quote figures from
+this table before Module 6 has run.</li>
 <li>
 <code>TABLE_species_curation_status.csv</code>: Taxon-level master
 registry detailing acceptance status, source classification

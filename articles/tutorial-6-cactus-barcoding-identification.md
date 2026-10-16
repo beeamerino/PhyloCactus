@@ -18,6 +18,12 @@ Each example has three parts:
     [`plot_barcoding_identification()`](https://beeamerino.github.io/PhyloCactus/reference/plot_barcoding_identification.md),
     one line of reading, and a link to the full HTML report.
 
+The reports on the website were written from the tables of the
+identification runs, made before the version number of the package was
+set to 0.5.0: their provenance table gives `0.4.5.9000`, the number the
+package carried when the samples were identified, and their footer gives
+0.5.0, the version that wrote the page.
+
 The script `tutorial-6-cactus-barcoding-identification.R` runs all of it
 from the tutorial folder:
 

@@ -11,8 +11,8 @@ GenBank inherit the heterogeneity of decades of deposition: inconsistent
 locus annotations, duplicated accessions, records without vouchers,
 orthographic variants and nomenclatural synonyms. Converting these
 records into a phylogenetic matrix requires curation, taxonomic
-reconciliation against an accepted checklist, and quality control of
-each alignment.
+reconciliation against an accepted checklist (for Cactaceae, Korotkova
+*et al*. 2021), and quality control of each alignment.
 
 The difficulty increases in plant lineages that diversified recently and
 rapidly. Low plastid divergence, incomplete lineage sorting (ILS) and

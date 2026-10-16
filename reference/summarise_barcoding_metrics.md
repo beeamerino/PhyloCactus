@@ -50,7 +50,7 @@ summarise_barcoding_metrics(
 - idtaxa_rule:
 
   Character. The row of the IdTaxa operating table used as its operating
-  point. Defaults to `"default_60"`, as decided on 2026-09-26.
+  point. Defaults to `"default_60"`.
 
 - figures:
 

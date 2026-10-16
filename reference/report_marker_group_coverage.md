@@ -26,7 +26,7 @@ report_marker_group_coverage(
   Character. Regular expression matched against terminal names, or a
   named character vector of regular expressions (e.g.
   `c(Anacampserotaceae = "...", Portulacaceae = "...", Talinaceae = "...")`)
-  to additionally compute per-group coverage columns.
+  which also adds per-group coverage columns.
 
 - min_coverage:
 

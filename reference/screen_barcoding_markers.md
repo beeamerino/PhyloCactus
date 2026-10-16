@@ -40,7 +40,7 @@ screen_barcoding_markers(
 
   Character vector or `NULL`. Loci to screen. `NULL` (the default)
   screens every curated alignment in `curated_dir`; the threshold then
-  decides which loci enter (decision of 2026-09-22).
+  decides which loci enter.
 
 - output_dir:
 
@@ -49,8 +49,7 @@ screen_barcoding_markers(
 - min_species_with_replica:
 
   Integer. A locus enters the branch when at least this number of
-  species keep two or more accessions after curation. Defaults to `20L`
-  (decision of 2026-09-21).
+  species keep two or more accessions after curation. Defaults to `20L`.
 
 - saturation_flag_cutoff:
 

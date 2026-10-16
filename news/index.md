@@ -1,5 +1,28 @@
 # Changelog
 
+## PhyloCactus 0.5.1
+
+Documentation, metadata and the website. The analyses and the
+distributed results are those of 0.5.0.
+
+- `DESCRIPTION` describes both branches of the package and lists the
+  external programs it calls (`SystemRequirements`);
+  `citation("PhyloCactus")` takes the new title.
+- The help pages of
+  [`assemble_ingroup_phylotar()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_ingroup_phylotar.md)
+  and
+  [`assemble_outgroup_phylotar()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_outgroup_phylotar.md),
+  and Tutorial 1, document the cut of records over 2000 bases introduced
+  in 0.5.0, with the tables that list them.
+- Tutorial 2 reads the weak support of the backbone: soft polytomies
+  from missing data, not evidence of a simultaneous divergence.
+- Tutorial 6 explains the two version numbers of its reports.
+- The website no longer serves the pages of the functions removed in
+  0.5.0: each deployment replaces the previous one.
+- The checklist of Korotkova et al. (2021) is cited wherever it is
+  named; the comments of the source code describe the code.
+- The 0.5.0 entry below is completed with changes it left out.
+
 ## PhyloCactus 0.5.0
 
 ### Molecular diagnostic section (DNA barcoding)
@@ -15,6 +38,11 @@
   (Korotkova et al. 2021); records over 2000 bases are cut to the extent
   of the shorter records of their locus; identical sequences of a
   species are collapsed. The library of this version holds 15 loci.
+  [`extract_barcoding_plastome_loci()`](https://beeamerino.github.io/PhyloCactus/reference/extract_barcoding_plastome_loci.md)
+  crops the loci of the library from GenBank plastomes as extra records;
+  [`barcoding_outgroup_taxids()`](https://beeamerino.github.io/PhyloCactus/reference/barcoding_outgroup_taxids.md)
+  gives the six NCBI Taxonomy IDs of the outgroup the controls query the
+  library with.
 - The library is validated before it is used: folds that ask for the
   species (scheme E) or, with the species left out, for the genus
   (scheme G)
@@ -22,7 +50,8 @@
   the barcode gap per locus
   ([`analyze_barcode_gap()`](https://beeamerino.github.io/PhyloCactus/reference/analyze_barcode_gap.md));
   classification of the folds by nearest neighbour and by IdTaxa, on one
-  machine in parallel processes or on a computing cluster
+  machine in parallel processes (`classify_barcoding_folds(workers = )`)
+  or on a computing cluster
   ([`classify_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/classify_barcoding_folds.md),
   [`generate_barcoding_job_scripts()`](https://beeamerino.github.io/PhyloCactus/reference/generate_barcoding_job_scripts.md),
   [`merge_barcoding_chunks()`](https://beeamerino.github.io/PhyloCactus/reference/merge_barcoding_chunks.md));
@@ -67,6 +96,32 @@
 
 ### Changes that also reach the phylogeny
 
+- The reference run is regenerated and every distributed artifact
+  republished: a supermatrix of 1218 terminals, 13 700 sites and 13
+  partitions, analysed as 1208 terminals once identical sequences are
+  collapsed; the chronogram is dated at a smoothing of 1e-05, an
+  interior minimum of the cross-validation, and its root is 45.53 Ma.
+  `MANIFEST.csv` gains `expected_tips`, the number of terminals each
+  distributed tree must have.
+- [`assemble_ingroup_phylotar()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_ingroup_phylotar.md)
+  and
+  [`assemble_outgroup_phylotar()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_outgroup_phylotar.md)
+  cut every record over 2000 bases to the extent the shorter records of
+  its marker cover, as the identification branch does, and list the long
+  records in `TABLE_LONG_RECORDS_CUT_INGROUP.csv` and
+  `TABLE_LONG_RECORDS_CUT_OUTGROUP.csv`.
+- The family filter of
+  [`validate_phylogenies()`](https://beeamerino.github.io/PhyloCactus/reference/validate_phylogenies.md)
+  keeps the species of Cactaceae in the checklist (Korotkova et
+  al. 2021) instead of the species of the constraint table; the tree
+  distances of the reference run do not change.
+- 31 species of the new mining are added to `cactus_constraints.csv`, so
+  that the constraint places every terminal of the supermatrix.
+- One style for the figures of every tutorial:
+  [`theme_phylocactus()`](https://beeamerino.github.io/PhyloCactus/reference/theme_phylocactus.md),
+  [`phylocactus_colours()`](https://beeamerino.github.io/PhyloCactus/reference/phylocactus_colours.md)
+  and
+  [`phylocactus_panel_tags()`](https://beeamerino.github.io/PhyloCactus/reference/phylocactus_panel_tags.md).
 - The phylotaR mining of both branches keeps sequences of 100 to 5000
   bases, and the outgroup of the phylogeny is mined through the same
   function as the ingroup.

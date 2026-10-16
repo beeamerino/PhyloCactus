@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Phylogenetic Inference and Divergence Time Estimation Pipeline for Cactaceae • PhyloCactus</title>
+<title>Phylogenetic Inference, Divergence Time Estimation and Molecular Identification for Cactaceae • PhyloCactus</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -16,9 +16,9 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
-<meta property="og:title" content="Phylogenetic Inference and Divergence Time Estimation Pipeline for Cactaceae">
-<meta name="description" content="Provides a reproducible workflow for reconstructing Cactaceae phylogenies from DNA sequence data. The pipeline automates GenBank sequence retrieval, multiple-sequence alignment, substitution model selection, saturation assessment, supermatrix construction, maximum-likelihood phylogenetic inference using RAxML-NG, divergence time estimation with treePL, and tree-space analyses for assessing phylogenetic stability across bootstrap replicates.">
-<meta property="og:description" content="Provides a reproducible workflow for reconstructing Cactaceae phylogenies from DNA sequence data. The pipeline automates GenBank sequence retrieval, multiple-sequence alignment, substitution model selection, saturation assessment, supermatrix construction, maximum-likelihood phylogenetic inference using RAxML-NG, divergence time estimation with treePL, and tree-space analyses for assessing phylogenetic stability across bootstrap replicates.">
+<meta property="og:title" content="Phylogenetic Inference, Divergence Time Estimation and Molecular Identification for Cactaceae">
+<meta name="description" content="Provides a reproducible workflow for reconstructing Cactaceae phylogenies from multilocus DNA sequence data and for identifying samples of cacti by DNA barcoding. The phylogeny branch automates GenBank sequence retrieval, multiple-sequence alignment, substitution model selection, saturation assessment, supermatrix construction, maximum-likelihood phylogenetic inference using RAxML-NG, divergence time estimation with treePL, and comparison with published phylogenies in tree space. The identification branch builds a reference library of marker sequences from the same mining, validates it with cross-validation folds and negative controls, and identifies a sample locus by locus from sequences, an assembly or sequencing reads, with a self-contained report.">
+<meta property="og:description" content="Provides a reproducible workflow for reconstructing Cactaceae phylogenies from multilocus DNA sequence data and for identifying samples of cacti by DNA barcoding. The phylogeny branch automates GenBank sequence retrieval, multiple-sequence alignment, substitution model selection, saturation assessment, supermatrix construction, maximum-likelihood phylogenetic inference using RAxML-NG, divergence time estimation with treePL, and comparison with published phylogenies in tree space. The identification branch builds a reference library of marker sequences from the same mining, validates it with cross-validation folds and negative controls, and identifies a sample locus by locus from sequences, an assembly or sequencing reads, with a self-contained report.">
 <meta property="og:image" content="https://beeamerino.github.io/PhyloCactus/logo.png">
 </head>
 <body>
@@ -29,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,7 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>Multilocus sequence matrices assembled from public repositories such as GenBank inherit the heterogeneity of decades of deposition: inconsistent locus annotations, duplicated accessions, records without vouchers, orthographic variants and nomenclatural synonyms. Converting these records into a phylogenetic matrix requires curation, taxonomic reconciliation against an accepted checklist, and quality control of each alignment.</p>
+<p>Multilocus sequence matrices assembled from public repositories such as GenBank inherit the heterogeneity of decades of deposition: inconsistent locus annotations, duplicated accessions, records without vouchers, orthographic variants and nomenclatural synonyms. Converting these records into a phylogenetic matrix requires curation, taxonomic reconciliation against an accepted checklist (for Cactaceae, Korotkova <em>et al</em>. 2021), and quality control of each alignment.</p>
 <p>The difficulty increases in plant lineages that diversified recently and rapidly. Low plastid divergence, incomplete lineage sorting (ILS) and reticulate evolution increase the risk of erroneous orthology assessment and of alignment error, and both can bias the inferred topology.</p>
 <p><strong>Cactaceae</strong> combine these properties. The family is one of the largest succulent radiations of the Neotropics (Arakaki <em>et al</em>. 2011; Hernández-Hernández <em>et al</em>. 2014; Guerrero <em>et al</em>. 2019), and its GenBank record is uneven in taxonomic and locus coverage.</p>
 <p><code>PhyloCactus</code> is an R package that implements this assembly and analysis as a reproducible workflow. It links established software in four stages: orthology-based sequence retrieval (<code>phylotaR</code>), multiple sequence alignment (<code>MAFFT</code>), alignment masking (<code>DECIPHER</code>), a saturation screen, substitution model selection (<code>ModelTest-NG</code>), constrained maximum-likelihood inference (<code>RAxML-NG</code>), Felsenstein bootstrap proportions (FBP), penalized likelihood dating (<code>treePL</code>), retrieval of IUCN Red List assessments (<code>rredlist</code>), and comparison with published phylogenies, one of which can be summarized under the multispecies coalescent with <code>ASTRAL-III</code>.</p>

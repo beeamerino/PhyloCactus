@@ -61,9 +61,10 @@ The branch reads:
   2021), against which every name is reconciled.
 - **Own sequences, optional.** `own_dir = "0_own"` in step 1 adds the
   records of `0_own/`: a sample sheet (`SAMPLES.csv`: sample, species of
-  the checklist, voucher, publication status) and one FASTA file per
-  locus. What cannot enter is listed with its reason. The default,
-  `own_dir = NULL`, builds the library from GenBank alone.
+  the checklist of Korotkova *et al*. 2021, voucher, publication status)
+  and one FASTA file per locus. What cannot enter is listed with its
+  reason. The default, `own_dir = NULL`, builds the library from GenBank
+  alone.
 
 The library is not distributed with the package: the user builds it with
 steps 1 to 4.

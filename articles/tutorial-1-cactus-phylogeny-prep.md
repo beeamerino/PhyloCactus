@@ -121,6 +121,19 @@ individual FASTA files within the `1_phylotaR_out_ingroup` directory,
 together with an occupancy table summarizing taxonomic representation,
 cluster characteristics, and associated metadata.
 
+The mining keeps records of 100 to 5000 bases, but a record over 2000
+bases does not reach the alignment whole. Before one record per species
+is kept, it is cut to the extent that the records of 2000 bases or fewer
+of its marker cover: a `matK` record that carries the flanking `trnK`
+intron keeps only the region the other `matK` records share. A long
+record that does not overlap that extent is left out, and a marker with
+no record of 2000 bases or fewer gets no FASTA file. Each long record,
+with what was done to it, is written to
+`TABLE_LONG_RECORDS_CUT_INGROUP.csv`
+(`TABLE_LONG_RECORDS_CUT_OUTGROUP.csv` for the outgroup). In the
+reference run, 595 ingroup records were cut and 6 left out, and 51
+outgroup records were cut.
+
 The
 [`assemble_outgroup_phylotar()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_outgroup_phylotar.md)
 function applies the same procedure to the outgroup taxa and retains
@@ -411,23 +424,25 @@ writes its outputs to separate subdirectories:
 4.  `4_Cleaned/tables`: Contains the complete taxonomic synthesis and
     curation table suite:
     - `TABLE_taxonomic_backbone_molecular_matrix.csv`: Master taxonomic
-      matrix anchored to all accepted species in the checklist
-      (**Cactaceae** and **Anacampserotaceae**) plus outgroups. Features
-      dynamic GenBank accession columns (`sid_<marker>`),
-      Caryophyllales.org UUIDs, and standardized placeholder columns for
-      phylogenetic inclusion (`retained_in_phylogeny`) and conservation
-      status (`iucn_redlist_category`).
+      matrix anchored to all accepted species in the checklist of
+      Korotkova *et al*. 2021 (**Cactaceae** and **Anacampserotaceae**)
+      plus outgroups. Features dynamic GenBank accession columns
+      (`sid_<marker>`), Caryophyllales.org UUIDs, and standardized
+      placeholder columns for phylogenetic inclusion
+      (`retained_in_phylogeny`) and conservation status
+      (`iucn_redlist_category`).
     - `TABLE_dataset_species_summary.csv`: Global dataset-level
-      synthesis reporting total species in the checklist, raw GenBank
-      species recovered, accepted vs. rejected species counts, outgroups
-      retained, total unique taxa in the joint dataset, and overall
-      checklist recovery percentage, plus the number of standardized
-      loci mined per taxonomic group (**Cactaceae**,
-      **Anacampserotaceae**, **Portulacaceae**, **Talinaceae**) at
-      Stage 1. Every row that depends on what survives the joint
-      realignment, both the “Final loci retained” counts and the
-      ingroup, outgroup and joint **species** counts, is written here as
-      a provisional (pre-realignment) value and overwritten in place by
+      synthesis reporting total species in the checklist (Korotkova *et
+      al*. 2021), raw GenBank species recovered, accepted vs. rejected
+      species counts, outgroups retained, total unique taxa in the joint
+      dataset, and overall checklist recovery percentage, plus the
+      number of standardized loci mined per taxonomic group
+      (**Cactaceae**, **Anacampserotaceae**, **Portulacaceae**,
+      **Talinaceae**) at Stage 1. Every row that depends on what
+      survives the joint realignment, both the “Final loci retained”
+      counts and the ingroup, outgroup and joint **species** counts, is
+      written here as a provisional (pre-realignment) value and
+      overwritten in place by
       [`run_concatenation_pipeline()`](https://beeamerino.github.io/PhyloCactus/reference/run_concatenation_pipeline.md)
       (Module 6) once the true post-realignment supermatrix exists. This
       single file therefore holds the definitive counts after Module 6

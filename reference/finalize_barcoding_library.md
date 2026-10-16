@@ -64,8 +64,7 @@ finalize_barcoding_library(
 - min_species_with_replica:
 
   Integer. A locus enters the library when at least this number of
-  species keep two or more distinct sequences. Defaults to `20L`
-  (decision of 2026-09-21).
+  species keep two or more distinct sequences. Defaults to `20L`.
 
 - paralog_loci:
 

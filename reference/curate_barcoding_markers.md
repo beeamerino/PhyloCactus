@@ -42,8 +42,7 @@ curate_barcoding_markers(
 
   Character vector or `NULL`. Loci to curate, as FASTA file names
   without extension. `NULL` (the default) curates every FASTA in
-  `input_dir`: the loci come out of the data, not out of a list
-  (decision of 2026-09-22).
+  `input_dir`: the loci come out of the data, not out of a list.
 
 - mask_alignment_regions:
 
