@@ -24,11 +24,13 @@
   for (k in seq_len(workers)) {
     tag <- paste0(suffix, "_worker", k, "of", workers)
     script <- file.path(chunk_dir, paste0("RUN_", tag, ".R"))
+    # The paths are written with deparse(): the backslashes of the Windows temporary folders would
+    # otherwise be read as escapes, and the worker would stop before writing its status
     writeLines(c(
-      sprintf('writeLines(as.character(Sys.getpid()), "%s")', file.path(chunk_dir, paste0("PID_", tag, ".txt"))),
-      sprintf('a <- readRDS("%s")', file.path(chunk_dir, paste0("ARGS_", suffix, ".rds"))),
+      sprintf('writeLines(as.character(Sys.getpid()), %s)', deparse(file.path(chunk_dir, paste0("PID_", tag, ".txt")))),
+      sprintf('a <- readRDS(%s)', deparse(file.path(chunk_dir, paste0("ARGS_", suffix, ".rds")))),
       sprintf('a$chunk <- %dL; a$n_chunks <- %dL', k, workers),
-      sprintf('st <- "%s"', file.path(chunk_dir, paste0("STATUS_", tag, ".txt"))),
+      sprintf('st <- %s', deparse(file.path(chunk_dir, paste0("STATUS_", tag, ".txt")))),
       'r <- tryCatch({',
       sprintf('  if (identical(Sys.getenv("PHYLOCACTUS_TEST_FAIL_CHUNK"), "%d")) stop("failure asked by PHYLOCACTUS_TEST_FAIL_CHUNK")', k),
       '  suppressPackageStartupMessages(library(PhyloCactus)); do.call(classify_barcoding_folds, a); "done"',
