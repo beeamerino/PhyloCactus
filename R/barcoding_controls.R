@@ -1,13 +1,12 @@
-# Negative controls of the molecular diagnostic branch (11_barcoding/8_controls/).
-# Phase 5B of PhyloCactus 0.5.0, validation plan sec. 4.
+# Negative controls of the molecular diagnostic branch (11_barcoding/8_controls/). PhyloCactus 0.5.0.
 #
-# The metric functions live here because CN1 needs them. In this phase they are applied only to
-# permuted labels, to outgroup queries and to resubstitution: never to the true labels, which is
-# Phase 6. The rule is procedural and it is written down rather than assumed.
+# The metric functions live here because the label permutation control needs them. Here they are
+# applied only to permuted labels, to outgroup queries and to resubstitution, never to the true
+# labels, which are measured in step 10. The rule is procedural and it is written down.
 
 #' Accuracy of a prediction table, with its base rate beside it
 #'
-#' What counts as a hit is fixed by sec. 1 of the validation plan and is not reinvented here. For
+#' What counts as a hit is fixed for the whole branch and is not reinvented here. For
 #' the species target, only state 1 with the right species; a candidate set never counts as a
 #' species hit. For the genus target, the right genus, whether it comes from state 1 or from a
 #' state 2 whose genus is unique. State 3 is never a hit, and it is not an error either: it is the
@@ -42,12 +41,12 @@
   out
 }
 
-#' Verdict of CN1, with the rule of the plan written out
+#' Verdict of the label permutation control, with its rule written out
 #'
 #' The accuracy with permuted labels must fall to the base rate. The threshold is the base rate plus
 #' three standard deviations of the permutation distribution, and what is published is the whole
 #' distribution, never a single value. Above the threshold there is leakage, the real result is not
-#' interpreted and the branch goes back to Phase 3.
+#' interpreted and the folds of step 5 are reviewed.
 #' @noRd
 .bc_cn1_verdict <- function(accuracies, base_rate) {
   accuracies <- accuracies[!is.na(accuracies)]
@@ -76,9 +75,8 @@
 #'
 #' **Resubstitution ("CN3").** The same queries as the folds, in both schemes, each one classified
 #' against its own training set with the query put back into it. Nothing else changes between this
-#' figure and the honest one, which is what makes the two comparable: until 2026-09-25 this control
-#' ran over the whole library instead, a different set of queries, and the two figures could not be
-#' subtracted. Written with the label `irreproducible_resubstitution` in the table itself, so the
+#' figure and the honest one, which is what makes the two comparable: run over the whole library,
+#' it would be a different set of queries, and the two figures could not be subtracted. Written with the label `irreproducible_resubstitution` in the table itself, so the
 #' figure cannot travel without it. **Its value is published only next to the honest
 #' figure**, which does not exist yet.
 #'
@@ -151,9 +149,9 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
     }
   }
   if ("CN2" %in% controls && !is.null(outgroup_dir) && method == "nn") {
-    # CN2 aligns every query against the library, so the controls need MAFFT at run time. The
-    # check belongs here and not inside the CN2 loop: an absent binary has to cost seconds, not
-    # the hour that CN1 takes before reaching it.
+    # The outgroup control aligns every query against the library, so the controls need MAFFT at
+    # run time. The check belongs here and not inside its loop: an absent binary has to cost
+    # seconds, not the hour that the label permutation takes before reaching it.
     .bc_assert_mafft(mafft_exec)
   }
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
@@ -321,11 +319,11 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   invisible(out)
 }
 
-#' One row per outgroup query, with the distance the threshold of Phase 6 will be swept over
+#' One row per outgroup query, with the distance the threshold of step 9 is swept over
 #'
 #' The outgroup sequences come from the branch's own assembly, so they share the locus but not the
 #' alignment. Positions that one of the two does not have are not comparable, which is the same
-#' rule the rest of the branch uses (E13).
+#' rule the rest of the branch uses.
 #'
 #' The state alone does not measure this control. `.bc_classify_nn()` has no rule of remoteness by
 #' design, so an alien query still gets its nearest neighbour and can come back as state 1 with a
@@ -390,11 +388,10 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
 
 # Adds one query to the alignment of the library without moving a single column of it.
 #
-# Until 2026-09-25 CN2 truncated both alignments to their smallest width and compared them position
-# by position. That assumes column i of one alignment is homologous to column i of another, which is
-# false: in the real run the library of matK had 2464 columns and the outgroup sequences ran from
-# 326 to 1533 bases, each starting at a different place. The defect showed up as a crash only
-# because the sequences of step 1 are not aligned, and the crash was the lucky part.
+# Truncating both alignments to their smallest width and comparing them position by position would
+# assume that column i of one alignment is homologous to column i of another, which is false: the
+# library of matK has 2464 columns and the outgroup sequences run from 326 to 1533 bases, each
+# starting at a different place.
 #
 # MAFFT --add places the query against the profile of the library, and --keeplength forbids it from
 # opening new columns: the insertions of the query are discarded. That is what keeps the distance of
@@ -439,13 +436,12 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   species <- stats::setNames(lib_tab$species, lib_tab$sid)
   h <- .bc_parse_header(labels(og))
   lib_m <- as.matrix(lib_dna)
-  # The pool of the locus is built once; the alignment is one call per query, decision of BMM of
-  # 2026-09-25, so that no query is ever aligned in the company of another, which is how a real
+  # The pool of the locus is built once; the alignment is one call per query, so that no query is ever aligned in the company of another, which is how a real
   # query will arrive.
   #
-  # Since 2026-09-26 the orientation, the alignment and the classification of one query are
-  # .bc_classify_by_add(), shared with the add path of step 7, and a query that matches the locus
-  # in neither direction comes back as state 3 with no species and no distance (decision D4).
+  # The orientation, the alignment and the classification of one query are .bc_classify_by_add(),
+  # shared with the add path of step 7, and a query that matches the locus in neither direction
+  # comes back as state 3 with no species and no distance.
   lib_m <- lib_m[lib_tab$sid, , drop = FALSE]
   pool <- .bc_strand_pool(lib_m)
   queries <- as.character(og)
@@ -460,11 +456,11 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
   do.call(rbind, rows)
 }
 
-#' CN2 with IdTaxa: the outgroup queries of one locus, oriented and classified
+#' The outgroup control with IdTaxa: the outgroup queries of one locus, oriented and classified
 #'
 #' The orientation is the one of the nearest neighbour, against the strand pool of the library of
 #' the locus; a query that matches the locus in neither direction is state 3 with the reason
-#' `no_match` and no confidence, and IdTaxa is not called for it (decision D4). The others are
+#' `no_match` and no confidence, and IdTaxa is not called for it. The others are
 #' classified by IdTaxa trained once on the whole locus, at threshold 0, each with the seed of
 #' `.bc_query_seed(seed, locus, "cn2", 0, sid)`.
 #' @noRd

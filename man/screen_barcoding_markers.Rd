@@ -21,12 +21,12 @@ registry \code{TABLE_barcoding_accession_registry.csv} is read from it.}
 \item{curated_dir}{Character. Output directory of \code{\link[=curate_barcoding_markers]{curate_barcoding_markers()}}.}
 
 \item{loci}{Character vector or \code{NULL}. Loci to screen. \code{NULL} (the default) screens every curated
-alignment in \code{curated_dir}; the threshold then decides which loci enter (decision of 2026-09-22).}
+alignment in \code{curated_dir}; the threshold then decides which loci enter.}
 
 \item{output_dir}{Character. Destination of the screening tables.}
 
 \item{min_species_with_replica}{Integer. A locus enters the branch when at least this number of
-species keep two or more accessions after curation. Defaults to \code{20L} (decision of 2026-09-21).}
+species keep two or more accessions after curation. Defaults to \code{20L}.}
 
 \item{saturation_flag_cutoff}{Numeric. Slope threshold of the saturation proxy, as in
 \code{\link[=run_marker_screening]{run_marker_screening()}}. Defaults to \code{0.3}.}

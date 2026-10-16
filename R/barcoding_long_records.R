@@ -1,8 +1,8 @@
-# Cut of long records in step 1 (Phase 10, decision L2 of BMM, 28-09).
+# Cut of long records in step 1.
 
 #' Records over `max_length` cut to the extent of the shorter records of their locus
 #'
-#' The mining keeps records of up to 5000 bases (L1). In every locus, a record longer than
+#' The mining keeps records of up to 5000 bases. In every locus, a record longer than
 #' `max_length` is cut to the span of its 20-mers found in two or more records of `max_length` bases
 #' or fewer of the same locus, on either strand; the hits are split where two lie more than
 #' `max_gap` bases apart and the group with the most hits is kept, so that a stray 20-mer in a flank

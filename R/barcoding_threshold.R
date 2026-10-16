@@ -1,15 +1,14 @@
 # ------------------------------------------------------------------------------
 # Molecular diagnostic branch (11_barcoding/9_threshold/), threshold of remoteness. PhyloCactus
-# 0.5.0, Phase 6A.
+# 0.5.0.
 #
-# The nearest neighbour has no rule of remoteness: in CN2, 288 of 312 alien queries came out in state
+# The nearest neighbour has no rule of remoteness: in the outgroup control, 288 of 312 alien queries came out in state
 # 1 with the name of a cactus species. The rule added here sends a query whose distance to its
 # nearest neighbour exceeds a threshold to state 3. The curve reports, for every threshold, what the
 # legitimate queries become and how many alien queries are rejected. The operating threshold of a
 # locus is the quantile 0.99, type 1, of the distances of the legitimate queries of scheme G, a cactus
 # whose species is missing from the library and whose genus is not, which is the query the rule must
-# not reject. It is fixed without the alien queries, which then report how many of them it rejects
-# (decisions D1 and D2 of BMM, 2026-09-26).
+# not reject. It is fixed without the alien queries, which then report how many of them it rejects.
 # ------------------------------------------------------------------------------
 
 #' The rule of remoteness applied to a table of predictions
@@ -30,7 +29,7 @@
 
 #' The confidence rule of IdTaxa applied to a table of predictions
 #'
-#' IdTaxa ran at threshold 0 and wrote the confidence of each rank (Phase 6B, K3). At a threshold
+#' IdTaxa ran at threshold 0 and wrote the confidence of each rank. At a threshold
 #' `threshold`: species confidence at or above it is state 1; genus confidence alone at or above it is
 #' state 2; neither is state 3 with the reason `low_confidence`. A query already in state 3 for another
 #' reason (`no_match`) keeps it. The confidences are never rewritten, and `candidates` is left as
@@ -84,7 +83,7 @@
         data.frame(outgroup_comparable = n_aj, outgroup_rejected = as.integer(n_rejected)))
 }
 
-#' Five disjoint outcomes of a legitimate query (validation plan, sec. 5)
+#' Five disjoint outcomes of a legitimate query
 #'
 #' A wrong species and an honest genus are not the same error and are never summed. In scheme G the
 #' true species is not in the training set, so every state 1 names a false species.
@@ -305,7 +304,7 @@ sweep_barcoding_threshold <- function(classifier_dir = file.path("11_barcoding",
   invisible(list(curve = curve_tab, operating = oper_tab))
 }
 
-#' Step 9 with IdTaxa (Phase 6B, K7)
+#' Step 9 with IdTaxa
 #' @noRd
 .bc_sweep_idtaxa <- function(classifier_dir, controls_dir, output_dir, q, quantile_type, figures, species_q = 0.95) {
   files <- file.path(classifier_dir, paste0("TABLE_barcoding_predictions_", c("species", "genus"), "_idtaxa.csv"))
@@ -369,8 +368,8 @@ sweep_barcoding_threshold <- function(classifier_dir = file.path("11_barcoding",
   rownames(oper_tab) <- NULL
   utils::write.csv(curve_tab, file.path(output_dir, "TABLE_barcoding_threshold_curve_idtaxa.csv"), row.names = FALSE)
   utils::write.csv(oper_tab, file.path(output_dir, "TABLE_barcoding_threshold_operating_idtaxa.csv"), row.names = FALSE)
-  # R-c: the species threshold of each locus for the identification path, from the species
-  # confidence of scheme G (species absent), never under 60; the validation stays at 60 (K7)
+  # The species threshold of each locus for the identification path, from the species
+  # confidence of scheme G (species absent), never under 60; the validation stays at 60
   sp_tab <- do.call(rbind, lapply(loci, function(l) {
     sc <- pred$genus$species_confidence[pred$genus$locus == l]
     sc <- sc[!is.na(sc)]
@@ -394,7 +393,7 @@ sweep_barcoding_threshold <- function(classifier_dir = file.path("11_barcoding",
 
 #' Figure of one locus: what the legitimate queries become and how many alien queries are rejected
 #'
-#' Editorial rule of the branch (acta of the figures of Phase 4): English, the figures in the
+#' Editorial rule of the branch: English, the figures in the
 #' subtitle and read from the table, nothing written inside the plotting area.
 #' @noRd
 .bc_threshold_plot <- function(curve_tab, oper_tab, locus, method = "nn") {

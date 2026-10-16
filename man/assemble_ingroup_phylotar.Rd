@@ -60,6 +60,14 @@ directly from GenBank using similarity clustering via \code{phylotaR} (Bennett \
 Clusters are formed by sequence similarity, not by GenBank locus annotations, so sequences are
 not lost to gene-name synonyms or mislabeled records.
 }
+\details{
+Records of more than 2000 bases (for example \code{matK} records that carry the flanking \code{trnK}
+intron) are cut to the extent that the records of 2000 bases or fewer of the same marker cover,
+before one record per species is kept, so that the records of a partition span the same region.
+A long record that does not overlap that extent is left out, and a marker with no record of 2000
+bases or fewer gets no FASTA file. Every long record, with what was done to it, is written to
+\code{TABLE_LONG_RECORDS_CUT_INGROUP.csv} in \code{out_dir}, and the log gives the counts.
+}
 \examples{
 \dontrun{
 assemble_ingroup_phylotar(

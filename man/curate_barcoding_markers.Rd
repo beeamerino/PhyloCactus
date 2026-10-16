@@ -25,7 +25,7 @@ curate_barcoding_markers(
 
 \item{loci}{Character vector or \code{NULL}. Loci to curate, as FASTA file names without extension.
 \code{NULL} (the default) curates every FASTA in \code{input_dir}: the loci come out of the data, not out of
-a list (decision of 2026-09-22).}
+a list.}
 
 \item{mask_alignment_regions}{Logical. Apply automated alignment masking via \code{DECIPHER}? Defaults to \code{TRUE}.}
 

@@ -1,11 +1,9 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/7_classifier/), step 7 in chunks. PhyloCactus 0.5.0,
-# Phase 6B.
+# Molecular diagnostic branch (11_barcoding/7_classifier/), step 7 in chunks. PhyloCactus 0.5.0.
 #
-# The full IdTaxa run is about 34 hours of one core (projection of 23-09) and runs on a cluster as a
+# The full IdTaxa run is about 34 hours of one core and runs on a cluster as a
 # job array: the folds are dealt to N chunks, each chunk is one task, and a last job merges the chunk
-# tables into the tables a single run would have written, byte for byte, or refuses (decisions K4
-# and K5 of BMM, 2026-09-26).
+# tables into the tables a single run would have written, byte for byte, or refuses.
 # ------------------------------------------------------------------------------
 
 #' Arguments of a chunked run, checked before anything is read

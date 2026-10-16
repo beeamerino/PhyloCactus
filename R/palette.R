@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Palette and theme of every figure of PhyloCactus (decisions E1 and E2 of BMM, 2026-10-15).
+# Palette and theme of every figure of PhyloCactus.
 #
 # Every colour of the package is defined here, by the job it does, and nowhere else: the functions
 # of R/, the scripts of the tutorials and the vignettes take their colours from phylocactus_colours()
@@ -7,7 +7,7 @@
 # of the dataviz method on a light surface (#fcfcfb): the categorical order passes every adjacent
 # check (worst colour-vision-deficiency Delta E 9.1, normal vision 19.6; the first three slots pass
 # all pairs); colour is kept for categories, and magnitudes, presence and single series are
-# drawn in the greys of the phylogeny figures of Tutorial 3, the reference of BMM (15-10): grey35
+# drawn in the greys of the phylogeny figures of Tutorial 3, the reference: grey35
 # for bars and points, grey95 against grey25 for absence and presence, gray60 for HPD bars,
 # steelblue for constrained nodes; each arm of the outcome scale passes the ordinal check (one hue, monotone lightness,
 # light end over 2:1); the neutral midpoint stands at 2.35:1.

@@ -4,9 +4,6 @@
 # A sheet with one row per sample, routed by the matrix of accepted inputs
 # (inst/extdata/barcoding_accepted_inputs.csv): an admitted input goes to its identification function
 # and gets its report; any other gets the message of its row. One index table for the whole sheet.
-#
-# Governing documents: 01_minutes_and_phases/04_barcoding_0.5.0/ of the audit repository, Phase 9
-# proposal of 2026-09-28 (decisions IR7 and IR8 of BMM).
 # ------------------------------------------------------------------------------
 
 #' The matrix of accepted inputs of the package

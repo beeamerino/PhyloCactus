@@ -25,7 +25,7 @@
 
 #' Paralogy surveillance: add `possible_paralog` to a table with a `locus` column
 #'
-#' Phase 2, item 5 of the 0.5.0 plan: the loci named in `paralog_loci` (by default `pepC_like`) are
+#' The loci named in `paralog_loci` (by default `pepC_like`) are
 #' flagged in every output of the branch. The flag informs and never excludes.
 #' @noRd
 .bc_flag_paralog <- function(tab, paralog_loci) {
@@ -49,7 +49,7 @@
   )
 }
 
-#' Screening decision: the threshold decides, saturation only flags (decision D3 of 2026-09-21)
+#' Screening decision: the threshold decides, saturation only flags
 #' @noRd
 .bc_screen_decision <- function(screen) {
   screen$enters <- screen$passes_threshold %in% TRUE
@@ -86,7 +86,7 @@
 #' @param output_dir Character. Destination; refused inside a directory of the phylogeny.
 #' @param loci Character vector or `NULL`. Loci to curate, as FASTA file names without extension.
 #'   `NULL` (the default) curates every FASTA in `input_dir`: the loci come out of the data, not out of
-#'   a list (decision of 2026-09-22).
+#'   a list.
 #' @inheritParams run_alignment_pipeline
 #' @return Invisibly, the summary table returned by [run_alignment_pipeline()].
 #' @examples
@@ -151,10 +151,10 @@ curate_barcoding_markers <- function(input_dir = file.path("11_barcoding", "1_as
 #'   registry `TABLE_barcoding_accession_registry.csv` is read from it.
 #' @param curated_dir Character. Output directory of [curate_barcoding_markers()].
 #' @param loci Character vector or `NULL`. Loci to screen. `NULL` (the default) screens every curated
-#'   alignment in `curated_dir`; the threshold then decides which loci enter (decision of 2026-09-22).
+#'   alignment in `curated_dir`; the threshold then decides which loci enter.
 #' @param output_dir Character. Destination of the screening tables.
 #' @param min_species_with_replica Integer. A locus enters the branch when at least this number of
-#'   species keep two or more accessions after curation. Defaults to `20L` (decision of 2026-09-21).
+#'   species keep two or more accessions after curation. Defaults to `20L`.
 #' @param saturation_flag_cutoff Numeric. Slope threshold of the saturation proxy, as in
 #'   [run_marker_screening()]. Defaults to `0.3`.
 #' @param paralog_loci Character vector. Loci under paralogy surveillance, flagged in the column

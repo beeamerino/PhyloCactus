@@ -6,9 +6,6 @@
 # the sampling of the named genera as CSV files. These functions draw the same figures from those
 # tables, so that a figure can be drawn again without the library, as Tutorial 6 does with the tables
 # distributed in extdata.
-#
-# Governing documents: 01_minutes_and_phases/04_barcoding_0.5.0/ of the audit repository, proposal of
-# Tutorial 6 of 2026-10-14 (decisions T6-5 and F2 to F4 of BMM).
 # ------------------------------------------------------------------------------
 
 #' A table given as a data frame or as the path of a CSV file, with the columns a figure needs

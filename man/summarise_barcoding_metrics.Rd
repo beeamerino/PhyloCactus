@@ -27,7 +27,7 @@ summarise_barcoding_metrics(
 identification path, at \verb{t*}) and \code{"idtaxa"}.}
 
 \item{idtaxa_rule}{Character. The row of the IdTaxa operating table used as its operating
-point. Defaults to \code{"default_60"}, as decided on 2026-09-26.}
+point. Defaults to \code{"default_60"}.}
 
 \item{figures}{Logical. Draw the curve figures. Defaults to \code{TRUE}.}
 }

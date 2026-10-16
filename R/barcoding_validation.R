@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), validation partitions. PhyloCactus 0.5.0, Phase 3.
+# Molecular diagnostic branch (11_barcoding/), validation partitions. PhyloCactus 0.5.0.
 #
-# Hard rule of the validation plan (sec. 2): no accession may be in the training set and in the
+# Hard rule of the validation: no accession may be in the training set and in the
 # evaluation set of the same fold. Scheme E leaves one sequence out and asks for the species of the
 # accession left out; scheme G leaves one whole species out and asks for its genus. The folds are
 # built on the library of 4_library/ (representatives, with the identical sequences already
@@ -33,8 +33,8 @@
 #' Scheme E, one sequence left out: for every species with two or more sequences in the locus, one
 #' fold per sequence. Scheme G, one species left out: for every species of a genus with two or more
 #' species in the locus, one fold with all its sequences. Species without replica and genera with one
-#' species stay in the training set and are never evaluated (validation plan, sec. 3). Deterministic
-#' and without a seed (E9): the order is locus, species and `sid`, in the C locale.
+#' species stay in the training set and are never evaluated. Deterministic
+#' and without a seed: the order is locus, species and `sid`, in the C locale.
 #'
 #' @param library Data frame with `sid`, `species`, `locus` and, optionally, `genus`.
 #' @param scheme `"species"` or `"genus"`.
@@ -81,7 +81,7 @@
   folds
 }
 
-#' Check the hard rule of the validation plan on a set of folds
+#' Check the hard rule of the validation on a set of folds
 #'
 #' Reports, and does not repair: every fold whose training set shares an accession with its
 #' evaluation set, and, in scheme G, every fold whose training set holds the species left out.
@@ -123,7 +123,7 @@
   out
 }
 
-#' Permute the training labels of one fold (machinery of CN1)
+#' Permute the training labels of one fold (machinery of the label permutation control)
 #'
 #' Permutes the labels of the training set among themselves, leaves the labels of the evaluation set
 #' untouched and restores the session's random state, so that calling it changes nothing outside.
@@ -155,7 +155,7 @@
 #' Compares only the positions where both sequences carry A, C, G or T, so gaps and ambiguities do
 #' not count. Ties are broken by the alphabetically smallest `sid`, so the result is deterministic.
 #' This is the reference classifier of the negative controls and of the tests, **not** the classifier
-#' of the branch, which is chosen in Phase 6.
+#' of the branch, which is chosen in step 9.
 #'
 #' @param train Character vector of aligned sequences named by `sid`.
 #' @param train_labels Character vector of labels named by `sid`.

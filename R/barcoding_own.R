@@ -1,4 +1,4 @@
-#' Own records of step 1, read from a folder of own data (decisions O1 to O3 of BMM, 29-09)
+#' Own records of step 1, read from a folder of own data
 #'
 #' The folder (`0_own/` of the tutorial) holds `SAMPLES.csv`, one row per sample (`sample`,
 #' `species`, `voucher`, `data_type`, `published`, `notes`), and one FASTA per library locus, named

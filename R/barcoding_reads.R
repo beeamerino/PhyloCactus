@@ -1,12 +1,8 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), identification of paired reads (route A, T4).
-# PhyloCactus 0.5.0.
+# Molecular diagnostic branch (11_barcoding/), identification of paired reads. PhyloCactus 0.5.0.
 #
-# fastp, GetOrganelle (plastome and nrDNA) and step 10 on the assembled paths, with the parameters of
-# the route probe of Phase 8. The same function builds 0_genomic_raw/reads/<run>/ for F3 (M3).
-#
-# Governing documents: 01_minutes_and_phases/04_barcoding_0.5.0/ of the audit repository, route A
-# proposal of 2026-09-28 (decisions RA1 to RA6 of BMM).
+# fastp, GetOrganelle (plastome and nrDNA) and step 10 on the assembled paths. The same function
+# builds 0_genomic_raw/reads/<run>/.
 # ------------------------------------------------------------------------------
 
 #' Default runner of the external steps
@@ -38,7 +34,7 @@
 #' tested in 0.5.0), and so do long reads (median length above 600 bases over the first 10 000 reads;
 #' not admitted in 0.5.0). Aligned reads (BAM, CRAM, SAM) stop with the command that converts them to
 #' FASTQ. Target capture, RAD-seq and GBS, RNA-seq and mixed amplicons are rejected in
-#' 0.5.0 (matrix of accepted inputs of 28-09) but cannot be told from the files; they should not be
+#' 0.5.0 (`barcoding_accepted_inputs.csv`) but cannot be told from the files; they should not be
 #' given to this function.
 #'
 #' A GetOrganelle step that fails, or exits 0 without writing a path, is reported with a message and

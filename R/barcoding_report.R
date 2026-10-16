@@ -3,12 +3,9 @@
 #
 # For every query, one self-contained HTML written by the package (no pandoc) and a set of CSV
 # files: the answer per locus, the alternatives under the threshold, a descriptive reading across
-# loci (never a combined call, E8), the sampling of the named genera in the library, and the
+# loci (never a combined call), the sampling of the named genera in the library, and the
 # provenance of the run (input, library, models, software). The figures follow Zeng et al. (2026,
 # New Phytologist): the route of the query, the answer per locus and the sampling of the genus.
-#
-# Governing documents: 01_minutes_and_phases/04_barcoding_0.5.0/ of the audit repository, Phase 9
-# proposal of 2026-09-28 (decisions IR1 to IR8 of BMM) and the review of maturity after Phase 8.
 # ------------------------------------------------------------------------------
 
 #' Base64 of a raw vector (RFC 4648), for the images embedded in the report
@@ -62,7 +59,7 @@
   paste0("<img alt=\"figure\" src=\"data:image/png;base64,", .bc_base64(readBin(f, "raw", file.size(f))), "\"/>")
 }
 
-#' Colours of the three states, used in every panel: the state role of the package palette (E1)
+#' Colours of the three states, used in every panel: the state role of the package palette
 #' @noRd
 .bc_state_colours <- function() phylocactus_colours("state")
 
@@ -90,7 +87,7 @@
   if (length(out)) out[1] else NA_character_
 }
 
-#' The run record of one identification (IR1), written as RUN_<run_name>.csv
+#' The run record of one identification, written as RUN_<run_name>.csv
 #' @noRd
 .bc_write_run_record <- function(dir, run_name, input_path, input_md5, input_type, route, library_dir, loci,
                                  models_dir, threshold, seed, min_overlap, tools = character(0), extra = NULL,
@@ -232,7 +229,7 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
 #' Answer per locus: species as a solid bar, genus as a striped bar, colour by state (Fig. 3c style)
 #'
 #' The two ranks are told apart by the fill (solid, striped), not by a shade, so that no rank can be
-#' read as a state (BMM, 28-09). Drawn with rectangles and segments: no pattern package is needed.
+#' read as a state. Drawn with rectangles and segments: no pattern package is needed.
 #' @noRd
 .bc_report_answer_plot <- function(t, threshold) {
   t <- t[order(t$compartment != "plastid", t$locus, method = "radix"), , drop = FALSE]
@@ -295,7 +292,7 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
                                          strip.text.y = ggplot2::element_text(angle = 0, face = "italic"))
 }
 
-#' The sentence of R2 (Phase 12) for the loci of a report named at genus rank only; empty when none is
+#' The sentence for the loci of a report named at genus rank only; empty when none is
 #' @noRd
 .bc_report_genus_only_words <- function(t) {
   g <- sort(unique(t$locus[t$reason %in% "genus_only_locus"]), method = "radix")
@@ -437,7 +434,7 @@ report_barcoding_identification <- function(run_name,
 
   # Answer
   if (!"identical_to_library" %in% names(tab)) tab$identical_to_library <- NA_character_
-  # R-c (Phase 11): a table written before the species threshold is read at the threshold of the run
+  # A table written before the species threshold is read at the threshold of the run
   if (!"species_threshold" %in% names(tab)) tab$species_threshold <- threshold
   extra <- intersect(c("identical_to_library", "scaffold", "scaffold_length", "mapq", "scaffolds_hit", "low_mapq", "contig", "organelle"),
                      names(tab))
@@ -456,7 +453,7 @@ report_barcoding_identification <- function(run_name,
                                             genus_confidence = r$genus_confidence, species_confidence = r$species_confidence,
                                             species_threshold = st, assigned = FALSE, stringsAsFactors = FALSE)
     }
-    # R2 (Phase 12): a locus that answers at genus rank only; the species IdTaxa reached is over the
+    # A locus that answers at genus rank only; the species IdTaxa reached is over the
     # species threshold, so it is listed under a kind of its own, never assigned
     if (r$state %in% 2L && r$reason %in% "genus_only_locus" && !is.na(r$species_idtaxa)) {
       alt[[length(alt) + 1L]] <- data.frame(query = r$query, locus = r$locus, kind = "species_of_genus_only_locus",

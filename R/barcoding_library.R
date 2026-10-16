@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
 # Molecular diagnostic branch (11_barcoding/), final library step. PhyloCactus 0.5.0.
 #
-# Decisions of BMM, 2026-09-21 (Phase 2 proposal, sec. 8):
+# Rules of the step:
 # - Sequences that run_alignment_pipeline() logs as "no_match_either_direction" in
 #   LOG_STRAND_<locus>.csv leave the library and are declared in a table.
 # - Within each species and locus, accessions with the same aligned sequence are reduced to one, the
@@ -31,7 +31,7 @@
 }
 
 #' Write UNMASKED_<locus>.fasta: the step 1 sequence of each accession, representatives and the
-#' accessions collapsed onto them (decision K3 of BMM, 28-09)
+#' accessions collapsed onto them
 #' @noRd
 .bc_write_unmasked <- function(assembly_dir, output_dir, locus, sids) {
   f <- file.path(assembly_dir, paste0(locus, ".fasta"))
@@ -71,7 +71,7 @@
 #' @param metadata_file Character. GenBank metadata cache written by [assemble_barcoding_dataset()],
 #'   read for the description of each excluded sequence.
 #' @param min_species_with_replica Integer. A locus enters the library when at least this number of
-#'   species keep two or more distinct sequences. Defaults to `20L` (decision of 2026-09-21).
+#'   species keep two or more distinct sequences. Defaults to `20L`.
 #' @param paralog_loci Character vector. Loci under paralogy surveillance, flagged in the column
 #'   `possible_paralog` of every table; the flag never excludes a locus. Defaults to `"pepC_like"`.
 #' @return Invisibly, a list with `summary`, `excluded` and `collapsed`. Writes `LIB_<locus>.fasta`
@@ -179,7 +179,7 @@ finalize_barcoding_library <- function(assembly_dir = file.path("11_barcoding", 
                             stringsAsFactors = FALSE)
     if (passes) {
       Biostrings::writeXStringSet(Biostrings::DNAStringSet(col$aln), file.path(output_dir, paste0("LIB_", l, ".fasta")))
-      # K3: the step 1 sequence of every accession the library represents, before masking
+      # The step 1 sequence of every accession the library represents, before masking
       .bc_write_unmasked(assembly_dir, output_dir, l, col$map$sid)
     }
     message(sprintf("Locus '%s': %d non-homologous removed, %d identical collapsed, %d species with replica (%s).",
@@ -197,7 +197,7 @@ finalize_barcoding_library <- function(assembly_dir = file.path("11_barcoding", 
   collapsed_tab <- do.call(rbind, collapsed)
   rownames(collapsed_tab) <- NULL
 
-  # Per-locus funnel (decision of 2026-09-22): every locus assembled or screened, with its count at each
+  # Per-locus funnel: every locus assembled or screened, with its count at each
   # stage. A locus that did not enter the screening keeps its row, with NA after that point.
   all_loci <- sort(union(unique(as.character(registry$locus)), as.character(screening$locus)))
   funnel_tab <- do.call(rbind, lapply(all_loci, function(l) {

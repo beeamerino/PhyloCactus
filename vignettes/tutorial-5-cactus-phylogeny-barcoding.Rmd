@@ -45,7 +45,7 @@ The branch reads:
 
 - **The phylotaR workspace of the phylogeny** (`0_phylotaR_raw_Ingroup/`, Tutorial 1). Both branches read the same mining; the barcoding branch adds no download of sequences, only the GenBank metadata of the accessions the phylogeny's cache does not hold.
 - **The curated files of the package:** the target loci (`target_genes.txt`), the dictionary of locus names (`genes_map.csv`), the manual exclusions (`manual_exclusions_ingroup.csv`, which include 21 `ITS` records annotated in GenBank as pseudogenes) and the checklist of Cactaceae of Caryophyllales.org (Korotkova *et al*. 2021), against which every name is reconciled.
-- **Own sequences, optional.** `own_dir = "0_own"` in step 1 adds the records of `0_own/`: a sample sheet (`SAMPLES.csv`: sample, species of the checklist, voucher, publication status) and one FASTA file per locus. What cannot enter is listed with its reason. The default, `own_dir = NULL`, builds the library from GenBank alone.
+- **Own sequences, optional.** `own_dir = "0_own"` in step 1 adds the records of `0_own/`: a sample sheet (`SAMPLES.csv`: sample, species of the checklist of Korotkova *et al*. 2021, voucher, publication status) and one FASTA file per locus. What cannot enter is listed with its reason. The default, `own_dir = NULL`, builds the library from GenBank alone.
 
 The library is not distributed with the package: the user builds it with steps 1 to 4.
 

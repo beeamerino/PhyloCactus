@@ -5,9 +5,6 @@
 # function, and builds a library with every accession of every species: none of the three
 # reductions to one sequence per species of the phylogeny is applied. Each sequence keeps its
 # GenBank accession (sid) in the FASTA header, as Genus_species|sid.
-#
-# Governing documents: 01_minutes_and_phases/04_barcoding_0.5.0/ of the audit repository, validation plan of
-# 2026-09-10 with its amendments of 2026-09-19 and 2026-09-21, and the Phase 2 design of 2026-09-21.
 # ------------------------------------------------------------------------------
 
 #' Refuse an output directory inside the phylogeny's directories
@@ -81,14 +78,13 @@ barcoding_outgroup_taxids <- function() {
 #' Resolve the Names of a Set of Accessions, With or Without a Checklist
 #'
 #' Two behaviours, and the difference matters outside Cactaceae. With a checklist, the one the
-#' branch has used since Phase 2: the checklist spelling for what matches and `NA` for what does
+#' branch uses for the ingroup: the checklist spelling for what matches and `NA` for what does
 #' not. With `checklist_path = NULL`, no checklist at all: the GenBank names come back cleaned to
 #' the `Genus_species` convention and nothing is dropped.
 #'
-#' The second is what CN2 needs (validation plan, sec. 4). An outgroup query is, by construction, a
+#' The second is what the outgroup control needs. An outgroup query is, by construction, a
 #' name that a checklist of Cactaceae does not hold, so resolving it against that checklist would
-#' discard the whole control. Added in Phase 5B; the assembly of the ingroup keeps its checklist and
-#' its behaviour untouched.
+#' discard the whole control. The assembly of the ingroup keeps its checklist.
 #'
 #' @param genbank_names Character vector of names as GenBank writes them.
 #' @param checklist_path Path to a checklist, a character vector of accepted names, or `NULL` for
@@ -238,7 +234,7 @@ barcoding_outgroup_taxids <- function() {
 #' Locus name of every cluster, keeping the clusters whose gene is not recognised
 #'
 #' A cluster with no standardized marker name is kept under the provisional name `cluster_<ID>` and
-#' listed with the GenBank description of its seed (decision of 2026-09-22).
+#' listed with the GenBank description of its seed.
 #' @param clusters Data frame with `ID`, `Marker_std` and `Description` (seed description).
 #' @return List with `map` (`ID`, `Marker_std`, `provisional_locus`) and `unnamed` (`ID`, `locus`,
 #'   `seed_description`).
@@ -276,7 +272,7 @@ barcoding_outgroup_taxids <- function() {
   )
 }
 
-#' The five context columns of the validation plan (sec. 3), per locus
+#' The five context columns of the validation, per locus
 #'
 #' A species has replication in a locus when it has two or more distinct accessions in that locus.
 #' Nothing is counted across loci.
@@ -453,7 +449,7 @@ assemble_barcoding_dataset <- function(wd_path,
                                        notify_to = NULL,
                                        notify_credentials = NULL) {
   .bc_assert_output_dir(output_dir)
-  # Email when step 1 ends, finished or failed (BMM, 29-09); the email of the mining (L4) is apart
+  # Email when step 1 ends, finished or failed; the email of the mining is sent apart
   step_done <- FALSE
   if (isTRUE(notify)) {
     started <- Sys.time()
@@ -467,8 +463,8 @@ assemble_barcoding_dataset <- function(wd_path,
   if (is.null(target_genes_file)) target_genes_file <- system.file("extdata", "target_genes.txt", package = "PhyloCactus")
   if (is.null(genes_map_file)) genes_map_file <- system.file("extdata", "genes_map.csv", package = "PhyloCactus")
   if (is.null(manual_exclusions_file)) manual_exclusions_file <- system.file("extdata", "manual_exclusions_ingroup.csv", package = "PhyloCactus")
-  # NULL keeps the checklist of Cactaceae, which is the behaviour the closed phases depend on.
-  # NA is the way to ask for no checklist at all, which is what the outgroup of CN2 needs.
+  # NULL keeps the checklist of Cactaceae, the default of the ingroup.
+  # NA is the way to ask for no checklist at all, which is what the outgroup control needs.
   if (is.null(checklist_path)) checklist_path <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
   if (is.null(phylogeny_map_file)) {
     phylogeny_map_file <- file.path(dirname(normalizePath(wd_path, mustWork = FALSE)), "1_phylotaR_out_Ingroup",
@@ -516,10 +512,10 @@ assemble_barcoding_dataset <- function(wd_path,
   # in assemble_ingroup_phylotar(); the records are then taken from the unreduced clusters.
   species_reduced <- phylotaR::drop_by_rank(phylota, rnk = "species", n = 1)
   cluster_ids <- species_reduced@cids
-  # Y1 (BMM, 29-09): the clusters of one locus pooled before the cut, as in the phylogeny
+  # The clusters of one locus pooled before the cut, as in the phylogeny
   cluster_locus <- .cp_cluster_loci(phylota, pattern, genes_map_df, marker_lookup)
   cluster_species <- .cp_cluster_species(species_reduced)
-  # Y2 (BMM, 29-09): only the clusters that overlap the main cluster of their locus are pooled
+  # Only the clusters that overlap the main cluster of their locus are pooled
   overlap <- .cp_cluster_overlap(phylota, cluster_locus, cluster_species)
   by_locus <- .cp_select_clusters_by_locus(cluster_species, cluster_locus, min_species, overlap = overlap)
   utils::write.csv(by_locus$table, file.path(dir_asm, "TABLE_barcoding_loci_over_min_species.csv"), row.names = FALSE)
@@ -544,7 +540,7 @@ assemble_barcoding_dataset <- function(wd_path,
   kept <- dd$kept
   counts_manual <- NULL
   if (isTRUE(apply_manual_exclusions) && nzchar(manual_exclusions_file) && file.exists(manual_exclusions_file)) {
-    # X2 (BMM, 29-09): the list is keyed by (locus, sid); its pairs in this workspace
+    # The list is keyed by (locus, sid); its pairs in this workspace
     ex_pairs <- .cp_exclusion_pairs(utils::read.csv(manual_exclusions_file, stringsAsFactors = FALSE), records, cluster_locus)
     log_message("Manual exclusions: ", ex_pairs$counts$n_file, " (locus, accession) rows in the list; ",
                 ex_pairs$counts$n_matched, " found in the selected clusters.")
@@ -594,7 +590,7 @@ assemble_barcoding_dataset <- function(wd_path,
   smmry <- .cp_enrich_cluster_summary(smmry, seed_meta, pattern, gene_lookup, marker_lookup)
 
   # Clusters whose gene is not recognised in target_genes.txt stay in the funnel under a provisional
-  # name (decision of 2026-09-22), so a locus that is new in GenBank is not lost at this point.
+  # name, so a locus that is new in GenBank is not lost at this point.
   named <- .bc_name_clusters(data.frame(ID = smmry$ID, Marker_std = smmry$Marker_std,
                                         Description = smmry$Description, stringsAsFactors = FALSE))
   marker_map <- named$map
@@ -635,7 +631,7 @@ assemble_barcoding_dataset <- function(wd_path,
   registry <- .bc_build_registry(kept[!is.na(kept$species), , drop = FALSE])
   sequences <- vapply(registry$sid, function(s) rawToChar(selected@sqs[[s]]@sq), character(1))
   names(sequences) <- registry$sid
-  # Own data (O1 to O3, BMM 29-09): records of 0_own/ join their loci before the cut of long records
+  # Own data: records of own_dir join their loci before the cut of long records
   if (!is.null(own_dir)) {
     own <- .bc_own_records(own_dir, checklist_path, loci = unique(registry$locus))
     utils::write.csv(own$left_out, file.path(dir_asm, "TABLE_barcoding_own_left_out.csv"), row.names = FALSE)
@@ -647,14 +643,14 @@ assemble_barcoding_dataset <- function(wd_path,
     rownames(registry) <- NULL
     sequences <- c(sequences, own$sequences)[registry$sid]
   }
-  # Records over 2000 bases cut to the extent of the shorter records of their locus (L2, 28-09)
+  # Records over 2000 bases cut to the extent of the shorter records of their locus
   cut <- .bc_cut_long_records(registry, sequences)
   utils::write.csv(cut$table, file.path(dir_asm, "TABLE_barcoding_long_records_cut.csv"), row.names = FALSE)
   log_message("Records over 2000 bases: ", sum(cut$table$action == "cut"), " cut to the extent of their locus, ",
               sum(cut$table$action == "no_overlap"), " left out.")
   registry <- cut$registry
   sequences <- cut$sequences
-  # Extra records from GenBank plastomes (Phase 8, F2); NULL leaves the step as it was
+  # Extra records from GenBank plastomes; NULL adds none
   extra <- .bc_add_extra_records(registry, sequences, extra_records_dir)
   if (!is.null(extra_records_dir)) {
     log_message("Extra records from ", extra_records_dir, ": ", nrow(extra$registry) - nrow(registry), ".")

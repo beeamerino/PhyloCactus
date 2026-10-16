@@ -1,5 +1,5 @@
 # Extra records of the library cropped from GenBank plastomes (0_genomic_raw/plastomes/).
-# Phase 8 of PhyloCactus 0.5.0, decision F2 and PL1 to PL7 of BMM (28-09): the plastomes fill loci
+# PhyloCactus 0.5.0. The plastomes fill loci
 # missing for species of the library; they enter step 1 beside the phylotaR clusters, with their
 # source declared, and nothing is classified here.
 
@@ -62,7 +62,7 @@
   (!is.na(x$key) & !is.na(y$key) & x$key == y$key) | (nzchar(x$full) & x$full == y$full)
 }
 
-#' Pools of one locus of the library: strand pool, core pool (J1) and crop window
+#' Pools of one locus of the library: strand pool, core pool and crop window
 #' @noRd
 .bc_locus_pools <- function(library_dir, locus) {
   dna <- ape::read.dna(file.path(library_dir, paste0("LIB_", locus, ".fasta")), format = "fasta")
@@ -73,7 +73,7 @@
        species = .bc_parse_header(rownames(lib_m))$species)
 }
 
-#' The region of a locus in a long sequence: the crop of step 10 and the cut of J1
+#' The region of a locus in a long sequence: the crop of step 10 and the cut to the core of the locus
 #'
 #' Returns NULL when the locus is not found, or a list with the coordinates in `s`, the strand and
 #' the region oriented as the library.
@@ -187,7 +187,7 @@ extract_barcoding_plastome_loci <- function(query = paste0("Cactaceae[Organism] 
   pl <- pl[!dup, , drop = FALSE]
 
   matched <- .bc_resolve_names(pl$organism, checklist_path)
-  # L5 (BMM, 28-09): genera outside the checklist (Portulacaceae, Talinaceae) keep the NCBI binomial,
+  # Genera outside the checklist (Portulacaceae, Talinaceae) keep the NCBI binomial,
   # provided it names a species
   w <- strsplit(trimws(pl$organism), "[[:space:]]+")
   epithet <- vapply(w, function(v) if (length(v) >= 2L) v[2] else NA_character_, "")
@@ -200,7 +200,7 @@ extract_barcoding_plastome_loci <- function(query = paste0("Cactaceae[Organism] 
 
   loci <- sub("^LIB_(.*)\\.fasta$", "\\1", list.files(library_dir, pattern = "^LIB_.*\\.fasta$"))
   pools <- lapply(stats::setNames(loci, loci), function(l) .bc_locus_pools(library_dir, l))
-  # The extent of a record is set by the library it is cut with (N1, 28-09)
+  # The extent of a record is set by the library it is cut with
   lib_md5 <- vapply(loci, function(l) unname(tools::md5sum(file.path(library_dir, paste0("LIB_", l, ".fasta")))), "")
 
   # Vouchers of the library accessions of the species that come with a voucher

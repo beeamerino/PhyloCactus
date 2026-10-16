@@ -31,7 +31,7 @@ entered the screening are read from \code{TABLE_barcoding_marker_screening.csv}.
 read for the description of each excluded sequence.}
 
 \item{min_species_with_replica}{Integer. A locus enters the library when at least this number of
-species keep two or more distinct sequences. Defaults to \code{20L} (decision of 2026-09-21).}
+species keep two or more distinct sequences. Defaults to \code{20L}.}
 
 \item{paralog_loci}{Character vector. Loci under paralogy surveillance, flagged in the column
 \code{possible_paralog} of every table; the flag never excludes a locus. Defaults to \code{"pepC_like"}.}

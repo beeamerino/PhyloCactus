@@ -3,9 +3,6 @@
 #
 # The crop of step 10 reads every 20-mer of a query and does not scale to an assembly of 1 Gb: the
 # loci are located first with minimap2, cut with samtools faidx and handed to step 10.
-#
-# Governing documents: 01_minutes_and_phases/04_barcoding_0.5.0/ of the audit repository, T3 proposal
-# of 2026-09-28 (decisions A1 to A5) and decision T3a of BMM (28-09).
 # ------------------------------------------------------------------------------
 
 #' Copy of the assembly as plain FASTA, when it is gzipped

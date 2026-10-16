@@ -296,7 +296,7 @@ build_marker_consolidated_row <- function(marker_id, summary_all, filter_info, f
   )
 }
 
-# Row of a marker that failed in Module 2 (decision M1 of BMM, 13-10): the columns of a processed
+# Row of a marker that failed in Module 2: the columns of a processed
 # marker, every count NA and the message in status, so that do.call(rbind, ...) in
 # run_alignment_pipeline() keeps the other markers and the manifest says which marker failed and why.
 .alignment_error_row <- function(marker_id, masking_applied, message) {
@@ -371,10 +371,9 @@ cached_params_match <- function(cached_summary, stamp) {
 #' @return A list with `dna` (the corrected set) and `log`, one row per sequence.
 #' @keywords internal
 #' @noRd
-# The k-mer parts of .normalise_strand(), pulled out on 2026-09-25 so that the barcoding branch can
+# The k-mer parts of .normalise_strand(), kept apart so that the barcoding branch can
 # orient one query against the library with the same rule instead of a second copy of it. The
-# extraction is behaviour preserving: what .normalise_strand() decides is pinned by a test written
-# before this change, and the ingroup of step 1 was re-run afterwards. Decision of BMM, 2026-09-25.
+# extraction is behaviour preserving: what .normalise_strand() decides is pinned by a test.
 .kmer_set <- function(s, k) {
   m <- nchar(s) - k + 1L
   if (m < 1L) return(character(0))

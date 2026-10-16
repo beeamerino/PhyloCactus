@@ -146,7 +146,7 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
   dir.create(OUT_TREES, recursive = TRUE, showWarnings = FALSE)
   dir.create(OUT_LOGS, recursive = TRUE, showWarnings = FALSE)
   
-  # The first five categorical colours of the package palette (decision E1), in their fixed order
+  # The first five categorical colours of the package palette, in their fixed order
   tree_palette <- stats::setNames(unname(phylocactus_colours("categorical")[1:5]),
                                   c("FocalTree", "Zuntini", "Thompson", "Amaral", "deVos"))
   # Shapes as well as colours, so that the five trees remain distinguishable in greyscale print and

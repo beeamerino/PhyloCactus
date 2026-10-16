@@ -17,7 +17,7 @@ report_marker_group_coverage(
 
 \item{outgroup_pattern}{Character. Regular expression matched against terminal names, or a named
 character vector of regular expressions (e.g. \code{c(Anacampserotaceae = "...", Portulacaceae = "...", Talinaceae = "...")})
-to additionally compute per-group coverage columns.}
+which also adds per-group coverage columns.}
 
 \item{min_coverage}{Numeric. Fraction of non-gap, non-missing characters at which a terminal
 counts as covered by that marker. Defaults to \code{0.2}.}

@@ -1,12 +1,12 @@
 # Per-class metrics of the molecular diagnostic branch (11_barcoding/11_metrics/).
-# Phase 6D of PhyloCactus 0.5.0, decisions M1 to M4 of BMM (26-09); section 5 of the validation plan.
+# PhyloCactus 0.5.0.
 # It reads the tables of steps 7 and 9 and the library summary, and runs no classifier.
 
 #' The predictions of one classifier at its operating point of step 9
 #'
-#' The nearest neighbour through the identification path is cut at `t*` of each locus and scheme
-#' (6A, D1); IdTaxa at the row `idtaxa_rule` of its operating table, 60 by the decision of 26-09
-#' (6B proposal, section 12). The operating point is read, never recomputed.
+#' The nearest neighbour through the identification path is cut at `t*` of each locus and scheme,
+#' and IdTaxa at the row `idtaxa_rule` of its operating table, 60 by default. The operating point is
+#' read, never recomputed.
 #' @noRd
 .bc_metrics_operating <- function(pred, operating, method, idtaxa_rule) {
   key_p <- paste(pred$locus, pred$scheme)
@@ -79,7 +79,7 @@
 #' @param methods Character vector, any of `"nn_add"` (the nearest neighbour through the
 #'   identification path, at `t*`) and `"idtaxa"`.
 #' @param idtaxa_rule Character. The row of the IdTaxa operating table used as its operating
-#'   point. Defaults to `"default_60"`, as decided on 2026-09-26.
+#'   point. Defaults to `"default_60"`.
 #' @param figures Logical. Draw the curve figures. Defaults to `TRUE`.
 #' @return Invisibly, a list with the class and summary tables of each method.
 #' @seealso [sweep_barcoding_threshold()], [classify_barcoding_folds()].

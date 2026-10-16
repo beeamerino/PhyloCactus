@@ -780,8 +780,8 @@ integrate_and_clean_markers <- function(
     }
   }
 
-  # Sharing a marker name is not evidence of sharing a region. Both false pairs the 2026-09-01
-  # audit found reached this point looking healthy: pepC with 506 aligned columns across the root,
+  # Sharing a marker name is not evidence of sharing a region. Two false pairs once reached this
+  # point looking healthy: pepC with 506 aligned columns across the root,
   # trnT-psbD with the most balanced ingroup/outgroup counts in the dataset. Counts cannot see
   # this and neither can a coverage table; only the sequences can. Measured here because this is
   # where the two sets are joined, and reported rather than enforced, because a low share on a
@@ -837,10 +837,8 @@ integrate_and_clean_markers <- function(
                 "counterpart, so their aligned columns cannot carry positional homology: ",
                 paste(sprintf("%s (k20 %.3f, k10 %.3f)", bad$marker_key, bad$share_k20,
                               bad$share_k10), collapse = ", "),
-                # Recomputed on 2026-09-19 over the current run: 0.26 to 0.59 is the interval of
-                # trnL_trnF, matK, phyC and rbcL in TABLE_marker_homology_check.csv. The 0.28 to
-                # 0.60 written here until 2026-09-25 came from the matrix of 2026-09-01, which the
-                # run no longer reproduces; the tutorials were corrected then and this was not.
+                # Measured on the reference run of 0.4.5: 0.26 to 0.59 is the interval of trnL_trnF,
+                # matK, phyC and rbcL in TABLE_marker_homology_check.csv.
                 ". Genuine counterparts in this dataset return 0.26 to 0.59 at k = 20. Such a ",
                 "locus places non-homologous characters on the terminals that define the root, ",
                 "which is where the outgroup branch is estimated. See ",

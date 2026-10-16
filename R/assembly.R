@@ -21,6 +21,13 @@
 #'   reading an existing workspace sends nothing. Defaults to `FALSE`.
 #' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
 #' @return A data frame summarizing sequence occupancy, taxon representation, and cluster characteristics across retained loci.
+#' @details
+#' Records of more than 2000 bases (for example `matK` records that carry the flanking `trnK`
+#' intron) are cut to the extent that the records of 2000 bases or fewer of the same marker cover,
+#' before one record per species is kept, so that the records of a partition span the same region.
+#' A long record that does not overlap that extent is left out, and a marker with no record of 2000
+#' bases or fewer gets no FASTA file. Every long record, with what was done to it, is written to
+#' `TABLE_LONG_RECORDS_CUT_INGROUP.csv` in `out_dir`, and the log gives the counts.
 #' @references
 #' Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. (2018).
 #' phylotaR: An automated pipeline for retrieving orthologous DNA sequences from GenBank in R.
@@ -102,7 +109,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   # 8. SPECIES REDUCTION AND CLUSTER FILTERING
   species_reduced <- phylotaR::drop_by_rank(phylota, rnk = "species", n = 1)
   cluster_ids <- species_reduced@cids
-  # Y1 (BMM, 29-09): the clusters of one locus are pooled before the cut, so that a locus split into
+  # The clusters of one locus are pooled before the cut, so that a locus split into
   # small clusters by the mining is not lost; a cluster with no locus name is judged alone
   cluster_locus <- .cp_cluster_loci(phylota, pattern, genes_map_df, marker_lookup)
   cluster_species <- .cp_cluster_species(species_reduced)
@@ -305,8 +312,8 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   df_joined <- df_joined |> dplyr::filter(!is.na(Marker_std), nzchar(Marker_std))
   markers_final <- sort(unique(df_joined$Marker_std))
   
-  # P10a (BMM, 13-10): records over 2000 bases cut to the extent of the shorter records of their
-  # marker, as in step 1 of the barcoding branch (L2), before one record per species is kept
+  # Records over 2000 bases cut to the extent of the shorter records of their marker, as in step 1
+  # of the barcoding branch, before one record per species is kept
   long_cut <- list()
   for (mk in markers_final) {
     log_message("Processing marker FASTA merge: ", mk)
@@ -381,6 +388,13 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
 #'   reading an existing workspace sends nothing. Defaults to `FALSE`.
 #' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
 #' @return A list containing the processed outgroup cluster objects and retained cluster IDs.
+#' @details
+#' Records of more than 2000 bases (for example `matK` records that carry the flanking `trnK`
+#' intron) are cut to the extent that the records of 2000 bases or fewer of the same marker cover,
+#' before one record per species is kept, so that the records of a partition span the same region.
+#' A long record that does not overlap that extent is left out, and a marker with no record of 2000
+#' bases or fewer gets no FASTA file. Every long record, with what was done to it, is written to
+#' `TABLE_LONG_RECORDS_CUT_OUTGROUP.csv` in `out_dir`, and the log gives the counts.
 #' @references
 #' Bennett, D. J., Hettling, H., Silvestro, D., Zizka, A., Bacon, C. D., Faurby, S., ... & Antonelli, A. (2018).
 #' phylotaR: An automated pipeline for retrieving orthologous DNA sequences from GenBank in R.
@@ -444,7 +458,7 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
   marker_lookup <- genes_map_df |> dplyr::select(search_marker = search, Marker_std = replace)
   
   # Workspace through the function shared with the ingroup and the barcoding branch: one set of
-  # parameters for both halves of folder 0 (E1, BMM, 28-09)
+  # parameters for the ingroup and the outgroup workspaces
   phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = outgroups[1], txid = outgroups,
                                     force_download = force_download, log_message = log_message,
                                     mnsql = mnsql, mxsql = mxsql,
@@ -619,8 +633,8 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
   df_joined <- df_joined |> dplyr::filter(!is.na(Marker_std), nzchar(Marker_std))
   markers_final <- sort(unique(df_joined$Marker_std))
   
-  # P10a (BMM, 13-10): records over 2000 bases cut to the extent of the shorter records of their
-  # marker, as in step 1 of the barcoding branch (L2), before one record per species is kept
+  # Records over 2000 bases cut to the extent of the shorter records of their marker, as in step 1
+  # of the barcoding branch, before one record per species is kept
   long_cut <- list()
   for (mk in markers_final) {
     log_message("Processing marker FASTA merge: ", mk)
@@ -851,11 +865,11 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
   }
 }
 
-#' Merge the cluster FASTA files of one marker, with the cut of long records (P10a)
+#' Merge the cluster FASTA files of one marker, with the cut of long records
 #'
 #' Reads the cluster files of a marker in the order given, cuts every record over `max_length`
 #' bases to the extent of the shorter records of the marker with the rule of step 1 of the barcoding
-#' branch (`.bc_cut_long_records()`, decision L2 of 28-09), leaves out a long record that shares
+#' branch (`.bc_cut_long_records()`), leaves out a long record that shares
 #' nothing with them, keeps the first record of each species and writes `out_file`. A marker whose
 #' records are all over `max_length` has no extent to cut to: no file is written and its records are
 #' listed with the action `no_shorter_records` (M2a). Folder 0 is not touched.
@@ -867,7 +881,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
   seqs_all <- do.call(c, seqs_list)
   src <- rep(files, vapply(seqs_list, length, 1L))
   headers <- names(seqs_all)
-  # M2a (BMM, 13-10): with no record of max_length or fewer there is no extent to cut to; the marker
+  # With no record of max_length or fewer there is no extent to cut to; the marker
   # gets no FASTA, and its records are listed, instead of an empty FASTA that stops Module 2
   if (length(seqs_all) && all(Biostrings::width(seqs_all) > max_length)) {
     n <- length(seqs_all)
@@ -951,7 +965,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
                                    run_fn = phylotaR::run) {
   # What is mined and which parent wins when a sid sits in two clusters are two different things.
   # They coincided while only the ingroup used this, with its single focal clade. The outgroup of
-  # CN2 is several clades and has no preferred parent, so `txid` carries what to mine and defaults
+  # the outgroup control is several clades and has no preferred parent, so `txid` carries what to mine and defaults
   # to `preferred_parent`, which leaves every existing call doing exactly what it did.
   if (is.null(txid)) txid <- preferred_parent
   mine <- function() {
@@ -991,7 +1005,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
     reader(wd_path)
   }, error = function(e) {
     if (!isTRUE(notify)) return(mine())
-    # L4 (BMM, 28-09): the mining takes hours on the Mac; it says when it ends or fails
+    # The mining takes hours; it says when it ends or fails
     started <- Sys.time()
     analysis <- paste0("phylotaR mining of ", paste(txid, collapse = ", "))
     res <- tryCatch(mine(), error = function(err) {
@@ -1042,7 +1056,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
 #' The same reading as the naming of the kept clusters (`cp_annotate_marker_text()`, the dominant
 #' marker of `cp_summarise_cluster_markers()`, `marker_lookup`), on the definition lines the
 #' workspace already holds, so that every cluster can be named before the cut of min_species
-#' (decision Y1 of BMM, 29-09) without downloading metadata.
+#' without downloading metadata.
 #' @return A data frame with `cluster_id` and `locus` (`NA` when no gene is recognised).
 #' @noRd
 .cp_cluster_loci <- function(phylota, pattern, genes_map_df, marker_lookup) {
@@ -1062,7 +1076,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
   data.frame(cluster_id = as.integer(s$cluster_id), locus = locus, stringsAsFactors = FALSE)
 }
 
-#' Clusters over the cut of min_species, the clusters of one locus pooled (decision Y1 of BMM, 29-09)
+#' Clusters over the cut of min_species, the clusters of one locus pooled
 #'
 #' A locus is kept when its clusters together hold more than `min_species` species; a cluster with
 #' no locus name is judged alone, as before.
@@ -1075,7 +1089,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
 .cp_select_clusters_by_locus <- function(cluster_species, cluster_locus, min_species, overlap = NULL) {
   fragments <- data.frame(cluster_id = integer(0), locus = character(0))
   if (!is.null(overlap)) {
-    # Y2 (BMM, 29-09): a named cluster that does not overlap the main cluster of its locus is not pooled
+    # A named cluster that does not overlap the main cluster of its locus is not pooled
     out <- overlap$cluster_id[!overlap$overlaps_main]
     loc_all <- cluster_locus$locus[match(out, cluster_locus$cluster_id)]
     out <- out[!is.na(loc_all) & nzchar(loc_all)]
@@ -1133,7 +1147,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
   out
 }
 
-#' The curated exclusions keyed by (locus, sid) as the (cluster, sid) pairs of this workspace (X2)
+#' The curated exclusions keyed by (locus, sid) as the (cluster, sid) pairs of this workspace
 #'
 #' An accession is removed from every cluster of the locus named in the list; its clusters of other
 #' loci are left alone.
@@ -1163,7 +1177,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
   }))
 }
 
-#' Read the curated exclusions, keyed by (locus, sid), as the (cluster, sid) pairs to remove (X2)
+#' Read the curated exclusions, keyed by (locus, sid), as the (cluster, sid) pairs to remove
 #'
 #' The list is written to `path_table` as read; the log says how many of its rows are found in this
 #' workspace, so that a run reports the curation it actually applied.

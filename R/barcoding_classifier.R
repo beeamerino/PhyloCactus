@@ -1,14 +1,13 @@
-# Classifier of the molecular diagnostic branch (11_barcoding/7_classifier/).
-# Phase 5A of PhyloCactus 0.5.0. This file implements the classifier and computes no accuracy:
-# the negative controls are Phase 5B and the real figures are Phase 6, in that order and for a
-# reason (a classifier written while its accuracy is on screen ends up fitted to it).
+# Classifier of the molecular diagnostic branch (11_barcoding/7_classifier/). PhyloCactus 0.5.0.
+# This file implements the classifier and computes no accuracy: the negative controls (step 8) and
+# the metrics (steps 9 and 10) come after it, so that the classifier is not fitted to its accuracy.
 
 #' Empty prediction row, so every path returns the same columns
 #'
 #' The two methods write the same columns, which is what makes them comparable column by column.
 #' `nn_distance` and `margin` are the scores of the nearest neighbour; `confidence` is the score
 #' of IdTaxa. Each method fills its own and leaves the other empty. The threshold is not applied
-#' here: it is swept in Phase 6 over these scores, without running the classifier again.
+#' here: it is swept in step 9 over these scores, without running the classifier again.
 #' @noRd
 .bc_prediction_row <- function(state, species = NA_character_, genus = NA_character_,
                                candidates = NA_character_, distance = NA_real_, margin = NA_real_,
@@ -25,11 +24,11 @@
 #' it is would be inventing it. A tie across genera is state 3. No threshold takes part in this
 #' decision, which is why the threshold can be swept afterwards.
 #'
-#' The function refuses a query that sits in its own training set. The folds of Phase 3 never put it
+#' The function refuses a query that sits in its own training set. The folds of step 5 never put it
 #' there, and the checker proves it, but the classifier does not rely on that: the defect that
 #' retired the section in v0.4.2 was exactly this one.
 #'
-#' `allow_resubstitution = TRUE` lifts that guard, and only CN3 uses it (validation plan, sec. 4).
+#' `allow_resubstitution = TRUE` lifts that guard, and only the resubstitution control uses it.
 #' It is an argument and not a silent case on purpose: resubstitution is the defect itself, measured
 #' on purpose to report its size, and whoever runs it has to ask for it by name.
 #' @noRd
@@ -74,7 +73,7 @@
 #' calls disagree; with the same seed they agree; and several queries in one call do not give what
 #' one call per query gives. So each query gets its own seed, derived from the seed of the run, the
 #' locus, the scheme, the fold and the `sid`, and from nothing else: not from the other folds, not
-#' from the chunk, not from the order of the run (decision K1 of BMM).
+#' from the chunk, not from the order of the run.
 #'
 #' The four fields are joined by a carriage return and hashed base 31 modulo the Mersenne prime
 #' 2^31 - 1, in doubles, which are exact below 2^53; the result is combined with the run seed. It
@@ -120,8 +119,7 @@
 #' Training of IdTaxa for one fold
 #'
 #' `DECIPHER::LearnTaxa()` with the genus and the species as the two ranks below `Root`. A fold is
-#' learnt once and every query of the fold is classified against the same training (decision K2 of
-#' BMM).
+#' learnt once and every query of the fold is classified against the same training.
 #'
 #' LearnTaxa() draws from the generator: it classifies its own training sequences in rounds with
 #' `sample()`, and where labels conflict, as GenBank's do, the training it returns depends on the
@@ -217,13 +215,12 @@
 #'
 #' The query arrives unaligned. It is oriented against the training set with the rule of
 #' `.normalise_strand()`, added to the training alignment with `MAFFT --add --keeplength`, one call
-#' for this query alone, and classified with the three states of `.bc_classify_nn()` under E13.
-#' CN2 and the add path of step 7 both go through here, so an alien query and a legitimate one are
+#' for this query alone, and classified with the three states of `.bc_classify_nn()`, with the minimum of comparable positions.
+#' The outgroup control and the add path of step 7 both go through here, so an alien query and a legitimate one are
 #' measured by the same operation.
 #'
 #' A query that matches the training set in neither direction is not aligned and not classified: it
-#' is state 3 with the reason `no_match`, no species and no distance (decision D4 of BMM,
-#' 2026-09-26). A sequence with no homology to the locus has no nearest neighbour worth publishing.
+#' is state 3 with the reason `no_match`, no species and no distance. A sequence with no homology to the locus has no nearest neighbour worth publishing.
 #'
 #' @param train_dna Aligned training set, `sid` as row names.
 #' @param species Character vector of species named by `sid`; must cover every training row.
@@ -383,7 +380,7 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
   if (alignment == "add") .bc_assert_mafft(mafft_exec)
   suffix <- paste0(method, if (alignment == "add") "_add" else "")
   if (workers > 1) {
-    # PA1 to PA3 (BMM, 29-09): the chunks of 6B run as parallel processes of this machine and are merged
+    # The chunks run as parallel processes of this machine and are merged
     args <- list(library_dir = library_dir, folds_dir = folds_dir, output_dir = output_dir, method = method,
                  model = model, min_comparable = min_comparable, schemes = schemes, loci = loci,
                  max_folds = max_folds, seed = seed, threshold = threshold, alignment = alignment,
@@ -443,7 +440,7 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
             train_aln <- .bc_training_alignment(dna, p$train_ids)
             pool <- .bc_strand_pool(train_aln)
           }
-          # IdTaxa learns the fold once (decision K2); LearnTaxa() draws from the generator, so the
+          # IdTaxa learns the fold once; LearnTaxa() draws from the generator, so the
           # training has a seed of its own
           trained <- if (method == "idtaxa") {
             .bc_idtaxa_train(seqs[p$train_ids], species[p$train_ids],
@@ -547,7 +544,7 @@ classify_barcoding_folds <- function(library_dir = file.path("11_barcoding", "4_
 
 #' Closing banner of step 7, in the format the phylogeny already uses
 #'
-#' It reports what was written and where, and nothing else. No accuracy, no rate: Phase 5A does not
+#' It reports what was written and where, and nothing else. No accuracy, no rate: this step does not
 #' measure any, and a banner is exactly where a number nobody asked for would slip in. `method` is the
 #' suffix of the tables, `nn`, `nn_add` or `idtaxa`.
 #' @noRd

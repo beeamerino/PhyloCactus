@@ -1,6 +1,6 @@
-#' Step 7 in parallel on one machine (decisions PA1 to PA3 of BMM, 29-09)
+#' Step 7 in parallel on one machine
 #'
-#' Starts `workers` R processes, one chunk of the 6B chunks each, writes the progress to
+#' Starts `workers` R processes, one chunk each, writes the progress to
 #' `PROGRESS_<suffix>.txt` of `output_dir` every `getOption("PhyloCactus.poll_seconds", 60)`
 #' seconds, merges the chunks with [merge_barcoding_chunks()] when every worker has finished, and
 #' sends one email at the end. A worker that fails stops the others and the run. On macOS the machine

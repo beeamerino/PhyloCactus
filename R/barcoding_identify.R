@@ -1,13 +1,12 @@
-# Identification of a user query (11_barcoding/10_identify/).
-# Phase 6 bis of PhyloCactus 0.5.0, decisions I1 to I9 of BMM (27-09): IdTaxa at 60, one model per
+# Identification of a user query (11_barcoding/10_identify/). PhyloCactus 0.5.0: IdTaxa at 60, one model per
 # locus trained on the whole library, a crop by 20-mer hits for contigs and plastomes, three reasons
-# for state 3, one row per query and locus and never a row that combines loci (E8).
+# for state 3, one row per query and locus and never a row that combines loci.
 
 #' The IdTaxa model of one locus trained on its whole library
 #'
-#' The object CN2 has trained since 6B, shared with the identification step so that both answer a
-#' query the same way (decision I8). The training seed keeps the key `"cn2"` it had in 6B, so the
-#' CN2 table does not change.
+#' The object the outgroup control (`"CN2"`) trains, shared with the identification step so that
+#' both answer a query the same way. The training seed keeps the key `"cn2"`, so the table of the
+#' outgroup control does not change.
 #' @noRd
 .bc_idtaxa_whole_locus <- function(lib_dna, lib_tab, locus, seed, trained = NULL) {
   species <- stats::setNames(lib_tab$species, lib_tab$sid)
@@ -23,7 +22,7 @@
        core_pool = .bc_core_pool(lib_m), lib_m = lib_m, genus_cores = new.env())
 }
 
-#' The 20-mers of the core of a locus, with their distance to each end of the core (amendment J1)
+#' The 20-mers of the core of a locus, with their distance to each end of the core
 #'
 #' The core is the span of alignment columns covered by `min_cover` or more of the library
 #' sequences. Each 20-mer of a library sequence inside that span is kept with the number of bases
@@ -67,7 +66,7 @@
     h2 + 19L + min(nchar(oriented) - (h2 + 19L), pool$after[k2]))
 }
 
-#' The core pool of one genus of a locus (amendment J2), computed once per call; NULL for a genus
+#' The core pool of one genus of a locus, computed once per call; NULL for a genus
 #' with fewer than `min_sequences` sequences in the locus
 #' @noRd
 .bc_genus_core <- function(wl, genus, min_sequences = 3L) {
@@ -141,7 +140,7 @@
   best
 }
 
-#' Answer of one query for one locus (decisions I3 and I4)
+#' Answer of one query for one locus
 #' @noRd
 .bc_identify_one <- function(s, id, locus, wl, width, threshold, min_overlap, seed) {
   n <- nchar(s)
@@ -182,7 +181,7 @@
     o <- .bc_orient_to_library(.bc_dnabin_row(region, "query"), wl$pool)
     if (o$orientation == "no_match") return(empty(path, "no_overlap", start, end, other))
   }
-  # J1: the region is cut where it runs beyond the core of the locus, in the coordinates of the
+  # The region is cut where it runs beyond the core of the locus, in the coordinates of the
   # query. Before the first core 20-mer the query keeps at most as many bases as the core holds
   # before that 20-mer, and the same after the last one.
   oriented <- toupper(paste(as.character(as.matrix(o$query)), collapse = ""))
@@ -213,11 +212,11 @@
                         query_seed = .bc_query_seed(seed, locus, "cn2", 0L, id))
   }
   r <- classify()
-  # J3: the region as it was before J1, cut to the core of the genus reached; classified again when
+  # The region as it was before the cut to the core of the locus, cut to the core of the genus reached; classified again when
   # that is not the region already classified. The core of a genus can be narrower or wider than
   # that of the locus.
   genus_trimmed <- 0L
-  # J3b: only after a first pass that assigns the genus (state 1 or 2)
+  # Only after a first pass that assigns the genus (state 1 or 2)
   if (!is.na(r$genus_idtaxa) && r$state %in% 1:2) {
     gpool <- .bc_genus_core(wl, r$genus_idtaxa)
     tg <- if (is.null(gpool)) NULL else .bc_core_cut(before_j1$oriented, gpool)
@@ -240,7 +239,7 @@
                    genus_core_trimmed = genus_trimmed, stringsAsFactors = FALSE), r)
 }
 
-#' The wrong-species rates of 6D for each locus, or NA with the reason (decision I6)
+#' The wrong-species rates of step 10 for each locus, or NA with the reason
 #' @noRd
 .bc_identify_context <- function(metrics_dir, loci, threshold) {
   na <- data.frame(locus = loci, validation_ws_rate_species_present = NA_real_,
@@ -270,7 +269,7 @@
   na
 }
 
-#' The species threshold of each locus, from step 9 (rule R-c, Phase 11, decisions C1 and C2 of BMM)
+#' The species threshold of each locus, from step 9
 #'
 #' Read from `TABLE_barcoding_species_threshold_idtaxa.csv` of `threshold_dir`; a missing table or
 #' locus takes `threshold`, with a message. Never under `threshold`.
@@ -293,7 +292,7 @@
   out
 }
 
-#' Rule R-c: a row named at species rank under the species threshold of its locus is named at genus
+#' Species threshold: a row named at species rank under the species threshold of its locus is named at genus
 #' rank, keeping what IdTaxa reached
 #' @noRd
 .bc_apply_species_threshold <- function(tab, thr) {
@@ -306,11 +305,11 @@
   tab
 }
 
-#' Rule R2 (Phase 12, decision of BMM, 14-10): a locus that answers at genus rank only
+#' A locus that answers at genus rank only
 #'
-#' A row of a locus of `genus_only_loci` that is still named at species rank after R-c is named at
+#' A row of a locus of `genus_only_loci` that is still named at species rank after the species threshold is named at
 #' genus rank, with reason `genus_only_locus`, keeping what IdTaxa reached. Rows in states 2 and 3,
-#' and rows moved by R-c, are left as they are.
+#' and rows moved by the species threshold, are left as they are.
 #' @noRd
 .bc_apply_genus_only <- function(tab, genus_only_loci) {
   if (!length(genus_only_loci)) return(tab)
@@ -321,7 +320,7 @@
   tab
 }
 
-#' Aligned reads are not accepted (decision Z2 of BMM, 28-09)
+#' Aligned reads are not accepted
 #' @noRd
 .bc_stop_aligned_reads <- function(path) {
   if (grepl("\\.(bam|cram|sam)$", path, ignore.case = TRUE)) {
@@ -332,8 +331,8 @@
   invisible(TRUE)
 }
 
-#' The sequences K1 compares a region with: those of UNMASKED_<locus>.fasta, named by sid, when the
-#' library has it (K3); otherwise the library sequences without gaps
+#' The sequences a region is compared with for identity: those of UNMASKED_<locus>.fasta, named by
+#' sid, when the library has it; otherwise the library sequences without gaps
 #' @noRd
 .bc_unmasked_seqs <- function(library_dir, locus, lib_seqs) {
   f <- file.path(library_dir, paste0("UNMASKED_", locus, ".fasta"))
@@ -342,10 +341,10 @@
   stats::setNames(toupper(as.character(u)), .bc_parse_header(names(u))$sid)
 }
 
-#' Library accessions whose sequence holds the region, or is held by it, on either strand (K1)
+#' Library accessions whose sequence holds the region, or is held by it, on either strand
 #'
 #' A region identical to a library sequence is the query finding itself (or its own specimen): its
-#' answer is not an independent identification, and the report says so (decision K1 of BMM, 28-09).
+#' answer is not an independent identification, and the report says so.
 #' @noRd
 .bc_identical_to_library <- function(region, lib_seqs, min_overlap) {
   region <- toupper(region)

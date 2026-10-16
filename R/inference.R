@@ -1827,9 +1827,8 @@ extract_species_binomial <- function(header) {
     first_field <- stringr::str_split(h, "\\|", simplify = TRUE)[1]
     first_field <- stringr::str_trim(first_field)
     if (!nzchar(first_field)) return(NA_character_)
-    # Only whitespace becomes an underscore. Until 2026-09-25 the hyphen did too, and the two
-    # fields taken below then cut a hyphenated epithet in half: 13 of the 1065 species of the
-    # library and 11 of the 1024 tips of the tree carry one, and they came back truncated.
+    # Only whitespace becomes an underscore. A hyphen turned into an underscore would let the two
+    # fields taken below cut a hyphenated epithet in half (Cereus pierre-braunianus, for example).
     clean_field <- stringr::str_replace_all(first_field, "[ ]+", "_")
     parts <- strsplit(clean_field, "_", fixed = TRUE)[[1]]
     if (length(parts) >= 2) {

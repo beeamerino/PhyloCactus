@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), barcode gap. PhyloCactus 0.5.0, Phase 4.
+# Molecular diagnostic branch (11_barcoding/), barcode gap. PhyloCactus 0.5.0.
 #
-# Rule of the validation plan (sec. 6.1), fixed before any data was seen: the candidate threshold of
+# Rule of the branch, fixed before any data was seen: the candidate threshold of
 # a locus is the 95th percentile of its intraspecific distribution, published next to the 5th
 # percentile of the interspecific nearest-neighbour distribution. When the first is above the second
 # there is no gap in that locus and it is declared; no other percentile is looked for. Both distance
@@ -20,8 +20,7 @@
 #' Comparable positions of every pair of the locus
 #'
 #' Counts, for every pair, the positions where both sequences carry A, C, G or T. A distance resting
-#' on too few of them says nothing, and the fourth amendment of the validation plan (E13, 2026-09-22)
-#' takes those pairs out of the distributions.
+#' on too few of them says nothing, so those pairs are taken out of the distributions.
 #' @param dna `DNAbin` of the locus.
 #' @noRd
 .bc_comparable_sites <- function(dna) {
@@ -46,7 +45,7 @@
   genus <- .bc_genus(unname(species))
   names(genus) <- names(species)
 
-  # E13: a pair resting on fewer than `min_comparable` positions has no value
+  # A pair resting on fewer than `min_comparable` positions has no value
   short <- matrix(FALSE, nrow(dmat), ncol(dmat), dimnames = dimnames(dmat))
   if (!is.null(comparable)) {
     cmp <- comparable[sids, sids, drop = FALSE]
@@ -107,7 +106,7 @@
   p95 <- q(iv, 0.95)
   p5 <- q(nv, 0.05)
 
-  # E14: three descriptive columns, because a 5th percentile of zero hides how much the two
+  # Three descriptive columns, because a 5th percentile of zero hides how much the two
   # distributions overlap
   zero <- !is.na(inter$distance) & inter$distance == 0
   congeneric <- zero & !is.na(inter$nn_species) &
@@ -138,7 +137,7 @@
 #' Editorial palette of the branch figures
 #'
 #' The two series of the barcode gap: the first two categorical colours of the package palette
-#' (phylocactus_colours(), decision E1), which pass every colour-vision check as a pair.
+#' (phylocactus_colours()), which pass every colour-vision check as a pair.
 #' @noRd
 .bc_gap_colors <- function() {
   k <- phylocactus_colours("categorical"); n <- phylocactus_colours("neutral")
@@ -148,7 +147,7 @@
 
 #' Editorial theme of the branch figures
 #'
-#' The theme of the package (theme_phylocactus(), decision E2), with the title and subtitle aligned
+#' The theme of the package (theme_phylocactus()), with the title and subtitle aligned
 #' to the panel of the composite figures of this branch.
 #' @noRd
 .bc_gap_theme <- function(base_size = 9) {
@@ -201,7 +200,7 @@
 
 #' Histogram of the two distributions of one model, as proportions of each distribution
 #'
-#' Editorial rule of the review of 2026-09-22: every visible string is English and short, and
+#' Editorial rule of the branch: every visible string is English and short, and
 #' nothing is written inside the plotting area. The two percentiles are read in the subtitle; the
 #' dashed and dotted lines only mark where they fall.
 #' @noRd
