@@ -86,8 +86,10 @@ test_that("the report is one self-contained HTML per query with the nine section
   .rep_run(f)
   h <- .rep_html(f)
   for (i in 1:9) expect_true(grepl(sprintf("id=\"section-%d\"", i), h, fixed = TRUE), info = i)
-  # Self-contained: every image is embedded, nothing is loaded from a file or the network
-  src <- regmatches(h, gregexpr("(src|href)=\"[^\"]*\"", h))[[1]]
+  # Self-contained: every image is embedded, nothing is loaded from a file or the network. Matched in
+  # bytes: on Windows the positions of gregexpr() count the cactus of the title as two characters and
+  # regmatches() as one, which shifts every later match
+  src <- regmatches(h, gregexpr("(src|href)=\"[^\"]*\"", h, useBytes = TRUE))[[1]]
   expect_true(length(src) > 0L)
   ok <- grepl("^(src|href)=\"(data:|#)", src)
   expect_true(all(ok), info = paste(substr(src[!ok], 1, 120), collapse = " | "))
