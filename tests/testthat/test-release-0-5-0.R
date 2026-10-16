@@ -1,15 +1,14 @@
-# Step 23 of Phase 12 (runbook of 13-10, publication of 0.5.0): the package carries the version
-# 0.5.0, NEWS opens with it, and the manifest fixes the number of terminals of every tree the run
-# publishes (column expected_tips, read by publish_run_outputs.R of the audit repository, which stops
-# when a tree of the run has another number). The trees of the Phase 12 run have 1208 terminals
-# (Module 7, reduced matrix; recount after step 19). Written before the code; the last test turns
-# green when step 23 publishes the trees.
+# Step 23 of Phase 12 (runbook of 13-10, publication of 0.5.0): NEWS keeps the section of 0.5.0,
+# and the manifest fixes the number of terminals of every tree the run publishes (column
+# expected_tips, read by publish_run_outputs.R of the audit repository, which stops when a tree of
+# the run has another number). The trees of the Phase 12 run have 1208 terminals (Module 7, reduced
+# matrix; recount after step 19). Written before the code; the last test turns green when step 23
+# publishes the trees.
 
-test_that("the package is version 0.5.0 and NEWS opens with it", {
-  expect_identical(as.character(utils::packageVersion("PhyloCactus")), "0.5.0")
+test_that("NEWS keeps the section of 0.5.0 (the version of the release is tested in test-release-0-5-1.R)", {
   f <- testthat::test_path("..", "..", "NEWS.md")
   skip_if(!file.exists(f), "NEWS.md is not in this tree")
-  expect_identical(readLines(f, n = 1L, warn = FALSE), "# PhyloCactus 0.5.0")
+  expect_length(grep("^# PhyloCactus 0\\.5\\.0$", readLines(f, warn = FALSE)), 1L)
 })
 
 test_that("the manifest fixes the terminals of every tree the run publishes (expected_tips)", {
