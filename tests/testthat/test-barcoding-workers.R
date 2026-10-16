@@ -115,3 +115,21 @@ test_that("Tutorial 5 runs nn_add with workers and declares n_workers (PA1)", {
   expect_length(add, 1L)
   expect_identical(add[[1]]$workers, as.name("n_workers"))
 })
+
+# On Windows the log a running worker writes is locked: the supervisor cannot open it until the worker
+# ends. A log that cannot be read counts as no lines, and the run goes on; the state comes from the
+# status files. The case is built on Unix with a log without read permission. Written before the code
+# (Windows CI, 16-10).
+test_that("the supervisor reads a worker log that cannot be opened as no lines, without stopping", {
+  rd <- PhyloCactus:::.bc_worker_log_lines
+  tmp <- withr::local_tempdir()
+  f <- file.path(tmp, "LOG_nn_worker1of2.txt")
+  expect_identical(rd(f), character(0))
+  writeLines(c("Locus 'matK' predictions written", "next"), f)
+  expect_identical(rd(f), c("Locus 'matK' predictions written", "next"))
+  skip_on_os("windows")
+  Sys.chmod(f, "000")
+  withr::defer(Sys.chmod(f, "644"))
+  skip_if(file.access(f, 4) == 0, "the log stays readable for this user (root)")
+  expect_identical(expect_silent(rd(f)), character(0))
+})

@@ -89,7 +89,8 @@ test_that("the report is one self-contained HTML per query with the nine section
   # Self-contained: every image is embedded, nothing is loaded from a file or the network
   src <- regmatches(h, gregexpr("(src|href)=\"[^\"]*\"", h))[[1]]
   expect_true(length(src) > 0L)
-  expect_true(all(grepl("^(src|href)=\"(data:|#)", src)))
+  ok <- grepl("^(src|href)=\"(data:|#)", src)
+  expect_true(all(ok), info = paste(substr(src[!ok], 1, 120), collapse = " | "))
   expect_true(grepl("data:image/png;base64,", h, fixed = TRUE))
 })
 
