@@ -56,8 +56,7 @@
   }
   steps_done <- function(k) {
     f <- file.path(chunk_dir, paste0("LOG_", suffix, "_worker", k, "of", workers, ".txt"))
-    if (!file.exists(f)) return(0L)
-    sum(grepl("^Locus '.*predictions written", readLines(f, warn = FALSE)))
+    sum(grepl("^Locus '.*predictions written", .bc_worker_log_lines(f)))
   }
   report <- function(state) {
     st <- vapply(seq_len(workers), function(k) status_of(k)[1], "")
@@ -98,7 +97,7 @@
     if (any(st == "failed")) {
       k <- which(st == "failed")[1]
       log <- file.path(chunk_dir, paste0("LOG_", suffix, "_worker", k, "of", workers, ".txt"))
-      tail_log <- if (file.exists(log)) utils::tail(readLines(log, warn = FALSE), 5) else character(0)
+      tail_log <- utils::tail(.bc_worker_log_lines(log), 5)
       fail(paste0("Step 7 stopped: chunk ", k, " of ", workers, " failed: ", paste(status_of(k)[-1], collapse = " "),
                   if (length(tail_log)) paste0("\nLast lines of its log:\n", paste(tail_log, collapse = "\n")) else ""))
     }
@@ -120,4 +119,12 @@
     send_run_notification(note$subject, note$body, to = notify_to, credentials = notify_credentials)
   }
   invisible(res)
+}
+
+#' Lines of the log of a worker: none when the file is absent or cannot be opened, as on Windows
+#' while the worker that writes it is running (the progress then comes from the status files)
+#' @noRd
+.bc_worker_log_lines <- function(f) {
+  if (!file.exists(f)) return(character(0))
+  tryCatch(suppressWarnings(readLines(f, warn = FALSE)), error = function(e) character(0))
 }
