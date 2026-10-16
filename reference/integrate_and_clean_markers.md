@@ -113,9 +113,10 @@ integrate_and_clean_markers(
 
   Numeric. A marker is flagged `no_detectable_homology` when it falls
   below **both**, at `k = 20` and `k = 10` respectively. In the
-  reference dataset `trnL_trnF`, `matK`, `phyC` and `rbcL` return 0.26
-  to 0.59 at `k = 20`; `trnT-psbD` returns 0.040 (ingroup median 605 bp
-  against outgroup 1347 bp). Default to `0.05` and `0.15`.
+  reference dataset the markers that pass (`rpL16`, `trnL_trnF`, `matK`
+  and `rbcL`) return 0.26 to 0.58 at `k = 20`; the lowest, `trnS_trnG`,
+  returns 0.013 at `k = 20` and 0.22 at `k = 10`, so it is not flagged.
+  Default to `0.05` and `0.15`.
 
 ## Value
 

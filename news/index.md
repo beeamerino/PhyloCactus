@@ -17,6 +17,10 @@ distributed results are those of 0.5.0.
 - Tutorial 2 reads the weak support of the backbone: soft polytomies
   from missing data, not evidence of a simultaneous divergence.
 - Tutorial 6 explains the two version numbers of its reports.
+- The homology check of
+  [`integrate_and_clean_markers()`](https://beeamerino.github.io/PhyloCactus/reference/integrate_and_clean_markers.md)
+  states, in its help page and its warning, the interval of the
+  reference run of 0.5.0 (0.26 to 0.58 at k = 20).
 - The website no longer serves the pages of the functions removed in
   0.5.0: each deployment replaces the previous one.
 - The checklist of Korotkova et al. (2021) is cited wherever it is
