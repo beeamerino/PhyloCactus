@@ -198,9 +198,9 @@ assigns the sampled species to subfamilies and major clades of
 al*. (2019).
 
 The constraint does not impose a complete topology. In the reference
-dataset it fixes 34 of the 1021 internal bipartitions, the relationships
-among 21 named clades, and leaves the other 987 to be estimated from the
-data, including the placement of every species within its clade.
+dataset it fixes 34 of the 1205 internal bipartitions, the relationships
+among 21 named clades, and leaves the other 1171 to be estimated from
+the data, including the placement of every species within its clade.
 
 The
 **[`calculate_ml_tree()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_ml_tree.md)**
@@ -228,8 +228,8 @@ rounds on one worker and two rounds on 25 workers. On an Apple M2 Pro
 with one worker and 8 threads, 50 starting trees on an earlier version
 of the supermatrix took 47115 s (about 938 s per tree). On an AMD EPYC
 9754 node with 25 workers and 75 threads (3 per worker), 50 starting
-trees on the reference supermatrix (1024 taxa, 12809 sites, 5959
-patterns, 11 partitions) took 2739 s (about 46 minutes).
+trees on the reference supermatrix (1208 taxa, 13 700 sites, 7899
+patterns, 13 partitions) took 4468 s (about 75 minutes).
 
 With `n_workers = NULL` the worker count is chosen as a divisor of the
 number of starting trees, so that no worker is idle in the last round;
@@ -346,8 +346,8 @@ if (run_local_ml) {
     cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
     cluster_nodes = 1L,                               # Number of compute nodes requested
     threads = 75,                                     # CPU cores requested (--cpus-per-task)
-    cluster_mem = "16G",                              # RAM memory allocation (--mem, ~11 GB max used)
-    cluster_time = "02:00:00",                        # Walltime limit (--time HH:MM:SS, ~41 min real runtime)
+    cluster_mem = "24G",                              # RAM memory allocation (--mem; 15.5 GB used, 1208 terminals)
+    cluster_time = "02:00:00",                        # Walltime limit (--time HH:MM:SS; 1 h 15 min used, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
     load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
@@ -395,7 +395,7 @@ function gathers the replicates, and
 tests whether their number is sufficient with the autoMRE bootstopping
 criterion (Pattengale *et al*., 2010) on Felsenstein bootstrap
 proportions (FBP), with a cutoff of 0.03. In the reference run the
-criterion was met after 650 of 1000 replicates.
+criterion was met after 550 of 1000 replicates.
 
 The
 **[`map_branch_supports()`](https://beeamerino.github.io/PhyloCactus/reference/map_branch_supports.md)**
@@ -406,8 +406,8 @@ which report bipartition frequencies or posterior probabilities (Arakaki
 bootstrap expectation (TBE; Lemoine *et al*., 2018) is computed as a
 secondary measure. TBE is less sensitive to unstable terminals in large
 matrices with missing data, but it is higher than FBP on large clades:
-on the 987 unconstrained nodes of the reference tree, clades of 51 to
-200 terminals have a median FBP of 0.220 and a median TBE of 0.952. FBP
+on the 1171 unconstrained nodes of the reference tree, clades of 51 to
+200 terminals have a median FBP of 0.080 and a median TBE of 0.930. FBP
 is reported for comparability with published studies, and TBE as a
 measure of the stability of taxon placement.
 
@@ -484,14 +484,14 @@ if (run_local_bs) {
     cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
     cluster_nodes = 1L,                               # Number of compute nodes requested
     threads = 40,                                     # CPU cores per array task (--cpus-per-task)
-    cluster_mem = "10G",                              # RAM memory allocation per task (--mem, ~5.3 GB max used)
-    cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS, ~17 h real runtime)
+    cluster_mem = "16G",                              # RAM memory allocation per task (--mem; 6.0 GiB used, 250 replicates, 1208 terminals)
+    cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS; 13 h 05 min used at most, 250 replicates, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
     load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
     # --- Bootstrap Array Settings ---
-    bs_per_rep = 500,                                 # Bootstrap replicates per array task
-    max_reps = 2,                                     # Number of array tasks (2 x 500 = 1000 total replicates)
+    bs_per_rep = 250,                                 # Bootstrap replicates per array task
+    max_reps = 4,                                     # Number of array tasks (4 x 250 = 1000 total replicates)
     workers = 10,
     output_dir = file.path(output_dir)
   )
@@ -597,8 +597,8 @@ if (run_local_temporal_bs) {
     cluster_job_name = "cactus_temp_bs",
     cluster_partition = "main",
     cluster_nodes = 1L,
-    cluster_mem = "16G",
-    cluster_time = "04:00:00",
+    cluster_mem = "24G",                              # RAM memory allocation (--mem; 6.0 GiB used, 500 replicates, 1208 terminals)
+    cluster_time = "04:00:00",                        # Walltime limit (--time HH:MM:SS; 1 h 08 min used, 500 replicates, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", "")
   )
   cat("   Temporal bootstrap HPC script generated at:", hpc_temp_bs_script, "\n")
@@ -654,17 +654,16 @@ calibrated node is:
   in `calibrations_bounds.csv` with `used_in_analysis = FALSE`, because
   it assumes that Cactaceae and Anacampserotaceae are sisters. The
   maximum-likelihood tree recovers Anacampserotaceae and Portulacaceae
-  as sisters (FBP 45; the node is not constrained), as do Zuntini *et
+  as sisters (FBP 81; the node is not constrained), as do Zuntini *et
   al.* (2024).
 - `ACPT_root` (\[33.28, 59.86\] Ma, Ramírez-Barahona *et al.*, 2020) is
   retained with `used_in_analysis = FALSE`. The root of the chronogram
   is the crown of the ACPT clade, so the deepest node of the tree is not
-  calibrated: its age of 45.61 Ma is extrapolated above the fixed
+  calibrated: its age of 45.53 Ma is extrapolated above the fixed
   calibration and depends on the smoothing value. It falls inside the
   published interval, which is a consistency check and not a constraint.
   Activating the bound would add a second calibration on the deepest
-  node and would be a different analysis. Methods should report the root
-  age as uncalibrated.
+  node and would be a different analysis.
 
 The crown intervals of Ramírez-Barahona *et al.* (2020) for these
 families are also listed with `used_in_analysis = FALSE`, for reference.
@@ -676,8 +675,7 @@ and are the ones used.
 Secondary calibrations do not carry the uncertainty of the studies they
 come from, so the node ages are conditional on those studies. The bounds
 of Hernández-Hernández *et al.* (2014) and Ramírez-Barahona *et al.*
-(2020) also come from analyses with different calibration schemes. Both
-limitations should be stated in Methods.
+(2020) also come from analyses with different calibration schemes.
 
 The
 **[`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)**
@@ -764,20 +762,17 @@ classifies and reports:
     The lowest $`\chi^2`$ is one of several equivalent values, and node
     ages have to be reported across the plateau.
 
-The reference dataset produces a plateau. Between $`10^{-4}`$ and
-$`10^{-6}`$ the $`\chi^2`$ decreases by 10.3 units; across the eight
-orders of magnitude from $`10^{-6}`$ to $`10^{-14}`$ it decreases by 3.7
-units, with three reversals. The lowest value, 221.12 at $`10^{-12}`$,
-is 0.04 units below the value at $`10^{-14}`$. Cross-validation
-therefore supports smoothing values below approximately $`10^{-6}`$
-without distinguishing among them. The chronogram is dated at
-$`10^{-12}`$, and
+The reference dataset produces an interior minimum at $`10^{-5}`$: the
+lowest $`\chi^2`$, 323.09, lies below the values at $`10^{-4}`$ (326.67)
+and $`10^{-6}`$ (326.97). Below $`10^{-6}`$ the $`\chi^2`$ stays between
+327.73 and 337.26, with reversals; above $`10^{-4}`$ it rises to 357.32
+at $`10^{-3}`$ and 519.81 at $`10^{-2}`$. The chronogram is dated at
+$`10^{-5}`$, and
 [`report_smoothing_sensitivity()`](https://beeamerino.github.io/PhyloCactus/reference/report_smoothing_sensitivity.md)
-dates the same tree at values across and beyond the plateau. Across the
-plateau ($`10^{-14}`$ to $`10^{-6}`$), the age of Opuntioideae varies by
-0.15 Ma, that of Cacteae by 0.25 Ma, that of Cactoideae by 1.09 Ma, and
-that of the uncalibrated root by 0.89 Ma. Methods should report the
-plateau and these ranges.
+dates the same tree at values across the grid and beyond it. From
+$`10^{-14}`$ to $`10^{-2}`$ the age of Opuntioideae varies by 0.62 Ma,
+that of Cactoideae by 0.85 Ma and that of Cacteae by 0.93 Ma. The age of
+`ACP_root` does not vary, because it is the fixed calibration.
 
 The code for Module 10:
 
@@ -953,8 +948,8 @@ if (file.exists(cv_file)) {
 }
 
 # 5. Smoothing sensitivity
-# The same tree dated across the plateau and beyond it. Read the range of each node across 1e-14
-# to 1e-06, the plateau of the reference run. At 1 and 10 the calibrated nodes sit on their upper
+# The same tree dated across the grid and beyond it. Read the range of each node from 1e-14 to
+# 1e-02; the reference run selects 1e-05, an interior minimum. At 1 and 10 the calibrated nodes sit on their upper
 # bounds; that end of the table lies outside the range supported by cross-validation.
 
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")
@@ -984,8 +979,8 @@ Integration](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus
 
 ## References
 
-- Akaike, H. 1974. A new look at the statistical model identification.
-  *IEEE Transactions on Automatic Control*, 19(6), 716-723.
+- Akaike 1974. A new look at the statistical model identification. *IEEE
+  Transactions on Automatic Control*, 19(6), 716–723.
   <https://doi.org/10.1109/TAC.1974.1100705>
 - Arakaki *et al*. 2011. Contemporaneous and recent radiations of the
   world’s major succulent plant lineages. *Proceedings of the National
@@ -993,13 +988,13 @@ Integration](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus
   8379–8384. <https://doi.org/10.1073/pnas.1100628108>
 - Darriba *et al*. 2020. ModelTest-NG: a new and scalable tool for the
   selection of DNA and protein evolutionary models. *Molecular Biology
-  and Evolution*, 37(1), 291-294.
+  and Evolution*, 37(1), 291–294.
   <https://doi.org/10.1093/molbev/msz189>
-- Felsenstein, J. 1981. Evolutionary trees from DNA sequences: A maximum
+- Felsenstein 1981. Evolutionary trees from DNA sequences: A maximum
   likelihood approach. *Journal of Molecular Evolution*, 17(6), 368–376.
   <https://doi.org/10.1007/BF01734359>
 - Flouri *et al*. 2014. The Phylogenetic Likelihood Library. *Systematic
-  Biology*, 64(2), 356-362. <https://doi.org/10.1093/sysbio/syu084>
+  Biology*, 64(2), 356–362. <https://doi.org/10.1093/sysbio/syu084>
 - Helfrich *et al*. 2018. TreeAnnotator: versatile visual annotation of
   hierarchical text relations. *Proceedings of the Eleventh
   International Conference on Language Resources and Evaluation*.
@@ -1012,10 +1007,10 @@ Integration](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus
   tool for maximum likelihood phylogenetic inference. *Bioinformatics*,
   35(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305>
 - Lemoine *et al*. 2018. Renewing Felsenstein’s phylogenetic bootstrap
-  in the era of big data. *Nature*, 556(7702), 452-456.
+  in the era of big data. *Nature*, 556(7702), 452–456.
   <https://doi.org/10.1038/s41586-018-0043-0>
-- Maurin, K. J. 2020. An empirical guide for producing a dated phylogeny
-  with treePL in a maximum likelihood framework. *arXiv preprint
+- Maurin 2020. An empirical guide for producing a dated phylogeny with
+  treePL in a maximum likelihood framework. *arXiv preprint
   arXiv:2008.07054*. <https://doi.org/10.48550/arXiv.2008.07054>
 - Pattengale *et al*. 2010. How many bootstrap replicates are
   necessary?. *Journal of Computational Biology*, 17(3), 337–354.
@@ -1024,14 +1019,13 @@ Integration](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus
   heterogeneous diversification of flowering plant families. *Nature
   Ecology and Evolution*, 4(9), 1232–1238.
   <https://doi.org/10.1038/s41559-020-1241-3>
-- Robinson, D. F., & Foulds, L. R. 1981. Comparison of phylogenetic
-  trees. *Mathematical Biosciences*, 53(1-2), 131-147.
+- Robinson & Foulds 1981. Comparison of phylogenetic trees.
+  *Mathematical Biosciences*, 53(1-2), 131–147.
   <https://doi.org/10.1016/0025-5564(81)90043-2>
-- Sanderson, M. J. 2002. Estimating Absolute Rates of Molecular
-  Evolution and Divergence Times: A Penalized Likelihood Approach.
-  *Molecular Biology and Evolution*, 19(1), 101–109.
+- Sanderson 2002. Estimating Absolute Rates of Molecular Evolution and
+  Divergence Times: A Penalized Likelihood Approach. *Molecular Biology
+  and Evolution*, 19(1), 101–109.
   <https://doi.org/10.1093/oxfordjournals.molbev.a003974>
-- Smith, S. A., & O’Meara, B. C. 2012. TreePL: Divergence time
-  estimation using penalized likelihood for large phylogenies.
-  *Bioinformatics*, 28(20), 2689–2690.
-  <https://doi.org/10.1093/bioinformatics/bts492>
+- Smith & O’Meara 2012. TreePL: Divergence time estimation using
+  penalized likelihood for large phylogenies. *Bioinformatics*, 28(20),
+  2689–2690. <https://doi.org/10.1093/bioinformatics/bts492>

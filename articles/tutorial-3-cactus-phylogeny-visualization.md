@@ -2,19 +2,20 @@
 
 ## Abstract
 
-This tutorial covers the last stage of the core workflow: integration of
-species metadata, figures of the phylogenetic products, and summaries of
-conservation status. It uses the supermatrix, maximum-likelihood tree,
-bootstrap support values and chronogram produced in [Tutorial
+This tutorial covers the third stage of the phylogenetic workflow:
+integration of species metadata, figures of the phylogenetic products,
+and summaries of conservation status. It uses the supermatrix,
+maximum-likelihood tree, bootstrap support values and chronogram
+produced in [Tutorial
 1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html)
 and [Tutorial
 2](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
 
 **Module 11** reconciles the species in the supermatrix with the
-accepted checklist of Cactaceae and retrieves species-level assessments
-from the IUCN Red List. The result is one table that records, for each
-species, its taxonomic status, molecular sampling, placement in the
-tree, distribution and conservation category.
+accepted checklist of Cactaceae (Korotkova *et al*. 2021) and retrieves
+species-level assessments from the IUCN Red List. The result is one
+table that records, for each species, its taxonomic status, molecular
+sampling, placement in the tree, distribution and conservation category.
 
 **Module 12** produces seventeen figures in five groups: coverage of the
 molecular dataset, structure of the supermatrix, the tree and the
@@ -44,7 +45,7 @@ to open the registration page, store the token in `.Renviron` (opened
 with `usethis::edit_r_environ()`) as `IUCN_REDLIST_KEY="your_api_key"`,
 and restart R.
 
-### Data Setup & Pre-processing
+### Data Setup and Preprocessing
 
 To run the module as a script, copy the executable script to the
 tutorial directory:
@@ -79,13 +80,13 @@ are not computed in this tutorial.
 
 Names are reconciled against the Cactaceae checklist of
 Caryophyllales.org (Korotkova *et al*. 2021; export of 1 July 2026),
-which lists 1,965 accepted species. With 38 outgroup species from
+which lists 1,965 accepted species. With 28 outgroup species from
 Anacampserotaceae, Portulacaceae and Talinaceae, the registry contains
-2,003 species. The supermatrix includes 1,060 of them (1,022 ingroup, 38
-outgroup). The maximum-likelihood tree and the chronogram have 1,024
-tips (986 ingroup, 38 outgroup), because `RAxML-NG` removed 36 ingroup
+1,993 species. The supermatrix includes 1,218 of them (1,190 ingroup, 28
+outgroup). The maximum-likelihood tree and the chronogram have 1,208
+tips (1,180 ingroup, 28 outgroup), because `RAxML-NG` removed 10 ingroup
 species whose sequences were identical to those of another species. The
-other 943 accepted species have no sequence data, and 134 of them are
+other 775 accepted species have no sequence data, and 102 of them are
 listed as threatened (CR, EN or VU) by the IUCN Red List.
 
 Load the libraries and the outputs of the previous modules:
@@ -239,16 +240,18 @@ species_summary <- species_summary %>%
 retrieves the latest IUCN assessment of one species through the
 `rredlist` interface to the IUCN Red List API. It returns the category,
 criteria, population trend, countries of occurrence, endemism, habitats,
-threats, and use and trade. The query covers the 1,965 checklist species
-and the 38 outgroups. All ingroup names in the supermatrix match the
-checklist, so every query uses an accepted name.
+threats, and use and trade. The query covers the 1,965 species of the
+checklist (Korotkova *et al*. 2021) and the 28 outgroups. All ingroup
+names in the supermatrix match the checklist, so every query uses an
+accepted name.
 
 The output table (`TABLE_species_all_data.csv`) is used by all figures
 in Module 12. The chunk also writes
 `TABLE_conservation_prioritization_gaps.csv`, which lists the threatened
 species without sequence data. If the table already exists, it is read
 from disk and the API is not queried. IUCN assessments change between
-Red List versions; record the version used with
+Red List versions. The reference run used Red List version 2026-1 (IUCN
+2026), reported by
 [`rredlist::rl_version()`](https://docs.ropensci.org/rredlist/reference/rl_version.html).
 
 ``` r
@@ -313,28 +316,7 @@ library(forcats)
 library(purrr)
 library(scales)
 
-# Harmonized visualization theme
-theme_phylocactus <- function(base_size = 12, base_family = "") {
-  theme_minimal(base_size = base_size, base_family = base_family) +
-    theme(
-      panel.background = element_rect(fill = "#F5F5F5", color = NA),
-      plot.background = element_rect(fill = "white", color = NA),
-      panel.grid.major = element_line(color = "white", linewidth = 0.6),
-      panel.grid.minor = element_line(color = "white", linewidth = 0.3),
-      axis.ticks = element_line(color = "grey70", linewidth = 0.4),
-      axis.title = element_text(face = "italic", color = "grey20"),
-      axis.title.x = element_text(face = "italic", margin = margin(t = 8)),
-      axis.title.y = element_text(face = "italic", margin = margin(r = 8)),
-      axis.text = element_text(color = "grey30"),
-      plot.title = element_text(face = "bold", color = "grey15", hjust = 0),
-      plot.subtitle = element_text(color = "grey40", hjust = 0, margin = margin(b = 8)),
-      legend.background = element_rect(fill = "transparent", color = NA),
-      legend.key = element_rect(fill = "transparent", color = NA),
-      legend.title = element_text(face = "bold", size = rel(0.9)),
-      strip.background = element_rect(fill = "grey90", color = NA),
-      strip.text = element_text(face = "bold", color = "grey20", size = rel(0.95))
-    )
-}
+# Theme and colours of every figure: theme_phylocactus() and phylocactus_colours() of the package
 
 # Reference outputs distributed with the package. The script in inst/scripts reads the same
 # tables from the run directory.
@@ -349,7 +331,7 @@ TABLE_conservation_prioritization_gaps <- species_summary_iucn %>%
   filter(status_pipeline == "unsampled_checklist_gap", iucn_category %in% c("CR", "EN", "VU")) %>%
   mutate(genus = stringr::str_extract(species, "^[A-Za-z]+"))
 
-# Data Summary Table Generation
+# Summary of the dataset: species of the checklist, the supermatrix and the tree, and IUCN counts
 TABLE_dataset_summary <- tibble(
   metric = c(
     "Total ingroup species in checklist",
@@ -384,27 +366,29 @@ TABLE_dataset_summary <- tibble(
     sum(species_summary_iucn$in_ml_tree & species_summary_iucn$is_ingroup & species_summary_iucn$iucn_is_endemic == TRUE, na.rm = TRUE)
   )
 )
-knitr::kable(TABLE_dataset_summary)
+knitr::kable(TABLE_dataset_summary, caption = "Table 1. Summary of the dataset: species of the checklist, the supermatrix and the tree, IUCN assessments, threatened and endemic species.")
 ```
 
 | metric                                                    | value |
 |:----------------------------------------------------------|------:|
 | Total ingroup species in checklist                        |  1965 |
-| Total species with sequences (supermatrix)                |  1060 |
-| Ingroup species with sequences (supermatrix)              |  1022 |
-| Outgroup species with sequences (supermatrix)             |    38 |
-| Ingroup species sampled and dated in tree                 |   986 |
-| Outgroup reference species in tree                        |    38 |
-| Sequenced ingroup species collapsed duplicates            |    36 |
-| Unsampled ingroup species (checklist gaps)                |   943 |
-| Total species in final phylogeny                          |  1024 |
+| Total species with sequences (supermatrix)                |  1218 |
+| Ingroup species with sequences (supermatrix)              |  1190 |
+| Outgroup species with sequences (supermatrix)             |    28 |
+| Ingroup species sampled and dated in tree                 |  1180 |
+| Outgroup reference species in tree                        |    28 |
+| Sequenced ingroup species collapsed duplicates            |    10 |
+| Unsampled ingroup species (checklist gaps)                |   775 |
+| Total species in final phylogeny                          |  1208 |
 | Ingroup species mapped to IUCN assessment                 |  1114 |
 | Ingroup species without IUCN assessment                   |   851 |
-| Threatened species in phylogeny (VU/EN/CR) (Ingroup)      |   180 |
-| Threatened unsequenced species (VU/EN/CR) (Priority gaps) |   134 |
-| Endemic species in phylogeny (Ingroup)                    |   534 |
+| Threatened species in phylogeny (VU/EN/CR) (Ingroup)      |   221 |
+| Threatened unsequenced species (VU/EN/CR) (Priority gaps) |   102 |
+| Endemic species in phylogeny (Ingroup)                    |   633 |
 
-#### Figure 1: Marker Coverage Across Species
+Table 1. Summary of the dataset: species of the checklist, the
+supermatrix and the tree, IUCN assessments, threatened and endemic
+species. {.table}
 
 Number of species with sequence data for each locus in the final
 dataset.
@@ -412,7 +396,7 @@ dataset.
 ``` r
 
 p1 <- ggplot(marker_stats, aes(x = reorder(marker, n_taxa), y = n_taxa)) +
-  geom_col(fill = "grey35", width = 0.7) +
+  geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
   coord_flip() +
   theme_phylocactus(base_size = 12) +
   theme(axis.text.y = element_text(face = "italic")) +
@@ -424,9 +408,10 @@ p1 <- ggplot(marker_stats, aes(x = reorder(marker, n_taxa), y = n_taxa)) +
 p1
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_coverage-1.png)
+![\*\*Figure 1.\*\* Marker coverage across
+species.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_coverage-1.png)
 
-#### Figure 2: Distribution of Marker Completeness
+**Figure 1.** Marker coverage across species.
 
 Number of loci per species for the tips of the maximum-likelihood tree.
 
@@ -434,7 +419,7 @@ Number of loci per species for the tips of the maximum-likelihood tree.
 
 if ("retained_markers" %in% names(species_summary_iucn)) {
   p2 <- ggplot(species_summary_iucn %>% filter(in_ml_tree == TRUE), aes(x = retained_markers)) +
-    geom_histogram(binwidth = 1, fill = "grey35", color = "white") +
+    geom_histogram(binwidth = 1, fill = phylocactus_colours("neutral")[["mark"]], color = "white") +
     scale_x_continuous(breaks = seq(1, 11, 1)) +
     theme_phylocactus(base_size = 12) +
     labs(
@@ -446,9 +431,10 @@ if ("retained_markers" %in% names(species_summary_iucn)) {
 }
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_completeness-1.png)
+![\*\*Figure 2.\*\* Distribution of marker
+completeness.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_completeness-1.png)
 
-#### Figure 3: Marker Presence Heatmap
+**Figure 2.** Distribution of marker completeness.
 
 Presence or absence of each locus for every species in the tree.
 
@@ -461,7 +447,8 @@ heatmap_data <- species_summary_iucn %>%
   mutate(present = accession != "-")
 
 p3 <- ggplot(heatmap_data, aes(x = marker, y = fct_rev(species), fill = present)) +
-  scale_fill_grey(start = 0.95, end = 0.25, name = "Present", labels = c("No", "Yes")) +
+  scale_fill_manual(values = c(phylocactus_colours("neutral")[["fill"]], phylocactus_colours("sequential")[["700"]]),
+                    name = "Present", labels = c("No", "Yes")) +
   geom_tile() +
   theme_phylocactus(base_size = 10) +
   labs(
@@ -479,9 +466,12 @@ p3 <- ggplot(heatmap_data, aes(x = marker, y = fct_rev(species), fill = present)
 p3
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_heatmap-1.png)
+![\*\*Figure 3.\*\* Marker presence heatmap. Dark grey, marker present;
+light grey,
+absent.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_heatmap-1.png)
 
-#### Figure 4: Supermatrix Structure
+**Figure 3.** Marker presence heatmap. Dark grey, marker present; light
+grey, absent.
 
 Start and end coordinates of each partition in the concatenated
 supermatrix.
@@ -494,7 +484,7 @@ if (file.exists(ranges_file)) {
   if ("marker" %in% names(TABLE_marker_ranges)) {
     TABLE_marker_ranges <- TABLE_marker_ranges %>% mutate(length = end - start + 1)
     p4 <- ggplot(TABLE_marker_ranges) +
-      geom_segment(aes(x = start, xend = end, y = marker, yend = marker), linewidth = 6, color = "grey35") +
+      geom_segment(aes(x = start, xend = end, y = marker, yend = marker), linewidth = 6, color = phylocactus_colours("neutral")[["mark"]]) +
       theme_phylocactus(base_size = 12) +
       theme(axis.text.y = element_text(face = "italic")) +
       labs(
@@ -507,9 +497,10 @@ if (file.exists(ranges_file)) {
 }
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/supermatrix_structure-1.png)
+![\*\*Figure 4.\*\* Supermatrix
+structure.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/supermatrix_structure-1.png)
 
-#### Figure 5: Marker Informativeness
+**Figure 4.** Supermatrix structure.
 
 Number of parsimony-informative sites against alignment length for each
 partition.
@@ -518,8 +509,8 @@ partition.
 
 if ("parsimony_informative" %in% names(marker_stats)) {
   p5 <- ggplot(marker_stats, aes(x = alignment_length, y = parsimony_informative, label = marker)) +
-    geom_point(size = 3.5, color = "grey35") +
-    geom_text(nudge_y = 20, size = 3.2, fontface = "italic", color = "grey20") +
+    geom_point(size = 3.5, color = phylocactus_colours("neutral")[["mark"]]) +
+    geom_text(nudge_y = 20, size = 3.2, fontface = "italic", color = phylocactus_colours("neutral")[["text"]]) +
     theme_phylocactus(base_size = 12) +
     labs(
       title = "Marker Informativeness",
@@ -530,9 +521,10 @@ if ("parsimony_informative" %in% names(marker_stats)) {
 }
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_informativeness-1.png)
+![\*\*Figure 5.\*\* Marker
+informativeness.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_informativeness-1.png)
 
-#### Figure 6: Maximum-Likelihood Tree with Bootstrap Support (FBP)
+**Figure 5.** Marker informativeness.
 
 Maximum-likelihood tree with FBP values on internal nodes and the major
 clades marked. Nodes fixed by the topological constraint are shown as
@@ -613,7 +605,7 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
       theme_tree() +
       geom_nodepoint(aes(fill = support_class), shape = 21, size = 2, stroke = 0.2, na.rm = TRUE) +
       scale_fill_manual(
-        values = c(">= 90" = "white", "70-89" = "grey", "< 70" = "black", "Constrained" = "steelblue"),
+        values = phylocactus_colours("support"),
         name = "Support (FBP)",
         na.translate = FALSE
       ) +
@@ -628,11 +620,18 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
 }
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_6_ml_tree-1.png)
+![\*\*Figure 6.\*\* Maximum-likelihood tree with bootstrap support
+(FBP). Node symbols: white, FBP of 90 or more; grey, 70 to 89; black,
+under 70; blue, constrained
+node.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_6_ml_tree-1.png)
 
-#### Figure 7: Full-Size Maximum-Likelihood Tree
+**Figure 6.** Maximum-likelihood tree with bootstrap support (FBP). Node
+symbols: white, FBP of 90 or more; grey, 70 to 89; black, under 70;
+blue, constrained node.
 
-All 1,024 tips with species names and FBP values, on a 36 × 48 in (91.4
+**Full-size maximum-likelihood tree.**
+
+All 1,208 tips with species names and FBP values, on a 36 × 48 in (91.4
 × 121.9 cm) page.
 
 ``` r
@@ -648,7 +647,7 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
   
   p7_supp <- ggtree(ml_tree_plot, linewidth = 0.2) +
     theme_tree() +
-    geom_tiplab(size = 0.70, align = FALSE, linetype = "solid", linesize = 0.15, colour = "grey20") +
+    geom_tiplab(size = 0.70, align = FALSE, linetype = "solid", linesize = 0.15, colour = phylocactus_colours("neutral")[["text"]]) +
     geom_nodelab(aes(label = support_label), size = 0.70, hjust = 0.7, colour = "black", na.rm = TRUE) +
     theme(legend.position = "none")
     
@@ -680,8 +679,6 @@ treeio::write.beast(annotated_treedata, file = "9_Visualization/figures/annotate
 > [Figure_7_ML_Tree_Extended.pdf](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/Figure_7_ML_Tree_Extended.pdf)
 > and
 > [annotated_ml_tree.tree](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/annotated_ml_tree.tree).
-
-#### Figure 8: Time-Calibrated Chronogram with HPD Intervals
 
 Chronogram estimated with penalized likelihood in `treePL`. Node bars
 are 95% HPD intervals summarized from the 100 bootstrap chronograms, and
@@ -722,7 +719,7 @@ if (file.exists(chrono_file) && nzchar(chrono_file)) {
 
     p8 <- ggtree(chrono_beast, linewidth = 0.3) +
       theme_tree2() + 
-      geom_range(range = 'height_0.95_HPD', color = 'gray60', alpha = 0.4, linewidth = 1.5) +
+      geom_range(range = 'height_0.95_HPD', color = phylocactus_colours("neutral")[["line"]], alpha = 0.4, linewidth = 1.5) +
       theme_tree()
     
     p8 <- PhyloCactus::apply_clade_label_layers(p8, registry_chrono, CHRONO_MAIN_LAYER_SPECS)
@@ -736,11 +733,16 @@ if (file.exists(chrono_file) && nzchar(chrono_file)) {
 }
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_8_chronogram-1.png)
+![\*\*Figure 8.\*\* Time-calibrated chronogram with HPD intervals. Grey
+bars: 95% HPD intervals of the node
+ages.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_8_chronogram-1.png)
 
-#### Figure 9: Full-Size Chronogram
+**Figure 8.** Time-calibrated chronogram with HPD intervals. Grey bars:
+95% HPD intervals of the node ages.
 
-All 1,024 tips with 95% HPD intervals and period boundaries, on a 36 ×
+**Full-size chronogram.**
+
+All 1,208 tips with 95% HPD intervals and period boundaries, on a 36 ×
 48 in (91.4 × 121.9 cm) page.
 
 ``` r
@@ -756,8 +758,8 @@ if (file.exists(chrono_file) && nzchar(chrono_file)) {
   
   p9_supp <- ggtree(chrono_beast, linewidth = 0.2) +
     theme_tree2() +
-    geom_tiplab(size = 0.85, align = FALSE, linetype = "solid", linesize = 0.15, colour = "grey20") +
-    geom_range(range = 'height_0.95_HPD', color = 'gray60', alpha = 0.4, linewidth = 0.8) +
+    geom_tiplab(size = 0.85, align = FALSE, linetype = "solid", linesize = 0.15, colour = phylocactus_colours("neutral")[["text"]]) +
+    geom_range(range = 'height_0.95_HPD', color = phylocactus_colours("neutral")[["line"]], alpha = 0.4, linewidth = 0.8) +
     theme_tree()
     
   p9_supp <- PhyloCactus::apply_clade_label_layers(p9_supp, registry_chrono, CHRONO_SUPP_LAYER_SPECS)
@@ -791,18 +793,17 @@ treeio::write.beast(annotated_chrono, file = "9_Visualization/figures/annotated_
 > and
 > [annotated_chronogram.tree](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/annotated_chronogram.tree).
 
-#### Figure 10: Species Composition
-
-Status of the 2,003 species in the registry: sampled and dated in the
-tree (986), sequenced but removed by `RAxML-NG` as identical duplicates
-(36), accepted species without sequences (943), and outgroups (38).
+Status of the 1,993 species in the registry: sampled and dated in the
+tree (1,180), sequenced but removed by `RAxML-NG` as identical
+duplicates (10), accepted species without sequences (775), and outgroups
+(28).
 
 ``` r
 
 p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(status_pipeline, n), y = n)) +
-  geom_col(fill = "grey35", width = 0.7) +
+  geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
   coord_flip() +
-  geom_text(aes(label = scales::comma(n)), hjust = -0.15, size = 3.8, color = "grey20") +
+  geom_text(aes(label = scales::comma(n)), hjust = -0.15, size = 3.8, color = phylocactus_colours("neutral")[["text"]]) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
   theme_phylocactus(base_size = 12) +
   labs(
@@ -814,9 +815,10 @@ p10 <- ggplot(species_summary_iucn %>% count(status_pipeline), aes(x = reorder(s
 p10
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_10_species_composition-1.png)
+![\*\*Figure 10.\*\* Species
+composition.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_10_species_composition-1.png)
 
-#### Figure 11: IUCN Categories
+**Figure 10.** Species composition.
 
 Number of ingroup species in the tree in each IUCN Red List category.
 
@@ -840,22 +842,26 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 }
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_11_iucn_categories-1.png)
+![\*\*Figure 11.\*\* IUCN categories. Colours of the IUCN Red List
+categories.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_11_iucn_categories-1.png)
 
-#### Figure 12: Molecular Completeness vs. IUCN Category
+**Figure 11.** IUCN categories. Colours of the IUCN Red List categories.
 
-Number of loci per species in each IUCN category, for the ingroup
-species in the chronogram. The figure shows whether threatened species
-are represented by fewer loci.
+Share of the loci sampled for each species in each IUCN category, for
+the ingroup species in the chronogram. The figure shows whether
+threatened species are represented by fewer loci.
 
 ``` r
 
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
+  # The species the figure plots, counted for its subtitle
+  fig12_data <- species_summary_iucn %>%
+    filter(status_pipeline == "sampled_and_dated",
+           iucn_found == TRUE,
+           !is.na(iucn_category))
+  n_fig12 <- nrow(fig12_data)
   p12 <- ggplot(
-    species_summary_iucn %>%
-      filter(status_pipeline == "sampled_and_dated",
-             iucn_found == TRUE,
-             !is.na(iucn_category)),
+    fig12_data,
     aes(x = iucn_category, y = pct_markers, fill = iucn_category)
   ) +
     geom_violin(trim = FALSE, alpha = 0.5) +
@@ -864,7 +870,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     theme_phylocactus(base_size = 12) +
     labs(
       title = "Molecular Completeness vs IUCN Category",
-      subtitle = "Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 986)",
+      subtitle = paste0("Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = ", n_fig12, ")"),
       x = "IUCN Category",
       y = "Marker completeness (%)"
     )
@@ -872,13 +878,16 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 }
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_12_completeness_vs_iucn-1.png)
+![\*\*Figure 12.\*\* Molecular completeness against IUCN category.
+Colours of the IUCN Red List
+categories.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_12_completeness_vs_iucn-1.png)
 
-#### Figure 13: Threatened Species Without Sequence Data by Genus
+**Figure 12.** Molecular completeness against IUCN category. Colours of
+the IUCN Red List categories.
 
-Threatened species (CR, EN, VU) among the 943 accepted species without
-sequence data, by genus. *Parodia* (24 species), *Mammillaria* (22) and
-*Melocactus* (14) have the most. The species are listed in
+Threatened species (CR, EN, VU) among the 775 accepted species without
+sequence data, by genus. *Parodia* (18 species), *Melocactus* (14) and
+*Coleocephalocereus* (7) have the most. The species are listed in
 `TABLE_conservation_prioritization_gaps.csv`, which can guide field
 collecting and sequencing.
 
@@ -909,9 +918,12 @@ p13 <- ggplot(plot_gaps_genus %>% filter(genus %in% top_gap_genera),
 p13
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_13_conservation_prioritization_gaps-1.png)
+![\*\*Figure 13.\*\* Threatened species without sequence data by genus.
+Colours of the IUCN Red List
+categories.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_13_conservation_prioritization_gaps-1.png)
 
-#### Figure 14: Endemic Species by Country
+**Figure 13.** Threatened species without sequence data by genus.
+Colours of the IUCN Red List categories.
 
 Countries ranked by the number of endemic ingroup species in the tree,
 based on IUCN records of endemism.
@@ -926,7 +938,7 @@ if (any(species_summary_iucn$iucn_is_endemic, na.rm = TRUE)) {
     slice_max(n, n = 20)
     
   p14 <- ggplot(plot_data_endemism, aes(x = reorder(iucn_endemic_locations, n), y = n)) +
-    geom_col(fill = "grey35", width = 0.7) +
+    geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
     coord_flip() +
     theme_phylocactus(base_size = 12) +
     labs(
@@ -938,9 +950,10 @@ if (any(species_summary_iucn$iucn_is_endemic, na.rm = TRUE)) {
 }
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_14_endemism_by_country-1.png)
+![\*\*Figure 14.\*\* Endemic species by
+country.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_14_endemism_by_country-1.png)
 
-#### Figure 15: Endemic Species by Country and IUCN Category
+**Figure 14.** Endemic species by country.
 
 IUCN categories of the endemic ingroup species in the tree, for the
 countries with the most endemics.
@@ -972,9 +985,12 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 }
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_15_iucn_by_country-1.png)
+![\*\*Figure 15.\*\* Endemic species by country and IUCN category.
+Colours of the IUCN Red List
+categories.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_15_iucn_by_country-1.png)
 
-#### Figure 16: Primary Ecological Threats
+**Figure 15.** Endemic species by country and IUCN category. Colours of
+the IUCN Red List categories.
 
 Threat classes recorded by the IUCN Red List for the ingroup species in
 the tree, ranked by frequency.
@@ -990,7 +1006,7 @@ if (any(!is.na(species_summary_iucn$iucn_threat_names))) {
     
   if (nrow(plot_threats) > 0) {
     p16 <- ggplot(plot_threats, aes(x = reorder(iucn_threat_names, n), y = n)) +
-      geom_col(fill = "grey35", width = 0.7) +
+      geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
       coord_flip() +
       theme_phylocactus(base_size = 12) +
       labs(
@@ -1003,9 +1019,10 @@ if (any(!is.na(species_summary_iucn$iucn_threat_names))) {
 }
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_16_threats-1.png)
+![\*\*Figure 16.\*\* Primary ecological
+threats.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_16_threats-1.png)
 
-#### Figure 17: Primary Ecological Habitats
+**Figure 16.** Primary ecological threats.
 
 Habitat classes recorded by the IUCN Red List for the ingroup species in
 the tree.
@@ -1021,7 +1038,7 @@ if (any(!is.na(species_summary_iucn$iucn_habitat_names))) {
     
   if (nrow(plot_habitats) > 0) {
     p17 <- ggplot(plot_habitats, aes(x = reorder(iucn_habitat_names, n), y = n)) +
-      geom_col(fill = "grey35", width = 0.7) +
+      geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
       coord_flip() +
       theme_phylocactus(base_size = 12) +
       labs(
@@ -1034,7 +1051,10 @@ if (any(!is.na(species_summary_iucn$iucn_habitat_names))) {
 }
 ```
 
-![](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_17_habitats-1.png)
+![\*\*Figure 17.\*\* Primary ecological
+habitats.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_17_habitats-1.png)
+
+**Figure 17.** Primary ecological habitats.
 
 ## Conclusion
 
@@ -1053,6 +1073,8 @@ Analyses](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-ph
 - Isaac *et al*. 2007. Mammals on the EDGE: conservation priorities
   based on threat and phylogeny. *PLoS ONE*, 2(3), e296.
   <https://doi.org/10.1371/journal.pone.0000296>
+- IUCN 2026. *The IUCN Red List of Threatened Species*. Version 2026-1.
+  Accessed 2026-10-15. <https://www.iucnredlist.org>
 - Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic
   online species-level taxonomic backbone for the family. *Willdenowia*,
   51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>

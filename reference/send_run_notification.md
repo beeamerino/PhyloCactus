@@ -66,8 +66,8 @@ which opens it. Nothing from that file is read, printed, logged or
 written anywhere by `PhyloCactus`, and the file belongs outside the
 repository. Create it once with
 [`blastula::create_smtp_creds_file()`](https://rstudio.github.io/blastula/reference/create_smtp_creds_file.html),
-and for a Gmail account use an application password rather than the
-account password.
+and for a Gmail account use an application password, not the account
+password.
 
 ## Examples
 

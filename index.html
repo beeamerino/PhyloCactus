@@ -15,7 +15,8 @@
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Phylogenetic Inference and Divergence Time Estimation Pipeline for Cactaceae">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><link href="extra.css" rel="stylesheet">
+<meta property="og:title" content="Phylogenetic Inference and Divergence Time Estimation Pipeline for Cactaceae">
 <meta name="description" content="Provides a reproducible workflow for reconstructing Cactaceae phylogenies from DNA sequence data. The pipeline automates GenBank sequence retrieval, multiple-sequence alignment, substitution model selection, saturation assessment, supermatrix construction, maximum-likelihood phylogenetic inference using RAxML-NG, divergence time estimation with treePL, and tree-space analyses for assessing phylogenetic stability across bootstrap replicates.">
 <meta property="og:description" content="Provides a reproducible workflow for reconstructing Cactaceae phylogenies from DNA sequence data. The pipeline automates GenBank sequence retrieval, multiple-sequence alignment, substitution model selection, saturation assessment, supermatrix construction, maximum-likelihood phylogenetic inference using RAxML-NG, divergence time estimation with treePL, and tree-space analyses for assessing phylogenetic stability across bootstrap replicates.">
 <meta property="og:image" content="https://beeamerino.github.io/PhyloCactus/logo.png">
@@ -28,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,8 +47,9 @@
     <li><a class="dropdown-item" href="articles/tutorial-2-cactus-phylogeny-inference.html">2. Inference &amp; Dating</a></li>
     <li><a class="dropdown-item" href="articles/tutorial-3-cactus-phylogeny-visualization.html">3. Visualization &amp; IUCN Summary</a></li>
     <li><a class="dropdown-item" href="articles/tutorial-4-cactus-phylogeny-validation.html">4. Phylogenetic Validation</a></li>
-    <li><a class="dropdown-item" href="articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding: Section Manifest</a></li>
-    <li><a class="dropdown-item" href="articles/tutorial-6-cactus-phylogeny-functions.html">6. Core Functions Dictionary</a></li>
+    <li><a class="dropdown-item" href="articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding</a></li>
+    <li><a class="dropdown-item" href="articles/tutorial-6-cactus-barcoding-identification.html">6. Identifying a Sample</a></li>
+    <li><a class="dropdown-item" href="articles/tutorial-7-cactus-phylogeny-functions.html">7. Core Functions Dictionary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -76,6 +78,7 @@
 <p>The difficulty increases in plant lineages that diversified recently and rapidly. Low plastid divergence, incomplete lineage sorting (ILS) and reticulate evolution increase the risk of erroneous orthology assessment and of alignment error, and both can bias the inferred topology.</p>
 <p><strong>Cactaceae</strong> combine these properties. The family is one of the largest succulent radiations of the Neotropics (Arakaki <em>et al</em>. 2011; Hernández-Hernández <em>et al</em>. 2014; Guerrero <em>et al</em>. 2019), and its GenBank record is uneven in taxonomic and locus coverage.</p>
 <p><code>PhyloCactus</code> is an R package that implements this assembly and analysis as a reproducible workflow. It links established software in four stages: orthology-based sequence retrieval (<code>phylotaR</code>), multiple sequence alignment (<code>MAFFT</code>), alignment masking (<code>DECIPHER</code>), a saturation screen, substitution model selection (<code>ModelTest-NG</code>), constrained maximum-likelihood inference (<code>RAxML-NG</code>), Felsenstein bootstrap proportions (FBP), penalized likelihood dating (<code>treePL</code>), retrieval of IUCN Red List assessments (<code>rredlist</code>), and comparison with published phylogenies, one of which can be summarized under the multispecies coalescent with <code>ASTRAL-III</code>.</p>
+<p>A second branch identifies samples of cacti by DNA barcoding: from the same mining it builds a reference library of Sanger marker records, validates it, and identifies a sample (sequences, an assembly or Illumina reads) against it, locus by locus (Tutorials 5 and 6).</p>
 </div>
 <div class="section level2">
 <h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
@@ -94,6 +97,7 @@ Adds species-level IUCN Red List assessments retrieved with <code>rredlist</code
 <li><p><strong>Stage 4: Validation (Module 13)</strong><br>
 Compares the focal tree with published phylogenies (Amaral <em>et al</em>. 2022; Thompson <em>et al</em>. 2024; Zuntini <em>et al</em>. 2024; de Vos <em>et al</em>. 2025) by Robinson-Foulds and information-theoretic distances and by multidimensional scaling (MDS) of tree space (<code><a href="reference/validate_phylogenies.html">validate_phylogenies()</a></code>). The published gene trees of de Vos <em>et al</em>. (2025) can optionally be summarized into a species tree with <code>ASTRAL-III</code>, which then enters the comparison as a further reference; by default the distributed summary tree is used. <code>PhyloCactus</code> does not infer gene trees from its own supermatrix and does not quantify gene tree discordance.</p></li>
 </ol>
+<p><strong>Molecular identification (Tutorial 5).</strong> Builds a reference library of 15 loci from the same phylotaR mining, validates it with folds that ask for the species or, with the species left out, for the genus, with negative controls, and identifies a sample locus by locus with IdTaxa (Murali <em>et al</em>. 2018) in three states: species, genus or no answer. Each identification writes an HTML report (Tutorial 6 identifies public samples of each kind of input).</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -194,6 +198,30 @@ Compares the focal tree with published phylogenies (Amaral <em>et al</em>. 2022;
 <td align="left">Smith &amp; O’Meara (2012) <em>Bioinformatics</em>
 </td>
 </tr>
+<tr>
+<td align="left"><a href="https://github.com/OpenGene/fastp" class="external-link"><code>fastp</code></a></td>
+<td align="left">Read trimming before organelle assembly (identification from Illumina reads only)</td>
+<td align="left">Chen <em>et al</em>. (2018) <em>Bioinformatics</em>
+</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/Kinggerm/GetOrganelle" class="external-link"><code>GetOrganelle</code></a></td>
+<td align="left">Assembly of the plastome and nuclear ribosomal DNA from reads (identification from Illumina reads only)</td>
+<td align="left">Jin <em>et al</em>. (2020) <em>Genome Biol.</em>
+</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/lh3/minimap2" class="external-link"><code>minimap2</code></a></td>
+<td align="left">Mapping of the library loci onto an assembly (identification from an assembly only)</td>
+<td align="left">Li (2018) <em>Bioinformatics</em>
+</td>
+</tr>
+<tr>
+<td align="left"><a href="https://github.com/samtools/samtools" class="external-link"><code>samtools</code></a></td>
+<td align="left">Extraction of the mapped regions (identification from an assembly only)</td>
+<td align="left">Danecek <em>et al</em>. (2021) <em>GigaScience</em>
+</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -232,10 +260,14 @@ Compares the focal tree with published phylogenies (Amaral <em>et al</em>. 2022;
 </tr>
 <tr>
 <td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html"><strong>Tutorial 5</strong></a></td>
-<td align="left">Section manifest: scope, decisions taken, open questions and reopening criteria for the molecular diagnostic section</td>
+<td align="left">Molecular identification: the reference library and its validation</td>
 </tr>
 <tr>
-<td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html"><strong>Function Reference</strong></a></td>
+<td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html"><strong>Tutorial 6</strong></a></td>
+<td align="left">Identifying a sample: worked examples of each kind of input, the report, and the rates measured with this version</td>
+</tr>
+<tr>
+<td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-7-cactus-phylogeny-functions.html"><strong>Function Reference</strong></a></td>
 <td align="left">Package functions and the methods they implement</td>
 </tr>
 </tbody>
@@ -254,23 +286,25 @@ Compares the focal tree with published phylogenies (Amaral <em>et al</em>. 2022;
 <ul>
 <li>Amaral <em>et al</em>. 2022. Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. <em>Biological Conservation</em>, 273, 109677. <a href="https://doi.org/10.1016/j.biocon.2022.109677" class="external-link uri">https://doi.org/10.1016/j.biocon.2022.109677</a>
 </li>
-<li>Arakaki <em>et al</em>. 2011. Contemporaneous and recent radiations of the world’s major succulent plant lineages. <em>PNAS</em>, 108(20), 8379-8384. <a href="https://doi.org/10.1073/pnas.1100628108" class="external-link uri">https://doi.org/10.1073/pnas.1100628108</a>
+<li>Arakaki <em>et al</em>. 2011. Contemporaneous and recent radiations of the world’s major succulent plant lineages. <em>PNAS</em>, 108(20), 8379–8384. <a href="https://doi.org/10.1073/pnas.1100628108" class="external-link uri">https://doi.org/10.1073/pnas.1100628108</a>
 </li>
 <li>de Vos <em>et al</em>. 2025. Phylogenomics and classification of Cactaceae based on hundreds of nuclear genes. <em>Plant Systematics and Evolution</em>, 311(5), 28. <a href="https://doi.org/10.1007/s00606-025-01948-z" class="external-link uri">https://doi.org/10.1007/s00606-025-01948-z</a>
 </li>
-<li>Guerrero <em>et al</em>. 2019. Phylogenetic relationships and evolutionary trends in the cactus family. <em>Journal of Heredity</em>, 110(1), 4-21. <a href="https://doi.org/10.1093/jhered/esy064" class="external-link uri">https://doi.org/10.1093/jhered/esy064</a>
+<li>Guerrero <em>et al</em>. 2019. Phylogenetic relationships and evolutionary trends in the cactus family. <em>Journal of Heredity</em>, 110(1), 4–21. <a href="https://doi.org/10.1093/jhered/esy064" class="external-link uri">https://doi.org/10.1093/jhered/esy064</a>
 </li>
-<li>Hernández-Hernández <em>et al</em>. 2014. Beyond aridification: multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. <em>New Phytologist</em>, 202(4), 1382-1397. <a href="https://doi.org/10.1111/nph.12752" class="external-link uri">https://doi.org/10.1111/nph.12752</a>
+<li>Hernández-Hernández <em>et al</em>. 2014. Beyond aridification: multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. <em>New Phytologist</em>, 202(4), 1382–1397. <a href="https://doi.org/10.1111/nph.12752" class="external-link uri">https://doi.org/10.1111/nph.12752</a>
 </li>
-<li>Jin, L., &amp; Nei, M. 1990. Limitations of the evolutionary parsimony method of phylogenetic analysis. <em>Molecular Biology and Evolution</em>, 7(1), 82-102. <a href="https://doi.org/10.1093/oxfordjournals.molbev.a040588" class="external-link uri">https://doi.org/10.1093/oxfordjournals.molbev.a040588</a>
+<li>Jin &amp; Nei 1990. Limitations of the evolutionary parsimony method of phylogenetic analysis. <em>Molecular Biology and Evolution</em>, 7(1), 82–102. <a href="https://doi.org/10.1093/oxfordjournals.molbev.a040588" class="external-link uri">https://doi.org/10.1093/oxfordjournals.molbev.a040588</a>
 </li>
-<li>Kimura, M. 1980. A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. <em>Journal of Molecular Evolution</em>, 16(2), 111-120. <a href="https://doi.org/10.1007/BF01731581" class="external-link uri">https://doi.org/10.1007/BF01731581</a>
+<li>Kimura 1980. A simple method for estimating evolutionary rates of base substitutions through comparative studies of nucleotide sequences. <em>Journal of Molecular Evolution</em>, 16(2), 111–120. <a href="https://doi.org/10.1007/BF01731581" class="external-link uri">https://doi.org/10.1007/BF01731581</a>
 </li>
-<li>Korotkova <em>et al</em>. 2021. Cactaceae at Caryophyllales.org, a dynamic online species-level taxonomic backbone for the family. <em>Willdenowia</em>, 51(2), 251-270. <a href="https://doi.org/10.3372/wi.51.51208" class="external-link uri">https://doi.org/10.3372/wi.51.51208</a>
+<li>Korotkova <em>et al</em>. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. <em>Willdenowia</em>, 51(2), 251–270. <a href="https://doi.org/10.3372/wi.51.51208" class="external-link uri">https://doi.org/10.3372/wi.51.51208</a>
+</li>
+<li>Murali <em>et al</em>. 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. <em>Microbiome</em>, 6. <a href="https://doi.org/10.1186/s40168-018-0521-5" class="external-link uri">https://doi.org/10.1186/s40168-018-0521-5</a>
 </li>
 <li>Thompson <em>et al</em>. 2024. Identifying the multiple drivers of cactus diversification. <em>Nature Communications</em>, 15(1), 7114. <a href="https://doi.org/10.1038/s41467-024-51666-2" class="external-link uri">https://doi.org/10.1038/s41467-024-51666-2</a>
 </li>
-<li>Zuntini <em>et al</em>. 2024. Phylogenomics and the rise of the angiosperms. <em>Nature</em>, 629, 843-850. <a href="https://doi.org/10.1038/s41586-024-07324-0" class="external-link uri">https://doi.org/10.1038/s41586-024-07324-0</a>
+<li>Zuntini <em>et al</em>. 2024. Phylogenomics and the rise of the angiosperms. <em>Nature</em>, 629, 843–850. <a href="https://doi.org/10.1038/s41586-024-07324-0" class="external-link uri">https://doi.org/10.1038/s41586-024-07324-0</a>
 </li>
 </ul>
 </div>

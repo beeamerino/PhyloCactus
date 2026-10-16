@@ -15,7 +15,8 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Get Started">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Get Started">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -25,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,8 +44,9 @@
     <li><a class="dropdown-item" href="../articles/tutorial-2-cactus-phylogeny-inference.html">2. Inference &amp; Dating</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-3-cactus-phylogeny-visualization.html">3. Visualization &amp; IUCN Summary</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-4-cactus-phylogeny-validation.html">4. Phylogenetic Validation</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding: Section Manifest</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Core Functions Dictionary</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-barcoding-identification.html">6. Identifying a Sample</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-7-cactus-phylogeny-functions.html">7. Core Functions Dictionary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -67,7 +69,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-09-19</h4>
+            <h4 data-toc-skip class="date">2026-10-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/PhyloCactus.Rmd" class="external-link"><code>vignettes/PhyloCactus.Rmd</code></a></small>
       <div class="d-none name"><code>PhyloCactus.Rmd</code></div>
@@ -88,11 +90,11 @@ of decades of deposition: inconsistent locus annotations, duplicated
 accessions, records without vouchers, orthographic variants and
 nomenclatural synonyms. Converting these records into a phylogenetic
 matrix requires curation, taxonomic reconciliation against an accepted
-checklist, and quality control of each alignment. The difficulty
-increases in plant lineages that diversified recently and rapidly, where
-low plastid divergence, incomplete lineage sorting (ILS) and reticulate
-evolution increase the risk of erroneous orthology assessment and of
-alignment error.</p>
+checklist (Korotkova <em>et al</em>. 2021), and quality control of each
+alignment. The difficulty increases in plant lineages that diversified
+recently and rapidly, where low plastid divergence, incomplete lineage
+sorting (ILS) and reticulate evolution increase the risk of erroneous
+orthology assessment and of alignment error.</p>
 <p><strong>Cactaceae</strong>, one of the largest succulent radiations
 of the Neotropics (Arakaki <em>et al</em>. 2011; Hernández-Hernández
 <em>et al</em>. 2014; Guerrero <em>et al</em>. 2019), combine these
@@ -117,8 +119,10 @@ the final chronogram and resumed from any completed module.</p>
 </h2>
 <p>The workflow comprises thirteen modules grouped in four stages.</p>
 <div class="figure" style="text-align: center">
-<img src="figures/Fig1_PhyloCactus_Workflow.png" class="r-plt" alt="Conceptual framework of the PhyloCactus pipeline" width="100%"><p class="caption">
-Conceptual framework of the PhyloCactus pipeline
+<img src="figures/Fig1_PhyloCactus_Workflow.png" class="r-plt" alt="**Figure 1.** Conceptual framework of the PhyloCactus pipeline: the phylogenetic branch (Modules 1 to 13) and the molecular diagnostic branch (Tutorials 5 and 6) on the same phylotaR mining." width="100%"><p class="caption">
+<strong>Figure 1.</strong> Conceptual framework of the PhyloCactus
+pipeline: the phylogenetic branch (Modules 1 to 13) and the molecular
+diagnostic branch (Tutorials 5 and 6) on the same phylotaR mining.
 </p>
 </div>
 <ol style="list-style-type: decimal">
@@ -154,6 +158,11 @@ gene trees under the multispecies coalescent with
 </ol>
 <p>Each stage can be run on its own, from the outputs of the previous
 one.</p>
+<p>A second branch, molecular identification by DNA barcoding (Tutorials
+5 and 6), builds a reference library of 15 loci from the same phylotaR
+mining, validates it, and identifies a sample (sequences, an assembly or
+Illumina reads) against it, locus by locus, in three states: species,
+genus or no answer.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -318,6 +327,36 @@ Divergence time estimation using penalized likelihood for large
 phylogenies. <em>Bioinformatics</em>, 28(20), 2689–2690. <a href="https://doi.org/10.1093/bioinformatics/bts492" class="external-link uri">https://doi.org/10.1093/bioinformatics/bts492</a>
 </td>
 </tr>
+<tr class="even">
+<td align="left"><a href="https://github.com/OpenGene/fastp" class="external-link"><code>fastp</code></a></td>
+<td align="left">Read trimming (identification from Illumina reads
+only)</td>
+<td align="left">Chen, S., Zhou, Y., Chen, Y., &amp; Gu, J. (2018).
+fastp: an ultra-fast all-in-one FASTQ preprocessor.
+<em>Bioinformatics</em>, 34(17), i884-i890.</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://github.com/Kinggerm/GetOrganelle" class="external-link"><code>GetOrganelle</code></a></td>
+<td align="left">Plastome and nuclear ribosomal DNA assembly
+(identification from Illumina reads only)</td>
+<td align="left">Jin, J.-J. <em>et al</em>. (2020). GetOrganelle: a fast
+and versatile toolkit for accurate de novo assembly of organelle
+genomes. <em>Genome Biology</em>, 21, 241.</td>
+</tr>
+<tr class="even">
+<td align="left"><a href="https://github.com/lh3/minimap2" class="external-link"><code>minimap2</code></a></td>
+<td align="left">Mapping onto an assembly (identification from an
+assembly only)</td>
+<td align="left">Li, H. (2018). Minimap2: pairwise alignment for
+nucleotide sequences. <em>Bioinformatics</em>, 34(18), 3094-3100.</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://github.com/samtools/samtools" class="external-link"><code>samtools</code></a></td>
+<td align="left">Extraction of mapped regions (identification from an
+assembly only)</td>
+<td align="left">Danecek, P. <em>et al</em>. (2021). Twelve years of
+SAMtools and BCFtools. <em>GigaScience</em>, 10(2), giab008.</td>
+</tr>
 </tbody>
 </table>
 <div class="section level3">
@@ -386,10 +425,16 @@ Estimation</td>
 <tr class="odd">
 <td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html"><strong>Tutorial
 5</strong></a></td>
-<td align="left">DNA Barcoding, Section Manifest</td>
+<td align="left">Molecular identification (DNA barcoding): the reference
+library and its validation</td>
 </tr>
 <tr class="even">
-<td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html"><strong>Function
+<td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html"><strong>Tutorial
+6</strong></a></td>
+<td align="left">Identifying a sample: worked examples and rates</td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-7-cactus-phylogeny-functions.html"><strong>Function
 Reference</strong></a></td>
 <td align="left">Core pipeline functions and methodological
 dictionary</td>
@@ -427,7 +472,7 @@ Multiple explanations for the elevated diversification of cacti in the
 New World Succulent Biome. <em>New Phytologist</em>, 202(4), 1382–1397.
 <a href="https://doi.org/10.1111/nph.12752" class="external-link uri">https://doi.org/10.1111/nph.12752</a>
 </li>
-<li>Korotkova <em>et al</em>. 2021. Cactaceae at Caryophyllales.org, a
+<li>Korotkova <em>et al</em>. 2021. Cactaceae at Caryophyllales.org - A
 dynamic online species-level taxonomic backbone for the family.
 <em>Willdenowia</em>, 51(2), 251–270. <a href="https://doi.org/10.3372/wi.51.51208" class="external-link uri">https://doi.org/10.3372/wi.51.51208</a>
 </li>

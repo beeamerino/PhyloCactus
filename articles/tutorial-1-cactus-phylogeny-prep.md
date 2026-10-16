@@ -98,11 +98,11 @@ to other groups or marker sets without modifying the package.
 
 The exclusion lists record a curatorial decision.
 `manual_exclusions_ingroup.csv` and `manual_exclusions_outgroup.csv`
-remove 99 unique accessions across 113 records, in 16 ingroup clusters
-and 24 outgroup clusters. Each accession was inspected and removed by
-the team supporting `PhyloCactus` on taxonomic or sequence-quality
-grounds that cannot be recovered from GenBank metadata. The
-`apply_manual_exclusions` argument defaults to `TRUE` and is stated
+remove 102 accessions, keyed by locus and accession: 60 in 5 ingroup
+loci and 42 in 13 outgroup loci. Each accession was inspected and
+removed by the team supporting `PhyloCactus` on taxonomic or
+sequence-quality grounds that cannot be recovered from GenBank metadata.
+The `apply_manual_exclusions` argument defaults to `TRUE` and is stated
 explicitly in the call below so that the curation is visible; setting it
 to `FALSE` reproduces the uncurated cluster set and allows the effect of
 the curation to be measured. The applied list is written to
@@ -144,7 +144,14 @@ ingroup_assembly <- assemble_ingroup_phylotar(
   manual_exclusions_file = system.file("extdata", "manual_exclusions_ingroup.csv", package = "PhyloCactus"),
   apply_manual_exclusions = TRUE,
   min_species = 50,
-  force_download = FALSE
+  force_download = FALSE,
+  # The length limits of a new mining: records of 100 to 5000 bases (the defaults). The workspace
+  # of 0_phylotaR_raw_Ingroup/ is read as it is when it exists, so they act only on a first mining.
+  mnsql = 100L,
+  mxsql = 5000L,
+  # Email when a mining ends or fails; TRUE needs MY_EMAIL and a blastula credentials file, as in
+  # Tutorial 2. The mining of 2026-09-29 took 50 minutes for the ingroup and 10 for the outgroup.
+  notify = FALSE
 )
 
 # Mine outgroup taxonomic database
@@ -160,7 +167,10 @@ outgroup_assembly <- assemble_outgroup_phylotar(
   #
   # Talinopsis (107598) is Anacampserotaceae, not Talinaceae, despite the name and adjacent ID.
   outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"),
-  force_download = FALSE
+  force_download = FALSE,
+  mnsql = 100L,
+  mxsql = 5000L,
+  notify = FALSE
 )
 
 # Load the accepted species checklist
@@ -211,14 +221,16 @@ Nothing downstream detects this. The row simply looks like a very
 divergent sequence, or fails the occupancy filter of Module 5 and
 disappears without explanation.
 
-In the reference dataset, the `rbcL` and `matK` accessions of *Portulaca
-oleracea* and *P. pilosa* are deposited reversed, and so are 163 ingroup
-sequences, 77 of `psbA-trnH` and 86 of `rpL16`. Uncorrected, these
-sequences align to nothing, lose occupancy and are removed by the
-occupancy filter of Module 5, so no reversed sequence remains visible in
-the curated output. Correcting the strand retains them: `psbA_trnH`
-keeps 368 ingroup sequences in place of 296, and `rpL16` 677 in place of
-600.
+In the reference dataset, the `matK` accessions of *Portulaca oleracea*
+and *P. pilosa* are deposited reversed, as are outgroup accessions of
+`atpI-atpH` and `ndhA`, and so are 502 ingroup sequences, most of them
+of `rpL16` (156), `rpl32-trnL` (150), `psbA-trnH` (126) and `psbE-petL`
+(45). Uncorrected, these sequences align to nothing, lose occupancy and
+are removed by the occupancy filter of Module 5, so no reversed sequence
+remains visible in the curated output. Correcting the strand retains
+them: of the ingroup sequences kept in the cleaned alignments, 120 of
+690 in `rpL16`, 119 of 532 in `psbA-trnH`, 140 of 167 in `rpl32-trnL`
+and 40 of 137 in `psbE-petL` were reverse-complemented.
 
 Orientation is decided against the majority orientation of each marker,
 because no external reference is guaranteed to exist for a mined locus.
@@ -335,7 +347,7 @@ alignments generated in Module 2. Passing `outgroup_folder` records
 `n_outgroup` and `n_total` in the summary table for diagnostic
 visibility, though retention decisions remain strictly based on ingroup
 thresholds to prevent distant outgroup divergence from distorting
-saturation regressions. For example, `trnT-psbD` possessed 50 ingroup
+saturation regressions. For example, `trnT-psbD` held 57 ingroup
 sequences and was filtered out by `min_nseq_to_retain = 100`, despite
 carrying extensive outgroup representation. First, substitution
 saturation is evaluated using regression-based statistics to identify
@@ -388,9 +400,9 @@ writes its outputs to separate subdirectories:
 
 1.  `4_Cleaned/cleaned_markers_ingroup`: Contains curated sequences
     exclusively for accepted **Cactaceae** taxa, preserved for
-    single-locus analyses. These are the inputs the molecular diagnostic
-    section will consume once its strategy is defined; see the section
-    manifest in Tutorial 5.
+    single-locus analyses. The molecular identification branch of
+    Tutorial 5 does not read them: it assembles its own library from the
+    `phylotaR` workspace of Module 1.
 2.  `4_Cleaned/cleaned_markers_outgroup`: Contains corresponding
     outgroup sequences (*Portulaca*, *Anacampseros*, *Talinopsis*,
     *Grahamia*, *Talinum*, *Talinella*).
@@ -458,8 +470,8 @@ integrate_and_clean_markers(
   # amplicon contains that intron. Verified before aliasing: outgroup ndhF shares none with
   # ndhF-rpl32 despite the resemblance, and is not aliased.
   marker_aliases = c(trnL = "trnL_trnF"),
-  # readmit_markers overrides the Module 3 verdict for a locus kept on outgroup grounds rather
-  # than ingroup resolution. Left empty; see the note below.
+  # readmit_markers overrides the Module 3 verdict for a locus kept on outgroup grounds, not for
+  # its ingroup resolution. Left empty; see the note below.
   readmit_markers = NULL,
   readmit_dir = NULL,
   # Alignment-free homology check, ingroup against outgroup, per marker.
@@ -467,13 +479,13 @@ integrate_and_clean_markers(
 )
 ```
 
-`trnT-psbD` shows why a locus is not readmitted on coverage alone. It
-has more outgroup sequences than any other marker (52 sequences of 52
-*Portulaca* species, against 50 ingroup sequences), but the two sets are
-not the same region: 0.040 of the outgroup 20-mers occur in the ingroup
-sequences, against 0.26 to 0.59 for `trnL_trnF`, `matK`, `phyC` and
-`rbcL`. The median length is 605 bp in the ingroup and 1347 bp in the
-outgroup.
+`trnT-psbD` shows why a locus is not readmitted on coverage alone. Its
+outgroup sample is large (53 sequences, of 52 *Portulaca* species and
+one *Talinopsis*, against 57 ingroup sequences), but the two sets are
+not the same region: 0.062 of the outgroup 20-mers occur in the ingroup
+sequences, all of them on the opposite strand and none on the same one,
+against 0.27 to 0.58 for `trnL_trnF`, `matK` and `rbcL`. The median
+length is 666 bp in the ingroup and 1347 bp in the outgroup.
 
 `homology_check` detects this case, which neither counts nor a coverage
 table can show. For each marker present on both sides, it measures the
@@ -590,16 +602,19 @@ no alignment raises a warning, so a misspelled name cannot leave a locus
 in the matrix unnoticed.
 
 Set `exclude_markers = NULL` to build the full matrix. `phyC` is
-excluded below because it carries no Portulacaceae terminal: of its 16
-outgroup terminals, 15 are Anacampserotaceae and one is Talinaceae,
-against 167 ingroup terminals (counted in
+excluded below. Its cleaned alignment holds 25 outgroup terminals (16
+Anacampserotaceae, 8 Portulacaceae and one Talinaceae) against 167
+ingroup terminals (counted in
 `5_MAFFT_Cleaned/aligned_markers/phyC.fasta`; the coverage report lists
-only the loci that enter the supermatrix). In a matrix built to date the
-ACP clade, a locus sampled for Anacampserotaceae and not for
-Portulacaceae supplies characters to only one side of the divergence
-between the two families. The exclusion is a property of this matrix;
-`phyC` remains the more discriminating of the two nuclear markers for
-barcoding.
+only the loci that enter the supermatrix), but only 0.196 of the
+outgroup 20-mers occur in the ingroup sequences
+(`TABLE_marker_homology_check.csv`, verdict “low”; 0.27 to 0.58 for
+`trnL_trnF`, `matK` and `rbcL`), so it is not established that its
+outgroup sequences are the same region as its ingroup sequences. In a
+matrix built to date the ACP clade, such a locus supplies characters of
+uncertain homology to the divergences among the three families. The
+exclusion is a property of this matrix; `phyC` remains the more
+discriminating of the two nuclear markers for barcoding.
 
 ``` r
 
@@ -632,13 +647,13 @@ Estimation](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-
 - Guerrero *et al*. 2019. Phylogenetic relationships and evolutionary
   trends in the cactus family. *Journal of Heredity*, 110(1), 4–21.
   <https://doi.org/10.1093/jhered/esy064>
-- Katoh, K., & Standley, D. M. 2013. MAFFT multiple sequence alignment
-  software version 7: improvements in performance and usability.
-  *Molecular Biology and Evolution*, 30(4), 772–780.
+- Katoh & Standley 2013. MAFFT multiple sequence alignment software
+  version 7: improvements in performance and usability. *Molecular
+  Biology and Evolution*, 30(4), 772–780.
   <https://doi.org/10.1093/molbev/mst010>
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org, a dynamic
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic
   online species-level taxonomic backbone for the family. *Willdenowia*,
   51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
-- Wright, E. 2024. Fast and flexible search for homologous biological
-  sequences with DECIPHER v3. *The R Journal*, 16(2), 191-200.
+- Wright 2024. Fast and flexible search for homologous biological
+  sequences with DECIPHER v3. *The R Journal*, 16(2), 191–200.
   <https://doi.org/10.18129/B9.bioc.DECIPHER>

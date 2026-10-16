@@ -15,7 +15,8 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tutorial 4: Phylogenetic Validation and Comparative Analyses">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Tutorial 4: Phylogenetic Validation and Comparative Analyses">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -25,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,8 +44,9 @@
     <li><a class="dropdown-item" href="../articles/tutorial-2-cactus-phylogeny-inference.html">2. Inference &amp; Dating</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-3-cactus-phylogeny-visualization.html">3. Visualization &amp; IUCN Summary</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-4-cactus-phylogeny-validation.html">4. Phylogenetic Validation</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding: Section Manifest</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Core Functions Dictionary</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-barcoding-identification.html">6. Identifying a Sample</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-7-cactus-phylogeny-functions.html">7. Core Functions Dictionary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -67,7 +69,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-09-19</h4>
+            <h4 data-toc-skip class="date">2026-10-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-4-cactus-phylogeny-validation.Rmd" class="external-link"><code>vignettes/tutorial-4-cactus-phylogeny-validation.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-4-cactus-phylogeny-validation.Rmd</code></div>
@@ -219,10 +221,10 @@ them.</p>
 <h3 id="topological-comparison">Topological Comparison<a class="anchor" aria-label="anchor" href="#topological-comparison"></a>
 </h3>
 <p>The focal tree is the chronogram from Module 10, whose topology is
-that of the maximum-likelihood tree (all 1021 bipartitions shared).
+that of the maximum-likelihood tree (all 1205 bipartitions shared).
 <code><a href="../reference/validate_phylogenies.html">validate_phylogenies()</a></code> restricts every tree to Cactaceae
-and to the names accepted in the checklist, then computes pairwise
-distances on four taxon sets:</p>
+and to the names accepted in the checklist (Korotkova <em>et al</em>.
+2021), then computes pairwise distances on four taxon sets:</p>
 <ul>
 <li>
 <strong>A1:</strong> species shared by all trees;</li>
@@ -303,9 +305,17 @@ distributed with the package
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="va">plot_to_show</span></span></code></pre></div>
-<p><img src="tutorial-4-cactus-phylogeny-validation_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="1122.24"></p>
+<div class="figure">
+<img src="tutorial-4-cactus-phylogeny-validation_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="**Figure 1.** Tree space of the focal chronogram and the four published phylogenies: classical MDS of the normalized Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4); trees close together have similar topologies." width="1122.24"><p class="caption">
+<strong>Figure 1.</strong> Tree space of the focal chronogram and the
+four published phylogenies: classical MDS of the normalized
+Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4);
+trees close together have similar topologies.
+</p>
+</div>
 <table style="width:100%;" class="table">
-<caption>Pairwise tree distances</caption>
+<caption>Table 1. Pairwise tree distances: normalized RF and DPI for
+each pair of trees and taxon set (first rows).</caption>
 <colgroup>
 <col width="14%">
 <col width="40%">
@@ -331,8 +341,8 @@ distributed with the package
 <td align="left">RF</td>
 <td align="left">Zuntini</td>
 <td align="left">FocalTree</td>
-<td align="right">60</td>
-<td align="right">0.2105263</td>
+<td align="right">66</td>
+<td align="right">0.2539683</td>
 </tr>
 <tr class="even">
 <td align="left">A1_species_all4</td>
@@ -340,8 +350,8 @@ distributed with the package
 <td align="left">RF</td>
 <td align="left">Thompson</td>
 <td align="left">FocalTree</td>
-<td align="right">60</td>
-<td align="right">0.3508772</td>
+<td align="right">66</td>
+<td align="right">0.3809524</td>
 </tr>
 <tr class="odd">
 <td align="left">A1_species_all4</td>
@@ -349,8 +359,8 @@ distributed with the package
 <td align="left">RF</td>
 <td align="left">Amaral</td>
 <td align="left">FocalTree</td>
-<td align="right">60</td>
-<td align="right">0.3684211</td>
+<td align="right">66</td>
+<td align="right">0.4285714</td>
 </tr>
 <tr class="even">
 <td align="left">A1_species_all4</td>
@@ -358,8 +368,8 @@ distributed with the package
 <td align="left">RF</td>
 <td align="left">deVos</td>
 <td align="left">FocalTree</td>
-<td align="right">60</td>
-<td align="right">0.2105263</td>
+<td align="right">66</td>
+<td align="right">0.2698413</td>
 </tr>
 <tr class="odd">
 <td align="left">A1_species_all4</td>
@@ -367,8 +377,8 @@ distributed with the package
 <td align="left">RF</td>
 <td align="left">Thompson</td>
 <td align="left">Zuntini</td>
-<td align="right">60</td>
-<td align="right">0.3684211</td>
+<td align="right">66</td>
+<td align="right">0.3809524</td>
 </tr>
 <tr class="even">
 <td align="left">A1_species_all4</td>
@@ -376,8 +386,8 @@ distributed with the package
 <td align="left">RF</td>
 <td align="left">Amaral</td>
 <td align="left">Zuntini</td>
-<td align="right">60</td>
-<td align="right">0.4035088</td>
+<td align="right">66</td>
+<td align="right">0.4444444</td>
 </tr>
 </tbody>
 </table>
@@ -396,12 +406,13 @@ not identify which clades are in conflict.</p>
 GenBank, maximum-likelihood inference with bootstrap support, divergence
 time estimation with penalized likelihood, integration of IUCN Red List
 data, figures, and comparison with published phylogenies.</p>
-<p>The next section of the workflow will assess how well individual
-markers discriminate species. It is under construction and contains no
-implementation. Tutorial 5 describes its scope, the design decisions
-taken, the open questions, and the conditions for reopening it.</p>
+<p>The second branch of the package, molecular identification by DNA
+barcoding, builds a reference library of Cactaceae from the same
+<code>phylotaR</code> mining, measures how well it tells genera and
+species apart, and identifies a sample against it (Tutorials 5 and
+6).</p>
 <p><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html">Continue
-to Tutorial 5: DNA Barcoding, Section Manifest</a></p>
+to Tutorial 5: Molecular Identification of Cacti (DNA Barcoding)</a></p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -414,6 +425,10 @@ protected areas. <em>Biological Conservation</em>, 273, 109677. <a href="https:/
 <li>de Vos <em>et al</em>. 2025. Phylogenomics and classification of
 Cactaceae based on hundreds of nuclear genes. <em>Plant Systematics and
 Evolution</em>, 311(5), 28. <a href="https://doi.org/10.1007/s00606-025-01948-z" class="external-link uri">https://doi.org/10.1007/s00606-025-01948-z</a>
+</li>
+<li>Korotkova <em>et al</em>. 2021. Cactaceae at Caryophyllales.org - A
+dynamic online species-level taxonomic backbone for the family.
+<em>Willdenowia</em>, 51(2), 251–270. <a href="https://doi.org/10.3372/wi.51.51208" class="external-link uri">https://doi.org/10.3372/wi.51.51208</a>
 </li>
 <li>Kubatko &amp; Degnan 2007. Inconsistency of phylogenetic estimates
 from concatenated data under coalescence. <em>Systematic Biology</em>,

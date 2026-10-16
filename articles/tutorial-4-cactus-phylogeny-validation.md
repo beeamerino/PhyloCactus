@@ -140,10 +140,11 @@ if (run_astral_locally && nzchar(astral_jar) && file.exists(astral_jar) &&
 ### Topological Comparison
 
 The focal tree is the chronogram from Module 10, whose topology is that
-of the maximum-likelihood tree (all 1021 bipartitions shared).
+of the maximum-likelihood tree (all 1205 bipartitions shared).
 [`validate_phylogenies()`](https://beeamerino.github.io/PhyloCactus/reference/validate_phylogenies.md)
 restricts every tree to Cactaceae and to the names accepted in the
-checklist, then computes pairwise distances on four taxon sets:
+checklist (Korotkova *et al*. 2021), then computes pairwise distances on
+four taxon sets:
 
 - **A1:** species shared by all trees;
 - **A2:** species shared by the focal tree and the trees of Thompson *et
@@ -224,18 +225,28 @@ if(length(existing_trees) > 1) {
 plot_to_show
 ```
 
-![](tutorial-4-cactus-phylogeny-validation_files/figure-html/unnamed-chunk-4-1.png)
+![\*\*Figure 1.\*\* Tree space of the focal chronogram and the four
+published phylogenies: classical MDS of the normalized Robinson-Foulds
+(RF) distances, one panel per taxon set (A1 to A4); trees close together
+have similar
+topologies.](tutorial-4-cactus-phylogeny-validation_files/figure-html/unnamed-chunk-4-1.png)
+
+**Figure 1.** Tree space of the focal chronogram and the four published
+phylogenies: classical MDS of the normalized Robinson-Foulds (RF)
+distances, one panel per taxon set (A1 to A4); trees close together have
+similar topologies.
 
 | analysis_id | analysis_label | metric | tree_1 | tree_2 | n_common_tips | distance |
 |:---|:---|:---|:---|:---|---:|---:|
-| A1_species_all4 | A1. Shared species across comparative trees | RF | Zuntini | FocalTree | 60 | 0.2105263 |
-| A1_species_all4 | A1. Shared species across comparative trees | RF | Thompson | FocalTree | 60 | 0.3508772 |
-| A1_species_all4 | A1. Shared species across comparative trees | RF | Amaral | FocalTree | 60 | 0.3684211 |
-| A1_species_all4 | A1. Shared species across comparative trees | RF | deVos | FocalTree | 60 | 0.2105263 |
-| A1_species_all4 | A1. Shared species across comparative trees | RF | Thompson | Zuntini | 60 | 0.3684211 |
-| A1_species_all4 | A1. Shared species across comparative trees | RF | Amaral | Zuntini | 60 | 0.4035088 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | Zuntini | FocalTree | 66 | 0.2539683 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | Thompson | FocalTree | 66 | 0.3809524 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | Amaral | FocalTree | 66 | 0.4285714 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | deVos | FocalTree | 66 | 0.2698413 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | Thompson | Zuntini | 66 | 0.3809524 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | Amaral | Zuntini | 66 | 0.4444444 |
 
-Pairwise tree distances {.table style="width:100%;"}
+Table 1. Pairwise tree distances: normalized RF and DPI for each pair of
+trees and taxon set (first rows). {.table style="width:100%;"}
 
 `TABLE_pairwise_tree_distances_main.csv` lists the distances for every
 pair of trees and every taxon set, and `FIG_tree_space_main.pdf` shows
@@ -250,13 +261,13 @@ bootstrap support, divergence time estimation with penalized likelihood,
 integration of IUCN Red List data, figures, and comparison with
 published phylogenies.
 
-The next section of the workflow will assess how well individual markers
-discriminate species. It is under construction and contains no
-implementation. Tutorial 5 describes its scope, the design decisions
-taken, the open questions, and the conditions for reopening it.
+The second branch of the package, molecular identification by DNA
+barcoding, builds a reference library of Cactaceae from the same
+`phylotaR` mining, measures how well it tells genera and species apart,
+and identifies a sample against it (Tutorials 5 and 6).
 
-[Continue to Tutorial 5: DNA Barcoding, Section
-Manifest](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html)
+[Continue to Tutorial 5: Molecular Identification of Cacti (DNA
+Barcoding)](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html)
 
 ## References
 
@@ -267,6 +278,9 @@ Manifest](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-ph
 - de Vos *et al*. 2025. Phylogenomics and classification of Cactaceae
   based on hundreds of nuclear genes. *Plant Systematics and Evolution*,
   311(5), 28. <https://doi.org/10.1007/s00606-025-01948-z>
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic
+  online species-level taxonomic backbone for the family. *Willdenowia*,
+  51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 - Kubatko & Degnan 2007. Inconsistency of phylogenetic estimates from
   concatenated data under coalescence. *Systematic Biology*, 56(1),
   17–24. <https://doi.org/10.1080/10635150601146041>

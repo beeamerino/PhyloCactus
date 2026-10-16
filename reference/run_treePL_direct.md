@@ -6,7 +6,7 @@ a prepared configuration file.
 ## Usage
 
 ``` r
-run_treePL_direct(cfg_file, label, cwd = NULL)
+run_treePL_direct(cfg_file, label, cwd = NULL, treepl_bin = "treePL")
 ```
 
 ## Arguments
@@ -22,6 +22,14 @@ run_treePL_direct(cfg_file, label, cwd = NULL)
 - cwd:
 
   Character. Optional working directory context. Defaults to `NULL`.
+
+- treepl_bin:
+
+  Character. Name or path of the `treePL` binary. Defaults to
+  `"treePL"`, which is what this function used to run with the name
+  written into the code: a run on a machine where the binary is not on
+  the path failed with exit status 127 even when the caller had been
+  given another path.
 
 ## Value
 

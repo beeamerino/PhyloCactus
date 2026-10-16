@@ -1,0 +1,31 @@
+/* PhyloCactus website: figure captions above the figure (N3) and spaced sections with a thin rule
+   (N4-b), decisions of 15-10. The grey of the rule is the rule grey of the package palette. */
+
+/* Captions above the figure: rmarkdown writes <div class="figure"><img><p class="caption">, newer
+   versions <figure><img><figcaption>; the caption is moved first without changing the sources. */
+.figure,
+figure {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.figure > .caption,
+figure > figcaption {
+  order: -1;
+  margin-bottom: 0.5rem;
+}
+
+/* Sections and steps: more space, and a thin rule above each heading */
+main h2 {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #E5E5E5;
+}
+
+main h3 {
+  margin-top: 2.25rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid #E5E5E5;
+}

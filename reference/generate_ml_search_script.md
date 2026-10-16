@@ -175,8 +175,8 @@ Reference timing illustrating worker parallelization: on an Apple M2 Pro
 starting trees sequentially on an earlier version of the supermatrix
 required 47115 s (~938 s per tree). The production run on an HPC cluster
 node (AMD EPYC 9754, 75 threads, `--workers 25`) over the full
-supermatrix (1024 terminals, 12809 sites, 5959 patterns, 11 partitions)
-completed 50 starting trees in 2739 s (~46 minutes), executing two
+supermatrix (1208 terminals, 13 700 sites, 7899 patterns, 13 partitions)
+completed 50 starting trees in 4468 s (about 75 minutes), executing two
 parallel rounds.
 
 `workers` is derived automatically and constrained to a divisor of the

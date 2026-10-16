@@ -18,7 +18,12 @@ assemble_outgroup_phylotar(
   apply_manual_exclusions = TRUE,
   outgroups = c("107598", "107617", "107583", "3582", "107600", "108056"),
   force_download = FALSE,
-  out_dir = "1_phylotaR_out_Outgroup"
+  out_dir = "1_phylotaR_out_Outgroup",
+  mnsql = 100L,
+  mxsql = 5000L,
+  notify = FALSE,
+  notify_to = NULL,
+  notify_credentials = NULL
 )
 ```
 
@@ -65,6 +70,26 @@ assemble_outgroup_phylotar(
 
   Character. Output directory path to save outgroup cluster tables and
   FASTA sequence files.
+
+- mnsql, mxsql:
+
+  Integer. Shortest and longest sequence, in bases, that a new mining
+  keeps
+  ([`phylotaR::setup()`](https://docs.ropensci.org/phylotaR/reference/setup.html));
+  100 and 5000 by default. Used only when GenBank is mined.
+
+- notify:
+
+  Logical. Send an email through
+  [`send_run_notification()`](https://beeamerino.github.io/PhyloCactus/reference/send_run_notification.md)
+  when a mining ends or fails; reading an existing workspace sends
+  nothing. Defaults to `FALSE`.
+
+- notify_to, notify_credentials:
+
+  Passed to
+  [`send_run_notification()`](https://beeamerino.github.io/PhyloCactus/reference/send_run_notification.md)
+  as `to` and `credentials`.
 
 ## Value
 

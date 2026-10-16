@@ -37,7 +37,13 @@ validate_phylogenies(
 
 - constraints_map:
 
-  Character. Path to taxonomy mapping CSV file.
+  Character. Path to the taxonomy mapping CSV file (the constraint
+  table). It lists, in `SUPP_missing_species_constraints.csv`, the
+  species of each tree absent from the table; it does not decide which
+  species are compared. The family filter keeps the species of
+  **Cactaceae** in `checklist_csv` (Korotkova *et al.*, 2021): the sheet
+  named Cactaceae of an Excel checklist, or the rows whose `Family`
+  column is Cactaceae in a CSV checklist.
 
 - out_dir:
 

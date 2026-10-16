@@ -20,7 +20,12 @@ assemble_ingroup_phylotar(
   preferred_parent = "3593",
   ncbi_dr = NULL,
   force_download = FALSE,
-  out_dir = "1_phylotaR_out_Ingroup"
+  out_dir = "1_phylotaR_out_Ingroup",
+  mnsql = 100L,
+  mxsql = 5000L,
+  notify = FALSE,
+  notify_to = NULL,
+  notify_credentials = NULL
 )
 ```
 
@@ -52,9 +57,12 @@ assemble_ingroup_phylotar(
   `TRUE`.** The lists shipped with the package are the product of manual
   curation by the expert team supporting `PhyloCactus`: each excluded
   accession was inspected and removed on taxonomic or sequence-quality
-  grounds that are not recoverable from GenBank metadata alone. Across
-  both lists they cover 99 unique accessions in 113 records, spanning 16
-  ingroup clusters and 24 outgroup clusters, and they live in
+  grounds that are not recoverable from GenBank metadata alone. The
+  lists are keyed by locus and accession (`locus`, `sid`, `reason`,
+  `source`), so that they survive a new mining that renumbers the
+  clusters: an accession is removed from every cluster of the locus
+  named. Across both lists they hold 102 accessions, 60 in 5 ingroup
+  loci and 42 in 13 outgroup loci, and they live in
   `inst/extdata/manual_exclusions_ingroup.csv` and
   `inst/extdata/manual_exclusions_outgroup.csv`. Setting this to `FALSE`
   reproduces the uncurated cluster set, which is the way to quantify
@@ -88,6 +96,26 @@ assemble_ingroup_phylotar(
 
   Character. Output directory path to save cluster summaries, FASTA
   sequence matrices, and log reports.
+
+- mnsql, mxsql:
+
+  Integer. Shortest and longest sequence, in bases, that a new mining
+  keeps
+  ([`phylotaR::setup()`](https://docs.ropensci.org/phylotaR/reference/setup.html));
+  100 and 5000 by default. Used only when GenBank is mined.
+
+- notify:
+
+  Logical. Send an email through
+  [`send_run_notification()`](https://beeamerino.github.io/PhyloCactus/reference/send_run_notification.md)
+  when a mining ends or fails; reading an existing workspace sends
+  nothing. Defaults to `FALSE`.
+
+- notify_to, notify_credentials:
+
+  Passed to
+  [`send_run_notification()`](https://beeamerino.github.io/PhyloCactus/reference/send_run_notification.md)
+  as `to` and `credentials`.
 
 ## Value
 

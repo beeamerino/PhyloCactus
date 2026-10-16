@@ -13,11 +13,11 @@ decades of deposition: inconsistent locus annotations, duplicated
 accessions, records without vouchers, orthographic variants and
 nomenclatural synonyms. Converting these records into a phylogenetic
 matrix requires curation, taxonomic reconciliation against an accepted
-checklist, and quality control of each alignment. The difficulty
-increases in plant lineages that diversified recently and rapidly, where
-low plastid divergence, incomplete lineage sorting (ILS) and reticulate
-evolution increase the risk of erroneous orthology assessment and of
-alignment error.
+checklist (Korotkova *et al*. 2021), and quality control of each
+alignment. The difficulty increases in plant lineages that diversified
+recently and rapidly, where low plastid divergence, incomplete lineage
+sorting (ILS) and reticulate evolution increase the risk of erroneous
+orthology assessment and of alignment error.
 
 **Cactaceae**, one of the largest succulent radiations of the Neotropics
 (Arakaki *et al*. 2011; Hernández-Hernández *et al*. 2014; Guerrero *et
@@ -41,10 +41,14 @@ from any completed module.
 
 The workflow comprises thirteen modules grouped in four stages.
 
-![Conceptual framework of the PhyloCactus
-pipeline](figures/Fig1_PhyloCactus_Workflow.png)
+![\*\*Figure 1.\*\* Conceptual framework of the PhyloCactus pipeline:
+the phylogenetic branch (Modules 1 to 13) and the molecular diagnostic
+branch (Tutorials 5 and 6) on the same phylotaR
+mining.](figures/Fig1_PhyloCactus_Workflow.png)
 
-Conceptual framework of the PhyloCactus pipeline
+**Figure 1.** Conceptual framework of the PhyloCactus pipeline: the
+phylogenetic branch (Modules 1 to 13) and the molecular diagnostic
+branch (Tutorials 5 and 6) on the same phylotaR mining.
 
 1.  **Data Assembly and Preparation (Modules 1 to 6)**: retrieval of
     orthologous sequence clusters with `phylotaR`, alignment with
@@ -72,6 +76,12 @@ Conceptual framework of the PhyloCactus pipeline
     coalescent with `ASTRAL-III`.
 
 Each stage can be run on its own, from the outputs of the previous one.
+
+A second branch, molecular identification by DNA barcoding (Tutorials 5
+and 6), builds a reference library of 15 loci from the same phylotaR
+mining, validates it, and identifies a sample (sequences, an assembly or
+Illumina reads) against it, locus by locus, in three states: species,
+genus or no answer.
 
 ## Installation
 
@@ -180,6 +190,10 @@ available on the system `PATH`:
 | [`ModelTest-NG`](https://github.com/ddarriba/modeltest) | Model selection | Darriba, D. *et al*. (2020). ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291-294. <https://doi.org/10.1093/molbev/msz189> |
 | [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | Maximum-likelihood phylogenetic inference | Kozlov, A. M. *et al*. (2019). RAxML-NG: A fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305> |
 | [`treePL`](https://github.com/blackrim/treePL) | Divergence time estimation | Smith, S. A., & O’Meara, B. C. (2012). TreePL: Divergence time estimation using penalized likelihood for large phylogenies. *Bioinformatics*, 28(20), 2689–2690. <https://doi.org/10.1093/bioinformatics/bts492> |
+| [`fastp`](https://github.com/OpenGene/fastp) | Read trimming (identification from Illumina reads only) | Chen, S., Zhou, Y., Chen, Y., & Gu, J. (2018). fastp: an ultra-fast all-in-one FASTQ preprocessor. *Bioinformatics*, 34(17), i884-i890. |
+| [`GetOrganelle`](https://github.com/Kinggerm/GetOrganelle) | Plastome and nuclear ribosomal DNA assembly (identification from Illumina reads only) | Jin, J.-J. *et al*. (2020). GetOrganelle: a fast and versatile toolkit for accurate de novo assembly of organelle genomes. *Genome Biology*, 21, 241. |
+| [`minimap2`](https://github.com/lh3/minimap2) | Mapping onto an assembly (identification from an assembly only) | Li, H. (2018). Minimap2: pairwise alignment for nucleotide sequences. *Bioinformatics*, 34(18), 3094-3100. |
+| [`samtools`](https://github.com/samtools/samtools) | Extraction of mapped regions (identification from an assembly only) | Danecek, P. *et al*. (2021). Twelve years of SAMtools and BCFtools. *GigaScience*, 10(2), giab008. |
 
 ### Configuring the System PATH
 
@@ -223,8 +237,9 @@ The tutorials follow the order of the workflow:
 | [**Tutorial 2**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html) | Phylogenetic Inference and Divergence Time Estimation |
 | [**Tutorial 3**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.html) | Visualization and Metadata Integration |
 | [**Tutorial 4**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.html) | Phylogenetic Validation and Comparative Analyses |
-| [**Tutorial 5**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html) | DNA Barcoding, Section Manifest |
-| [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.html) | Core pipeline functions and methodological dictionary |
+| [**Tutorial 5**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.html) | Molecular identification (DNA barcoding): the reference library and its validation |
+| [**Tutorial 6**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html) | Identifying a sample: worked examples and rates |
+| [**Function Reference**](https://beeamerino.github.io/PhyloCactus/articles/tutorial-7-cactus-phylogeny-functions.html) | Core pipeline functions and methodological dictionary |
 
 ## Next Steps
 
@@ -249,6 +264,6 @@ which assembles a curated multilocus dataset from GenBank.
   explanations for the elevated diversification of cacti in the New
   World Succulent Biome. *New Phytologist*, 202(4), 1382–1397.
   <https://doi.org/10.1111/nph.12752>
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org, a dynamic
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic
   online species-level taxonomic backbone for the family. *Willdenowia*,
   51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>

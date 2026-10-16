@@ -8,8 +8,9 @@ articles:
   tutorial-3-cactus-phylogeny-visualization: tutorial-3-cactus-phylogeny-visualization.html
   tutorial-4-cactus-phylogeny-validation: tutorial-4-cactus-phylogeny-validation.html
   tutorial-5-cactus-phylogeny-barcoding: tutorial-5-cactus-phylogeny-barcoding.html
-  tutorial-6-cactus-phylogeny-functions: tutorial-6-cactus-phylogeny-functions.html
-last_built: 2026-09-19T21:04Z
+  tutorial-6-cactus-barcoding-identification: tutorial-6-cactus-barcoding-identification.html
+  tutorial-7-cactus-phylogeny-functions: tutorial-7-cactus-phylogeny-functions.html
+last_built: 2026-10-16T12:24Z
 urls:
   reference: https://beeamerino.github.io/PhyloCactus/reference
   article: https://beeamerino.github.io/PhyloCactus/articles

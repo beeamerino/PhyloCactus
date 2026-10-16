@@ -77,14 +77,14 @@ generate_bootstrap_script(
   the SLURM array (`1-max_reps`). Defaults to `2`, giving a total array
   target of `bs_per_rep * max_reps = 1000` bootstrap trees. This
   provides a safety margin over the autoMRE convergence point observed
-  in the reference run (1024 taxa, 11 partitions), which converged
-  (`bs-cutoff = 0.03`, FBP) after 650 of 1000 collected trees, i.e.
+  in the reference run (1208 taxa, 13 partitions), which converged
+  (`bs-cutoff = 0.03`, FBP) after 550 of 1000 collected trees, i.e.
   convergence is not guaranteed at a fixed replicate count for every
   dataset or taxon sampling scheme. Always confirm convergence with
   [`check_bs_convergence()`](https://beeamerino.github.io/PhyloCactus/reference/check_bs_convergence.md)
   on the collected trees (via
-  [`collect_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/collect_bootstraps.md))
-  rather than assuming `bs_per_rep * max_reps` is sufficient; increase
+  [`collect_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/collect_bootstraps.md)):
+  `bs_per_rep * max_reps` is not sufficient by itself; increase
   `max_reps` and re-run
   [`collect_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/collect_bootstraps.md)
   if it is not.

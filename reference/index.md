@@ -23,17 +23,6 @@ names against accepted botanical checklists.
   : Final Marker Integration, Taxonomic Cleaning, and Ingroup-Outgroup
   Partitioning
 
-## DNA Barcoding (section under construction)
-
-Molecular diagnostic section. No implementation is shipped while its
-analytical strategy is being defined; see the section manifest in
-Tutorial 5.
-
-- [`barcoding`](https://beeamerino.github.io/PhyloCactus/reference/barcoding.md)
-  : DNA Barcoding Evaluation (Section Under Construction)
-- [`evaluate_dna_barcoding()`](https://beeamerino.github.io/PhyloCactus/reference/evaluate_dna_barcoding.md)
-  : Evaluate DNA Barcoding Resolution and Taxonomic Classification Power
-
 ## Multiple Alignment, DECIPHER Cleaners, & Masking
 
 Infer positional homology using `MAFFT` and refine nucleotide alignments
@@ -103,9 +92,6 @@ scaffolds.
   : Map Bootstrap Support Values onto Reference Phylogeny
 - [`classify_constrained_nodes()`](https://beeamerino.github.io/PhyloCactus/reference/classify_constrained_nodes.md)
   : Classify Every Internal Node as Constrained or Estimated
-- [`infer_gene_trees()`](https://beeamerino.github.io/PhyloCactus/reference/infer_gene_trees.md)
-  : Infer Single-Locus Maximum-Likelihood Gene Trees and Assess Species
-  Monophyly
 
 ## Divergence Time Estimation & treePL Automation
 
@@ -160,6 +146,78 @@ standardized IUCN color scales to phylogenetic trees.
   : Fetch IUCN Red List Metadata via rredlist API
 - [`scale_fill_iucn()`](https://beeamerino.github.io/PhyloCactus/reference/scale_fill_iucn.md)
   : Standardized IUCN Category Color Scale for ggplot2
+- [`phylocactus_colours()`](https://beeamerino.github.io/PhyloCactus/reference/phylocactus_colours.md)
+  : Colours of the Figures of PhyloCactus
+- [`phylocactus_panel_tags()`](https://beeamerino.github.io/PhyloCactus/reference/phylocactus_panel_tags.md)
+  : Panel Tags of the Composite Figures of PhyloCactus
+- [`theme_phylocactus()`](https://beeamerino.github.io/PhyloCactus/reference/theme_phylocactus.md)
+  : Theme of the Figures of PhyloCactus
+
+## Barcoding Library
+
+Build the reference library of the barcoding branch from the phylotaR
+mining of the phylogeny and, optionally, own sequences (Tutorial 5,
+steps 1 to 4).
+
+- [`assemble_barcoding_dataset()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_barcoding_dataset.md)
+  : Assemble the Reference Library of the Molecular Diagnostic Branch
+- [`curate_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/curate_barcoding_markers.md)
+  : Curate the Loci of the Molecular Diagnostic Branch
+- [`screen_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/screen_barcoding_markers.md)
+  : Screen the Curated Loci of the Molecular Diagnostic Branch
+- [`finalize_barcoding_library()`](https://beeamerino.github.io/PhyloCactus/reference/finalize_barcoding_library.md)
+  : Build the Final Reference Library of the Molecular Diagnostic Branch
+- [`extract_barcoding_plastome_loci()`](https://beeamerino.github.io/PhyloCactus/reference/extract_barcoding_plastome_loci.md)
+  : Extra library records cropped from GenBank plastomes (step 1)
+- [`barcoding_outgroup_taxids()`](https://beeamerino.github.io/PhyloCactus/reference/barcoding_outgroup_taxids.md)
+  : Taxonomic IDs of the Outgroup of the Molecular Diagnostic Branch
+
+## Barcoding Validation
+
+Validation folds, barcode gap, classification of the folds by nearest
+neighbour and IdTaxa (on one machine or a computing cluster), negative
+controls, thresholds and metrics (Tutorial 5, steps 5 to 10).
+
+- [`build_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/build_barcoding_folds.md)
+  : Build the Validation Folds of the Molecular Diagnostic Branch
+- [`analyze_barcode_gap()`](https://beeamerino.github.io/PhyloCactus/reference/analyze_barcode_gap.md)
+  : Barcode Gap of the Molecular Diagnostic Branch
+- [`classify_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/classify_barcoding_folds.md)
+  : Classify the Validation Folds of the Molecular Diagnostic Branch
+- [`generate_barcoding_job_scripts()`](https://beeamerino.github.io/PhyloCactus/reference/generate_barcoding_job_scripts.md)
+  : Generate the SLURM Job Scripts of a Chunked Run of Step 7
+- [`merge_barcoding_chunks()`](https://beeamerino.github.io/PhyloCactus/reference/merge_barcoding_chunks.md)
+  : Merge the Chunks of a Chunked Run of Step 7
+- [`run_barcoding_controls()`](https://beeamerino.github.io/PhyloCactus/reference/run_barcoding_controls.md)
+  : Negative Controls of the Molecular Diagnostic Branch
+- [`sweep_barcoding_threshold()`](https://beeamerino.github.io/PhyloCactus/reference/sweep_barcoding_threshold.md)
+  : Sweep the Threshold of Remoteness of the Molecular Diagnostic Branch
+- [`summarise_barcoding_metrics()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_metrics.md)
+  : Summarise the Per-Class Metrics of the Molecular Diagnostic Branch
+- [`summarise_barcoding_genus_discrimination()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_genus_discrimination.md)
+  : Per-genus discrimination of each locus in the validation folds
+
+## Molecular Identification
+
+Identify a sample against the library, locus by locus, from sequences, a
+sample sheet, an assembly or Illumina reads, write its report, and draw
+its answer (Tutorials 5 and 6).
+
+- [`identify_barcoding_query()`](https://beeamerino.github.io/PhyloCactus/reference/identify_barcoding_query.md)
+  : Identify user sequences against the barcoding library (step 11 of
+  Tutorial 5)
+- [`identify_barcoding_samples()`](https://beeamerino.github.io/PhyloCactus/reference/identify_barcoding_samples.md)
+  : Identify the samples of a sample sheet
+- [`identify_barcoding_assembly()`](https://beeamerino.github.io/PhyloCactus/reference/identify_barcoding_assembly.md)
+  : Identify a genome assembly against the library
+- [`identify_barcoding_reads()`](https://beeamerino.github.io/PhyloCactus/reference/identify_barcoding_reads.md)
+  : Identify paired Illumina reads through route A
+- [`report_barcoding_identification()`](https://beeamerino.github.io/PhyloCactus/reference/report_barcoding_identification.md)
+  : Build the identification report of one run
+- [`plot_barcoding_identification()`](https://beeamerino.github.io/PhyloCactus/reference/plot_barcoding_identification.md)
+  : Draw the answer of an identification
+- [`plot_barcoding_identification_summary()`](https://beeamerino.github.io/PhyloCactus/reference/plot_barcoding_identification_summary.md)
+  : Draw the answers of several identifications side by side
 
 ## Internal Tools and Visualization Helpers
 

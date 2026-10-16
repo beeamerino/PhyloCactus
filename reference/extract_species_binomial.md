@@ -18,4 +18,6 @@ extract_species_binomial(header)
 ## Value
 
 Standardized species binomial formatted with underscores (e.g.,
-`Copiapoa_cinerea`).
+`Copiapoa_cinerea`). A hyphenated epithet is kept whole, so
+`Opuntia_ficus-indica|KJ773783.1` returns `Opuntia_ficus-indica` and not
+`Opuntia_ficus`.

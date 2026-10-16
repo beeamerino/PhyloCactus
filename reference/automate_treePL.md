@@ -40,7 +40,8 @@ automate_treePL(
   wrapper_sh = NULL,
   notify = FALSE,
   notify_to = NULL,
-  notify_credentials = NULL
+  notify_credentials = NULL,
+  treepl_bin = "treePL"
 )
 ```
 
@@ -209,6 +210,13 @@ automate_treePL(
   [`send_run_notification()`](https://beeamerino.github.io/PhyloCactus/reference/send_run_notification.md)
   as `to` and `credentials`. Both default to `NULL`, which reads the
   `MY_EMAIL` and `PHYLOCACTUS_SMTP_CREDS` environment variables.
+
+- treepl_bin:
+
+  Character. Name or path of the `treePL` binary, handed down to both
+  stages, the cross-validation and the dating of the bootstrap
+  replicates. Defaults to `"treePL"`, which is the name both stages used
+  to run with written into the code.
 
 ## Value
 

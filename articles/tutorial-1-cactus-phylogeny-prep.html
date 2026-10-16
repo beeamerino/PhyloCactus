@@ -15,7 +15,8 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tutorial 1: Data Assembly and Preparation">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Tutorial 1: Data Assembly and Preparation">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -25,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,8 +44,9 @@
     <li><a class="dropdown-item" href="../articles/tutorial-2-cactus-phylogeny-inference.html">2. Inference &amp; Dating</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-3-cactus-phylogeny-visualization.html">3. Visualization &amp; IUCN Summary</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-4-cactus-phylogeny-validation.html">4. Phylogenetic Validation</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding: Section Manifest</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Core Functions Dictionary</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-barcoding-identification.html">6. Identifying a Sample</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-7-cactus-phylogeny-functions.html">7. Core Functions Dictionary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -67,7 +69,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-09-19</h4>
+            <h4 data-toc-skip class="date">2026-10-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-1-cactus-phylogeny-prep.Rmd" class="external-link"><code>vignettes/tutorial-1-cactus-phylogeny-prep.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-1-cactus-phylogeny-prep.Rmd</code></div>
@@ -175,8 +177,8 @@ can be adapted to other groups or marker sets without modifying the
 package.</p>
 <p>The exclusion lists record a curatorial decision.
 <code>manual_exclusions_ingroup.csv</code> and
-<code>manual_exclusions_outgroup.csv</code> remove 99 unique accessions
-across 113 records, in 16 ingroup clusters and 24 outgroup clusters.
+<code>manual_exclusions_outgroup.csv</code> remove 102 accessions, keyed
+by locus and accession: 60 in 5 ingroup loci and 42 in 13 outgroup loci.
 Each accession was inspected and removed by the team supporting
 <code>PhyloCactus</code> on taxonomic or sequence-quality grounds that
 cannot be recovered from GenBank metadata. The
@@ -218,7 +220,14 @@ and are the input of the next module.</p>
 <span>  manual_exclusions_file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"manual_exclusions_ingroup.csv"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span>,</span>
 <span>  apply_manual_exclusions <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  min_species <span class="op">=</span> <span class="fl">50</span>,</span>
-<span>  force_download <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  force_download <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="co"># The length limits of a new mining: records of 100 to 5000 bases (the defaults). The workspace</span></span>
+<span>  <span class="co"># of 0_phylotaR_raw_Ingroup/ is read as it is when it exists, so they act only on a first mining.</span></span>
+<span>  mnsql <span class="op">=</span> <span class="fl">100L</span>,</span>
+<span>  mxsql <span class="op">=</span> <span class="fl">5000L</span>,</span>
+<span>  <span class="co"># Email when a mining ends or fails; TRUE needs MY_EMAIL and a blastula credentials file, as in</span></span>
+<span>  <span class="co"># Tutorial 2. The mining of 2026-09-29 took 50 minutes for the ingroup and 10 for the outgroup.</span></span>
+<span>  notify <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Mine outgroup taxonomic database</span></span>
@@ -234,7 +243,10 @@ and are the input of the next module.</p>
 <span>  <span class="co">#</span></span>
 <span>  <span class="co"># Talinopsis (107598) is Anacampserotaceae, not Talinaceae, despite the name and adjacent ID.</span></span>
 <span>  outgroups <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"107598"</span>, <span class="st">"107617"</span>, <span class="st">"107583"</span>, <span class="st">"3582"</span>, <span class="st">"107600"</span>, <span class="st">"108056"</span><span class="op">)</span>,</span>
-<span>  force_download <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  force_download <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  mnsql <span class="op">=</span> <span class="fl">100L</span>,</span>
+<span>  mxsql <span class="op">=</span> <span class="fl">5000L</span>,</span>
+<span>  notify <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Load the accepted species checklist</span></span>
@@ -281,15 +293,19 @@ carries no positional homology to the rest of the block. Nothing
 downstream detects this. The row simply looks like a very divergent
 sequence, or fails the occupancy filter of Module 5 and disappears
 without explanation.</p>
-<p>In the reference dataset, the <code>rbcL</code> and <code>matK</code>
-accessions of <em>Portulaca oleracea</em> and <em>P. pilosa</em> are
-deposited reversed, and so are 163 ingroup sequences, 77 of
-<code>psbA-trnH</code> and 86 of <code>rpL16</code>. Uncorrected, these
-sequences align to nothing, lose occupancy and are removed by the
-occupancy filter of Module 5, so no reversed sequence remains visible in
-the curated output. Correcting the strand retains them:
-<code>psbA_trnH</code> keeps 368 ingroup sequences in place of 296, and
-<code>rpL16</code> 677 in place of 600.</p>
+<p>In the reference dataset, the <code>matK</code> accessions of
+<em>Portulaca oleracea</em> and <em>P. pilosa</em> are deposited
+reversed, as are outgroup accessions of <code>atpI-atpH</code> and
+<code>ndhA</code>, and so are 502 ingroup sequences, most of them of
+<code>rpL16</code> (156), <code>rpl32-trnL</code> (150),
+<code>psbA-trnH</code> (126) and <code>psbE-petL</code> (45).
+Uncorrected, these sequences align to nothing, lose occupancy and are
+removed by the occupancy filter of Module 5, so no reversed sequence
+remains visible in the curated output. Correcting the strand retains
+them: of the ingroup sequences kept in the cleaned alignments, 120 of
+690 in <code>rpL16</code>, 119 of 532 in <code>psbA-trnH</code>, 140 of
+167 in <code>rpl32-trnL</code> and 40 of 137 in <code>psbE-petL</code>
+were reverse-complemented.</p>
 <p>Orientation is decided against the majority orientation of each
 marker, because no external reference is guaranteed to exist for a mined
 locus. Every sequence is logged with its k-mer match in both directions
@@ -402,7 +418,7 @@ Module 2. Passing <code>outgroup_folder</code> records
 for diagnostic visibility, though retention decisions remain strictly
 based on ingroup thresholds to prevent distant outgroup divergence from
 distorting saturation regressions. For example, <code>trnT-psbD</code>
-possessed 50 ingroup sequences and was filtered out by
+held 57 ingroup sequences and was filtered out by
 <code>min_nseq_to_retain = 100</code>, despite carrying extensive
 outgroup representation. First, substitution saturation is evaluated
 using regression-based statistics to identify loci in which multiple
@@ -451,9 +467,9 @@ separate subdirectories:</p>
 <li>
 <code>4_Cleaned/cleaned_markers_ingroup</code>: Contains curated
 sequences exclusively for accepted <strong>Cactaceae</strong> taxa,
-preserved for single-locus analyses. These are the inputs the molecular
-diagnostic section will consume once its strategy is defined; see the
-section manifest in Tutorial 5.</li>
+preserved for single-locus analyses. The molecular identification branch
+of Tutorial 5 does not read them: it assembles its own library from the
+<code>phylotaR</code> workspace of Module 1.</li>
 <li>
 <code>4_Cleaned/cleaned_markers_outgroup</code>: Contains
 corresponding outgroup sequences (<em>Portulaca</em>,
@@ -537,21 +553,21 @@ log (<code>LOG_clean_integration_summary.txt</code>).</li>
 <span>  <span class="co"># amplicon contains that intron. Verified before aliasing: outgroup ndhF shares none with</span></span>
 <span>  <span class="co"># ndhF-rpl32 despite the resemblance, and is not aliased.</span></span>
 <span>  marker_aliases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>trnL <span class="op">=</span> <span class="st">"trnL_trnF"</span><span class="op">)</span>,</span>
-<span>  <span class="co"># readmit_markers overrides the Module 3 verdict for a locus kept on outgroup grounds rather</span></span>
-<span>  <span class="co"># than ingroup resolution. Left empty; see the note below.</span></span>
+<span>  <span class="co"># readmit_markers overrides the Module 3 verdict for a locus kept on outgroup grounds, not for</span></span>
+<span>  <span class="co"># its ingroup resolution. Left empty; see the note below.</span></span>
 <span>  readmit_markers <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  readmit_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="co"># Alignment-free homology check, ingroup against outgroup, per marker.</span></span>
 <span>  homology_check <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><code>trnT-psbD</code> shows why a locus is not readmitted on
-coverage alone. It has more outgroup sequences than any other marker (52
-sequences of 52 <em>Portulaca</em> species, against 50 ingroup
-sequences), but the two sets are not the same region: 0.040 of the
-outgroup 20-mers occur in the ingroup sequences, against 0.26 to 0.59
-for <code>trnL_trnF</code>, <code>matK</code>, <code>phyC</code> and
-<code>rbcL</code>. The median length is 605 bp in the ingroup and 1347
-bp in the outgroup.</p>
+coverage alone. Its outgroup sample is large (53 sequences, of 52
+<em>Portulaca</em> species and one <em>Talinopsis</em>, against 57
+ingroup sequences), but the two sets are not the same region: 0.062 of
+the outgroup 20-mers occur in the ingroup sequences, all of them on the
+opposite strand and none on the same one, against 0.27 to 0.58 for
+<code>trnL_trnF</code>, <code>matK</code> and <code>rbcL</code>. The
+median length is 666 bp in the ingroup and 1347 bp in the outgroup.</p>
 <p><code>homology_check</code> detects this case, which neither counts
 nor a coverage table can show. For each marker present on both sides, it
 measures the fraction of outgroup k-mers that occur in the ingroup
@@ -659,16 +675,20 @@ written to the run log and to
 no alignment raises a warning, so a misspelled name cannot leave a locus
 in the matrix unnoticed.</p>
 <p>Set <code>exclude_markers = NULL</code> to build the full matrix.
-<code>phyC</code> is excluded below because it carries no Portulacaceae
-terminal: of its 16 outgroup terminals, 15 are Anacampserotaceae and one
-is Talinaceae, against 167 ingroup terminals (counted in
+<code>phyC</code> is excluded below. Its cleaned alignment holds 25
+outgroup terminals (16 Anacampserotaceae, 8 Portulacaceae and one
+Talinaceae) against 167 ingroup terminals (counted in
 <code>5_MAFFT_Cleaned/aligned_markers/phyC.fasta</code>; the coverage
-report lists only the loci that enter the supermatrix). In a matrix
-built to date the ACP clade, a locus sampled for Anacampserotaceae and
-not for Portulacaceae supplies characters to only one side of the
-divergence between the two families. The exclusion is a property of this
-matrix; <code>phyC</code> remains the more discriminating of the two
-nuclear markers for barcoding.</p>
+report lists only the loci that enter the supermatrix), but only 0.196
+of the outgroup 20-mers occur in the ingroup sequences
+(<code>TABLE_marker_homology_check.csv</code>, verdict “low”; 0.27 to
+0.58 for <code>trnL_trnF</code>, <code>matK</code> and
+<code>rbcL</code>), so it is not established that its outgroup sequences
+are the same region as its ingroup sequences. In a matrix built to date
+the ACP clade, such a locus supplies characters of uncertain homology to
+the divergences among the three families. The exclusion is a property of
+this matrix; <code>phyC</code> remains the more discriminating of the
+two nuclear markers for barcoding.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/run_concatenation_pipeline.html">run_concatenation_pipeline</a></span><span class="op">(</span></span>
 <span>  input_dir <span class="op">=</span> <span class="st">"5_MAFFT_Cleaned/aligned_markers"</span>,</span>
@@ -702,16 +722,16 @@ Estimation</a></p>
 evolutionary trends in the cactus family. <em>Journal of Heredity</em>,
 110(1), 4–21. <a href="https://doi.org/10.1093/jhered/esy064" class="external-link uri">https://doi.org/10.1093/jhered/esy064</a>
 </li>
-<li>Katoh, K., &amp; Standley, D. M. 2013. MAFFT multiple sequence
-alignment software version 7: improvements in performance and usability.
+<li>Katoh &amp; Standley 2013. MAFFT multiple sequence alignment
+software version 7: improvements in performance and usability.
 <em>Molecular Biology and Evolution</em>, 30(4), 772–780. <a href="https://doi.org/10.1093/molbev/mst010" class="external-link uri">https://doi.org/10.1093/molbev/mst010</a>
 </li>
-<li>Korotkova <em>et al</em>. 2021. Cactaceae at Caryophyllales.org, a
+<li>Korotkova <em>et al</em>. 2021. Cactaceae at Caryophyllales.org - A
 dynamic online species-level taxonomic backbone for the family.
 <em>Willdenowia</em>, 51(2), 251–270. <a href="https://doi.org/10.3372/wi.51.51208" class="external-link uri">https://doi.org/10.3372/wi.51.51208</a>
 </li>
-<li>Wright, E. 2024. Fast and flexible search for homologous biological
-sequences with DECIPHER v3. <em>The R Journal</em>, 16(2), 191-200. <a href="https://doi.org/10.18129/B9.bioc.DECIPHER" class="external-link uri">https://doi.org/10.18129/B9.bioc.DECIPHER</a>
+<li>Wright 2024. Fast and flexible search for homologous biological
+sequences with DECIPHER v3. <em>The R Journal</em>, 16(2), 191–200. <a href="https://doi.org/10.18129/B9.bioc.DECIPHER" class="external-link uri">https://doi.org/10.18129/B9.bioc.DECIPHER</a>
 </li>
 </ul>
 </div>

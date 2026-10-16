@@ -12,7 +12,9 @@
   Integration](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus-phylogeny-visualization.md):
 - [Tutorial 4: Phylogenetic Validation and Comparative
   Analyses](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-phylogeny-validation.md):
-- [Tutorial 5: DNA Barcoding, Section
-  Manifest](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.md):
-- [Tutorial 6: Core Pipeline Functions and Methodological
-  Dictionary](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-phylogeny-functions.md):
+- [Tutorial 5: Molecular Identification of Cacti (DNA
+  Barcoding)](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-phylogeny-barcoding.md):
+- [Tutorial 6: Identifying a
+  Sample](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.md):
+- [Tutorial 7: Core Pipeline Functions and Methodological
+  Dictionary](https://beeamerino.github.io/PhyloCactus/articles/tutorial-7-cactus-phylogeny-functions.md):

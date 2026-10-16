@@ -15,7 +15,8 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Tutorial 3: Visualization and Metadata Integration">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<meta property="og:title" content="Tutorial 3: Visualization and Metadata Integration">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -25,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,8 +44,9 @@
     <li><a class="dropdown-item" href="../articles/tutorial-2-cactus-phylogeny-inference.html">2. Inference &amp; Dating</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-3-cactus-phylogeny-visualization.html">3. Visualization &amp; IUCN Summary</a></li>
     <li><a class="dropdown-item" href="../articles/tutorial-4-cactus-phylogeny-validation.html">4. Phylogenetic Validation</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding: Section Manifest</a></li>
-    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-phylogeny-functions.html">6. Core Functions Dictionary</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-5-cactus-phylogeny-barcoding.html">5. DNA Barcoding</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-6-cactus-barcoding-identification.html">6. Identifying a Sample</a></li>
+    <li><a class="dropdown-item" href="../articles/tutorial-7-cactus-phylogeny-functions.html">7. Core Functions Dictionary</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -67,7 +69,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-09-19</h4>
+            <h4 data-toc-skip class="date">2026-10-16</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-3-cactus-phylogeny-visualization.Rmd" class="external-link"><code>vignettes/tutorial-3-cactus-phylogeny-visualization.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-3-cactus-phylogeny-visualization.Rmd</code></div>
@@ -78,17 +80,19 @@ Meriño</h4>
 <div class="section level2">
 <h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
 </h2>
-<p>This tutorial covers the last stage of the core workflow: integration
-of species metadata, figures of the phylogenetic products, and summaries
-of conservation status. It uses the supermatrix, maximum-likelihood
-tree, bootstrap support values and chronogram produced in <a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html">Tutorial
+<p>This tutorial covers the third stage of the phylogenetic workflow:
+integration of species metadata, figures of the phylogenetic products,
+and summaries of conservation status. It uses the supermatrix,
+maximum-likelihood tree, bootstrap support values and chronogram
+produced in <a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html">Tutorial
 1</a> and <a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html">Tutorial
 2</a>.</p>
 <p><strong>Module 11</strong> reconciles the species in the supermatrix
-with the accepted checklist of Cactaceae and retrieves species-level
-assessments from the IUCN Red List. The result is one table that
-records, for each species, its taxonomic status, molecular sampling,
-placement in the tree, distribution and conservation category.</p>
+with the accepted checklist of Cactaceae (Korotkova <em>et al</em>.
+2021) and retrieves species-level assessments from the IUCN Red List.
+The result is one table that records, for each species, its taxonomic
+status, molecular sampling, placement in the tree, distribution and
+conservation category.</p>
 <p><strong>Module 12</strong> produces seventeen figures in five groups:
 coverage of the molecular dataset, structure of the supermatrix, the
 tree and the chronogram, the species accounting across pipeline stages,
@@ -114,7 +118,7 @@ with <code>usethis::edit_r_environ()</code>) as
 <code>IUCN_REDLIST_KEY="your_api_key"</code>, and restart R.</p>
 </div>
 <div class="section level3">
-<h3 id="data-setup-pre-processing">Data Setup &amp; Pre-processing<a class="anchor" aria-label="anchor" href="#data-setup-pre-processing"></a>
+<h3 id="data-setup-and-preprocessing">Data Setup and Preprocessing<a class="anchor" aria-label="anchor" href="#data-setup-and-preprocessing"></a>
 </h3>
 <p>To run the module as a script, copy the executable script to the
 tutorial directory:</p>
@@ -146,13 +150,13 @@ conservation metrics such as EDGE scores (Isaac <em>et al</em>. 2007),
 which are not computed in this tutorial.</p>
 <p>Names are reconciled against the Cactaceae checklist of
 Caryophyllales.org (Korotkova <em>et al</em>. 2021; export of 1 July
-2026), which lists 1,965 accepted species. With 38 outgroup species from
+2026), which lists 1,965 accepted species. With 28 outgroup species from
 Anacampserotaceae, Portulacaceae and Talinaceae, the registry contains
-2,003 species. The supermatrix includes 1,060 of them (1,022 ingroup, 38
-outgroup). The maximum-likelihood tree and the chronogram have 1,024
-tips (986 ingroup, 38 outgroup), because <code>RAxML-NG</code> removed
-36 ingroup species whose sequences were identical to those of another
-species. The other 943 accepted species have no sequence data, and 134
+1,993 species. The supermatrix includes 1,218 of them (1,190 ingroup, 28
+outgroup). The maximum-likelihood tree and the chronogram have 1,208
+tips (1,180 ingroup, 28 outgroup), because <code>RAxML-NG</code> removed
+10 ingroup species whose sequences were identical to those of another
+species. The other 775 accepted species have no sequence data, and 102
 of them are listed as threatened (CR, EN or VU) by the IUCN Red
 List.</p>
 <p>Load the libraries and the outputs of the previous modules:</p>
@@ -304,16 +308,16 @@ List.</p>
 one species through the <code>rredlist</code> interface to the IUCN Red
 List API. It returns the category, criteria, population trend, countries
 of occurrence, endemism, habitats, threats, and use and trade. The query
-covers the 1,965 checklist species and the 38 outgroups. All ingroup
-names in the supermatrix match the checklist, so every query uses an
-accepted name.</p>
+covers the 1,965 species of the checklist (Korotkova <em>et al</em>.
+2021) and the 28 outgroups. All ingroup names in the supermatrix match
+the checklist, so every query uses an accepted name.</p>
 <p>The output table (<code>TABLE_species_all_data.csv</code>) is used by
 all figures in Module 12. The chunk also writes
 <code>TABLE_conservation_prioritization_gaps.csv</code>, which lists the
 threatened species without sequence data. If the table already exists,
 it is read from disk and the API is not queried. IUCN assessments change
-between Red List versions; record the version used with
-<code><a href="https://docs.ropensci.org/rredlist/reference/rl_version.html" class="external-link">rredlist::rl_version()</a></code>.</p>
+between Red List versions. The reference run used Red List version
+2026-1 (IUCN 2026), reported by <code><a href="https://docs.ropensci.org/rredlist/reference/rl_version.html" class="external-link">rredlist::rl_version()</a></code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># ============================================================</span></span>
 <span><span class="co"># RUN IUCN EXTRACTION OR LOAD INTEGRATED SPECIES TABLE</span></span>
@@ -380,28 +384,7 @@ figures from the outputs of your own run.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://scales.r-lib.org" class="external-link">scales</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Harmonized visualization theme</span></span>
-<span><span class="va">theme_phylocactus</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">base_size</span> <span class="op">=</span> <span class="fl">12</span>, <span class="va">base_family</span> <span class="op">=</span> <span class="st">""</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="va">base_size</span>, base_family <span class="op">=</span> <span class="va">base_family</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
-<span>      panel.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"#F5F5F5"</span>, color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
-<span>      plot.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
-<span>      panel.grid.major <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"white"</span>, linewidth <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span>,</span>
-<span>      panel.grid.minor <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"white"</span>, linewidth <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span>,</span>
-<span>      axis.ticks <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_line</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"grey70"</span>, linewidth <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span>,</span>
-<span>      axis.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"italic"</span>, color <span class="op">=</span> <span class="st">"grey20"</span><span class="op">)</span>,</span>
-<span>      axis.title.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"italic"</span>, margin <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">margin</a></span><span class="op">(</span>t <span class="op">=</span> <span class="fl">8</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>      axis.title.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"italic"</span>, margin <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">margin</a></span><span class="op">(</span>r <span class="op">=</span> <span class="fl">8</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>      axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"grey30"</span><span class="op">)</span>,</span>
-<span>      plot.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span>, color <span class="op">=</span> <span class="st">"grey15"</span>, hjust <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>,</span>
-<span>      plot.subtitle <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"grey40"</span>, hjust <span class="op">=</span> <span class="fl">0</span>, margin <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">margin</a></span><span class="op">(</span>b <span class="op">=</span> <span class="fl">8</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>      legend.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"transparent"</span>, color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
-<span>      legend.key <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"transparent"</span>, color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
-<span>      legend.title <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span>, size <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">rel</a></span><span class="op">(</span><span class="fl">0.9</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>      strip.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_rect</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"grey90"</span>, color <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span>,</span>
-<span>      strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"bold"</span>, color <span class="op">=</span> <span class="st">"grey20"</span>, size <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">rel</a></span><span class="op">(</span><span class="fl">0.95</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
-<span><span class="op">}</span></span>
+<span><span class="co"># Theme and colours of every figure: theme_phylocactus() and phylocactus_colours() of the package</span></span>
 <span></span>
 <span><span class="co"># Reference outputs distributed with the package. The script in inst/scripts reads the same</span></span>
 <span><span class="co"># tables from the run directory.</span></span>
@@ -416,7 +399,7 @@ figures from the outputs of your own run.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">status_pipeline</span> <span class="op">==</span> <span class="st">"unsampled_checklist_gap"</span>, <span class="va">iucn_category</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CR"</span>, <span class="st">"EN"</span>, <span class="st">"VU"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>genus <span class="op">=</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_extract.html" class="external-link">str_extract</a></span><span class="op">(</span><span class="va">species</span>, <span class="st">"^[A-Za-z]+"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Data Summary Table Generation</span></span>
+<span><span class="co"># Summary of the dataset: species of the checklist, the supermatrix and the tree, and IUCN counts</span></span>
 <span><span class="va">TABLE_dataset_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
 <span>  metric <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"Total ingroup species in checklist"</span>,</span>
@@ -451,8 +434,11 @@ figures from the outputs of your own run.</p>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">in_ml_tree</span> <span class="op">&amp;</span> <span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">is_ingroup</span> <span class="op">&amp;</span> <span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">iucn_is_endemic</span> <span class="op">==</span> <span class="cn">TRUE</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">TABLE_dataset_summary</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">TABLE_dataset_summary</span>, caption <span class="op">=</span> <span class="st">"Table 1. Summary of the dataset: species of the checklist, the supermatrix and the tree, IUCN assessments, threatened and endemic species."</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
+<caption>Table 1. Summary of the dataset: species of the checklist, the
+supermatrix and the tree, IUCN assessments, threatened and endemic
+species.</caption>
 <thead><tr class="header">
 <th align="left">metric</th>
 <th align="right">value</th>
@@ -464,35 +450,35 @@ figures from the outputs of your own run.</p>
 </tr>
 <tr class="even">
 <td align="left">Total species with sequences (supermatrix)</td>
-<td align="right">1060</td>
+<td align="right">1218</td>
 </tr>
 <tr class="odd">
 <td align="left">Ingroup species with sequences (supermatrix)</td>
-<td align="right">1022</td>
+<td align="right">1190</td>
 </tr>
 <tr class="even">
 <td align="left">Outgroup species with sequences (supermatrix)</td>
-<td align="right">38</td>
+<td align="right">28</td>
 </tr>
 <tr class="odd">
 <td align="left">Ingroup species sampled and dated in tree</td>
-<td align="right">986</td>
+<td align="right">1180</td>
 </tr>
 <tr class="even">
 <td align="left">Outgroup reference species in tree</td>
-<td align="right">38</td>
+<td align="right">28</td>
 </tr>
 <tr class="odd">
 <td align="left">Sequenced ingroup species collapsed duplicates</td>
-<td align="right">36</td>
+<td align="right">10</td>
 </tr>
 <tr class="even">
 <td align="left">Unsampled ingroup species (checklist gaps)</td>
-<td align="right">943</td>
+<td align="right">775</td>
 </tr>
 <tr class="odd">
 <td align="left">Total species in final phylogeny</td>
-<td align="right">1024</td>
+<td align="right">1208</td>
 </tr>
 <tr class="even">
 <td align="left">Ingroup species mapped to IUCN assessment</td>
@@ -505,29 +491,26 @@ figures from the outputs of your own run.</p>
 <tr class="even">
 <td align="left">Threatened species in phylogeny (VU/EN/CR)
 (Ingroup)</td>
-<td align="right">180</td>
+<td align="right">221</td>
 </tr>
 <tr class="odd">
 <td align="left">Threatened unsequenced species (VU/EN/CR) (Priority
 gaps)</td>
-<td align="right">134</td>
+<td align="right">102</td>
 </tr>
 <tr class="even">
 <td align="left">Endemic species in phylogeny (Ingroup)</td>
-<td align="right">534</td>
+<td align="right">633</td>
 </tr>
 </tbody>
 </table>
-<div class="section level4">
-<h4 id="figure-1-marker-coverage-across-species">Figure 1: Marker Coverage Across Species<a class="anchor" aria-label="anchor" href="#figure-1-marker-coverage-across-species"></a>
-</h4>
 <p>Number of species with sequence data for each locus in the final
 dataset.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">marker_stats</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">marker</span>, <span class="va">n_taxa</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n_taxa</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"grey35"</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"mark"</span><span class="op">]</span><span class="op">]</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"italic"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">"Marker Coverage Across Species"</span>,</span>
@@ -535,19 +518,19 @@ dataset.</p>
 <span>    y <span class="op">=</span> <span class="st">"Number of species"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="va">p1</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_coverage-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_coverage-1.png" class="r-plt" alt="**Figure 1.** Marker coverage across species." width="576"><p class="caption">
+<strong>Figure 1.</strong> Marker coverage across species.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-2-distribution-of-marker-completeness">Figure 2: Distribution of Marker Completeness<a class="anchor" aria-label="anchor" href="#figure-2-distribution-of-marker-completeness"></a>
-</h4>
 <p>Number of loci per species for the tips of the maximum-likelihood
 tree.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="st">"retained_markers"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">in_ml_tree</span> <span class="op">==</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">retained_markers</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html" class="external-link">geom_histogram</a></span><span class="op">(</span>binwidth <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="st">"grey35"</span>, color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html" class="external-link">geom_histogram</a></span><span class="op">(</span>binwidth <span class="op">=</span> <span class="fl">1</span>, fill <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"mark"</span><span class="op">]</span><span class="op">]</span>, color <span class="op">=</span> <span class="st">"white"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">11</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>      title <span class="op">=</span> <span class="st">"Distribution of Marker Completeness"</span>,</span>
 <span>      x <span class="op">=</span> <span class="st">"Number of retained markers"</span>,</span>
@@ -555,11 +538,11 @@ tree.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="va">p2</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_completeness-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_completeness-1.png" class="r-plt" alt="**Figure 2.** Distribution of marker completeness." width="576"><p class="caption">
+<strong>Figure 2.</strong> Distribution of marker completeness.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-3-marker-presence-heatmap">Figure 3: Marker Presence Heatmap<a class="anchor" aria-label="anchor" href="#figure-3-marker-presence-heatmap"></a>
-</h4>
 <p>Presence or absence of each locus for every species in the tree.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">heatmap_data</span> <span class="op">&lt;-</span> <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -569,9 +552,10 @@ tree.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>present <span class="op">=</span> <span class="va">accession</span> <span class="op">!=</span> <span class="st">"-"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">heatmap_data</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">marker</span>, y <span class="op">=</span> <span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_rev.html" class="external-link">fct_rev</a></span><span class="op">(</span><span class="va">species</span><span class="op">)</span>, fill <span class="op">=</span> <span class="va">present</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_grey.html" class="external-link">scale_fill_grey</a></span><span class="op">(</span>start <span class="op">=</span> <span class="fl">0.95</span>, end <span class="op">=</span> <span class="fl">0.25</span>, name <span class="op">=</span> <span class="st">"Present"</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"No"</span>, <span class="st">"Yes"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"fill"</span><span class="op">]</span><span class="op">]</span>, <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"sequential"</span><span class="op">)</span><span class="op">[[</span><span class="st">"700"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>                    name <span class="op">=</span> <span class="st">"Present"</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"No"</span>, <span class="st">"Yes"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">"Marker Presence Heatmap"</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">"Marker"</span>,</span>
@@ -585,11 +569,12 @@ tree.</p>
 <span>    panel.grid.minor <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="va">p3</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_heatmap-1.png" class="r-plt" alt="" width="768" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_heatmap-1.png" class="r-plt" alt="**Figure 3.** Marker presence heatmap. Dark grey, marker present; light grey, absent." width="768"><p class="caption">
+<strong>Figure 3.</strong> Marker presence heatmap. Dark grey, marker
+present; light grey, absent.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-4-supermatrix-structure">Figure 4: Supermatrix Structure<a class="anchor" aria-label="anchor" href="#figure-4-supermatrix-structure"></a>
-</h4>
 <p>Start and end coordinates of each partition in the concatenated
 supermatrix.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -599,8 +584,8 @@ supermatrix.</p>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="st">"marker"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">TABLE_marker_ranges</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">TABLE_marker_ranges</span> <span class="op">&lt;-</span> <span class="va">TABLE_marker_ranges</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>length <span class="op">=</span> <span class="va">end</span> <span class="op">-</span> <span class="va">start</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span>
 <span>    <span class="va">p4</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">TABLE_marker_ranges</span><span class="op">)</span> <span class="op">+</span></span>
-<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">start</span>, xend <span class="op">=</span> <span class="va">end</span>, y <span class="op">=</span> <span class="va">marker</span>, yend <span class="op">=</span> <span class="va">marker</span><span class="op">)</span>, linewidth <span class="op">=</span> <span class="fl">6</span>, color <span class="op">=</span> <span class="st">"grey35"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>      <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_segment.html" class="external-link">geom_segment</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">start</span>, xend <span class="op">=</span> <span class="va">end</span>, y <span class="op">=</span> <span class="va">marker</span>, yend <span class="op">=</span> <span class="va">marker</span><span class="op">)</span>, linewidth <span class="op">=</span> <span class="fl">6</span>, color <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"mark"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"italic"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>        title <span class="op">=</span> <span class="st">"Supermatrix Structure"</span>,</span>
@@ -610,19 +595,19 @@ supermatrix.</p>
 <span>    <span class="va">p4</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/supermatrix_structure-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/supermatrix_structure-1.png" class="r-plt" alt="**Figure 4.** Supermatrix structure." width="576"><p class="caption">
+<strong>Figure 4.</strong> Supermatrix structure.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-5-marker-informativeness">Figure 5: Marker Informativeness<a class="anchor" aria-label="anchor" href="#figure-5-marker-informativeness"></a>
-</h4>
 <p>Number of parsimony-informative sites against alignment length for
 each partition.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="st">"parsimony_informative"</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">marker_stats</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">p5</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">marker_stats</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">alignment_length</span>, y <span class="op">=</span> <span class="va">parsimony_informative</span>, label <span class="op">=</span> <span class="va">marker</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3.5</span>, color <span class="op">=</span> <span class="st">"grey35"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span>nudge_y <span class="op">=</span> <span class="fl">20</span>, size <span class="op">=</span> <span class="fl">3.2</span>, fontface <span class="op">=</span> <span class="st">"italic"</span>, color <span class="op">=</span> <span class="st">"grey20"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">3.5</span>, color <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"mark"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span>nudge_y <span class="op">=</span> <span class="fl">20</span>, size <span class="op">=</span> <span class="fl">3.2</span>, fontface <span class="op">=</span> <span class="st">"italic"</span>, color <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"text"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>      title <span class="op">=</span> <span class="st">"Marker Informativeness"</span>,</span>
 <span>      x <span class="op">=</span> <span class="st">"Alignment length (bp)"</span>,</span>
@@ -630,11 +615,11 @@ each partition.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="va">p5</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_informativeness-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/marker_informativeness-1.png" class="r-plt" alt="**Figure 5.** Marker informativeness." width="576"><p class="caption">
+<strong>Figure 5.</strong> Marker informativeness.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-6-maximum-likelihood-tree-with-bootstrap-support-fbp">Figure 6: Maximum-Likelihood Tree with Bootstrap Support (FBP)<a class="anchor" aria-label="anchor" href="#figure-6-maximum-likelihood-tree-with-bootstrap-support-fbp"></a>
-</h4>
 <p>Maximum-likelihood tree with FBP values on internal nodes and the
 major clades marked. Nodes fixed by the topological constraint are shown
 as constrained and carry no FBP value.</p>
@@ -712,7 +697,7 @@ as constrained and carry no FBP value.</p>
 <span>      <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/theme_tree.html" class="external-link">theme_tree</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_nodepoint.html" class="external-link">geom_nodepoint</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="va">support_class</span><span class="op">)</span>, shape <span class="op">=</span> <span class="fl">21</span>, size <span class="op">=</span> <span class="fl">2</span>, stroke <span class="op">=</span> <span class="fl">0.2</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span></span>
-<span>        values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"&gt;= 90"</span> <span class="op">=</span> <span class="st">"white"</span>, <span class="st">"70-89"</span> <span class="op">=</span> <span class="st">"grey"</span>, <span class="st">"&lt; 70"</span> <span class="op">=</span> <span class="st">"black"</span>, <span class="st">"Constrained"</span> <span class="op">=</span> <span class="st">"steelblue"</span><span class="op">)</span>,</span>
+<span>        values <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"support"</span><span class="op">)</span>,</span>
 <span>        name <span class="op">=</span> <span class="st">"Support (FBP)"</span>,</span>
 <span>        na.translate <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>      <span class="op">)</span> <span class="op">+</span></span>
@@ -725,12 +710,15 @@ as constrained and carry no FBP value.</p>
 <span>    <span class="va">p6</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_6_ml_tree-1.png" class="r-plt" alt="" width="816" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_6_ml_tree-1.png" class="r-plt" alt="**Figure 6.** Maximum-likelihood tree with bootstrap support (FBP). Node symbols: white, FBP of 90 or more; grey, 70 to 89; black, under 70; blue, constrained node." width="816"><p class="caption">
+<strong>Figure 6.</strong> Maximum-likelihood tree with bootstrap
+support (FBP). Node symbols: white, FBP of 90 or more; grey, 70 to 89;
+black, under 70; blue, constrained node.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-7-full-size-maximum-likelihood-tree">Figure 7: Full-Size Maximum-Likelihood Tree<a class="anchor" aria-label="anchor" href="#figure-7-full-size-maximum-likelihood-tree"></a>
-</h4>
-<p>All 1,024 tips with species names and FBP values, on a 36 × 48 in
+<p><strong>Full-size maximum-likelihood tree.</strong></p>
+<p>All 1,208 tips with species names and FBP values, on a 36 × 48 in
 (91.4 × 121.9 cm) page.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">supp_tree_file</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">supp_tree_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -744,7 +732,7 @@ as constrained and carry no FBP value.</p>
 <span>  </span>
 <span>  <span class="va">p7_supp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/ggtree.html" class="external-link">ggtree</a></span><span class="op">(</span><span class="va">ml_tree_plot</span>, linewidth <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/theme_tree.html" class="external-link">theme_tree</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tiplab.html" class="external-link">geom_tiplab</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.70</span>, align <span class="op">=</span> <span class="cn">FALSE</span>, linetype <span class="op">=</span> <span class="st">"solid"</span>, linesize <span class="op">=</span> <span class="fl">0.15</span>, colour <span class="op">=</span> <span class="st">"grey20"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tiplab.html" class="external-link">geom_tiplab</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.70</span>, align <span class="op">=</span> <span class="cn">FALSE</span>, linetype <span class="op">=</span> <span class="st">"solid"</span>, linesize <span class="op">=</span> <span class="fl">0.15</span>, colour <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"text"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_nodelab.html" class="external-link">geom_nodelab</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">support_label</span><span class="op">)</span>, size <span class="op">=</span> <span class="fl">0.70</span>, hjust <span class="op">=</span> <span class="fl">0.7</span>, colour <span class="op">=</span> <span class="st">"black"</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
 <span>    </span>
@@ -769,10 +757,6 @@ workspace: -
 directory of the repository: <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/Figure_7_ML_Tree_Extended.pdf" class="external-link">Figure_7_ML_Tree_Extended.pdf</a>
 and <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/annotated_ml_tree.tree" class="external-link">annotated_ml_tree.tree</a>.</p>
 </blockquote>
-</div>
-<div class="section level4">
-<h4 id="figure-8-time-calibrated-chronogram-with-hpd-intervals">Figure 8: Time-Calibrated Chronogram with HPD Intervals<a class="anchor" aria-label="anchor" href="#figure-8-time-calibrated-chronogram-with-hpd-intervals"></a>
-</h4>
 <p>Chronogram estimated with penalized likelihood in
 <code>treePL</code>. Node bars are 95% HPD intervals summarized from the
 100 bootstrap chronograms, and the axis shows geological periods.</p>
@@ -810,7 +794,7 @@ and <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/ext
 <span></span>
 <span>    <span class="va">p8</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/ggtree.html" class="external-link">ggtree</a></span><span class="op">(</span><span class="va">chrono_beast</span>, linewidth <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/theme_tree2.html" class="external-link">theme_tree2</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>      <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_range.html" class="external-link">geom_range</a></span><span class="op">(</span>range <span class="op">=</span> <span class="st">'height_0.95_HPD'</span>, color <span class="op">=</span> <span class="st">'gray60'</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>, linewidth <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_range.html" class="external-link">geom_range</a></span><span class="op">(</span>range <span class="op">=</span> <span class="st">'height_0.95_HPD'</span>, color <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"line"</span><span class="op">]</span><span class="op">]</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>, linewidth <span class="op">=</span> <span class="fl">1.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/theme_tree.html" class="external-link">theme_tree</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>    </span>
 <span>    <span class="va">p8</span> <span class="op">&lt;-</span> <span class="fu">PhyloCactus</span><span class="fu">::</span><span class="fu"><a href="../reference/apply_clade_label_layers.html">apply_clade_label_layers</a></span><span class="op">(</span><span class="va">p8</span>, <span class="va">registry_chrono</span>, <span class="va">CHRONO_MAIN_LAYER_SPECS</span><span class="op">)</span></span>
@@ -822,12 +806,14 @@ and <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/ext
 <span>    <span class="va">p8</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_8_chronogram-1.png" class="r-plt" alt="" width="816" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_8_chronogram-1.png" class="r-plt" alt="**Figure 8.** Time-calibrated chronogram with HPD intervals. Grey bars: 95% HPD intervals of the node ages." width="816"><p class="caption">
+<strong>Figure 8.</strong> Time-calibrated chronogram with HPD
+intervals. Grey bars: 95% HPD intervals of the node ages.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-9-full-size-chronogram">Figure 9: Full-Size Chronogram<a class="anchor" aria-label="anchor" href="#figure-9-full-size-chronogram"></a>
-</h4>
-<p>All 1,024 tips with 95% HPD intervals and period boundaries, on a 36
+<p><strong>Full-size chronogram.</strong></p>
+<p>All 1,208 tips with 95% HPD intervals and period boundaries, on a 36
 × 48 in (91.4 × 121.9 cm) page.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">chrono_file</span><span class="op">)</span> <span class="op">&amp;&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="va">chrono_file</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -841,8 +827,8 @@ and <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/ext
 <span>  </span>
 <span>  <span class="va">p9_supp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/ggtree.html" class="external-link">ggtree</a></span><span class="op">(</span><span class="va">chrono_beast</span>, linewidth <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/theme_tree2.html" class="external-link">theme_tree2</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tiplab.html" class="external-link">geom_tiplab</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.85</span>, align <span class="op">=</span> <span class="cn">FALSE</span>, linetype <span class="op">=</span> <span class="st">"solid"</span>, linesize <span class="op">=</span> <span class="fl">0.15</span>, colour <span class="op">=</span> <span class="st">"grey20"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_range.html" class="external-link">geom_range</a></span><span class="op">(</span>range <span class="op">=</span> <span class="st">'height_0.95_HPD'</span>, color <span class="op">=</span> <span class="st">'gray60'</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>, linewidth <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_tiplab.html" class="external-link">geom_tiplab</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.85</span>, align <span class="op">=</span> <span class="cn">FALSE</span>, linetype <span class="op">=</span> <span class="st">"solid"</span>, linesize <span class="op">=</span> <span class="fl">0.15</span>, colour <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"text"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/geom_range.html" class="external-link">geom_range</a></span><span class="op">(</span>range <span class="op">=</span> <span class="st">'height_0.95_HPD'</span>, color <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"line"</span><span class="op">]</span><span class="op">]</span>, alpha <span class="op">=</span> <span class="fl">0.4</span>, linewidth <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/pkg/ggtree/man/theme_tree.html" class="external-link">theme_tree</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>    </span>
 <span>  <span class="va">p9_supp</span> <span class="op">&lt;-</span> <span class="fu">PhyloCactus</span><span class="fu">::</span><span class="fu"><a href="../reference/apply_clade_label_layers.html">apply_clade_label_layers</a></span><span class="op">(</span><span class="va">p9_supp</span>, <span class="va">registry_chrono</span>, <span class="va">CHRONO_SUPP_LAYER_SPECS</span><span class="op">)</span></span>
@@ -867,21 +853,17 @@ the workspace: -
 directory of the repository: <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/Figure_9_Chronogram_Extended.pdf" class="external-link">Figure_9_Chronogram_Extended.pdf</a>
 and <a href="https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/annotated_chronogram.tree" class="external-link">annotated_chronogram.tree</a>.</p>
 </blockquote>
-</div>
-<div class="section level4">
-<h4 id="figure-10-species-composition">Figure 10: Species Composition<a class="anchor" aria-label="anchor" href="#figure-10-species-composition"></a>
-</h4>
-<p>Status of the 2,003 species in the registry: sampled and dated in the
-tree (986), sequenced but removed by <code>RAxML-NG</code> as identical
-duplicates (36), accepted species without sequences (943), and outgroups
-(38).</p>
+<p>Status of the 1,993 species in the registry: sampled and dated in the
+tree (1,180), sequenced but removed by <code>RAxML-NG</code> as
+identical duplicates (10), accepted species without sequences (775), and
+outgroups (28).</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">status_pipeline</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">status_pipeline</span>, <span class="va">n</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"grey35"</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"mark"</span><span class="op">]</span><span class="op">]</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">comma</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, hjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.15</span>, size <span class="op">=</span> <span class="fl">3.8</span>, color <span class="op">=</span> <span class="st">"grey20"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/comma.html" class="external-link">comma</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span>, hjust <span class="op">=</span> <span class="op">-</span><span class="fl">0.15</span>, size <span class="op">=</span> <span class="fl">3.8</span>, color <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"text"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>expand <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span>mult <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.15</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">"Species Composition"</span>,</span>
 <span>    subtitle <span class="op">=</span> <span class="st">"Methodological status across checklist, supermatrix, and tree"</span>,</span>
@@ -889,11 +871,11 @@ duplicates (36), accepted species without sequences (943), and outgroups
 <span>    y <span class="op">=</span> <span class="st">"Number of species"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="va">p10</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_10_species_composition-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_10_species_composition-1.png" class="r-plt" alt="**Figure 10.** Species composition." width="576"><p class="caption">
+<strong>Figure 10.</strong> Species composition.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-11-iucn-categories">Figure 11: IUCN Categories<a class="anchor" aria-label="anchor" href="#figure-11-iucn-categories"></a>
-</h4>
 <p>Number of ingroup species in the tree in each IUCN Red List
 category.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
@@ -905,7 +887,7 @@ category.</p>
 <span>  <span class="va">p11</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">TABLE_iucn_categories</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">iucn_category</span>, <span class="va">n</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span>, fill <span class="op">=</span> <span class="va">iucn_category</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">PhyloCactus</span><span class="fu">::</span><span class="fu"><a href="../reference/scale_fill_iucn.html">scale_fill_iucn</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"IUCN Category"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>      title <span class="op">=</span> <span class="st">"IUCN Categories"</span>,</span>
 <span>      x <span class="op">=</span> <span class="st">"Category"</span>,</span>
@@ -913,44 +895,49 @@ category.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="va">p11</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_11_iucn_categories-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_11_iucn_categories-1.png" class="r-plt" alt="**Figure 11.** IUCN categories. Colours of the IUCN Red List categories." width="576"><p class="caption">
+<strong>Figure 11.</strong> IUCN categories. Colours of the IUCN Red
+List categories.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-12-molecular-completeness-vs--iucn-category">Figure 12: Molecular Completeness vs. IUCN Category<a class="anchor" aria-label="anchor" href="#figure-12-molecular-completeness-vs--iucn-category"></a>
-</h4>
-<p>Number of loci per species in each IUCN category, for the ingroup
-species in the chronogram. The figure shows whether threatened species
-are represented by fewer loci.</p>
+<p>Share of the loci sampled for each species in each IUCN category, for
+the ingroup species in the chronogram. The figure shows whether
+threatened species are represented by fewer loci.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">iucn_found</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># The species the figure plots, counted for its subtitle</span></span>
+<span>  <span class="va">fig12_data</span> <span class="op">&lt;-</span> <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">status_pipeline</span> <span class="op">==</span> <span class="st">"sampled_and_dated"</span>,</span>
+<span>           <span class="va">iucn_found</span> <span class="op">==</span> <span class="cn">TRUE</span>,</span>
+<span>           <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">iucn_category</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">n_fig12</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">fig12_data</span><span class="op">)</span></span>
 <span>  <span class="va">p12</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
-<span>    <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">status_pipeline</span> <span class="op">==</span> <span class="st">"sampled_and_dated"</span>,</span>
-<span>             <span class="va">iucn_found</span> <span class="op">==</span> <span class="cn">TRUE</span>,</span>
-<span>             <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">iucn_category</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="va">fig12_data</span>,</span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">iucn_category</span>, y <span class="op">=</span> <span class="va">pct_markers</span>, fill <span class="op">=</span> <span class="va">iucn_category</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_violin.html" class="external-link">geom_violin</a></span><span class="op">(</span>trim <span class="op">=</span> <span class="cn">FALSE</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_boxplot.html" class="external-link">geom_boxplot</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.2</span>, outlier.size <span class="op">=</span> <span class="fl">0.6</span>, alpha <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu">PhyloCactus</span><span class="fu">::</span><span class="fu"><a href="../reference/scale_fill_iucn.html">scale_fill_iucn</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"IUCN Category"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>      title <span class="op">=</span> <span class="st">"Molecular Completeness vs IUCN Category"</span>,</span>
-<span>      subtitle <span class="op">=</span> <span class="st">"Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = 986)"</span>,</span>
+<span>      subtitle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = "</span>, <span class="va">n_fig12</span>, <span class="st">")"</span><span class="op">)</span>,</span>
 <span>      x <span class="op">=</span> <span class="st">"IUCN Category"</span>,</span>
 <span>      y <span class="op">=</span> <span class="st">"Marker completeness (%)"</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="va">p12</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_12_completeness_vs_iucn-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_12_completeness_vs_iucn-1.png" class="r-plt" alt="**Figure 12.** Molecular completeness against IUCN category. Colours of the IUCN Red List categories." width="672"><p class="caption">
+<strong>Figure 12.</strong> Molecular completeness against IUCN
+category. Colours of the IUCN Red List categories.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-13-threatened-species-without-sequence-data-by-genus">Figure 13: Threatened Species Without Sequence Data by Genus<a class="anchor" aria-label="anchor" href="#figure-13-threatened-species-without-sequence-data-by-genus"></a>
-</h4>
-<p>Threatened species (CR, EN, VU) among the 943 accepted species
-without sequence data, by genus. <em>Parodia</em> (24 species),
-<em>Mammillaria</em> (22) and <em>Melocactus</em> (14) have the most.
-The species are listed in
+<p>Threatened species (CR, EN, VU) among the 775 accepted species
+without sequence data, by genus. <em>Parodia</em> (18 species),
+<em>Melocactus</em> (14) and <em>Coleocephalocereus</em> (7) have the
+most. The species are listed in
 <code>TABLE_conservation_prioritization_gaps.csv</code>, which can guide
 field collecting and sequencing.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
@@ -968,7 +955,7 @@ field collecting and sequencing.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">PhyloCactus</span><span class="fu">::</span><span class="fu"><a href="../reference/scale_fill_iucn.html">scale_fill_iucn</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Threat Category"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>face <span class="op">=</span> <span class="st">"italic"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">"Threatened Unsampled Species by Genus"</span>,</span>
@@ -977,11 +964,12 @@ field collecting and sequencing.</p>
 <span>    y <span class="op">=</span> <span class="st">"Number of threatened unsequenced species"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="va">p13</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_13_conservation_prioritization_gaps-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_13_conservation_prioritization_gaps-1.png" class="r-plt" alt="**Figure 13.** Threatened species without sequence data by genus. Colours of the IUCN Red List categories." width="576"><p class="caption">
+<strong>Figure 13.</strong> Threatened species without sequence data by
+genus. Colours of the IUCN Red List categories.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-14-endemic-species-by-country">Figure 14: Endemic Species by Country<a class="anchor" aria-label="anchor" href="#figure-14-endemic-species-by-country"></a>
-</h4>
 <p>Countries ranked by the number of endemic ingroup species in the
 tree, based on IUCN records of endemism.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
@@ -993,9 +981,9 @@ tree, based on IUCN records of endemism.</p>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_max</a></span><span class="op">(</span><span class="va">n</span>, n <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span>    </span>
 <span>  <span class="va">p14</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plot_data_endemism</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">iucn_endemic_locations</span>, <span class="va">n</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"grey35"</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"mark"</span><span class="op">]</span><span class="op">]</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>      title <span class="op">=</span> <span class="st">"Endemic Species by Country"</span>,</span>
 <span>      x <span class="op">=</span> <span class="st">"Country"</span>,</span>
@@ -1003,11 +991,11 @@ tree, based on IUCN records of endemism.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="va">p14</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_14_endemism_by_country-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_14_endemism_by_country-1.png" class="r-plt" alt="**Figure 14.** Endemic species by country." width="576"><p class="caption">
+<strong>Figure 14.</strong> Endemic species by country.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-15-endemic-species-by-country-and-iucn-category">Figure 15: Endemic Species by Country and IUCN Category<a class="anchor" aria-label="anchor" href="#figure-15-endemic-species-by-country-and-iucn-category"></a>
-</h4>
 <p>IUCN categories of the endemic ingroup species in the tree, for the
 countries with the most endemics.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
@@ -1025,7 +1013,7 @@ countries with the most endemics.</p>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu">PhyloCactus</span><span class="fu">::</span><span class="fu"><a href="../reference/scale_fill_iucn.html">scale_fill_iucn</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"IUCN Category"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>      <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>        title <span class="op">=</span> <span class="st">"Endemic Species by Country and IUCN Category"</span>,</span>
 <span>        x <span class="op">=</span> <span class="st">"Country"</span>,</span>
@@ -1034,11 +1022,12 @@ countries with the most endemics.</p>
 <span>    <span class="va">p15</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_15_iucn_by_country-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_15_iucn_by_country-1.png" class="r-plt" alt="**Figure 15.** Endemic species by country and IUCN category. Colours of the IUCN Red List categories." width="576"><p class="caption">
+<strong>Figure 15.</strong> Endemic species by country and IUCN
+category. Colours of the IUCN Red List categories.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-16-primary-ecological-threats">Figure 16: Primary Ecological Threats<a class="anchor" aria-label="anchor" href="#figure-16-primary-ecological-threats"></a>
-</h4>
 <p>Threat classes recorded by the IUCN Red List for the ingroup species
 in the tree, ranked by frequency.</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
@@ -1051,9 +1040,9 @@ in the tree, ranked by frequency.</p>
 <span>    </span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">plot_threats</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">p16</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plot_threats</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">iucn_threat_names</span>, <span class="va">n</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"grey35"</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"mark"</span><span class="op">]</span><span class="op">]</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>      <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>        title <span class="op">=</span> <span class="st">"Most Common Threats"</span>,</span>
 <span>        x <span class="op">=</span> <span class="st">"Threat"</span>,</span>
@@ -1062,11 +1051,11 @@ in the tree, ranked by frequency.</p>
 <span>    <span class="va">p16</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_16_threats-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_16_threats-1.png" class="r-plt" alt="**Figure 16.** Primary ecological threats." width="576"><p class="caption">
+<strong>Figure 16.</strong> Primary ecological threats.
+</p>
 </div>
-<div class="section level4">
-<h4 id="figure-17-primary-ecological-habitats">Figure 17: Primary Ecological Habitats<a class="anchor" aria-label="anchor" href="#figure-17-primary-ecological-habitats"></a>
-</h4>
 <p>Habitat classes recorded by the IUCN Red List for the ingroup species
 in the tree.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
@@ -1079,9 +1068,9 @@ in the tree.</p>
 <span>    </span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">plot_habitats</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
 <span>    <span class="va">p17</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">plot_habitats</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">iucn_habitat_names</span>, <span class="va">n</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">n</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"grey35"</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="fu"><a href="../reference/phylocactus_colours.html">phylocactus_colours</a></span><span class="op">(</span><span class="st">"neutral"</span><span class="op">)</span><span class="op">[[</span><span class="st">"mark"</span><span class="op">]</span><span class="op">]</span>, width <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_flip.html" class="external-link">coord_flip</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>      <span class="fu">theme_phylocactus</span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
+<span>      <span class="fu"><a href="../reference/theme_phylocactus.html">theme_phylocactus</a></span><span class="op">(</span>base_size <span class="op">=</span> <span class="fl">12</span><span class="op">)</span> <span class="op">+</span></span>
 <span>      <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>        title <span class="op">=</span> <span class="st">"Most Common Habitats"</span>,</span>
 <span>        x <span class="op">=</span> <span class="st">"Habitat"</span>,</span>
@@ -1090,7 +1079,10 @@ in the tree.</p>
 <span>    <span class="va">p17</span></span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p><img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_17_habitats-1.png" class="r-plt" alt="" width="576" style="display: block; margin: auto;"></p>
+<div class="figure" style="text-align: center">
+<img src="tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_17_habitats-1.png" class="r-plt" alt="**Figure 17.** Primary ecological habitats." width="576"><p class="caption">
+<strong>Figure 17.</strong> Primary ecological habitats.
+</p>
 </div>
 </div>
 </div>
@@ -1112,6 +1104,9 @@ to Tutorial 4: Phylogenetic Validation and Comparative Analyses</a></p>
 <li>Isaac <em>et al</em>. 2007. Mammals on the EDGE: conservation
 priorities based on threat and phylogeny. <em>PLoS ONE</em>, 2(3), e296.
 <a href="https://doi.org/10.1371/journal.pone.0000296" class="external-link uri">https://doi.org/10.1371/journal.pone.0000296</a>
+</li>
+<li>IUCN 2026. <em>The IUCN Red List of Threatened Species</em>. Version
+2026-1. Accessed 2026-10-15. <a href="https://www.iucnredlist.org" class="external-link uri">https://www.iucnredlist.org</a>
 </li>
 <li>Korotkova <em>et al</em>. 2021. Cactaceae at Caryophyllales.org - A
 dynamic online species-level taxonomic backbone for the family.
