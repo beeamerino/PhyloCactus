@@ -2,9 +2,9 @@
 # DESCRIPTION names both branches and the external programs; NEWS records the changes of 0.5.0 that
 # it left out; the cut of long records in the phylogeny branch is documented; Tutorial 2 reads the
 # weak support of the backbone; the website deploy removes the pages of earlier builds; the reports
-# of Tutorial 6 explain their two versions; the source of R/ carries no internal code of the audit;
-# the help pages hold no "additionally"; every line that names the checklist cites it. Written
-# before the text.
+# of Tutorial 6 explain their two versions; the source of R/ carries no internal code of the audit
+# and, with the help pages, no dated decision; the help pages hold no "additionally"; every line
+# that names the checklist cites it. Written before the text.
 
 .r51_root <- function(...) testthat::test_path("..", "..", ...)
 
@@ -105,6 +105,21 @@ test_that("the source of R/ carries no internal code of the audit (m2)", {
     if (length(h)) fail(paste0(basename(f), ": ", paste(substr(trimws(h), 1, 90), collapse = " | ")))
   }
   expect_false(any(grepl("1024 tips", readLines(file.path(d, "inference.R"), warn = FALSE), fixed = TRUE)))
+})
+
+test_that("the source of R/ and the help pages date no decision (m2)", {
+  dated <- "[Dd]ecisions? of 20[0-9]{2}|[Dd]ecided on 20[0-9]{2}|\\b[Uu]ntil 20[0-9]{2}-|\\b[Ss]ince 20[0-9]{2}-"
+  for (dir in c("R", "man")) {
+    d <- .r51_root(dir)
+    skip_if(!dir.exists(d), paste(dir, "is not in this tree"))
+    for (f in list.files(d, "\\.(R|Rd)$", full.names = TRUE)) {
+      x <- readLines(f, warn = FALSE)
+      if (dir == "R") x <- sub("^[^#]*#", "#", x[grepl("#", x)])
+      h <- x[grepl(dated, x, perl = TRUE)]
+      expect_length(h, 0L)
+      if (length(h)) fail(paste0(basename(f), ": ", paste(substr(trimws(h), 1, 90), collapse = " | ")))
+    }
+  }
 })
 
 test_that("the help pages hold no 'additionally' (m3)", {
