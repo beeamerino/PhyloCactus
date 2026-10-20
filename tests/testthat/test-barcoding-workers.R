@@ -164,7 +164,8 @@ test_that("a worker that ends without its status stops the run with an error tha
     classify_barcoding_folds(library_dir = f$library_dir, folds_dir = f$folds_dir, output_dir = out,
                              method = "nn", workers = 2L))), "chunk 2 of 2 ended without writing its status")
   setTimeLimit(elapsed = Inf)
-  expect_match(paste(readLines(file.path(out, "PROGRESS_nn.txt")), collapse = "\n"), "failed", fixed = TRUE)
+  # The state of the run, in the first line; "0 failed" in the count line does not count
+  expect_match(readLines(file.path(out, "PROGRESS_nn.txt"))[1], "2 workers: failed", fixed = TRUE)
   expect_false(file.exists(file.path(out, "TABLE_barcoding_predictions_species_nn.csv")))
 })
 
