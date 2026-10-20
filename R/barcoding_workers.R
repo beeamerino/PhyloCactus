@@ -3,7 +3,11 @@
 #' Starts `workers` R processes, one chunk each, writes the progress to
 #' `PROGRESS_<suffix>.txt` of `output_dir` every `getOption("PhyloCactus.poll_seconds", 60)`
 #' seconds, merges the chunks with [merge_barcoding_chunks()] when every worker has finished, and
-#' sends one email at the end. A worker that fails stops the others and the run. On macOS the machine
+#' sends one email at the end. A worker that fails stops the others and the run, and so does a worker
+#' that ends without writing its status (memory exhausted, a killed process, a crash of R): at every
+#' poll the process of each worker without a status is checked by the process id it wrote when it
+#' started, and a worker with no process id after `getOption("PhyloCactus.worker_grace_seconds")`
+#' seconds (by default three polls, never under 60) has not started. On macOS the machine
 #' is kept awake with `caffeinate` while the call lasts (a flag file in `chunks/` removed on exit),
 #' when `caffeinate` exists.
 #' @param args Named list of the arguments of [classify_barcoding_folds()] passed to every worker.
@@ -27,8 +31,10 @@
     # The paths are written with deparse(): the backslashes of the Windows temporary folders would
     # otherwise be read as escapes, and the worker would stop before writing its status
     writeLines(c(
+      sprintf('if (identical(Sys.getenv("PHYLOCACTUS_TEST_DIE_EARLY_CHUNK"), "%d")) quit(save = "no", status = 1)', k),
       sprintf('writeLines(as.character(Sys.getpid()), %s)', deparse(file.path(chunk_dir, paste0("PID_", tag, ".txt")))),
       sprintf('a <- readRDS(%s)', deparse(file.path(chunk_dir, paste0("ARGS_", suffix, ".rds")))),
+      sprintf('if (identical(Sys.getenv("PHYLOCACTUS_TEST_DIE_CHUNK"), "%d")) quit(save = "no", status = 1)', k),
       sprintf('a$chunk <- %dL; a$n_chunks <- %dL', k, workers),
       sprintf('st <- %s', deparse(file.path(chunk_dir, paste0("STATUS_", tag, ".txt")))),
       'r <- tryCatch({',
@@ -72,6 +78,24 @@
     st
   }
   wait <- getOption("PhyloCactus.poll_seconds", 60)
+  grace <- getOption("PhyloCactus.worker_grace_seconds", max(3 * wait, 60))
+  pid_of <- function(k) {
+    pf <- file.path(chunk_dir, paste0("PID_", suffix, "_worker", k, "of", workers, ".txt"))
+    if (!file.exists(pf)) return(NA_integer_)
+    suppressWarnings(as.integer(readLines(pf, warn = FALSE)[1]))
+  }
+  # A worker without a status has ended when its process is gone, or when it wrote no process id
+  # within the grace period; its status is read once more, for a worker that wrote it as it ended
+  ended_without_status <- function(k) {
+    if (status_of(k)[1] != "running") return(FALSE)
+    pid <- pid_of(k)
+    gone <- if (is.na(pid)) {
+      as.numeric(difftime(Sys.time(), started, units = "secs")) > grace
+    } else {
+      !.bc_process_alive(pid)
+    }
+    gone && status_of(k)[1] == "running"
+  }
   kill_all <- function() {
     for (k in seq_len(workers)) {
       pf <- file.path(chunk_dir, paste0("PID_", suffix, "_worker", k, "of", workers, ".txt"))
@@ -102,6 +126,14 @@
                   if (length(tail_log)) paste0("\nLast lines of its log:\n", paste(tail_log, collapse = "\n")) else ""))
     }
     if (all(st == "done")) break
+    dead <- Filter(ended_without_status, seq_len(workers))
+    if (length(dead)) {
+      k <- dead[1]
+      log <- file.path(chunk_dir, paste0("LOG_", suffix, "_worker", k, "of", workers, ".txt"))
+      tail_log <- utils::tail(.bc_worker_log_lines(log), 5)
+      fail(paste0("Step 7 stopped: chunk ", k, " of ", workers, " ended without writing its status",
+                  if (length(tail_log)) paste0("\nLast lines of its log:\n", paste(tail_log, collapse = "\n")) else ""))
+    }
   }
   res <- tryCatch(suppressMessages(merge_barcoding_chunks(library_dir = args$library_dir, folds_dir = args$folds_dir,
                                                           output_dir = out_dir, method = args$method, n_chunks = workers,
@@ -127,4 +159,18 @@
 .bc_worker_log_lines <- function(f) {
   if (!file.exists(f)) return(character(0))
   tryCatch(suppressWarnings(readLines(f, warn = FALSE)), error = function(e) character(0))
+}
+
+#' Whether a process is running: `tools::pskill(pid, 0)` on Unix, which sends no signal and only
+#' asks whether the process exists; `tasklist` filtered by the process id on Windows
+#' @noRd
+.bc_process_alive <- function(pid) {
+  pid <- suppressWarnings(as.integer(pid))
+  if (length(pid) != 1L || is.na(pid) || pid <= 0L) return(FALSE)
+  if (.Platform$OS.type == "windows") {
+    out <- tryCatch(suppressWarnings(system2("tasklist", c("/FI", shQuote(paste("PID eq", pid)), "/NH", "/FO", "CSV"),
+                                             stdout = TRUE, stderr = FALSE)), error = function(e) character(0))
+    return(any(grepl(paste0("\"", pid, "\""), out, fixed = TRUE)))
+  }
+  isTRUE(suppressWarnings(tools::pskill(pid, 0L)))
 }
