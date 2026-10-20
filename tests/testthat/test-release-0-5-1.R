@@ -16,11 +16,10 @@
 
 .r51_flat <- function(x) gsub("\\s+", " ", x)
 
-test_that("the package is version 0.5.1 and NEWS opens with it", {
-  expect_identical(as.character(utils::packageVersion("PhyloCactus")), "0.5.1")
+test_that("NEWS keeps the section of 0.5.1 (the version of the release is tested in test-release-0-5-2.R)", {
   f <- .r51_root("NEWS.md")
   skip_if(!file.exists(f), "NEWS.md is not in this tree")
-  expect_identical(readLines(f, n = 1L, warn = FALSE), "# PhyloCactus 0.5.1")
+  expect_length(grep("^# PhyloCactus 0\\.5\\.1$", readLines(f, warn = FALSE)), 1L)
 })
 
 test_that("DESCRIPTION names both branches and the external programs (M1, m5)", {

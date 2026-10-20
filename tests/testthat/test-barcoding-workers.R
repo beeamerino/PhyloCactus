@@ -133,3 +133,53 @@ test_that("the supervisor reads a worker log that cannot be opened as no lines, 
   skip_if(file.access(f, 4) == 0, "the log stays readable for this user (root)")
   expect_identical(expect_silent(rd(f)), character(0))
 })
+
+# A worker that ends without writing its status file (memory exhausted, a killed process, a crash of
+# R) stops the run with an error that names it, instead of a wait without end. The supervisor checks
+# at every poll that the process of each worker without a status is alive, by the process id the
+# worker writes when it starts; a worker that has written no process id after the grace period
+# (`PhyloCactus.worker_grace_seconds`) has not started. The death is simulated by two test variables
+# read by the worker script: one ends the worker after its process id, the other before it. The
+# time limit turns a wait without end into an error. Written before the code (0.5.2).
+
+test_that("the supervisor tells a live process from an ended one", {
+  alive <- PhyloCactus:::.bc_process_alive
+  expect_true(alive(Sys.getpid()))
+  rscript <- file.path(R.home("bin"), "Rscript")
+  ended <- as.integer(system2(rscript, c("-e", shQuote("cat(Sys.getpid())")), stdout = TRUE))
+  expect_false(alive(ended))
+  expect_false(alive(NA_integer_))
+})
+
+test_that("a worker that ends without its status stops the run with an error that names it", {
+  .wk_skip()
+  withr::local_options(PhyloCactus.poll_seconds = 1, PhyloCactus.worker_grace_seconds = 5)
+  withr::local_envvar(PHYLOCACTUS_TEST_DIE_CHUNK = "2")
+  tmp <- withr::local_tempdir()
+  f <- .wk_fixture(tmp)
+  out <- file.path(tmp, "7_par")
+  setTimeLimit(elapsed = 300, transient = TRUE)
+  withr::defer(setTimeLimit(elapsed = Inf))
+  expect_error(suppressMessages(utils::capture.output(
+    classify_barcoding_folds(library_dir = f$library_dir, folds_dir = f$folds_dir, output_dir = out,
+                             method = "nn", workers = 2L))), "chunk 2 of 2 ended without writing its status")
+  setTimeLimit(elapsed = Inf)
+  expect_match(paste(readLines(file.path(out, "PROGRESS_nn.txt")), collapse = "\n"), "failed", fixed = TRUE)
+  expect_false(file.exists(file.path(out, "TABLE_barcoding_predictions_species_nn.csv")))
+})
+
+test_that("a worker that ends before writing its process id stops the run after the grace period", {
+  .wk_skip()
+  withr::local_options(PhyloCactus.poll_seconds = 1, PhyloCactus.worker_grace_seconds = 5)
+  withr::local_envvar(PHYLOCACTUS_TEST_DIE_EARLY_CHUNK = "2")
+  tmp <- withr::local_tempdir()
+  f <- .wk_fixture(tmp)
+  out <- file.path(tmp, "7_par")
+  setTimeLimit(elapsed = 300, transient = TRUE)
+  withr::defer(setTimeLimit(elapsed = Inf))
+  expect_error(suppressMessages(utils::capture.output(
+    classify_barcoding_folds(library_dir = f$library_dir, folds_dir = f$folds_dir, output_dir = out,
+                             method = "nn", workers = 2L))), "chunk 2 of 2 ended without writing its status")
+  setTimeLimit(elapsed = Inf)
+  expect_false(file.exists(file.path(out, "TABLE_barcoding_predictions_species_nn.csv")))
+})
