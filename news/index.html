@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,10 @@
       <small>Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.2" id="phylocactus-052">PhyloCactus 0.5.2<a class="anchor" aria-label="anchor" href="#phylocactus-052"></a></h2>
+<ul><li>Step 7 in parallel (<code>classify_barcoding_folds(workers = )</code>) stops with an error that names the worker when a worker process ends without writing its status (memory exhausted, a killed process, a crash of R), instead of waiting without end. A worker that has written no process id after <code>getOption("PhyloCactus.worker_grace_seconds")</code> seconds (by default three polls, never under 60) counts as ended. The analyses and the distributed results are those of 0.5.0.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.5.1" id="phylocactus-051">PhyloCactus 0.5.1<a class="anchor" aria-label="anchor" href="#phylocactus-051"></a></h2>
 <p>Documentation, metadata and the website. The analyses and the distributed results are those of 0.5.0.</p>

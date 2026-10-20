@@ -1,5 +1,15 @@
 # Changelog
 
+## PhyloCactus 0.5.2
+
+- Step 7 in parallel (`classify_barcoding_folds(workers = )`) stops with
+  an error that names the worker when a worker process ends without
+  writing its status (memory exhausted, a killed process, a crash of R),
+  instead of waiting without end. A worker that has written no process
+  id after `getOption("PhyloCactus.worker_grace_seconds")` seconds (by
+  default three polls, never under 60) counts as ended. The analyses and
+  the distributed results are those of 0.5.0.
+
 ## PhyloCactus 0.5.1
 
 Documentation, metadata and the website. The analyses and the
