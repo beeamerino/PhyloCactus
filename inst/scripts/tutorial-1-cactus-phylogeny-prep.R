@@ -174,7 +174,8 @@ integrate_and_clean_markers(
   ingroup_dir = "3_Saturation/filtered_markers",
   outgroup_dir = "2_MAFFT_Outgroup/alignments",
   output_dir = "4_Cleaned",
-  accepted_list_file = system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus"),
+  # The checklist (Korotkova et al. 2021) is read from the local path in PHYLOCACTUS_CHECKLIST
+  accepted_list_file = phylocactus_checklist(),
   metadata_in_file = "1_phylotaR_out_Ingroup/TABLE_ACCESSION_OCCUPANCY_INGROUP_CLEAN.csv",
   metadata_out_file = "1_phylotaR_out_Outgroup/TABLE_ACCESSION_OCCUPANCY_OUTGROUP_CLEAN.csv",
   # The two phylotaR runs cluster independently, so the same region can carry different names.

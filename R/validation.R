@@ -94,8 +94,8 @@ compute_pairwise_metric <- function(tree_list, FUN, min_tips = 4L) {
 #' @param pruning_strategy Character. Strategy for pruning trees before metric computation. Under `"common_set"`, the shared intersection across all trees is used for the multidimensional scaling (MDS) projection, whereas pairwise tables retain all shared tips between each pair. Defaults to `"common_set"`.
 #' @param tree_labels Named character vector or `NULL`. Legend labels for the trees in the tree-space
 #'   figure, named by the entries of `trees_mapping_list`. Labels of the form `"Author et al. (year)"`
-#'   are typeset with *et al.* in italics. Defaults to `NULL`, which labels the reference trees
-#'   distributed with the package as `"Zuntini et al. (2024)"`, `"Thompson et al. (2024)"`,
+#'   are typeset with *et al.* in italics. Defaults to `NULL`, which labels the four reference trees
+#'   of Tutorial 4 as `"Zuntini et al. (2024)"`, `"Thompson et al. (2024)"`,
 #'   `"Amaral et al. (2022)"` and `"de Vos et al. (2025)"`, and the focal tree as `"This study"`.
 #'   Supplied labels replace the defaults of the same name.
 #' @param rooting_genus Character. Genus whose terminals root every tree after the family filter. Defaults to `"Leuenbergeria"`.
@@ -146,37 +146,10 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
   dir.create(OUT_TREES, recursive = TRUE, showWarnings = FALSE)
   dir.create(OUT_LOGS, recursive = TRUE, showWarnings = FALSE)
   
-  # The first five categorical colours of the package palette, in their fixed order
-  tree_palette <- stats::setNames(unname(phylocactus_colours("categorical")[1:5]),
-                                  c("FocalTree", "Zuntini", "Thompson", "Amaral", "deVos"))
-  # Shapes as well as colours, so that the five trees remain distinguishable in greyscale print and
-  # when two points overlap.
-  tree_shapes <- c(FocalTree = 16, Zuntini = 17, Thompson = 15, Amaral = 18, deVos = 4)
+  # The legend labels are checked here, before the trees are read; the figure is drawn by
+  # plot_tree_space().
+  .tree_space_style(tree_labels)
 
-  reference_labels <- c(
-    FocalTree = "This study",
-    Zuntini   = "Zuntini et al. (2024)",
-    Thompson  = "Thompson et al. (2024)",
-    Amaral    = "Amaral et al. (2022)",
-    deVos     = "de Vos et al. (2025)"
-  )
-  if (!is.null(tree_labels)) {
-    if (!is.character(tree_labels) || is.null(names(tree_labels)) || any(!nzchar(names(tree_labels)))) {
-      stop("`tree_labels` must be a named character vector.", call. = FALSE)
-    }
-    reference_labels[names(tree_labels)] <- tree_labels
-  }
-  legend_labels <- .format_reference_labels(reference_labels[names(tree_palette)])
-  
-  base_theme <- theme_phylocactus(base_size = 12) +
-    ggplot2::theme(
-      plot.title = ggplot2::element_text(face = "bold", hjust = 0.5),
-      axis.title = ggplot2::element_text(face = "bold"),
-      legend.position = "bottom",
-      legend.title = ggplot2::element_text(face = "bold"),
-      panel.grid.minor = ggplot2::element_blank()
-    )
-  
   # standardize_taxon() is defined at package level in R/visualization_helpers.R and resolved here
   # by normal lexical scoping. The local copy that used to sit here was character for character the
   # same function; two definitions of one normalisation rule is one more than can be kept in step.
@@ -311,53 +284,6 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
     }
     tree$tip.label <- new_labels
     tree
-  }
-  
-  plot_tree_space_panel <- function(coords_tbl, analysis_id_target, title_label = NULL,
-                                    show_legend = FALSE) {
-    df <- coords_tbl |> dplyr::filter(analysis_id == analysis_id_target)
-    
-    if (nrow(df) == 0) {
-      stop(paste("No tree-space coordinates found for:", analysis_id_target))
-    }
-    
-    if (is.null(title_label)) title_label <- analysis_id_target
-    
-    # Trees are identified by colour and shape in a single legend, labelled by source. Point labels
-    # inside the panels are not drawn.
-    ggplot2::ggplot(df, ggplot2::aes(x = Dimension_1, y = Dimension_2, color = tree, shape = tree)) +
-      ggplot2::geom_point(size = 3.8) +
-      ggplot2::scale_color_manual(
-        values = tree_palette,
-        breaks = names(tree_palette),
-        limits = names(tree_palette),
-        labels = legend_labels,
-        drop = FALSE,
-        guide = ggplot2::guide_legend(nrow = 1, byrow = TRUE)
-      ) +
-      ggplot2::scale_shape_manual(
-        values = tree_shapes,
-        breaks = names(tree_palette),
-        limits = names(tree_palette),
-        labels = legend_labels,
-        drop = FALSE,
-        guide = ggplot2::guide_legend(nrow = 1, byrow = TRUE)
-      ) +
-      ggplot2::labs(
-        title = title_label,
-        x = "Dimension 1",
-        y = "Dimension 2",
-        color = NULL,
-        shape = NULL
-      ) +
-      base_theme +
-      ggplot2::theme(
-        plot.title = ggplot2::element_text(size = 11.5, face = "bold", hjust = 0),
-        axis.text = ggplot2::element_text(color = "black"),
-        legend.position = if (show_legend) "bottom" else "none",
-        legend.title = ggplot2::element_text(size = 10.5),
-        legend.text = ggplot2::element_text(size = 9.5)
-      )
   }
   
   message("Loading trees...")
@@ -774,44 +700,8 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
   )
   
   message("Generating MDS plots...")
-  expected_analyses <- c(
-    "A1_species_all4",
-    "A2_species_3",
-    "A3_all_species_in_shared_genera",
-    "A4_representative_shared_genera"
-  )
-  
-  available_analyses <- unique(SUPP_tree_space_coordinates_rf$analysis_id)
-  if (length(available_analyses) > 0) {
-    p_legend <- plot_tree_space_panel(
-      SUPP_tree_space_coordinates_rf,
-      available_analyses[1],
-      "Legend",
-      show_legend = TRUE
-    )
-    
-    plot_list <- list()
-    for (aid in available_analyses) {
-      label <- unname(analysis_labels[aid])
-      if (is.na(label)) label <- aid
-      plot_list[[aid]] <- plot_tree_space_panel(
-        SUPP_tree_space_coordinates_rf,
-        aid,
-        label,
-        show_legend = FALSE
-      )
-    }
-    
-    legend_grob <- cowplot::get_legend(p_legend)
-    panels <- cowplot::plot_grid(plotlist = plot_list, ncol = 2, labels = .phylocactus_tag_labels(length(plot_list)))
-    
-    FIG_tree_space_main <- cowplot::plot_grid(
-      panels,
-      legend_grob,
-      ncol = 1,
-      rel_heights = c(1, 0.10)
-    )
-    
+  if (nrow(SUPP_tree_space_coordinates_rf) > 0) {
+    FIG_tree_space_main <- plot_tree_space(SUPP_tree_space_coordinates, metric = "RF", tree_labels = tree_labels)
     ggplot2::ggsave(
       file.path(OUT_FIGURES, "FIG_tree_space_main.pdf"),
       FIG_tree_space_main,
@@ -910,6 +800,145 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
     }
   }, character(1))
   parse(text = out)
+}
+
+#' Colours, shapes, legend labels and theme of the tree-space figure
+#'
+#' @param tree_labels Named character vector or `NULL`, as in `validate_phylogenies()`.
+#' @return A list with `palette`, `shapes`, `labels` (an expression vector) and `theme`.
+#' @noRd
+.tree_space_style <- function(tree_labels = NULL) {
+  # The first five categorical colours of the package palette, in their fixed order
+  tree_palette <- stats::setNames(unname(phylocactus_colours("categorical")[1:5]),
+                                  c("FocalTree", "Zuntini", "Thompson", "Amaral", "deVos"))
+  # Shapes as well as colours, so that the five trees remain distinguishable in greyscale print and
+  # when two points overlap.
+  tree_shapes <- c(FocalTree = 16, Zuntini = 17, Thompson = 15, Amaral = 18, deVos = 4)
+
+  reference_labels <- c(
+    FocalTree = "This study",
+    Zuntini   = "Zuntini et al. (2024)",
+    Thompson  = "Thompson et al. (2024)",
+    Amaral    = "Amaral et al. (2022)",
+    deVos     = "de Vos et al. (2025)"
+  )
+  if (!is.null(tree_labels)) {
+    if (!is.character(tree_labels) || is.null(names(tree_labels)) || any(!nzchar(names(tree_labels)))) {
+      stop("`tree_labels` must be a named character vector.", call. = FALSE)
+    }
+    reference_labels[names(tree_labels)] <- tree_labels
+  }
+  legend_labels <- .format_reference_labels(reference_labels[names(tree_palette)])
+
+  base_theme <- theme_phylocactus(base_size = 12) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(face = "bold", hjust = 0.5),
+      axis.title = ggplot2::element_text(face = "bold"),
+      legend.position = "bottom",
+      legend.title = ggplot2::element_text(face = "bold"),
+      panel.grid.minor = ggplot2::element_blank()
+    )
+  list(palette = tree_palette, shapes = tree_shapes, labels = legend_labels, theme = base_theme)
+}
+
+#' Tree Space of a Comparison of Phylogenies
+#'
+#' Draws the tree-space figure of `validate_phylogenies()`: one panel per taxon set (A1 to A4) with
+#' the classical multidimensional scaling (MDS) of the pairwise distances among the trees, and one
+#' legend below. `validate_phylogenies()` calls it on the coordinates it computes; Tutorial 4 calls
+#' it on the coordinates of the reference run distributed in `inst/extdata`
+#' (`phylocactus_table_tree_space.csv`), so the figure is drawn without the reference trees or the
+#' checklist.
+#'
+#' @param coordinates Data frame, or path to a CSV file, of tree-space coordinates as
+#'   `validate_phylogenies()` writes them to `SUPP_tree_space_coordinates.csv`: columns
+#'   `analysis_id`, `analysis_label`, `tree`, `Dimension_1`, `Dimension_2` and `metric`.
+#' @param metric Character. Distance whose projection is drawn: `"RF"` (normalized Robinson-Foulds,
+#'   the default) or `"DPI"` (Different Phylogenetic Information).
+#' @param tree_labels Named character vector or `NULL`. Legend labels, as in `validate_phylogenies()`.
+#' @return A `ggplot` object (assembled with `cowplot`).
+#' @examples
+#' \dontrun{
+#' coords <- system.file("extdata", "phylocactus_table_tree_space.csv", package = "PhyloCactus")
+#' plot_tree_space(coords, metric = "RF")
+#' }
+#' @export
+plot_tree_space <- function(coordinates, metric = c("RF", "DPI"), tree_labels = NULL) {
+  metric <- match.arg(metric)
+  style <- .tree_space_style(tree_labels)
+  coords_tbl <- if (is.character(coordinates)) {
+    utils::read.csv(coordinates, stringsAsFactors = FALSE)
+  } else {
+    as.data.frame(coordinates)
+  }
+  needed <- c("analysis_id", "tree", "Dimension_1", "Dimension_2", "metric")
+  absent <- setdiff(needed, names(coords_tbl))
+  if (length(absent)) stop("The coordinates lack the columns: ", paste(absent, collapse = ", "), call. = FALSE)
+  coords_tbl <- coords_tbl[coords_tbl$metric == metric, , drop = FALSE]
+  if (nrow(coords_tbl) == 0) stop("No tree-space coordinates for the metric ", metric, ".", call. = FALSE)
+
+  plot_tree_space_panel <- function(analysis_id_target, title_label, show_legend = FALSE) {
+    df <- coords_tbl[coords_tbl$analysis_id == analysis_id_target, , drop = FALSE]
+    # Trees are identified by colour and shape in a single legend, labelled by source. Point labels
+    # inside the panels are not drawn.
+    ggplot2::ggplot(df, ggplot2::aes(x = Dimension_1, y = Dimension_2, color = tree, shape = tree)) +
+      ggplot2::geom_point(size = 3.8) +
+      ggplot2::scale_color_manual(
+        values = style$palette,
+        breaks = names(style$palette),
+        limits = names(style$palette),
+        labels = style$labels,
+        drop = FALSE,
+        guide = ggplot2::guide_legend(nrow = 1, byrow = TRUE)
+      ) +
+      ggplot2::scale_shape_manual(
+        values = style$shapes,
+        breaks = names(style$palette),
+        limits = names(style$palette),
+        labels = style$labels,
+        drop = FALSE,
+        guide = ggplot2::guide_legend(nrow = 1, byrow = TRUE)
+      ) +
+      ggplot2::labs(
+        title = title_label,
+        x = "Dimension 1",
+        y = "Dimension 2",
+        color = NULL,
+        shape = NULL
+      ) +
+      style$theme +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(size = 11.5, face = "bold", hjust = 0),
+        axis.text = ggplot2::element_text(color = "black"),
+        legend.position = if (show_legend) "bottom" else "none",
+        legend.title = ggplot2::element_text(size = 10.5),
+        legend.text = ggplot2::element_text(size = 9.5)
+      )
+  }
+
+  available_analyses <- unique(coords_tbl$analysis_id)
+  p_legend <- plot_tree_space_panel(available_analyses[1], "Legend", show_legend = TRUE)
+
+  plot_list <- list()
+  for (aid in available_analyses) {
+    label <- if ("analysis_label" %in% names(coords_tbl)) {
+      coords_tbl$analysis_label[coords_tbl$analysis_id == aid][1]
+    } else {
+      NA_character_
+    }
+    if (is.na(label)) label <- aid
+    plot_list[[aid]] <- plot_tree_space_panel(aid, label, show_legend = FALSE)
+  }
+
+  legend_grob <- cowplot::get_legend(p_legend)
+  panels <- cowplot::plot_grid(plotlist = plot_list, ncol = 2, labels = .phylocactus_tag_labels(length(plot_list)))
+
+  cowplot::plot_grid(
+    panels,
+    legend_grob,
+    ncol = 1,
+    rel_heights = c(1, 0.10)
+  )
 }
 
 #' The names of one family in the checklist, standardized as the tips of the trees

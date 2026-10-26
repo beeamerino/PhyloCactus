@@ -72,7 +72,7 @@ This module requires the outputs of [Tutorial 2: Phylogenetic Inference and Dive
 
 #### Species Registry
 
-The species registry links each accepted species to its molecular sampling, its placement in the tree and its IUCN assessment.
+The species registry links each accepted species to its molecular sampling, its placement in the tree and its IUCN Red List category.
 With these data, threatened species without sequence data can be listed, and the molecular sampling of threatened and non-threatened species can be compared.
 The registry can also serve as input for phylogeny-based conservation metrics such as EDGE scores (Isaac *et al*. 2007), which are not computed in this tutorial.
 
@@ -111,7 +111,8 @@ marker_stats_file <- "6_Concatenated/final_tables/TABLE_marker_statistics.csv"
 marker_ranges_file <- "6_Concatenated/final_tables/TABLE_marker_ranges.tsv"
 
 # Canonical inputs that do not change across runs
-accepted_list_file <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
+# The checklist (Korotkova et al. 2021) is read from the local path in PHYLOCACTUS_CHECKLIST
+accepted_list_file <- phylocactus_checklist()
 constraints_csv_path <- system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus")
 
 # Tree outputs from Modules 9 and 10
@@ -238,6 +239,10 @@ The chunk also writes `TABLE_conservation_prioritization_gaps.csv`, which lists 
 If the table already exists, it is read from disk and the API is not queried.
 IUCN assessments change between Red List versions. The reference run used Red List version 2026-1 (IUCN 2026), reported by `rredlist::rl_version()`.
 
+The table of assessments is Red List Data, retrieved with the user's own token, and stays on the user's machine: the IUCN Red List Terms of Use (version 3.1) do not allow it to be redistributed (section 4), but place no restriction on the category of a named species (section 3).
+`summarise_iucn_registry()` reduces it to the tables the package distributes: the species registry with the category as its only IUCN content (`TABLE_species_registry.csv`), the endemic species in the tree by country and category (`TABLE_iucn_endemic_by_country.csv`), and the species in the tree by threat class and habitat class (`TABLE_iucn_classes.csv`), each with the version of the Red List and the date of access.
+Figures 14 to 17 and the endemism row of Table 1 are drawn from the two count tables.
+
 ```{r, eval = FALSE}
 # ============================================================
 # RUN IUCN EXTRACTION OR LOAD INTEGRATED SPECIES TABLE
@@ -263,6 +268,13 @@ TABLE_conservation_prioritization_gaps <- species_summary_iucn %>%
   arrange(factor(iucn_category, levels = c("CR", "EN", "VU")), genus, species)
 
 write_csv(TABLE_conservation_prioritization_gaps, prioritization_file)
+
+# Category of each species and counts: the tables the package distributes. The version and the
+# date of access are those of the assessments in output_file.
+iucn_tables <- summarise_iucn_registry(output_file,
+                                       redlist_version = "2026-1",
+                                       access_date = "2026-10-15",
+                                       output_dir = "9_Visualization/tables")
 ```
 
 ```{r, eval = TRUE, echo = FALSE}
@@ -304,6 +316,12 @@ marker_stats <- read_csv(system.file("extdata", "phylocactus_table_markers.csv",
                          show_col_types = FALSE)
 marker_cols <- intersect(marker_stats$marker, names(species_summary_iucn))
 
+# Counts of the Red List (IUCN 2026, version 2026-1) by country, threat class and habitat class
+iucn_endemic_by_country <- read_csv(system.file("extdata", "phylocactus_table_iucn_endemic_by_country.csv",
+                                                package = "PhyloCactus"), show_col_types = FALSE)
+iucn_classes <- read_csv(system.file("extdata", "phylocactus_table_iucn_classes.csv", package = "PhyloCactus"),
+                         show_col_types = FALSE)
+
 TABLE_conservation_prioritization_gaps <- species_summary_iucn %>%
   filter(status_pipeline == "unsampled_checklist_gap", iucn_category %in% c("CR", "EN", "VU")) %>%
   mutate(genus = stringr::str_extract(species, "^[A-Za-z]+"))
@@ -340,7 +358,7 @@ TABLE_dataset_summary <- tibble(
     sum(species_summary_iucn$is_ingroup & (is.na(species_summary_iucn$iucn_found) | species_summary_iucn$iucn_found == FALSE), na.rm = TRUE),
     sum(species_summary_iucn$status_pipeline == "sampled_and_dated" & species_summary_iucn$iucn_category %in% c("VU", "EN", "CR"), na.rm = TRUE),
     sum(species_summary_iucn$status_pipeline == "unsampled_checklist_gap" & species_summary_iucn$iucn_category %in% c("VU", "EN", "CR"), na.rm = TRUE),
-    sum(species_summary_iucn$in_ml_tree & species_summary_iucn$is_ingroup & species_summary_iucn$iucn_is_endemic == TRUE, na.rm = TRUE)
+    iucn_classes$n[iucn_classes$field == "endemic_species_in_tree"]
   )
 )
 knitr::kable(TABLE_dataset_summary, caption = "Table 1. Summary of the dataset: species of the checklist, the supermatrix and the tree, IUCN assessments, threatened and endemic species.")
@@ -697,7 +715,7 @@ p10
 
 Number of ingroup species in the tree in each IUCN Red List category.
 
-```{r figure_11_iucn_categories, eval = has_data, fig.cap = "**Figure 11.** IUCN categories. Colours of the IUCN Red List categories."}
+```{r figure_11_iucn_categories, eval = has_data, fig.cap = "**Figure 11.** IUCN categories. Colours of the IUCN Red List categories. Data: IUCN (2026), Red List version 2026-1, accessed 2026-10-15 through `rredlist`."}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   TABLE_iucn_categories <- species_summary_iucn %>%
     filter(iucn_found == TRUE, in_ml_tree == TRUE, is_ingroup == TRUE) %>%
@@ -719,7 +737,7 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 Share of the loci sampled for each species in each IUCN category, for the ingroup species in the chronogram.
 The figure shows whether threatened species are represented by fewer loci.
 
-```{r figure_12_completeness_vs_iucn, eval = has_data, fig.width = 7, fig.height = 5, fig.cap = "**Figure 12.** Molecular completeness against IUCN category. Colours of the IUCN Red List categories."}
+```{r figure_12_completeness_vs_iucn, eval = has_data, fig.width = 7, fig.height = 5, fig.cap = "**Figure 12.** Molecular completeness against IUCN category. Colours of the IUCN Red List categories. Data: IUCN (2026), Red List version 2026-1, accessed 2026-10-15 through `rredlist`."}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   # The species the figure plots, counted for its subtitle
   fig12_data <- species_summary_iucn %>%
@@ -749,7 +767,7 @@ Threatened species (CR, EN, VU) among the 775 accepted species without sequence 
 *Parodia* (18 species), *Melocactus* (14) and *Coleocephalocereus* (7) have the most.
 The species are listed in `TABLE_conservation_prioritization_gaps.csv`, which can guide field collecting and sequencing.
 
-```{r figure_13_conservation_prioritization_gaps, eval = has_data, fig.height = 5, fig.cap = "**Figure 13.** Threatened species without sequence data by genus. Colours of the IUCN Red List categories."}
+```{r figure_13_conservation_prioritization_gaps, eval = has_data, fig.height = 5, fig.cap = "**Figure 13.** Threatened species without sequence data by genus. Colours of the IUCN Red List categories. Data: IUCN (2026), Red List version 2026-1, accessed 2026-10-15 through `rredlist`."}
 plot_gaps_genus <- TABLE_conservation_prioritization_gaps %>%
   count(genus, iucn_category) %>%
   mutate(iucn_category = factor(iucn_category, levels = c("CR", "EN", "VU")))
@@ -777,15 +795,15 @@ p13
 
 Countries ranked by the number of endemic ingroup species in the tree, based on IUCN records of endemism.
 
-```{r figure_14_endemism_by_country, eval = has_data, fig.cap = "**Figure 14.** Endemic species by country."}
-if (any(species_summary_iucn$iucn_is_endemic, na.rm = TRUE)) {
-  plot_data_endemism <- species_summary_iucn %>%
-    filter(iucn_is_endemic == TRUE, in_ml_tree == TRUE, is_ingroup == TRUE) %>%
-    separate_rows(iucn_endemic_locations, sep = "; ") %>%
-    count(iucn_endemic_locations, sort = TRUE) %>%
+```{r figure_14_endemism_by_country, eval = has_data, fig.cap = "**Figure 14.** Endemic species by country. Data: IUCN (2026), Red List version 2026-1, accessed 2026-10-15 through `rredlist`."}
+if (nrow(iucn_endemic_by_country) > 0) {
+  plot_data_endemism <- iucn_endemic_by_country %>%
+    group_by(country) %>%
+    summarise(n = sum(n)) %>%
+    arrange(desc(n)) %>%
     slice_max(n, n = 20)
     
-  p14 <- ggplot(plot_data_endemism, aes(x = reorder(iucn_endemic_locations, n), y = n)) +
+  p14 <- ggplot(plot_data_endemism, aes(x = reorder(country, n), y = n)) +
     geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
     coord_flip() +
     theme_phylocactus(base_size = 12) +
@@ -800,18 +818,15 @@ if (any(species_summary_iucn$iucn_is_endemic, na.rm = TRUE)) {
 
 IUCN categories of the endemic ingroup species in the tree, for the countries with the most endemics.
 
-```{r figure_15_iucn_by_country, eval = has_data, fig.cap = "**Figure 15.** Endemic species by country and IUCN category. Colours of the IUCN Red List categories."}
-if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
-  plot_iucn_country <- species_summary_iucn %>%
-    filter(iucn_is_endemic == TRUE, in_ml_tree == TRUE, is_ingroup == TRUE, !is.na(iucn_endemic_locations)) %>%
-    separate_rows(iucn_endemic_locations, sep = "; ") %>%
-    count(iucn_endemic_locations, iucn_category)
-    
-  top_countries <- plot_data_endemism$iucn_endemic_locations
-  plot_iucn_country <- plot_iucn_country %>% filter(iucn_endemic_locations %in% top_countries)
+```{r figure_15_iucn_by_country, eval = has_data, fig.cap = "**Figure 15.** Endemic species by country and IUCN category. Colours of the IUCN Red List categories. Data: IUCN (2026), Red List version 2026-1, accessed 2026-10-15 through `rredlist`."}
+if (nrow(iucn_endemic_by_country) > 0) {
+  top_countries <- plot_data_endemism$country
+  plot_iucn_country <- iucn_endemic_by_country %>%
+    filter(country %in% top_countries) %>%
+    select(country, iucn_category, n)
   
   if (nrow(plot_iucn_country) > 0) {
-    p15 <- ggplot(plot_iucn_country, aes(x = factor(iucn_endemic_locations, levels = rev(top_countries)), y = n, fill = iucn_category)) +
+    p15 <- ggplot(plot_iucn_country, aes(x = factor(country, levels = rev(top_countries)), y = n, fill = iucn_category)) +
       geom_col(width = 0.7) +
       coord_flip() +
       PhyloCactus::scale_fill_iucn(name = "IUCN Category") +
@@ -828,16 +843,16 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 
 Threat classes recorded by the IUCN Red List for the ingroup species in the tree, ranked by frequency.
 
-```{r figure_16_threats, eval = has_data, fig.cap = "**Figure 16.** Primary ecological threats."}
-if (any(!is.na(species_summary_iucn$iucn_threat_names))) {
-  plot_threats <- species_summary_iucn %>%
-    filter(!is.na(iucn_threat_names), in_ml_tree == TRUE, is_ingroup == TRUE) %>%
-    separate_rows(iucn_threat_names, sep = "; ") %>%
-    count(iucn_threat_names, sort = TRUE) %>%
+```{r figure_16_threats, eval = has_data, fig.cap = "**Figure 16.** Primary ecological threats. Data: IUCN (2026), Red List version 2026-1, accessed 2026-10-15 through `rredlist`."}
+if (any(iucn_classes$field == "threat")) {
+  plot_threats <- iucn_classes %>%
+    filter(field == "threat") %>%
+    select(class, n) %>%
+    arrange(desc(n)) %>%
     slice_max(n, n = 15)
     
   if (nrow(plot_threats) > 0) {
-    p16 <- ggplot(plot_threats, aes(x = reorder(iucn_threat_names, n), y = n)) +
+    p16 <- ggplot(plot_threats, aes(x = reorder(class, n), y = n)) +
       geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
       coord_flip() +
       theme_phylocactus(base_size = 12) +
@@ -853,16 +868,16 @@ if (any(!is.na(species_summary_iucn$iucn_threat_names))) {
 
 Habitat classes recorded by the IUCN Red List for the ingroup species in the tree.
 
-```{r figure_17_habitats, eval = has_data, fig.cap = "**Figure 17.** Primary ecological habitats."}
-if (any(!is.na(species_summary_iucn$iucn_habitat_names))) {
-  plot_habitats <- species_summary_iucn %>%
-    filter(!is.na(iucn_habitat_names), in_ml_tree == TRUE, is_ingroup == TRUE) %>%
-    separate_rows(iucn_habitat_names, sep = "; ") %>%
-    count(iucn_habitat_names, sort = TRUE) %>%
+```{r figure_17_habitats, eval = has_data, fig.cap = "**Figure 17.** Primary ecological habitats. Data: IUCN (2026), Red List version 2026-1, accessed 2026-10-15 through `rredlist`."}
+if (any(iucn_classes$field == "habitat")) {
+  plot_habitats <- iucn_classes %>%
+    filter(field == "habitat") %>%
+    select(class, n) %>%
+    arrange(desc(n)) %>%
     slice_max(n, n = 15)
     
   if (nrow(plot_habitats) > 0) {
-    p17 <- ggplot(plot_habitats, aes(x = reorder(iucn_habitat_names, n), y = n)) +
+    p17 <- ggplot(plot_habitats, aes(x = reorder(class, n), y = n)) +
       geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
       coord_flip() +
       theme_phylocactus(base_size = 12) +
@@ -886,6 +901,7 @@ Tutorial 4 compares the tree with published phylogenies of Cactaceae using Robin
 
 ## References
 
+- Gearty & Chamberlain 2025. rredlist: 'IUCN' Red List Client. R package version 1.1.1. <https://doi.org/10.32614/CRAN.package.rredlist>
 - Isaac *et al*. 2007. Mammals on the EDGE: conservation priorities based on threat and phylogeny. *PLoS ONE*, 2(3), e296. <https://doi.org/10.1371/journal.pone.0000296>
 - IUCN 2026. *The IUCN Red List of Threatened Species*. Version 2026-1. Accessed 2026-10-15. <https://www.iucnredlist.org>
 - Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>

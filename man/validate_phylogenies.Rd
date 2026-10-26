@@ -44,8 +44,8 @@ given in \code{resolve_rooting_outgroup()}. Trees lacking the genus are left unr
 
 \item{tree_labels}{Named character vector or \code{NULL}. Legend labels for the trees in the tree-space
 figure, named by the entries of \code{trees_mapping_list}. Labels of the form \code{"Author et al. (year)"}
-are typeset with \emph{et al.} in italics. Defaults to \code{NULL}, which labels the reference trees
-distributed with the package as \code{"Zuntini et al. (2024)"}, \code{"Thompson et al. (2024)"},
+are typeset with \emph{et al.} in italics. Defaults to \code{NULL}, which labels the four reference trees
+of Tutorial 4 as \code{"Zuntini et al. (2024)"}, \code{"Thompson et al. (2024)"},
 \code{"Amaral et al. (2022)"} and \code{"de Vos et al. (2025)"}, and the focal tree as \code{"This study"}.
 Supplied labels replace the defaults of the same name.}
 }

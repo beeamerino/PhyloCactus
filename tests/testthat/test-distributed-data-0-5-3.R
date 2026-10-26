@@ -59,7 +59,7 @@ test_that("the count tables give the counts of the reference run of 0.5.2", {
   # 633 endemic ingroup species in the tree (Table 1 of Tutorial 3 in 0.5.2)
   expect_identical(classes$n[classes$field == "endemic_species_in_tree"], 633L)
   per_country <- tapply(by_country$n, by_country$country, sum)
-  expect_identical(unname(per_country[c("Mexico", "Brazil", "Chile", "Argentina", "Peru")]),
+  expect_identical(as.vector(per_country[c("Mexico", "Brazil", "Chile", "Argentina", "Peru")]),
                    c(310L, 95L, 59L, 54L, 51L))
 })
 

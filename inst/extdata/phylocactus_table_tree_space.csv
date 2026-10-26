@@ -1,0 +1,37 @@
+analysis_id,tree,Dimension_1,Dimension_2,metric,analysis_label
+A1_species_all4,FocalTree,-0.0479234959465302,-0.06331651282151042,RF,A1. Shared species across comparative trees
+A1_species_all4,Zuntini,-0.07352792562046827,-0.1197655388186056,RF,A1. Shared species across comparative trees
+A1_species_all4,Thompson,-0.1712496919844282,0.2372846913659563,RF,A1. Shared species across comparative trees
+A1_species_all4,Amaral,0.31222529469157273,0.08360588304630319,RF,A1. Shared species across comparative trees
+A1_species_all4,deVos,-0.019524181140145872,-0.13780852277214345,RF,A1. Shared species across comparative trees
+A2_species_3,FocalTree,-0.14551955680212003,0.2963704911390062,RF,"A2. Shared species across Focal Tree, Thompson, and Amaral"
+A2_species_3,Thompson,-0.253703305134144,-0.24726467758235196,RF,"A2. Shared species across Focal Tree, Thompson, and Amaral"
+A2_species_3,Amaral,0.3992228619362639,-0.04910581355665486,RF,"A2. Shared species across Focal Tree, Thompson, and Amaral"
+A3_all_species_in_shared_genera,FocalTree,-0.0479234959465302,-0.06331651282151042,RF,A3. All species within genera shared across comparative trees
+A3_all_species_in_shared_genera,Zuntini,-0.07352792562046827,-0.1197655388186056,RF,A3. All species within genera shared across comparative trees
+A3_all_species_in_shared_genera,Thompson,-0.1712496919844282,0.2372846913659563,RF,A3. All species within genera shared across comparative trees
+A3_all_species_in_shared_genera,Amaral,0.31222529469157273,0.08360588304630319,RF,A3. All species within genera shared across comparative trees
+A3_all_species_in_shared_genera,deVos,-0.019524181140145872,-0.13780852277214345,RF,A3. All species within genera shared across comparative trees
+A4_representative_shared_genera,FocalTree,0.06520122738196725,0.08008242628727937,RF,A4. One representative per shared genus across comparative trees
+A4_representative_shared_genera,Zuntini,-0.20071026585175472,0.13605244119227478,RF,A4. One representative per shared genus across comparative trees
+A4_representative_shared_genera,Thompson,0.34533385234780173,0.05301696853624032,RF,A4. One representative per shared genus across comparative trees
+A4_representative_shared_genera,Amaral,-0.04877049881250284,-0.352419170876598,RF,A4. One representative per shared genus across comparative trees
+A4_representative_shared_genera,deVos,-0.16105431506551127,0.08326733486080354,RF,A4. One representative per shared genus across comparative trees
+A1_species_all4,FocalTree,0.07335512133323846,0.01900614951369606,DPI,A1. Shared species across comparative trees
+A1_species_all4,Zuntini,0.0869696836717886,0.012127466033261954,DPI,A1. Shared species across comparative trees
+A1_species_all4,Thompson,-0.13114373969065724,0.1427900901027098,DPI,A1. Shared species across comparative trees
+A1_species_all4,Amaral,-0.12209021668686681,-0.1508665365241531,DPI,A1. Shared species across comparative trees
+A1_species_all4,deVos,0.09290915137249706,-0.02305716912551461,DPI,A1. Shared species across comparative trees
+A2_species_3,FocalTree,-0.027012757585302354,0.1516720449726214,DPI,"A2. Shared species across Focal Tree, Thompson, and Amaral"
+A2_species_3,Thompson,-0.1769357029481432,-0.09197116504197089,DPI,"A2. Shared species across Focal Tree, Thompson, and Amaral"
+A2_species_3,Amaral,0.20394846053344556,-0.05970087993065083,DPI,"A2. Shared species across Focal Tree, Thompson, and Amaral"
+A3_all_species_in_shared_genera,FocalTree,0.07335512133323846,0.01900614951369606,DPI,A3. All species within genera shared across comparative trees
+A3_all_species_in_shared_genera,Zuntini,0.0869696836717886,0.012127466033261954,DPI,A3. All species within genera shared across comparative trees
+A3_all_species_in_shared_genera,Thompson,-0.13114373969065724,0.1427900901027098,DPI,A3. All species within genera shared across comparative trees
+A3_all_species_in_shared_genera,Amaral,-0.12209021668686681,-0.1508665365241531,DPI,A3. All species within genera shared across comparative trees
+A3_all_species_in_shared_genera,deVos,0.09290915137249706,-0.02305716912551461,DPI,A3. All species within genera shared across comparative trees
+A4_representative_shared_genera,FocalTree,-0.004762534727975707,0.09118694677096569,DPI,A4. One representative per shared genus across comparative trees
+A4_representative_shared_genera,Zuntini,0.09348278554460757,0.04752544357980247,DPI,A4. One representative per shared genus across comparative trees
+A4_representative_shared_genera,Thompson,-0.23143159125897073,-0.009556976096009775,DPI,A4. One representative per shared genus across comparative trees
+A4_representative_shared_genera,Amaral,0.0598224334959815,-0.1944482362489657,DPI,A4. One representative per shared genus across comparative trees
+A4_representative_shared_genera,deVos,0.0828889069463574,0.0652928219942075,DPI,A4. One representative per shared genus across comparative trees

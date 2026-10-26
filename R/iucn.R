@@ -54,9 +54,15 @@ extract_locations <- function(locs) {
 
 #' Fetch IUCN Red List Metadata via rredlist API
 #'
-#' Queries the IUCN Red List API (`rredlist`) to retrieve verified macroevolutionary conservation threat categories (e.g., CR, EN, VU),
-#' population trends, habitat descriptions, and geographic endemism metrics for a focal species.
+#' Queries the IUCN Red List API through `rredlist` and returns the latest assessment of one species: the
+#' Red List category (e.g., CR, EN, VU) and its criteria, the population trend, the countries of occurrence
+#' and of endemism, habitats, threats, and the texts of the assessment.
 #' Enriching phylogenetic datasets with IUCN conservation statuses enables evolutionary distinctness and extinction vulnerability analyses.
+#'
+#' The table returned is Red List Data under the IUCN Red List Terms of Use: it is for the user's own
+#' analysis, queried with the user's own token, and is not redistributed (sections 1 and 4 of the terms).
+#' `summarise_iucn_registry()` reduces it to the category of each species and to counts, which is what
+#' the package distributes.
 #'
 #' @param sp_name Character. Standardized binomial scientific name of the target species (e.g., `"Astrophytum asterias"`).
 #' @return A single-row `tibble` containing extracted IUCN conservation metadata fields.
@@ -163,6 +169,114 @@ get_iucn_data <- function(sp_name) {
     message("IUCN query failed for ", sp_name, ": ", e$message)
     out
   })
+}
+
+#' Reduce the IUCN Red List table of a run to the category of each species and to counts
+#'
+#' Reads the species table that Module 11 writes with the assessments of `get_iucn_data()`
+#' (`9_Visualization/tables/TABLE_species_all_data.csv`) and returns three tables that hold no
+#' assessment content: the species registry with `iucn_found`, `iucn_category` and
+#' `iucn_category_name` as its only IUCN columns, and two count tables. Under the IUCN Red List Terms
+#' of Use (version 3.1), IUCN places no restriction on the use of the category of a named taxon
+#' (section 3), whereas the assessments themselves are not to be redistributed (section 4); counts are
+#' published with the citation of the Red List and its version (section 6). The figures of endemism,
+#' threats and habitats of Tutorial 3 are drawn from the count tables.
+#'
+#' The counts cover the ingroup species in the maximum-likelihood tree (`is_ingroup` and `in_ml_tree`
+#' true), as the figures of Tutorial 3 do. Countries, threats and habitats are split on `"; "`, the
+#' separator `get_iucn_data()` writes, so a species is counted once in every country, threat class or
+#' habitat class it has.
+#'
+#' @param species_table A data frame, or the path to the CSV file, with the columns of the species
+#'   registry and of `get_iucn_data()`.
+#' @param redlist_version Character. Version of the Red List the assessments were taken from, as
+#'   `rredlist::rl_version()` reports it (e.g., `"2026-1"`).
+#' @param access_date Character. Date the assessments were retrieved, `YYYY-MM-DD`.
+#' @param output_dir Character or `NULL`. Folder where the three tables are written as
+#'   `TABLE_species_registry.csv`, `TABLE_iucn_endemic_by_country.csv` and `TABLE_iucn_classes.csv`.
+#'   `NULL` (the default) writes nothing.
+#' @return A list of three tibbles:
+#'   * `registry`: the species table without its `iucn_` columns other than `iucn_found`,
+#'     `iucn_category` and `iucn_category_name`;
+#'   * `endemic_by_country`: `country`, `iucn_category`, `n` (endemic species of each country in each
+#'     category), `redlist_version`, `access_date`;
+#'   * `classes`: `field` (`threat`, `habitat` or `endemic_species_in_tree`), `class`, `n`,
+#'     `redlist_version`, `access_date`. The row of `endemic_species_in_tree` (class `all`) is the
+#'     number of endemic species, each counted once.
+#' @references
+#' IUCN (2026). *The IUCN Red List of Threatened Species*. Version 2026-1. <https://www.iucnredlist.org>
+#' @examples
+#' \dontrun{
+#' summarise_iucn_registry("9_Visualization/tables/TABLE_species_all_data.csv",
+#'                         redlist_version = "2026-1", access_date = "2026-10-15",
+#'                         output_dir = "9_Visualization/tables")
+#' }
+#' @export
+summarise_iucn_registry <- function(species_table, redlist_version, access_date, output_dir = NULL) {
+  if (missing(redlist_version) || !is.character(redlist_version) || length(redlist_version) != 1L ||
+      !nzchar(redlist_version)) {
+    stop("`redlist_version` is required: the version of the Red List of the assessments (rredlist::rl_version()).",
+         call. = FALSE)
+  }
+  if (missing(access_date) || length(access_date) != 1L || is.na(as.Date(access_date, optional = TRUE))) {
+    stop("`access_date` is required: the date the assessments were retrieved, as YYYY-MM-DD.", call. = FALSE)
+  }
+  access_date <- format(as.Date(access_date))
+  sp <- if (is.character(species_table)) {
+    readr::read_csv(species_table, show_col_types = FALSE, guess_max = 10000)
+  } else {
+    tibble::as_tibble(species_table)
+  }
+  needed <- c("in_ml_tree", "is_ingroup", "iucn_category", "iucn_is_endemic", "iucn_endemic_locations",
+              "iucn_threat_names", "iucn_habitat_names")
+  absent <- setdiff(needed, names(sp))
+  if (length(absent)) stop("The species table lacks the columns: ", paste(absent, collapse = ", "), call. = FALSE)
+
+  kept <- c("iucn_found", "iucn_category", "iucn_category_name")
+  registry <- sp[, !grepl("^iucn_", names(sp)) | names(sp) %in% kept, drop = FALSE]
+
+  in_tree <- sp[sp$in_ml_tree %in% TRUE & sp$is_ingroup %in% TRUE, , drop = FALSE]
+  endemic <- in_tree[in_tree$iucn_is_endemic %in% TRUE, , drop = FALSE]
+  stamp <- function(d) {
+    d$n <- as.integer(d$n)
+    d$redlist_version <- redlist_version
+    d$access_date <- access_date
+    d
+  }
+
+  endemic_by_country <- endemic |>
+    dplyr::select(country = "iucn_endemic_locations", "iucn_category") |>
+    tidyr::separate_rows("country", sep = "; ") |>
+    dplyr::filter(!is.na(.data$country), nzchar(.data$country)) |>
+    dplyr::count(dplyr::across(dplyr::all_of(c("country", "iucn_category"))), name = "n") |>
+    dplyr::arrange(.data$country, .data$iucn_category) |>
+    stamp()
+
+  count_field <- function(column, field) {
+    in_tree |>
+      dplyr::select(class = dplyr::all_of(column)) |>
+      dplyr::filter(!is.na(.data$class)) |>
+      tidyr::separate_rows("class", sep = "; ") |>
+      dplyr::filter(nzchar(.data$class)) |>
+      dplyr::count(dplyr::across(dplyr::all_of("class")), name = "n") |>
+      dplyr::mutate(field = field, .before = 1)
+  }
+  classes <- dplyr::bind_rows(
+    count_field("iucn_threat_names", "threat"),
+    count_field("iucn_habitat_names", "habitat"),
+    tibble::tibble(field = "endemic_species_in_tree", class = "all", n = nrow(endemic))
+  ) |>
+    dplyr::arrange(match(.data$field, c("threat", "habitat", "endemic_species_in_tree")),
+                   dplyr::desc(.data$n), .data$class) |>
+    stamp()
+
+  if (!is.null(output_dir)) {
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+    readr::write_csv(registry, file.path(output_dir, "TABLE_species_registry.csv"), na = "NA")
+    readr::write_csv(endemic_by_country, file.path(output_dir, "TABLE_iucn_endemic_by_country.csv"))
+    readr::write_csv(classes, file.path(output_dir, "TABLE_iucn_classes.csv"))
+  }
+  list(registry = registry, endemic_by_country = endemic_by_country, classes = classes)
 }
 
 #' Standardized IUCN Category Color Scale for ggplot2

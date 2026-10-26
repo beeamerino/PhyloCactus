@@ -139,7 +139,8 @@
 #' @param query Character. GenBank query of the plastomes.
 #' @param library_dir Character. Directory of step 4, with the `LIB_<locus>.fasta` files.
 #' @param output_dir Character. Where the downloads and the extra records are written.
-#' @param checklist_path Character. The checklist (a path, or a vector of accepted names).
+#' @param checklist_path Character. The checklist (a path, or a vector of accepted names). Defaults to
+#'   the local copy named by `phylocactus_checklist()`.
 #' @param min_region Integer. Shortest region written. Defaults to 100.
 #' @param keep_genera Character. Genera outside the checklist whose plastomes are kept under the
 #'   NCBI binomial (for the outgroup: Portulacaceae and Talinaceae). A name
@@ -157,8 +158,7 @@ extract_barcoding_plastome_loci <- function(query = paste0("Cactaceae[Organism] 
                                                            "(chloroplast OR plastid) AND \"complete genome\" NOT refseq[filter]"),
                                             library_dir = file.path("11_barcoding", "4_library"),
                                             output_dir = file.path("0_genomic_raw", "plastomes"),
-                                            checklist_path = system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx",
-                                                                         package = "PhyloCactus"),
+                                            checklist_path = phylocactus_checklist(),
                                             min_region = 100L,
                                             keep_genera = character(0),
                                             fetch = .bc_fetch_genbank) {

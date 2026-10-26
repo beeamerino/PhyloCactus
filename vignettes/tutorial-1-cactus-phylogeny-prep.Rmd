@@ -58,7 +58,9 @@ For the default workflow, the ingroup is defined as the family **Cactaceae** (NC
 
 *Talinopsis* (**107598**) belongs to Anacampserotaceae, not to Talinaceae, despite its name and adjacent taxonomic identifier. These identifiers are the default configuration; other ingroup or outgroup NCBI Taxonomy IDs can be supplied to apply the workflow to other groups.
 
-Taxonomic and molecular curation relies on reference files distributed with the package in `inst/extdata` and read with `system.file()`. Species names are reconciled against a taxonomic backbone (`CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`) derived from the Caryophyllales.org project (Korotkova *et al.*, 2021), which lists the accepted species of Cactaceae, Portulacaceae and Anacampserotaceae. Reconciling against this checklist, and not relying on the names in GenBank records, reduces inconsistencies from outdated names, spelling variants and unresolved synonymy.
+Taxonomic and molecular curation relies on reference files distributed with the package in `inst/extdata` and read with `system.file()`, and on one file that is not distributed. Species names are reconciled against a taxonomic backbone (`CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`) derived from the Caryophyllales.org project (Korotkova *et al.*, 2021), which lists the accepted species of Cactaceae, Portulacaceae and Anacampserotaceae. Reconciling against this checklist, and not relying on the names in GenBank records, reduces inconsistencies from outdated names, spelling variants and unresolved synonymy.
+
+The checklist is not distributed with the package, because the terms under which it was obtained do not allow its redistribution. A user requests it from the team of Caryophyllales.org (<https://caryophyllales.org>; Korotkova *et al*. 2021, *Willdenowia* 51(2): 251–270), saves the Excel workbook locally and sets its path in `~/.Renviron` as `PHYLOCACTUS_CHECKLIST`; `phylocactus_checklist()` returns that path to every module that reads the checklist (Korotkova *et al*. 2021) and stops with this instruction when the variable is not set. The reference run read the checklist (Korotkova *et al*. 2021) of 2026-07-01, `CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`, md5 `0ab7855cef6fe7db0e0105646d5fee08`. Caryophyllales.org updates the checklist (Korotkova *et al*. 2021), so a copy obtained later can change the species counts; `phylocactus_checklist()` warns when the md5 of the file read differs from that of the reference run.
 
 Locus selection is controlled by `target_genes.txt`, which lists the markers targeted during retrieval; the default list contains loci commonly used in Cactaceae phylogenetics and can be edited or replaced. Gene names are standardized with `genes_map.csv`, a dictionary of synonymous gene names found in GenBank, so that the same locus is recognized under the different names used by independent studies. Both files are separate from the package code, so the workflow can be adapted to other groups or marker sets without modifying the package.
 
@@ -115,7 +117,8 @@ outgroup_assembly <- assemble_outgroup_phylotar(
 )
 
 # Load the accepted species checklist
-checklist_path <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
+# Path of the local checklist (Korotkova et al. 2021), from PHYLOCACTUS_CHECKLIST in ~/.Renviron
+checklist_path <- phylocactus_checklist()
 if (file.exists(checklist_path)) {
   sheets <- readxl::excel_sheets(checklist_path)
   checklist_sheets <- sheets[!grepl("^facts", sheets, ignore.case = TRUE)]
@@ -235,7 +238,7 @@ integrate_and_clean_markers(
   ingroup_dir = "3_Saturation/filtered_markers",
   outgroup_dir = "2_MAFFT_Outgroup/alignments",
   output_dir = "4_Cleaned",
-  accepted_list_file = system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus"),
+  accepted_list_file = phylocactus_checklist(),
   metadata_in_file = "1_phylotaR_out_Ingroup/TABLE_ACCESSION_OCCUPANCY_INGROUP_CLEAN.csv",
   metadata_out_file = "1_phylotaR_out_Outgroup/TABLE_ACCESSION_OCCUPANCY_OUTGROUP_CLEAN.csv",
   # The two phylotaR runs cluster independently, so the same region can carry different names.

@@ -61,7 +61,8 @@ assemble_barcoding_dataset(
   genes_map_file = system.file("extdata", "genes_map.csv", package = "PhyloCactus"),
   manual_exclusions_file = system.file("extdata", "manual_exclusions_ingroup.csv", package = "PhyloCactus"),
   apply_manual_exclusions = TRUE,
-  checklist_path = system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus"),
+  # The checklist (Korotkova et al. 2021) is read from the local path in PHYLOCACTUS_CHECKLIST
+  checklist_path = phylocactus_checklist(),
   min_species = 50,
   preferred_parent = "3593",
   force_download = FALSE,
@@ -336,7 +337,7 @@ lib_records$genus <- sub("_.*$", "", lib_records$species)
 
 # Accepted species of the checklist (Korotkova et al. 2021) and the genera with a native species in
 # Chile (sheet Facts_Cactaceae)
-checklist_file <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
+checklist_file <- phylocactus_checklist()
 accepted <- as.data.frame(readxl::read_excel(checklist_file, sheet = "Cactaceae"))
 accepted <- unique(gsub(" ", "_", accepted$pureName[accepted$RANK %in% "Species"]))
 accepted_genus <- table(sub("_.*$", "", accepted))

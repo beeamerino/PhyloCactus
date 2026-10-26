@@ -31,8 +31,20 @@ The trees are compared with the Robinson-Foulds distance (Robinson & Foulds 1981
 
 #### Reference Trees
 
-The four reference trees are distributed with the package in `inst/extdata/`, so the comparison runs without downloads: Amaral *et al*. (2022), Thompson *et al*. (2024), Zuntini *et al*. (2024), and a species tree estimated with `ASTRAL-III` from the gene trees of de Vos *et al*. (2025).
-Paths to external software and to data downloaded by the user are read from environment variables.
+The four reference trees are those of Amaral *et al*. (2022), Thompson *et al*. (2024) and Zuntini *et al*. (2024), and a species tree estimated with `ASTRAL-III` from the gene trees of de Vos *et al*. (2025).
+They are not distributed with the package: the licences of three of them are not established, and one route serves the four.
+The user obtains each tree from its source, saves the four in one folder under the names below, and sets the path of the folder in `~/.Renviron` as `PHYLOCACTUS_REFERENCE_TREES`.
+The comparison also reads the checklist of Cactaceae (Korotkova *et al*. 2021) from the local path in `PHYLOCACTUS_CHECKLIST` (`phylocactus_checklist()`; Tutorial 1).
+
+| File in the folder | Study | Source (DOI of the study) | File of the study |
+|---|---|---|---|
+| `reference_amaral_2022.tree` | Amaral *et al*. (2022) | <https://doi.org/10.1016/j.biocon.2022.109677> | `Tree_80MD.tre` |
+| `reference_thompson_2024.tree` | Thompson *et al*. (2024) | <https://doi.org/10.1038/s41467-024-51666-2> | `ultra_cacti_JT.tre` |
+| `reference_zuntini_2024.tree` | Zuntini *et al*. (2024) | <https://doi.org/10.1038/s41586-024-07324-0> | the Cactaceae of the Kew Tree of Life, release 4.0 |
+| `reference_devos_2025_astral.tree` | de Vos *et al*. (2025) | <https://doi.org/10.1007/s00606-025-01948-z> | `ASTRAL-III` species tree from the gene trees of the study (below) |
+
+Figure 1 and Table 1 of this page are drawn from the outputs of the reference run distributed with the package (the tree-space coordinates and the pairwise distances), so the page is built without the reference trees and without the checklist (Korotkova *et al*. 2021).
+Paths to external software and to data obtained by the user are read from environment variables.
 
 #### Species Tree from the Gene Trees of de Vos *et al*. (2025)
 
@@ -49,11 +61,14 @@ Shared scripts then contain no local paths.
 
 ```{r, eval = FALSE}
 # Add these lines to your ~/.Renviron file (e.g., using usethis::edit_r_environ())
+# PHYLOCACTUS_REFERENCE_TREES="/path/to/reference_trees"
+# PHYLOCACTUS_CHECKLIST="/path/to/CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx"
 # ASTRAL_PATH="/path/to/astral.5.7.8.jar"
 # DEVOS_GENETREES_PATH="/path/to/QC.bestTreeCollapsed.trees"
 # DEVOS_METADATA_PATH="/path/to/606_2025_1948_MOESM1_ESM.csv"
 
 # Read them in R:
+reference_dir <- Sys.getenv("PHYLOCACTUS_REFERENCE_TREES")
 astral_jar <- Sys.getenv("ASTRAL_PATH")
 gene_trees_file <- Sys.getenv("DEVOS_GENETREES_PATH")
 metadata_file <- Sys.getenv("DEVOS_METADATA_PATH")
@@ -65,10 +80,10 @@ de Vos *et al*. (2025) sequenced the Angiosperms353 loci.
 The reference tree used here is the `ASTRAL-III` species tree estimated from their gene trees, after the tip labels are converted to species names with the sample metadata of the study.
 
 The chunk below renames the tips of the gene trees, writes them to a file, and runs `ASTRAL-III`.
-With `run_astral_locally <- FALSE`, the default, it copies the precomputed tree distributed with the package instead.
+With `run_astral_locally <- FALSE`, the default, it copies the species tree saved in the folder of reference trees instead.
 Output files are written to a temporary directory; change `val_dir` to keep them.
 
-```{r}
+```{r, eval = FALSE}
 # Target output paths in the validation directory
 val_dir <- file.path(tempdir(), "10_Validation")
 dir.create(val_dir, recursive = TRUE, showWarnings = FALSE)
@@ -123,8 +138,8 @@ if (run_astral_locally && nzchar(astral_jar) && file.exists(astral_jar) &&
                "-o", shQuote(output_tree), "2>/dev/null")
   system(cmd)
 } else {
-  # Copy the precomputed de Vos et al. (2025) species tree distributed with the package
-  ref_devos <- system.file("extdata", "reference_devos_2025_astral.tree", package = "PhyloCactus")
+  # Copy the de Vos et al. (2025) species tree saved in the folder of reference trees
+  ref_devos <- file.path(Sys.getenv("PHYLOCACTUS_REFERENCE_TREES"), "reference_devos_2025_astral.tree")
   file.copy(ref_devos, output_tree, overwrite = TRUE)
 }
 ```
@@ -150,34 +165,35 @@ The Module 10 chronogram is rooted on Talinaceae, but the family filter removes 
 The genus can be changed with `rooting_genus`; trees without it are left unrooted and flagged in `SUPP_rooting_summary`.
 Because RF and DPI are computed on unrooted trees, the rooting affects only the exported tree files, not the distances or the tree-space projection.
 
-**Trees compared.** The four reference trees are read from `inst/extdata/`, where they are distributed with the package. The focal tree is the chronogram produced in Module 10, `8_Dating/dated_summary_hpd.tree`. When that file is absent, as when this tutorial is run on its own, the reference chronogram distributed with the package (`phylocactus_chronogram_hpd.tree`) is used instead.
+**Trees compared.** The four reference trees are read from the folder in `PHYLOCACTUS_REFERENCE_TREES`. The focal tree is the chronogram produced in Module 10, `8_Dating/dated_summary_hpd.tree`. When that file is absent, as when this tutorial is run on its own, the reference chronogram distributed with the package (`phylocactus_chronogram_hpd.tree`) is used instead.
 
-```{r, fig.width=11.69, fig.height=8.27, warning=FALSE, message=FALSE, fig.cap="**Figure 1.** Tree space of the focal chronogram and the four published phylogenies: classical MDS of the normalized Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4); trees close together have similar topologies."}
+The chunk below runs the comparison on the user's machine. Figure 1 and Table 1 are then drawn from the tree-space coordinates and the pairwise distances of the reference run, distributed with the package (`phylocactus_table_tree_space.csv`, `phylocactus_table_tree_distances.csv`); `plot_tree_space()` draws the figure that `validate_phylogenies()` returns.
+
+```{r, eval = FALSE}
 library(PhyloCactus)
 
-# The focal tree is the chronogram of this run; the reference trees are distributed with the package.
+# The focal tree is the chronogram of this run; the reference trees and the checklist are read from
+# local paths (PHYLOCACTUS_REFERENCE_TREES, PHYLOCACTUS_CHECKLIST).
 focal_tree <- file.path("8_Dating", "dated_summary_hpd.tree")
 if (!file.exists(focal_tree)) {
   focal_tree <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")
 }
+reference_dir <- Sys.getenv("PHYLOCACTUS_REFERENCE_TREES")
 tree_paths <- list(
   FocalTree   = focal_tree,
-  Zuntini     = system.file("extdata", "reference_zuntini_2024.tree", package = "PhyloCactus"),
-  Thompson    = system.file("extdata", "reference_thompson_2024.tree", package = "PhyloCactus"),
-  Amaral      = system.file("extdata", "reference_amaral_2022.tree", package = "PhyloCactus"),
-  deVos       = system.file("extdata", "reference_devos_2025_astral.tree", package = "PhyloCactus")
+  Zuntini     = file.path(reference_dir, "reference_zuntini_2024.tree"),
+  Thompson    = file.path(reference_dir, "reference_thompson_2024.tree"),
+  Amaral      = file.path(reference_dir, "reference_amaral_2022.tree"),
+  deVos       = file.path(reference_dir, "reference_devos_2025_astral.tree")
 )
 
 # Drop trees whose files are missing
-existing_trees <- tree_paths[sapply(tree_paths, function(x) file.exists(x) && nzchar(x))]
+existing_trees <- tree_paths[sapply(tree_paths, function(x) nzchar(x) && file.exists(x))]
 
-plot_to_show <- NULL
-table_to_show <- NULL
-
-if(length(existing_trees) > 1) {
-  checklist_file   <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
+if (length(existing_trees) > 1) {
+  checklist_file   <- phylocactus_checklist()
   constraints_file <- system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus")
-  
+
   # validate_phylogenies() harmonizes tip names, computes RF and DPI distances,
   # and projects them into tree space.
   validation_outputs <- validate_phylogenies(
@@ -186,22 +202,24 @@ if(length(existing_trees) > 1) {
     constraints_map = constraints_file,
     out_dir = file.path(tempdir(), "10_Validation")
   )
-  
-  plot_to_show <- validation_outputs$plot
-  
-  dist_table <- read.csv(file.path(validation_outputs$tables, "TABLE_pairwise_tree_distances_main.csv"))
-  table_to_show <- head(dist_table)
+  validation_outputs$plot
 } else {
-  message("Please upload the reference trees to inst/extdata/ to run the full validation.")
+  message("Set PHYLOCACTUS_REFERENCE_TREES to the folder of the reference trees to run the validation.")
 }
+```
 
-plot_to_show
+```{r, fig.width=11.69, fig.height=8.27, warning=FALSE, message=FALSE, fig.cap="**Figure 1.** Tree space of the focal chronogram and the four published phylogenies: classical MDS of the normalized Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4); trees close together have similar topologies."}
+library(PhyloCactus)
+
+# Tree-space coordinates of the reference run (SUPP_tree_space_coordinates.csv of Module 13)
+tree_space <- read.csv(system.file("extdata", "phylocactus_table_tree_space.csv", package = "PhyloCactus"))
+plot_tree_space(tree_space, metric = "RF")
 ```
 
 ```{r, echo=FALSE}
-if (!is.null(table_to_show)) {
-  knitr::kable(table_to_show, caption = "Table 1. Pairwise tree distances: normalized RF and DPI for each pair of trees and taxon set (first rows).")
-}
+# Pairwise distances of the reference run (TABLE_pairwise_tree_distances_main.csv of Module 13)
+dist_table <- read.csv(system.file("extdata", "phylocactus_table_tree_distances.csv", package = "PhyloCactus"))
+knitr::kable(head(dist_table), caption = "Table 1. Pairwise tree distances: normalized RF and DPI for each pair of trees and taxon set (first rows).")
 ```
 
 `TABLE_pairwise_tree_distances_main.csv` lists the distances for every pair of trees and every taxon set, and `FIG_tree_space_main.pdf` shows the tree-space projections.

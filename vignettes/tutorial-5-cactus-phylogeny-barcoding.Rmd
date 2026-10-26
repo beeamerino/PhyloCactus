@@ -100,7 +100,7 @@ assemble_barcoding_dataset(
   genes_map_file = system.file("extdata", "genes_map.csv", package = "PhyloCactus"),
   manual_exclusions_file = system.file("extdata", "manual_exclusions_ingroup.csv", package = "PhyloCactus"),
   apply_manual_exclusions = TRUE,
-  checklist_path = system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus"),
+  checklist_path = phylocactus_checklist(),
   min_species = 50,
   preferred_parent = "3593",
   force_download = FALSE,

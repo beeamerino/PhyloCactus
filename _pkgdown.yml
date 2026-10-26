@@ -46,6 +46,7 @@ reference:
   desc: Verify nomenclatural spelling, audit duplicates, and reconcile species names
     against accepted botanical checklists.
   contents:
+  - phylocactus_checklist
   - clean_taxonomic_names
   - integrate_and_clean_markers
 - title: Multiple Alignment, DECIPHER Cleaners, & Masking
@@ -100,7 +101,9 @@ reference:
 - title: Topological Validation & Tree Space Projections
   desc: Quantify topological congruence across comparative trees using Robinson-Foulds
     distances and multidimensional tree-space projections.
-  contents: validate_phylogenies
+  contents:
+  - validate_phylogenies
+  - plot_tree_space
 - title: Publication Integration & Clade Summaries
   desc: Map branch support values, collapse poorly supported nodes into soft polytomies
     (`integrate_publication_tree`), and export figures.
@@ -110,6 +113,7 @@ reference:
     IUCN color scales to phylogenetic trees.
   contents:
   - get_iucn_data
+  - summarise_iucn_registry
   - scale_fill_iucn
   - phylocactus_colours
   - phylocactus_panel_tags

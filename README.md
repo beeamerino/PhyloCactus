@@ -92,6 +92,12 @@ The following programs must be installed and available on the system `PATH`, or 
 | [`minimap2`](https://github.com/lh3/minimap2) | Mapping of the library loci onto an assembly (identification from an assembly only) | Li (2018) *Bioinformatics* |
 | [`samtools`](https://github.com/samtools/samtools) | Extraction of the mapped regions (identification from an assembly only) | Danecek *et al*. (2021) *GigaScience* |
 
+## Data Obtained by the User
+
+The checklist of Cactaceae of Caryophyllales.org (Korotkova *et al*. 2021, *Willdenowia* 51(2): 251–270) is not distributed with the package, because the terms under which it was obtained do not allow its redistribution. Request it from the team of Caryophyllales.org (<https://caryophyllales.org>) and set the path of the Excel workbook in `~/.Renviron` as `PHYLOCACTUS_CHECKLIST`; `phylocactus_checklist()` returns it to every module that reads the checklist (Korotkova *et al*. 2021). The reference run read the checklist (Korotkova *et al*. 2021) of 2026-07-01, `CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`, md5 `0ab7855cef6fe7db0e0105646d5fee08`; a copy obtained later can give other species counts, and `phylocactus_checklist()` warns when the md5 differs.
+
+The four published trees compared in Tutorial 4 are read from the folder in `PHYLOCACTUS_REFERENCE_TREES` (sources in Tutorial 4), and the IUCN Red List assessments of Tutorial 3 are retrieved with the user's own token (`IUCN_REDLIST_KEY`). The package distributes the IUCN Red List category of each species and counts by country, threat class and habitat class, not the assessments.
+
 ## Documentation
 
 | Tutorial | Content |

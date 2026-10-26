@@ -41,12 +41,17 @@ dir.create("9_Visualization/tables", showWarnings = FALSE, recursive = TRUE)
 # ============================================================
 species_file <- "6_Concatenated/final_tables/TABLE_final_species_alignment_summary.csv"
 output_file <- "9_Visualization/tables/TABLE_species_all_data.csv"
+# Version of the Red List and date of access of the assessments in output_file (reference run:
+# 2026-1, 2026-10-15). A new extraction below sets them from rredlist::rl_version() and today.
+iucn_redlist_version <- "2026-1"
+iucn_access_date <- "2026-10-15"
 prioritization_file <- "9_Visualization/tables/TABLE_conservation_prioritization_gaps.csv"
 marker_stats_file <- "6_Concatenated/final_tables/TABLE_marker_statistics.csv"
 marker_ranges_file <- "6_Concatenated/final_tables/TABLE_marker_ranges.tsv"
 
 # Canonical inputs that do not change across runs
-accepted_list_file <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
+# The checklist (Korotkova et al. 2021) is read from the local path in PHYLOCACTUS_CHECKLIST
+accepted_list_file <- phylocactus_checklist()
 constraints_csv_path <- system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus")
 
 # Tree outputs from Modules 9 and 10
@@ -172,6 +177,8 @@ if (file.exists(output_file)) {
   species_summary_iucn <- species_summary %>%
     left_join(iucn_data, by = "species_clean")
   write_csv(species_summary_iucn, output_file)
+  iucn_redlist_version <- rredlist::rl_version()
+  iucn_access_date <- format(Sys.Date())
 }
 
 # ============================================================
@@ -188,6 +195,25 @@ TABLE_conservation_prioritization_gaps <- species_summary_iucn %>%
 
 write_csv(TABLE_conservation_prioritization_gaps, prioritization_file)
 message("Conservation prioritization table written with ", nrow(TABLE_conservation_prioritization_gaps), " priority taxa.")
+
+# Endemic ingroup species in the tree with their countries (a table of this run, not distributed)
+TABLE_endemic_species <- species_summary_iucn %>%
+  filter(iucn_is_endemic == TRUE, in_ml_tree == TRUE, is_ingroup == TRUE) %>%
+  select(species, iucn_category, iucn_endemic_locations)
+write_csv(TABLE_endemic_species, "9_Visualization/tables/TABLE_endemic_species.csv")
+
+# ============================================================
+# CATEGORY OF EACH SPECIES AND COUNTS (the tables the package distributes)
+# ============================================================
+# The assessments are Red List Data and stay on this machine (IUCN Red List Terms of Use v3.1,
+# section 4). The registry keeps the category of each species (section 3); endemism, threats and
+# habitats are counted. Figures 14 to 17 and the endemism row of Table 1 are drawn from the counts.
+iucn_tables <- summarise_iucn_registry(output_file,
+                                       redlist_version = iucn_redlist_version,
+                                       access_date = iucn_access_date,
+                                       output_dir = "9_Visualization/tables")
+iucn_endemic_by_country <- iucn_tables$endemic_by_country
+iucn_classes <- iucn_tables$classes
 
 # ============================================================
 # LOAD DATA FOR FIGURES
@@ -230,7 +256,7 @@ TABLE_dataset_summary <- tibble(
     sum(species_summary_iucn$is_ingroup & (is.na(species_summary_iucn$iucn_found) | species_summary_iucn$iucn_found == FALSE), na.rm = TRUE),
     sum(species_summary_iucn$status_pipeline == "sampled_and_dated" & species_summary_iucn$iucn_category %in% c("VU", "EN", "CR"), na.rm = TRUE),
     sum(species_summary_iucn$status_pipeline == "unsampled_checklist_gap" & species_summary_iucn$iucn_category %in% c("VU", "EN", "CR"), na.rm = TRUE),
-    sum(species_summary_iucn$in_ml_tree & species_summary_iucn$is_ingroup & species_summary_iucn$iucn_is_endemic == TRUE, na.rm = TRUE)
+    iucn_classes$n[iucn_classes$field == "endemic_species_in_tree"]
   )
 )
 write_csv(TABLE_dataset_summary, "9_Visualization/tables/TABLE_dataset_summary.csv")
@@ -571,18 +597,13 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     
   # FIGURE 14: Endemism by Country
   message("Rendering Figure 14 (Endemism by Country)...")
-  TABLE_endemic_species <- species_summary_iucn %>%
-    filter(iucn_is_endemic == TRUE, in_ml_tree == TRUE, is_ingroup == TRUE) %>%
-    select(species, iucn_category, iucn_endemic_locations)
-  write_csv(TABLE_endemic_species, "9_Visualization/tables/TABLE_endemic_species.csv")
-
-  plot_data_endimism <- species_summary_iucn %>%
-    filter(iucn_is_endemic == TRUE, in_ml_tree == TRUE, is_ingroup == TRUE) %>%
-    separate_rows(iucn_endemic_locations, sep = "; ") %>%
-    count(iucn_endemic_locations, sort = TRUE) %>%
+  plot_data_endemism <- iucn_endemic_by_country %>%
+    group_by(country) %>%
+    summarise(n = sum(n)) %>%
+    arrange(desc(n)) %>%
     slice_max(n, n = 20)
 
-  p14 <- ggplot(plot_data_endimism, aes(x = reorder(iucn_endemic_locations, n), y = n)) +
+  p14 <- ggplot(plot_data_endemism, aes(x = reorder(country, n), y = n)) +
     geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
     coord_flip() +
     theme_phylocactus(base_size = 12) +
@@ -591,14 +612,12 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
   
   # FIGURE 15: IUCN Categories by Country (Endemic)
   message("Rendering Figure 15 (IUCN Categories by Country)...")
-  plot_iucn_country <- species_summary_iucn %>%
-    filter(iucn_is_endemic == TRUE, in_ml_tree == TRUE, is_ingroup == TRUE, !is.na(iucn_endemic_locations)) %>%
-    separate_rows(iucn_endemic_locations, sep = "; ") %>%
-    count(iucn_endemic_locations, iucn_category)
-  top_countries <- plot_data_endimism$iucn_endemic_locations
-  plot_iucn_country <- plot_iucn_country %>% filter(iucn_endemic_locations %in% top_countries)
+  top_countries <- plot_data_endemism$country
+  plot_iucn_country <- iucn_endemic_by_country %>%
+    filter(country %in% top_countries) %>%
+    select(country, iucn_category, n)
   if (nrow(plot_iucn_country) > 0) {
-    p15 <- ggplot(plot_iucn_country, aes(x = factor(iucn_endemic_locations, levels = rev(top_countries)), y = n, fill = iucn_category)) +
+    p15 <- ggplot(plot_iucn_country, aes(x = factor(country, levels = rev(top_countries)), y = n, fill = iucn_category)) +
       geom_col(width = 0.7) +
       coord_flip() +
       PhyloCactus::scale_fill_iucn(name = "IUCN Category") +
@@ -609,13 +628,13 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
 
   # FIGURE 16: Primary Ecological Threats
   message("Rendering Figure 16 (Primary Ecological Threats)...")
-  plot_threats <- species_summary_iucn %>%
-    filter(!is.na(iucn_threat_names), in_ml_tree == TRUE, is_ingroup == TRUE) %>%
-    separate_rows(iucn_threat_names, sep = "; ") %>%
-    count(iucn_threat_names, sort = TRUE) %>%
+  plot_threats <- iucn_classes %>%
+    filter(field == "threat") %>%
+    select(class, n) %>%
+    arrange(desc(n)) %>%
     slice_max(n, n = 15)
   if (nrow(plot_threats) > 0) {
-    p16 <- ggplot(plot_threats, aes(x = reorder(iucn_threat_names, n), y = n)) +
+    p16 <- ggplot(plot_threats, aes(x = reorder(class, n), y = n)) +
       geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
       coord_flip() +
       theme_phylocactus(base_size = 12) +
@@ -625,13 +644,13 @@ if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
     
   # FIGURE 17: Primary Ecological Habitats
   message("Rendering Figure 17 (Primary Ecological Habitats)...")
-  plot_habitats <- species_summary_iucn %>%
-    filter(!is.na(iucn_habitat_names), in_ml_tree == TRUE, is_ingroup == TRUE) %>%
-    separate_rows(iucn_habitat_names, sep = "; ") %>%
-    count(iucn_habitat_names, sort = TRUE) %>%
+  plot_habitats <- iucn_classes %>%
+    filter(field == "habitat") %>%
+    select(class, n) %>%
+    arrange(desc(n)) %>%
     slice_max(n, n = 15)
   if (nrow(plot_habitats) > 0) {
-    p17 <- ggplot(plot_habitats, aes(x = reorder(iucn_habitat_names, n), y = n)) +
+    p17 <- ggplot(plot_habitats, aes(x = reorder(class, n), y = n)) +
       geom_col(fill = phylocactus_colours("neutral")[["mark"]], width = 0.7) +
       coord_flip() +
       theme_phylocactus(base_size = 12) +

@@ -26,8 +26,17 @@ dir.create("10_Validation/logs", recursive = TRUE, showWarnings = FALSE)
 # Reference Phylogenies and Optional ASTRAL-III Re-inference
 # -------------------------------------------------------------
 # The reference trees (Amaral et al. 2022, Thompson et al. 2024, Zuntini et al. 2024,
-# and de Vos et al. 2025) are distributed in inst/extdata/. Re-estimating the
-# de Vos et al. (2025) species tree from its gene trees requires ASTRAL-III and Java:
+# and de Vos et al. 2025) are not distributed with the package. Obtain each from its
+# source (table in Tutorial 4), save the four in one folder and set its path in ~/.Renviron:
+# - PHYLOCACTUS_REFERENCE_TREES="/path/to/reference_trees", holding
+#   reference_amaral_2022.tree      Amaral et al. 2022, doi:10.1016/j.biocon.2022.109677 (Tree_80MD.tre)
+#   reference_thompson_2024.tree    Thompson et al. 2024, doi:10.1038/s41467-024-51666-2 (ultra_cacti_JT.tre)
+#   reference_zuntini_2024.tree     Zuntini et al. 2024, doi:10.1038/s41586-024-07324-0 (Cactaceae of the
+#                                   Kew Tree of Life, release 4.0)
+#   reference_devos_2025_astral.tree  de Vos et al. 2025, doi:10.1007/s00606-025-01948-z (ASTRAL-III
+#                                   species tree from the gene trees of the study, Module 13a)
+# - PHYLOCACTUS_CHECKLIST, the checklist of Korotkova et al. (2021) (Tutorial 1).
+# Re-estimating the de Vos et al. (2025) species tree from its gene trees requires ASTRAL-III and Java:
 # - Set ASTRAL_PATH in ~/.Renviron (e.g., ASTRAL_PATH="/path/to/astral.5.7.8.jar")
 # - Set DEVOS_GENETREES_PATH and DEVOS_METADATA_PATH for the raw de Vos inputs
 
@@ -106,10 +115,10 @@ if (run_astral_locally && nzchar(astral_jar) && file.exists(astral_jar) &&
   cat("ASTRAL-III execution complete: tree saved to", output_tree, "\n")
 } else {
   cat("External ASTRAL-III binary or raw gene trees not detected.\n")
-  cat("Deploying precalculated de Vos et al. (2025) reference tree to tutorial directory...\n")
-  ref_tree_pkg <- system.file("extdata", "reference_devos_2025_astral.tree", package = "PhyloCactus")
-  file.copy(ref_tree_pkg, output_tree, overwrite = TRUE)
-  file.copy(ref_tree_pkg, "10_Validation/trees/QC.Species_tree_astral.tree", overwrite = TRUE)
+  cat("Copying the de Vos et al. (2025) species tree from the folder of reference trees...\n")
+  ref_tree_local <- file.path(Sys.getenv("PHYLOCACTUS_REFERENCE_TREES"), "reference_devos_2025_astral.tree")
+  file.copy(ref_tree_local, output_tree, overwrite = TRUE)
+  file.copy(ref_tree_local, "10_Validation/trees/QC.Species_tree_astral.tree", overwrite = TRUE)
   cat("De Vos et al. (2025) tree created in tutorial directory:", output_tree, "\n")
 }
 
@@ -118,27 +127,28 @@ if (run_astral_locally && nzchar(astral_jar) && file.exists(astral_jar) &&
 # -------------------------------------------------------------
 cat("\n--- Running Phylogenetic Validation Pipeline ---\n")
 
-# The focal tree is the chronogram of this run (Module 10); the reference trees are distributed
-# with the package. When 8_Dating/ is absent, the reference chronogram distributed with the package
-# is used as the focal tree.
+# The focal tree is the chronogram of this run (Module 10); the reference trees are read from the
+# folder in PHYLOCACTUS_REFERENCE_TREES. When 8_Dating/ is absent, the reference chronogram
+# distributed with the package is used as the focal tree.
 focal_tree <- file.path("8_Dating", "dated_summary_hpd.tree")
 if (!file.exists(focal_tree)) {
   focal_tree <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")
 }
+reference_dir <- Sys.getenv("PHYLOCACTUS_REFERENCE_TREES")
 tree_paths <- list(
   FocalTree   = focal_tree,
-  Zuntini     = system.file("extdata", "reference_zuntini_2024.tree", package = "PhyloCactus"),
-  Thompson    = system.file("extdata", "reference_thompson_2024.tree", package = "PhyloCactus"),
-  Amaral      = system.file("extdata", "reference_amaral_2022.tree", package = "PhyloCactus"),
-  deVos       = system.file("extdata", "reference_devos_2025_astral.tree", package = "PhyloCactus")
+  Zuntini     = file.path(reference_dir, "reference_zuntini_2024.tree"),
+  Thompson    = file.path(reference_dir, "reference_thompson_2024.tree"),
+  Amaral      = file.path(reference_dir, "reference_amaral_2022.tree"),
+  deVos       = file.path(reference_dir, "reference_devos_2025_astral.tree")
 )
 
 # Filter missing trees
-existing_trees <- tree_paths[sapply(tree_paths, function(x) file.exists(x) && nzchar(x))]
+existing_trees <- tree_paths[sapply(tree_paths, function(x) nzchar(x) && file.exists(x))]
 
 if(length(existing_trees) > 1) {
   
-  checklist_file   <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
+  checklist_file   <- phylocactus_checklist()
   constraints_file <- system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus")
   
   validation_outputs <- validate_phylogenies(
@@ -154,5 +164,5 @@ if(length(existing_trees) > 1) {
   
   cat("Validation Complete! Results exported to 10_Validation/\n")
 } else {
-  cat("Insufficient trees found in package extdata to run full validation pipeline.\n")
+  cat("Fewer than two trees found: set PHYLOCACTUS_REFERENCE_TREES to the folder of the reference trees.\n")
 }

@@ -43,7 +43,7 @@ distributed with the package, as in \code{\link[=assemble_ingroup_phylotar]{asse
 \item{apply_manual_exclusions}{Logical. Apply the curated exclusions? Defaults to \code{TRUE}.}
 
 \item{checklist_path}{Character. Accepted checklist (Korotkova \emph{et al}. 2021); \code{NULL}, the default,
-uses the checklist distributed with the package. \code{NA} applies no checklist and keeps every
+uses the local copy named by \code{phylocactus_checklist()}. \code{NA} applies no checklist and keeps every
 GenBank name, cleaned to \code{Genus_species}: that is what the outgroup of the outgroup control needs, since a
 checklist of Cactaceae would discard every outgroup name.}
 

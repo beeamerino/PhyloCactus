@@ -377,7 +377,7 @@ barcoding_outgroup_taxids <- function() {
 #'   `inst/extdata/manual_exclusions_ingroup.csv`.
 #' @param apply_manual_exclusions Logical. Apply the curated exclusions? Defaults to `TRUE`.
 #' @param checklist_path Character. Accepted checklist (Korotkova *et al*. 2021); `NULL`, the default,
-#'   uses the checklist distributed with the package. `NA` applies no checklist and keeps every
+#'   uses the local copy named by `phylocactus_checklist()`. `NA` applies no checklist and keeps every
 #'   GenBank name, cleaned to `Genus_species`: that is what the outgroup of the outgroup control needs, since a
 #'   checklist of Cactaceae would discard every outgroup name.
 #' @param min_species Integer. A cluster is retained when it holds more than this number of species.
@@ -465,7 +465,7 @@ assemble_barcoding_dataset <- function(wd_path,
   if (is.null(manual_exclusions_file)) manual_exclusions_file <- system.file("extdata", "manual_exclusions_ingroup.csv", package = "PhyloCactus")
   # NULL keeps the checklist of Cactaceae, the default of the ingroup.
   # NA is the way to ask for no checklist at all, which is what the outgroup control needs.
-  if (is.null(checklist_path)) checklist_path <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
+  if (is.null(checklist_path)) checklist_path <- phylocactus_checklist()
   if (is.null(phylogeny_map_file)) {
     phylogeny_map_file <- file.path(dirname(normalizePath(wd_path, mustWork = FALSE)), "1_phylotaR_out_Ingroup",
                                     "TABLE_CLUSTER_MARKER_ASSIGNMENT_INGROUP.csv")
