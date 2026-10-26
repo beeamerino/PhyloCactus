@@ -4,9 +4,12 @@
 # removed with the outgroups (19 species of the tree of Zuntini et al. 2024 and 2 of the tree of
 # de Vos et al. 2025 in the run of Phase 12). Written before the code.
 
+# The checklist is not distributed with the package (closure of 0.5.2, phase 2): the test of the real
+# file runs where PHYLOCACTUS_CHECKLIST names it, and the synthetic workbook of testdata/ covers the
+# reader everywhere else (test-distributed-data-0-5-3.R).
 .ff_checklist <- function() {
-  f <- system.file("extdata", "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus")
-  skip_if(!nzchar(f), "checklist not installed")
+  f <- Sys.getenv("PHYLOCACTUS_CHECKLIST")
+  skip_if(!nzchar(f) || !file.exists(f), "PHYLOCACTUS_CHECKLIST is not set")
   f
 }
 

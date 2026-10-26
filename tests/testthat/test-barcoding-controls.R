@@ -512,7 +512,7 @@ test_that("the assembly keeps the GenBank names when no checklist is given, and 
   expect_equal(with_list, c(NA, NA, "Opuntia_robusta"))
   # And the default of the assembly is still the Cactaceae checklist, not NULL
   expect_null(formals(assemble_barcoding_dataset)$checklist_path)
-  expect_match(deparse(body(assemble_barcoding_dataset)), "CactaceaeFullList", all = FALSE)
+  expect_match(deparse(body(assemble_barcoding_dataset)), "phylocactus_checklist()", fixed = TRUE, all = FALSE)
 })
 
 test_that("step 8 writes the three control tables, labels CN3, and names the step that is missing", {
