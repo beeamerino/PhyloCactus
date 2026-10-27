@@ -241,6 +241,10 @@ A plastome or an assembly holds most loci of the library, a Sanger record one; y
 
 The rates below were measured with the library of this version, built from GenBank alone on 2026-10-13, with the species thresholds of step 9 and `rbcL` at genus rank only. They belong to this library: as GenBank enriches it, they are measured again and are expected to change.
 
+The estimate to expect for a new sample comes from records that did not set the rules. Of 94 Sanger records from outside the library (named at subspecies or variety, or with no species name, so left out of the mining), identified one by one, none was named at species rank: 48 were answered at the right genus and 46 not at all (5 with no locus found). Where IdTaxa reached the right species, it did so under the species threshold (`below_species_threshold`), as in example 1. Of 23 specimens with several of these records, 17 were answered at the right genus, 5 not at all, and 1 at a wrong species (example 4).
+
+The table below measures the library against its own records. The species thresholds of step 9 (the 0.95 quantile of the species confidence over the folds of this library) and the rule that `rbcL` answers at genus rank only (decided on these same queries, where 11 of 34 of its species answers were right) were set on the library they are evaluated on, and the records of that library are the queries of the first row, so that row favours them. Read per answer and not per query, 59 of the 207 species answers of the first row are wrong (28.5 %), at the mix of this measurement (2304 queries of species present, 2507 of species absent); the share changes with that mix.
+
 Outcomes, in the order species correct / genus correct / no answer / conflict / wrong species / wrong genus (number of queries). A species is "present" when the library holds it once the records of the query's own specimen are set aside.
 
 | Input | Unit | Species present | Species absent |
@@ -249,8 +253,6 @@ Outcomes, in the order species correct / genus correct / no answer / conflict / 
 | Sanger records of one GenBank specimen | specimen | 6 / 52 / 99 / 0 / 1 / 0 (158) | 0 / 22 / 19 / 0 / 1 / 0 (42) |
 | GenBank plastome | plastome | 3 / 51 / 26 / 1 / 1 / 11 (93) | 0 / 2 / 0 / 1 / 0 / 1 (4) |
 | Illumina reads (genome skims) | run | 1 / 2 / 1 / 0 / 0 / 0 (4) | 0 / 1 / 2 / 0 / 0 / 0 (3) |
-
-Records from outside the library are a harder query than library records with their own specimen set aside. Of 94 Sanger records from outside the library (named at subspecies or variety, or with no species name, so left out of the mining), identified one by one, none was named at species rank: 48 were answered at the right genus and 46 not at all (5 with no locus found). Where IdTaxa reached the right species, it did so under the species threshold (`below_species_threshold`), as in example 1. Of 23 specimens with several of these records, 17 were answered at the right genus, 5 not at all, and 1 at a wrong species (example 4).
 
 The genus is the answer to expect from this version. A species is named rarely, mostly from `matK` and from plastomes; abstention is the most common answer, and a wrong species is rare but possible.
 

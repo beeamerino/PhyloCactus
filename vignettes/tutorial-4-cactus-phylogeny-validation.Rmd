@@ -165,6 +165,27 @@ The Module 10 chronogram is rooted on Talinaceae, but the family filter removes 
 The genus can be changed with `rooting_genus`; trees without it are left unrooted and flagged in `SUPP_rooting_summary`.
 Because RF and DPI are computed on unrooted trees, the rooting affects only the exported tree files, not the distances or the tree-space projection.
 
+**The constraint.** The focal tree was inferred under the topological constraint of Module 8 (Tutorial 2), so part of its agreement with each reference is imposed by the constraint and not found by the data. On each shared taxon set, 12 to 17 of the bipartitions the focal tree shares with a reference are imposed by the constraint: 27 to 37 % of the shared bipartitions in the small sets A1 and A4, where the deep splits weigh most, and 5 to 8 % in the large sets of Thompson *et al*. (2024) and Amaral *et al*. (2022). The table below gives, for the reference run, the published RF beside the RF without the constrained bipartitions, removed from both trees of the pair. Every distance rises, by 0.010 to 0.100; for example, the RF of A1 against Zuntini *et al*. (2024) rises from 0.254 to 0.312. The order of the references by distance does not change in A1, A2 and A3, and in A4 Zuntini *et al*. (2024) and Thompson *et al*. (2024) exchange places (0.470 and 0.467). DPI cannot be split this way, because it gives partial credit across bipartitions, and is reported with the constraint only. Tutorial 2 weighs the constrained bipartitions absent from each reference by the support of the reference clades that contradict them: the two nuclear trees contradict none at the level of a tribe with support, while Amaral *et al*. (2022) contradicts with support three relationships at that level, the position of Rhipsalideae in core Cactoideae II (bootstrap 87), Tephrocacteae with Opuntieae (100) and core Cactoideae I with II (99).
+
+| Set | Reference | Shared terminals | Imposed and in the reference | RF | RF without the constrained bipartitions |
+|---|---|---|---|---|---|
+| A1 | Zuntini | 66 | 14 | 0.254 | 0.312 |
+| A1 | Thompson | 66 | 12 | 0.381 | 0.449 |
+| A1 | Amaral | 66 | 12 | 0.429 | 0.510 |
+| A1 | de Vos | 66 | 14 | 0.270 | 0.333 |
+| A2 | Thompson | 620 | 14 | 0.554 | 0.564 |
+| A2 | Amaral | 620 | 17 | 0.645 | 0.661 |
+| A3 | Zuntini | 119 | 15 | 0.440 | 0.490 |
+| A3 | Thompson | 734 | 14 | 0.628 | 0.638 |
+| A3 | Amaral | 631 | 17 | 0.678 | 0.696 |
+| A3 | de Vos | 88 | 15 | 0.353 | 0.420 |
+| A4 | Zuntini | 78 | 15 | 0.387 | 0.470 |
+| A4 | Thompson | 78 | 12 | 0.413 | 0.467 |
+| A4 | Amaral | 78 | 14 | 0.493 | 0.593 |
+| A4 | de Vos | 78 | 14 | 0.360 | 0.424 |
+
+**What each reference can test.** The tree of Zuntini *et al*. (2024) is built on a constrained backbone of at most five samples per family, so its deep relationships within Cactaceae are not an independent test of the constraint (Tutorial 2). The tree of Thompson *et al*. (2024) carries no support values and its chronogram is not independent of Ramírez-Barahona *et al*. (2020), whose ages anchor the chronogram of this package; it is a comparison tree only, and a distance to it says nothing on the support of a conflict.
+
 **Trees compared.** The four reference trees are read from the folder in `PHYLOCACTUS_REFERENCE_TREES`. The focal tree is the chronogram produced in Module 10, `8_Dating/dated_summary_hpd.tree`. When that file is absent, as when this tutorial is run on its own, the reference chronogram distributed with the package (`phylocactus_chronogram_hpd.tree`) is used instead.
 
 The chunk below runs the comparison on the user's machine. Figure 1 and Table 1 are then drawn from the tree-space coordinates and the pairwise distances of the reference run, distributed with the package (`phylocactus_table_tree_space.csv`, `phylocactus_table_tree_distances.csv`); `plot_tree_space()` draws the figure that `validate_phylogenies()` returns.

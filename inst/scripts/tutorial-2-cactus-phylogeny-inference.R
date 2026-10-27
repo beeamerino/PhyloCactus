@@ -480,6 +480,9 @@ for (i in seq_len(nrow(calibs))) {
 #      node and not on the deepest split of the tree.
 #   3. ACP_root is monophyletic. If the likelihood placed Talinaceae inside the ACP clade, the
 #      anchor would be addressing something other than the node it was written for.
+# Lines 1 and 3 assert relationships that the constraint imposes: Talinaceae is a constrained clade, and
+# in the unrooted tree its bipartition is that of the ACP clade. They cannot fail on a constrained
+# run; they guard the rooting and the node of the anchor, not a result of the data.
 stopifnot(ape::is.monophyletic(rooted_ml, grep("^(Talinum|Talinella)_", tip_labels, value = TRUE)))
 acp_tips <- tips_for("Family", "Cactaceae;Anacampserotaceae;Portulacaceae")
 stopifnot(ape::getMRCA(rooted_ml, acp_tips) != root_node)
