@@ -66,8 +66,10 @@ configuration, so every intermediate lands here.}
 }
 \value{
 Invisibly, a list with \code{smoothing}, \code{cv_table}, \code{cv_at_edge}, \code{cv_shape},
-\code{prime_lines}, \code{primes}, \code{tree_file} (the chronogram written) and the paths of the three
-configurations.
+\code{cv_failures} (per smoothing value, the subsamples evaluated and how many failed; \code{NULL} when
+the log carries no per-subsample line), \code{cv_smoothing_without_failures} (see the section on
+failed subsamples below), \code{prime_lines}, \code{primes}, \code{tree_file} (the chronogram written) and the
+paths of the three configurations.
 }
 \description{
 Runs the three stages of the \code{treePL} protocol of Maurin (2020) (priming, cross-validation and
@@ -105,6 +107,24 @@ than 1\% in chi-square and lie within 1\% of the minimum. Values on the plateau 
 equally well, so the selected value is a nominal choice among them; report node ages across the
 plateau with \code{\link[=report_smoothing_sensitivity]{report_smoothing_sensitivity()}}. Reported as a message.
 }
+}
+
+\section{Failed subsamples}{
+
+Under \code{randomcv}, \code{treePL} writes in the log of the cross-validation (\verb{cv_<label>.log}) the
+running chi-square sum after each random subsample. A subsample whose contribution is 1e+30 or
+more has failed, and the total at that smoothing value is then of the same order, so the value
+drops out of the selection. The function counts the failed subsamples at every value and warns
+when one or more failed at any value of 0.1 or below, the part of the grid where a selection
+falls in practice: the warning names each such value with how many of how many subsamples failed
+there, says whether the selected value is among them, and names the smoothing with the lowest
+chi-square among the values of 0.1 or below at which no subsample failed, which is also returned
+as \code{cv_smoothing_without_failures}. Values above 0.1 are left out because they fail under most
+seeds on the reference dataset and are never selected there. On that dataset, two of five seeds
+lost one subsample at values next to 1e-05 and selected 1e-02 and 1e-08, while the reference seed
+lost none at 0.1 or below and selected 1e-05. The running sum is printed with eight significant
+digits, so the chi-square of the subsamples after a failure cannot be recovered from the log, and
+the count of failures is a lower bound.
 }
 
 \references{

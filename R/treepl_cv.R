@@ -166,6 +166,103 @@
   list(smoothing = best, table = tab, at_edge = at_edge, shape = shape)
 }
 
+#' Count the failed random subsamples of a treePL cross-validation
+#'
+#' Under `randomcv`, treePL prints in its log, for each smoothing value, the running chi-square sum
+#' after each random subsample (`(chisq): v`) and then the total. The contribution of a subsample is
+#' the difference between consecutive sums, and a subsample has failed when it adds `fail_at` or
+#' more: in the probes of the closure of 0.5.2 a failed subsample added 1e+36 to 1e+41, against
+#' totals of 30 to 1200 where none failed. The sum is printed with eight significant digits, so a
+#' failure hides the contributions of the subsamples after it, and a later failure smaller than the
+#' first by more than eight orders of magnitude is not seen; the count is a lower bound. A
+#' `smoothing:` block without subsamples (treePL ends the log with the fit at the selected value)
+#' is not read.
+#'
+#' @param cv_log Path to the log of the cross-validation stage.
+#' @param fail_at Contribution at or above which a subsample is counted as failed.
+#' @return A data frame with `smoothing`, `subsamples` and `failed`, in ascending order of
+#'   smoothing, or `NULL` when the log is absent or carries no per-subsample line.
+#' @keywords internal
+#' @noRd
+.read_cv_subsamples <- function(cv_log, fail_at = 1e30) {
+  if (!file.exists(cv_log)) return(NULL)
+  x <- readLines(cv_log, warn = FALSE)
+  start <- grep("^\\s*smoothing\\s*:", x)
+  rows <- lapply(seq_along(start), function(i) {
+    end <- if (i < length(start)) start[i + 1L] - 1L else length(x)
+    b <- x[start[i]:end]
+    run <- suppressWarnings(as.numeric(sub("^\\s*\\(chisq\\)\\s*:\\s*", "",
+                                           grep("^\\s*\\(chisq\\)\\s*:", b, value = TRUE))))
+    run <- run[is.finite(run)]
+    if (!length(run)) return(NULL)
+    data.frame(smoothing = suppressWarnings(as.numeric(sub("^\\s*smoothing\\s*:\\s*", "", b[1L]))),
+               subsamples = length(run), failed = sum(diff(c(0, run)) >= fail_at))
+  })
+  out <- do.call(rbind, rows)
+  if (is.null(out)) return(NULL)
+  out <- out[is.finite(out$smoothing), , drop = FALSE]
+  out <- out[order(out$smoothing), , drop = FALSE]
+  rownames(out) <- NULL
+  out
+}
+
+#' Warn on the failed subsamples of a cross-validation at the values it can select
+#'
+#' A smoothing value at which a subsample failed carries a total chi-square of the order of the
+#' failure, so it drops out of the selection, and the value selected is then the minimum over the
+#' values that survived. Seeds 20260919 and 8675309 of the cross-validation probe of the closure of
+#' 0.5.2 lost one subsample at 1e-07 to 1e-04 and at 1e-05 to 1e-03 and selected 1e-02 and 1e-08,
+#' with no message. Values above `max_smoothing` are left out: every seed of that probe failed in
+#' four to seven subsamples at 10 and above, and no run read then selected a value above 0.1.
+#'
+#' @param failures The table of `.read_cv_subsamples()`, or `NULL`.
+#' @param cv_table The cross-validation table of `.select_cv_smoothing()`.
+#' @param selected The selected smoothing value.
+#' @param label Run label, for the message.
+#' @param max_smoothing Largest smoothing value checked.
+#' @return A list with `failures` (as given) and `smoothing_without_failures`, the value with the
+#'   lowest chi-square among those of `max_smoothing` or below at which no subsample failed (`NA`
+#'   when there is none or the log could not be read).
+#' @keywords internal
+#' @noRd
+.check_cv_subsamples <- function(failures, cv_table, selected, label, max_smoothing = 0.1) {
+  if (is.null(failures) || nrow(failures) == 0L) {
+    message("The cross-validation log of '", label, "' carries no per-subsample chi-square, so ",
+            "failed subsamples were not checked.")
+    return(list(failures = failures, smoothing_without_failures = NA_real_))
+  }
+  same <- function(a, b) match(signif(a, 6), signif(b, 6))
+  low <- failures[failures$smoothing <= max_smoothing * (1 + 1e-9), , drop = FALSE]
+  ok <- cv_table[!is.na(same(cv_table$smoothing, low$smoothing[low$failed == 0L])), , drop = FALSE]
+  best_ok <- if (nrow(ok)) ok$smoothing[which.min(ok$chisq)] else NA_real_
+  bad <- low[low$failed > 0L, , drop = FALSE]
+  if (nrow(bad)) {
+    bad <- bad[order(-bad$smoothing), , drop = FALSE]
+    fmt <- function(v) vapply(v, function(s) format(s, digits = 6), character(1))
+    each <- paste0(fmt(bad$smoothing), " (", bad$failed, " of ", bad$subsamples,
+                   c(" subsamples", rep("", nrow(bad) - 1L)), ")")
+    listed <- if (length(each) == 1L) each else
+      paste0(paste(each[-length(each)], collapse = ", "), " and ", each[length(each)])
+    among <- !is.na(same(selected, bad$smoothing))
+    warning("The cross-validation of '", label, "' failed in part: at smoothing ", listed,
+            ", a random subsample returned a chi-square of ", format(1e30), " or more. A value with a ",
+            "failed subsample carries a total of that order, so the selection falls on the values ",
+            "without failures whenever there are any. The selected value, ", fmt(selected), ", ",
+            if (among) "is among them. " else "is not among them. ",
+            if (is.na(best_ok)) {
+              paste0("A subsample failed at every value of ", fmt(max_smoothing), " or below. ")
+            } else {
+              paste0("The smoothing with the lowest chi-square among the values of ", fmt(max_smoothing),
+                     " or below at which no subsample failed is ", fmt(best_ok), " (chi-square ",
+                     format(ok$chisq[which.min(ok$chisq)], digits = 8), "). ")
+            },
+            "Repeating the cross-validation with another `seed` shows whether the selection depends on ",
+            "the subsamples drawn; the failures per value are in `cv_failures` of the result.",
+            call. = FALSE)
+  }
+  list(failures = failures, smoothing_without_failures = best_ok)
+}
+
 #' Prime, Cross-Validate and Date a Tree with treePL
 #'
 #' Runs the three stages of the `treePL` protocol of Maurin (2020) (priming, cross-validation and
@@ -219,8 +316,10 @@
 #'   configuration, so every intermediate lands here.
 #' @param quiet Suppress the per-stage progress messages.
 #' @return Invisibly, a list with `smoothing`, `cv_table`, `cv_at_edge`, `cv_shape`,
-#'   `prime_lines`, `primes`, `tree_file` (the chronogram written) and the paths of the three
-#'   configurations.
+#'   `cv_failures` (per smoothing value, the subsamples evaluated and how many failed; `NULL` when
+#'   the log carries no per-subsample line), `cv_smoothing_without_failures` (see the section on
+#'   failed subsamples below), `prime_lines`, `primes`, `tree_file` (the chronogram written) and the
+#'   paths of the three configurations.
 #' @section Shape of the cross-validation curve:
 #' The selected smoothing value is the one with the lowest chi-square. `cv_shape` reports what that
 #' value means, and a message or warning states it when the function runs:
@@ -232,6 +331,21 @@
 #'   than 1% in chi-square and lie within 1% of the minimum. Values on the plateau fit the data about
 #'   equally well, so the selected value is a nominal choice among them; report node ages across the
 #'   plateau with [report_smoothing_sensitivity()]. Reported as a message.
+#' @section Failed subsamples:
+#' Under `randomcv`, `treePL` writes in the log of the cross-validation (`cv_<label>.log`) the
+#' running chi-square sum after each random subsample. A subsample whose contribution is 1e+30 or
+#' more has failed, and the total at that smoothing value is then of the same order, so the value
+#' drops out of the selection. The function counts the failed subsamples at every value and warns
+#' when one or more failed at any value of 0.1 or below, the part of the grid where a selection
+#' falls in practice: the warning names each such value with how many of how many subsamples failed
+#' there, says whether the selected value is among them, and names the smoothing with the lowest
+#' chi-square among the values of 0.1 or below at which no subsample failed, which is also returned
+#' as `cv_smoothing_without_failures`. Values above 0.1 are left out because they fail under most
+#' seeds on the reference dataset and are never selected there. On that dataset, two of five seeds
+#' lost one subsample at values next to 1e-05 and selected 1e-02 and 1e-08, while the reference seed
+#' lost none at 0.1 or below and selected 1e-05. The running sum is printed with eight significant
+#' digits, so the chi-square of the subsamples after a failure cannot be recovered from the log, and
+#' the count of failures is a lower bound.
 #' @references
 #' Maurin, K. J. L. (2020). An empirical guide for producing a dated phylogeny with treePL in a
 #' maximum likelihood framework. *arXiv*:2008.07054. \doi{10.48550/arXiv.2008.07054}
@@ -334,6 +448,7 @@ run_treePL_cv <- function(cfg_file, tree_file, label,
   sel <- .select_cv_smoothing(cv_out)
   say("  Smoothing selected: ", format(sel$smoothing, scientific = FALSE),
       " (lowest chi-square of ", nrow(sel$table), " values; curve shape: ", sel$shape, ")")
+  failed <- .check_cv_subsamples(.read_cv_subsamples(cv_log), sel$table, sel$smoothing, label)
 
   # ---- Stage 3: dating --------------------------------------------------------------------------
   # `smooth`, never `smoothing`. run_treePL_direct() confirms against treePL's own log that the
@@ -349,7 +464,8 @@ run_treePL_cv <- function(cfg_file, tree_file, label,
   .validate_treepl_output(out_tree, label)
 
   invisible(list(smoothing = sel$smoothing, cv_table = sel$table, cv_at_edge = sel$at_edge,
-                 cv_shape = sel$shape,
+                 cv_shape = sel$shape, cv_failures = failed$failures,
+                 cv_smoothing_without_failures = failed$smoothing_without_failures,
                  prime_lines = prime_lines, primes = primes,
                  tree_file = normalizePath(out_tree, mustWork = TRUE),
                  prime_cfg = prime_cfg, cv_cfg = cv_cfg, smooth_cfg = smooth_cfg))

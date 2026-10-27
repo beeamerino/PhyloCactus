@@ -337,7 +337,9 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL, treepl_bin = "treePL"
 #' @param cv_method `"randomcv"`, recommended by Maurin (2020) as faster and more stable, or `"cv"`
 #'   for leave-one-out.
 #' @param cvstart,cvstop Ends of the cross-validation smoothing grid, 1e+03 and 1e-14 by default.
-#'   See [run_treePL_cv()] for how the shape of the resulting curve is classified and reported.
+#'   See [run_treePL_cv()] for how the shape of the resulting curve is classified and reported,
+#'   and for the warning on failed random subsamples, which is repeated here when the
+#'   maximum-likelihood stage is read from disk.
 #' @param ml_tree_file Character. Path to input maximum-likelihood reference tree file.
 #' @param bs_trees_file Character. Path to input temporal bootstrap trees file.
 #' @param results_dir Character. Directory path to save intermediate optimization results.
@@ -659,9 +661,17 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
   # instead, the same classification is repeated here on the stored curve.
   cv_file <- file.path(ml_dir, "cv_ML_tree")
   if (ml_cached && file.exists(cv_file)) {
-    tryCatch(invisible(.select_cv_smoothing(cv_file)),
-             error = function(e) message("The cross-validation curve on disk could not be ",
-                                         "classified: ", conditionMessage(e)))
+    cv_sel <- tryCatch(.select_cv_smoothing(cv_file),
+                       error = function(e) {
+                         message("The cross-validation curve on disk could not be ",
+                                 "classified: ", conditionMessage(e))
+                         NULL
+                       })
+    # The failed subsamples are counted from the log on disk as run_treePL_cv() counts them.
+    if (!is.null(cv_sel)) {
+      .check_cv_subsamples(.read_cv_subsamples(file.path(ml_dir, "cv_ML_tree.log")),
+                           cv_sel$table, best_smoothing, "ML_tree")
+    }
   }
   
   # STEP 4: Prepare and rescale Bootstrap Trees (from concatenated)

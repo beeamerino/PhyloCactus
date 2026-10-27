@@ -71,7 +71,9 @@ reproduce the run.}
 for leave-one-out.}
 
 \item{cvstart, cvstop}{Ends of the cross-validation smoothing grid, 1e+03 and 1e-14 by default.
-See \code{\link[=run_treePL_cv]{run_treePL_cv()}} for how the shape of the resulting curve is classified and reported.}
+See \code{\link[=run_treePL_cv]{run_treePL_cv()}} for how the shape of the resulting curve is classified and reported,
+and for the warning on failed random subsamples, which is repeated here when the
+maximum-likelihood stage is read from disk.}
 
 \item{cv_nthreads}{Integer. Number of threads for the cross-validation stage. Defaults to \code{1L},
 which makes the cross-validation curve reproducible for a given \code{seed}. See \code{\link[=run_treePL_cv]{run_treePL_cv()}}.}
