@@ -241,7 +241,7 @@ The second branch of the package, molecular identification by DNA barcoding, bui
 - Kubatko & Degnan 2007. Inconsistency of phylogenetic estimates from concatenated data under coalescence. *Systematic Biology*, 56(1), 17–24. <https://doi.org/10.1080/10635150601146041>
 - Robinson & Foulds 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1–2), 131–147. <https://doi.org/10.1016/0025-5564(81)90043-2>
 - Smith 2020. Information theoretic generalized Robinson–Foulds metrics for comparing phylogenetic trees. *Bioinformatics*, 36(20), 5007–5013. <https://doi.org/10.1093/bioinformatics/btaa614>
-- Thompson *et al*. 2024. Identifying the multiple drivers of cactus diversification. *Nature Communications*, 15(1), 7114. <https://doi.org/10.1038/s41467-024-51666-2>
+- Thompson *et al*. 2024. Identifying the multiple drivers of cactus diversification. *Nature Communications*, 15(1), 7282. <https://doi.org/10.1038/s41467-024-51666-2>
 - Zhang *et al*. 2018. ASTRAL-III: polynomial time species tree reconstruction from partially resolved gene trees. *BMC Bioinformatics*, 19(Suppl 6), 153. <https://doi.org/10.1186/s12859-018-2129-y>
 - Zuntini *et al*. 2024. Phylogenomics and the rise of the angiosperms. *Nature*, 629, 843–850. <https://doi.org/10.1038/s41586-024-07324-0>
 

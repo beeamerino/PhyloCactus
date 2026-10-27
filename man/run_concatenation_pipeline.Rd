@@ -47,7 +47,7 @@ run_concatenation_pipeline(
   output_dir = "6_Concatenated"
 )
 
-# A dating matrix without the nuclear locus that carries no outgroup coverage.
+# A dating matrix without the nuclear locus whose outgroup sequences are of uncertain homology.
 run_concatenation_pipeline(
   input_dir = "5_MAFFT_Cleaned/aligned_markers",
   output_dir = "6_Concatenated_dating",

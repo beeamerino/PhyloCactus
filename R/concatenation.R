@@ -92,7 +92,7 @@
 #'   output_dir = "6_Concatenated"
 #' )
 #'
-#' # A dating matrix without the nuclear locus that carries no outgroup coverage.
+#' # A dating matrix without the nuclear locus whose outgroup sequences are of uncertain homology.
 #' run_concatenation_pipeline(
 #'   input_dir = "5_MAFFT_Cleaned/aligned_markers",
 #'   output_dir = "6_Concatenated_dating",
@@ -192,8 +192,9 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
   marker_clean <- sub("^Masked_", "", marker_raw)
 
   # A locus can be worth keeping for one purpose and disqualifying for another. phyC resolves
-  # Cactaceae for barcoding and carries no Portulacaceae, so in a dating matrix it adds columns
-  # that only one side of the root can occupy. The alignment stays in `input_dir`; the exclusion
+  # Cactaceae for barcoding, but only 0.196 of its outgroup 20-mers occur in its ingroup sequences,
+  # so in a dating matrix it adds columns of uncertain homology to the divergences among the families
+  # of the outgroup and Cactaceae. The alignment stays in `input_dir`; the exclusion
   # is declared at the call site, named in the log and written to disk, so the composition of the
   # supermatrix is readable from the run alone rather than from whichever files happened to be
   # in the folder.

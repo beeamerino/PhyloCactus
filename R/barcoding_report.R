@@ -394,7 +394,7 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
 #' of the named genus in the library; (5) how far to trust each locus: the wrong-species rates of the validation and
 #' the per-genus discrimination of [summarise_barcoding_genus_discrimination()]; (6) sampling of the
 #' named genera in the library; (7) reads; (8) library, models and software; (9) limits. The figures
-#' follow Zeng et al. (2026, New Phytologist). The three identification functions call it at the end;
+#' follow Zeng et al. (2026). The three identification functions call it at the end;
 #' a report can be rebuilt from saved tables.
 #'
 #' @param run_name Character. The run.
@@ -405,6 +405,10 @@ summarise_barcoding_genus_discrimination <- function(classifier_dir = file.path(
 #' @param output_dir Character. Where the report is written; `results_dir` by default.
 #' @return Invisibly, the paths of the HTML reports.
 #' @seealso [identify_barcoding_query()], [identify_barcoding_assembly()], [identify_barcoding_reads()].
+#' @references
+#' Zeng, C.-X., Zhou, M.-Y., Twyford, A. D., et al. (2026). Plant species identification by genome
+#' skimming across the vascular plant tree of life. *New Phytologist*, 252(1), 488-502.
+#' \doi{10.1111/nph.71494}
 #' @examples
 #' \dontrun{
 #' report_barcoding_identification("query")
@@ -618,9 +622,11 @@ report_barcoding_identification <- function(run_name,
     s8 <- paste0("<p>Names follow the Cactaceae checklist of Korotkova et al. (2021, Willdenowia 51(2): 251-270). ",
                  "Sources of the library: phylotaR clusters of GenBank records and, where present, loci cut from GenBank plastomes.</p>",
                  .bc_html_table(lib_sum), .bc_html_table(rec[rec$kind %in% c("library", "model", "software", "setting"), , drop = FALSE]))
-    s9 <- paste0("<p>Standard plant barcodes resolve about half of the species, complete plastomes a little more, and a part of ",
-                 "species is not resolvable by any of them, because of hybridisation, incomplete lineage sorting and species that ",
-                 "are evolutionary grades, not clades (Zeng et al., 2026, New Phytologist). In Cactaceae the plastid loci ",
+    s9 <- paste0("<p>In 475 species of 32 genera of vascular plants, standard plant barcodes resolved 49.3 % of the species ",
+                 "and complete plastomes 57.6 % (Zeng, C.-X., Zhou, M.-Y., Twyford, A. D., et al. 2026. Plant species ",
+                 "identification by genome skimming across the vascular plant tree of life. New Phytologist 252(1): 488-502. ",
+                 "doi:10.1111/nph.71494). Some species cannot be resolved by any of these loci, for example where hybridisation ",
+                 "or incomplete lineage sorting leaves a species non-monophyletic at them. In Cactaceae the plastid loci ",
                  "vary little within genera and many species have one sequence or none in the library (section 6). A state 3 is ",
                  "not evidence that the species is absent from the library; a state 1 relies on the species being in it. If the ",
                  "query comes from a specimen already in the library, its answer is not an independent test.</p>")

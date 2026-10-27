@@ -679,7 +679,7 @@ process_marker_file <- function(
 #' \doi{10.1093/molbev/mst010}
 #'
 #' Wright, E. S. (2024). Fast and Flexible Search for Homologous Biological Sequences with DECIPHER v3.
-#' *The R Journal*, 16(2), 191-200. \doi{10.18129/B9.bioc.DECIPHER}
+#' *The R Journal*, 16(2), 191-200. \doi{10.32614/RJ-2024-022}
 #' @examples
 #' \dontrun{
 #' run_alignment_pipeline(

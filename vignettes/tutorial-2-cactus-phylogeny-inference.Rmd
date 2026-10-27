@@ -272,7 +272,7 @@ The **`map_branch_supports()`** function maps the bootstrap support onto the max
 
 Nodes imposed by the constraint (`cactus_constraints.tree`) are recovered in every bootstrap replicate by construction and receive a support of 1.000. That value reproduces the constraint and does not measure support from the data; these nodes are reported as constrained in publication tables.
 
-The weak support of the backbone is a lack of signal, not a finding about the history of the clades. Outside the 34 constrained nodes, clades of 51 to 200 terminals have a median FBP of 0.080; the supermatrix is 76.9% gaps, and 214 of the 1208 terminals are represented by a single locus, whose parent nodes have a median FBP of 0.52, against 0.58 for terminals with two loci or more. These nodes are soft polytomies: the data do not resolve them, and they do not show a simultaneous divergence of lineages (a hard polytomy), which only more loci could test.
+The weak support of the backbone is a lack of signal, not a finding about the history of the clades. Outside the 34 constrained nodes, clades of 51 to 200 terminals have a median FBP of 0.080; the supermatrix is 76.9% gaps, and 214 of the 1208 terminals are represented by a single locus, whose parent nodes have a median FBP of 0.495, against 0.58 for terminals with two loci or more. These nodes are soft polytomies: the data do not resolve them, and they do not show a simultaneous divergence of lineages (a hard polytomy), which only more loci could test.
 
 #### Temporal Bootstrap Replicates for Divergence Time Estimation
 
@@ -322,6 +322,8 @@ if (run_local_bs) {
     partition_file = paths$best_models,
     constraint_file = paths$constraint_tree,
     outgroup = rooting_outgroup,
+    # Base of the seeds of the reference run: task i of the array runs with seed i * 2150.
+    base_seed = 2150,
     # --- SLURM & HPC Resource Configuration ---
     cluster_job_name = "cactus_bs",
     cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
@@ -431,6 +433,7 @@ if (run_local_temporal_bs) {
     best_tree_file = paths$best_tree,
     outgroup = rooting_outgroup,
     bs_trees = 500,
+    base_seed = 87786,                                # Seed of the reference run
     threads = 40,
     workers = 10,
     threads_per_worker = 4L,
@@ -463,7 +466,7 @@ Internal calibrations are crown ages of Opuntioideae, Cactoideae and Cacteae fro
 
 Cactaceae lack a macrofossil record suitable for calibrating internal nodes. The deepest calibration is therefore a secondary age from the angiosperm-wide chronogram of Ramírez-Barahona *et al.* (2020), `RC_complete` scheme. With Talinaceae sampled to root the tree, the calibrated node is:
 
-- `ACP_root`: Constrains the crown divergence of the Anacampserotaceae + Portulacaceae + **Cactaceae** clade (corresponding to the stem node of Portulacaceae in Ramírez-Barahona *et al.*, 2020). The primary calibration scheme (Scheme S1) applies a fixed point of 41.82 Ma (the median stem age under BEAST relaxed clock), with alternative sensitivity schemes available in `calibrations_bounds.csv` (Scheme S2: 95% HPD interval [27.81, 53.37] Ma; Scheme S4: 53.22 Ma from Zuntini *et al.*, 2024 young tree).
+- `ACP_root`: Constrains the crown divergence of the Anacampserotaceae + Portulacaceae + **Cactaceae** clade (corresponding to the stem node of Portulacaceae in Ramírez-Barahona *et al.*, 2020). The primary calibration scheme (Scheme S1) applies a fixed point of 41.82 Ma, the median height of the stem node of Portulacaceae on the maximum clade credibility tree of the `RC_complete` BEAST analysis (`Data4_Ages.xlsx`, column `Stem_BEAST`), with alternative sensitivity schemes available in `calibrations_bounds.csv` (Scheme S2: 95% HPD interval [27.81, 53.37] Ma; Scheme S4: 53.22 Ma from Zuntini *et al.*, 2024 young tree).
 - `Cactaceae_Anacampserotaceae_stem` ([21.95, 48.51] Ma) is retained in `calibrations_bounds.csv` with `used_in_analysis = FALSE`, because it assumes that Cactaceae and Anacampserotaceae are sisters. The maximum-likelihood tree recovers Anacampserotaceae and Portulacaceae as sisters (FBP 81; the node is not constrained), as do Zuntini *et al.* (2024).
 - `ACPT_root` ([33.28, 59.86] Ma, Ramírez-Barahona *et al.*, 2020) is retained with `used_in_analysis = FALSE`. The root of the chronogram is the crown of the ACPT clade, so the deepest node of the tree is not calibrated: its age of 45.53 Ma is extrapolated above the fixed calibration and depends on the smoothing value. It falls inside the published interval, which is a consistency check and not a constraint. Activating the bound would add a second calibration on the deepest node and would be a different analysis.
 
@@ -475,19 +478,21 @@ The **`automate_treePL()`** function runs the dating: it prepares the maximum-li
 
 Following Maurin (2020), the optimization parameters and the smoothing value are selected on the maximum-likelihood tree and applied unchanged to every temporal replicate. Repeating the cross-validation for each replicate is computationally prohibitive; as a consequence, the confidence intervals do not include uncertainty in the smoothing value.
 
-The temporal replicates of Module 9 are then dated with those parameters.
+100 of the 500 temporal replicates, drawn at random with the seed of the run (`num_bs = 100`, `seed`), are then dated with those parameters; `num_bs = NULL` dates all of them.
 
 The dated replicates give the distribution of each node age, from which the confidence intervals are obtained.
+
+`treePL` does not accept a branch shorter than one expected substitution over the alignment. When it read the maximum-likelihood tree of the reference run, it set 563 branches (300 of them terminal) to that minimum, 0.0073 in the rescaled units (100 / 13 700 sites), and lists each one in its log (`cv_ML_tree.log`, "tiny branch length at ... setting to 0.0072992701"). These are near-zero branches, such as those leading to identical or nearly identical composite terminals, which therefore receive a small nonzero duration in the chronogram. The effect of this on the ages of the shallowest nodes has not been measured.
 
 This is the longest step that runs on the local machine, and it has no scheduler to send a notification. With `notify_email <- TRUE` in the SETUP block, `automate_treePL()` sends an email when the run ends, with its status, start and end times, elapsed time, host, output paths and, if the run failed, the R error. This requires `MY_EMAIL` in `.Renviron` and a `blastula` credentials file created with `blastula::create_smtp_creds_file()`; `PhyloCactus` passes the path of that file to `blastula` and does not read it. A notification that cannot be sent is reported and does not fail the run. See `?send_run_notification`.
 
 #### Summarizing Dated Temporal Bootstrap Replicates
 
-The dated replicates are summarized with `TreeAnnotator` (Helfrich *et al.*, 2018), following Maurin (2020).
+The dated replicates are summarized with `TreeAnnotator`, the summary program of BEAST 2 (Bouckaert *et al.*, 2019; Heled & Bouckaert, 2013), following Maurin (2020).
 
 All replicates share the maximum-likelihood topology, so the summary estimates the distribution of node ages and does not compare topologies.
 
-`TreeAnnotator` is run with a maximum sum of clade credibilities target tree, mean node heights, and 0% burn-in. It computes the mean age of each node and its interval across the dated replicates.
+`TreeAnnotator` is run with the settings of Maurin (2020): the maximum clade credibility tree as target tree, mean node heights, and 0% burn-in. All dated replicates share one topology, so the choice of target tree does not change the ages. It computes the mean age of each node and its interval across the dated replicates.
 
 `TreeAnnotator` labels these intervals as highest posterior density (HPD) intervals because it is written for Bayesian analyses. Here they are confidence intervals from independently dated bootstrap replicates, not posterior distributions.
 
@@ -497,11 +502,11 @@ In penalized likelihood dating, the rate-smoothing parameter ($\lambda$) governs
 
 Cross-validation (`randomcv`) removes subsets of the data, re-estimates rates and times without them, and scores the prediction error of each smoothing value as a chi-square ($\chi^2$); the value with the lowest $\chi^2$ is selected (Maurin, 2020). `automate_treePL()` evaluates one value per order of magnitude from $10^3$ to $10^{-14}$. The meaning of the selected value depends on the shape of the curve, which `run_treePL_cv()` classifies and reports:
 
-1. **Interior minimum.** The curve decreases and then increases within the grid. The lowest value is an optimum, and the chronogram is dated at it.
+1. **Interior minimum.** The curve decreases and then increases within the grid. The chronogram is dated at the lowest value.
 2. **Edge.** The lowest value lies at the end of the grid, and the curve is still decreasing there. The optimum lies beyond the grid; `cvstop` has to be extended and the analysis repeated before any age is interpreted (Maurin, 2020).
 3. **Plateau.** The curve decreases and then levels off, so that smoothing values below a threshold fit the data about equally well. The lowest $\chi^2$ is one of several equivalent values, and node ages have to be reported across the plateau.
 
-The reference dataset produces an interior minimum at $10^{-5}$: the lowest $\chi^2$, 323.09, lies below the values at $10^{-4}$ (326.67) and $10^{-6}$ (326.97). Below $10^{-6}$ the $\chi^2$ stays between 327.73 and 337.26, with reversals; above $10^{-4}$ it rises to 357.32 at $10^{-3}$ and 519.81 at $10^{-2}$. The chronogram is dated at $10^{-5}$, and `report_smoothing_sensitivity()` dates the same tree at values across the grid and beyond it. From $10^{-14}$ to $10^{-2}$ the age of Opuntioideae varies by 0.62 Ma, that of Cactoideae by 0.85 Ma and that of Cacteae by 0.93 Ma. The age of `ACP_root` does not vary, because it is the fixed calibration.
+On the reference dataset the curve has an interior minimum at $10^{-5}$ on one random partition of the data: the lowest $\chi^2$, 323.09, lies 1.1% below the value at $10^{-4}$ (326.67) and 1.2% below that at $10^{-6}$ (326.97). Below $10^{-6}$ the $\chi^2$ stays between 327.73 and 337.26, with reversals; above $10^{-4}$ it rises to 357.32 at $10^{-3}$ and 519.81 at $10^{-2}$. The chronogram is dated at $10^{-5}$, and `report_smoothing_sensitivity()` dates the same tree at values across the grid and beyond it. From $10^{-14}$ to $10^{-2}$ the age of Opuntioideae varies by 0.62 Ma, that of Cactoideae by 0.85 Ma and that of Cacteae by 0.93 Ma. The age of `ACP_root` does not vary, because it is the fixed calibration.
 
 The code for Module 10:
 
@@ -622,7 +627,8 @@ cat("\nRunning automated `treePL` wrapper script over maximum-likelihood tree an
 # The seed fixes every stochastic step of the dating. 79992967 is the seed of the reference run:
 # keep it to reproduce the published chronogram, or change it for an independent run.
 #
-# num_bs = 100 dates 100 temporal bootstrap replicates; num_bs = NULL dates all of them.
+# num_bs = 100 dates 100 of the 500 temporal bootstrap replicates, drawn at random with the seed;
+# num_bs = NULL dates all of them.
 automate_treePL(
   cfg_file = calibrations_cfg_path,
   ml_tree_file = paths$best_tree,
@@ -706,11 +712,13 @@ Tutorial 3 adds IUCN Red List assessments and produces the tree, chronogram and 
 
 - Akaike 1974. A new look at the statistical model identification. *IEEE Transactions on Automatic Control*, 19(6), 716–723. <https://doi.org/10.1109/TAC.1974.1100705>
 - Arakaki *et al*. 2011. Contemporaneous and recent radiations of the world’s major succulent plant lineages. *Proceedings of the National Academy of Sciences of the United States of America*, 108(20), 8379–8384. <https://doi.org/10.1073/pnas.1100628108>
+- Bouckaert *et al*. 2019. BEAST 2.5: an advanced software platform for Bayesian evolutionary analysis. *PLoS Computational Biology*, 15(4), e1006650. <https://doi.org/10.1371/journal.pcbi.1006650>
 - Darriba *et al*. 2020. ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291–294. <https://doi.org/10.1093/molbev/msz189>
 - Felsenstein 1981. Evolutionary trees from DNA sequences: A maximum likelihood approach. *Journal of Molecular Evolution*, 17(6), 368–376. <https://doi.org/10.1007/BF01734359>
-- Flouri *et al*. 2014. The Phylogenetic Likelihood Library. *Systematic Biology*, 64(2), 356–362. <https://doi.org/10.1093/sysbio/syu084>
-- Helfrich *et al*. 2018. TreeAnnotator: versatile visual annotation of hierarchical text relations. *Proceedings of the Eleventh International Conference on Language Resources and Evaluation*. <https://lrec.elra.info/lrec2018-main-308>
+- Flouri *et al*. 2015. The Phylogenetic Likelihood Library. *Systematic Biology*, 64(2), 356–362. <https://doi.org/10.1093/sysbio/syu084>
+- Heled & Bouckaert 2013. Looking for trees in the forest: summary tree from posterior samples. *BMC Evolutionary Biology*, 13, 221. <https://doi.org/10.1186/1471-2148-13-221>
 - Hernández-Hernández *et al*. 2014. Beyond aridification: Multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. *New Phytologist*, 202(4), 1382–1397. <https://doi.org/10.1111/nph.12752>
+- Hurvich & Tsai 1989. Regression and time series model selection in small samples. *Biometrika*, 76(2), 297–307. <https://doi.org/10.1093/biomet/76.2.297>
 - Kozlov *et al*. 2019. RAxML-NG: A fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305>
 - Lemoine *et al*. 2018. Renewing Felsenstein’s phylogenetic bootstrap in the era of big data. *Nature*, 556(7702), 452–456. <https://doi.org/10.1038/s41586-018-0043-0>
 - Maurin 2020. An empirical guide for producing a dated phylogeny with treePL in a maximum likelihood framework. *arXiv preprint arXiv:2008.07054*. <https://doi.org/10.48550/arXiv.2008.07054>
@@ -719,4 +727,5 @@ Tutorial 3 adds IUCN Red List assessments and produces the tree, chronogram and 
 - Robinson & Foulds 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1-2), 131–147. <https://doi.org/10.1016/0025-5564(81)90043-2>
 - Sanderson 2002. Estimating Absolute Rates of Molecular Evolution and Divergence Times: A Penalized Likelihood Approach. *Molecular Biology and Evolution*, 19(1), 101–109. <https://doi.org/10.1093/oxfordjournals.molbev.a003974>
 - Smith & O’Meara 2012. TreePL: Divergence time estimation using penalized likelihood for large phylogenies. *Bioinformatics*, 28(20), 2689–2690. <https://doi.org/10.1093/bioinformatics/bts492>
+- Zuntini *et al*. 2024. Phylogenomics and the rise of the angiosperms. *Nature*, 629(8013), 843–850. <https://doi.org/10.1038/s41586-024-07324-0>
 

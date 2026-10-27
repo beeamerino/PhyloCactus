@@ -44,13 +44,18 @@ so the alternatives are that path when it falls under the threshold and, in stat
 of the named genus in the library; (5) how far to trust each locus: the wrong-species rates of the validation and
 the per-genus discrimination of \code{\link[=summarise_barcoding_genus_discrimination]{summarise_barcoding_genus_discrimination()}}; (6) sampling of the
 named genera in the library; (7) reads; (8) library, models and software; (9) limits. The figures
-follow Zeng et al. (2026, New Phytologist). The three identification functions call it at the end;
+follow Zeng et al. (2026). The three identification functions call it at the end;
 a report can be rebuilt from saved tables.
 }
 \examples{
 \dontrun{
 report_barcoding_identification("query")
 }
+}
+\references{
+Zeng, C.-X., Zhou, M.-Y., Twyford, A. D., et al. (2026). Plant species identification by genome
+skimming across the vascular plant tree of life. \emph{New Phytologist}, 252(1), 488-502.
+\doi{10.1111/nph.71494}
 }
 \seealso{
 \code{\link[=identify_barcoding_query]{identify_barcoding_query()}}, \code{\link[=identify_barcoding_assembly]{identify_barcoding_assembly()}}, \code{\link[=identify_barcoding_reads]{identify_barcoding_reads()}}.

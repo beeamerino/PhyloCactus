@@ -249,7 +249,7 @@ if (run_local_bs) {
     aln_file = paths$analysed_phy,
     part_file = paths$best_models,
     constraint_file = paths$constraint_tree,
-    bs_trees = 700,
+    bs_trees = 500,
     outgroup = rooting_outgroup,
     threads = 8,
     workers = 1,
@@ -263,6 +263,8 @@ if (run_local_bs) {
     partition_file = paths$best_models,
     constraint_file = paths$constraint_tree,
     outgroup = rooting_outgroup,
+    # Base of the seeds of the reference run: task i of the array runs with seed i * 2150.
+    base_seed = 2150,
     # --- SLURM & HPC Resource Configuration ---
     cluster_job_name = "cactus_bs",
     cluster_partition = "main",                        # Partition name (e.g., "main", "standard", "general")
@@ -327,8 +329,9 @@ print(converge_log)
 # EDITORIAL & METHODOLOGICAL NOTE:
 # 1. Primary metric: Felsenstein's Bootstrap Proportions (FBP). This is the canonical metric
 #    reported across published Cactaceae phylogenies (e.g. Hernandez-Hernandez et al. 2014,
-#    Arakaki et al. 2011). TBE systematically inflates support on large clades (median FBP 0.450
-#    vs median TBE 0.772 in unconstrained nodes).
+#    Arakaki et al. 2011). TBE is higher than FBP on large clades: on the 1171 unconstrained nodes
+#    the medians are FBP 0.450 and TBE 0.7725, and on the 39 clades of 51 to 200 terminals FBP 0.080
+#    and TBE 0.930.
 # 2. Secondary metric: Transfer Bootstrap Expectation (TBE; Lemoine et al. 2018), retained as a
 #    complementary assessment of stability in supermatrices with missing data.
 # 3. Constrained nodes warning: The 34 nodes enforced by cactus_constraints.tree exhibit 1.000
@@ -382,6 +385,7 @@ if (run_local_temporal_bs) {
     best_tree_file = paths$best_tree,
     outgroup = rooting_outgroup,
     bs_trees = 500,
+    base_seed = 87786,                                # Seed of the reference run
     threads = 40,
     workers = 10,
     threads_per_worker = 4L,
@@ -521,7 +525,8 @@ cat("\nRunning treePL priming, cross-validation and dating over maximum-likeliho
 # The seed fixes every stochastic step of the dating. 79992967 is the seed of the reference run:
 # keep it to reproduce the published chronogram, or change it for an independent run.
 #
-# num_bs = 100 dates 100 temporal bootstrap replicates; num_bs = NULL dates all of them.
+# num_bs = 100 dates 100 of the 500 temporal bootstrap replicates, drawn at random with the seed;
+# num_bs = NULL dates all of them.
 automate_treePL(
   cfg_file = calibrations_cfg_path,
   ml_tree_file = paths$best_tree,
@@ -579,7 +584,8 @@ if (file.exists(cv_file)) {
 # 10.4 Smoothing sensitivity
 # -------------------------------------------------------------
 # The same tree dated across the grid and beyond it. Read the range of each node from 1e-14 to
-# 1e-02; the reference run selects 1e-05, an interior minimum. At 1 and 10 the calibrated nodes sit on their upper
+# 1e-02; the reference run selects 1e-05, an interior minimum on one random partition of the data,
+# 1.1 % and 1.2 % below its two neighbours. At 1 and 10 the calibrated nodes sit on their upper
 # bounds; that end of the table lies outside the range supported by cross-validation.
 
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")

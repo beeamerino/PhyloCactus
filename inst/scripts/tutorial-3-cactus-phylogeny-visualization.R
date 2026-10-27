@@ -285,7 +285,7 @@ message("Rendering Figure 2 (Marker Completeness)...")
 if ("retained_markers" %in% names(species_summary_iucn)) {
   p2 <- ggplot(species_summary_iucn %>% filter(in_ml_tree == TRUE), aes(x = retained_markers)) +
     geom_histogram(binwidth = 1, fill = phylocactus_colours("neutral")[["mark"]], color = "white") +
-    scale_x_continuous(breaks = seq(1, 11, 1)) +
+    scale_x_continuous(breaks = seq(1, 13, 1)) +
     theme_phylocactus(base_size = 12) +
     labs(title = "Distribution of Marker Completeness", x = "Number of retained markers", y = "Number of species")
   ggsave("9_Visualization/figures/Figure_2_marker_completeness.pdf", p2, width = 7, height = 5)
@@ -442,7 +442,7 @@ if (file.exists(supp_tree_file)) {
   }
 }
 
-# FIGURE 8: Time-Calibrated Chronogram with HPD intervals
+# FIGURE 8: Time-Calibrated Chronogram with the 95% intervals of the dated bootstrap replicates
 message("Rendering Figure 8 (Chronogram)...")
 if (file.exists(chrono_file)) {
   chrono_beast <- treeio::read.beast(chrono_file)

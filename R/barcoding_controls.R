@@ -78,7 +78,7 @@
 #' figure and the honest one, which is what makes the two comparable: run over the whole library,
 #' it would be a different set of queries, and the two figures could not be subtracted. Written with the label `irreproducible_resubstitution` in the table itself, so the
 #' figure cannot travel without it. **Its value is published only next to the honest
-#' figure**, which does not exist yet.
+#' figure**, the rates of the folds of [build_barcoding_folds()] on the same queries.
 #'
 #' @param library_dir Character. Output directory of [finalize_barcoding_library()].
 #' @param folds_dir Character. Output directory of [build_barcoding_folds()].

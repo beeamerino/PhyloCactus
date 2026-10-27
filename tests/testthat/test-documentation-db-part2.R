@@ -69,7 +69,7 @@ test_that("Tutorial 3 states the registry, the tree and the gaps of the Phase 12
   .db2_absent(.db2_script("tutorial-3-cactus-phylogeny-visualization"), "N = 986", "Tutorial 3 script")
   .db2_present(v, c("1,965 accepted species", "1,993 species", "1,218 of them (1,190 ingroup, 28 outgroup)",
                     "1,208 tips (1,180 ingroup, 28 outgroup)", "10 ingroup species", "775 accepted species",
-                    "102 of them", "*Parodia* (18 species), *Melocactus* (14) and *Coleocephalocereus* (7)"),
+                    "102 of them", "*Parodia* (18 species), *Melocactus* (14), *Coleocephalocereus* (7) and *Discocactus* (7)"),
                "Tutorial 3 vignette")
 })
 

@@ -16,7 +16,8 @@ License: GPL (>= 3)
 Encoding: UTF-8
 Depends: R (>= 4.1.0)
 SystemRequirements: MAFFT, RAxML-NG, ModelTest-NG, treePL and BLAST+ for the
-    phylogeny branch; minimap2 and samtools (assemblies), fastp and GetOrganelle
+    phylogeny branch, and TreeAnnotator 2.7.7 (BEAST 2) to summarise the dated
+    replicates; minimap2 and samtools (assemblies), fastp and GetOrganelle
     (sequencing reads) for the identification branch
 Imports:
     tidytree,

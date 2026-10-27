@@ -101,5 +101,5 @@ Improvements in performance and usability. \emph{Molecular Biology and Evolution
 \doi{10.1093/molbev/mst010}
 
 Wright, E. S. (2024). Fast and Flexible Search for Homologous Biological Sequences with DECIPHER v3.
-\emph{The R Journal}, 16(2), 191-200. \doi{10.18129/B9.bioc.DECIPHER}
+\emph{The R Journal}, 16(2), 191-200. \doi{10.32614/RJ-2024-022}
 }

@@ -89,7 +89,7 @@ against its own training set with the query put back into it. Nothing else chang
 figure and the honest one, which is what makes the two comparable: run over the whole library,
 it would be a different set of queries, and the two figures could not be subtracted. Written with the label \code{irreproducible_resubstitution} in the table itself, so the
 figure cannot travel without it. \strong{Its value is published only next to the honest
-figure}, which does not exist yet.
+figure}, the rates of the folds of \code{\link[=build_barcoding_folds]{build_barcoding_folds()}} on the same queries.
 }
 \examples{
 \dontrun{

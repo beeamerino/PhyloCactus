@@ -171,7 +171,8 @@
 #' Under `randomcv`, treePL prints in its log, for each smoothing value, the running chi-square sum
 #' after each random subsample (`(chisq): v`) and then the total. The contribution of a subsample is
 #' the difference between consecutive sums, and a subsample has failed when it adds `fail_at` or
-#' more: in the probes of the closure of 0.5.2 a failed subsample added 1e+36 to 1e+41, against
+#' more: in cross-validations of the reference Cactaceae dataset under five seeds, a failed
+#' subsample added 1e+36 to 1e+41, against
 #' totals of 30 to 1200 where none failed. The sum is printed with eight significant digits, so a
 #' failure hides the contributions of the subsamples after it, and a later failure smaller than the
 #' first by more than eight orders of magnitude is not seen; the count is a lower bound. A
@@ -210,10 +211,10 @@
 #'
 #' A smoothing value at which a subsample failed carries a total chi-square of the order of the
 #' failure, so it drops out of the selection, and the value selected is then the minimum over the
-#' values that survived. Seeds 20260919 and 8675309 of the cross-validation probe of the closure of
-#' 0.5.2 lost one subsample at 1e-07 to 1e-04 and at 1e-05 to 1e-03 and selected 1e-02 and 1e-08,
-#' with no message. Values above `max_smoothing` are left out: every seed of that probe failed in
-#' four to seven subsamples at 10 and above, and no run read then selected a value above 0.1.
+#' values that survived. On the reference Cactaceae dataset, seeds 20260919 and 8675309 lost one
+#' subsample at 1e-07 to 1e-04 and at 1e-05 to 1e-03 and selected 1e-02 and 1e-08, with no message.
+#' Values above `max_smoothing` are left out: every one of five seeds failed in four to seven
+#' subsamples at 10 and above, and none selected a value above 0.1.
 #'
 #' @param failures The table of `.read_cv_subsamples()`, or `NULL`.
 #' @param cv_table The cross-validation table of `.select_cv_smoothing()`.

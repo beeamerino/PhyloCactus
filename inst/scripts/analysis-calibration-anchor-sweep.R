@@ -17,13 +17,21 @@
 # topology-dependent.
 #
 # Why a fixed value and not an interval. treePL takes `min` and `max`; a point age is expressed
-# by setting them equal. With an interval whose upper end the data want to exceed, the analysis
-# reports the bound instead of an estimate: ACP_root returned its maximum in 84 of 100 replicates
-# under the 27.81-53.37 HPD of Ramirez-Barahona et al. (2020). A fixed anchor removes that artifact
-# by construction and states plainly that the node is a scaling decision, not a measurement.
+# by setting them equal. The reason first given for the fixed value, that ACP_root returned the
+# maximum of the 27.81-53.37 HPD interval of Ramirez-Barahona et al. (2020) in 84 of 100
+# replicates, was measured on the 0.4.x tree, rooted on Portulaca without Talinaceae, and does not
+# hold on the 0.5.x tree rooted on Talinaceae: there the interval places ACP_root on a bound in
+# 11 % (first anchor probe of the closure of 0.5.2) and 15 % of the replicates (the probe at the
+# common smoothing 1e-05). The reason that holds on this tree is another. 41.82 Ma is the estimate
+# of the preferred analysis and method of the source (RC_complete, BEAST). Estimating the node
+# inside that source's interval (S2) gives Cactaceae ages that the smoothing alone cannot tell apart
+# from those under S1. The older anchors (67.01 and 79.97 Ma) push the crowns of Cactoideae,
+# Cacteae and Opuntioideae onto the maxima of their internal bounds. S1 stays the main scheme and
+# S2 is reported beside it as the scheme that carries the uncertainty of the source.
 #
 # The four anchors below all address the same biological node, verified in each source:
-#   S1  41.82  Ramirez-Barahona (2020), RC_complete, Portulacaceae Stem_BEAST. Their preferred
+#   S1  41.82  Ramirez-Barahona (2020), RC_complete, Portulacaceae Stem_BEAST, the median height
+#              of the node on the maximum clade credibility tree of that analysis. Their preferred
 #              analysis and their preferred method. Read from Data4_Ages.xlsx.
 #   S3  67.01  Ramirez-Barahona (2020), RC_complete, Portulacaceae Stem_treePL. Same data, same
 #              node, method matched to this study. Their paper does not describe or validate these
@@ -39,8 +47,9 @@
 # this node. S4 and S5 come from a different matrix and a different fossil set but the same method,
 # and the gap between them measures sensitivity to the maximum imposed at the angiosperm crown.
 #
-# Runtime: priming and cross-validation take about eight minutes per scheme and the 100 replicates
-# about ten, so budget roughly twenty minutes per scheme on a comparable machine. Cross-validation
+# Runtime: Module 10 of the reference run took about 37 min on the Mac for these steps under S1,
+# and the cross-validation of S2 alone took 67 min in the anchor probe of the closure of 0.5.2, so
+# budget an hour or more per scheme on a comparable machine. Cross-validation
 # is repeated for every scheme because the optimal smoothing need not be the same under a different
 # anchor.
 # -------------------------------------------------------------

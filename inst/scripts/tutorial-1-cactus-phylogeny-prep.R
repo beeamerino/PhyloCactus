@@ -29,8 +29,9 @@ ingroup_assembly <- assemble_ingroup_phylotar(
   target_genes_file = system.file("extdata", "target_genes.txt", package = "PhyloCactus"),
   genes_map_file = system.file("extdata", "genes_map.csv", package = "PhyloCactus"),
   manual_exclusions_file = system.file("extdata", "manual_exclusions_ingroup.csv", package = "PhyloCactus"),
-  # The exclusion lists are expert curation by the team supporting PhyloCactus: each
-  # accession was inspected and removed on grounds not recoverable from GenBank metadata.
+  # The exclusion lists are curation by the team supporting PhyloCactus. Of the 102 accessions,
+  # 47 state their ground in the reason column; 55 carry only "manual conflict resolution" and were
+  # removed to resolve duplicate assignments of one accession to the clusters of several loci.
   # Stated explicitly so that the curation is visible.
   # Set to FALSE to reproduce the uncurated cluster set and measure what curation removes.
   apply_manual_exclusions = TRUE,
@@ -109,11 +110,13 @@ outgroup_assembly <- assemble_outgroup_phylotar(
 # Nothing downstream catches it. The row looks like a very divergent sequence, or fails
 # the occupancy filter of Module 5 and disappears without explanation.
 #
-# In the reference dataset, the rbcL and matK accessions of Portulaca oleracea and P. pilosa are
-# deposited reversed, and so are 163 ingroup sequences, 77 of psbA-trnH and 86 of rpL16.
-# Uncorrected, they align to nothing, lose occupancy and are removed by the occupancy filter of
-# Module 5, so the curated output shows no reversed sequence. Correcting the strand retains them:
-# psbA_trnH keeps 368 ingroup sequences in place of 296, and rpL16 677 in place of 600.
+# In the reference dataset, the matK accessions of Portulaca oleracea and P. pilosa are deposited
+# reversed, as are outgroup accessions of atpI-atpH and ndhA, and so are 502 ingroup sequences,
+# most of them of rpL16 (156), rpl32-trnL (150), psbA-trnH (126) and psbE-petL (45). Uncorrected,
+# they align to nothing, lose occupancy and are removed by the occupancy filter of Module 5, so the
+# curated output shows no reversed sequence. Correcting the strand retains them: of the ingroup
+# sequences kept in the cleaned alignments, 120 of 690 in rpL16, 119 of 532 in psbA-trnH, 140 of
+# 167 in rpl32-trnL and 40 of 137 in psbE-petL were reverse-complemented.
 #
 # Every sequence is logged in both directions in tables/LOG_STRAND_<marker>.csv. The
 # ingroup and outgroup are aligned in separate runs, so neither can see that the two
@@ -158,6 +161,7 @@ screening_summary <- run_marker_screening(
   out_base = "3_Saturation",
   min_cols_to_evaluate = 50,
   min_aln_len_to_retain = 200,
+  # trnT-psbD held 57 ingroup sequences and was filtered out by this threshold.
   min_nseq_to_retain = 100,
   # Reporting only, and only for the loci that have an outgroup counterpart. Which outgroup
   # markers have none is Module 4's business, not this module's.
@@ -186,10 +190,11 @@ integrate_and_clean_markers(
   # readmit_markers overrides the Module 3 verdict for a locus kept on outgroup grounds rather
   # than ingroup resolution. Left empty.
   #
-  # trnT-psbD is not readmitted. It has more outgroup sequences than any other marker (52), but
-  # the two sets are not the same region: 0.040 of the outgroup 20-mers occur in the ingroup,
-  # against 0.26 to 0.59 for trnL_trnF, matK, phyC and rbcL. homology_check below measures
-  # this for every marker.
+  # trnT-psbD is not readmitted. Its outgroup sample is large (53 sequences, of 52 Portulaca
+  # species and one Talinopsis, against 57 ingroup sequences), but the two sets are not the same
+  # region: 0.062 of the outgroup 20-mers occur in the ingroup sequences, all of them on the
+  # opposite strand and none on the same one, against 0.27 to 0.58 for trnL_trnF, matK and rbcL.
+  # homology_check below measures this for every marker.
   readmit_markers = NULL,
   readmit_dir = NULL,
   # Alignment-free homology check, ingroup against outgroup, per marker. Writes
@@ -226,11 +231,14 @@ run_joint_realignment(
 # exclusions are echoed to the run log and written to logs_and_qc/TABLE_markers_excluded.csv,
 # and a name matching no alignment warns instead of passing silently.
 #
-# phyC is excluded because it carries no Portulacaceae terminal: of its 16 outgroup terminals, 15
-# are Anacampserotaceae and one is Talinaceae, against 167 ingroup terminals. In a matrix built to
-# date the ACP clade, a locus sampled for Anacampserotaceae and not for Portulacaceae supplies
-# characters to only one side of the divergence between the two families. The exclusion is a
-# property of this matrix; phyC remains the more discriminating nuclear marker for barcoding.
+# phyC is excluded. Its cleaned alignment holds 25 outgroup terminals (16 Anacampserotaceae,
+# 8 Portulacaceae and one Talinaceae) against 167 ingroup terminals, but only 0.196 of the outgroup
+# 20-mers occur in the ingroup sequences (TABLE_marker_homology_check.csv, verdict "low"; 0.27 to
+# 0.58 for trnL_trnF, matK and rbcL), so it is not established that its outgroup sequences are the
+# same region as its ingroup sequences. In a matrix built to date the ACP clade, such a locus
+# supplies characters of uncertain homology to the divergences among the three families. The
+# exclusion is a property of this matrix; phyC remains the more discriminating of the two nuclear
+# markers for barcoding.
 # Set exclude_markers = NULL to build the full matrix.
 #
 # outgroup_pattern is a named vector, not a single expression, so the coverage report resolves the
