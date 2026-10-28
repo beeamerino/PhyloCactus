@@ -29,12 +29,18 @@ dir.create("10_Validation/logs", recursive = TRUE, showWarnings = FALSE)
 # and de Vos et al. 2025) are not distributed with the package. Obtain each from its
 # source (table in Tutorial 4), save the four in one folder and set its path in ~/.Renviron:
 # - PHYLOCACTUS_REFERENCE_TREES="/path/to/reference_trees", holding
-#   reference_amaral_2022.tree      Amaral et al. 2022, doi:10.1016/j.biocon.2022.109677 (Tree_80MD.tre)
-#   reference_thompson_2024.tree    Thompson et al. 2024, doi:10.1038/s41467-024-51666-2 (ultra_cacti_JT.tre)
-#   reference_zuntini_2024.tree     Zuntini et al. 2024, doi:10.1038/s41586-024-07324-0 (Cactaceae of the
-#                                   Kew Tree of Life, release 4.0)
-#   reference_devos_2025_astral.tree  de Vos et al. 2025, doi:10.1007/s00606-025-01948-z (ASTRAL-III
-#                                   species tree from the gene trees of the study, Module 13a)
+#   reference_amaral_2022.tree      Amaral et al. 2022: dataset+tree_80MD/Tree_80MD.tre of
+#                                   https://doi.org/10.6084/m9.figshare.17057816
+#                                   (md5 185926b62a0a01b3187750e664e0fcf7)
+#   reference_thompson_2024.tree    Thompson et al. 2024: Alignment, accessions and tree/treepl_cacti.tre of
+#                                   https://github.com/jamie-thompson/cactaceae
+#                                   (md5 df479c182a14028aa710b508aebaa458)
+#   reference_zuntini_2024.tree     Zuntini et al. 2024: treeoflife.all_support_values.4.0.tree of the Kew
+#                                   Tree of Life, release 4.0 (sftp.kew.org, pub/treeoflife), pruned to
+#                                   its Cactaceae as Tutorial 4 shows (md5 of the reference run's file
+#                                   319e6985225858b836ab2ff37054b3e5)
+#   reference_devos_2025_astral.tree  de Vos et al. 2025: QC.Species_tree_astral.tree of Online Resource 4,
+#                                   doi:10.1007/s00606-025-01948-z (md5 5ceb901a0555521da1a14f0815787362)
 # - PHYLOCACTUS_CHECKLIST, the checklist of Korotkova et al. (2021) (Tutorial 1).
 # Re-estimating the de Vos et al. (2025) species tree from its gene trees requires ASTRAL-III and Java:
 # - Set ASTRAL_PATH in ~/.Renviron (e.g., ASTRAL_PATH="/path/to/astral.5.7.8.jar")

@@ -99,7 +99,9 @@ is the name both stages used to run with written into the code.}
 }
 \value{
 Invisibly, the path of the dated maximum-likelihood chronogram written into
-\code{treePL_out}.
+\code{treePL_out}. The failed subsamples of the cross-validation per smoothing value (\code{cv_failures})
+are returned by \code{\link[=run_treePL_cv]{run_treePL_cv()}}, not by this function, which repeats only their warning when
+the maximum-likelihood stage is read from disk.
 }
 \description{
 Automates cross-validation parameter optimization, rate smoothing selection, and chronogram estimation

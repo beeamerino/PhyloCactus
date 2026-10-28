@@ -119,10 +119,13 @@ when one or more failed at any value of 0.1 or below, the part of the grid where
 falls in practice: the warning names each such value with how many of how many subsamples failed
 there, says whether the selected value is among them, and names the smoothing with the lowest
 chi-square among the values of 0.1 or below at which no subsample failed, which is also returned
-as \code{cv_smoothing_without_failures}. Values above 0.1 are left out because they fail under most
-seeds on the reference dataset and are never selected there. On that dataset, two of five seeds
-lost one subsample at values next to 1e-05 and selected 1e-02 and 1e-08, while the reference seed
-lost none at 0.1 or below and selected 1e-05. The running sum is printed with eight significant
+as \code{cv_smoothing_without_failures}. Because a value with a failed subsample carries a total of
+the order of the failure, that smoothing is the selected value whenever the selection falls at 0.1
+or below, and the warning then says so. Values above 0.1 are left out: on the reference dataset, at 10
+and above every one of five seeds failed in four to seven subsamples, and no run selected a value
+above 0.1. On that dataset, two of five seeds lost one subsample at 1e-07 to 1e-04 and at 1e-05 to
+1e-03 (and both at 0.1 and 1) and selected 1e-02 and 1e-08, while the reference seed lost none at
+0.1 or below and selected 1e-05. The running sum is printed with eight significant
 digits, so the chi-square of the subsamples after a failure cannot be recovered from the log, and
 the count of failures is a lower bound.
 }

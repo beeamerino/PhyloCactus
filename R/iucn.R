@@ -197,7 +197,9 @@ get_iucn_data <- function(sp_name) {
 #'   `NULL` (the default) writes nothing.
 #' @return A list of three tibbles:
 #'   * `registry`: the species table without its `iucn_` columns other than `iucn_found`,
-#'     `iucn_category` and `iucn_category_name`;
+#'     `iucn_category` and `iucn_category_name`, and without the checklist columns
+#'     `checklist_fullName`, `checklist_author`, `checklist_rank`, `checklist_taxon` and
+#'     `checklist_uuid` (the checklist of Korotkova et al. 2021 may be used but not redistributed);
 #'   * `endemic_by_country`: `country`, `iucn_category`, `n` (endemic species of each country in each
 #'     category), `redlist_version`, `access_date`;
 #'   * `classes`: `field` (`threat`, `habitat` or `endemic_species_in_tree`), `class`, `n`,
@@ -233,7 +235,12 @@ summarise_iucn_registry <- function(species_table, redlist_version, access_date,
   if (length(absent)) stop("The species table lacks the columns: ", paste(absent, collapse = ", "), call. = FALSE)
 
   kept <- c("iucn_found", "iucn_category", "iucn_category_name")
-  registry <- sp[, !grepl("^iucn_", names(sp)) | names(sp) %in% kept, drop = FALSE]
+  # The checklist (Korotkova et al. 2021) may be used but not redistributed: the registry keeps the
+  # names and the result of the match, not the authors, ranks, taxa and identifiers of the checklist.
+  checklist_content <- c("checklist_fullName", "checklist_author", "checklist_rank", "checklist_taxon",
+                         "checklist_uuid")
+  registry <- sp[, (!grepl("^iucn_", names(sp)) | names(sp) %in% kept) &
+                   !names(sp) %in% checklist_content, drop = FALSE]
 
   in_tree <- sp[sp$in_ml_tree %in% TRUE & sp$is_ingroup %in% TRUE, , drop = FALSE]
   endemic <- in_tree[in_tree$iucn_is_endemic %in% TRUE, , drop = FALSE]

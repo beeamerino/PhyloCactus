@@ -904,4 +904,4 @@ Tutorial 4 compares the tree with published phylogenies of Cactaceae using Robin
 - Gearty & Chamberlain 2025. rredlist: 'IUCN' Red List Client. R package version 1.1.1. <https://doi.org/10.32614/CRAN.package.rredlist>
 - Isaac *et al*. 2007. Mammals on the EDGE: conservation priorities based on threat and phylogeny. *PLoS ONE*, 2(3), e296. <https://doi.org/10.1371/journal.pone.0000296>
 - IUCN 2026. *The IUCN Red List of Threatened Species*. Version 2026-1. Accessed 2026-10-15. <https://www.iucnredlist.org>
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org – a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>

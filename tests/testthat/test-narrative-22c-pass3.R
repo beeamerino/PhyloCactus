@@ -41,5 +41,5 @@ test_that("the README gives its references in the short style of the tutorials",
   expect_gt(length(refs), 5L)
   expect_false(any(grepl("^- [A-Z][^ ]*, [A-Z]\\.", refs)), info = "full author lists")
   expect_false(any(grepl("[0-9]-[0-9]+\\. <", refs)), info = "page ranges with a hyphen")
-  expect_true(any(grepl("Cactaceae at Caryophyllales.org - A dynamic online", refs, fixed = TRUE)))
+  expect_true(any(grepl("Cactaceae at Caryophyllales.org – a dynamic online", refs, fixed = TRUE)))
 })

@@ -89,7 +89,7 @@ test_that("Tutorial 2 states the median FBP of the parents of single-locus termi
   skip_if(!"retained_markers" %in% names(sp), "the distributed species table has no retained_markers column")
   loci <- sp$retained_markers[match(ml$tip.label, sp$species)]
   parent <- ml$edge[match(seq_len(ape::Ntip(ml)), ml$edge[, 2]), 1]
-  fbp <- suppressWarnings(as.numeric(ml$node.label[parent - ape::Ntip(ml)])) / 100
+  fbp <- suppressWarnings(as.numeric(ml$node.label[parent - ape::Ntip(ml)]))  # percent, as the tree labels it
   v <- .t53_flat(.t53_read("vignettes", "tutorial-2-cactus-phylogeny-inference.Rmd"))
   x <- .t53_capture(v, "single locus, whose parent nodes have a median FBP of ([0-9.]+), against ([0-9.]+) for terminals with two loci or more")
   digits <- nchar(sub("^[0-9]*\\.", "", x))

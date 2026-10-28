@@ -376,7 +376,9 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL, treepl_bin = "treePL"
 #'   `credentials`. Both default to `NULL`, which reads the `MY_EMAIL` and `PHYLOCACTUS_SMTP_CREDS`
 #'   environment variables.
 #' @return Invisibly, the path of the dated maximum-likelihood chronogram written into
-#'   `treePL_out`.
+#'   `treePL_out`. The failed subsamples of the cross-validation per smoothing value (`cv_failures`)
+#'   are returned by [run_treePL_cv()], not by this function, which repeats only their warning when
+#'   the maximum-likelihood stage is read from disk.
 #' @references
 #' Sanderson, M. J. (2002). Estimating absolute rates of molecular evolution and divergence times:
 #' a penalized likelihood approach. *Molecular Biology and Evolution*, 19(1), 101-109. \doi{10.1093/oxfordjournals.molbev.a003974}

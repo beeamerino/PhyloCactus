@@ -264,7 +264,7 @@ Two answers without threshold, computed on the same queries of the first row, sh
 
 With the species present in the library, the thresholds and the `rbcL` rule reduce wrong species answers from about one in three queries (749 of 2304 with BLAST, 659 with the nearest neighbour) to 14, and raise the precision of a species answer from 0.593 (BLAST, 1091 of 1840) and 0.603 (nearest neighbour, 999 of 1658) to 0.914 (148 of 162). They cost the right species: IdTaxa names it for 148 queries, BLAST for 1091. The genus is right, at any rank of the answer, for 564 of the 2304 queries with IdTaxa, 1929 with BLAST and 1778 with the nearest neighbour; per answer, it is right in 0.996 of the answers of IdTaxa and 0.870 of those of BLAST. With the species absent, every species answer is wrong: 1988 with BLAST, 1833 with the nearest neighbour and 45 with IdTaxa. The thresholds were set on this library and the baselines have no tuned parameter, so the comparison favours IdTaxa.
 
-The genus is the answer to expect from this version. A species is named rarely, mostly from `matK` and from plastomes; abstention is the most common answer, and a wrong species is rare but possible.
+The genus is the answer to expect from this version. A species is named for few queries, mostly from `matK` and from plastomes, and abstention is the most common answer. When a species is named, it is wrong in 14 of 162 answers if the species is in the library and in every answer if it is not, 59 of 207 at the mix of this measurement.
 
 ## Limitations
 
@@ -274,7 +274,7 @@ The genus is the answer to expect from this version. A species is named rarely, 
 
 ## References
 
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
+- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org – a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 - Murali *et al*. 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. *Microbiome*, 6. <https://doi.org/10.1186/s40168-018-0521-5>
 
 [Continue to Tutorial 7: Core Pipeline Functions and Methodological Dictionary](https://beeamerino.github.io/PhyloCactus/articles/tutorial-7-cactus-phylogeny-functions.html)

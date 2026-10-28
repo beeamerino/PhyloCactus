@@ -30,8 +30,10 @@ ingroup_assembly <- assemble_ingroup_phylotar(
   genes_map_file = system.file("extdata", "genes_map.csv", package = "PhyloCactus"),
   manual_exclusions_file = system.file("extdata", "manual_exclusions_ingroup.csv", package = "PhyloCactus"),
   # The exclusion lists are curation by the team supporting PhyloCactus. Of the 102 accessions,
-  # 47 state their ground in the reason column; 55 carry only "manual conflict resolution" and were
-  # removed to resolve duplicate assignments of one accession to the clusters of several loci.
+  # 47 state their ground in the reason column; 55 carry only "manual conflict resolution":
+  # of the 44 found in the metadata of the mining, 43 were placed by its clustering in the
+  # clusters of more than one locus, and for 36 the GenBank description names another locus or a
+  # transcript.
   # Stated explicitly so that the curation is visible.
   # Set to FALSE to reproduce the uncurated cluster set and measure what curation removes.
   apply_manual_exclusions = TRUE,

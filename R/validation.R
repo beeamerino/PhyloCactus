@@ -111,7 +111,7 @@ compute_pairwise_metric <- function(tree_list, FUN, min_tips = 4L) {
 #' @references
 #' Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M.,
 #' Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D., Nyffeler, R., Sánchez, D., Schlumpberger, B. O.,
-#' & Berendsohn, W. G. (2021). Cactaceae at Caryophyllales.org - a dynamic online species-level taxonomic backbone for the family.
+#' & Berendsohn, W. G. (2021). Cactaceae at Caryophyllales.org – a dynamic online species-level taxonomic backbone for the family.
 #' *Willdenowia*, 51(2), 251-270. \doi{10.3372/wi.51.51208}
 #'
 #' Robinson, D. F., & Foulds, L. R. (1981). Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1-2), 131-147.

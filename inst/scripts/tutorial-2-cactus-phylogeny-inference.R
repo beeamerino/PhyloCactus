@@ -330,12 +330,12 @@ print(converge_log)
 # 1. Primary metric: Felsenstein's Bootstrap Proportions (FBP). This is the canonical metric
 #    reported across published Cactaceae phylogenies (e.g. Hernandez-Hernandez et al. 2014,
 #    Arakaki et al. 2011). TBE is higher than FBP on large clades: on the 1171 unconstrained nodes
-#    the medians are FBP 0.450 and TBE 0.7725, and on the 39 clades of 51 to 200 terminals FBP 0.080
-#    and TBE 0.930.
+#    the medians are FBP 45 and TBE 0.7725, and on the 39 clades of 51 to 200 terminals FBP 8 and
+#    TBE 0.930 (FBP in percent, as the tree labels it; TBE as a proportion).
 # 2. Secondary metric: Transfer Bootstrap Expectation (TBE; Lemoine et al. 2018), retained as a
 #    complementary assessment of stability in supermatrices with missing data.
-# 3. Constrained nodes warning: The 34 nodes enforced by cactus_constraints.tree exhibit 1.000
-#    support by construction. Do not report empirical bootstrap values for constrained nodes.
+# 3. Constrained nodes warning: The 34 nodes enforced by cactus_constraints.tree exhibit a support of 100
+#    by construction. Do not report empirical bootstrap values for constrained nodes.
 cat("\n4. Mapping bootstrap supports onto the best tree...\n")
 
 # Primary: FBP support (written to paths$support_tree: cactus_support.raxml.support)
@@ -594,7 +594,9 @@ if (file.exists(cv_file)) {
 # -------------------------------------------------------------
 # The same tree dated across the grid and beyond it. Read the range of each node from 1e-14 to
 # 1e-02; the reference run selects 1e-05, an interior minimum on one random partition of the data,
-# 1.1 % and 1.2 % below its two neighbours. At 1 and 10 the calibrated nodes sit on their upper
+# 1.1 % and 1.2 % below its two neighbours. Five seeds of treePL selected 1e-08 to 1e-02, so
+# the cross-validation does not identify a smoothing value on this tree, and the table below mixes
+# the effect of the smoothing with that of the optimizer (Tutorial 2). At 1 and 10 the calibrated nodes sit on their upper
 # bounds; that end of the table lies outside the range supported by cross-validation.
 
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")

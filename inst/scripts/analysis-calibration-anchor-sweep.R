@@ -244,4 +244,8 @@ print(age_table)
 # Pachycereeae and Cacteae, which sits close to the crown of Cactoideae, and a scheme returning that
 # node younger than 15.6 Ma would conflict with it. The placement is an assumption: the paper gives
 # an affinity, not an assignment to a clade. It is not the only fossil of the family: the same paper
-# cites Eopuntia douglassii, an Eocene macrofossil of the Green River Formation compared with Opuntia.
+# cites Eopuntia douglassii, an Eocene macrofossil of the Green River Formation compared with Opuntia,
+# which this script does not evaluate.
+#   Ramirez-Arriaga et al. 2026. Cactaceae fossil pollen grains recovered from 15.6-Ma evaporites in
+#   south-central Mexico. Review of Palaeobotany and Palynology 344: 105463.
+#   doi:10.1016/j.revpalbo.2025.105463

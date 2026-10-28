@@ -28,7 +28,9 @@ registry and of \code{get_iucn_data()}.}
 A list of three tibbles:
 \itemize{
 \item \code{registry}: the species table without its \code{iucn_} columns other than \code{iucn_found},
-\code{iucn_category} and \code{iucn_category_name};
+\code{iucn_category} and \code{iucn_category_name}, and without the checklist columns
+\code{checklist_fullName}, \code{checklist_author}, \code{checklist_rank}, \code{checklist_taxon} and
+\code{checklist_uuid} (the checklist of Korotkova et al. 2021 may be used but not redistributed);
 \item \code{endemic_by_country}: \code{country}, \code{iucn_category}, \code{n} (endemic species of each country in each
 category), \code{redlist_version}, \code{access_date};
 \item \code{classes}: \code{field} (\code{threat}, \code{habitat} or \code{endemic_species_in_tree}), \code{class}, \code{n},
