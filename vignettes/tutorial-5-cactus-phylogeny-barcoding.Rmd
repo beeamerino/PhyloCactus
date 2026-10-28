@@ -458,7 +458,7 @@ The branch rests on five design decisions:
 2. **Unit of assignment.** A graded answer per locus: species, genus or none, with the reason for none. A species is named only above the species threshold of its locus.
 3. **Reporting ambiguity.** The candidates under the thresholds are listed as alternatives in the report, never promoted to an answer; disagreement between loci is reported as a conflict.
 4. **Genome skims and other reads.** The library is built from Sanger marker records of GenBank and own sequences, and genome skims are not a source of it. Illumina reads that a user brings are a query: `identify_barcoding_reads()` assembles their plastome and nuclear ribosomal DNA and identifies them against the library, locus by locus.
-5. **Paralogy and organelle capture.** Possible paralogs (`pepC_like`) and saturation are flagged and kept; conflict between plastid and nuclear loci is reported as disagreement between loci, not resolved. Per-locus monophyly and the cytonuclear diagnosis are planned for version 0.6.
+5. **Paralogy and organelle capture.** Possible paralogs (`pepC_like`) and saturation are flagged and kept; conflict between plastid and nuclear loci is reported as disagreement between loci, not resolved. Per-locus monophyly and the cytonuclear diagnosis are planned work, with no version set.
 
 [Continue to Tutorial 6: Identifying a Sample](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html)
 
