@@ -254,6 +254,16 @@ Outcomes, in the order species correct / genus correct / no answer / conflict / 
 | GenBank plastome | plastome | 3 / 51 / 26 / 1 / 1 / 11 (93) | 0 / 2 / 0 / 1 / 0 / 1 (4) |
 | Illumina reads (genome skims) | run | 1 / 2 / 1 / 0 / 0 / 0 (4) | 0 / 1 / 2 / 0 / 0 / 0 (3) |
 
+Two answers without threshold, computed on the same queries of the first row, show what the thresholds and the `rbcL` rule do: the top hit of BLAST (`blastn` megablast against the training records of each query) and the nearest neighbour without threshold (step 7 without the remoteness threshold of step 9), each naming a species, or the genus when the best matches tie across species of one genus. Outcomes in the same order:
+
+| Answer | Species present | Species absent |
+|---|---|---|
+| IdTaxa with thresholds (first row above) | 148 / 402 / 1738 / n.a. / 14 / 2 (2304) | 0 / 252 / 2173 / n.a. / 45 / 37 (2507) |
+| BLAST top hit | 1091 / 345 / 88 / n.a. / 749 / 31 (2304) | 0 / 299 / 78 / n.a. / 1988 / 142 (2507) |
+| Nearest neighbour without threshold | 999 / 424 / 151 / n.a. / 659 / 71 (2304) | 0 / 356 / 144 / n.a. / 1833 / 174 (2507) |
+
+With the species present in the library, the thresholds and the `rbcL` rule reduce wrong species answers from about one in three queries (749 of 2304 with BLAST, 659 with the nearest neighbour) to 14, and raise the precision of a species answer from 0.593 (BLAST, 1091 of 1840) and 0.603 (nearest neighbour, 999 of 1658) to 0.914 (148 of 162). They cost the right species: IdTaxa names it for 148 queries, BLAST for 1091. The genus is right, at any rank of the answer, for 564 of the 2304 queries with IdTaxa, 1929 with BLAST and 1778 with the nearest neighbour; per answer, it is right in 0.996 of the answers of IdTaxa and 0.870 of those of BLAST. With the species absent, every species answer is wrong: 1988 with BLAST, 1833 with the nearest neighbour and 45 with IdTaxa. The thresholds were set on this library and the baselines have no tuned parameter, so the comparison favours IdTaxa.
+
 The genus is the answer to expect from this version. A species is named rarely, mostly from `matK` and from plastomes; abstention is the most common answer, and a wrong species is rare but possible.
 
 ## Limitations

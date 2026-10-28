@@ -544,6 +544,12 @@ automate_treePL(
   notify = notify_email
 )
 
+# The dated replicates are summarized outside R with TreeAnnotator v2.7.7 of BEAST 2, with the
+# settings of Maurin (2020): maximum clade credibility target tree, mean node heights, 0% burn-in.
+# The reference run used this command, which reproduces the distributed summary node for node:
+#   treeannotator -burnin 0 -height mean -topology MCC 8_Dating/bsTree_treePL.tree 8_Dating/dated_summary_hpd.tree
+# In the graphical interface, set the burn-in to 0 (it starts at 10) and the heights to mean heights.
+
 cat("\n--- Chronological Dating Results Summary ---\n")
 if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
   ml_chronogram <- ape::read.tree(file.path(dating_dir, "BestTree_treePL.tree"))

@@ -238,8 +238,10 @@ print(age_table)
 # exactly scale invariant, because the roughness penalty is not, so exact proportionality is not
 # expected; the question is how far from it the result falls.
 #
-# The fossil pollen of Ramirez-Arriaga et al. (2026), 15.6 Ma with an affinity to
-# Cephalocereus-Mammillaria, implies a minimum for the common ancestor of Pachycereeae and Cacteae,
-# which sits close to the crown of Cactoideae. Any scheme returning a Cactoideae crown below that
-# age is in conflict with the only Cactaceae fossil in the record, and that is worth stating for
-# each scheme, not only for the one chosen.
+# The fossil pollen of Ramirez-Arriaga et al. (2026), from 15.6 Ma evaporites of the Tehuacan
+# Formation, includes tricolpate grains that the authors compare with Cephalocereus and Mammillaria.
+# Placed on the clade joining those genera, it implies a minimum for the common ancestor of
+# Pachycereeae and Cacteae, which sits close to the crown of Cactoideae, and a scheme returning that
+# node younger than 15.6 Ma would conflict with it. The placement is an assumption: the paper gives
+# an affinity, not an assignment to a clade. It is not the only fossil of the family: the same paper
+# cites Eopuntia douglassii, an Eocene macrofossil of the Green River Formation compared with Opuntia.

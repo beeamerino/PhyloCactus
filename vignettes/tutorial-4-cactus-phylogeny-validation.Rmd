@@ -165,7 +165,7 @@ The Module 10 chronogram is rooted on Talinaceae, but the family filter removes 
 The genus can be changed with `rooting_genus`; trees without it are left unrooted and flagged in `SUPP_rooting_summary`.
 Because RF and DPI are computed on unrooted trees, the rooting affects only the exported tree files, not the distances or the tree-space projection.
 
-**The constraint.** The focal tree was inferred under the topological constraint of Module 8 (Tutorial 2), so part of its agreement with each reference is imposed by the constraint and not found by the data. On each shared taxon set, 12 to 17 of the bipartitions the focal tree shares with a reference are imposed by the constraint: 27 to 37 % of the shared bipartitions in the small sets A1 and A4, where the deep splits weigh most, and 5 to 8 % in the large sets of Thompson *et al*. (2024) and Amaral *et al*. (2022). The table below gives, for the reference run, the published RF beside the RF without the constrained bipartitions, removed from both trees of the pair. Every distance rises, by 0.010 to 0.100; for example, the RF of A1 against Zuntini *et al*. (2024) rises from 0.254 to 0.312. The order of the references by distance does not change in A1, A2 and A3, and in A4 Zuntini *et al*. (2024) and Thompson *et al*. (2024) exchange places (0.470 and 0.467). DPI cannot be split this way, because it gives partial credit across bipartitions, and is reported with the constraint only. Tutorial 2 weighs the constrained bipartitions absent from each reference by the support of the reference clades that contradict them: the two nuclear trees contradict none at the level of a tribe with support, while Amaral *et al*. (2022) contradicts with support three relationships at that level, the position of Rhipsalideae in core Cactoideae II (bootstrap 87), Tephrocacteae with Opuntieae (100) and core Cactoideae I with II (99).
+**The constraint.** The focal tree was inferred under the topological constraint of Module 8 (Tutorial 2), so part of its agreement with each reference is imposed by the constraint and not found by the data. On each shared taxon set, 12 to 17 of the bipartitions the focal tree shares with a reference are imposed by the constraint: 27 to 37 % of the shared bipartitions in the small sets A1 and A4, where the deep splits weigh most, and 5 to 8 % in the large sets of Thompson *et al*. (2024) and Amaral *et al*. (2022). The table below gives, for the reference run, the published RF beside the RF without the constrained bipartitions, removed from both trees of the pair. Every distance rises, by 0.010 to 0.100; for example, the RF of A1 against Zuntini *et al*. (2024) rises from 0.254 to 0.312. The order of the references by distance does not change in A1, A2 and A3, and in A4 Zuntini *et al*. (2024) and Thompson *et al*. (2024) exchange places (0.470 and 0.467). DPI cannot be split this way, because it gives partial credit across bipartitions, and is reported with the constraint only. Tutorial 2 weighs the constrained bipartitions absent from each reference by the support of the reference clades that contradict them: the two nuclear trees contradict none at the level of a tribe with support, while Amaral *et al*. (2022) contradicts with support three relationships at that level, the position of Rhipsalideae in core Cactoideae II (ultrafast bootstrap 87, under the 95 from which the documentation of IQ-TREE advises relying on that measure), Tephrocacteae with Opuntieae (100) and core Cactoideae I with II (99).
 
 | Set | Reference | Shared terminals | Imposed and in the reference | RF | RF without the constrained bipartitions |
 |---|---|---|---|---|---|
@@ -185,6 +185,7 @@ Because RF and DPI are computed on unrooted trees, the rooting affects only the 
 | A4 | de Vos | 78 | 14 | 0.360 | 0.424 |
 
 **What each reference can test.** The tree of Zuntini *et al*. (2024) is built on a constrained backbone of at most five samples per family, so its deep relationships within Cactaceae are not an independent test of the constraint (Tutorial 2). The tree of Thompson *et al*. (2024) carries no support values and its chronogram is not independent of Ramírez-Barahona *et al*. (2020), whose ages anchor the chronogram of this package; it is a comparison tree only, and a distance to it says nothing on the support of a conflict.
+The tree of Amaral *et al*. (2022) was inferred from GenBank sequences mined with `phylotaR`, the source of this package too, aligned with MAFFT, concatenated and analysed with IQ-TREE 2.1 under constraints on core Cactoideae and on Cacteae, with five outgroup species; the tree used here is that of their matrix with up to 80 % missing data (`Tree_80MD.tre`, 921 species after their filtering), chosen by the authors among matrices with 40, 60 and 80 % missing data. Its supports are ultrafast bootstrap values (Minh *et al*. 2013), which are not on the scale of the standard bootstrap. It shares its source of data with the focal tree and is not an independent test of it.
 
 **Trees compared.** The four reference trees are read from the folder in `PHYLOCACTUS_REFERENCE_TREES`. The focal tree is the chronogram produced in Module 10, `8_Dating/dated_summary_hpd.tree`. When that file is absent, as when this tutorial is run on its own, the reference chronogram distributed with the package (`phylocactus_chronogram_hpd.tree`) is used instead.
 
@@ -246,6 +247,56 @@ knitr::kable(head(dist_table), caption = "Table 1. Pairwise tree distances: norm
 `TABLE_pairwise_tree_distances_main.csv` lists the distances for every pair of trees and every taxon set, and `FIG_tree_space_main.pdf` shows the tree-space projections.
 The distances summarize overall agreement between topologies; they do not identify which clades are in conflict.
 
+### Monophyly of the Genera
+
+Of the 102 genera of Cactaceae with two species or more in the tree, 39 are not monophyletic in the maximum-likelihood tree of the reference run (`phylocactus_ml_tree.tree`, rooted on Talinaceae). None is contradicted by a constrained clade. For 27 of them the non-monophyly rests only on nodes under FBP 70: once those nodes are collapsed, the genus is compatible with the tree, so its split is a soft polytomy, a lack of signal that follows from the incomplete sampling of the genus and from few, little-variable loci, and not evidence against the genus. The largest are *Mammillaria* (118 species in 29 fragments, 52 of them single-locus), *Pilosocereus* (37 species in 8 fragments, whose best-supported contradicting clade has FBP 7), *Selenicereus*, *Cochemiea* and *Parodia*.
+
+The other 12 are contradicted by at least one unconstrained clade of FBP 70 or more, and in each case the clade places one or a few species of another accepted genus inside the genus, or a few of its species inside another: *Pachycereus* with *Carnegiea* (FBP 97, a clade of two terminals), *Eriosyce* with *Rimacactus* (96), *Cephalocereus* and *Lophocereus* with each other (89 and 72), *Espostoa* with *Rauhocereus* (87), *Rapicactus* and *Acharagma* with each other (87 and 85), *Homalocephala* with *Astrophytum* and *Echinocactus* (85), *Lophophora* with *Obregonia* (72), *Matucana* with *Borzicactus* (71), and *Echinopsis* and *Chamaecereus* with each other (70). In this tree such a genus is a grade with respect to the genus nested in it, or is split between two clades; each conflict rests on few terminals, and this table does not separate a question of generic delimitation from the identification of the sequenced vouchers or from the composite terminals of Tutorial 1. Without the 214 single-locus terminals, 32 genera stay non-monophyletic, 4 become monophyletic (*Homalocephala*, *Cochemiea*, *Parodia*, *Rebutia*) and 3 keep fewer than two species.
+
+"Fragments" counts the maximal clades made only of species of the genus; "Highest FBP of a contradicting clade" is the support of the best-supported unconstrained clade that holds part of the genus and other terminals, and the next column names the other genera in it.
+
+| Genus | Species in the tree | Fragments | Single-locus species | Highest FBP of a contradicting clade | Other genera in that clade | Without single-locus terminals | Reading |
+|---|---|---|---|---|---|---|---|
+| *Eriosyce* | 41 | 5 | 1 | 96 | *Rimacactus* | not monophyletic | supported conflict (FBP 70 or more) |
+| *Matucana* | 17 | 5 | 0 | 71 | *Borzicactus* | not monophyletic | supported conflict (FBP 70 or more) |
+| *Cephalocereus* | 13 | 2 | 0 | 89 | *Lophocereus* | not monophyletic | supported conflict (FBP 70 or more) |
+| *Espostoa* | 11 | 7 | 0 | 87 | *Rauhocereus* | not monophyletic | supported conflict (FBP 70 or more) |
+| *Echinopsis* | 10 | 2 | 0 | 70 | *Chamaecereus* | not monophyletic | supported conflict (FBP 70 or more) |
+| *Pachycereus* | 5 | 2 | 0 | 97 | *Carnegiea* | not monophyletic | supported conflict (FBP 70 or more) |
+| *Rapicactus* | 5 | 3 | 3 | 87 | *Acharagma* | not monophyletic | supported conflict (FBP 70 or more) |
+| *Homalocephala* | 3 | 2 | 1 | 85 | *Astrophytum*, *Echinocactus* | monophyletic | supported conflict (FBP 70 or more) |
+| *Lophocereus* | 3 | 2 | 0 | 89 | *Cephalocereus* | not monophyletic | supported conflict (FBP 70 or more) |
+| *Lophophora* | 3 | 3 | 2 | 72 | *Obregonia* | fewer than 2 species | supported conflict (FBP 70 or more) |
+| *Acharagma* | 2 | 2 | 0 | 87 | *Rapicactus* | not monophyletic | supported conflict (FBP 70 or more) |
+| *Chamaecereus* | 2 | 2 | 0 | 70 | *Echinopsis* | not monophyletic | supported conflict (FBP 70 or more) |
+| *Mammillaria* | 118 | 29 | 52 | 52 | *Cochemiea* | not monophyletic | unresolved (soft polytomy) |
+| *Pilosocereus* | 37 | 8 | 1 | 7 | *Discocactus*, *Xiquexique* | not monophyletic | unresolved (soft polytomy) |
+| *Selenicereus* | 28 | 2 | 2 | 66 | *Armatocereus* | not monophyletic | unresolved (soft polytomy) |
+| *Cochemiea* | 22 | 11 | 3 | 52 | *Mammillaria* | monophyletic | unresolved (soft polytomy) |
+| *Parodia* | 19 | 5 | 8 | 48 | *Yavia* | monophyletic | unresolved (soft polytomy) |
+| *Ferocactus* | 17 | 11 | 9 | 54 | *Stenocactus* | not monophyletic | unresolved (soft polytomy) |
+| *Stenocereus* | 16 | 3 | 6 | 51 | *Myrtillocactus*, *Polaskia*, *Escontria* | not monophyletic | unresolved (soft polytomy) |
+| *Cereus* | 12 | 6 | 3 | 46 | *Micranthocereus* | not monophyletic | unresolved (soft polytomy) |
+| *Borzicactus* | 10 | 2 | 0 | 37 | *Matucana* | not monophyletic | unresolved (soft polytomy) |
+| *Acanthocereus* | 9 | 2 | 0 | 3 | *Selenicereus*, *Disocactus*, *Epiphyllum*, *Weberocereus*, *Pseudorhipsalis*, *Kimnachia* | not monophyletic | unresolved (soft polytomy) |
+| *Cleistocactus* | 9 | 2 | 0 | 48 | *Weberbauerocereus* | not monophyletic | unresolved (soft polytomy) |
+| *Pelecyphora* | 9 | 2 | 1 | 17 | *Coryphantha*, *Mammillaria* | not monophyletic | unresolved (soft polytomy) |
+| *Leucostele* | 7 | 2 | 4 | 29 | *Harrisia* | not monophyletic | unresolved (soft polytomy) |
+| *Thelocactus* | 7 | 6 | 1 | 47 | *Ferocactus* | not monophyletic | unresolved (soft polytomy) |
+| *Weberbauerocereus* | 7 | 3 | 1 | 48 | *Cleistocactus* | not monophyletic | unresolved (soft polytomy) |
+| *Armatocereus* | 5 | 3 | 1 | 66 | *Selenicereus* | not monophyletic | unresolved (soft polytomy) |
+| *Melocactus* | 5 | 2 | 2 | 64 | *Arrojadoa* | not monophyletic | unresolved (soft polytomy) |
+| *Oreocereus* | 5 | 3 | 0 | 60 | *Matucana*, *Haageocereus*, *Oroya*, *Pygmaeocereus*, *Cremnocereus*, *Mila* | not monophyletic | unresolved (soft polytomy) |
+| *Browningia* | 4 | 3 | 1 | 21 | *Rebutia* | not monophyletic | unresolved (soft polytomy) |
+| *Xiquexique* | 4 | 3 | 0 | 9 | *Discocactus* | not monophyletic | unresolved (soft polytomy) |
+| *Cipocereus* | 3 | 2 | 2 | 26 | *Cereus* | fewer than 2 species | unresolved (soft polytomy) |
+| *Rebutia* | 3 | 2 | 1 | 36 | *Gymnocalycium*, *Aylostera* | monophyletic | unresolved (soft polytomy) |
+| *Discocactus* | 2 | 2 | 0 | 29 | *Melocactus* | not monophyletic | unresolved (soft polytomy) |
+| *Facheiroa* | 2 | 2 | 1 | 6 | *Pilosocereus*, *Discocactus*, *Xiquexique* | fewer than 2 species | unresolved (soft polytomy) |
+| *Neowerdermannia* | 2 | 2 | 0 | 54 | *Eriosyce*, *Rimacactus* | not monophyletic | unresolved (soft polytomy) |
+| *Polaskia* | 2 | 2 | 0 | 40 | *Myrtillocactus* | not monophyletic | unresolved (soft polytomy) |
+| *Salmonopuntia* | 2 | 2 | 0 | 24 | *Opuntia*, *Tacinga*, *Consolea*, *Brasiliopuntia* | not monophyletic | unresolved (soft polytomy) |
+
 ## Conclusion
 
 This tutorial completes the core workflow of `PhyloCactus`: assembly of a multilocus supermatrix from GenBank, maximum-likelihood inference with bootstrap support, divergence time estimation with penalized likelihood, integration of IUCN Red List data, figures, and comparison with published phylogenies.
@@ -260,6 +311,8 @@ The second branch of the package, molecular identification by DNA barcoding, bui
 - de Vos *et al*. 2025. Phylogenomics and classification of Cactaceae based on hundreds of nuclear genes. *Plant Systematics and Evolution*, 311(5), 28. <https://doi.org/10.1007/s00606-025-01948-z>
 - Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
 - Kubatko & Degnan 2007. Inconsistency of phylogenetic estimates from concatenated data under coalescence. *Systematic Biology*, 56(1), 17–24. <https://doi.org/10.1080/10635150601146041>
+- Minh *et al*. 2013. Ultrafast approximation for phylogenetic bootstrap. *Molecular Biology and Evolution*, 30(5), 1188–1195. <https://doi.org/10.1093/molbev/mst024>
+- Ramírez-Barahona *et al*. 2020. The delayed and geographically heterogeneous diversification of flowering plant families. *Nature Ecology & Evolution*, 4(9), 1232–1238. <https://doi.org/10.1038/s41559-020-1241-3>
 - Robinson & Foulds 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1–2), 131–147. <https://doi.org/10.1016/0025-5564(81)90043-2>
 - Smith 2020. Information theoretic generalized Robinson–Foulds metrics for comparing phylogenetic trees. *Bioinformatics*, 36(20), 5007–5013. <https://doi.org/10.1093/bioinformatics/btaa614>
 - Thompson *et al*. 2024. Identifying the multiple drivers of cactus diversification. *Nature Communications*, 15(1), 7282. <https://doi.org/10.1038/s41467-024-51666-2>
