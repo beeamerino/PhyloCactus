@@ -149,7 +149,7 @@ test_that("Tutorial 1 names the sheets of the checklist and their sources (m8), 
   expect_true(grepl(s, r, fixed = TRUE), info = s)
   inf <- readLines(.d4_root("R", "inference.R"), warn = FALSE)
   req <- sub('.*extract_required_clade\\(cf, "([^"]+)"\\).*', "\\1", grep("extract_required_clade\\(cf,", inf, value = TRUE))
-  s1 <- sprintf("requires %d of these named groups, the %d of Cactaceae and %d outgroup genera",
+  s1 <- sprintf("requires %d of the groups named in `cactus_constraints.csv`, the %d of Cactaceae and %d outgroup genera",
                 length(req), sum(req %in% cl$Clade[cl$Family == "Cactaceae"]), sum(req %in% cl$Clade[cl$Family != "Cactaceae"]))
   expect_true(grepl(s1, v, fixed = TRUE), info = s1)
   expect_false(grepl("21 named clades", .d4_t2(), fixed = TRUE))
@@ -218,4 +218,22 @@ test_that("Tutorial 2 says once that the replicates share one topology (m20)", {
   v <- .d4_t2()
   expect_false(grepl("All dated replicates share one topology", v, fixed = TRUE))
   expect_true(grepl("does not change the ages", v, fixed = TRUE))
+})
+
+test_that("summarise_iucn_registry() leaves the checklist content out of the registry it writes (M5)", {
+  sp <- data.frame(
+    species = c("A_a", "A_b"), status_pipeline = c("sampled_and_dated", "unsampled_checklist_gap"),
+    in_ml_tree = c(TRUE, FALSE), is_ingroup = c(TRUE, TRUE), in_checklist = c(TRUE, TRUE),
+    accepted_in_checklist = c(TRUE, TRUE),
+    checklist_pureName = c("A a", "A b"), checklist_fullName = c("A a L.", "A b Mill."),
+    checklist_author = c("L.", "Mill."), checklist_rank = c("species", "species"),
+    checklist_taxon = c("Taxon", "Taxon"), checklist_uuid = c("u1", "u2"),
+    iucn_found = c(TRUE, TRUE), iucn_category = c("CR", "VU"),
+    iucn_category_name = c("Critically Endangered", "Vulnerable"), iucn_is_endemic = c(TRUE, FALSE),
+    iucn_endemic_locations = c("Mexico", NA), iucn_threat_names = c("Roads", NA),
+    iucn_habitat_names = c("Desert", NA), stringsAsFactors = FALSE)
+  out <- summarise_iucn_registry(sp, redlist_version = "2026-1", access_date = "2026-10-15")
+  dropped <- c("checklist_fullName", "checklist_author", "checklist_rank", "checklist_taxon", "checklist_uuid")
+  expect_length(intersect(dropped, names(out$registry)), 0L)
+  expect_true(all(c("species", "in_checklist", "accepted_in_checklist", "checklist_pureName") %in% names(out$registry)))
 })
