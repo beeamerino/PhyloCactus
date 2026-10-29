@@ -140,7 +140,7 @@ test_that("Tutorial 4 states the data of the tree of Amaral et al. (2022), and t
 test_that("Tutorial 2 states what dating without the internal bounds showed (D14, 3g)", {
   f <- .r53_flat("vignettes", "tutorial-2-cactus-phylogeny-inference.Rmd")
   for (p in c("Dated without the three bounds of Hernández-Hernández *et al.* (2014)",
-              "moves by 0.15 to 1.01 Ma at the four Cactaceae nodes",
+              "moves by 0.15 to 1.02 Ma at the four Cactaceae nodes",
               "the bounds are inactive under S1",
               "S3 and S5 place the crowns of Cactoideae, Cacteae and Opuntioideae above the maxima",
               "the ACP crown of Wu *et al.* (2026), 43.09 Ma",
