@@ -269,9 +269,9 @@
   })
 }
 
-#' Classify the Validation Folds of the Molecular Diagnostic Branch
+#' Classify the Validation Folds of Module 14
 #'
-#' Step 7 of the branch. Reads the library of step 4 and the folds of step 5, classifies every query
+#' Step 7 of Module 14. Reads the library of step 4 and the folds of step 5, classifies every query
 #' of every fold and writes the raw predictions, one row per query. It aggregates nothing: no
 #' accuracy, no rate, no mean. The negative controls (step 8) and the metrics (step 10) read
 #' these tables afterwards.
@@ -284,7 +284,7 @@
 #' @param library_dir Character. Output directory of [finalize_barcoding_library()].
 #' @param folds_dir Character. Output directory of [build_barcoding_folds()].
 #' @param output_dir Character. Destination; refused inside a directory of the phylogeny.
-#' @param method Character. `"nn"`, the branch classifier, or `"idtaxa"`, the contrast.
+#' @param method Character. `"nn"`, the classifier of Module 14, or `"idtaxa"`, the contrast.
 #' @param model Character. Distance model of [ape::dist.dna()], for `"nn"`.
 #' @param min_comparable Integer. Minimum number of comparable positions for a pair to have a value
 #'   Pairs below it are left without value, never imputed.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_threshold.R
 \name{sweep_barcoding_threshold}
 \alias{sweep_barcoding_threshold}
-\title{Sweep the Threshold of Remoteness of the Molecular Diagnostic Branch}
+\title{Sweep the Threshold of Remoteness of Module 14}
 \usage{
 sweep_barcoding_threshold(
   classifier_dir = file.path("11_barcoding", "7_classifier"),
@@ -57,7 +57,7 @@ Invisibly, a list with \code{curve} and \code{operating}. Writes
 \code{figures = TRUE}, \verb{FIG_barcoding_threshold_<locus>.pdf} and \code{.png}.
 }
 \description{
-Step 9 of the branch. Without a rule of remoteness the nearest neighbour names a cactus species
+Step 9 of Module 14. Without a rule of remoteness the nearest neighbour names a cactus species
 for any query: in the outgroup control, 288 of 312 outgroup queries came out in state 1. This
 step applies the rule (a query whose distance to its nearest neighbour exceeds a threshold is
 state 3, reason \code{remoteness}) over every threshold observed, and fixes an operating threshold per

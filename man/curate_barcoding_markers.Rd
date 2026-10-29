@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_curation.R
 \name{curate_barcoding_markers}
 \alias{curate_barcoding_markers}
-\title{Curate the Loci of the Molecular Diagnostic Branch}
+\title{Curate the Loci of Module 14}
 \usage{
 curate_barcoding_markers(
   input_dir = file.path("11_barcoding", "1_assembly"),

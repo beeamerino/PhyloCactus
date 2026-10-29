@@ -119,7 +119,7 @@ reference:
   - phylocactus_panel_tags
   - theme_phylocactus
 - title: Barcoding Library
-  desc: Build the reference library of the barcoding branch from the phylotaR mining of the
+  desc: Build the reference library of Module 14 from the phylotaR mining of the
     phylogeny and, optionally, own sequences (Tutorial 5, steps 1 to 4).
   contents:
   - assemble_barcoding_dataset

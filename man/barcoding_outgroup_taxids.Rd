@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_assembly.R
 \name{barcoding_outgroup_taxids}
 \alias{barcoding_outgroup_taxids}
-\title{Taxonomic IDs of the Outgroup of the Molecular Diagnostic Branch}
+\title{Taxonomic IDs of the Outgroup of Module 14}
 \usage{
 barcoding_outgroup_taxids()
 }
@@ -24,8 +24,8 @@ the three families that surround Cactaceae.
 \emph{Amphipetalum} (1835425) is not requested: GenBank holds no nucleotide records for it, so the
 request would only produce an empty download.
 
-\strong{This is the branch's own copy}. The phylogeny keeps its list in
-\code{assemble_outgroup_phylotar()} and is not touched, so the branch runs without it. A test compares
+\strong{This is Module 14's own copy}. The phylogeny keeps its list in
+\code{assemble_outgroup_phylotar()} and is not touched, so Module 14 runs without it. A test compares
 the two and fails if they ever drift apart.
 }
 \examples{

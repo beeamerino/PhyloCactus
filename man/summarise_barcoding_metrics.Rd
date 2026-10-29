@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_metrics.R
 \name{summarise_barcoding_metrics}
 \alias{summarise_barcoding_metrics}
-\title{Summarise the Per-Class Metrics of the Molecular Diagnostic Branch}
+\title{Summarise the Per-Class Metrics of Module 14}
 \usage{
 summarise_barcoding_metrics(
   classifier_dir = file.path("11_barcoding", "7_classifier"),
@@ -35,7 +35,7 @@ point. Defaults to \code{"default_60"}.}
 Invisibly, a list with the class and summary tables of each method.
 }
 \description{
-Step 10 of the branch. For each classifier at its operating point of step 9, per locus
+Step 10 of Module 14. For each classifier at its operating point of step 9, per locus
 and per scheme, it writes the metrics of the validation: per-class recall and
 precision as distributions (median, interquartile range, the classes with recall 0 and the
 classes never assigned), the unassigned rate and the two kinds of misassignment as separate

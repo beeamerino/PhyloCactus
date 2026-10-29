@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_library.R
 \name{finalize_barcoding_library}
 \alias{finalize_barcoding_library}
-\title{Build the Final Reference Library of the Molecular Diagnostic Branch}
+\title{Build the Final Reference Library of Module 14}
 \usage{
 finalize_barcoding_library(
   assembly_dir = file.path("11_barcoding", "1_assembly"),

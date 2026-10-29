@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_assembly.R
 \name{assemble_barcoding_dataset}
 \alias{assemble_barcoding_dataset}
-\title{Assemble the Reference Library of the Molecular Diagnostic Branch}
+\title{Assemble the Reference Library of Module 14}
 \usage{
 assemble_barcoding_dataset(
   wd_path,
@@ -31,7 +31,7 @@ assemble_barcoding_dataset(
 \item{wd_path}{Character. The \code{phylotaR} workspace, shared with the phylogeny (e.g.
 \verb{0_phylotaR_raw_Ingroup}).}
 
-\item{output_dir}{Character. Root of the branch. Refused if it lies inside a directory of the
+\item{output_dir}{Character. Root of Module 14. Refused if it lies inside a directory of the
 phylogeny. Defaults to \code{"11_barcoding"}.}
 
 \item{target_genes_file, genes_map_file}{Character. Marker definitions; default to the files
@@ -54,7 +54,7 @@ Defaults to \code{50}, as in the phylogeny.}
 cluster keeps a sid that sits in two. Defaults to \code{"3593"}.}
 
 \item{taxids}{Character vector or \code{NULL}. What to mine from GenBank when the workspace of
-\code{wd_path} does not exist yet, which is what lets the branch run without the phylogeny having
+\code{wd_path} does not exist yet, which is what lets Module 14 run without the phylogeny having
 run first. \code{NULL} mines \code{preferred_parent}, the behaviour of earlier versions. Several IDs are mined
 together, as \code{\link[=barcoding_outgroup_taxids]{barcoding_outgroup_taxids()}} returns them for the outgroup control.}
 
@@ -67,7 +67,7 @@ has to be created.}
 (\code{phylotaR::setup()}); 100 and 5000 by default. Used only when GenBank is mined.}
 
 \item{phylogeny_map_file}{Character or \code{NULL}. Cluster-to-locus table of the phylogeny, compared
-with the branch's own when it exists. Defaults to
+with Module 14's own when it exists. Defaults to
 \verb{1_phylotaR_out_Ingroup/TABLE_CLUSTER_MARKER_ASSIGNMENT_INGROUP.csv} next to \code{wd_path}.}
 
 \item{extra_records_dir}{Character or \code{NULL}. A folder written by \code{\link[=extract_barcoding_plastome_loci]{extract_barcoding_plastome_loci()}};

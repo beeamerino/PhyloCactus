@@ -46,7 +46,7 @@
   invisible(NULL)
 }
 
-#' Build the Final Reference Library of the Molecular Diagnostic Branch
+#' Build the Final Reference Library of Module 14
 #'
 #' Takes the curated alignments written by [curate_barcoding_markers()] and writes the reference
 #' library used by the validation. For each locus it (1) removes the sequences that the alignment

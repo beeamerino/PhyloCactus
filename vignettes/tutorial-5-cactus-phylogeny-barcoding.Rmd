@@ -18,12 +18,12 @@ knitr::opts_chunk$set(
 
 ## Abstract
 
-The barcoding branch of `PhyloCactus` builds a reference library of Cactaceae from Sanger marker records of GenBank (and, optionally, the user's own sequences), measures how well that library tells genera and species apart, and identifies a sample against it.
+Module 14 of `PhyloCactus`, the fifth stage of the workflow, builds a reference library of Cactaceae from Sanger marker records of GenBank (and, optionally, the user's own sequences), measures how well that library tells genera and species apart, and identifies a sample against it.
 It answers one question: given a sample of a cactus, to which genus and species does it belong, according to the loci the library holds, and how much can that answer be trusted?
 
 The answer is given locus by locus, in one of three states: a species (state 1), a genus without a species (state 2), or no answer (state 3, with its reason).
 Loci are never combined into one verdict; agreement or conflict between loci is reported as such.
-The branch identifies against a library of multilocus sequence data; it does not place a sample in a phylogeny.
+Module 14 identifies against a library of multilocus sequence data; it does not place a sample in a phylogeny.
 
 ## Complete Pipeline Execution Workflow
 
@@ -33,17 +33,17 @@ The script, `tutorial-5-cactus-phylogeny-barcoding.R`, runs the eleven steps in 
 file.edit(system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus"))
 ```
 
-The branch runs in four stages: a reference library built from the multilocus sequence data of the phylogeny (steps 1 to 4), its validation (steps 5 to 8), the thresholds and metrics read from that validation (steps 9 and 10), and the identification of a sample (step 11).
+Module 14 runs in four parts: a reference library built from the multilocus sequence data of the phylogeny (steps 1 to 4), its validation (steps 5 to 8), the thresholds and metrics read from that validation (steps 9 and 10), and the identification of a sample (step 11).
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 1.** The molecular identification branch, from the reference library to the answer for a sample. Steps are numbered as in this tutorial."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 1.** Module 14, molecular identification, from the reference library to the answer for a sample. Steps are numbered as in this tutorial."}
 knitr::include_graphics("figures/Figure_TB8_barcoding_workflow.png")
 ```
 
 ### Setup: Creating a Clean Workspace
 
-The branch reads:
+Module 14 reads:
 
-- **The phylotaR workspace of the phylogeny** (`0_phylotaR_raw_Ingroup/`, Tutorial 1). Both branches read the same mining; the barcoding branch adds no download of sequences, only the GenBank metadata of the accessions the phylogeny's cache does not hold.
+- **The phylotaR workspace of the phylogeny** (`0_phylotaR_raw_Ingroup/`, Tutorial 1). The phylogeny and Module 14 read the same mining; Module 14 adds no download of sequences, only the GenBank metadata of the accessions the phylogeny's cache does not hold.
 - **The curated files of the package:** the target loci (`target_genes.txt`), the dictionary of locus names (`genes_map.csv`), the manual exclusions (`manual_exclusions_ingroup.csv`, which include 21 `ITS` records annotated in GenBank as pseudogenes) and the checklist of Cactaceae of Caryophyllales.org (Korotkova *et al*. 2021), against which every name is reconciled.
 - **Own sequences, optional.** `own_dir = "0_own"` in step 1 adds the records of `0_own/`: a sample sheet (`SAMPLES.csv`: sample, species of the checklist of Korotkova *et al*. 2021, voucher, publication status) and one FASTA file per locus. What cannot enter is listed with its reason. The default, `own_dir = NULL`, builds the library from GenBank alone.
 
@@ -199,7 +199,7 @@ build_barcoding_folds(
 
 ### Step 6: Barcode Gap
 
-**`analyze_barcode_gap()`**. Intraspecific distances and the distance to the nearest neighbour of another species, per locus, uncorrected and K80. No locus shows a gap, so no fixed distance threshold is used anywhere in the branch.
+**`analyze_barcode_gap()`**. Intraspecific distances and the distance to the nearest neighbour of another species, per locus, uncorrected and K80. No locus shows a gap, so no fixed distance threshold is used anywhere in Module 14.
 
 ```{r, eval = FALSE}
 analyze_barcode_gap(
@@ -217,7 +217,7 @@ analyze_barcode_gap(
 **`classify_barcoding_folds()`**. Two classifiers: the nearest neighbour, with each query added to the training alignment of its fold by `MAFFT --add` (hours on a laptop, in parallel processes), and IdTaxa (Murali *et al*. 2018), which retrains once per fold and takes tens of core-hours. IdTaxa is run once, on a computing cluster, on the final library (`generate_barcoding_job_scripts()`, `merge_barcoding_chunks()`); the script reads its merged tables through the switch `idtaxa_tables` and never trains it.
 
 ```{r, eval = FALSE}
-# The branch classifier of the internal validation: exact leave-one-out over the distance matrix
+# The classifier of the internal validation of Module 14: exact leave-one-out over the distance matrix
 # of the locus, and seconds of running time.
 classify_barcoding_folds(
   library_dir = "11_barcoding/4_library",
@@ -452,7 +452,7 @@ print(utils::read.csv("11_barcoding/11_metrics/TABLE_barcoding_metrics_summary_n
 
 ## Design Decisions
 
-The branch rests on five design decisions:
+Module 14 rests on five design decisions:
 
 1. **Loci and combinations.** Each locus is classified on its own; loci are not concatenated and no combination of loci is evaluated as a unit.
 2. **Unit of assignment.** A graded answer per locus: species, genus or none, with the reason for none. A species is named only above the species threshold of its locus.

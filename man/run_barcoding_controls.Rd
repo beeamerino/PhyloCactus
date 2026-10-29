@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_controls.R
 \name{run_barcoding_controls}
 \alias{run_barcoding_controls}
-\title{Negative Controls of the Molecular Diagnostic Branch}
+\title{Negative Controls of Module 14}
 \usage{
 run_barcoding_controls(
   library_dir = file.path("11_barcoding", "4_library"),
@@ -69,7 +69,7 @@ Invisibly, a list with the tables. Writes \code{TABLE_barcoding_cn1_permutations
 \code{TABLE_barcoding_cn3_resubstitution.csv}.
 }
 \description{
-Step 8 of the branch, and the gate in front of every real figure. Three
+Step 8 of Module 14, and the gate in front of every real figure. Three
 controls, none of which is a result of the method: the three are the condition for a result of
 the method to be interpretable.
 }

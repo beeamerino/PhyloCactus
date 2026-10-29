@@ -8,7 +8,7 @@
 # collapsed), are deterministic, and are checked before they are written.
 # ------------------------------------------------------------------------------
 
-#' Library of the branch, read from the FASTA files of step 4
+#' Library of Module 14, read from the FASTA files of step 4
 #' @param library_dir Character. Output directory of [finalize_barcoding_library()].
 #' @return Data frame with `sid`, `species`, `genus` and `locus`, one row per sequence.
 #' @noRd
@@ -28,7 +28,7 @@
   out
 }
 
-#' Validation folds of the branch, scheme E (species) and scheme G (genus)
+#' Validation folds of Module 14, scheme E (species) and scheme G (genus)
 #'
 #' Scheme E, one sequence left out: for every species with two or more sequences in the locus, one
 #' fold per sequence. Scheme G, one species left out: for every species of a genus with two or more
@@ -155,7 +155,7 @@
 #' Compares only the positions where both sequences carry A, C, G or T, so gaps and ambiguities do
 #' not count. Ties are broken by the alphabetically smallest `sid`, so the result is deterministic.
 #' This is the reference classifier of the negative controls and of the tests, **not** the classifier
-#' of the branch, which is chosen in step 9.
+#' of Module 14, which is chosen in step 9.
 #'
 #' @param train Character vector of aligned sequences named by `sid`.
 #' @param train_labels Character vector of labels named by `sid`.
@@ -180,9 +180,9 @@
   unname(train_labels[sort(best, method = "radix")[1]])
 }
 
-#' Build the Validation Folds of the Molecular Diagnostic Branch
+#' Build the Validation Folds of Module 14
 #'
-#' Step 5 of the branch. Reads the library written by [finalize_barcoding_library()], builds the two
+#' Step 5 of Module 14. Reads the library written by [finalize_barcoding_library()], builds the two
 #' partition schemes (E and G), checks the hard rule on every fold and writes the fold
 #' tables and their summary. The training set is not written: it is the rest of the library of the
 #' locus, and writing it would multiply the size of the tables without adding information.

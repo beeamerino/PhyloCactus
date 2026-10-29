@@ -7,7 +7,7 @@
 # replication threshold there, flags saturation without excluding, and counts identical sequences.
 # ------------------------------------------------------------------------------
 
-#' Read a table written by an earlier step of the branch, naming that step when the file is absent
+#' Read a table written by an earlier step of Module 14, naming that step when the file is absent
 #' @noRd
 .bc_read_step_table <- function(path, step_fn) {
   if (!file.exists(path)) {
@@ -26,7 +26,7 @@
 #' Paralogy surveillance: add `possible_paralog` to a table with a `locus` column
 #'
 #' The loci named in `paralog_loci` (by default `pepC_like`) are
-#' flagged in every output of the branch. The flag informs and never excludes.
+#' flagged in every output of Module 14. The flag informs and never excludes.
 #' @noRd
 .bc_flag_paralog <- function(tab, paralog_loci) {
   if (is.null(tab)) return(tab)
@@ -74,7 +74,7 @@
   }))
 }
 
-#' Curate the Loci of the Molecular Diagnostic Branch
+#' Curate the Loci of Module 14
 #'
 #' Aligns and curates the per-locus FASTA files written by [assemble_barcoding_dataset()] with the
 #' phylogeny's alignment pipeline, [run_alignment_pipeline()], called unchanged and with the
@@ -139,10 +139,10 @@ curate_barcoding_markers <- function(input_dir = file.path("11_barcoding", "1_as
   invisible(manifest)
 }
 
-#' Screen the Curated Loci of the Molecular Diagnostic Branch
+#' Screen the Curated Loci of Module 14
 #'
 #' For each curated locus, recomputes the five context columns (species, species with a replicate, accessions, genera, genera with two or more species) on the
-#' accessions that survived curation, applies the branch's replication threshold to them, flags
+#' accessions that survived curation, applies Module 14's replication threshold to them, flags
 #' saturation (which never excludes a locus), and counts identical aligned sequences per species.
 #' Inputs are read from the directories of the earlier steps, so the screening runs on its own
 #' whenever those directories exist.
@@ -153,7 +153,7 @@ curate_barcoding_markers <- function(input_dir = file.path("11_barcoding", "1_as
 #' @param loci Character vector or `NULL`. Loci to screen. `NULL` (the default) screens every curated
 #'   alignment in `curated_dir`; the threshold then decides which loci enter.
 #' @param output_dir Character. Destination of the screening tables.
-#' @param min_species_with_replica Integer. A locus enters the branch when at least this number of
+#' @param min_species_with_replica Integer. A locus enters Module 14 when at least this number of
 #'   species keep two or more accessions after curation. Defaults to `20L`.
 #' @param saturation_flag_cutoff Numeric. Slope threshold of the saturation proxy, as in
 #'   [run_marker_screening()]. Defaults to `0.3`.

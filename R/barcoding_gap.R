@@ -134,7 +134,7 @@
   list(intra = intra, inter = inter, summary_df = summary_df)
 }
 
-#' Editorial palette of the branch figures
+#' Editorial palette of the figures of Module 14
 #'
 #' The two series of the barcode gap: the first two categorical colours of the package palette
 #' (phylocactus_colours()), which pass every colour-vision check as a pair.
@@ -145,10 +145,10 @@
     text = n[["text"]], line = n[["line"]], rule = n[["rule"]])
 }
 
-#' Editorial theme of the branch figures
+#' Editorial theme of the figures of Module 14
 #'
 #' The theme of the package (theme_phylocactus()), with the title and subtitle aligned
-#' to the panel of the composite figures of this branch.
+#' to the panel of the composite figures of Module 14.
 #' @noRd
 .bc_gap_theme <- function(base_size = 9) {
   theme_phylocactus(base_size = base_size) +
@@ -200,7 +200,7 @@
 
 #' Histogram of the two distributions of one model, as proportions of each distribution
 #'
-#' Editorial rule of the branch: every visible string is English and short, and
+#' Editorial rule of Module 14: every visible string is English and short, and
 #' nothing is written inside the plotting area. The two percentiles are read in the subtitle; the
 #' dashed and dotted lines only mark where they fall.
 #' @noRd
@@ -346,9 +346,9 @@
       theme = ggplot2::theme(plot.caption = ggplot2::element_text(size = 7, colour = col[["text"]], hjust = 0)))
 }
 
-#' Barcode Gap of the Molecular Diagnostic Branch
+#' Barcode Gap of Module 14
 #'
-#' Step 6 of the branch. For every locus of the library, computes the intraspecific distances by
+#' Step 6 of Module 14. For every locus of the library, computes the intraspecific distances by
 #' pairs and, for every sequence, the distance to its nearest neighbour of another species, with the
 #' `raw` and K80 models. Derives the candidate threshold with this rule: the
 #' 95th percentile of the intraspecific distribution, published next to the 5th percentile of the

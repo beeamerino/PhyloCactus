@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_classifier.R
 \name{classify_barcoding_folds}
 \alias{classify_barcoding_folds}
-\title{Classify the Validation Folds of the Molecular Diagnostic Branch}
+\title{Classify the Validation Folds of Module 14}
 \usage{
 classify_barcoding_folds(
   library_dir = file.path("11_barcoding", "4_library"),
@@ -34,7 +34,7 @@ classify_barcoding_folds(
 
 \item{output_dir}{Character. Destination; refused inside a directory of the phylogeny.}
 
-\item{method}{Character. \code{"nn"}, the branch classifier, or \code{"idtaxa"}, the contrast.}
+\item{method}{Character. \code{"nn"}, the classifier of Module 14, or \code{"idtaxa"}, the contrast.}
 
 \item{model}{Character. Distance model of \code{\link[ape:dist.dna]{ape::dist.dna()}}, for \code{"nn"}.}
 
@@ -100,7 +100,7 @@ one row per locus and scheme with the folds, the queries and the seconds they to
 \code{alignment} and \code{orientation}.
 }
 \description{
-Step 7 of the branch. Reads the library of step 4 and the folds of step 5, classifies every query
+Step 7 of Module 14. Reads the library of step 4 and the folds of step 5, classifies every query
 of every fold and writes the raw predictions, one row per query. It aggregates nothing: no
 accuracy, no rate, no mean. The negative controls (step 8) and the metrics (step 10) read
 these tables afterwards.

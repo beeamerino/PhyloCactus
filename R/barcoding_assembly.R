@@ -44,7 +44,7 @@
   unique(trimws(pure[!is.na(pure)]))
 }
 
-#' Taxonomic IDs of the Outgroup of the Molecular Diagnostic Branch
+#' Taxonomic IDs of the Outgroup of Module 14
 #'
 #' The six genus-level NCBI Taxonomy IDs that the outgroup control queries the library with:
 #' the three families that surround Cactaceae.
@@ -57,8 +57,8 @@
 #' *Amphipetalum* (1835425) is not requested: GenBank holds no nucleotide records for it, so the
 #' request would only produce an empty download.
 #'
-#' **This is the branch's own copy**. The phylogeny keeps its list in
-#' `assemble_outgroup_phylotar()` and is not touched, so the branch runs without it. A test compares
+#' **This is Module 14's own copy**. The phylogeny keeps its list in
+#' `assemble_outgroup_phylotar()` and is not touched, so Module 14 runs without it. A test compares
 #' the two and fails if they ever drift apart.
 #'
 #' @return Character vector of six taxonomic IDs.
@@ -115,7 +115,7 @@ barcoding_outgroup_taxids <- function() {
   gsub("[[:space:]]+", "_", hit)
 }
 
-#' FASTA header of the branch, Genus_species|sid
+#' FASTA header of Module 14, Genus_species|sid
 #' @noRd
 .bc_header <- function(species, sid) paste0(species, "|", sid)
 
@@ -315,7 +315,7 @@ barcoding_outgroup_taxids <- function() {
   invisible(paths)
 }
 
-#' Seed metadata with a cache of the branch: only seeds missing from the cache are fetched
+#' Seed metadata with a cache of Module 14: only seeds missing from the cache are fetched
 #'
 #' A seed whose fetch failed is not cached, so the next run tries again.
 #' @noRd
@@ -338,7 +338,7 @@ barcoding_outgroup_taxids <- function() {
   tibble::tibble(Seed = seeds, Species = cached$Species[idx], Description = cached$Description[idx])
 }
 
-#' Compare the branch's cluster-to-locus assignment with the phylogeny's
+#' Compare Module 14's cluster-to-locus assignment with the phylogeny's
 #' @noRd
 .bc_compare_marker_maps <- function(branch, phylogeny) {
   b <- data.frame(ID = as.character(branch$ID), marker_branch = trimws(as.character(branch$Marker_std)),
@@ -354,7 +354,7 @@ barcoding_outgroup_taxids <- function() {
   m
 }
 
-#' Assemble the Reference Library of the Molecular Diagnostic Branch
+#' Assemble the Reference Library of Module 14
 #'
 #' Builds the multi-accession reference library of the molecular diagnostic section from the
 #' `phylotaR` workspace shared with the phylogeny. The workspace is read, or created with the same
@@ -369,7 +369,7 @@ barcoding_outgroup_taxids <- function() {
 #'
 #' @param wd_path Character. The `phylotaR` workspace, shared with the phylogeny (e.g.
 #'   `0_phylotaR_raw_Ingroup`).
-#' @param output_dir Character. Root of the branch. Refused if it lies inside a directory of the
+#' @param output_dir Character. Root of Module 14. Refused if it lies inside a directory of the
 #'   phylogeny. Defaults to `"11_barcoding"`.
 #' @param target_genes_file,genes_map_file Character. Marker definitions; default to the files
 #'   distributed with the package, as in [assemble_ingroup_phylotar()].
@@ -394,7 +394,7 @@ barcoding_outgroup_taxids <- function() {
 #' @param preferred_parent Character. NCBI Taxonomy ID of the focal ingroup, used to decide which
 #'   cluster keeps a sid that sits in two. Defaults to `"3593"`.
 #' @param taxids Character vector or `NULL`. What to mine from GenBank when the workspace of
-#'   `wd_path` does not exist yet, which is what lets the branch run without the phylogeny having
+#'   `wd_path` does not exist yet, which is what lets Module 14 run without the phylogeny having
 #'   run first. `NULL` mines `preferred_parent`, the behaviour of earlier versions. Several IDs are mined
 #'   together, as [barcoding_outgroup_taxids()] returns them for the outgroup control.
 #' @param ncbi_dr Character or `NULL`. Directory of the BLAST+ binaries, used only when the workspace
@@ -407,7 +407,7 @@ barcoding_outgroup_taxids <- function() {
 #'   A notification that cannot be sent is reported and never fails the step. Defaults to `FALSE`.
 #' @param notify_to,notify_credentials Passed to [send_run_notification()] as `to` and `credentials`.
 #' @param phylogeny_map_file Character or `NULL`. Cluster-to-locus table of the phylogeny, compared
-#'   with the branch's own when it exists. Defaults to
+#'   with Module 14's own when it exists. Defaults to
 #'   `1_phylotaR_out_Ingroup/TABLE_CLUSTER_MARKER_ASSIGNMENT_INGROUP.csv` next to `wd_path`.
 #' @return Invisibly, a list with `registry`, `summary`, `marker_map`, `comparison` and `counts`.
 #'   Files written under `output_dir/1_assembly/`: one FASTA per locus,

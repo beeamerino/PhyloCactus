@@ -166,9 +166,9 @@
   unname(stats::quantile(d, q, type = type))
 }
 
-#' Sweep the Threshold of Remoteness of the Molecular Diagnostic Branch
+#' Sweep the Threshold of Remoteness of Module 14
 #'
-#' Step 9 of the branch. Without a rule of remoteness the nearest neighbour names a cactus species
+#' Step 9 of Module 14. Without a rule of remoteness the nearest neighbour names a cactus species
 #' for any query: in the outgroup control, 288 of 312 outgroup queries came out in state 1. This
 #' step applies the rule (a query whose distance to its nearest neighbour exceeds a threshold is
 #' state 3, reason `remoteness`) over every threshold observed, and fixes an operating threshold per
@@ -393,7 +393,7 @@ sweep_barcoding_threshold <- function(classifier_dir = file.path("11_barcoding",
 
 #' Figure of one locus: what the legitimate queries become and how many alien queries are rejected
 #'
-#' Editorial rule of the branch: English, the figures in the
+#' Editorial rule of Module 14: English, the figures in the
 #' subtitle and read from the table, nothing written inside the plotting area.
 #' @noRd
 .bc_threshold_plot <- function(curve_tab, oper_tab, locus, method = "nn") {

@@ -911,7 +911,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
 # the same phylotaR call on the same workspace and assign clusters to loci with the same code.
 # ------------------------------------------------------------------------------
 
-#' phylotaR search term shared by both branches
+#' phylotaR search term shared by the phylogeny and Module 14
 #'
 #' Excludes predicted, unverified, whole-genome shotgun, synthetic, RefSeq and TSA records, and
 #' records named at open nomenclature (sp., aff., cf.), below species (var., subsp.) or as hybrids.

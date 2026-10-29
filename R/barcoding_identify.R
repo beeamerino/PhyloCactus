@@ -397,13 +397,13 @@
 #' Identify user sequences against the barcoding library (step 11 of Tutorial 5)
 #'
 #' Classifies each query against the IdTaxa model of each locus of the library, or of the one
-#' declared, and answers locus by locus with the three states of the branch. It never combines
+#' declared, and answers locus by locus with the three states of Module 14. It never combines
 #' loci into one answer.
 #'
 #' @details
 #' For each locus:
 #' 1. The whole query is tested against the 20-mers of the locus on both strands, with the rule of
-#'    the rest of the branch (share of 0.15, ratio of 3). If it matches, it is classified as it is
+#'    the rest of Module 14 (share of 0.15, ratio of 3). If it matches, it is classified as it is
 #'    (`path = "whole"`). This is the path of a Sanger sequence.
 #' 2. If it does not match and it is longer than 1.5 times the longest library sequence of the
 #'    locus, the region of the query with the most 20-mer hits in a window of that width is cropped

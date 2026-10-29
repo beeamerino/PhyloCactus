@@ -1,12 +1,12 @@
 # -------------------------------------------------------------
-# PhyloCactus: Tutorial 5 - Molecular Diagnostic Branch (11_barcoding/)
+# PhyloCactus: Tutorial 5 - Stage 5, Module 14: molecular identification (11_barcoding/)
 # -------------------------------------------------------------
 # Phases 2 to 11 of PhyloCactus 0.5.0: assembly (with own data, if any), curation, screening,
 # reference library, validation folds, barcode gap, classification of those folds, negative
 # controls, the threshold of remoteness and the metrics per class. The controls of step 8 come
 # before any real figure is read.
 #
-# The branch reads the same phylotaR workspace as the phylogeny (0_phylotaR_raw_Ingroup/)
+# Module 14 reads the same phylotaR workspace as the phylogeny (0_phylotaR_raw_Ingroup/)
 # and writes only under 11_barcoding/. The first run downloads GenBank metadata for the
 # accessions the phylogeny's cache does not hold, so it needs a network connection; later
 # runs read the caches in 11_barcoding/cache/.
@@ -143,7 +143,7 @@ analyze_barcode_gap(
 # distance, never from a threshold: the threshold is swept in step 9 over the scores this step
 # writes. One row per query and nothing aggregated.
 # -------------------------------------------------------------
-# The branch classifier of the internal validation: exact leave-one-out over the distance matrix
+# The classifier of the internal validation of Module 14: exact leave-one-out over the distance matrix
 # of the locus, and seconds of running time.
 classify_barcoding_folds(
   library_dir = "11_barcoding/4_library",
@@ -314,7 +314,7 @@ print(utils::read.csv("11_barcoding/11_metrics/TABLE_barcoding_metrics_summary_n
 
 # -------------------------------------------------------------
 # Figures of the library and its validation (TB1 to TB7 and TB9), drawn from the files of steps 1
-# to 10 into 11_barcoding/figures/, each as PDF and PNG. The schema of the branch (TB8) is drawn once
+# to 10 into 11_barcoding/figures/, each as PDF and PNG. The schema of Module 14 (TB8) is drawn once
 # and is not produced here. The figures of the folds read the IdTaxa predictions when the cluster
 # tables were copied into step 7, and the nearest neighbour through MAFFT --add otherwise; the
 # states of the nearest neighbour are those of the tie structure, before the threshold of

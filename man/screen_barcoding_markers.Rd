@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_curation.R
 \name{screen_barcoding_markers}
 \alias{screen_barcoding_markers}
-\title{Screen the Curated Loci of the Molecular Diagnostic Branch}
+\title{Screen the Curated Loci of Module 14}
 \usage{
 screen_barcoding_markers(
   assembly_dir = file.path("11_barcoding", "1_assembly"),
@@ -25,7 +25,7 @@ alignment in \code{curated_dir}; the threshold then decides which loci enter.}
 
 \item{output_dir}{Character. Destination of the screening tables.}
 
-\item{min_species_with_replica}{Integer. A locus enters the branch when at least this number of
+\item{min_species_with_replica}{Integer. A locus enters Module 14 when at least this number of
 species keep two or more accessions after curation. Defaults to \code{20L}.}
 
 \item{saturation_flag_cutoff}{Numeric. Slope threshold of the saturation proxy, as in
@@ -40,7 +40,7 @@ Invisibly, a list with \code{screening} and \code{identical}. Writes
 }
 \description{
 For each curated locus, recomputes the five context columns (species, species with a replicate, accessions, genera, genera with two or more species) on the
-accessions that survived curation, applies the branch's replication threshold to them, flags
+accessions that survived curation, applies Module 14's replication threshold to them, flags
 saturation (which never excludes a locus), and counts identical aligned sequences per species.
 Inputs are read from the directories of the earlier steps, so the screening runs on its own
 whenever those directories exist.

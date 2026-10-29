@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_validation.R
 \name{build_barcoding_folds}
 \alias{build_barcoding_folds}
-\title{Build the Validation Folds of the Molecular Diagnostic Branch}
+\title{Build the Validation Folds of Module 14}
 \usage{
 build_barcoding_folds(
   library_dir = file.path("11_barcoding", "4_library"),
@@ -23,7 +23,7 @@ Invisibly, a list with \code{folds} (by scheme) and \code{summary}. Writes
 \code{TABLE_barcoding_folds_summary.csv}.
 }
 \description{
-Step 5 of the branch. Reads the library written by \code{\link[=finalize_barcoding_library]{finalize_barcoding_library()}}, builds the two
+Step 5 of Module 14. Reads the library written by \code{\link[=finalize_barcoding_library]{finalize_barcoding_library()}}, builds the two
 partition schemes (E and G), checks the hard rule on every fold and writes the fold
 tables and their summary. The training set is not written: it is the rest of the library of the
 locus, and writing it would multiply the size of the tables without adding information.

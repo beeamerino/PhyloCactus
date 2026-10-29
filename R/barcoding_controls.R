@@ -57,9 +57,9 @@
              stringsAsFactors = FALSE)
 }
 
-#' Negative Controls of the Molecular Diagnostic Branch
+#' Negative Controls of Module 14
 #'
-#' Step 8 of the branch, and the gate in front of every real figure. Three
+#' Step 8 of Module 14, and the gate in front of every real figure. Three
 #' controls, none of which is a result of the method: the three are the condition for a result of
 #' the method to be interpretable.
 #'
@@ -321,9 +321,9 @@ run_barcoding_controls <- function(library_dir = file.path("11_barcoding", "4_li
 
 #' One row per outgroup query, with the distance the threshold of step 9 is swept over
 #'
-#' The outgroup sequences come from the branch's own assembly, so they share the locus but not the
+#' The outgroup sequences come from Module 14's own assembly, so they share the locus but not the
 #' alignment. Positions that one of the two does not have are not comparable, which is the same
-#' rule the rest of the branch uses.
+#' rule the rest of Module 14 uses.
 #'
 #' The state alone does not measure this control. `.bc_classify_nn()` has no rule of remoteness by
 #' design, so an alien query still gets its nearest neighbour and can come back as state 1 with a

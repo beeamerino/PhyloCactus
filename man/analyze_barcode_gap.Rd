@@ -2,7 +2,7 @@
 % Please edit documentation in R/barcoding_gap.R
 \name{analyze_barcode_gap}
 \alias{analyze_barcode_gap}
-\title{Barcode Gap of the Molecular Diagnostic Branch}
+\title{Barcode Gap of Module 14}
 \usage{
 analyze_barcode_gap(
   library_dir = file.path("11_barcoding", "4_library"),
@@ -34,7 +34,7 @@ Invisibly, a list with \code{summary} and \code{distances} (by locus). Writes
 \verb{FIG_barcoding_gap_<locus>.png}.
 }
 \description{
-Step 6 of the branch. For every locus of the library, computes the intraspecific distances by
+Step 6 of Module 14. For every locus of the library, computes the intraspecific distances by
 pairs and, for every sequence, the distance to its nearest neighbour of another species, with the
 \code{raw} and K80 models. Derives the candidate threshold with this rule: the
 95th percentile of the intraspecific distribution, published next to the 5th percentile of the
