@@ -136,17 +136,21 @@ test_that("Tutorial 4 states the data of the tree of Amaral et al. (2022), and t
 
 # Phase 3g (28-10): the five anchors dated without the three bounds of Hernandez-Hernandez et al.
 # (2014). Its ages are in the probe results of the tutorial folder, not in inst/extdata, so the numbers
-# are pinned as text here and traced to those files in the tracing table of the closure.
+# are pinned as text here and traced to those files in the tracing table of the closure. The anchor
+# section was shortened by BMM in 5b (28-10) to what the schemes give, without the arguments.
 test_that("Tutorial 2 states what dating without the internal bounds showed (D14, 3g)", {
   f <- .r53_flat("vignettes", "tutorial-2-cactus-phylogeny-inference.Rmd")
-  for (p in c("Dated without the three bounds of Hernández-Hernández *et al.* (2014)",
-              "moves by 0.15 to 1.02 Ma at the four Cactaceae nodes",
-              "the bounds are inactive under S1",
-              "S3 and S5 place the crowns of Cactoideae, Cacteae and Opuntioideae above the maxima",
-              "the ACP crown of Wu *et al.* (2026), 43.09 Ma",
-              "inside their intervals: nine, against eight under S4",
-              "the agreement does not show that S1 is correct")) {
+  for (p in c("Dated without the three bounds of Hernández-Hernández *et al.* (2014), S1 changes the four Cactaceae nodes by 0.15 to 1.02 Ma",
+              "it places nine of ten published crown ages",
+              "inside their intervals, against eight under S4, two under S3 and one under S5",
+              "the ACP crown is estimated at 46.08 Ma",
+              "the Cactaceae nodes differ from S1 by 0.03 to 0.74 Ma")) {
     expect_match(f, p, fixed = TRUE, info = p)
+  }
+  # The section describes the schemes; the arguments for S1 stay in the minutes of 3b and 3g.
+  for (p in c("the effect of the anchor exceeds that of the smoothing", "their ages are the bounds, not estimates",
+              "the agreement does not show that S1 is correct")) {
+    expect_false(grepl(p, f, fixed = TRUE), info = p)
   }
   # Every source the statement cites is in the reference list, with its DOI.
   expect_match(f, "Wu *et al*. 2026. Integrated analysis of fossils and molecular divergence time estimates a latest Jurassic origin of angiosperms. *Nature Plants*, 12(6), 1242–1251. <https://doi.org/10.1038/s41477-026-02311-x>", fixed = TRUE)
