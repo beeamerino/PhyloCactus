@@ -447,3 +447,157 @@ test_that("automate_treePL() repeats the check on a cross-validation read from d
     warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
   expect_true(any(grepl("1e-04 (1 of 10)", w, fixed = TRUE)))
 })
+
+# Anomalous subsamples excluded from the selection (phase 3h of the closure of 0.5.2)
+# ---------------------------------------------------------------------------
+# In the re-dating of 30-10-2026, under four calibration schemes without internal bounds, one or two
+# random subsamples of each cross-validation fitted badly from 0.1 down to 1e-07 (increments of 700
+# to 2400, or a failure of 1e+38, against 20 to 80 for the other subsamples) and normally from 1e-08
+# down. They moved every selection to 1e-09 to 1e-11; summed without them, each curve had its
+# minimum at 1e-05. A subsample is anomalous when it fails (D13) or adds more than
+# `cv_outlier_factor` times the median increment at any value of 0.1 or below. The values are
+# compared on one set of subsamples: after a failure the running sum hides the subsamples that
+# follow, so either the values with hidden subsamples or the hidden subsamples are left out,
+# whichever keeps more subsample-by-value cells.
+
+# Nine subsamples with a minimum at 1e-05; the fourth adds 950 from 0.1 to 1e-07 and 45 below, which
+# moves the minimum of the plain sum to 1e-08 (the young tree of Zuntini et al. 2024 in 3h).
+fixture_outlier <- function() {
+  off <- c(8, 6, 4, 3, 1, 0, 0.5, 1, 1.5, 2, 2.5)
+  m <- matrix(30 + rep(off, each = 10) + rep(0:9, 11) / 10, nrow = length(grid_d13), byrow = TRUE)
+  m[1, 4] <- 80
+  m[2:8, 4] <- 950
+  m[9:11, 4] <- 45
+  m
+}
+
+test_that("the increment of every subsample is read, and those hidden by a failure are marked lost", {
+  tmp <- withr::local_tempdir()
+  f <- cv_log_with(tmp, grid_d13, fixture_away(), selected = 1e-8)
+  inc <- .read_cv_increments(f[["log"]])
+  expect_setequal(names(inc), c("smoothing", "subsample", "increment", "failed", "lost"))
+  expect_equal(nrow(inc), length(grid_d13) * 10L)
+  at <- function(s, i) inc[abs(log10(inc$smoothing / s)) < 1e-9 & inc$subsample == i, ]
+  expect_true(at(1e-5, 7)$failed)
+  expect_true(all(vapply(8:10, function(i) at(1e-5, i)$lost, logical(1))))
+  expect_true(all(is.na(vapply(8:10, function(i) at(1e-5, i)$increment, numeric(1)))))
+  expect_false(at(1e-6, 8)$lost)
+  expect_equal(at(1e-6, 8)$increment, 31.7, tolerance = 1e-6)
+  expect_null(.read_cv_increments(file.path(tmp, "absent.log")))
+})
+
+test_that("an anomalous subsample is excluded and the selection falls on the minimum of the others", {
+  tmp <- withr::local_tempdir()
+  f <- cv_log_with(tmp, grid_d13, fixture_outlier(), selected = 1e-8)
+  expect_equal(.select_cv_smoothing(f[["cv"]])$smoothing, 1e-8)
+  r <- .robust_cv_curve(.read_cv_increments(f[["log"]]), factor = 5)
+  expect_equal(r$excluded, 4L)
+  expect_equal(r$smoothing, 1e-5)
+  expect_equal(r$shape, "interior")
+  expect_length(r$dropped_values, 0L)
+  expect_length(r$dropped_subsamples, 0L)
+  expect_true(all(r$table$smoothing <= 0.1))
+  expect_null(.robust_cv_curve(.read_cv_increments(f[["log"]]), factor = NULL))
+})
+
+test_that("with a failure hiding later subsamples, the hidden subsamples are left out when that keeps more cells", {
+  tmp <- withr::local_tempdir()
+  # The seventh subsample fails from 0.1 to 1e-05 (Ramirez-Barahona et al. 2020 in 3h): leaving out
+  # subsamples 8 to 10 keeps 6 x 10 cells; leaving out the five values keeps 9 x 5.
+  m <- fixture_outlier(); m[, 4] <- 30 + c(8, 6, 4, 3, 1, 0, 0.5, 1, 1.5, 2, 2.5) + 0.3
+  m[2:6, 7] <- 4.1e38
+  f <- cv_log_with(tmp, grid_d13, m, selected = 1e-8)
+  r <- .robust_cv_curve(.read_cv_increments(f[["log"]]), factor = 5)
+  expect_equal(r$excluded, 7L)
+  expect_equal(r$dropped_subsamples, 8:10)
+  expect_length(r$dropped_values, 0L)
+  expect_equal(r$smoothing, 1e-5)
+})
+
+test_that("with a failure at one value only, that value is left out when that keeps more cells", {
+  tmp <- withr::local_tempdir()
+  # The second subsample fails at 0.1 only (the old tree of Zuntini et al. 2024 in 3h): leaving out
+  # the value keeps 9 x 9 cells; leaving out the hidden subsamples would keep 1 x 10.
+  m <- fixture_outlier(); m[, 4] <- 30 + c(8, 6, 4, 3, 1, 0, 0.5, 1, 1.5, 2, 2.5) + 0.3
+  m[2, 2] <- 3.7e40
+  f <- cv_log_with(tmp, grid_d13, m, selected = 1e-5)
+  r <- .robust_cv_curve(.read_cv_increments(f[["log"]]), factor = 5)
+  expect_equal(r$excluded, 2L)
+  expect_equal(r$dropped_values, 0.1)
+  expect_length(r$dropped_subsamples, 0L)
+  expect_equal(r$smoothing, 1e-5)
+})
+
+test_that("without an anomalous subsample nothing is excluded, so the selection is that of the plain sum", {
+  tmp <- withr::local_tempdir()
+  # As in the reference run: failures above 0.1 only.
+  m <- fixture_away(); m[, 7] <- 30; m[1, c(3, 5)] <- 9.3e40
+  f <- cv_log_with(tmp, grid_d13, m, selected = 1e-8)
+  r <- .robust_cv_curve(.read_cv_increments(f[["log"]]), factor = 5)
+  expect_length(r$excluded, 0L)
+  expect_equal(r$smoothing, .select_cv_smoothing(f[["cv"]])$smoothing)
+})
+
+test_that("too few subsamples left is reported, and no curve is returned", {
+  tmp <- withr::local_tempdir()
+  # More than half of the subsamples cannot exceed five times the median at one value, so too few
+  # remain only when subsamples fail: here subsamples 1 to 6 each fail at one value.
+  m <- fixture_outlier()
+  for (i in 1:6) m[i + 1L, i] <- 2e39
+  f <- cv_log_with(tmp, grid_d13, m, selected = 1e-8)
+  r <- .robust_cv_curve(.read_cv_increments(f[["log"]]), factor = 5)
+  expect_null(r$table)
+  expect_match(r$reason, "fewer than 5 subsamples", fixed = TRUE)
+})
+
+# A stand-in treePL that answers the priming, returns the fixture as the cross-validation and writes
+# an ultrametric tree as the dating.
+standin_treepl <- function(tmp, fx) {
+  bin <- file.path(tmp, "treePL_standin")
+  writeLines(c("#!/bin/sh", "cfg=\"$1\"",
+               "if grep -q '^prime$' \"$cfg\"; then",
+               "  printf 'PLACE THE LINES BELOW IN THE CONFIGURATION FILE\\nopt = 1\\noptad = 1\\noptcvad = 1\\n'",
+               "elif grep -q '^randomcv$' \"$cfg\"; then",
+               paste0("  cp '", fx[["cv"]], "' \"$(sed -n 's/^cvoutfile = //p' \"$cfg\")\""),
+               paste0("  cat '", fx[["log"]], "'"),
+               "else",
+               "  echo '((A:1,B:1):1,(C:1,D:1):1);' > \"$(sed -n 's/^outfile = //p' \"$cfg\")\"",
+               "fi"), bin)
+  Sys.chmod(bin, "0755")
+  bin
+}
+
+test_that("run_treePL_cv() selects without the anomalous subsample by default, says so and writes the curve", {
+  skip_if_not_installed("ape")
+  skip_if(.Platform$OS.type != "unix", "requires a POSIX shell for the stand-in treePL")
+  tmp <- withr::local_tempdir()
+  fx <- cv_log_with(tmp, grid_d13, fixture_outlier(), selected = 1e-5)
+  bin <- standin_treepl(tmp, fx)
+  tr <- file.path(tmp, "t.tree")
+  ape::write.tree(ape::read.tree(text = "((A:0.1,B:0.1):0.1,(C:0.1,D:0.1):0.1);"), tr)
+  cfg <- file.path(tmp, "t.cfg")
+  writeLines(c("numsites = 1000", "mrca = root A D", "min = root 1", "max = root 5"), cfg)
+  wd <- file.path(tmp, "wd")
+  w <- character(0)
+  res <- withCallingHandlers(
+    run_treePL_cv(cfg, tr, "fx", n_prime = 1L, treepl_bin = bin, work_dir = wd, quiet = TRUE),
+    warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
+  expect_equal(res$smoothing, 1e-5)
+  expect_equal(res$cv_smoothing_all_subsamples, 1e-8)
+  expect_equal(res$cv_excluded_subsamples, 4L)
+  expect_true(any(grepl("subsample 4", w, fixed = TRUE)))
+  expect_true(file.exists(file.path(wd, "cv_fx_selection.csv")))
+  expect_true(file.exists(file.path(wd, "cv_fx_selection.txt")))
+  expect_true(any(grepl("^smooth = 0.00001$", readLines(file.path(wd, "configure_smooth_fx")))))
+
+  res0 <- suppressWarnings(run_treePL_cv(cfg, tr, "fx", n_prime = 1L, treepl_bin = bin,
+                                         work_dir = file.path(tmp, "wd0"), quiet = TRUE,
+                                         cv_outlier_factor = NULL))
+  expect_equal(res0$smoothing, 1e-8)
+})
+
+test_that("automate_treePL() passes cv_outlier_factor on, with 5 as its default", {
+  expect_true("cv_outlier_factor" %in% names(formals(automate_treePL)))
+  expect_equal(formals(automate_treePL)$cv_outlier_factor, 5)
+  expect_equal(formals(run_treePL_cv)$cv_outlier_factor, 5)
+})
