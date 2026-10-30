@@ -14,6 +14,7 @@ run_treePL_cv(
   cvstart = 1000,
   cvstop = 1e-14,
   cv_nthreads = 1L,
+  cv_outlier_factor = 5,
   treepl_bin = "treePL",
   work_dir = NULL,
   quiet = FALSE
@@ -57,6 +58,11 @@ the same \code{seed} return different cross-validation curves and can select dif
 values. With one thread the curve is reproducible for a given \code{seed}, at a cost of about 4\% in
 wall-clock time on the reference dataset.}
 
+\item{cv_outlier_factor}{Number or \code{NULL}. A random subsample of the cross-validation that fails,
+or adds more than this many times the median chi-square increment at any smoothing value of 0.1
+or below, is left out of the selection. Defaults to \code{5}; \code{NULL} selects on the sum over every
+subsample, as before 0.5.3. See the section on anomalous subsamples below.}
+
 \item{treepl_bin}{Name or path of the \code{treePL} binary.}
 
 \item{work_dir}{Directory to run in. Defaults to the current one. \code{treePL} writes beside its
@@ -68,7 +74,9 @@ configuration, so every intermediate lands here.}
 Invisibly, a list with \code{smoothing}, \code{cv_table}, \code{cv_at_edge}, \code{cv_shape},
 \code{cv_failures} (per smoothing value, the subsamples evaluated and how many failed; \code{NULL} when
 the log carries no per-subsample line), \code{cv_smoothing_without_failures} (see the section on
-failed subsamples below), \code{prime_lines}, \code{primes}, \code{tree_file} (the chronogram written) and the
+failed subsamples below), \code{cv_smoothing_all_subsamples}, \code{cv_excluded_subsamples} and
+\code{cv_table_selection} (see the section on anomalous subsamples below), \code{prime_lines}, \code{primes},
+\code{tree_file} (the chronogram written) and the
 paths of the three configurations.
 }
 \description{
@@ -128,6 +136,26 @@ above 0.1. On that dataset, two of five seeds lost one subsample at 1e-07 to 1e-
 0.1 or below and selected 1e-05. The running sum is printed with eight significant
 digits, so the chi-square of the subsamples after a failure cannot be recovered from the log, and
 the count of failures is a lower bound.
+}
+
+\section{Anomalous subsamples}{
+
+A failed subsample is not the only one that can move the selection. In the re-dating of the
+reference dataset under four calibration schemes without internal bounds (closure of 0.5.2, phase
+3h), one or two of the ten subsamples of each cross-validation added 700 to 2400 to the chi-square
+from 0.1 down to 1e-07, against 20 to 80 for the others, and a normal amount from 1e-08 down; summed
+over every subsample, the curves selected 1e-09 to 1e-11, and summed without those subsamples each
+had its minimum at 1e-05. With \code{cv_outlier_factor} set, a subsample that fails at any value of 0.1
+or below, or adds more than \code{cv_outlier_factor} times the median increment of the subsamples at
+such a value, is left out, and the smoothing is selected on the curve of the remaining subsamples
+over the values of 0.1 or below. The values are compared on one set of subsamples: because the
+subsamples after a failure are lost at that value, either those values or those subsamples are
+left out, whichever keeps more subsample-by-value cells. The curve is classified as the plain sum
+is (see above). When no subsample is anomalous the selection is that of the plain sum. When fewer
+than five subsamples or five values would remain, the function warns and selects on the plain
+sum. A warning names the subsamples left out and why, and gives the selection over every
+subsample, returned as \code{cv_smoothing_all_subsamples}; both curves are written to
+\verb{cv_<label>_selection.csv}, and the account to \verb{cv_<label>_selection.txt}.
 }
 
 \references{

@@ -366,6 +366,10 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL, treepl_bin = "treePL"
 #'   reproduce the run.
 #' @param cv_nthreads Integer. Number of threads for the cross-validation stage. Defaults to `1L`,
 #'   which makes the cross-validation curve reproducible for a given `seed`. See [run_treePL_cv()].
+#' @param cv_outlier_factor Number or `NULL`. Random subsamples of the cross-validation that fail, or
+#'   add more than this many times the median chi-square increment at a smoothing value of 0.1 or
+#'   below, are left out of the selection of the smoothing. Defaults to `5`; `NULL` selects on every
+#'   subsample. See the section on anomalous subsamples of [run_treePL_cv()].
 #' @param notify Logical. Send an email when the run ends, whether it finished or failed. The
 #'   message carries the status, the start and end times, the elapsed time, the host and the paths
 #'   of the outputs. Intended for this step in particular, which runs on a local machine for hours
@@ -405,8 +409,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             rescale_factor = 100, n_prime = 10L,
                             prime_rule = c("lowest", "modal"),
                             cv_method = c("randomcv", "cv"),
-                            cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, wrapper_sh = NULL,
-                            notify = FALSE, notify_to = NULL, notify_credentials = NULL,
+                            cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, cv_outlier_factor = 5,
+                            wrapper_sh = NULL, notify = FALSE, notify_to = NULL, notify_credentials = NULL,
                             treepl_bin = "treePL") {
 
   # The work itself is unchanged and lives in .automate_treePL_run(). This wrapper exists only to
@@ -421,7 +425,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
       numsites = numsites, outgroup = outgroup, seed = seed,
       rescale_factor = rescale_factor, n_prime = n_prime, prime_rule = prime_rule,
       cv_method = cv_method, cvstart = cvstart, cvstop = cvstop, cv_nthreads = cv_nthreads,
-      wrapper_sh = wrapper_sh, treepl_bin = treepl_bin
+      cv_outlier_factor = cv_outlier_factor, wrapper_sh = wrapper_sh, treepl_bin = treepl_bin
     )
   }
 
@@ -467,8 +471,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             rescale_factor = 100, n_prime = 10L,
                             prime_rule = c("lowest", "modal"),
                             cv_method = c("randomcv", "cv"),
-                            cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, wrapper_sh = NULL,
-                            treepl_bin = "treePL") {
+                            cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, cv_outlier_factor = 5,
+                            wrapper_sh = NULL, treepl_bin = "treePL") {
 
   prime_rule <- match.arg(prime_rule)
   cv_method <- match.arg(cv_method)
@@ -615,6 +619,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                   cvstart = cvstart,
                   cvstop = cvstop,
                   cv_nthreads = cv_nthreads,
+                  cv_outlier_factor = cv_outlier_factor,
                   treepl_bin = treepl_bin,
                   work_dir = ml_dir)
   } else {
