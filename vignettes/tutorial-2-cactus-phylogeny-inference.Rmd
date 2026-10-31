@@ -536,6 +536,8 @@ Some random subsamples fit badly at every low smoothing value. In the reference 
 
 In the reference run (scheme 1) the selection left out the seventh subsample and the eighth to tenth, which it hides, and rests on six subsamples. On their sum the curve has an interior minimum at $10^{-5}$: the lowest $\chi^2$, 297.43, lies 1.3% below the value at $10^{-6}$ (301.32) and 3.2% below that at $10^{-4}$ (307.41). Below $10^{-6}$ the $\chi^2$ stays between 305.81 and 322.05; above $10^{-4}$ it is 305.98 at $10^{-3}$, 310.87 at $10^{-2}$ and 429.24 at 0.1. Summed over every subsample, the minimum falls at $10^{-9}$. Each of the three schemes selects $10^{-5}$ in this way (over every subsample, $10^{-9}$ to $10^{-11}$) and is dated at it. `report_smoothing_sensitivity()` dates the same tree at values across the grid and beyond it; under scheme 1, from $10^{-14}$ to $10^{-2}$, the root moves by 3.13 Ma, the crown of Cactaceae by 2.42 Ma, that of Cactoideae by 1.07 Ma, that of Cacteae by 0.75 Ma and that of Opuntioideae by 0.39 Ma. The age of `ACP_root` does not vary, because it is the fixed calibration.
 
+That range is not the effect of the smoothing alone. The cross-validation and the dating under scheme 1 were repeated with four further seeds of `treePL` beside the reference seed (79992967), which reproduced the distributed chronogram exactly. With the anomalous subsamples left out, the five seeds selected $10^{-5}$, $10^{-3}$, $10^{-3}$, $10^{-4}$ and $10^{-2}$, each on an interior curve (summed over every subsample, $10^{-9}$, $10^{-3}$, $10^{-2}$, $10^{-11}$ and $10^{-9}$): the cross-validation does not identify a smoothing value on this tree. At a single smoothing value the ages move between seeds by up to 3.53 Ma (root), 5.38 Ma (Cactaceae), 2.04 Ma (Cactoideae), 1.39 Ma (Cacteae) and 1.05 Ma (Opuntioideae), more than half their range over the smoothing values under the reference seed, so `TABLE_smoothing_sensitivity.csv`, written with one seed, mixes the effect of the smoothing with that of the optimizer. At $10^{-5}$, over the five seeds, the root is 44.35 to 45.53 Ma, the crown of Cactaceae 22.84 to 24.59 Ma, that of Cactoideae 17.71 to 18.52 Ma, that of Cacteae 13.30 to 14.28 Ma and that of Opuntioideae 10.20 to 10.71 Ma, inside the percentiles of scheme 1 over the replicates in the table above. Over the five seeds and the eight smoothing values from $10^{-14}$ to $10^{-2}$, the crown of Cactaceae ranges from 20.96 to 26.34 Ma. The distributed chronogram keeps the reference seed and $10^{-5}$.
+
 
 The code for Module 10:
 
@@ -722,6 +724,9 @@ if (file.exists(cv_file)) {
 # age is fixed, so the ages read are those of the root and of the crowns of Cactaceae, Cactoideae,
 # Cacteae and Opuntioideae, given to `nodes` as sets of terminals. Read the range of each node from
 # 1e-14 to 1e-02; values of 1 and above lie outside the part of the curve the selection reads.
+# Under scheme 1, five seeds of treePL selected 1e-05 to 1e-02, so
+# the cross-validation does not identify a smoothing value on this tree, and the table below,
+# written with one seed, mixes the effect of the smoothing with that of the optimizer (Tutorial 2).
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")
 if (file.exists(sensitivity_cfg)) {
   cat("\nRunning smoothing sensitivity analysis across 1e-14 to 100...\n")
