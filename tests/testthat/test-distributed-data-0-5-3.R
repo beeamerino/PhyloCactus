@@ -229,9 +229,11 @@ test_that("README and Tutorial 1 say how to obtain the checklist, with its versi
   for (f in list(c("README.md"), c("vignettes", "tutorial-1-cactus-phylogeny-prep.Rmd"))) {
     x <- do.call(.dd_read, as.list(f))
     for (k in c("Caryophyllales.org", "Korotkova", "Willdenowia", "PHYLOCACTUS_CHECKLIST",
-                "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", "0ab7855cef6fe7db0e0105646d5fee08"))
+                "0ab7855cef6fe7db0e0105646d5fee08"))
       expect_match(x, k, fixed = TRUE, info = paste(f[length(f)], k))
   }
+  # The file name of the workbook the reference run read is given in the README (BMM, 30-10)
+  expect_match(.dd_read("README.md"), "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", fixed = TRUE)
 })
 
 # ---- Reference trees (plan 5.4) ----------------------------------------------------------------

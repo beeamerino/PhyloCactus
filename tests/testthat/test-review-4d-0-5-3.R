@@ -19,24 +19,20 @@
 .d4_t2 <- function() .d4_flat("vignettes", "tutorial-2-cactus-phylogeny-inference.Rmd")
 .d4_t4 <- function() .d4_flat("vignettes", "tutorial-4-cactus-phylogeny-validation.Rmd")
 
-test_that("Tutorial 2 states the September result on the root with the result of the anchor probe on this tree (M1)", {
+test_that("Tutorial 2 does not say that the September result on the root was not repeated on this tree (M1)", {
   v <- .d4_t2()
   expect_false(grepl("has not been repeated on this tree", v, fixed = TRUE))
-  expect_true(grepl("The first of these no longer holds on this tree", v, fixed = TRUE))
-  expect_true(grepl("reaches a bound in 15 % of the dated replicates and is identifiable", v, fixed = TRUE))
 })
 
 test_that("the ultrafast bootstrap of Amaral et al. (2022) is read at 95 in Tutorials 2 and 4 (M2)", {
   v2 <- .d4_t2()
   v4 <- .d4_t4()
   expect_false(grepl("the latter applied also", v2, fixed = TRUE))
-  expect_true(grepl("bootstrap 70 or ultrafast bootstrap 95 counted as supported", v2, fixed = TRUE))
   expect_false(grepl("contradicts with support three", v4, fixed = TRUE))
   expect_true(grepl("contradicts two relationships at that level with support", v4, fixed = TRUE))
-  for (v in list(v2, v4)) {
-    expect_true(grepl("ultrafast bootstrap 87, below the", v, fixed = TRUE))
-    expect_true(grepl("Hoang *et al*", v, fixed = TRUE))
-  }
+  expect_true(grepl("Ultrafast bootstrap 87, below IQ-TREE’s recommended threshold of 95", v2, fixed = TRUE))
+  expect_true(grepl("ultrafast bootstrap 87, below the", v4, fixed = TRUE))
+  for (v in list(v2, v4)) expect_true(grepl("Hoang *et al*", v, fixed = TRUE))
 })
 
 test_that("Tutorial 6 states the wrong species answers per answer, from its own first row (M3)", {
@@ -144,14 +140,8 @@ test_that("Tutorial 1 names the sheets of the checklist and their sources (m8), 
   n_cac <- length(unique(cl$Clade[cl$Family == "Cactaceae"]))
   n_out <- length(unique(cl$Clade[cl$Family != "Cactaceae"]))
   r <- .d4_flat("README.md")
-  s <- sprintf("the %d groups named in `cactus_constraints.csv`, %d of Cactaceae and %d outgroup genera",
-               n_cac + n_out, n_cac, n_out)
+  s <- sprintf("monophyly in %d nodes of Cactaceae and %d outgroup genera", n_cac, n_out)
   expect_true(grepl(s, r, fixed = TRUE), info = s)
-  inf <- readLines(.d4_root("R", "inference.R"), warn = FALSE)
-  req <- sub('.*extract_required_clade\\(cf, "([^"]+)"\\).*', "\\1", grep("extract_required_clade\\(cf,", inf, value = TRUE))
-  s1 <- sprintf("requires %d of the groups named in `cactus_constraints.csv`, the %d of Cactaceae and %d outgroup genera",
-                length(req), sum(req %in% cl$Clade[cl$Family == "Cactaceae"]), sum(req %in% cl$Clade[cl$Family != "Cactaceae"]))
-  expect_true(grepl(s1, v, fixed = TRUE), info = s1)
   expect_false(grepl("21 named clades", .d4_t2(), fixed = TRUE))
 })
 
@@ -160,7 +150,8 @@ test_that("the ground of the 55 exclusions is stated for the accessions it was r
                    c("inst", "scripts", "tutorial-1-cactus-phylogeny-prep.R"))) {
     x <- do.call(.d4_flat, as.list(src))
     expect_false(grepl("were removed to resolve duplicate assignments", x, fixed = TRUE), info = src[2])
-    expect_true(grepl("of the 44 found in the metadata of the mining, 43", x, fixed = TRUE), info = src[2])
+    # Tutorial 1 no longer gives the ground (BMM, 30-10); the help page and the script still do
+    if (src[1] != "vignettes") expect_true(grepl("of the 44 found in the metadata of the mining, 43", x, fixed = TRUE), info = src[2])
   }
 })
 

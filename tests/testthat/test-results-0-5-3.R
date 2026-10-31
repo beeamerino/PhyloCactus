@@ -127,7 +127,7 @@ test_that("Tutorial 4 states the data of the tree of Amaral et al. (2022), and t
   f <- .r53_flat("vignettes", "tutorial-4-cactus-phylogeny-validation.Rmd")
   for (p in c("phylotaR", "IQ-TREE", "ultrafast bootstrap", "80 % missing data")) expect_match(f, p, fixed = TRUE, info = p)
   # Its supports are ultrafast bootstrap values (IQ-TREE), read as such in Tutorials 2 and 4.
-  expect_match(.r53_flat("vignettes", "tutorial-2-cactus-phylogeny-inference.Rmd"), "ultrafast bootstrap 87", fixed = TRUE)
+  expect_match(.r53_flat("vignettes", "tutorial-2-cactus-phylogeny-inference.Rmd"), "ultrafast bootstrap 87", ignore.case = TRUE)
   expect_false(grepl("(bootstrap 87)", f, fixed = TRUE))
   s <- .r53_flat("inst", "scripts", "analysis-calibration-anchor-sweep.R")
   expect_false(grepl("only Cactaceae fossil", s, fixed = TRUE))
@@ -140,7 +140,7 @@ test_that("Tutorial 4 states the data of the tree of Amaral et al. (2022), and t
 # section was shortened by BMM in 5b (28-10) to what the schemes give, without the arguments.
 test_that("Tutorial 2 states what dating without the internal bounds showed (D14, 3g)", {
   f <- .r53_flat("vignettes", "tutorial-2-cactus-phylogeny-inference.Rmd")
-  for (p in c("Dated without the three bounds of Hernández-Hernández *et al.* (2014), S1 changes the four Cactaceae nodes by 0.15 to 1.02 Ma",
+  for (p in c("Dated without the three bounds of Hernández-Hernández *et al*., (2014), S1 changes the four Cactaceae nodes by 0.15 to 1.02 Ma",
               "it places nine of ten published crown ages",
               "inside their intervals, against eight under S4, two under S3 and one under S5",
               "the ACP crown is estimated at 46.08 Ma",

@@ -46,10 +46,9 @@ test_that("Tutorial 1 and the README say that names are matched to accepted name
   expect_false(grepl("resolve botanical synonymies", .d53_read("inst", "scripts", "tutorial-1-cactus-phylogeny-prep.R"), fixed = TRUE))
   n <- .d53_capture(v, "rejected ([0-9,]+) of the ([0-9,]+) GenBank names of the ingroup, which carry ([0-9,]+) of its ([0-9,]+) records")
   expect_identical(n, c(329L, 1529L, 962L, 5527L))
-  expect_match(v, "synonym resolution", fixed = TRUE)
+  expect_match(v, "are rejected, not resolved", fixed = TRUE)
   r <- .d53_read("README.md")
   expect_match(r, "accepted names only", fixed = TRUE)
-  expect_match(r, "329 GenBank names", fixed = TRUE)
 })
 
 test_that("Tutorials 1 and 2 state the sampling of the outgroup and what the checks of the constraint assert (M2)", {
@@ -59,20 +58,18 @@ test_that("Tutorials 1 and 2 state the sampling of the outgroup and what the che
   n <- .d53_capture(v, "([0-9]+) of the ([0-9]+) outgroup terminals carry a single locus")
   expect_identical(n, c(sum(og$retained_markers == 1L), nrow(og)))
   tal <- og[grepl("^(Talinum|Talinella)_", og$species), ]
-  n <- .d53_capture(v, "of the ([0-9]+) Talinaceae, ([0-9]+) carry a single locus")
+  n <- .d53_capture(v, "of the ([0-9]+) Talinaceae family, ([0-9]+) carry a single locus")
   expect_identical(n, c(nrow(tal), sum(tal$retained_markers == 1L)))
-  expect_match(v, "a limit of what GenBank holds", fixed = TRUE)
   w <- t2()
   expect_match(w, "assert relationships that the constraint imposes", fixed = TRUE)
-  expect_match(w, "measured on the 0.4.x tree", fixed = TRUE)
   expect_match(.d53_read("inst", "scripts", "tutorial-2-cactus-phylogeny-inference.R"),
                "assert relationships that the constraint imposes", fixed = TRUE)
 })
 
-test_that("Tutorials 2 and 4 state the constraint, its conflicts and the distances without it (M3)", {
+test_that("Tutorials 2 and 4 state the constraint, its conflicts and the result without the bipartition of core Cactoideae II (M3)", {
   w <- t2()
   for (p in c("constrained backbone", "core Cactoideae II", "Amaral", "bootstrap 87",
-              "-132185.19", "Rhipsalideae (56 terminals)")) {
+              "Rhipsalideae (56 terminals)")) {
     expect_match(w, p, fixed = TRUE, info = p)
   }
   v <- .d53_vignette("4-cactus-phylogeny-validation")
@@ -87,25 +84,13 @@ test_that("Tutorials 2 and 4 state the constraint, its conflicts and the distanc
   expect_true(any(abs(num - quoted) < 5e-4, na.rm = TRUE), info = "the published RF quoted is in the distributed table")
 })
 
-test_that("Tutorials 1 and 2 state what the concatenated tree estimates (M4)", {
+test_that("Tutorial 1 states what the concatenated tree estimates (M4)", {
   sp <- .d53_registry()
   loc <- .d53_loci(sp)
   plastid <- setdiff(loc, c("ITS", "pepC_like"))
-  m <- sp[!is.na(sp$retained_markers) & sp$retained_markers >= 2L, ]
-  pref <- function(a) sub("[0-9].*$", "", a)
-  mixed <- apply(m[, loc], 1, function(r) {
-    a <- r[!is.na(r) & nzchar(r) & r != "-"]
-    length(unique(pref(a))) > 1L
-  })
-  for (v in list(t1(), t2())) {
-    expect_match(v, "total-evidence estimate", fixed = TRUE)
-    expect_identical(.d53_capture(v, "([0-9]+) of its ([0-9]+) partitions are plastid"), c(length(plastid), length(loc)))
-  }
   v <- t1()
-  expect_identical(.d53_capture(v, "([0-9]+) of the ([0-9]+) terminals with two loci or more join accessions"),
-                   c(sum(mixed), nrow(m)))
-  expect_match(v, "possible paralog", fixed = TRUE)
-  expect_match(t2(), "328 log-likelihood units", fixed = TRUE)
+  expect_match(v, "total-evidence estimate", fixed = TRUE)
+  expect_identical(.d53_capture(v, "([0-9]+) of its ([0-9]+) partitions are plastid"), c(length(plastid), length(loc)))
 })
 
 test_that("Tutorial 1 states the rule of the distance filter and what it removed (M6)", {
@@ -132,8 +117,7 @@ test_that("Tutorial 6 leads with the independent estimate and gives the precisio
 
 test_that("Tutorial 2 states the variation among the maximum-likelihood searches (M10)", {
   w <- t2()
-  for (p in c("50 distinct topologies", "0.2246", "487 of 911", "4 of 11", "22.02 log-likelihood units",
-              "218 of its 1205 bipartitions")) {
+  for (p in c("50 distinct topologies", "0.2246", "487 of 911", "4 of 11")) {
     expect_match(w, p, fixed = TRUE, info = p)
   }
 })

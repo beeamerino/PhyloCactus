@@ -50,7 +50,7 @@ test_that("Tutorials 1 and 2 and the help of the search and bootstrap functions 
   }
   t2 <- gsub("\\s+", " ", .p2_read("vignettes", "tutorial-2-cactus-phylogeny-inference.Rmd"))
   expect_true(grepl("after 550 of 1000 replicates", t2, fixed = TRUE))
-  expect_true(grepl("(1208 taxa, 13 700 sites, 7899 patterns, 13 partitions) took 4468 s", t2, fixed = TRUE))
+  expect_true(grepl("On an AMD EPYC 9754 node with 25 workers and 75 threads (3 per worker), 50 starting trees took 4468 s", t2, fixed = TRUE))
   t1 <- gsub("\\s+", " ", .p2_read("vignettes", "tutorial-1-cactus-phylogeny-prep.Rmd"))
   expect_true(grepl("`trnT-psbD` held 57 ingroup sequences", t1, fixed = TRUE))
   for (rd in c("generate_bootstrap_script.Rd", "generate_ml_search_script.Rd")) {

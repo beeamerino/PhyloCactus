@@ -29,7 +29,7 @@ test_that("DESCRIPTION names both branches and the external programs (M1, m5)", 
   title <- d[1, "Title"]
   desc <- .r51_flat(d[1, "Description"])
   expect_match(title, "Identification", fixed = TRUE)
-  expect_match(desc, "identification", fixed = TRUE)
+  expect_match(desc, "identifying samples of cacti by DNA barcoding", fixed = TRUE)
   expect_match(desc, "DNA barcoding", fixed = TRUE)
   expect_false(grepl("across bootstrap replicates", desc, fixed = TRUE))
   urls <- trimws(strsplit(d[1, "URL"], ",")[[1]])
