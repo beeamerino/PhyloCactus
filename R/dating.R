@@ -1220,8 +1220,12 @@ report_bound_adherence <- function(chronogram, calibs, constraints, tol = 0.05,
 #' function tests that dependence: it dates the same tree, under the same calibrations, at
 #' each smoothing value given, and reports the age of every calibrated node in each run.
 #'
-#' The nodes come from the `mrca` lines of the configuration itself, so the table covers exactly
-#' the nodes the analysis makes claims about and cannot drift out of step with them.
+#' The calibrated nodes come from the `mrca` lines of the configuration itself, so the table covers
+#' exactly the nodes the analysis constrains and cannot drift out of step with them. Under a single
+#' fixed-age calibration (`min` equal to `max`) that is one node whose age cannot move, and the table
+#' says nothing about the ages the chronogram estimates. `nodes` adds those nodes: each is a set of
+#' terminals, and its age is that of their most recent common ancestor in each chronogram. A set
+#' holding every terminal gives the root.
 #'
 #' Each run is checked with the same verification applied everywhere else: the smoothing treePL
 #' reports in its log must match the smoothing requested. A run whose smoothing cannot be confirmed
@@ -1241,12 +1245,26 @@ report_bound_adherence <- function(chronogram, calibs, constraints, tol = 0.05,
 #' @param work_dir Character or `NULL`. Directory for the intermediate configurations, logs and
 #'   chronograms. Defaults to a `smoothing_sensitivity` directory beside `cfg_file`, so the
 #'   evidence behind the table survives alongside it.
-#' @return Invisibly, a data frame with one row per smoothing value and calibrated node:
+#' @param nodes Named list of character vectors, or `NULL` (the default). Each element is a set of
+#'   terminal labels, and the age of their most recent common ancestor is reported under its name,
+#'   after the calibrated nodes. Names must differ from the labels of the `mrca` lines. A set with
+#'   fewer than two terminals in the chronogram gets no age, with a warning. With `nodes`, a
+#'   configuration without `mrca` lines is accepted.
+#' @return Invisibly, a data frame with one row per smoothing value and node (calibrated, then those
+#'   of `nodes`):
 #'   `smoothing`, `smoothing_used`, `node`, `age_ma`, `seconds` and `converged`.
 #' @examples
 #' \dontrun{
 #' report_smoothing_sensitivity(
 #'   cfg_file = "8_Dating/auto_results/ML_tree/configure_smooth_ML_tree"
+#' )
+#' # Under one fixed-age calibration, the ages of uncalibrated crowns
+#' constraints <- read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
+#' tips <- ape::read.tree("ml_tree.tree")$tip.label  # the maximum-likelihood tree that was dated
+#' report_smoothing_sensitivity(
+#'   cfg_file = "8_Dating/auto_results/ML_tree/configure_smooth_ML_tree",
+#'   nodes = list(Cactaceae_crown = calibration_tips(constraints, "Family", "Cactaceae", tips),
+#'                root = tips)
 #' )
 #' }
 #' @export
@@ -1255,7 +1273,8 @@ report_smoothing_sensitivity <- function(cfg_file,
                                          smoothing_values = c(1e-4, 1e-2, 1, 10, 100),
                                          treepl_bin = "treePL",
                                          timeout = 1800,
-                                         work_dir = NULL) {
+                                         work_dir = NULL,
+                                         nodes = NULL) {
   if (!file.exists(cfg_file)) {
     stop("`cfg_file` does not exist: '", cfg_file, "'.", call. = FALSE)
   }
@@ -1267,11 +1286,27 @@ report_smoothing_sensitivity <- function(cfg_file,
 
   cfg_file <- normalizePath(cfg_file, mustWork = TRUE)
   cfg_lines <- readLines(cfg_file, warn = FALSE)
-  nodes <- .mrca_sets_from_cfg(cfg_file)
-  if (length(nodes) == 0L) {
-    stop("No `mrca` lines found in '", cfg_file, "'. Without them there are no calibrated nodes ",
-         "to report, and the table would be empty.", call. = FALSE)
+  extra <- nodes
+  if (!is.null(extra)) {
+    if (!is.list(extra) || is.null(names(extra)) || any(!nzchar(names(extra))) || anyDuplicated(names(extra))) {
+      stop("`nodes` must be a named list of terminal sets, with distinct names.", call. = FALSE)
+    }
+    if (!all(vapply(extra, is.character, logical(1)))) {
+      stop("Each element of `nodes` must be a character vector of terminal labels.", call. = FALSE)
+    }
   }
+  nodes <- .mrca_sets_from_cfg(cfg_file)
+  taken <- intersect(names(extra), names(nodes))
+  if (length(taken)) {
+    stop("`nodes` repeats the name of an `mrca` line of the configuration: ",
+         paste(taken, collapse = ", "), ".", call. = FALSE)
+  }
+  if (length(nodes) == 0L && length(extra) == 0L) {
+    stop("No `mrca` lines found in '", cfg_file, "' and no `nodes` given. Without them there are no ",
+         "nodes to report, and the table would be empty.", call. = FALSE)
+  }
+  nodes <- c(nodes, extra)
+  missing_tips <- character(0)
 
   if (is.null(work_dir)) work_dir <- file.path(dirname(cfg_file), "smoothing_sensitivity")
   dir.create(work_dir, recursive = TRUE, showWarnings = FALSE)
@@ -1322,6 +1357,8 @@ report_smoothing_sensitivity <- function(cfg_file,
           if (length(tips) >= 2L) {
             nd <- ape::getMRCA(tr, tips)
             if (!is.null(nd)) ages[[nm]] <- tip_max - depth[nd]
+          } else if (nm %in% names(extra)) {
+            missing_tips <- union(missing_tips, nm)
           }
         }
       }
@@ -1346,6 +1383,10 @@ report_smoothing_sensitivity <- function(cfg_file,
       message(sprintf("  %-34s varies %.2f Ma across the smoothing values tested",
                       spread$node[i], spread$age_ma[i]))
     }
+  }
+  if (length(missing_tips)) {
+    warning("Fewer than two terminals of `nodes` are in the chronogram for: ",
+            paste(missing_tips, collapse = ", "), ". Those rows carry no ages.", call. = FALSE)
   }
   failed <- unique(out$smoothing[!out$converged])
   if (length(failed)) {
