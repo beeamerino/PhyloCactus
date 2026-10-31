@@ -147,3 +147,54 @@ test_that("rooting on a single Portulaca terminal reproduces the original defect
   expect_equal(ape::getMRCA(rooted_on_one, portulaca), root_node)
 })
 
+
+# Closure of 0.5.2 into 0.5.3, phase 4e (re-dating of 3h, BMM 30-10 and 31-10): three calibration
+# schemes, each one fixed age on ACP_root and no calibration inside Cactaceae, numbered 1 to 3 in
+# the order BMM chose. The ages are those the run of 3h read (8_Dating/<scheme>/calibrations_used.csv
+# of the tutorial folder, snapshot c436b411 of the audit repository). Written before the change.
+test_that("calibrations_bounds.csv carries the three calibration schemes, with scheme 1 the only active row", {
+  calibs <- read_calibrations()
+  active <- calibs[calibs$used_in_analysis == TRUE, ]
+  expect_equal(nrow(active), 1L)
+  expect_identical(active$mrca, "ACP_root")
+  expect_equal(c(active$min, active$max), rep(41.8234076705405, 2))
+  expect_match(active$reference, "Ramirez-Barahona_2020", fixed = TRUE)
+
+  scheme <- function(k) calibs[grepl(paste0("_calibration_scheme_", k, "$"), calibs$reference), ]
+  fixed <- c(`1` = 41.8234076705405, `2` = 53.223549, `3` = 37)
+  source <- c(`1` = "Ramirez-Barahona_2020", `2` = "Zuntini_2024", `3` = "Arakaki_2011")
+  for (k in names(fixed)) {
+    s <- scheme(k)
+    expect_equal(nrow(s), 1L, info = k)
+    expect_identical(s$mrca, "ACP_root", info = k)
+    expect_equal(c(s$min, s$max), rep(fixed[[k]], 2), info = k)
+    expect_true(startsWith(s$reference, source[[k]]), info = k)
+  }
+  expect_identical(scheme("2")$used_in_analysis, FALSE)
+  expect_identical(scheme("3")$used_in_analysis, FALSE)
+
+  # No calibration inside Cactaceae: the bounds of Hernandez-Hernandez et al. (2014) stay as references.
+  hh <- calibs[startsWith(calibs$reference, "Hernandez-Hernandez_2014"), ]
+  expect_true(all(c("Opuntioideae_mrca", "Cactoideae_mrca", "Cacteae_mrca") %in% hh$mrca))
+  expect_false(any(hh$used_in_analysis))
+
+  # The old Zuntini tree, the treePL column and the HPD interval of Ramirez-Barahona et al. (2020) are
+  # kept, inactive, and say they belong to no scheme.
+  acp <- calibs[calibs$mrca == "ACP_root", ]
+  for (age in c(79.972647, 67.006802, 27.80801619)) {
+    r <- acp[abs(acp$min - age) < 1e-6, ]
+    expect_equal(nrow(r), 1L, info = age)
+    expect_false(r$used_in_analysis, info = age)
+    expect_false(grepl("_calibration_scheme_[0-9]+$", r$reference), info = age)
+  }
+
+  # The ACP and ACPT crowns of Wu et al. (2026) as reference rows (doi:10.1038/s41477-026-02311-x).
+  wu <- calibs[startsWith(calibs$reference, "Wu_2026"), ]
+  expect_setequal(wu$mrca, c("ACP_root", "ACPT_root"))
+  expect_equal(unname(unlist(wu[wu$mrca == "ACP_root", c("min", "max")])), c(28.90, 54.67))
+  expect_equal(unname(unlist(wu[wu$mrca == "ACPT_root", c("min", "max")])), c(31.18, 56.57))
+  expect_false(any(wu$used_in_analysis))
+
+  # The labels of the probes (scheme_S1 to scheme_S5) are not used in the package (BMM, 31-10).
+  expect_false(any(grepl("scheme_S[0-9]", calibs$reference)))
+})
