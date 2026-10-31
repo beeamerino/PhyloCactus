@@ -60,8 +60,8 @@ supp_tree_file <- if (file.exists("7_Phylogenetics/cactus_support.raxml.support"
 } else {
   "7_Phylogenetics/cactus.raxml.bestTree"
 }
-dated_tree_file <- "8_Dating/BestTree_treePL.tree"
-chrono_file <- "8_Dating/dated_summary_hpd.tree"
+dated_tree_file <- "8_Dating/RamirezBarahona2020/BestTree_treePL.tree"  # calibration scheme 1 (Tutorial 2, Module 10)
+chrono_file <- "8_Dating/RamirezBarahona2020/dated_summary_hpd.tree"
 
 # ============================================================
 # LOAD SPECIES TABLE & ACCEPTED CHECKLIST (Korotkova et al. 2021)

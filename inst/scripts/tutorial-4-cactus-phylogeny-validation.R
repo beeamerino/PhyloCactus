@@ -136,7 +136,7 @@ cat("\n--- Running Phylogenetic Validation Pipeline ---\n")
 # The focal tree is the chronogram of this run (Module 10); the reference trees are read from the
 # folder in PHYLOCACTUS_REFERENCE_TREES. When 8_Dating/ is absent, the reference chronogram
 # distributed with the package is used as the focal tree.
-focal_tree <- file.path("8_Dating", "dated_summary_hpd.tree")
+focal_tree <- file.path("8_Dating", "RamirezBarahona2020", "dated_summary_hpd.tree")
 if (!file.exists(focal_tree)) {
   focal_tree <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")
 }
