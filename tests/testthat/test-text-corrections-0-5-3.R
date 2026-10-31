@@ -152,8 +152,8 @@ test_that("Tutorial 2 states the replicates dated, and the branches treePL lengt
   expect_match(.t53_call(v, "generate_temporal_bootstrap_script"), paste0("bs_trees = ", n[2]), fixed = TRUE)
   expect_match(v, "563 branches \\(300 of them terminal\\)")
   expect_false(grepl("are floors", v, fixed = TRUE))
-  # The cross-validation minimum is described as what one random partition gave.
-  expect_match(v, "on one random partition of the data", fixed = TRUE)
+  # "On one random partition of the data" described the curve of the 15-10 run; under scheme 1 the
+  # selection rests on six of the ten random subsamples (phase 4e, test-redating-0-5-3.R).
 })
 
 test_that("Tutorial 3 states the threatened species without sequences and their genera from the registry (M5)", {
@@ -266,12 +266,11 @@ test_that("the exclusions without a stated ground are described as such (M11)", 
   expect_identical(n, sum(grepl("manual conflict resolution", ex$reason, fixed = TRUE)))
 })
 
-test_that("the sweep script and Tutorial 2 give the reason for the fixed anchor that holds on this tree (D14)", {
-  s <- .t53_script("analysis-calibration-anchor-sweep.R")
-  # The September reason (the interval returned its maximum) holds for the 0.4.x tree only.
+test_that("the script of the calibration schemes and Tutorial 2 describe the fixed age of scheme 1 (D14, 4e)", {
+  # The sweep of the five anchors of D14 became analysis-calibration-schemes.R in phase 4e; the
+  # September reason for a fixed anchor (0.4.x tree) is no longer given.
+  s <- .t53_script("analysis-calibration-schemes.R")
   expect_false(grepl("A fixed anchor removes that artifact", s, fixed = TRUE))
-  expect_match(s, "0.4.x tree", fixed = TRUE)
-  expect_match(s, "15 % of the replicates", fixed = TRUE)
   v <- .t53_flat(.t53_read("vignettes", "tutorial-2-cactus-phylogeny-inference.Rmd"))
   expect_match(v, "median height", fixed = TRUE)
   expect_match(v, "maximum clade credibility tree", fixed = TRUE)

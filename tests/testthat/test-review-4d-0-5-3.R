@@ -76,11 +76,11 @@ test_that("the distributed registry carries no checklist content beyond the name
   expect_true(all(c("species", "accepted_in_checklist", "status_pipeline") %in% names(sp)))
 })
 
-test_that("the anchor table of Tutorial 2 says what else differs between schemes, and what S3 is (m1, m2)", {
+test_that("the table of schemes of Tutorial 2 does not say the schemes differ in the fixed age alone (m1)", {
+  # The table of the five anchors, and the description of S3 (m2), were replaced by the three
+  # calibration schemes in phase 4e.
   v <- .d4_t2()
   expect_false(grepl("differ in the anchor alone", v, fixed = TRUE))
-  expect_true(grepl("in the optimiser settings that priming chose under it", v, fixed = TRUE))
-  expect_true(grepl("which the paper does not describe", v, fixed = TRUE))
 })
 
 test_that("the failed subsamples of the seed probe are stated where they fell (m3)", {
@@ -126,7 +126,7 @@ test_that("every work cited in a vignette is in its reference list (m6, m15)", {
 })
 
 test_that("the sweep script gives the full reference of the fossil pollen (m7)", {
-  x <- .d4_flat("inst", "scripts", "analysis-calibration-anchor-sweep.R")
+  x <- .d4_flat("inst", "scripts", "analysis-calibration-schemes.R")
   expect_true(grepl("doi:10.1016/j.revpalbo.2025.105463", x, fixed = TRUE))
   expect_true(grepl("which this script does not evaluate", x, fixed = TRUE))
 })
