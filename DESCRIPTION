@@ -12,7 +12,7 @@ Authors@R: c(
 Description: Provides a reproducible workflow for reconstructing Cactaceae phylogenies from multilocus DNA sequence data and for identifying samples of cacti by DNA barcoding. Modules 1 to 13 automate GenBank sequence retrieval, multiple-sequence alignment, substitution model selection, saturation assessment, supermatrix construction, maximum-likelihood phylogenetic inference using RAxML-NG, divergence time estimation with treePL, and comparison with published phylogenies in tree space. Module 14 builds a reference library of marker sequences from the same mining, validates it with cross-validation folds and negative controls, and identifies a sample locus by locus from sequences, an assembly or sequencing reads, with a self-contained report.
 URL: https://github.com/beeamerino/PhyloCactus, https://beeamerino.github.io/PhyloCactus/
 BugReports: https://github.com/beeamerino/PhyloCactus/issues
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 4.1.0)
 SystemRequirements: MAFFT, RAxML-NG, ModelTest-NG, treePL and BLAST+ for the
