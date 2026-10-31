@@ -414,23 +414,30 @@ cat("=======================================================\n")
 paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file,
                            require = c("analysed_phy", "best_tree", "temporal_bs"))
 
-dating_dir <- "8_Dating"
-dir.create(dating_dir, showWarnings = FALSE)
+# The calibration scheme to date: 1, Ramirez-Barahona et al. (2020), 41.82 Ma, the distributed
+# chronogram; 2, Zuntini et al. (2024), young tree, 53.22 Ma; 3, Arakaki et al. (2011), 37.0 Ma.
+# Each is one fixed age on ACP_root, read from the row of calibrations_bounds.csv whose reference
+# ends in "_calibration_scheme_<n>", and each is dated in a folder of its own.
+calibration_scheme <- 1
+scheme_dirs <- c("RamirezBarahona2020", "Zuntini2024_young", "Arakaki2011")
+dating_dir <- file.path("8_Dating", scheme_dirs[calibration_scheme])
+dir.create(dating_dir, recursive = TRUE, showWarnings = FALSE)
 
-# 10.1 Prepare Calibrations
-cat("Creating treePL calibrations configurations...\n")
+# 1. Prepare Calibrations
+cat("Creating `treePL` calibrations configurations...\n")
 calibs_all <- read.csv(system.file("extdata", "calibrations_bounds.csv", package = "PhyloCactus"))
-calibs <- calibs_all[calibs_all$used_in_analysis == TRUE, ]
+calibs <- calibs_all[grepl(paste0("_calibration_scheme_", calibration_scheme, "$"), calibs_all$reference), ]
+stopifnot(nrow(calibs) == 1L)
 
-# Load constraints and phylogeny tips to map calibrations
 constraints <- read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
 ml_tree <- ape::read.tree(paths$best_tree)
 tip_labels <- ml_tree$tip.label
 
-# numsites must be the length of the matrix RAxML-NG actually analysed, not a rounded figure.
+# `numsites` must be the length of the matrix RAxML-NG actually analysed, not a rounded figure.
 # treePL uses it to convert branch lengths into expected substitution counts, so it is read from
-# the header of the matrix Module 7 reported as analyzed. paths$analysed_phy already resolves to the
-# reduced PHYLIP when terminals were collapsed and to the supermatrix when they were not.
+# the header of the matrix Module 7 reported as analysed. `paths$analysed_phy` already resolves to the
+# reduced PHYLIP when terminals were collapsed and to the supermatrix when they were not, so no
+# second guess at the filename is needed here.
 phy_header <- strsplit(trimws(readLines(paths$analysed_phy, n = 1)), "\\s+")[[1]]
 num_sites <- as.integer(phy_header[2])
 cat("   Matrix analysed:", paths$analysed_phy, "-", phy_header[1], "taxa x", num_sites, "sites\n")
@@ -439,14 +446,14 @@ cat("   Matrix analysed:", paths$analysed_phy, "-", phy_header[1], "taxa x", num
 # standalone after a restart.
 if (!exists("rooting_outgroup")) rooting_outgroup <- resolve_rooting_outgroup(tip_labels, pattern = "^(Talinum|Talinella)_")
 
-# treePL resolves every mrca entry by the MRCA of the listed terminals, so a correct label is
-# no guarantee of a correct node. The rooted topology is reconstructed here to verify node
-# identity before any bound is written.
+# `treePL` resolves every `mrca` entry by the MRCA of the listed terminals, so a correct
+# label is no guarantee of a correct node. The rooted topology is reconstructed here to
+# verify node identity before any bound is written.
 rooted_ml <- root_on_clade(ml_tree, rooting_outgroup)
 root_node <- ape::Ntip(rooted_ml) + 1L
 
-# value accepts a semicolon-separated list, required by the two stem calibrations: a stem node
-# is shared by the families it subtends and cannot be addressed by a single family name.
+# `value` accepts a semicolon-separated list, which is required by ACP_root: a node shared by
+# several families cannot be addressed by a single family name.
 tips_for <- function(column, value) calibration_tips(constraints, column, value, tip_labels)
 
 # Bounds are declared per node, but the nodes are nested and an ultrametric tree forces every
@@ -476,13 +483,13 @@ for (i in seq_len(nrow(calibs))) {
 #   1. The rooting clade is monophyletic. Rooting on a single terminal instead of the clade leaves
 #      the lineage paraphyletic and collapses its crown onto the root, which silently reassigns
 #      every bound addressed by that lineage.
-#   2. ACP_root resolves to a node that is NOT the root, so the anchor is placed on an internal
+#   2. ACP_root resolves to a node that is NOT the root, so the fixed age is placed on an internal
 #      node and not on the deepest split of the tree.
 #   3. ACP_root is monophyletic. If the likelihood placed Talinaceae inside the ACP clade, the
-#      anchor would be addressing something other than the node it was written for.
+#      calibration would be addressing something other than the node it was written for.
 # Lines 1 and 3 assert relationships that the constraint imposes: Talinaceae is a constrained clade, and
 # in the unrooted tree its bipartition is that of the ACP clade. They cannot fail on a constrained
-# run; they guard the rooting and the node of the anchor, not a result of the data.
+# run; they guard the rooting and the calibrated node, not a result of the data.
 stopifnot(ape::is.monophyletic(rooted_ml, grep("^(Talinum|Talinella)_", tip_labels, value = TRUE)))
 acp_tips <- tips_for("Family", "Cactaceae;Anacampserotaceae;Portulacaceae")
 stopifnot(ape::getMRCA(rooted_ml, acp_tips) != root_node)
@@ -501,10 +508,10 @@ cat("   Anacampserotaceae + Portulacaceae monophyletic: ",
 cat("   Cactaceae + Portulacaceae monophyletic: ",
     ape::is.monophyletic(rooted_ml, cact_por), "\n")
 
-# num_sites here is the true length of the analysed matrix, which is what belongs in a file
-# meant to document the analysis. automate_treePL() rescales branch lengths and divides this
-# value by the same factor before handing a copy to treePL, so the substitution count per
-# branch stays correct. The copy it actually runs is written to auto_results/ML_tree/.
+# `num_sites` here is the true length of the analysed matrix, which is what belongs in a file
+# meant to document the analysis. `automate_treePL()` rescales branch lengths and divides this
+# value by the same factor before handing a copy to `treePL`, so the substitution count per
+# branch stays correct. The copy it actually runs is written to `auto_results/ML_tree/`.
 treepl_cfg <- c(
   paste0("numsites = ", num_sites),
   cfg_lines,
@@ -516,8 +523,8 @@ calibrations_cfg_path <- file.path(dating_dir, "calibrations_treePL_fulltips.cfg
 writeLines(treepl_cfg, calibrations_cfg_path)
 cat("   Calibrations compiled successfully to:", calibrations_cfg_path, "\n")
 
-# 10.2 Run Fast Automated treePL Dating Pipeline
-cat("\nRunning treePL priming, cross-validation and dating over maximum-likelihood tree and bootstrap replicates...\n")
+# 2. Run Fast Automated `treePL` Dating Pipeline
+cat("\nRunning automated `treePL` wrapper script over maximum-likelihood tree and bootstrap replicates...\n")
 
 # Priming, cross-validation and dating follow the protocol of Maurin (2020, arXiv:2008.07054) and
 # run through run_treePL_cv(). The priming parameters are the lowest of the repeats,
@@ -546,10 +553,13 @@ automate_treePL(
 
 # The dated replicates are summarized outside R with TreeAnnotator v2.7.7 of BEAST 2, with the
 # settings of Maurin (2020): maximum clade credibility target tree, mean node heights, 0% burn-in.
-# The reference run used this command, which reproduces the distributed summary node for node:
-#   treeannotator -burnin 0 -height mean -topology MCC 8_Dating/bsTree_treePL.tree 8_Dating/dated_summary_hpd.tree
-# In the graphical interface, set the burn-in to 0 (it starts at 10) and the heights to mean heights.
+# The reference run (scheme 1) used this command, whose output is the distributed summary:
+#   treeannotator -burnin 0 -height mean -topology MCC 8_Dating/RamirezBarahona2020/bsTree_treePL.tree 8_Dating/RamirezBarahona2020/dated_summary_hpd.tree
+# If the treeannotator first on the PATH is that of BEAST 1 (v1.10), which rejects -height, call the
+# program of BEAST 2 by its full path. In the graphical interface, set the burn-in to 0 (it starts at
+# 10) and the heights to mean heights.
 
+# 3. View and evaluate dating metrics cleanly in R
 cat("\n--- Chronological Dating Results Summary ---\n")
 if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
   ml_chronogram <- ape::read.tree(file.path(dating_dir, "BestTree_treePL.tree"))
@@ -560,7 +570,7 @@ if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
 
   # A node whose age equals one of its own bounds was not estimated: penalized likelihood returned
   # the constraint, and the chronogram gives no sign of it. ACP_root is fixed (min = max), so it
-  # sits on its bound by construction; the other three calibrations are expected to be estimated.
+  # sits on its bound by construction; the check matters when a bound with min < max is added.
   # The bootstrap chronograms are passed because a single point estimate can land just inside
   # a bound while the underlying age is unidentifiable, and only the replicates separate the two.
   bs_chronograms <- file.path(dating_dir, "bsTree_treePL.tree")
@@ -573,41 +583,39 @@ if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
 }
 cat("--------------------------------------------\n")
 
-# -------------------------------------------------------------
-# 10.3 Cross-validation curve
-# -------------------------------------------------------------
-# run_treePL_cv() reported the shape of this curve when it ran (interior minimum, edge or plateau);
-# the table shows the curve itself. Values from 10 upward are of the order of 1e41: treePL fails
-# numerically at high smoothing, and those rows carry no information.
-cv_file <- file.path(dating_dir, "auto_results", "ML_tree", "cv_ML_tree")
+# 4. The cross-validation curves
+# run_treePL_cv() reported the shape of the curve when it ran (interior minimum, edge or plateau).
+# cv_ML_tree_selection.csv holds the chi-square summed over every random subsample and, beside it,
+# the sum without the anomalous subsamples, on which the smoothing was selected (NA where a value
+# was left out). Values from 1 upward are of the order of 1e38 or more: treePL fails numerically at
+# high smoothing, and those rows carry no information.
+cv_file <- file.path(dating_dir, "auto_results", "ML_tree", "cv_ML_tree_selection.csv")
 if (file.exists(cv_file)) {
-  lines_cv <- grep("chisq", readLines(cv_file, warn = FALSE), value = TRUE)
-  cv_tab <- data.frame(
-    smoothing = as.numeric(gsub(".*\\(([^)]*)\\).*", "\\1", lines_cv)),
-    chisq = as.numeric(sub(".*\\)\\s*", "", lines_cv))
-  )
+  cv_tab <- read.csv(cv_file)
   print(cv_tab[order(cv_tab$smoothing), ], row.names = FALSE)
 }
 
-# -------------------------------------------------------------
-# 10.4 Smoothing sensitivity
-# -------------------------------------------------------------
-# The same tree dated across the grid and beyond it. Read the range of each node from 1e-14 to
-# 1e-02; the reference run selects 1e-05, an interior minimum on one random partition of the data,
-# 1.1 % and 1.2 % below its two neighbours. Five seeds of treePL selected 1e-08 to 1e-02, so
-# the cross-validation does not identify a smoothing value on this tree, and the table below mixes
-# the effect of the smoothing with that of the optimizer (Tutorial 2). At 1 and 10 the calibrated nodes sit on their upper
-# bounds; that end of the table lies outside the range supported by cross-validation.
-
+# 5. Smoothing sensitivity
+# The same tree dated across the grid and beyond it. ACP_root is the only calibrated node, and its
+# age is fixed, so the ages read are those of the root and of the crowns of Cactaceae, Cactoideae,
+# Cacteae and Opuntioideae, given to `nodes` as sets of terminals. Read the range of each node from
+# 1e-14 to 1e-02; values of 1 and above lie outside the part of the curve the selection reads.
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")
 if (file.exists(sensitivity_cfg)) {
   cat("\nRunning smoothing sensitivity analysis across 1e-14 to 100...\n")
   sensitivity <- report_smoothing_sensitivity(
     cfg_file = sensitivity_cfg,
     smoothing_values = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-5, 1e-4, 1e-2, 1, 10, 100),
-    treepl_bin = treepl_path
+    treepl_bin = treepl_path,
+    nodes = list(
+      root = tip_labels,
+      Cactaceae_crown = tips_for("Family", "Cactaceae"),
+      Cactoideae_crown = tips_for("Subfam", "Cactoideae"),
+      Cacteae_crown = tips_for("Clade", "Cacteae"),
+      Opuntioideae_crown = tips_for("Subfam", "Opuntioideae")
+    )
   )
-  cat("\n--- Calibrated Node Age Sensitivity Table ---\n")
+  cat("\n--- Node Age Sensitivity Table ---\n")
   print(sensitivity)
   cat("--------------------------------------------\n")
 }

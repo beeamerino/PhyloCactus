@@ -25,7 +25,7 @@ This tutorial covers the second stage of the `PhyloCactus` workflow (Modules 7 t
 
 Taxon sampling and sequence availability are irregular across a matrix of this size, while relationships among the major lineages of **Cactaceae** are established by previous phylogenetic studies. The maximum-likelihood search is therefore run under a topological constraint derived from `cactus_constraints.csv`, which assigns the sampled species to higher clades and subfamilies. The constraint fixes the relationships among those clades and leaves the relationships within them to be estimated from the data.
 
-**Cactaceae** lack fossils suitable for calibrating the family directly. Divergence times are estimated with secondary calibrations (`calibrations_bounds.csv`): crown ages of major clades from Hernández-Hernández *et al*. (2014), and an age for the ACP clade from the angiosperm-wide chronogram of Ramírez-Barahona *et al*. (2020). The resulting chronogram is conditional on those studies and on the models selected here.
+**Cactaceae** lack fossils suitable for calibrating the family directly. Divergence times are estimated with one secondary calibration, a fixed age on the crown of the clade of Anacampserotaceae, Cactaceae and Portulacaceae taken from a published chronogram (`calibrations_bounds.csv`; three calibration schemes, the main one from Ramírez-Barahona *et al*., 2020). The resulting chronogram is conditional on that age and on the models selected here.
 
 ## Complete Pipeline Execution Workflow
 
@@ -464,31 +464,35 @@ Temporal constraints are provided through the `calibrations_bounds.csv` referenc
 
 The distinction between stem and crown nodes governs which bound may be assigned to which node. A crown node is the first divergence within a clade and a stem node is the divergence separating that clade from its sister, and is therefore always older. Assigning a stem age to a crown node inflates the node by construction, and propagates that inflation to every node below it.
 
-Internal calibrations are crown ages of Opuntioideae, Cactoideae and Cacteae from Hernández-Hernández *et al*., (2014), applied to the corresponding crown nodes.
+No calibration is placed inside Cactaceae. The crown ages of Opuntioideae, Cactoideae and Cacteae from Hernández-Hernández *et al*. (2014), which bounded those nodes in earlier versions of the package, are kept in `calibrations_bounds.csv` with `used_in_analysis = FALSE`, as references against which the estimated ages can be read.
 
-Cactaceae lack a macrofossil record suitable for calibrating internal nodes. The deepest calibration is therefore a secondary age from the angiosperm-wide chronogram of Ramírez-Barahona *et al*., (2020), `RC_complete` scheme. With Talinaceae sampled to root the tree, the calibrated node is:
+Cactaceae lack a macrofossil record suitable for calibrating internal nodes. The scale of the chronogram is therefore set by one secondary calibration with a fixed age (`min` equal to `max`) on one node:
 
-- `ACP_root`: Constrains the crown divergence of the Anacampserotaceae + Portulacaceae + Cactaceae clade (corresponding to the stem node of Portulacaceae in Ramírez-Barahona *et al.*, (2020)). The primary calibration scheme (Scheme S1) applies a fixed point of 41.82 Ma, the median height of the stem node of Portulacaceae on the maximum clade credibility tree of the `RC_complete` BEAST analysis (`Data4_Ages.xlsx`, column `Stem_BEAST`), with alternative sensitivity schemes available in `calibrations_bounds.csv` (Scheme S2: 95% HPD interval [27.81, 53.37] Ma). S3 is the treePL column of the same study, and S4 and S5 are the stem age of ACP clade of the young and old trees of Zuntini *et al*., (2024). See below for details on the ACP clade's calibration schemes.
+- `ACP_root`: the crown of the clade of Anacampserotaceae, Portulacaceae and Cactaceae. `calibrations_bounds.csv` holds three calibration schemes for this node, each a fixed age from a published chronogram (below). Scheme 1 is the row with `used_in_analysis = TRUE`, and the distributed chronogram is dated under it.
 - `Cactaceae_Anacampserotaceae_stem` ([21.95, 48.51] Ma) is retained in `calibrations_bounds.csv` with `used_in_analysis = FALSE`, because it assumes that Cactaceae and Anacampserotaceae are sisters. The maximum-likelihood tree recovers Anacampserotaceae and Portulacaceae as sisters (FBP 81; the node is not constrained), as do Zuntini *et al.* (2024).
-- `ACPT_root` ([33.28, 59.86] Ma, Ramírez-Barahona *et al.*, 2020) is retained with `used_in_analysis = FALSE`. The root of the chronogram is the crown of the ACPT clade, so the deepest node of the tree is not calibrated: its age of 45.53 Ma is extrapolated above the fixed calibration and depends on the smoothing value. It falls inside the published interval, which is a consistency check and not a constraint. Activating the bound would add a second calibration on the deepest node and would be a different analysis.
+- `ACPT_root` ([33.28, 59.86] Ma, Ramírez-Barahona *et al*., 2020) is retained with `used_in_analysis = FALSE`. The root of the chronogram is the crown of the ACPT clade, so the deepest node of the tree is not calibrated: its age, 45.53 Ma under scheme 1, is extrapolated above the fixed calibration and depends on the smoothing value. It falls inside the published interval, which is a consistency check and not a constraint. Activating the bound would add a second calibration on the deepest node and would be a different analysis.
 
 The crown intervals of Ramírez-Barahona *et al*., (2020) for these families are also listed with `used_in_analysis = FALSE`, for reference. That study samples two terminals per family, so its crown ages are the divergence between the two sampled species and underestimate the crown of each family; its stem ages do not depend on within-family sampling and are the ones used.
 
-Secondary calibrations do not carry the uncertainty of the studies they come from, so the node ages are conditional on those studies. The bounds of Hernández-Hernández *et al*., (2014) and Ramírez-Barahona *et al*., (2020) also come from analyses with different calibration schemes.
+The three calibration schemes are:
 
-The anchor on `ACP_root` sets the scale of the chronogram, so every age is conditional on the anchor. Five schemes for that node (`calibrations_bounds.csv`) were dated on the maximum-likelihood tree and the 100 temporal replicates at the smoothing value of the reference run, $10^{-5}$; besides the anchor, they differ only in the optimiser settings that priming chose under it. Ages in Ma on the maximum-likelihood chronogram, with the 2.5 and 97.5 percentiles over the replicates:
+1. Ramírez-Barahona *et al*. (2020): 41.82 Ma, the median height of the stem node of Portulacaceae, which on the topology of this tree is the ACP crown, on the maximum clade credibility tree of the `RC_complete` BEAST analysis (`Data4_Ages.xlsx`, column `Stem_BEAST`).
+2. Zuntini *et al*. (2024): 53.22 Ma, the stem age of Cactaceae on their young tree (Supplementary Table 3), which on the topology of this tree is also the ACP crown. Their tree was inferred from the Angiosperms353 loci, samples 117 terminals of Cactaceae, recovers the relationships among the three families found here, and was dated with `treePL`.
+3. Arakaki *et al*. (2011): 37.0 Ma, their age for this node (Table S4), applied as a fixed age and not as the interval of 31.90 to 42.10 Ma (mean ± 1.96 SD).
 
-| Node | S1 (41.82, fixed) | S2 (27.81 to 53.37) | S3 (67.01, fixed) | S4 (53.22, fixed) | S5 (79.97, fixed) |
-|---|---|---|---|---|---|
-| ACP crown | 41.82 | 46.08 (37.50 to 53.37) | 67.01 | 53.22 | 79.97 |
-| Cactaceae crown | 22.68 (18.65 to 24.88) | 21.95 (16.78 to 26.60) | 28.83 (26.32 to 30.50) | 28.30 (23.43 to 29.87) | 29.09 (27.00 to 30.92) |
-| Cactoideae crown | 17.61 (14.75 to 19.04) | 17.93 (14.25 to 21.16) | 21.85 (21.80 to 21.85) | 21.85 (19.07 to 21.85) | 21.85 (21.83 to 21.85) |
-| Cacteae crown | 13.47 (11.22 to 15.22) | 14.21 (11.40 to 16.54) | 17.27 (17.27 to 17.27) | 16.96 (14.49 to 17.27) | 17.27 (17.27 to 17.27) |
-| Opuntioideae crown | 10.37 (8.63 to 11.81) | 10.34 (8.64 to 13.20) | 13.80 (13.17 to 13.80) | 13.06 (11.26 to 13.80) | 13.80 (13.70 to 13.80) |
+Scheme 1 is the main scheme. Six published crown ages come from none of the three sources: the crowns of Cactaceae, Cactoideae, Cacteae and Opuntioideae of Hernández-Hernández *et al*. (2014), and the ACP crown and the root of Wu *et al*. (2026). Scheme 1 places all six inside their intervals, scheme 3 all six and scheme 2 five. Under scheme 2 the crowns of Cactoideae, Cacteae and Opuntioideae are about 1.4 times the estimates of Hernández-Hernández *et al*. (2014), and the root (58.10 Ma) lies above the interval of Wu *et al*. (2026), 31.18 to 56.57 Ma. Those reference ages are Bayesian relaxed-clock estimates, as is the source of scheme 1, so the agreement does not show that 41.82 Ma is correct.
 
-S1, the distributed chronogram, is the median height of the ACP crown on the maximum clade credibility tree of the `RC_complete` BEAST analysis of Ramírez-Barahona *et al*., (2020), and S2 is its 95% HPD interval. S3 is the treePL column of the same study, which the paper does not describe, and S4 and S5 are the young and old trees of Zuntini *et al*., (2024). Under S3 and S5 the crowns of Cactoideae, Cacteae and Opuntioideae sit on the maxima of their bounds from Hernández-Hernández *et al*., (2014) in 92 to 99 % of the replicates; under S4 the Cactoideae crown sits on its maximum on the maximum-likelihood chronogram, with a median of 21.05 Ma over the replicates. Under S2 the ACP crown is estimated at 46.08 Ma and reaches a bound of the interval in 15 % of the replicates, and the Cactaceae nodes differ from S1 by 0.03 to 0.74 Ma. Under S1 the Cactaceae crown, which carries no calibration, ranges from 20.98 to 23.62 Ma over the smoothing values from $10^{-2}$ to $10^{-14}$.
+Each scheme fixes one age, and every age of its chronogram is conditional on that age; the chronogram does not carry the uncertainty of the study the age was taken from. Ages in Ma on the maximum-likelihood chronogram of each scheme, dated at $10^{-5}$ (see the selection of the smoothing below), with the 2.5 and 97.5 percentiles over the 100 dated replicates:
 
-S1 is the main scheme, and S2 is reported beside it. Dated without the three bounds of Hernández-Hernández *et al*., (2014), S1 changes the four Cactaceae nodes by 0.15 to 1.02 Ma, and it places nine of ten published crown ages (Hernández-Hernández *et al*., 2014; Arakaki *et al*., 2011; Wu *et al*., 2026) inside their intervals, against eight under S4, two under S3 and one under S5. `inst/scripts/analysis-calibration-anchor-sweep.R` runs the schemes with a cross-validation of each.
+| Node | Scheme 1 (41.82 Ma) | Scheme 2 (53.22 Ma) | Scheme 3 (37.0 Ma) |
+|---|---|---|---|
+| Root (ACPT crown) | 45.53 (43.28 to 49.57) | 58.10 (55.15 to 60.03) | 40.45 (38.29 to 42.08) |
+| Cactaceae crown | 23.16 (18.63 to 25.19) | 27.33 (23.51 to 30.37) | 20.71 (16.54 to 23.41) |
+| Cactoideae crown | 17.90 (15.13 to 19.26) | 21.54 (18.99 to 23.14) | 16.42 (13.60 to 17.97) |
+| Cacteae crown | 13.76 (11.48 to 15.09) | 16.77 (14.54 to 18.66) | 12.81 (10.61 to 14.15) |
+| Opuntioideae crown | 10.71 (8.80 to 11.85) | 12.97 (11.25 to 14.81) | 9.51 (7.91 to 10.98) |
+
+The old tree of Zuntini *et al*. (2024) (79.97 Ma), the `treePL` column of Ramírez-Barahona *et al*. (2020) (67.01 Ma), its 95% HPD interval (27.81 to 53.37 Ma), and the chronograms of earlier versions, dated with the three bounds of Hernández-Hernández *et al*. (2014), are reported in the supplementary material. `inst/scripts/analysis-calibration-schemes.R` dates the three schemes.
 
 The **`automate_treePL()`** function runs the dating: it prepares the maximum-likelihood tree and the calibrations for `treePL`, selects the optimization parameters and the smoothing value, and dates the maximum-likelihood tree and the temporal replicates.
 
@@ -511,10 +515,10 @@ All replicates share the maximum-likelihood topology, so the summary estimates t
 `TreeAnnotator` is run with the settings of Maurin, (2020): the maximum clade credibility tree as target tree, mean node heights, and 0% burn-in. It computes the mean age of each node and its interval across the dated replicates. The reference run used TreeAnnotator v2.7.7 of BEAST 2, outside R:
 
 ```
-treeannotator -burnin 0 -height mean -topology MCC 8_Dating/bsTree_treePL.tree 8_Dating/dated_summary_hpd.tree
+treeannotator -burnin 0 -height mean -topology MCC 8_Dating/RamirezBarahona2020/bsTree_treePL.tree 8_Dating/RamirezBarahona2020/dated_summary_hpd.tree
 ```
 
-Run again on the 100 dated replicates, this command reproduces the distributed summary (`phylocactus_chronogram_hpd.tree`) at every one of its 2415 nodes: the same mean heights and the same bounds of the 95% interval. A user of the graphical interface sets the burn-in to 0 (it starts at 10) and the node heights to mean heights.
+The distributed summary (`phylocactus_chronogram_hpd.tree`, 2415 nodes) is the output of this command on the 100 dated replicates of scheme 1. If the `treeannotator` found first on the `PATH` is that of BEAST 1 (v1.10), which rejects `-height`, call the program of BEAST 2 by its full path (on macOS, `/Applications/BEAST 2.7.7/bin/treeannotator`). A user of the graphical interface sets the burn-in to 0 (it starts at 10) and the node heights to mean heights.
 
 `TreeAnnotator` labels these intervals as highest posterior density (HPD) intervals because it is written for Bayesian analyses. Here they are confidence intervals from independently dated bootstrap replicates, not posterior distributions.
 
@@ -528,9 +532,10 @@ Cross-validation (`randomcv`) removes subsets of the data, re-estimates rates an
 2. **Edge.** The lowest value lies at the end of the grid, and the curve is still decreasing there. The optimum lies beyond the grid; `cvstop` has to be extended and the analysis repeated before any age is interpreted (Maurin, 2020).
 3. **Plateau.** The curve decreases and then levels off, so that smoothing values below a threshold fit the data about equally well. The lowest $\chi^2$ is one of several equivalent values, and node ages have to be reported across the plateau.
 
-On the reference dataset the curve has an interior minimum at $10^{-5}$ on one random partition of the data: the lowest $\chi^2$, 323.09, lies 1.1% below the value at $10^{-4}$ (326.67) and 1.2% below that at $10^{-6}$ (326.97). Below $10^{-6}$ the $\chi^2$ stays between 327.73 and 337.26, with reversals; above $10^{-4}$ it rises to 357.32 at $10^{-3}$ and 519.81 at $10^{-2}$. The chronogram is dated at $10^{-5}$, and `report_smoothing_sensitivity()` dates the same tree at values across the grid and beyond it. From $10^{-14}$ to $10^{-2}$ the age of Opuntioideae varies by 0.62 Ma, that of Cactoideae by 0.85 Ma and that of Cacteae by 0.93 Ma. The age of `ACP_root` does not vary, because it is the fixed calibration.
+Some random subsamples fit badly at every low smoothing value. In the reference run the seventh of the ten subsamples failed, with a $\chi^2$ of the order of $10^{38}$, at 0.1 to $10^{-5}$ and at $10^{-7}$, and because `treePL` prints a running sum, the failure also hides the subsamples after it at those values. `run_treePL_cv()` therefore leaves out of the selection a subsample that fails, or adds more than `cv_outlier_factor` (default 5) times the median increment of the subsamples, at any value of 0.1 or below, and compares the values on one set of subsamples. It warns when it does so, writes both curves to `cv_<label>_selection.csv` and its account to `cv_<label>_selection.txt`; `cv_outlier_factor = NULL` selects on every subsample.
 
-That range is not the effect of the smoothing alone. The cross-validation and the dating were repeated with four further seeds of `treePL` beside the reference seed (79992967), which reproduced the reference run exactly. The five seeds selected $10^{-5}$, $10^{-4}$, $10^{-2}$, $10^{-4}$ and $10^{-8}$, each with an interior curve: the cross-validation does not identify a smoothing value on this tree. At a single smoothing value the ages move between seeds by up to 1.00 Ma (Opuntioideae), 1.82 Ma (Cactoideae) and 1.60 Ma (Cacteae), more than half their range over the smoothing values under the reference seed (0.62, 0.85 and 0.93 Ma), so `TABLE_smoothing_sensitivity.csv`, written with one seed, mixes the effect of the smoothing with that of the optimizer. At $10^{-5}$, over the five seeds, Opuntioideae is 9.91 to 10.62 Ma, Cactoideae 16.76 to 18.35 Ma and Cacteae 12.68 to 14.15 Ma, inside the percentiles of S1 over the replicates in the table above (8.63 to 11.81, 14.75 to 19.04 and 11.22 to 15.22 Ma). Two of the seeds lost one random subsample of the cross-validation, at $10^{-7}$ to $10^{-4}$ and at $10^{-5}$ to $10^{-3}$ (and both at 0.1 and 1), which displaced their selection; `run_treePL_cv()` now warns when that happens. The distributed chronogram keeps the reference seed and $10^{-5}$.
+In the reference run (scheme 1) the selection left out the seventh subsample and the eighth to tenth, which it hides, and rests on six subsamples. On their sum the curve has an interior minimum at $10^{-5}$: the lowest $\chi^2$, 297.43, lies 1.3% below the value at $10^{-6}$ (301.32) and 3.2% below that at $10^{-4}$ (307.41). Below $10^{-6}$ the $\chi^2$ stays between 305.81 and 322.05; above $10^{-4}$ it is 305.98 at $10^{-3}$, 310.87 at $10^{-2}$ and 429.24 at 0.1. Summed over every subsample, the minimum falls at $10^{-9}$. Each of the three schemes selects $10^{-5}$ in this way (over every subsample, $10^{-9}$ to $10^{-11}$) and is dated at it. `report_smoothing_sensitivity()` dates the same tree at values across the grid and beyond it; under scheme 1, from $10^{-14}$ to $10^{-2}$, the root moves by 3.13 Ma, the crown of Cactaceae by 2.42 Ma, that of Cactoideae by 1.07 Ma, that of Cacteae by 0.75 Ma and that of Opuntioideae by 0.39 Ma. The age of `ACP_root` does not vary, because it is the fixed calibration.
+
 
 The code for Module 10:
 
@@ -539,13 +544,20 @@ The code for Module 10:
 paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file,
                            require = c("analysed_phy", "best_tree", "temporal_bs"))
 
-dating_dir <- "8_Dating"
-dir.create(dating_dir, showWarnings = FALSE)
+# The calibration scheme to date: 1, Ramirez-Barahona et al. (2020), 41.82 Ma, the distributed
+# chronogram; 2, Zuntini et al. (2024), young tree, 53.22 Ma; 3, Arakaki et al. (2011), 37.0 Ma.
+# Each is one fixed age on ACP_root, read from the row of calibrations_bounds.csv whose reference
+# ends in "_calibration_scheme_<n>", and each is dated in a folder of its own.
+calibration_scheme <- 1
+scheme_dirs <- c("RamirezBarahona2020", "Zuntini2024_young", "Arakaki2011")
+dating_dir <- file.path("8_Dating", scheme_dirs[calibration_scheme])
+dir.create(dating_dir, recursive = TRUE, showWarnings = FALSE)
 
 # 1. Prepare Calibrations
 cat("Creating `treePL` calibrations configurations...\n")
 calibs_all <- read.csv(system.file("extdata", "calibrations_bounds.csv", package = "PhyloCactus"))
-calibs <- calibs_all[calibs_all$used_in_analysis == TRUE, ]
+calibs <- calibs_all[grepl(paste0("_calibration_scheme_", calibration_scheme, "$"), calibs_all$reference), ]
+stopifnot(nrow(calibs) == 1L)
 
 constraints <- read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
 ml_tree <- ape::read.tree(paths$best_tree)
@@ -570,9 +582,8 @@ if (!exists("rooting_outgroup")) rooting_outgroup <- resolve_rooting_outgroup(ti
 rooted_ml <- root_on_clade(ml_tree, rooting_outgroup)
 root_node <- ape::Ntip(rooted_ml) + 1L
 
-# `value` accepts a semicolon-separated list, which is required by the two stem
-# calibrations: a stem node is shared by the families it subtends and cannot be addressed
-# by a single family name.
+# `value` accepts a semicolon-separated list, which is required by ACP_root: a node shared by
+# several families cannot be addressed by a single family name.
 tips_for <- function(column, value) calibration_tips(constraints, column, value, tip_labels)
 
 # Bounds are declared per node, but the nodes are nested and an ultrametric tree forces every
@@ -602,13 +613,13 @@ for (i in seq_len(nrow(calibs))) {
 #   1. The rooting clade is monophyletic. Rooting on a single terminal instead of the clade leaves
 #      the lineage paraphyletic and collapses its crown onto the root, which silently reassigns
 #      every bound addressed by that lineage.
-#   2. ACP_root resolves to a node that is NOT the root, so the anchor is placed on an internal
+#   2. ACP_root resolves to a node that is NOT the root, so the fixed age is placed on an internal
 #      node and not on the deepest split of the tree.
 #   3. ACP_root is monophyletic. If the likelihood placed Talinaceae inside the ACP clade, the
-#      anchor would be addressing something other than the node it was written for.
+#      calibration would be addressing something other than the node it was written for.
 # Lines 1 and 3 assert relationships that the constraint imposes: Talinaceae is a constrained clade, and
 # in the unrooted tree its bipartition is that of the ACP clade. They cannot fail on a constrained
-# run; they guard the rooting and the node of the anchor, not a result of the data.
+# run; they guard the rooting and the calibrated node, not a result of the data.
 stopifnot(ape::is.monophyletic(rooted_ml, grep("^(Talinum|Talinella)_", tip_labels, value = TRUE)))
 acp_tips <- tips_for("Family", "Cactaceae;Anacampserotaceae;Portulacaceae")
 stopifnot(ape::getMRCA(rooted_ml, acp_tips) != root_node)
@@ -681,7 +692,7 @@ if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
 
   # A node whose age equals one of its own bounds was not estimated: penalized likelihood returned
   # the constraint, and the chronogram gives no sign of it. ACP_root is fixed (min = max), so it
-  # sits on its bound by construction; the other three calibrations are expected to be estimated.
+  # sits on its bound by construction; the check matters when a bound with min < max is added.
   # The bootstrap chronograms are passed because a single point estimate can land just inside
   # a bound while the underlying age is unidentifiable, and only the replicates separate the two.
   bs_chronograms <- file.path(dating_dir, "bsTree_treePL.tree")
@@ -694,34 +705,39 @@ if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
 }
 cat("--------------------------------------------\n")
 
-# 4. The cross-validation curve
-# run_treePL_cv() reported the shape of this curve when it ran (interior minimum, edge or plateau);
-# the table shows the curve itself. Values from 10 upward are of the order of 1e41: treePL fails
-# numerically at high smoothing, and those rows carry no information.
-cv_file <- file.path(dating_dir, "auto_results", "ML_tree", "cv_ML_tree")
+# 4. The cross-validation curves
+# run_treePL_cv() reported the shape of the curve when it ran (interior minimum, edge or plateau).
+# cv_ML_tree_selection.csv holds the chi-square summed over every random subsample and, beside it,
+# the sum without the anomalous subsamples, on which the smoothing was selected (NA where a value
+# was left out). Values from 1 upward are of the order of 1e38 or more: treePL fails numerically at
+# high smoothing, and those rows carry no information.
+cv_file <- file.path(dating_dir, "auto_results", "ML_tree", "cv_ML_tree_selection.csv")
 if (file.exists(cv_file)) {
-  lines_cv <- grep("chisq", readLines(cv_file, warn = FALSE), value = TRUE)
-  cv_tab <- data.frame(
-    smoothing = as.numeric(gsub(".*\\(([^)]*)\\).*", "\\1", lines_cv)),
-    chisq = as.numeric(sub(".*\\)\\s*", "", lines_cv))
-  )
+  cv_tab <- read.csv(cv_file)
   print(cv_tab[order(cv_tab$smoothing), ], row.names = FALSE)
 }
 
 # 5. Smoothing sensitivity
-# The same tree dated across the grid and beyond it. Read the range of each node from 1e-14 to
-# 1e-02; the reference run selects 1e-05, an interior minimum. At 1 and 10 the calibrated nodes sit on their upper
-# bounds; that end of the table lies outside the range supported by cross-validation.
-
+# The same tree dated across the grid and beyond it. ACP_root is the only calibrated node, and its
+# age is fixed, so the ages read are those of the root and of the crowns of Cactaceae, Cactoideae,
+# Cacteae and Opuntioideae, given to `nodes` as sets of terminals. Read the range of each node from
+# 1e-14 to 1e-02; values of 1 and above lie outside the part of the curve the selection reads.
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")
 if (file.exists(sensitivity_cfg)) {
   cat("\nRunning smoothing sensitivity analysis across 1e-14 to 100...\n")
   sensitivity <- report_smoothing_sensitivity(
     cfg_file = sensitivity_cfg,
     smoothing_values = c(1e-14, 1e-12, 1e-10, 1e-8, 1e-6, 1e-5, 1e-4, 1e-2, 1, 10, 100),
-    treepl_bin = treepl_path
+    treepl_bin = treepl_path,
+    nodes = list(
+      root = tip_labels,
+      Cactaceae_crown = tips_for("Family", "Cactaceae"),
+      Cactoideae_crown = tips_for("Subfam", "Cactoideae"),
+      Cacteae_crown = tips_for("Clade", "Cacteae"),
+      Opuntioideae_crown = tips_for("Subfam", "Opuntioideae")
+    )
   )
-  cat("\n--- Calibrated Node Age Sensitivity Table ---\n")
+  cat("\n--- Node Age Sensitivity Table ---\n")
   print(sensitivity)
   cat("--------------------------------------------\n")
 }
