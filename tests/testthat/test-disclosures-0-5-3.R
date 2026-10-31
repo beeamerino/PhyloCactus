@@ -58,7 +58,7 @@ test_that("Tutorials 1 and 2 state the sampling of the outgroup and what the che
   n <- .d53_capture(v, "([0-9]+) of the ([0-9]+) outgroup terminals carry a single locus")
   expect_identical(n, c(sum(og$retained_markers == 1L), nrow(og)))
   tal <- og[grepl("^(Talinum|Talinella)_", og$species), ]
-  n <- .d53_capture(v, "of the ([0-9]+) Talinaceae family, ([0-9]+) carry a single locus")
+  n <- .d53_capture(v, "of the ([0-9]+) Talinaceae, ([0-9]+) carry a single locus")
   expect_identical(n, c(nrow(tal), sum(tal$retained_markers == 1L)))
   w <- t2()
   expect_match(w, "assert relationships that the constraint imposes", fixed = TRUE)

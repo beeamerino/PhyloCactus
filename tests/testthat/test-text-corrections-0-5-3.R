@@ -197,7 +197,7 @@ test_that("the references are the ones the publishers record (M8, m1 to m6)", {
   expect_match(t2, "Flouri *et al*., 2015)", fixed = TRUE)
   t1 <- .t53_read("vignettes", "tutorial-1-cactus-phylogeny-prep.Rmd")
   expect_false(grepl("Cactineae", t1, fixed = TRUE))
-  for (ref in c("Nyffeler & Eggli, 2010.", "Ramírez-Barahona *et al*., 2020.", "Zuntini *et al*., 2024.",
+  for (ref in c("Nyffeler & Eggli 2010.", "Ramírez-Barahona *et al*. 2020.", "Zuntini *et al*. 2024.",
                 "https://doi.org/10.32614/RJ-2024-022")) {
     expect_match(t1, ref, fixed = TRUE, info = ref)
   }
@@ -262,7 +262,7 @@ test_that("the exclusions without a stated ground are described as such (M11)", 
   expect_false(grepl("on taxonomic or sequence-quality grounds that cannot be recovered", t1, fixed = TRUE))
   ex <- rbind(utils::read.csv(.t53_extdata("manual_exclusions_ingroup.csv"), stringsAsFactors = FALSE)[, c("locus", "reason")],
               utils::read.csv(.t53_extdata("manual_exclusions_outgroup.csv"), stringsAsFactors = FALSE)[, c("locus", "reason")])
-  n <- as.integer(.t53_capture(t1, "([0-9]+) was removed by manual conflict resolution"))
+  n <- as.integer(.t53_capture(t1, "([0-9]+) were removed by manual conflict resolution"))
   expect_identical(n, sum(grepl("manual conflict resolution", ex$reason, fixed = TRUE)))
 })
 

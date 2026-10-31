@@ -30,7 +30,7 @@ test_that("the ultrafast bootstrap of Amaral et al. (2022) is read at 95 in Tuto
   expect_false(grepl("the latter applied also", v2, fixed = TRUE))
   expect_false(grepl("contradicts with support three", v4, fixed = TRUE))
   expect_true(grepl("contradicts two relationships at that level with support", v4, fixed = TRUE))
-  expect_true(grepl("Ultrafast bootstrap 87, below IQ-TREE’s recommended threshold of 95", v2, fixed = TRUE))
+  expect_true(grepl("ultrafast bootstrap 87, below the threshold of 95", v2, fixed = TRUE))
   expect_true(grepl("ultrafast bootstrap 87, below the", v4, fixed = TRUE))
   for (v in list(v2, v4)) expect_true(grepl("Hoang *et al*", v, fixed = TRUE))
 })
@@ -140,7 +140,8 @@ test_that("Tutorial 1 names the sheets of the checklist and their sources (m8), 
   n_cac <- length(unique(cl$Clade[cl$Family == "Cactaceae"]))
   n_out <- length(unique(cl$Clade[cl$Family != "Cactaceae"]))
   r <- .d4_flat("README.md")
-  s <- sprintf("monophyly in %d nodes of Cactaceae and %d outgroup genera", n_cac, n_out)
+  s <- sprintf("the %d groups named in `cactus_constraints.csv`, %d of Cactaceae and %d outgroup genera",
+               n_cac + n_out, n_cac, n_out)
   expect_true(grepl(s, r, fixed = TRUE), info = s)
   expect_false(grepl("21 named clades", .d4_t2(), fixed = TRUE))
 })
