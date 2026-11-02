@@ -133,17 +133,19 @@ test_that("the help pages hold no 'additionally' (m3)", {
   expect_length(hits, 0L)
 })
 
-test_that("every prose line that names the checklist cites it (m4)", {
+# D16 (BMM, 02-11): the checklist is cited once per document, at its first mention in the prose.
+test_that("the first prose line that names the checklist cites it, in every document (m4, D16)", {
   files <- c(.r51_root("README.md"), list.files(.r51_root("vignettes"), "\\.Rmd$", full.names = TRUE))
   skip_if(!all(file.exists(files[1])), "README.md is not in this tree")
   for (f in files) {
     x <- readLines(f, warn = FALSE, encoding = "UTF-8")
     chunk <- cumsum(grepl("^```", x)) %% 2 == 1 | grepl("^```", x)
     prose <- x[!chunk]
-    h <- prose[grepl("checklist|Caryophyllales\\.org|CactaceaeFullList", prose, ignore.case = TRUE) &
-                 !grepl("Korotkova", prose, fixed = TRUE)]
-    expect_length(h, 0L)
-    if (length(h)) fail(paste0(basename(f), ": ", paste(substr(trimws(h), 1, 90), collapse = " | ")))
+    named <- prose[grepl("checklist|Caryophyllales\\.org|CactaceaeFullList", prose, ignore.case = TRUE)]
+    if (!length(named)) next
+    first <- named[1]
+    expect_true(grepl("Korotkova", first, fixed = TRUE), info = basename(f))
+    if (!grepl("Korotkova", first, fixed = TRUE)) fail(paste0(basename(f), ": ", substr(trimws(first), 1, 90)))
   }
 })
 
