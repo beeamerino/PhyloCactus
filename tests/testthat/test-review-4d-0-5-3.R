@@ -91,7 +91,7 @@ test_that("the failed subsamples of the seed probe are stated where they fell (m
   }
   h <- .d4_flat("man", "run_treePL_cv.Rd")
   expect_false(grepl("fail under most seeds", h, fixed = TRUE))
-  expect_true(grepl("at 10 and above every one of five seeds failed in four to seven subsamples", h, fixed = TRUE))
+  # The counts of the seed probe under the configuration of 0.5.2 left the help page in review 4f (M2).
 })
 
 test_that("FBP is written in percent in the text, as the distributed tree labels it (m5)", {
