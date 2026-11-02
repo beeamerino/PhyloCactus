@@ -237,12 +237,15 @@
 #' @param selected The selected smoothing value.
 #' @param label Run label, for the message.
 #' @param max_smoothing Largest smoothing value checked.
+#' @param left_out Subsamples left out of the selection by `cv_outlier_factor`; when there are any,
+#'   the selection was made without the failed subsample and can fall on a value where it failed.
 #' @return A list with `failures` (as given) and `smoothing_without_failures`, the value with the
 #'   lowest chi-square among those of `max_smoothing` or below at which no subsample failed (`NA`
 #'   when there is none or the log could not be read).
 #' @keywords internal
 #' @noRd
-.check_cv_subsamples <- function(failures, cv_table, selected, label, max_smoothing = 0.1) {
+.check_cv_subsamples <- function(failures, cv_table, selected, label, max_smoothing = 0.1,
+                                 left_out = integer(0)) {
   if (is.null(failures) || nrow(failures) == 0L) {
     message("The cross-validation log of '", label, "' carries no per-subsample chi-square, so ",
             "failed subsamples were not checked.")
@@ -262,14 +265,21 @@
       paste0(paste(each[-length(each)], collapse = ", "), " and ", each[length(each)])
     among <- !is.na(same(selected, bad$smoothing))
     warning("The cross-validation of '", label, "' failed in part: at smoothing ", listed,
-            ", a random subsample returned a chi-square of ", format(1e30), " or more. A value with a ",
-            "failed subsample carries a total of that order, so the selection falls on the values ",
-            "without failures whenever there are any. The selected value, ", fmt(selected), ", ",
+            ", a random subsample returned a chi-square of ", format(1e30), " or more. ",
+            if (length(left_out)) {
+              paste0("The failed subsample was left out of the selection (`cv_outlier_factor`), which can ",
+                     "therefore fall on a value where it failed. ")
+            } else {
+              paste0("A value with a failed subsample carries a total of that order, so the selection falls ",
+                     "on the values without failures whenever there are any. ")
+            },
+            "The selected value, ", fmt(selected), ", ",
             if (among) "is among them. " else "is not among them. ",
             if (is.na(best_ok)) {
               paste0("A subsample failed at every value of ", fmt(max_smoothing), " or below. ")
             } else {
-              paste0("The smoothing with the lowest chi-square among the values of ", fmt(max_smoothing),
+              paste0(if (length(left_out)) "Over every subsample, the" else "The",
+                     " smoothing with the lowest chi-square among the values of ", fmt(max_smoothing),
                      " or below at which no subsample failed is ", fmt(best_ok), " (chi-square ",
                      format(ok$chisq[which.min(ok$chisq)], digits = 8), ")",
                      if (!is.na(same(selected, best_ok))) ", the selected value. " else ". ")
@@ -279,6 +289,22 @@
             call. = FALSE)
   }
   list(failures = failures, smoothing_without_failures = best_ok)
+}
+
+#' Stop unless `cv_outlier_factor` is `NULL` or one finite number above 1
+#'
+#' A character value would be compared with the ratios as text, so that a subsample at 30 times the
+#' median reads as below "5".
+#'
+#' @param x The value given.
+#' @return `invisible(NULL)`.
+#' @keywords internal
+#' @noRd
+.check_cv_outlier_factor <- function(x) {
+  if (!is.null(x) && !(is.numeric(x) && length(x) == 1L && is.finite(x) && x > 1)) {
+    stop("`cv_outlier_factor` must be NULL or one finite number above 1.", call. = FALSE)
+  }
+  invisible(NULL)
 }
 
 #' Read the chi-square increment of every random subsample of a treePL cross-validation
@@ -378,7 +404,7 @@
     if (any(ratio > factor, na.rm = TRUE)) {
       excluded <- c(excluded, i)
       hit <- which(ratio > factor)
-      reasons <- c(reasons, sprintf("subsample %d added %.0f to %.0f times the median at %s", i,
+      reasons <- c(reasons, sprintf("subsample %d added %.1f to %.1f times the median at %s", i,
                                     min(ratio[hit]), max(ratio[hit]), paste(fmt(rev(xi$smoothing[hit])), collapse = ", ")))
     }
   }
@@ -466,7 +492,7 @@
 #'   the same `seed` return different cross-validation curves and can select different smoothing
 #'   values. With one thread the curve is reproducible for a given `seed`, at a cost of about 4% in
 #'   wall-clock time on the reference dataset.
-#' @param cv_outlier_factor Number or `NULL`. A random subsample of the cross-validation that fails,
+#' @param cv_outlier_factor One number above 1, or `NULL`. A random subsample of the cross-validation that fails,
 #'   or adds more than this many times the median chi-square increment at any smoothing value of 0.1
 #'   or below, is left out of the selection. Defaults to `5`; `NULL` selects on the sum over every
 #'   subsample, as before 0.5.3. See the section on anomalous subsamples below.
@@ -501,22 +527,22 @@
 #' falls in practice: the warning names each such value with how many of how many subsamples failed
 #' there, says whether the selected value is among them, and names the smoothing with the lowest
 #' chi-square among the values of 0.1 or below at which no subsample failed, which is also returned
-#' as `cv_smoothing_without_failures`. Because a value with a failed subsample carries a total of
-#' the order of the failure, that smoothing is the selected value whenever the selection falls at 0.1
-#' or below, and the warning then says so. Values above 0.1 are left out: on the reference dataset, at 10
-#' and above every one of five seeds failed in four to seven subsamples, and no run selected a value
-#' above 0.1. On that dataset, two of five seeds lost one subsample at 1e-07 to 1e-04 and at 1e-05 to
-#' 1e-03 (and both at 0.1 and 1) and selected 1e-02 and 1e-08, while the reference seed lost none at
-#' 0.1 or below and selected 1e-05. The running sum is printed with eight significant
+#' as `cv_smoothing_without_failures`. With `cv_outlier_factor = NULL`, a value with a failed
+#' subsample carries a total of the order of the failure, so that smoothing is the selected value
+#' whenever the selection falls at 0.1 or below, and the warning then says so. With the default, the
+#' failed subsample is left out (see the section on anomalous subsamples), the selection can fall on a
+#' value where it failed, and the warning says that too. Values above 0.1 are left out: on the
+#' reference dataset no run has selected a value above 0.1, and subsamples fail often there. The
+#' running sum is printed with eight significant
 #' digits, so the chi-square of the subsamples after a failure cannot be recovered from the log, and
 #' the count of failures is a lower bound.
 #' @section Anomalous subsamples:
 #' A failed subsample is not the only one that can move the selection. In the re-dating of the
-#' reference dataset under four calibration schemes without internal bounds (closure of 0.5.2, phase
-#' 3h), one or two of the ten subsamples of each cross-validation added 700 to 2400 to the chi-square
-#' from 0.1 down to 1e-07, against 20 to 80 for the others, and a normal amount from 1e-08 down; summed
-#' over every subsample, the curves selected 1e-09 to 1e-11, and summed without those subsamples each
-#' had its minimum at 1e-05. With `cv_outlier_factor` set, a subsample that fails at any value of 0.1
+#' reference dataset under one fixed-age calibration (Tutorial 2, Module 10), one or two of the ten
+#' subsamples of each cross-validation fitted badly from 0.1 down to about 1e-07, or failed, and
+#' normally below; summed over every subsample, the curves selected the smallest values of the grid,
+#' and summed without those subsamples each had its minimum at 1e-05. The default factor of 5 was set
+#' after those curves had been read. With `cv_outlier_factor` set, a subsample that fails at any value of 0.1
 #' or below, or adds more than `cv_outlier_factor` times the median increment of the subsamples at
 #' such a value, is left out, and the smoothing is selected on the curve of the remaining subsamples
 #' over the values of 0.1 or below. The values are compared on one set of subsamples: because the
@@ -556,6 +582,7 @@ run_treePL_cv <- function(cfg_file, tree_file, label,
   if (is.na(cv_nthreads) || cv_nthreads < 1L) {
     stop("`cv_nthreads` must be a positive integer.", call. = FALSE)
   }
+  .check_cv_outlier_factor(cv_outlier_factor)
   if (!file.exists(cfg_file)) stop("Configuration not found: ", cfg_file, call. = FALSE)
   if (!file.exists(tree_file)) stop("Tree not found: ", tree_file, call. = FALSE)
   cfg_abs <- normalizePath(cfg_file, mustWork = TRUE)
@@ -658,7 +685,8 @@ run_treePL_cv <- function(cfg_file, tree_file, label,
   }
   say("  Smoothing selected: ", format(sel$smoothing, scientific = FALSE),
       " (lowest chi-square of ", rule, "; curve shape: ", sel$shape, ")")
-  failed <- .check_cv_subsamples(.read_cv_subsamples(cv_log), sel_all$table, sel$smoothing, label)
+  failed <- .check_cv_subsamples(.read_cv_subsamples(cv_log), sel_all$table, sel$smoothing, label,
+                                 left_out = if (!is.null(rob) && !is.null(rob$table)) rob$excluded else integer(0))
   if (!is.null(rob)) {
     curve <- sel_all$table
     names(curve)[2] <- "chisq_all_subsamples"

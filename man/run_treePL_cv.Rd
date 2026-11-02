@@ -58,7 +58,7 @@ the same \code{seed} return different cross-validation curves and can select dif
 values. With one thread the curve is reproducible for a given \code{seed}, at a cost of about 4\% in
 wall-clock time on the reference dataset.}
 
-\item{cv_outlier_factor}{Number or \code{NULL}. A random subsample of the cross-validation that fails,
+\item{cv_outlier_factor}{One number above 1, or \code{NULL}. A random subsample of the cross-validation that fails,
 or adds more than this many times the median chi-square increment at any smoothing value of 0.1
 or below, is left out of the selection. Defaults to \code{5}; \code{NULL} selects on the sum over every
 subsample, as before 0.5.3. See the section on anomalous subsamples below.}
@@ -127,13 +127,13 @@ when one or more failed at any value of 0.1 or below, the part of the grid where
 falls in practice: the warning names each such value with how many of how many subsamples failed
 there, says whether the selected value is among them, and names the smoothing with the lowest
 chi-square among the values of 0.1 or below at which no subsample failed, which is also returned
-as \code{cv_smoothing_without_failures}. Because a value with a failed subsample carries a total of
-the order of the failure, that smoothing is the selected value whenever the selection falls at 0.1
-or below, and the warning then says so. Values above 0.1 are left out: on the reference dataset, at 10
-and above every one of five seeds failed in four to seven subsamples, and no run selected a value
-above 0.1. On that dataset, two of five seeds lost one subsample at 1e-07 to 1e-04 and at 1e-05 to
-1e-03 (and both at 0.1 and 1) and selected 1e-02 and 1e-08, while the reference seed lost none at
-0.1 or below and selected 1e-05. The running sum is printed with eight significant
+as \code{cv_smoothing_without_failures}. With \code{cv_outlier_factor = NULL}, a value with a failed
+subsample carries a total of the order of the failure, so that smoothing is the selected value
+whenever the selection falls at 0.1 or below, and the warning then says so. With the default, the
+failed subsample is left out (see the section on anomalous subsamples), the selection can fall on a
+value where it failed, and the warning says that too. Values above 0.1 are left out: on the
+reference dataset no run has selected a value above 0.1, and subsamples fail often there. The
+running sum is printed with eight significant
 digits, so the chi-square of the subsamples after a failure cannot be recovered from the log, and
 the count of failures is a lower bound.
 }
@@ -141,11 +141,11 @@ the count of failures is a lower bound.
 \section{Anomalous subsamples}{
 
 A failed subsample is not the only one that can move the selection. In the re-dating of the
-reference dataset under four calibration schemes without internal bounds (closure of 0.5.2, phase
-3h), one or two of the ten subsamples of each cross-validation added 700 to 2400 to the chi-square
-from 0.1 down to 1e-07, against 20 to 80 for the others, and a normal amount from 1e-08 down; summed
-over every subsample, the curves selected 1e-09 to 1e-11, and summed without those subsamples each
-had its minimum at 1e-05. With \code{cv_outlier_factor} set, a subsample that fails at any value of 0.1
+reference dataset under one fixed-age calibration (Tutorial 2, Module 10), one or two of the ten
+subsamples of each cross-validation fitted badly from 0.1 down to about 1e-07, or failed, and
+normally below; summed over every subsample, the curves selected the smallest values of the grid,
+and summed without those subsamples each had its minimum at 1e-05. The default factor of 5 was set
+after those curves had been read. With \code{cv_outlier_factor} set, a subsample that fails at any value of 0.1
 or below, or adds more than \code{cv_outlier_factor} times the median increment of the subsamples at
 such a value, is left out, and the smoothing is selected on the curve of the remaining subsamples
 over the values of 0.1 or below. The values are compared on one set of subsamples: because the

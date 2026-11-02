@@ -366,7 +366,7 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL, treepl_bin = "treePL"
 #'   reproduce the run.
 #' @param cv_nthreads Integer. Number of threads for the cross-validation stage. Defaults to `1L`,
 #'   which makes the cross-validation curve reproducible for a given `seed`. See [run_treePL_cv()].
-#' @param cv_outlier_factor Number or `NULL`. Random subsamples of the cross-validation that fail, or
+#' @param cv_outlier_factor One number above 1, or `NULL`. Random subsamples of the cross-validation that fail, or
 #'   add more than this many times the median chi-square increment at a smoothing value of 0.1 or
 #'   below, are left out of the selection of the smoothing. Defaults to `5`; `NULL` selects on every
 #'   subsample. See the section on anomalous subsamples of [run_treePL_cv()].
@@ -412,6 +412,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, cv_outlier_factor = 5,
                             wrapper_sh = NULL, notify = FALSE, notify_to = NULL, notify_credentials = NULL,
                             treepl_bin = "treePL") {
+
+  .check_cv_outlier_factor(cv_outlier_factor)
 
   # The work itself is unchanged and lives in .automate_treePL_run(). This wrapper exists only to
   # time the run and to report its outcome, and it is deliberately thin: a notification is a

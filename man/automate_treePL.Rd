@@ -79,7 +79,7 @@ maximum-likelihood stage is read from disk.}
 \item{cv_nthreads}{Integer. Number of threads for the cross-validation stage. Defaults to \code{1L},
 which makes the cross-validation curve reproducible for a given \code{seed}. See \code{\link[=run_treePL_cv]{run_treePL_cv()}}.}
 
-\item{cv_outlier_factor}{Number or \code{NULL}. Random subsamples of the cross-validation that fail, or
+\item{cv_outlier_factor}{One number above 1, or \code{NULL}. Random subsamples of the cross-validation that fail, or
 add more than this many times the median chi-square increment at a smoothing value of 0.1 or
 below, are left out of the selection of the smoothing. Defaults to \code{5}; \code{NULL} selects on every
 subsample. See the section on anomalous subsamples of \code{\link[=run_treePL_cv]{run_treePL_cv()}}.}
