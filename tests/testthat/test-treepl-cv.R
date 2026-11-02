@@ -601,3 +601,77 @@ test_that("automate_treePL() passes cv_outlier_factor on, with 5 as its default"
   expect_equal(formals(automate_treePL)$cv_outlier_factor, 5)
   expect_equal(formals(run_treePL_cv)$cv_outlier_factor, 5)
 })
+
+# The threshold of the rule (review 4f of the closure of 0.5.2). Under one seed of the re-dating, two
+# subsamples reached 6.1 and 6.4 times the median and a third 23.5 times, and the selection changed
+# between a factor of 5 and 7. Here, from 0.1 to 1e-07, subsample 8 adds 25 times the median of the
+# subsamples at that value, subsample 10 adds 5.5 times and subsample 4 adds 4 times; below 1e-07 all
+# three are normal. With subsamples 4, 8 and 10 among them, the median is that of the other seven.
+fixture_threshold <- function() {
+  off <- c(8, 6, 4, 3, 1, 0, 0.5, 1, 1.5, 2, 2.5)
+  m <- matrix(30 + rep(off, each = 10) + rep(0:9, 11) / 10, nrow = length(grid_d13), byrow = TRUE)
+  med <- 30 + off + 0.55
+  for (r in 2:8) {
+    m[r, 8] <- 25 * med[r]
+    m[r, 10] <- 5.5 * med[r]
+    m[r, 4] <- 4 * med[r]
+  }
+  m
+}
+
+test_that("the factor decides which subsamples are left out, against the median at each value", {
+  tmp <- withr::local_tempdir()
+  f <- cv_log_with(tmp, grid_d13, fixture_threshold(), selected = 1e-8)
+  inc <- .read_cv_increments(f[["log"]])
+  expect_equal(.robust_cv_curve(inc, factor = 3)$excluded, c(4L, 8L, 10L))
+  expect_equal(.robust_cv_curve(inc, factor = 5)$excluded, c(8L, 10L))
+  expect_equal(.robust_cv_curve(inc, factor = 7)$excluded, 8L)
+  expect_length(.robust_cv_curve(inc, factor = 30)$excluded, 0L)
+  expect_equal(.robust_cv_curve(inc, factor = 3)$smoothing, 1e-5)
+  expect_equal(.robust_cv_curve(inc, factor = 5)$smoothing, 1e-8)
+  # The ratio that decides is written with one decimal, so a subsample left out for more than 5 times
+  # the median does not read as 5 or 6.
+  r5 <- .robust_cv_curve(inc, factor = 5)
+  expect_true(any(grepl("subsample 10 added 5.5 to 5.5 times the median", r5$reasons, fixed = TRUE)))
+})
+
+test_that("when the subsample that fails at the selected value is left out, the D13 warning says so", {
+  skip_if_not_installed("ape")
+  skip_if(.Platform$OS.type != "unix", "requires a POSIX shell for the stand-in treePL")
+  tmp <- withr::local_tempdir()
+  # The seventh subsample fails from 0.1 to 1e-05 (the run of Ramirez-Barahona et al. 2020 in 3h);
+  # without it the selection is 1e-05, a value where it failed.
+  m <- fixture_outlier(); m[, 4] <- 30 + c(8, 6, 4, 3, 1, 0, 0.5, 1, 1.5, 2, 2.5) + 0.3
+  m[2:6, 7] <- 4.1e38
+  fx <- cv_log_with(tmp, grid_d13, m, selected = 1e-5)
+  bin <- standin_treepl(tmp, fx)
+  tr <- file.path(tmp, "t.tree")
+  ape::write.tree(ape::read.tree(text = "((A:0.1,B:0.1):0.1,(C:0.1,D:0.1):0.1);"), tr)
+  cfg <- file.path(tmp, "t.cfg")
+  writeLines(c("numsites = 1000", "mrca = root A D", "min = root 1", "max = root 5"), cfg)
+  w <- character(0)
+  res <- withCallingHandlers(
+    run_treePL_cv(cfg, tr, "fx", n_prime = 1L, treepl_bin = bin, work_dir = file.path(tmp, "wd"), quiet = TRUE),
+    warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
+  expect_equal(res$smoothing, 1e-5)
+  d13 <- grep("failed in part", w, value = TRUE)
+  expect_length(d13, 1L)
+  expect_false(grepl("the selection falls on the values without failures", d13, fixed = TRUE))
+  expect_match(d13, "left out of the selection", fixed = TRUE)
+  expect_match(d13, "is among them", fixed = TRUE)
+})
+
+test_that("cv_outlier_factor must be NULL or one number above 1", {
+  skip_if_not_installed("ape")
+  tmp <- withr::local_tempdir()
+  tr <- file.path(tmp, "t.tree")
+  ape::write.tree(ape::read.tree(text = "((A:0.1,B:0.1):0.1,(C:0.1,D:0.1):0.1);"), tr)
+  cfg <- file.path(tmp, "t.cfg")
+  writeLines(c("numsites = 1000", "min = root 1", "max = root 5"), cfg)
+  for (bad in list("5", 1, 0.5, c(5, 7), NA_real_, Inf)) {
+    expect_error(run_treePL_cv(cfg, tr, "bad", cv_outlier_factor = bad, work_dir = tmp),
+                 "cv_outlier_factor", fixed = TRUE)
+  }
+  expect_error(automate_treePL(cfg, tr, tr, results_dir = tmp, treePL_out = tmp, cv_outlier_factor = "5"),
+               "cv_outlier_factor", fixed = TRUE)
+})
