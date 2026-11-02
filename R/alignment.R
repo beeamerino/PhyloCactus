@@ -371,7 +371,7 @@ cached_params_match <- function(cached_summary, stamp) {
 #' @return A list with `dna` (the corrected set) and `log`, one row per sequence.
 #' @keywords internal
 #' @noRd
-# The k-mer parts of .normalise_strand(), kept apart so that the barcoding branch can
+# The k-mer parts of .normalise_strand(), kept apart so that Module 14 can
 # orient one query against the library with the same rule instead of a second copy of it. The
 # extraction is behaviour preserving: what .normalise_strand() decides is pinned by a test.
 .kmer_set <- function(s, k) {

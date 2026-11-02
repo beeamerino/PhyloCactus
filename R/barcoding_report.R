@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), the identification report. PhyloCactus 0.5.0.
+# Module 14, molecular identification (11_barcoding/), the identification report. PhyloCactus 0.5.0.
 #
 # For every query, one self-contained HTML written by the package (no pandoc) and a set of CSV
 # files: the answer per locus, the alternatives under the threshold, a descriptive reading across

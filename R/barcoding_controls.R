@@ -1,4 +1,4 @@
-# Negative controls of the molecular diagnostic branch (11_barcoding/8_controls/). PhyloCactus 0.5.0.
+# Negative controls of Module 14 (11_barcoding/8_controls/). PhyloCactus 0.5.0.
 #
 # The metric functions live here because the label permutation control needs them. Here they are
 # applied only to permuted labels, to outgroup queries and to resubstitution, never to the true

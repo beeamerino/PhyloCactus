@@ -1,4 +1,4 @@
-# Per-class metrics of the molecular diagnostic branch (11_barcoding/11_metrics/).
+# Per-class metrics of Module 14 (11_barcoding/11_metrics/).
 # PhyloCactus 0.5.0.
 # It reads the tables of steps 7 and 9 and the library summary, and runs no classifier.
 

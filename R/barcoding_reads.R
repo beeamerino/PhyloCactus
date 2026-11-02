@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), identification of paired reads. PhyloCactus 0.5.0.
+# Module 14, molecular identification (11_barcoding/), identification of paired reads. PhyloCactus 0.5.0.
 #
 # fastp, GetOrganelle (plastome and nrDNA) and step 10 on the assembled paths. The same function
 # builds 0_genomic_raw/reads/<run>/.

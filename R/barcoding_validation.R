@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), validation partitions. PhyloCactus 0.5.0.
+# Module 14, molecular identification (11_barcoding/), validation partitions. PhyloCactus 0.5.0.
 #
 # Hard rule of the validation: no accession may be in the training set and in the
 # evaluation set of the same fold. Scheme E leaves one sequence out and asks for the species of the

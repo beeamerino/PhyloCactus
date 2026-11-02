@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), the sample sheet. PhyloCactus 0.5.0.
+# Module 14, molecular identification (11_barcoding/), the sample sheet. PhyloCactus 0.5.0.
 #
 # A sheet with one row per sample, routed by the matrix of accepted inputs
 # (inst/extdata/barcoding_accepted_inputs.csv): an admitted input goes to its identification function

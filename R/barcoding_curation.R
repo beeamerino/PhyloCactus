@@ -1,9 +1,9 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), curation and screening steps. PhyloCactus 0.5.0.
+# Module 14, molecular identification (11_barcoding/), curation and screening steps. PhyloCactus 0.5.0.
 #
 # Curation calls the phylogeny's alignment pipeline, run_alignment_pipeline(), unchanged: it works
 # sequence by sequence, does not collapse by species and keeps the Genus_species|sid headers.
-# Screening recomputes the per-locus context columns on the curated alignments, applies the branch's
+# Screening recomputes the per-locus context columns on the curated alignments, applies Module 14's
 # replication threshold there, flags saturation without excluding, and counts identical sequences.
 # ------------------------------------------------------------------------------
 

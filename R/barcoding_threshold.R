@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/9_threshold/), threshold of remoteness. PhyloCactus
+# Module 14, molecular identification (11_barcoding/9_threshold/), threshold of remoteness. PhyloCactus
 # 0.5.0.
 #
 # The nearest neighbour has no rule of remoteness: in the outgroup control, 288 of 312 alien queries came out in state

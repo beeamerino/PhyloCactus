@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), identification of a genome assembly. PhyloCactus 0.5.0.
+# Module 14, molecular identification (11_barcoding/), identification of a genome assembly. PhyloCactus 0.5.0.
 #
 # The crop of step 10 reads every 20-mer of a query and does not scale to an assembly of 1 Gb: the
 # loci are located first with minimap2, cut with samtools faidx and handed to step 10.

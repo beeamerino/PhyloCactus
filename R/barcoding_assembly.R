@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), assembly step. PhyloCactus 0.5.0.
+# Module 14, molecular identification (11_barcoding/), assembly step. PhyloCactus 0.5.0.
 #
 # Reads the same phylotaR workspace as the phylogeny (0_phylotaR_raw_Ingroup/), through the same
 # function, and builds a library with every accession of every species: none of the three
@@ -13,8 +13,8 @@
   parts <- strsplit(normalizePath(output_dir, mustWork = FALSE), "[/\\\\]")[[1]]
   hit <- parts[grepl("^0_phylotaR_raw_|^1_phylotaR_out_|^4_Cleaned$", parts)]
   if (length(hit) > 0) {
-    stop("output_dir is inside a directory of the phylogeny branch (", hit[1], "): ", output_dir,
-         ". The molecular diagnostic branch writes only under its own directory.", call. = FALSE)
+    stop("output_dir is inside a directory of the phylogeny, Modules 1 to 13 (", hit[1], "): ", output_dir,
+         ". Module 14 writes only under its own directory.", call. = FALSE)
   }
   invisible(TRUE)
 }
@@ -560,7 +560,7 @@ assemble_barcoding_dataset <- function(wd_path,
   txids <- vapply(kept$sid, function(s) as.character(selected@sqs[[s]]@txid), character(1), USE.NAMES = FALSE)
   kept$genbank_name <- cp_clean_species_name(phylotaR::get_tx_slot(selected, txid = txids, slt_nm = "scnm"))
 
-  # 4. Cluster-to-locus assignment, with the phylogeny's code and the branch's own caches
+  # 4. Cluster-to-locus assignment, with the phylogeny's code and Module 14's own caches
   metadata <- cp_download_all_metadata(unique(kept$sid),
                                        file.path(dir_cache, "CACHE_GENBANK_METADATA_BARCODING.csv"),
                                        batch_size = 200, sleep_time = 0.5, max_retries = 5,

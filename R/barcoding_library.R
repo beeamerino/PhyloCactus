@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), final library step. PhyloCactus 0.5.0.
+# Module 14, molecular identification (11_barcoding/), final library step. PhyloCactus 0.5.0.
 #
 # Rules of the step:
 # - Sequences that run_alignment_pipeline() logs as "no_match_either_direction" in

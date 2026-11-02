@@ -1,7 +1,7 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), barcode gap. PhyloCactus 0.5.0.
+# Module 14, molecular identification (11_barcoding/), barcode gap. PhyloCactus 0.5.0.
 #
-# Rule of the branch, fixed before any data was seen: the candidate threshold of
+# Rule of Module 14, fixed before any data was seen: the candidate threshold of
 # a locus is the 95th percentile of its intraspecific distribution, published next to the 5th
 # percentile of the interspecific nearest-neighbour distribution. When the first is above the second
 # there is no gap in that locus and it is declared; no other percentile is looked for. Both distance

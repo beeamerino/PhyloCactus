@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Molecular diagnostic branch (11_barcoding/), figures of an identification drawn from the tables of
+# Module 14, molecular identification (11_barcoding/), figures of an identification drawn from the tables of
 # its report. PhyloCactus 0.5.0.
 #
 # The report of an identification (report_barcoding_identification()) writes its answer per locus and

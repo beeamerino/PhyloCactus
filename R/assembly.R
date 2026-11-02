@@ -99,7 +99,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   
   log_message("Inputs loaded successfully.")
   
-  # Setup / Load phylotaR. Shared with assemble_barcoding_dataset(), so that both branches make the
+  # Setup / Load phylotaR. Shared with assemble_barcoding_dataset(), so that the phylogeny and Module 14 make the
   # same phylotaR call and share the same raw workspace, whichever of them runs first.
   phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = preferred_parent, ncbi_dr = ncbi_dr,
                                     force_download = force_download, log_message = log_message,
@@ -313,7 +313,7 @@ assemble_ingroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_m
   markers_final <- sort(unique(df_joined$Marker_std))
   
   # Records over 2000 bases cut to the extent of the shorter records of their marker, as in step 1
-  # of the barcoding branch, before one record per species is kept
+  # of Module 14, before one record per species is kept
   long_cut <- list()
   for (mk in markers_final) {
     log_message("Processing marker FASTA merge: ", mk)
@@ -457,7 +457,7 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
   gene_lookup <- genes_map_df |> dplyr::select(search_gene = search, Gene_std = replace)
   marker_lookup <- genes_map_df |> dplyr::select(search_marker = search, Marker_std = replace)
   
-  # Workspace through the function shared with the ingroup and the barcoding branch: one set of
+  # Workspace through the function shared with the ingroup and Module 14: one set of
   # parameters for the ingroup and the outgroup workspaces
   phylota <- .phylotar_load_or_mine(wd_path, preferred_parent = outgroups[1], txid = outgroups,
                                     force_download = force_download, log_message = log_message,
@@ -634,7 +634,7 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
   markers_final <- sort(unique(df_joined$Marker_std))
   
   # Records over 2000 bases cut to the extent of the shorter records of their marker, as in step 1
-  # of the barcoding branch, before one record per species is kept
+  # of Module 14, before one record per species is kept
   long_cut <- list()
   for (mk in markers_final) {
     log_message("Processing marker FASTA merge: ", mk)
@@ -907,7 +907,7 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
 
 # ------------------------------------------------------------------------------
 # Shared by assemble_ingroup_phylotar() and assemble_barcoding_dataset(). Moved here in 0.5.0
-# without changing their behaviour, so that the phylogeny and the molecular diagnostic branch make
+# without changing their behaviour, so that the phylogeny and Module 14 make
 # the same phylotaR call on the same workspace and assign clusters to loci with the same code.
 # ------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-# Classifier of the molecular diagnostic branch (11_barcoding/7_classifier/). PhyloCactus 0.5.0.
+# Classifier of Module 14 (11_barcoding/7_classifier/). PhyloCactus 0.5.0.
 # This file implements the classifier and computes no accuracy: the negative controls (step 8) and
 # the metrics (steps 9 and 10) come after it, so that the classifier is not fitted to its accuracy.
 
