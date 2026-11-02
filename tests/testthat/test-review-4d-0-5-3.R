@@ -161,10 +161,8 @@ test_that("Tutorial 4 states the root of the Thompson tree and reads genus split
   expect_false(grepl("a lack of signal that follows from", v, fixed = TRUE))
 })
 
-test_that("the script of Tutorial 2 carries the reading of the seed probe (m16)", {
-  x <- .d4_flat("inst", "scripts", "tutorial-2-cactus-phylogeny-inference.R")
-  expect_true(grepl("the cross-validation does not identify a smoothing value on this tree", x, fixed = TRUE))
-})
+# m16: the reading of the seed probe is not stated in the package (BMM, 02-11); it stays in the
+# minutes of 3e and 4e.
 
 test_that("the references are written as the publishers record them (m17)", {
   for (src in list("README.md", c("vignettes", "tutorial-1-cactus-phylogeny-prep.Rmd"),

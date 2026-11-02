@@ -41,8 +41,8 @@ test_that("Tutorial 2 states the Module 10 of the Phase 12 run, not that of 0.4.
                    "the plateau of the reference run"), "Tutorial 2 vignette")
   .db2_absent(s, "the plateau of the reference run", "Tutorial 2 script")
   # The curve and ranges of the 15-10 run (323.09; 0.62, 0.85 and 0.93 Ma) were replaced by those of
-  # scheme 1 in phase 4e (test-redating-0-5-3.R and the tracing table).
-  .db2_present(v, c("FBP 81", "45.53 Ma", "interior minimum at $10^{-5}$"),
+  # scheme 1 in phase 4e, and the root age (45.53 Ma) by that of the main scheme (test-redating-0-5-3.R).
+  .db2_present(v, c("FBP 81", "interior minimum at $10^{-5}$"),
                "Tutorial 2 vignette")
   stale_doc <- "Cactaceae dataset reaches a plateau below 1e-06"
   .db2_absent(.db2_tree_file("R", "treepl_cv.R"), stale_doc, "R/treepl_cv.R")

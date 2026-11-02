@@ -600,9 +600,6 @@ if (file.exists(cv_file)) {
 # age is fixed, so the ages read are those of the root and of the crowns of Cactaceae, Cactoideae,
 # Cacteae and Opuntioideae, given to `nodes` as sets of terminals. Read the range of each node from
 # 1e-14 to 1e-02; values of 1 and above lie outside the part of the curve the selection reads.
-# Under scheme 2, five seeds of treePL selected 1e-05 to 1e-02, so
-# the cross-validation does not identify a smoothing value on this tree, and the table below,
-# written with one seed, mixes the effect of the smoothing with that of the optimizer (Tutorial 2).
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")
 if (file.exists(sensitivity_cfg)) {
   cat("\nRunning smoothing sensitivity analysis across 1e-14 to 100...\n")
