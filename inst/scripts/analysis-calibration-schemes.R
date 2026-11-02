@@ -11,16 +11,18 @@
 # Portulacaceae (ACP_root), and no node inside Cactaceae is calibrated. calibrations_bounds.csv
 # holds three calibration schemes for that node, each identified by the suffix
 # "_calibration_scheme_<n>" of its `reference`:
-#   1  41.82 Ma  Ramirez-Barahona et al. (2020), RC_complete, the median height of the stem node of
+#   1  53.22 Ma  Zuntini et al. (2024), Supplementary Table 3, the stem of Cactaceae on the young tree
+#                (maximum of 154 Ma at the angiosperm crown), dated with treePL. The main scheme.
+#   2  41.82 Ma  Ramirez-Barahona et al. (2020), RC_complete, the median height of the stem node of
 #                Portulacaceae on the maximum clade credibility tree of the BEAST analysis
-#                (Data4_Ages.xlsx, column Stem_BEAST). The main scheme.
-#   2  53.22 Ma  Zuntini et al. (2024), Supplementary Table 3, the stem of Cactaceae on the young tree
-#                (maximum of 154 Ma at the angiosperm crown), dated with treePL.
+#                (Data4_Ages.xlsx, column Stem_BEAST).
 #   3  37.0 Ma   Arakaki et al. (2011), Table S4, applied as a fixed age and not as the interval of
 #                31.90 to 42.10 Ma.
-# On the topology of this tree each of these nodes is the ACP crown. Whatever the resolution of
-# Anacampserotaceae, Cactaceae and Portulacaceae, the most recent common ancestor of the three
-# families is the same node.
+# Each age is that of the ACP crown in the source's own tree: on the topology of this tree, where
+# Cactaceae is sister to Anacampserotaceae plus Portulacaceae, the stem of Cactaceae of Zuntini et al.
+# (2024) is the ACP crown; in Ramirez-Barahona et al. (2020), where Cactaceae is sister to
+# Anacampserotaceae, the stem of Portulacaceae is. Whatever the resolution of the three families,
+# the most recent common ancestor of the three is the same node of this tree.
 #
 # Each scheme is dated as Module 10 of Tutorial 2 dates one: the same configuration with only the
 # calibration line changed, automate_treePL() with priming, cross-validation over 1e+03 to 1e-14
@@ -38,7 +40,7 @@ tutorial_dir <- "~/Desktop/PhyloCactus_Tutorial"
 setwd(tutorial_dir)
 
 SEED <- 79992967
-scheme_dirs <- c("RamirezBarahona2020", "Zuntini2024_young", "Arakaki2011")
+scheme_dirs <- c("Zuntini2024_young", "RamirezBarahona2020", "Arakaki2011")
 treepl_path <- Sys.getenv("PATH_TREEPL", "treePL")
 
 # Inputs are resolved as in Module 10 of Tutorial 2, from the run itself and not as literal paths or

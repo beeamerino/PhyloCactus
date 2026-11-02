@@ -209,7 +209,7 @@ library(PhyloCactus)
 
 # The focal tree is the chronogram of this run; the reference trees and the checklist are read from
 # local paths (PHYLOCACTUS_REFERENCE_TREES, PHYLOCACTUS_CHECKLIST).
-focal_tree <- file.path("8_Dating", "RamirezBarahona2020", "dated_summary_hpd.tree")
+focal_tree <- file.path("8_Dating", "Zuntini2024_young", "dated_summary_hpd.tree")
 if (!file.exists(focal_tree)) {
   focal_tree <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")
 }

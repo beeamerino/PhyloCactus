@@ -414,12 +414,12 @@ cat("=======================================================\n")
 paths <- resolve_run_paths(output_dir, run_prefix, supermatrix_file,
                            require = c("analysed_phy", "best_tree", "temporal_bs"))
 
-# The calibration scheme to date: 1, Ramirez-Barahona et al. (2020), 41.82 Ma, the distributed
-# chronogram; 2, Zuntini et al. (2024), young tree, 53.22 Ma; 3, Arakaki et al. (2011), 37.0 Ma.
+# The calibration scheme to date: 1, Zuntini et al. (2024), young tree, 53.22 Ma, the distributed
+# chronogram; 2, Ramirez-Barahona et al. (2020), 41.82 Ma; 3, Arakaki et al. (2011), 37.0 Ma.
 # Each is one fixed age on ACP_root, read from the row of calibrations_bounds.csv whose reference
 # ends in "_calibration_scheme_<n>", and each is dated in a folder of its own.
 calibration_scheme <- 1
-scheme_dirs <- c("RamirezBarahona2020", "Zuntini2024_young", "Arakaki2011")
+scheme_dirs <- c("Zuntini2024_young", "RamirezBarahona2020", "Arakaki2011")
 dating_dir <- file.path("8_Dating", scheme_dirs[calibration_scheme])
 dir.create(dating_dir, recursive = TRUE, showWarnings = FALSE)
 
@@ -554,7 +554,7 @@ automate_treePL(
 # The dated replicates are summarized outside R with TreeAnnotator v2.7.7 of BEAST 2, with the
 # settings of Maurin (2020): maximum clade credibility target tree, mean node heights, 0% burn-in.
 # The reference run (scheme 1) used this command, whose output is the distributed summary:
-#   treeannotator -burnin 0 -height mean -topology MCC 8_Dating/RamirezBarahona2020/bsTree_treePL.tree 8_Dating/RamirezBarahona2020/dated_summary_hpd.tree
+#   treeannotator -burnin 0 -height mean -topology MCC 8_Dating/Zuntini2024_young/bsTree_treePL.tree 8_Dating/Zuntini2024_young/dated_summary_hpd.tree
 # If the treeannotator first on the PATH is that of BEAST 1 (v1.10), which rejects -height, call the
 # program of BEAST 2 by its full path. In the graphical interface, set the burn-in to 0 (it starts at
 # 10) and the heights to mean heights.
@@ -600,7 +600,7 @@ if (file.exists(cv_file)) {
 # age is fixed, so the ages read are those of the root and of the crowns of Cactaceae, Cactoideae,
 # Cacteae and Opuntioideae, given to `nodes` as sets of terminals. Read the range of each node from
 # 1e-14 to 1e-02; values of 1 and above lie outside the part of the curve the selection reads.
-# Under scheme 1, five seeds of treePL selected 1e-05 to 1e-02, so
+# Under scheme 2, five seeds of treePL selected 1e-05 to 1e-02, so
 # the cross-validation does not identify a smoothing value on this tree, and the table below,
 # written with one seed, mixes the effect of the smoothing with that of the optimizer (Tutorial 2).
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")

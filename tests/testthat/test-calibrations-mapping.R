@@ -150,19 +150,19 @@ test_that("rooting on a single Portulaca terminal reproduces the original defect
 
 # Closure of 0.5.2 into 0.5.3, phase 4e (re-dating of 3h, BMM 30-10 and 31-10): three calibration
 # schemes, each one fixed age on ACP_root and no calibration inside Cactaceae, numbered 1 to 3 in
-# the order BMM chose. The ages are those the run of 3h read (8_Dating/<scheme>/calibrations_used.csv
+# the order BMM chose (D15 as amended on 02-11: the young tree of Zuntini et al. 2024 first). The ages are those the run of 3h read (8_Dating/<scheme>/calibrations_used.csv
 # of the tutorial folder, snapshot c436b411 of the audit repository). Written before the change.
 test_that("calibrations_bounds.csv carries the three calibration schemes, with scheme 1 the only active row", {
   calibs <- read_calibrations()
   active <- calibs[calibs$used_in_analysis == TRUE, ]
   expect_equal(nrow(active), 1L)
   expect_identical(active$mrca, "ACP_root")
-  expect_equal(c(active$min, active$max), rep(41.8234076705405, 2))
-  expect_match(active$reference, "Ramirez-Barahona_2020", fixed = TRUE)
+  expect_equal(c(active$min, active$max), rep(53.223549, 2))
+  expect_match(active$reference, "Zuntini_2024", fixed = TRUE)
 
   scheme <- function(k) calibs[grepl(paste0("_calibration_scheme_", k, "$"), calibs$reference), ]
-  fixed <- c(`1` = 41.8234076705405, `2` = 53.223549, `3` = 37)
-  source <- c(`1` = "Ramirez-Barahona_2020", `2` = "Zuntini_2024", `3` = "Arakaki_2011")
+  fixed <- c(`1` = 53.223549, `2` = 41.8234076705405, `3` = 37)
+  source <- c(`1` = "Zuntini_2024", `2` = "Ramirez-Barahona_2020", `3` = "Arakaki_2011")
   for (k in names(fixed)) {
     s <- scheme(k)
     expect_equal(nrow(s), 1L, info = k)
