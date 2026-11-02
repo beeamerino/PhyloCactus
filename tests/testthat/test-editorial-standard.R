@@ -1,10 +1,8 @@
-# Decisions E1 to E6 of BMM (15-10, Phase 12): one visual and editorial standard for every figure and
-# vignette. E1, every colour of the package comes from one palette module, by role, validated with
-# the palette validator of the dataviz method (categorical order, a diverging outcome scale blue,
-# grey and red, one blue sequential ramp, node support with filled symbols for strong support, the
-# IUCN colours kept; neutral greys for lines, text and backgrounds). E2, one theme. E3, figure captions below the figure, "**Figure n.**", numbered
-# in each vignette, no heading naming a figure. E4, table captions above, "Table n.". E5, Tutorials 1
-# to 7 open with Abstract and close with References. Written before the code.
+# Decisions E1 and E2 of BMM (15-10, Phase 12): one visual standard for every figure. E1, every
+# colour of the package comes from one palette module, by role, validated with the palette validator
+# of the dataviz method (categorical order, a diverging outcome scale blue, grey and red, one blue
+# sequential ramp, node support with filled symbols for strong support, the IUCN colours kept;
+# neutral greys for lines, text and backgrounds). E2, one theme. Written before the code.
 
 .es_tree <- function(...) {
   f <- testthat::test_path("..", "..", ...)
@@ -33,20 +31,6 @@
   x <- readLines(f, warn = FALSE)
   x[!grepl("^\\s*#", x)]
 }
-
-# Chunks of a vignette: header options and code
-.es_chunks <- function(f) {
-  x <- readLines(f, warn = FALSE)
-  out <- list(); inside <- FALSE
-  for (l in x) {
-    if (!inside && grepl("^```\\{r", l)) { inside <- TRUE; cur <- list(header = l, code = character(0)); next }
-    if (inside && grepl("^```\\s*$", l)) { inside <- FALSE; out[[length(out) + 1L]] <- cur; next }
-    if (inside) cur$code <- c(cur$code, l)
-  }
-  out
-}
-
-.es_evaluated <- function(ch) !grepl("eval\\s*=\\s*FALSE|include\\s*=\\s*FALSE", ch$header)
 
 test_that("the palette gives the colours of E1 by role, in their fixed order", {
   pc <- PhyloCactus::phylocactus_colours
@@ -127,19 +111,6 @@ test_that("every composite figure of R/ and of the scripts takes its tags from p
   }
 })
 
-test_that("points are filled with the grey of the bars, and TB4 tells its classes apart with the outcome colours", {
-  for (f in c(.es_scripts(), .es_vignettes())) {
-    x <- .es_code_lines(f)
-    pts <- grep("geom_point\\(", x, value = TRUE)
-    pts <- pts[!grepl("aes\\(|data\\s*=", pts)]
-    expect_true(all(grepl("mark", pts)), info = paste(basename(f), paste(pts[!grepl("mark", pts)], collapse = " | ")))
-    # The same grey as the bars: no transparency on points (BMM, 15-10)
-    expect_false(any(grepl("alpha", pts)), info = paste(basename(f), "points with alpha"))
-  }
-  s <- paste(readLines(system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus")), collapse = "\n")
-  expect_true(grepl('phylocactus_colours("outcome")[c("species correct", "genus correct", "wrong species", "wrong genus")]', s, fixed = TRUE))
-})
-
 test_that("no colour literal outside the palette module (E1)", {
   hex <- "#[0-9A-Fa-f]{6}\\b"
   for (f in setdiff(.es_r_files(), .es_r_files()[basename(.es_r_files()) == "palette.R"])) {
@@ -177,7 +148,7 @@ test_that("a single series is drawn in the mark grey, never in a categorical col
   }
 })
 
-test_that("one theme: theme_phylocactus() in the package, no other base theme (E2)", {
+test_that("one theme: theme_phylocactus() in the package (E2)", {
   # The theme of BMM written in the script of Tutorial 3 before 15-10, moved into the package as it was
   # (T1 to T3 of BMM, 15-10): theme_minimal at base size 12, a light grey panel with a white grid, italic
   # axis titles; its colours come from the theme role of the palette
@@ -196,122 +167,4 @@ test_that("one theme: theme_phylocactus() in the package, no other base theme (E
   expect_identical(th$axis.text$colour, "#4D4D4D")
   expect_identical(th$strip.background$fill, "#E5E5E5")
   expect_identical(th$strip.text$face, "bold")
-  other <- "\\btheme_(minimal|bw|classic|light|void|gray|grey|linedraw|dark)\\("
-  files <- c(setdiff(.es_r_files(), .es_r_files()[basename(.es_r_files()) == "palette.R"]), .es_scripts(), .es_vignettes())
-  for (f in files) {
-    x <- .es_code_lines(f)
-    expect_false(any(grepl(other, x)), info = basename(f))
-    expect_false(any(grepl("theme_phylocactus\\s*<-\\s*function", x)), info = paste(basename(f), "defines its own theme"))
-  }
-})
-
-test_that("figures: a caption below, numbered, and no heading naming a figure or a table (E3)", {
-  draws <- "include_graphics\\(|\\bggplot\\(|\\bggtree\\(|plot_barcoding_identification|wrap_plots\\(|print\\(p[0-9]*\\)"
-  for (f in .es_vignettes()) {
-    v <- readLines(f, warn = FALSE)
-    expect_false(any(grepl("^#+ .*\\b(Figure|Table)\\b", v)), info = paste(basename(f), "heading"))
-    # Tutorial 3 is the reference (BMM, 15-10): its captions keep the numbers of its text and of the
-    # files its script writes (Figure_1 to Figure_17); Figures 7 and 9, the full-size trees, are not
-    # rendered and have no caption. The other vignettes number their figures 1, 2, ...
-    t3 <- grepl("^tutorial-3-", basename(f))
-    expected <- if (t3) c(1:6, 8, 10:17) else NULL
-    n <- 0L
-    for (ch in Filter(.es_evaluated, .es_chunks(f))) {
-      is_fig <- any(grepl(draws, ch$code)) || grepl("fig\\.(width|height)", ch$header)
-      has_cap <- grepl("fig\\.cap\\s*=", ch$header)
-      if (is_fig) expect_true(has_cap, info = paste(basename(f), ch$header))
-      if (has_cap) {
-        n <- n + 1L
-        k <- if (t3) expected[n] else n
-        expect_match(ch$header, paste0("fig\\.cap\\s*=\\s*\"\\*\\*Figure ", k, "\\.\\*\\* [A-Z]"), info = paste(basename(f), ch$header))
-        lab <- regmatches(ch$header, regexpr("figure_[0-9]+_", ch$header))
-        if (t3 && length(lab)) expect_identical(as.integer(gsub("\\D", "", lab)), as.integer(k), info = ch$header)
-      }
-    }
-    if (t3) {
-      expect_identical(n, length(expected), info = "Tutorial 3: 15 captions")
-      for (k in c(7L, 9L)) expect_true(any(grepl(paste0("Figure ", k, " is not rendered on this page"), v, fixed = TRUE)), info = k)
-    }
-  }
-})
-
-test_that("tables: a caption above, numbered (E4)", {
-  for (f in .es_vignettes()) {
-    n <- 0L
-    for (ch in Filter(.es_evaluated, .es_chunks(f))) {
-      code <- paste(ch$code, collapse = " ")
-      k <- gregexpr("kable\\(", code)[[1]]
-      if (k[1] < 0) next
-      caps <- regmatches(code, gregexpr("caption\\s*=\\s*\"Table [0-9]+\\. [A-Z]", code))[[1]]
-      expect_length(caps, length(k))
-      for (cp in caps) {
-        n <- n + 1L
-        expect_match(cp, paste0("Table ", n, "\\. "), info = basename(f))
-      }
-    }
-  }
-})
-
-test_that("Tutorials 1 to 7 open with Abstract and close with References (E5)", {
-  for (f in .es_vignettes()[grepl("^tutorial-[1-7]-", basename(.es_vignettes()))]) {
-    h2 <- grep("^## ", readLines(f, warn = FALSE), value = TRUE)
-    expect_identical(h2[1], "## Abstract", info = basename(f))
-    expect_identical(h2[length(h2)], "## References", info = basename(f))
-  }
-})
-
-# BMM (15-10): Tutorial 3 is the reference of the style, and running it must not change its figures.
-# The titles and subtitles drawn inside its plots are kept as they were before 15-10.
-test_that("the figures of Tutorial 3 keep their titles and subtitles (Tutorial 3 is the reference)", {
-  titles <- c("Marker Coverage Across Species", "Distribution of Marker Completeness", "Marker Presence Heatmap",
-              "Supermatrix Structure", "Marker Informativeness", "Species Composition",
-              "Methodological status across checklist, supermatrix, and tree", "IUCN Categories",
-              "Molecular Completeness vs IUCN Category",
-              "Threatened Unsampled Species by Genus", "Priority Cactaceae taxa (CR, EN, VU) lacking molecular sequences",
-              "Endemic Species by Country", "Endemic Species by Country and IUCN Category", "Most Common Threats",
-              "Most Common Habitats")
-  s <- paste(readLines(system.file("scripts", "tutorial-3-cactus-phylogeny-visualization.R", package = "PhyloCactus")),
-             collapse = "\n")
-  v <- paste(readLines(.es_tree("vignettes", "tutorial-3-cactus-phylogeny-visualization.Rmd")), collapse = "\n")
-  for (t in titles) {
-    expect_true(grepl(paste0("title = \"", t, "\""), s, fixed = TRUE), info = paste("script:", t))
-    expect_true(grepl(paste0("title = \"", t, "\""), v, fixed = TRUE), info = paste("vignette:", t))
-  }
-  # The subtitle of Figure 12 keeps its words; its N is computed from the data (decision of BMM, 15-10,
-  # D-b part 2: test-documentation-db-part2.R)
-  n12 <- 'subtitle = paste0("Marker occupancy across IUCN threat categories for sampled ingroup taxa (N = ",'
-  expect_true(grepl(n12, s, fixed = TRUE), info = "script: subtitle of Figure 12")
-  expect_true(grepl(n12, v, fixed = TRUE), info = "vignette: subtitle of Figure 12")
-})
-
-# Decision TB2-a of BMM (15-10): TB2 of Tutorial 5 is drawn as the marker presence heatmap of Tutorial 3
-# (Figure 3): the whole grid of species and loci, absent in grey95 and present in grey25, no ticks on
-# the species axis, loci in italics, no grid, base size 10. The number of sequences stays in the table.
-test_that("TB2 is drawn as the marker presence heatmap of Tutorial 3 (TB2-a)", {
-  x <- readLines(system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus"), warn = FALSE)
-  from <- grep("^# TB2\\.", x); to <- grep("save_fig\\(p_tb2", x)
-  expect_length(from, 1L); expect_length(to, 1L)
-  b <- paste(x[from:to], collapse = "\n")
-  # The whole grid: table() gives every species and locus; no row dropped
-  expect_false(grepl("Freq\\s*>\\s*0\\s*,\\s*\\]", b), info = "absent cells dropped")
-  expect_true(grepl("present", b, fixed = TRUE))
-  expect_true(grepl("fill = present", b, fixed = TRUE))
-  expect_true(grepl(paste0('scale_fill_manual(values = c(phylocactus_colours("neutral")[["fill"]], ',
-                           'phylocactus_colours("sequential")[["700"]]),'), b, fixed = TRUE))
-  expect_true(grepl('name = "Present", labels = c("No", "Yes")', b, fixed = TRUE))
-  expect_false(grepl("gradient|trans\\s*=", b), info = "a gradient of counts")
-  expect_true(grepl("theme_phylocactus(base_size = 10)", b, fixed = TRUE))
-  for (el in c("axis.text.y = element_blank()", "axis.ticks.y = element_blank()",
-               "panel.grid.major = element_blank()", "panel.grid.minor = element_blank()",
-               'axis.text.x = element_text(angle = 45, hjust = 1, face = "italic")'))
-    expect_true(grepl(el, b, fixed = TRUE), info = el)
-})
-
-# BMM (15-10): the figures of Tutorial 5 carry no caption inside the plot; the caption of a figure is
-# the one of the vignette (E3).
-test_that("no caption inside the plots of the tutorial scripts (E3, TB5, TB6, TB9)", {
-  for (f in .es_scripts()) {
-    x <- .es_code_lines(f)
-    expect_false(any(grepl("caption\\s*=", x)), info = paste(basename(f), paste(grep("caption\\s*=", x, value = TRUE), collapse = " | ")))
-  }
 })

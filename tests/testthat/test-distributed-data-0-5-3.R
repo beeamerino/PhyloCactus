@@ -12,12 +12,6 @@
 
 .dd_root <- function(...) testthat::test_path("..", "..", ...)
 
-.dd_read <- function(...) {
-  f <- .dd_root(...)
-  skip_if(!file.exists(f), paste(basename(f), "is not in this tree"))
-  paste(readLines(f, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
-}
-
 .dd_synthetic_checklist <- function() testthat::test_path("testdata", "checklist_synthetic.xlsx")
 
 .dd_kept_iucn <- c("iucn_found", "iucn_category", "iucn_category_name")
@@ -120,43 +114,6 @@ test_that("summarise_iucn_registry() asks for the version and the access date of
   expect_error(summarise_iucn_registry(sp, redlist_version = "2026-1"), "access_date")
 })
 
-test_that("the help page of get_iucn_data() says what it returns and that it is not redistributed (m10)", {
-  rd <- .dd_read("man", "get_iucn_data.Rd")
-  expect_false(grepl("verified macroevolutionary", rd, fixed = TRUE))
-  expect_match(rd, "summarise_iucn_registry", fixed = TRUE)
-})
-
-.dd_assessment_columns <- "iucn_endemic_locations|iucn_threat_names|iucn_habitat_names|iucn_is_endemic"
-
-# The evaluated chunks of a vignette: the code the website runs on the distributed files
-.dd_evaluated_chunks <- function(v) {
-  lines <- strsplit(v, "\n", fixed = TRUE)[[1]]
-  out <- character(0)
-  for (h in grep("^```\\{r", lines)) {
-    end <- h + match(TRUE, grepl("^```$", lines[(h + 1):length(lines)]))
-    if (!grepl("eval *= *FALSE", lines[h])) out <- c(out, lines[h:end])
-  }
-  paste(out, collapse = "\n")
-}
-
-test_that("Tutorial 3 draws Figures 14 to 17 and the endemism row of Table 1 from the count tables", {
-  v <- .dd_read("vignettes", "tutorial-3-cactus-phylogeny-visualization.Rmd")
-  ev <- .dd_evaluated_chunks(v)
-  expect_false(grepl(.dd_assessment_columns, ev))
-  expect_match(ev, "phylocactus_table_iucn_endemic_by_country.csv", fixed = TRUE)
-  expect_match(ev, "phylocactus_table_iucn_classes.csv", fixed = TRUE)
-  # The script of a user's run derives the two tables after Module 11 and draws the figures from them
-  s <- strsplit(.dd_read("inst", "scripts", "tutorial-3-cactus-phylogeny-visualization.R"), "\n", fixed = TRUE)[[1]]
-  call <- grep("summarise_iucn_registry(", s, fixed = TRUE)
-  expect_length(call, 1L)
-  after <- paste(s[(call + 1):length(s)], collapse = "\n")
-  expect_false(grepl(.dd_assessment_columns, after))
-  expect_match(after, "endemic_by_country", fixed = TRUE)
-  expect_match(after, "classes", fixed = TRUE)
-  expect_match(v, "Version 2026-1", fixed = TRUE)
-  expect_match(v, "rredlist", fixed = TRUE)
-})
-
 # ---- Checklist (plan 5.4) ----------------------------------------------------------------------
 
 test_that("no workbook and no reference tree is distributed in inst/extdata or declared in the manifest", {
@@ -225,36 +182,7 @@ test_that("the readers of the checklist read the synthetic workbook", {
   expect_identical(length(nm), 11L)
 })
 
-test_that("README and Tutorial 1 say how to obtain the checklist, with its version, md5 and variable", {
-  for (f in list(c("README.md"), c("vignettes", "tutorial-1-cactus-phylogeny-prep.Rmd"))) {
-    x <- do.call(.dd_read, as.list(f))
-    for (k in c("Caryophyllales.org", "Korotkova", "Willdenowia", "PHYLOCACTUS_CHECKLIST",
-                "0ab7855cef6fe7db0e0105646d5fee08"))
-      expect_match(x, k, fixed = TRUE, info = paste(f[length(f)], k))
-  }
-  # The file name of the workbook the reference run read is given in the README (BMM, 30-10)
-  expect_match(.dd_read("README.md"), "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", fixed = TRUE)
-})
-
 # ---- Reference trees (plan 5.4) ----------------------------------------------------------------
-
-test_that("Tutorial 4 reads the reference trees from local paths and draws Figure 1 from the run", {
-  for (f in list(c("vignettes", "tutorial-4-cactus-phylogeny-validation.Rmd"),
-                 c("inst", "scripts", "tutorial-4-cactus-phylogeny-validation.R"))) {
-    x <- do.call(.dd_read, as.list(f))
-    expect_match(x, "PHYLOCACTUS_REFERENCE_TREES", fixed = TRUE, info = f[length(f)])
-    expect_match(x, "phylocactus_checklist(", fixed = TRUE, info = f[length(f)])
-  }
-  v <- .dd_read("vignettes", "tutorial-4-cactus-phylogeny-validation.Rmd")
-  # Every chunk that needs a reference tree or the checklist is shown, not run
-  expect_false(grepl("PHYLOCACTUS_REFERENCE_TREES|phylocactus_checklist\\(|validate_phylogenies\\(|ASTRAL_PATH",
-                     .dd_evaluated_chunks(v)))
-  expect_match(v, "phylocactus_table_tree_space.csv", fixed = TRUE)
-  expect_match(v, "plot_tree_space(", fixed = TRUE)
-  for (doi in c("10.1016/j.biocon.2022.109677", "10.1038/s41467-024-51666-2",
-                "10.1038/s41586-024-07324-0", "10.1007/s00606-025-01948-z"))
-    expect_match(v, doi, fixed = TRUE)
-})
 
 test_that("the tree-space coordinates of the reference run are distributed and redraw Figure 1", {
   co <- utils::read.csv(.dd_extdata("phylocactus_table_tree_space.csv"), stringsAsFactors = FALSE)

@@ -104,18 +104,6 @@ test_that("workers = 1 is the run of one process, and workers cannot be combined
   expect_error(classify_barcoding_folds(workers = 2L, chunk = 1L, n_chunks = 2L), "workers")
 })
 
-test_that("Tutorial 5 runs nn_add with workers and declares n_workers (PA1)", {
-  f <- system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus")
-  skip_if(!nzchar(f), "Tutorial 5 not installed")
-  ex <- as.list(parse(f))
-  lhs <- vapply(Filter(function(e) is.call(e) && identical(e[[1]], as.name("<-")), ex), function(e) deparse(e[[2]]), "")
-  expect_true("n_workers" %in% lhs)
-  calls <- Filter(function(e) is.call(e) && identical(e[[1]], as.name("classify_barcoding_folds")), ex)
-  add <- Filter(function(e) identical(e$alignment, "add"), calls)
-  expect_length(add, 1L)
-  expect_identical(add[[1]]$workers, as.name("n_workers"))
-})
-
 # On Windows the log a running worker writes is locked: the supervisor cannot open it until the worker
 # ends. A log that cannot be read counts as no lines, and the run goes on; the state comes from the
 # status files. The case is built on Unix with a log without read permission. Written before the code

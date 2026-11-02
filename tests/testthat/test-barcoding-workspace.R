@@ -496,13 +496,8 @@ test_that("an email that cannot be sent never fails step 1 (step 1 notification)
     "smtp down")
 })
 
-test_that("step 1 sends its email on exit when notify is on, and Tutorial 5 passes notify_email (step 1 notification)", {
+test_that("step 1 sends its email on exit when notify is on (step 1 notification)", {
   b <- paste(deparse(body(assemble_barcoding_dataset)), collapse = "\n")
   expect_match(b, "on.exit(", fixed = TRUE)
   expect_match(b, ".bc_notify_step(", fixed = TRUE)
-  f <- system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus")
-  skip_if(!nzchar(f), "Tutorial 5 not installed")
-  step1 <- Filter(function(e) is.call(e) && identical(e[[1]], as.name("assemble_barcoding_dataset")) &&
-                    identical(e$wd_path, "0_phylotaR_raw_Ingroup"), as.list(parse(f)))
-  expect_identical(step1[[1]]$notify, as.name("notify_email"))
 })

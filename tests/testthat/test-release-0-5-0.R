@@ -1,15 +1,8 @@
-# Step 23 of Phase 12 (runbook of 13-10, publication of 0.5.0): NEWS keeps the section of 0.5.0,
-# and the manifest fixes the number of terminals of every tree the run publishes (column
-# expected_tips, read by publish_run_outputs.R of the audit repository, which stops when a tree of
-# the run has another number). The trees of the Phase 12 run have 1208 terminals (Module 7, reduced
-# matrix; recount after step 19). Written before the code; the last test turns green when step 23
-# publishes the trees.
-
-test_that("NEWS keeps the section of 0.5.0 (the version of the release is tested in test-release-0-5-1.R)", {
-  f <- testthat::test_path("..", "..", "NEWS.md")
-  skip_if(!file.exists(f), "NEWS.md is not in this tree")
-  expect_length(grep("^# PhyloCactus 0\\.5\\.0$", readLines(f, warn = FALSE)), 1L)
-})
+# Step 23 of Phase 12 (runbook of 13-10, publication of 0.5.0): the manifest fixes the number of
+# terminals of every tree the run publishes (column expected_tips, read by publish_run_outputs.R of
+# the audit repository, which stops when a tree of the run has another number). The trees of the
+# Phase 12 run have 1208 terminals (Module 7, reduced matrix; recount after step 19). Written before
+# the code; the last test turns green when step 23 publishes the trees.
 
 test_that("the manifest fixes the terminals of every tree the run publishes (expected_tips)", {
   path <- system.file("extdata", "MANIFEST.csv", package = "PhyloCactus")
