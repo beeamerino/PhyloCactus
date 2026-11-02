@@ -1,8 +1,8 @@
 # -------------------------------------------------------------
-# PhyloCactus: Tutorial 1 - Phylogenetics Pipeline: Data Assembly & Preparation
+# PhyloCactus: Tutorial 1 - Stage 1, Modules 1 to 6: Data Assembly and Preparation
 # -------------------------------------------------------------
-# This script covers Modules 1 to 6 of the phylogenetic pipeline:
-# Sequence Mining, Alignment, Screening, and Concatenation.
+# This script covers Modules 1 to 6: sequence mining, alignment, screening and
+# concatenation.
 #
 # Keep this script in sync with vignettes/tutorial-1-cactus-phylogeny-prep.Rmd:
 # every argument below is stated explicitly, including the ones that match the
@@ -240,7 +240,7 @@ run_joint_realignment(
 # same region as its ingroup sequences. In a matrix built to date the ACP clade, such a locus
 # supplies characters of uncertain homology to the divergences among the three families. The
 # exclusion is a property of this matrix; phyC remains the more discriminating of the two nuclear
-# markers for barcoding.
+# markers for molecular identification (Module 14).
 # Set exclude_markers = NULL to build the full matrix.
 #
 # outgroup_pattern is a named vector, not a single expression, so the coverage report resolves the
@@ -265,7 +265,7 @@ run_concatenation_pipeline(
 # run log.
 cat(readLines("6_Concatenated/logs_and_qc/LOG_concatenation_run.txt", n = 8), sep = "\n")
 
-# Outgroup occupancy per terminal, used in Tutorial 2 to choose the rooting terminal.
+# Outgroup occupancy per terminal, read in Tutorial 2 to check the occupancy of the rooting terminals.
 final_summary <- utils::read.csv("6_Concatenated/final_tables/TABLE_final_species_alignment_summary.csv")
 outgroup_rows <- final_summary[final_summary$species_class == "outgroup", c("species", "retained_markers", "pct_markers")]
 print(outgroup_rows[order(-outgroup_rows$retained_markers), ])

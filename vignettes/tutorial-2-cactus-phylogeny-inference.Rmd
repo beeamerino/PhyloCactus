@@ -356,7 +356,7 @@ if (run_local_bs) {
 # optionally sync the files back to your local repository.
 
 cat("\n2. Collecting bootstrap replicates...\n")
-# bs_dir was defined in Step 1 depending on whether you ran locally or via HPC chunks
+# bs_dir was set above by run_local_bs (local run or HPC chunks)
 bs_concat_file <- collect_bootstraps(
   bs_dir = bs_dir,
   output_dir = output_dir,
@@ -552,7 +552,7 @@ scheme_dirs <- c("Zuntini2024_young", "RamirezBarahona2020", "Arakaki2011")
 dating_dir <- file.path("8_Dating", scheme_dirs[calibration_scheme])
 dir.create(dating_dir, recursive = TRUE, showWarnings = FALSE)
 
-# 1. Prepare Calibrations
+# 1. Calibrations
 cat("Creating `treePL` calibrations configurations...\n")
 calibs_all <- read.csv(system.file("extdata", "calibrations_bounds.csv", package = "PhyloCactus"))
 calibs <- calibs_all[grepl(paste0("_calibration_scheme_", calibration_scheme, "$"), calibs_all$reference), ]
@@ -652,7 +652,7 @@ calibrations_cfg_path <- file.path(dating_dir, "calibrations_treePL_fulltips.cfg
 writeLines(treepl_cfg, calibrations_cfg_path)
 cat("   Calibrations compiled successfully to:", calibrations_cfg_path, "\n")
 
-# 2. Run Fast Automated `treePL` Dating Pipeline
+# 2. Dating with automate_treePL()
 cat("\nRunning automated `treePL` wrapper script over maximum-likelihood tree and bootstrap replicates...\n")
 
 # Priming, cross-validation and dating follow the protocol of Maurin (2020, arXiv:2008.07054) and
@@ -680,7 +680,7 @@ automate_treePL(
   notify = notify_email
 )
 
-# 3. View and evaluate dating metrics cleanly in R
+# 3. Checks of the dating
 cat("\n--- Chronological Dating Results Summary ---\n")
 if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
   ml_chronogram <- ape::read.tree(file.path(dating_dir, "BestTree_treePL.tree"))

@@ -1,13 +1,13 @@
 # -------------------------------------------------------------
-# PhyloCactus: Tutorial 2 - Phylogenetics Pipeline: Inference & Dating
+# PhyloCactus: Tutorial 2 - Stage 2, Modules 7 to 10: Inference and Dating
 # -------------------------------------------------------------
-# This script covers Modules 7 to 10 of the phylogenetic pipeline:
-# Substitution Models, ML search, Bootstraps, and treePL dating.
+# This script covers Modules 7 to 10: substitution models, maximum-likelihood search,
+# bootstrap support and treePL dating.
 #
-# RESUMING AT A LATER STAGE. The stages are long, and a full run spans several sessions. Every
-# stage below therefore begins by calling resolve_run_paths(), which reconstructs the absolute
+# RESUMING AT A LATER MODULE. The modules are long, and a full run spans several sessions. Every
+# module below therefore begins by calling resolve_run_paths(), which reconstructs the absolute
 # path of every file of the run from output_dir and run_prefix instead of relying on variables
-# left in the session. Run this SETUP block, then jump to whichever stage you need: nothing
+# left in the session. Run this SETUP block, then jump to whichever module you need: nothing
 # carries over in memory, so nothing breaks with "object not found" after a restart.
 # -------------------------------------------------------------
 library(PhyloCactus)
@@ -293,7 +293,7 @@ if (run_local_bs) {
 # optionally sync the files back to your local repository.
 
 cat("\n2. Collecting bootstrap replicates...\n")
-# bs_dir was defined in Step 1 depending on whether you ran locally or via HPC chunks
+# bs_dir was set above by run_local_bs (local run or HPC chunks)
 bs_concat_file <- collect_bootstraps(
   bs_dir = bs_dir,
   output_dir = output_dir,
@@ -423,7 +423,7 @@ scheme_dirs <- c("Zuntini2024_young", "RamirezBarahona2020", "Arakaki2011")
 dating_dir <- file.path("8_Dating", scheme_dirs[calibration_scheme])
 dir.create(dating_dir, recursive = TRUE, showWarnings = FALSE)
 
-# 1. Prepare Calibrations
+# 1. Calibrations
 cat("Creating `treePL` calibrations configurations...\n")
 calibs_all <- read.csv(system.file("extdata", "calibrations_bounds.csv", package = "PhyloCactus"))
 calibs <- calibs_all[grepl(paste0("_calibration_scheme_", calibration_scheme, "$"), calibs_all$reference), ]
@@ -495,8 +495,9 @@ acp_tips <- tips_for("Family", "Cactaceae;Anacampserotaceae;Portulacaceae")
 stopifnot(ape::getMRCA(rooted_ml, acp_tips) != root_node)
 stopifnot(ape::is.monophyletic(rooted_ml, acp_tips))
 
-# The resolution of the ACPT quartet is estimated by this run, so it is reported and not asserted. Whether Cactaceae_Anacampserotaceae_stem can be reactivated in
-# calibrations_bounds.csv depends on what this prints.
+# The resolution of the ACPT quartet is estimated by this run, so it is reported and not asserted.
+# Whether Cactaceae_Anacampserotaceae_stem can be reactivated in calibrations_bounds.csv depends
+# on what this prints.
 cact_anac <- tips_for("Family", "Cactaceae;Anacampserotaceae")
 anac_por  <- tips_for("Family", "Anacampserotaceae;Portulacaceae")
 cact_por  <- tips_for("Family", "Cactaceae;Portulacaceae")
@@ -523,7 +524,7 @@ calibrations_cfg_path <- file.path(dating_dir, "calibrations_treePL_fulltips.cfg
 writeLines(treepl_cfg, calibrations_cfg_path)
 cat("   Calibrations compiled successfully to:", calibrations_cfg_path, "\n")
 
-# 2. Run Fast Automated `treePL` Dating Pipeline
+# 2. Dating with automate_treePL()
 cat("\nRunning automated `treePL` wrapper script over maximum-likelihood tree and bootstrap replicates...\n")
 
 # Priming, cross-validation and dating follow the protocol of Maurin (2020, arXiv:2008.07054) and
@@ -559,7 +560,7 @@ automate_treePL(
 # program of BEAST 2 by its full path. In the graphical interface, set the burn-in to 0 (it starts at
 # 10) and the heights to mean heights.
 
-# 3. View and evaluate dating metrics cleanly in R
+# 3. Checks of the dating
 cat("\n--- Chronological Dating Results Summary ---\n")
 if (file.exists(file.path(dating_dir, "BestTree_treePL.tree"))) {
   ml_chronogram <- ape::read.tree(file.path(dating_dir, "BestTree_treePL.tree"))

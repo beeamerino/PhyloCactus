@@ -1,5 +1,5 @@
 # -------------------------------------------------------------
-# PhyloCactus: Tutorial 4. Phylogenetic Validation and Comparative Analyses
+# PhyloCactus: Tutorial 4 - Stage 4, Module 13: Phylogenetic Validation and Comparative Analyses
 # -------------------------------------------------------------
 # Module 13: comparison of the focal tree with published phylogenies of Cactaceae.
 # -------------------------------------------------------------
@@ -54,7 +54,7 @@ cat("=======================================================\n")
 # e.g., ASTRAL_PATH="/path/to/astral.5.7.8.jar"
 
 # -------------------------------------------------------------
-# Module 13a: Species tree of de Vos et al. (2025) with ASTRAL-III
+# Module 13: Species tree of de Vos et al. (2025) with ASTRAL-III
 # -------------------------------------------------------------
 cat("\n--- Running ASTRAL-III Pipeline ---\n")
 
@@ -129,13 +129,14 @@ if (run_astral_locally && nzchar(astral_jar) && file.exists(astral_jar) &&
 }
 
 # -------------------------------------------------------------
-# Module 13b: Topological comparison
+# Module 13: Topological comparison
 # -------------------------------------------------------------
 cat("\n--- Running Phylogenetic Validation Pipeline ---\n")
 
 # The focal tree is the chronogram of this run (Module 10); the reference trees are read from the
-# folder in PHYLOCACTUS_REFERENCE_TREES. When 8_Dating/ is absent, the reference chronogram
-# distributed with the package is used as the focal tree.
+# folder in PHYLOCACTUS_REFERENCE_TREES. When the chronogram of calibration scheme 1 is
+# absent from 8_Dating/, the reference chronogram distributed with the package is used as the focal
+# tree.
 focal_tree <- file.path("8_Dating", "Zuntini2024_young", "dated_summary_hpd.tree")
 if (!file.exists(focal_tree)) {
   focal_tree <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")

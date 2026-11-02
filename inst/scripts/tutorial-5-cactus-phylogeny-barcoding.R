@@ -1,10 +1,10 @@
 # -------------------------------------------------------------
 # PhyloCactus: Tutorial 5 - Stage 5, Module 14: molecular identification (11_barcoding/)
 # -------------------------------------------------------------
-# Phases 2 to 11 of PhyloCactus 0.5.0: assembly (with own data, if any), curation, screening,
-# reference library, validation folds, barcode gap, classification of those folds, negative
-# controls, the threshold of remoteness and the metrics per class. The controls of step 8 come
-# before any real figure is read.
+# Steps 1 to 11 of Module 14: assembly (with own data, if any), curation, screening, reference
+# library, validation folds, barcode gap, classification of those folds, negative controls, the
+# threshold of remoteness, the metrics per class and the identification of a sample. The controls
+# of step 8 come before any real figure is read.
 #
 # Module 14 reads the same phylotaR workspace as the phylogeny (0_phylotaR_raw_Ingroup/)
 # and writes only under 11_barcoding/. The first run downloads GenBank metadata for the

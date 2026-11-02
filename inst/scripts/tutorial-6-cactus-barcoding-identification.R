@@ -1,7 +1,7 @@
 # -------------------------------------------------------------
-# PhyloCactus: Tutorial 6 - Identifying a Sample (11_barcoding/10_identify/)
+# PhyloCactus: Tutorial 6 - Stage 5, Module 14: Identifying a Sample (11_barcoding/10_identify/)
 # -------------------------------------------------------------
-# Worked examples of the identification of PhyloCactus 0.5.0, one for each kind of input the package
+# Worked examples of the identification of Module 14, one for each kind of input the package
 # accepts, all of them public records that are not in the library: a Sanger record, a specimen of
 # unknown species, two specimens with several loci, two GenBank plastomes, a sample sheet, a genome
 # assembly and paired Illumina reads. Each example is downloaded in a block of its own and then

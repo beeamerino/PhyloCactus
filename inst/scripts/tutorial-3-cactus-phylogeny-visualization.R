@@ -1,5 +1,5 @@
 # -------------------------------------------------------------
-# PhyloCactus: Tutorial 3. Visualization and Metadata Integration
+# PhyloCactus: Tutorial 3 - Stage 3, Modules 11 and 12: Visualization and Metadata Integration
 # -------------------------------------------------------------
 # Modules 11 and 12: taxonomic reconciliation, IUCN metadata, and figures.
 # Requires the outputs of Tutorials 1 and 2 (Modules 1 to 10). The working
@@ -26,7 +26,7 @@ tutorial_dir <- "~/Desktop/PhyloCactus_Tutorial"
 setwd(tutorial_dir)
 
 # ============================================================
-# Module 11: Taxonomic Reconciliation and IUCN Metadata
+# Module 11: Taxonomic Reconciliation and IUCN Metadata Enrichment
 # ============================================================
 cat("\n=======================================================\n")
 cat("Module 11: Taxonomic Reconciliation and IUCN Metadata\n")
@@ -264,7 +264,7 @@ write_csv(TABLE_dataset_summary, "9_Visualization/tables/TABLE_dataset_summary.c
 # Theme and colours of every figure: theme_phylocactus() and phylocactus_colours() of the package
 
 # ============================================================
-# Module 12: FIGURES 1 TO 17
+# Module 12: Figures and Summary Tables
 # ============================================================
 
 # -------------------------------------------------------------
