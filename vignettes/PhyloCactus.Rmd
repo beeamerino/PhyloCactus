@@ -198,5 +198,5 @@ With `PhyloCactus` and its external dependencies installed, continue with [Tutor
 - Kozlov *et al*. 2019. RAxML-NG: a fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305>
 - Li 2018. Minimap2: pairwise alignment for nucleotide sequences. *Bioinformatics*, 34(18), 3094–3100. <https://doi.org/10.1093/bioinformatics/bty191>
 - Smith & O’Meara 2012. treePL: divergence time estimation using penalized likelihood for large phylogenies. *Bioinformatics*, 28(20), 2689–2690. <https://doi.org/10.1093/bioinformatics/bts492>
-- Wang *et al*. 2026. phylotaR: Automated Phylogenetic Sequence Cluster Identification from 'GenBank. *R package version 1.3.0*. <https://docs.ropensci.org/phylotaR/>
+- Wang *et al*. 2026. phylotaR: Automated Phylogenetic Sequence Cluster Identification from 'GenBank'. *R package version 1.3.0*. <https://docs.ropensci.org/phylotaR/>
 - Zhang *et al*. 2018. ASTRAL-III: polynomial time species tree reconstruction from partially resolved gene trees. *BMC Bioinformatics*, 19(Suppl 6), 153. <https://doi.org/10.1186/s12859-018-2129-y>

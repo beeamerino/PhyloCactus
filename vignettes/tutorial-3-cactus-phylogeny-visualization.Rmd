@@ -603,7 +603,7 @@ treeio::write.beast(annotated_treedata, file = "9_Visualization/figures/annotate
 Chronogram estimated with penalized likelihood in `treePL`.
 Node bars are the 95% intervals of the node ages over the 100 dated bootstrap chronograms, summarized with `TreeAnnotator`, which names them `height_0.95_HPD`; they are confidence intervals from bootstrap replicates, not posterior intervals (Tutorial 2). The axis shows geological periods.
 
-```{r figure_8_chronogram, eval = has_data, fig.width = 8.5, fig.height = 11, message = FALSE, warning = FALSE, fig.cap = "**Figure 8.** Time-calibrated chronogram. Grey bars: 95% intervals of the node ages over the 100 dated bootstrap replicates."}
+```{r figure_8_chronogram, eval = has_data, fig.width = 8.5, fig.height = 11, message = FALSE, warning = FALSE, fig.cap = "**Figure 8.** Time-calibrated chronogram under calibration scheme 1 (the ACP crown fixed at 53.22 Ma; Tutorial 2, Module 10). Grey bars: 95% intervals of the node ages over the 100 dated bootstrap replicates."}
 # Load summary chronogram from Module 10
 chrono_file <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")
 
