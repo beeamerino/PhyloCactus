@@ -298,9 +298,14 @@ augment_treedata_with_registry <- function(treedata_obj, registry) {
 #' @param offset Numeric. Horizontal offset fraction for clade bars. Defaults to `0.03`.
 #' @param offset_text Numeric. Offset fraction for label text. Defaults to `0.004`.
 #' @param fontface Character. Font face specification (e.g., `"plain"`, `"bold"`, `"italic"`). Defaults to `"plain"`.
+#'   With `"plain"`, a label that is a genus name is set in italics; names ending in `-aceae`,
+#'   `-oideae`, `-eae` or `-inae`, names in capitals and names starting with `"Core "` stay plain.
 #' @param sort_desc Logical. Sort clade labels in descending order by tip height? Defaults to `TRUE`.
 #' @param angle Numeric. Rotation angle for text labels in degrees. Defaults to `0`.
 #' @param align Logical. Align clade bars to common rightmost margin? Defaults to `TRUE`.
+#' @param hjust Numeric or `NULL`. Justification of the label along its own direction. `NULL` (the
+#'   default) centres a rotated label on its bar (`0.5` when `angle` is not `0`) and starts a
+#'   horizontal label at its bar (`0`).
 #' @return Updated `ggtree` plot object containing clade label layers.
 #' @export
 #' @keywords internal
@@ -313,8 +318,15 @@ add_clade_labels_by_level <- function(p,
                                       fontface = "plain",
                                       sort_desc = TRUE,
                                       angle = 0,
-                                      align = TRUE) {
+                                      align = TRUE,
+                                      hjust = NULL) {
   if (is.null(label_tbl) || !nrow(label_tbl)) return(p)
+  # geom_cladelabel() starts the text at the middle of the bar (hjust = 0), which moves a rotated
+  # label half its length off the centre of its clade
+  if (is.null(hjust) || is.na(hjust)) hjust <- if (angle != 0) 0.5 else 0
+  # A plain label that is a genus name is set in italics; suprageneric names (-aceae, -oideae, -eae,
+  # -inae), informal names in capitals (BCT) and "Core ..." stay as given
+  is_genus <- function(x) !grepl("(aceae|oideae|eae|inae)$|^[A-Z]{2,}$|^Core ", x)
   
   node_pos <- p$data |>
     dplyr::select(node, x, y)
@@ -337,6 +349,8 @@ add_clade_labels_by_level <- function(p,
   off_txt_abs <- span_x * offset_text
   
   for (i in seq_len(nrow(plot_tbl))) {
+    face <- if (fontface == "plain" && is_genus(plot_tbl$label[i])) "italic" else fontface
+    n_before <- length(p$layers)
     p <- p +
       ggtree::geom_cladelabel(
         node = plot_tbl$node[i],
@@ -345,10 +359,14 @@ add_clade_labels_by_level <- function(p,
         angle = angle,
         barsize = barsize,
         fontsize = fontsize,
-        fontface = fontface,
         offset = off_abs,
-        offset.text = off_txt_abs
+        offset.text = off_txt_abs,
+        hjust = hjust
       )
+    # geom_cladelabel() does not pass a font face to its text layer; it is set on that layer here
+    for (k in seq.int(n_before + 1L, length.out = length(p$layers) - n_before)) {
+      if (inherits(p$layers[[k]]$geom, "GeomText")) p$layers[[k]]$aes_params$fontface <- face
+    }
   }
   
   p
@@ -360,17 +378,22 @@ add_clade_labels_by_level <- function(p,
 #'
 #' @param p A `ggtree` plot object.
 #' @param registry Named list of node annotation data frames.
-#' @param layer_specs Data frame defining visual style specifications per annotation layer.
+#' @param layer_specs Data frame defining visual style specifications per annotation layer. An
+#'   optional `hjust` column sets the justification of each layer; without it, rotated labels are
+#'   centred on their bars (see [add_clade_labels_by_level()]).
 #' @return Updated `ggtree` plot object.
 #' @export
 #' @keywords internal
 apply_clade_label_layers <- function(p, registry, layer_specs) {
   if (is.null(layer_specs) || !nrow(layer_specs)) return(p)
-  
+
   if (!"align" %in% names(layer_specs)) {
     layer_specs$align <- TRUE
   }
-  
+  if (!"hjust" %in% names(layer_specs)) {
+    layer_specs$hjust <- NA_real_
+  }
+
   for (i in seq_len(nrow(layer_specs))) {
     reg_name <- layer_specs$reg_name[i]
     if (!reg_name %in% names(registry)) next
@@ -385,7 +408,8 @@ apply_clade_label_layers <- function(p, registry, layer_specs) {
       fontface = layer_specs$fontface[i],
       sort_desc = layer_specs$sort_desc[i],
       angle = layer_specs$angle[i],
-      align = layer_specs$align[i]
+      align = layer_specs$align[i],
+      hjust = layer_specs$hjust[i]
     )
   }
   

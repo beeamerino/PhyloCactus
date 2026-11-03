@@ -11,7 +11,9 @@ apply_clade_label_layers(p, registry, layer_specs)
 
 \item{registry}{Named list of node annotation data frames.}
 
-\item{layer_specs}{Data frame defining visual style specifications per annotation layer.}
+\item{layer_specs}{Data frame defining visual style specifications per annotation layer. An
+optional \code{hjust} column sets the justification of each layer; without it, rotated labels are
+centred on their bars (see \code{\link[=add_clade_labels_by_level]{add_clade_labels_by_level()}}).}
 }
 \value{
 Updated \code{ggtree} plot object.

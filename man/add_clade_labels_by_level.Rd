@@ -14,7 +14,8 @@ add_clade_labels_by_level(
   fontface = "plain",
   sort_desc = TRUE,
   angle = 0,
-  align = TRUE
+  align = TRUE,
+  hjust = NULL
 )
 }
 \arguments{
@@ -30,13 +31,19 @@ add_clade_labels_by_level(
 
 \item{offset_text}{Numeric. Offset fraction for label text. Defaults to \code{0.004}.}
 
-\item{fontface}{Character. Font face specification (e.g., \code{"plain"}, \code{"bold"}, \code{"italic"}). Defaults to \code{"plain"}.}
+\item{fontface}{Character. Font face specification (e.g., \code{"plain"}, \code{"bold"}, \code{"italic"}). Defaults to \code{"plain"}.
+With \code{"plain"}, a label that is a genus name is set in italics; names ending in \code{-aceae},
+\code{-oideae}, \code{-eae} or \code{-inae}, names in capitals and names starting with \code{"Core "} stay plain.}
 
 \item{sort_desc}{Logical. Sort clade labels in descending order by tip height? Defaults to \code{TRUE}.}
 
 \item{angle}{Numeric. Rotation angle for text labels in degrees. Defaults to \code{0}.}
 
 \item{align}{Logical. Align clade bars to common rightmost margin? Defaults to \code{TRUE}.}
+
+\item{hjust}{Numeric or \code{NULL}. Justification of the label along its own direction. \code{NULL} (the
+default) centres a rotated label on its bar (\code{0.5} when \code{angle} is not \code{0}) and starts a
+horizontal label at its bar (\code{0}).}
 }
 \value{
 Updated \code{ggtree} plot object containing clade label layers.
