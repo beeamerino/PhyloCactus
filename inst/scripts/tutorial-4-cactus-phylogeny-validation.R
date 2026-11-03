@@ -162,6 +162,7 @@ if(length(existing_trees) > 1) {
     trees_mapping_list = existing_trees,
     checklist_csv = checklist_file,
     constraints_map = constraints_file,
+    rooting_genus = "Leuenbergeria",  # Genus that roots every tree after the family filter; change it here
     out_dir = "10_Validation"
   )
   
