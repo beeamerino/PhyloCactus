@@ -1187,7 +1187,7 @@ Pterocactus,Pterocactus_megliolii,Tephrocacteae,Tephrocacteae,Opuntioideae,Cacta
 Pterocactus,Pterocactus_neuquensis,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
 Pterocactus,Pterocactus_reticulatus,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
 Pterocactus,Pterocactus_tuberosus,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
-Pterocereus,Pterocereus_gaumeri,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
+Pterocereus,Pterocereus_gaumeri,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Pachycerinae
 Punotia,Punotia_lagopus,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
 Pygmaeocereus,Pygmaeocereus_bieblii,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Pygmaeocereus,Pygmaeocereus_bylesianus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
@@ -1329,7 +1329,7 @@ Stenocereus,Stenocereus_kerberi,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cac
 Stenocereus,Stenocereus_martinezii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Stenocerinae
 Stenocereus,Stenocereus_montanus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Stenocerinae
 Stenocereus,Stenocereus_pruinosus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Stenocerinae
-Stenocereus,Stenocereus_queretaroensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Echinocereus
+Stenocereus,Stenocereus_queretaroensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Stenocerinae
 Stenocereus,Stenocereus_standleyi,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Stenocerinae
 Stenocereus,Stenocereus_stellatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Stenocerinae
 Stenocereus,Stenocereus_thurberi,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Stenocerinae
