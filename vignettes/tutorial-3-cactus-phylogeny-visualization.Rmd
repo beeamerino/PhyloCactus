@@ -26,13 +26,13 @@ knitr::opts_chunk$set(
 
 ## Abstract
 
-This tutorial covers the third stage of the phylogenetic workflow: integration of species metadata, figures of the phylogenetic products, and summaries of conservation status.
+This tutorial covers the third stage of the phylogenetic workflow: integration of species metadata, figures of the phylogenetic trees, and summaries of conservation status.
 It uses the supermatrix, maximum-likelihood tree, bootstrap support values and chronogram produced in [Tutorial 1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) and [Tutorial 2](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
 
-**Module 11** reconciles the species in the supermatrix with the accepted checklist of Cactaceae (Korotkova *et al*. 2021) and retrieves species-level assessments from the IUCN Red List.
+**Module 11** check the species in the supermatrix with the accepted checklist of Cactaceae (Korotkova *et al*. 2021) and retrieves species-level assessments from the IUCN Red List.
 The result is one table that records, for each species, its taxonomic status, molecular sampling, placement in the tree, distribution and conservation category.
 
-**Module 12** produces seventeen figures in five groups: coverage of the molecular dataset, structure of the supermatrix, the tree and the chronogram, the species accounting across pipeline stages, and summaries of IUCN categories, endemism, threats and habitats.
+**Module 12** generates seventeen figures showing the coverage of the molecular dataset, structure of the supermatrix, the tree and the chronogram, the species accounting across pipeline stages, and summaries of IUCN categories, endemism, threats and habitats.
 
 ## Complete Pipeline Execution Workflow
 
@@ -49,7 +49,7 @@ new_pkgs <- required_pkgs[!(required_pkgs %in% installed.packages()[,"Package"])
 if(length(new_pkgs)) install.packages(new_pkgs)
 ```
 
-**IUCN Red List API token.** The IUCN queries require a personal API token. Run `rredlist::rl_use_iucn()` to open the registration page, store the token in `.Renviron` (opened with `usethis::edit_r_environ()`) as `IUCN_REDLIST_KEY="your_api_key"`, and restart R.
+**IUCN Red List API token.** The IUCN queries require a personal API token. Run `rredlist::rl_use_iucn()` to open the registration page, then store the token in `.Renviron` (opened with `usethis::edit_r_environ()`) as `IUCN_REDLIST_KEY="your_api_key"`, and finally restart R.
 
 ### Data Setup and Preprocessing
 
@@ -70,17 +70,17 @@ file.copy(
 
 This module requires the outputs of [Tutorial 2: Phylogenetic Inference and Divergence Time Estimation](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
 
-#### Species Registry
+#### Species Record
 
-The species registry links each accepted species to its molecular sampling, its placement in the tree and its IUCN Red List category.
-With these data, threatened species without sequence data can be listed, and the molecular sampling of threatened and non-threatened species can be compared.
-The registry can also serve as input for phylogeny-based conservation metrics such as EDGE scores (Isaac *et al*. 2007), which are not computed in this tutorial.
+The species record links each accepted species to its molecular sampling, its placement in the tree and its IUCN Red List category.
+With these data, threatened species without sequence data can be included in the list, and the molecular sampling of threatened and non-threatened species can be compared.
+The record can also serve as input for phylogeny-based conservation metrics such as EDGE scores (Isaac *et al*., 2007).
 
 Names are reconciled against the Cactaceae checklist of Caryophyllales.org (Korotkova *et al*. 2021; export of 1 July 2026), which lists 1,965 accepted species.
-With 28 outgroup species from Anacampserotaceae, Portulacaceae and Talinaceae, the registry contains 1,993 species.
+With 28 outgroup species from Anacampserotaceae, Portulacaceae and Talinaceae, the record contains 1,993 species.
 The supermatrix includes 1,218 of them (1,190 ingroup, 28 outgroup).
 The maximum-likelihood tree and the chronogram have 1,208 tips (1,180 ingroup, 28 outgroup), because `RAxML-NG` removed 10 ingroup species whose sequences were identical to those of another species.
-The other 775 accepted species have no sequence data, and 102 of them are listed as threatened (CR, EN or VU) by the IUCN Red List.
+The other 775 accepted species have no sequence data, of which 102 of them are listed as threatened (CR, EN or VU) by the IUCN Red List.
 
 Load the libraries and the outputs of the previous modules:
 
@@ -125,13 +125,13 @@ dated_tree_file <- "8_Dating/Zuntini2024_young/BestTree_treePL.tree"  # calibrat
 chrono_file <- "8_Dating/Zuntini2024_young/dated_summary_hpd.tree"
 
 # ============================================================
-# LOAD SPECIES TABLE & ACCEPTED CHECKLIST (Korotkova et al. 2021)
+# LOAD SPECIES TABLE & ACCEPTED CHECKLIST
 # ============================================================
 message("Reading species genetics table from supermatrix outputs...")
 species_summary <- read_csv(species_file, show_col_types = FALSE) %>%
   mutate(species_clean = str_replace_all(species, "_", " "))
 
-message("Reading accepted checklist (Korotkova et al. 2021, Caryophyllales.org)...")
+message("Reading accepted checklist...")
 if (grepl("\\.xlsx?$", accepted_list_file, ignore.case = TRUE)) {
   sheets <- readxl::excel_sheets(accepted_list_file)
   checklist_sheets <- sheets[!grepl("^facts", sheets, ignore.case = TRUE)]
@@ -231,17 +231,14 @@ species_summary <- species_summary %>%
 
 `get_iucn_data()` retrieves the latest IUCN assessment of one species through the `rredlist` interface to the IUCN Red List API.
 It returns the category, criteria, population trend, countries of occurrence, endemism, habitats, threats, and use and trade.
-The query covers the 1,965 species of the checklist (Korotkova *et al*. 2021) and the 28 outgroups.
-All ingroup names in the supermatrix match the checklist (Korotkova *et al*. 2021), so every query uses an accepted name.
+The query covers the 1,965 species of the checklist and the 28 outgroups.
+All ingroup names in the supermatrix match the checklist, so every query uses an accepted name.
 
 The output table (`TABLE_species_all_data.csv`) is used by all figures in Module 12.
 The chunk also writes `TABLE_conservation_prioritization_gaps.csv`, which lists the threatened species without sequence data.
 If the table already exists, it is read from disk and the API is not queried.
-IUCN assessments change between Red List versions. The reference run used Red List version 2026-1 (IUCN 2026), reported by `rredlist::rl_version()`.
+IUCN assessments change between Red List versions. The reference run used Red List version 2026-1 (IUCN 2026).
 
-The table of assessments is Red List Data, retrieved with the user's own token, and stays on the user's machine: the IUCN Red List Terms of Use (version 3.1) do not allow it to be redistributed (section 4), but place no restriction on the category of a named species (section 3).
-`summarise_iucn_registry()` reduces it to the tables the package distributes: the species registry with the category as its only IUCN content (`TABLE_species_registry.csv`), the endemic species in the tree by country and category (`TABLE_iucn_endemic_by_country.csv`), and the species in the tree by threat class and habitat class (`TABLE_iucn_classes.csv`), each with the version of the Red List and the date of access.
-Figures 14 to 17 and the endemism row of Table 1 are drawn from the two count tables.
 
 ```{r, eval = FALSE}
 # ============================================================
@@ -268,13 +265,6 @@ TABLE_conservation_prioritization_gaps <- species_summary_iucn %>%
   arrange(factor(iucn_category, levels = c("CR", "EN", "VU")), genus, species)
 
 write_csv(TABLE_conservation_prioritization_gaps, prioritization_file)
-
-# Category of each species and counts: the tables the package distributes. The version and the
-# date of access are those of the assessments in output_file.
-iucn_tables <- summarise_iucn_registry(output_file,
-                                       redlist_version = "2026-1",
-                                       access_date = "2026-10-15",
-                                       output_dir = "9_Visualization/tables")
 ```
 
 ```{r, eval = TRUE, echo = FALSE}
@@ -284,15 +274,13 @@ has_data <- nzchar(system.file("extdata", "phylocactus_table_species.csv", packa
 
 ### Module 12: Figures and Summary Tables
 
-Module 12 produces seventeen figures in five groups:
+Module 12 generates seventeen figures:
 
 1. **Molecular dataset (Figures 1 to 3):** species per locus, loci per species, and locus occupancy.
 2. **Supermatrix (Figures 4 and 5):** partition coordinates and parsimony-informative sites per locus.
 3. **Tree and chronogram (Figures 6 to 9):** maximum-likelihood tree with Felsenstein bootstrap proportions (FBP), full-size tree, chronogram with the 95% intervals of the node ages over the dated bootstrap replicates, and full-size chronogram.
-4. **Species accounting (Figure 10):** status of every species in the registry across pipeline stages.
+4. **Species accounting (Figure 10):** status of every species in the record across pipeline stages.
 5. **Conservation (Figures 11 to 17):** IUCN categories, molecular completeness by category, threatened species without sequences, national endemism, threats and habitats.
-
-The figures on this page are drawn from the reference outputs distributed with the package in `inst/extdata`. The script `tutorial-3-cactus-phylogeny-visualization.R` draws the same figures from the outputs of your own run.
 
 ```{r, eval = has_data}
 library(PhyloCactus)

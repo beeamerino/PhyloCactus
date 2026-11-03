@@ -31,9 +31,9 @@ Taxon sampling and sequence availability are irregular across a matrix of this s
 
 ### Setup: Creating a Clean Workspace
 
-The external programs `ModelTest-NG`, `RAxML-NG` and `treePL` must be installed and available on the system `PATH` before Module 7.
+The external software `ModelTest-NG`, `RAxML-NG` and `treePL` must be installed and available on the system `PATH` before Module 7.
 
-*On macOS, several of them can be installed with Homebrew (`brew install raxml-ng`). If R reports "command not found", pass the absolute path of the executable in the corresponding argument (for example, `raxml_path = "/usr/local/bin/raxml-ng"`).*
+*On macOS and Linux, several of them can be installed with Homebrew (`brew install raxml-ng`). If R reports "command not found", pass the absolute path of the executable in the corresponding argument (for example, `raxml_path = "/usr/local/bin/raxml-ng"`).*
 
 The complete script of this tutorial can be copied to the working directory:
 
@@ -151,19 +151,17 @@ setwd("..")
 
 ### Module 8: Constraint Trees and Maximum Likelihood Search
 
-The maximum-likelihood tree is the topology that maximizes the likelihood of the alignment under the selected models and the topological constraint. Taxon sampling is incomplete and irregular, and previously established relationships among major lineages are used to restrict the search to the part of tree space that remains unresolved.
+The maximum-likelihood tree is the topology that maximizes the likelihood of the alignment under the selected models and the topological constraint. Taxon sampling is incomplete and irregular, so previously established relationships among major lineages are used to restrict the search to the part of tree space that remains unresolved.
 
-The **`build_constraint_scaffold()`** function builds the constraint tree from `cactus_constraints.csv`, which assigns the sampled species to subfamilies and major clades of **Cactaceae** following published phylogenies, principally Hernández-Hernández *et al*. (2014), Guerrero *et al*. (2019), Zuntini *et al*. (2024) and de Vos *et al*. (2025).
+The **`build_constraint_scaffold()`** function builds the constraint tree from `cactus_constraints.csv`, which assigns the sampled species to subfamilies and major clades of **Cactaceae** following published phylogenies, principally Hernández-Hernández *et al*., (2014), Guerrero *et al*., (2019), Zuntini *et al*., (2024) and de Vos *et al*., (2025).
 
 The constraint does not impose a complete topology. In the reference dataset it fixes 34 of the 1205 internal bipartitions and leaves the other 1171 to be estimated from the data, including the placement of every species within its clade.
 
-In the reference run, the constrained tree differs slightly from the reference trees in Stage 4 at shared terminals. Of the eleven constrained bipartitions absent from Zuntini *et al*. (2024) and de Vos *et al*. (2025), only two conflict with supported relationships above the level of single terminals: the monophyly of *Pereskia* and of *Copiapoa* (two terminals each in the tree of Zuntini *et al*., 2024). No conflict at the level of a tribe remains when *Haageocereus fascicularis* and *Neoraimondia arequipensis*, which Zuntini *et al*. (2024) places differently, are excluded.
+In the reference run, the constrained tree differs slightly from the reference trees in Stage 4 at shared terminals. Of the eleven constrained bipartitions absent from Zuntini *et al*., (2024) and de Vos *et al*., (2025), only two conflict with supported relationships above the level of single terminals: the monophyly of *Pereskia* and of *Copiapoa* (two terminals each in the tree of Zuntini *et al*., 2024). No conflict at the level of a tribe remains when *Haageocereus fascicularis* and *Neoraimondia arequipensis*, which Zuntini *et al*., (2024) places differently, are excluded.
 
-Zuntini *et al*. (2024) also relies on a constrained backbone, with at most five samples per family. The first split in Cactaceae is unresolved in its quartet frequencies (0.346, 0.324, 0.330), so its deep relationships do not provide an independent test. The constrained placement of Rhipsalideae as sister to Notocacteae + BCT (core Cactoideae II, following Guerrero *et al*., 2019) conflicts with Amaral *et al*. (2022) (ultrafast bootstrap 87, below the threshold of 95 recommended for IQ-TREE; Minh *et al*., 2013; Hoang *et al*., 2018) and receives weak support from Zuntini *et al*. (2024) (local posterior probability 0.58–0.93). Amaral *et al*. (2022) also differs in supported tribe relationships within Opuntioideae and in the placement of *Copiapoa* and *Calymmanthium*. Core Cactoideae II was then tested on this matrix by repeating the maximum-likelihood search with that bipartition removed from the constraint and everything else unchanged: the relaxed search recovered core Cactoideae II, with Rhipsalideae (56 terminals) monophyletic and sister to BCT (250) plus Notocacteae (64).
+Zuntini *et al*., (2024) also relies on a constrained backbone, with at most five samples per family. The first split in Cactaceae is unresolved in its quartet frequencies (0.346, 0.324, 0.330), so its deep relationships do not provide an independent test. The constrained placement of Rhipsalideae as sister to Notocacteae + BCT (core Cactoideae II, following Guerrero *et al*., 2019) conflicts with Amaral *et al*., (2022) (ultrafast bootstrap 87, below the threshold of 95 recommended for IQ-TREE; Minh *et al*., 2013; Hoang *et al*., 2018) and receives weak support from Zuntini *et al*., (2024) (local posterior probability 0.58–0.93). Amaral *et al*., (2022) also differs in supported tribe relationships within Opuntioideae and in the placement of *Copiapoa* and *Calymmanthium*. Core Cactoideae II was then tested on this matrix by repeating the maximum-likelihood search with that bipartition removed from the constraint and everything else unchanged: the relaxed search recovered core Cactoideae II, with Rhipsalideae (56 terminals) monophyletic and sister to BCT (250) plus Notocacteae (64).
 
-The **`calculate_ml_tree()`** function runs the constrained search in `RAxML-NG` (Kozlov *et al*., 2019) with the partition models selected in Module 7.
-
-The search runs on a local workstation with `calculate_ml_tree()`, or on a cluster with **`generate_ml_search_script()`**, which writes a SLURM batch script for the same constrained search. The `run_local_ml` flag below selects between them, as `run_local_bs` does for the bootstrap replicates of Module 9. The search is a single job: `RAxML-NG` distributes the starting trees among workers within the job and writes one best tree.
+The **`calculate_ml_tree()`** function runs the constrained search in `RAxML-NG` (Kozlov *et al*., 2019) with the partition models selected in Module 7. The search runs on a local workstation with `calculate_ml_tree()`, or on a cluster with **`generate_ml_search_script()`**, which writes a SLURM batch script for the same constrained search. The `run_local_ml` flag below selects between them, as `run_local_bs` does for the bootstrap replicates of Module 9. The search is a single job: `RAxML-NG` distributes the starting trees among workers within the job and writes one best tree.
 
 The wall-clock time of this stage depends mainly on `n_workers`. `RAxML-NG` gives each worker `threads / workers` threads and one starting tree at a time, so the search takes `ceiling(n_init_trees / workers)` rounds: 50 starting trees take 50 rounds on one worker and two rounds on 25 workers. On an Apple M2 Pro with one worker and 8 threads, 50 starting trees took 47115 s (about 13.1 h, 942.3 s per tree). On an AMD EPYC 9754 node with 25 workers and 75 threads (3 per worker), 50 starting trees took 4468 s (about 75 minutes), corresponding to an average of 89.4 s per tree.
 
@@ -171,7 +169,7 @@ With `n_workers = NULL` the worker count is chosen as a divisor of the number of
 
 The **`calculate_rf_distances()`** function computes Robinson-Foulds distances (Robinson & Foulds, 1981) among the trees of independent searches, as a measure of their convergence.
 
-In the reference run the 50 searches ended in 50 distinct topologies (mean relative RF 0.2246; log-likelihoods from -132207.2 to -132294.1; `cactus_RF.raxml.log` and `cactus_search.raxml.log`), and the best of them is the maximum-likelihood tree. The constrained bipartitions do not vary among searches, by construction; the free ones do, and more the deeper they are. Of the 1171 free bipartitions of the best tree, the share found in all 50 searches is 487 of 911 among those with 2 to 10 terminals on their smaller side, 67 of 210 with 11 to 50, 4 of 39 with 51 to 200 and 4 of 11 with more than 200 (the least frequent of these in 4 of the 50 searches). 
+In the reference run the 50 searches ended in 50 distinct topologies (mean relative RF 0.2246; log-likelihoods from -132207.2 to -132294.1; `cactus_RF.raxml.log` and `cactus_search.raxml.log`), and the best of them is the maximum-likelihood tree. The constrained bipartitions do not vary among searches, and of the 1171 free bipartitions of the best tree, the share found in all 50 searches is 487 of 911 among those with 2 to 10 terminals on their smaller side, 67 of 210 with 11 to 50, 4 of 39 with 51 to 200 and 4 of 11 with more than 200 (the least frequent of these in 4 of the 50 searches). 
 
 The root is placed after the search. Under time-reversible substitution models the likelihood of a topology is the same for all its rootings (Felsenstein, 1981), so the data carry no information on the position of the root, and constraint trees, like the search, are unrooted. The `--outgroup` option of `RAxML-NG` only orders the output. The root is placed by `automate_treePL()` through `root_on_clade()`, and its position determines which groups are monophyletic, which nodes exist and where each calibration falls, because `treePL` addresses nodes by the MRCA of the terminals declared for them.
 
@@ -179,7 +177,7 @@ The root is placed on the whole outgroup clade. Rooting on a single terminal pla
 
 In the reference dataset the rooting set comprises the 8 sampled terminals of Talinaceae (*Talinum* and *Talinella*); their occupancy is reported in `6_Concatenated/final_tables/TABLE_final_species_alignment_summary.csv`. Rooting on Talinaceae places the root on the stem of the ACP clade (Anacampserotaceae, Cactaceae, Portulacaceae). Rooting on Portulacaceae, without a fourth lineage, would impose a sister relationship between Cactaceae and Anacampserotaceae.
 
-With this rooting the crown of the ACP clade is an internal node, and the likelihood can choose among the three resolutions of the three families (Ramírez-Barahona *et al*., 2020; Zuntini *et al*., 2024; de Vos *et al*., 2025). Relationships among these families are in conflict across published analyses, and the resolution in the tree is an estimate from this supermatrix. The outgroup is sampled as GenBank holds it: 18 of its 28 terminals carry one locus, and it has data in five of the 13 partitions (Tutorial 1). Module 8 constrains each of the four families to be monophyletic, and in the unrooted tree the bipartition of Talinaceae is that of the ACP clade, so the only relationship among the families that the data decide is the grouping of Anacampserotaceae with Portulacaceae (FBP 81, not constrained).
+With this rooting the crown of the ACP clade is an internal node, and the likelihood can choose among the three resolutions of the three families (Arakaki *et al*., 2011; Ramírez-Barahona *et al*., 2020; Zuntini *et al*., 2024). Relationships among these families are in conflict across published analyses, and the resolution in the tree is an estimate from this supermatrix. The outgroup is sampled as GenBank holds it: 18 of its 28 terminals carry one locus, and it has data in five of the 13 partitions (Tutorial 1). Module 8 constrains each of the four families to be monophyletic, and in the unrooted tree the bipartition of Talinaceae is that of the ACP clade, so the only relationship among the families that the data decide is the grouping of Anacampserotaceae with Portulacaceae (FBP 81, not constrained).
 
 ```{r, eval = FALSE}
 # Module 8 needs the outputs of Module 7. Asking for them by name turns a missing input into an
@@ -274,21 +272,21 @@ The **`collect_bootstraps()`** function gathers the replicates, and **`check_bs_
 
 The **`map_branch_supports()`** function maps the bootstrap support onto the maximum-likelihood tree. FBP is the primary measure, as in published phylogenies of Cactaceae, which report bipartition frequencies or posterior probabilities (Arakaki *et al*., 2011; Hernández-Hernández *et al*., 2014). The transfer bootstrap expectation (TBE; Lemoine *et al*., 2018) is computed as a secondary measure. TBE is less sensitive to unstable terminals in large matrices with missing data, but it is higher than FBP on large clades: on the 1171 unconstrained nodes of the reference tree, clades of 51 to 200 terminals have a median FBP of 8 (in percent, as the tree labels it) and a median TBE of 0.930. FBP is reported for comparability with published studies, and TBE as a measure of the stability of taxon placement.
 
-Nodes imposed by the constraint (`cactus_constraints.tree`) are recovered in every bootstrap replicate by construction and receive a support of 100. That value reproduces the constraint and does not measure support from the data; these nodes are reported as constrained in publication tables.
+Nodes imposed by the constraint (`cactus_constraints.tree`) are recovered in every bootstrap replicate by construction and receive a support of 100. That value reproduces the constraint and does not measure support from the data. These nodes are reported as constrained in publication tables.
 
 The weak support of the backbone is a lack of signal, not a finding about the history of the clades. Outside the 34 constrained nodes, clades of 51 to 200 terminals have a median FBP of 8; the supermatrix is 76.9% gaps, and 214 of the 1208 terminals are represented by a single locus, whose parent nodes have a median FBP of 49.5, against 58 for terminals with two loci or more. These nodes are soft polytomies: the data do not resolve them, and they do not show a simultaneous divergence of lineages (a hard polytomy), which only more loci could test.
 
 #### Temporal Bootstrap Replicates for Divergence Time Estimation
 
-Following Maurin (2020), a second set of bootstrap replicates is generated for dating, to measure the uncertainty in branch lengths.
+Following Maurin, (2020), a second set of bootstrap replicates is generated for dating, to measure the uncertainty in branch lengths.
 
 The **`calculate_temporal_bootstraps()`** function resamples the alignment and estimates branch lengths for each replicate with the topology fixed to the maximum-likelihood tree.
 
 Because the topology is fixed, the dated replicates measure uncertainty in branch lengths only. The confidence intervals of node ages do not include topological uncertainty, which is measured separately by the bootstrap support of Module 9.
 
-Following Maurin (2020), the penalized likelihood parameters and the smoothing value are selected on the maximum-likelihood tree with `treePL` (Smith & O’Meara, 2012) and then applied to the temporal replicates, whose dated trees give the confidence intervals of node ages.
+Following Maurin, (2020), the penalized likelihood parameters and the smoothing value are selected on the maximum-likelihood tree with `treePL` (Smith & O’Meara, 2012) and then applied to the temporal replicates, whose dated trees give the confidence intervals of node ages.
 
-The two bootstrap procedures therefore measure different things: the standard bootstrap measures topological support, and the temporal bootstrap measures uncertainty in branch lengths for dating.
+The two bootstrap procedures therefore measure different things: the standard bootstrap measures topological support (FBP, TBE), and the temporal bootstrap measures uncertainty in branch lengths for dating.
 
 ```{r, eval = FALSE}
 # -------------------------------------------------------------
@@ -464,25 +462,21 @@ Temporal constraints are provided through the `calibrations_bounds.csv` referenc
 
 The distinction between stem and crown nodes governs which bound may be assigned to which node. A crown node is the first divergence within a clade and a stem node is the divergence separating that clade from its sister, and is therefore always older. Assigning a stem age to a crown node inflates the node by construction, and propagates that inflation to every node below it.
 
-No calibration is placed inside Cactaceae. The crown ages of Opuntioideae, Cactoideae and Cacteae from Hernández-Hernández *et al*. (2014), which bounded those nodes in earlier versions of the package, are kept in `calibrations_bounds.csv` with `used_in_analysis = FALSE`, as references against which the estimated ages can be read.
+No calibration is placed inside Cactaceae. The crown ages of Opuntioideae, Cactoideae and Cacteae from Hernández-Hernández *et al*. (2014), are kept in `calibrations_bounds.csv` with `used_in_analysis = FALSE`, as references against which the estimated ages can be read.
 
 Cactaceae lack a macrofossil record suitable for calibrating internal nodes. The scale of the chronogram is therefore set by one secondary calibration with a fixed age (`min` equal to `max`) on one node:
 
 - `ACP_root`: the crown of the clade of Anacampserotaceae, Portulacaceae and Cactaceae. `calibrations_bounds.csv` holds three calibration schemes for this node, each a fixed age from a published chronogram (below). Scheme 1 is the row with `used_in_analysis = TRUE`, and the distributed chronogram is dated under it.
-- `Cactaceae_Anacampserotaceae_stem` ([21.95, 48.51] Ma) is retained in `calibrations_bounds.csv` with `used_in_analysis = FALSE`, because it assumes that Cactaceae and Anacampserotaceae are sisters. The maximum-likelihood tree recovers Anacampserotaceae and Portulacaceae as sisters (FBP 81; the node is not constrained), as do Zuntini *et al*. (2024).
-- `ACPT_root` ([33.28, 59.86] Ma, Ramírez-Barahona *et al*., 2020) is retained with `used_in_analysis = FALSE`. The root of the chronogram is the crown of the ACPT clade, so the deepest node of the tree is not calibrated: its age, 58.10 Ma under scheme 1, is extrapolated above the fixed calibration and depends on the smoothing value. It falls inside the published interval, which is a consistency check and not a constraint. Activating the bound would add a second calibration on the deepest node and would be a different analysis.
 
-The crown intervals of Ramírez-Barahona *et al*. (2020) for these families are also listed with `used_in_analysis = FALSE`, for reference. That study samples two terminals per family, so its crown ages are the divergence between the two sampled species and underestimate the crown of each family; its stem ages do not depend on within-family sampling and are the ones used.
+The three calibration schemes of ACP are:
 
-The three calibration schemes are:
+1. Zuntini *et al*., (2024): 53.22 Ma, the stem age of Cactaceae on their young tree (Supplementary Table 3), which on the topology of this tree is the ACP crown. Their tree was inferred from the Angiosperms353 loci, samples 117 terminals of Cactaceae, recovers the relationships among the three families found here, and was dated with `treePL`.
+2. Ramírez-Barahona *et al*., (2020): 41.82 Ma, the median height of the stem node of Portulacaceae on the maximum clade credibility tree of the `RC_complete` BEAST analysis (`Data4_Ages.xlsx`, column `Stem_BEAST`). In their tree, where Cactaceae is sister to Anacampserotaceae, that node is the ACP crown.
+3. Arakaki *et al*., (2011): 37.0 Ma, their age for this node (Table S4), applied as a fixed age and not as the interval of 31.90 to 42.10 Ma (mean ± 1.96 SD).
 
-1. Zuntini *et al*. (2024): 53.22 Ma, the stem age of Cactaceae on their young tree (Supplementary Table 3), which on the topology of this tree is the ACP crown. Their tree was inferred from the Angiosperms353 loci, samples 117 terminals of Cactaceae, recovers the relationships among the three families found here, and was dated with `treePL`.
-2. Ramírez-Barahona *et al*. (2020): 41.82 Ma, the median height of the stem node of Portulacaceae on the maximum clade credibility tree of the `RC_complete` BEAST analysis (`Data4_Ages.xlsx`, column `Stem_BEAST`); in their tree, where Cactaceae is sister to Anacampserotaceae, that node is the ACP crown.
-3. Arakaki *et al*. (2011): 37.0 Ma, their age for this node (Table S4), applied as a fixed age and not as the interval of 31.90 to 42.10 Ma (mean ± 1.96 SD).
+Scheme 1 is the main scheme. The tree of Zuntini *et al*., (2024) resolves Cactaceae as sister to Anacampserotaceae plus Portulacaceae, as this tree does, while Ramírez-Barahona *et al*., (2020) place Cactaceae sister to Anacampserotaceae. Of six published crown ages that come from none of the three sources (the crowns of Cactaceae, Cactoideae, Cacteae and Opuntioideae of Hernández-Hernández *et al*., 2014, and the ACP crown and the root of Wu *et al*., 2026), scheme 1 places five inside their intervals, and five of its six ages are 1.2 to 1.4 times the point estimates; scheme 2 places all six, and scheme 3 all six.
 
-Scheme 1 is the main scheme. The tree of Zuntini *et al*. (2024) resolves Cactaceae as sister to Anacampserotaceae plus Portulacaceae, as this tree does, while Ramírez-Barahona *et al*. (2020) place Cactaceae sister to Anacampserotaceae; it also rests on many more loci. Of six published crown ages that come from none of the three sources (the crowns of Cactaceae, Cactoideae, Cacteae and Opuntioideae of Hernández-Hernández *et al*., 2014, and the ACP crown and the root of Wu *et al*., 2026), scheme 1 places five inside their intervals, and five of its six ages are 1.2 to 1.4 times the point estimates; scheme 2 places all six, and scheme 3 all six.
-
-Each scheme fixes one age, and every age of its chronogram is conditional on that age; the chronogram does not carry the uncertainty of the study the age was taken from. Ages in Ma on the maximum-likelihood chronogram of each scheme, dated at $10^{-5}$ (see the selection of the smoothing below), with the 2.5 and 97.5 percentiles over the 100 dated replicates:
+Each scheme fixes one age, and every age of its chronogram is conditional on that age, so the chronogram does not carry the uncertainty of the study the age was taken from. Ages in Ma on the maximum-likelihood chronogram of each scheme, dated at $10^{-5}$ (see the selection of the smoothing below), with the 2.5 and 97.5 percentiles over the 100 dated replicates:
 
 | Node | Scheme 1 (53.22 Ma) | Scheme 2 (41.82 Ma) | Scheme 3 (37.0 Ma) |
 |---|---|---|---|
@@ -492,35 +486,43 @@ Each scheme fixes one age, and every age of its chronogram is conditional on tha
 | Cacteae crown | 16.77 (14.54 to 18.66) | 13.76 (11.48 to 15.09) | 12.81 (10.61 to 14.15) |
 | Opuntioideae crown | 12.97 (11.25 to 14.81) | 10.71 (8.80 to 11.85) | 9.51 (7.91 to 10.98) |
 
-The old tree of Zuntini *et al*. (2024) (79.97 Ma), the `treePL` column of Ramírez-Barahona *et al*. (2020) (67.01 Ma), its 95% HPD interval (27.81 to 53.37 Ma), and the chronograms of earlier versions, dated with the three bounds of Hernández-Hernández *et al*. (2014), are reported in the supplementary material. `inst/scripts/analysis-calibration-schemes.R` dates the three schemes.
+The old tree of Zuntini *et al*., (2024) (79.97 Ma), the `treePL` column of Ramírez-Barahona *et al*., (2020) (67.01 Ma), its 95% HPD interval (27.81 to 53.37 Ma) are reported in the supplementary material. `inst/scripts/analysis-calibration-schemes.R` dates the three schemes.
 
 The **`automate_treePL()`** function runs the dating: it prepares the maximum-likelihood tree and the calibrations for `treePL`, selects the optimization parameters and the smoothing value, and dates the maximum-likelihood tree and the temporal replicates.
 
-Following Maurin (2020), the optimization parameters and the smoothing value are selected on the maximum-likelihood tree and applied unchanged to every temporal replicate. Repeating the cross-validation for each replicate is computationally prohibitive; as a consequence, the confidence intervals do not include uncertainty in the smoothing value.
+Following Maurin, (2020), the optimization parameters and the smoothing value are selected on the maximum-likelihood tree and applied unchanged to every temporal replicate. Repeating the cross-validation for each replicate is computationally prohibitive, as a consequence, the confidence intervals do not include uncertainty in the smoothing value.
 
-100 of the 500 temporal replicates, drawn at random with the seed of the run (`num_bs = 100`, `seed`), are then dated with those parameters; `num_bs = NULL` dates all of them.
-
-The dated replicates give the distribution of each node age, from which the confidence intervals are obtained.
+100 of the 500 temporal replicates, drawn at random with the seed of the run (`num_bs = 100`, `seed`), are then dated with those parameters; `num_bs = NULL` dates all of them. The dated replicates give the distribution of each node age, from which the confidence intervals are obtained.
 
 `treePL` does not accept a branch shorter than one expected substitution over the alignment. When it read the maximum-likelihood tree of the reference run, it set 563 branches (300 of them terminal) to that minimum, 0.0073 in the rescaled units (100 / 13 700 sites), and lists each one in its log (`cv_ML_tree.log`, "tiny branch length at ... setting to 0.0072992701"). These are near-zero branches, such as those leading to identical or nearly identical composite terminals, which therefore receive a small nonzero duration in the chronogram. The effect of this on the ages of the shallowest nodes has not been measured.
 
-This is the longest step that runs on the local machine, and it has no scheduler to send a notification. With `notify_email <- TRUE` in the SETUP block, `automate_treePL()` sends an email when the run ends, with its status, start and end times, elapsed time, host, output paths and, if the run failed, the R error. This requires `MY_EMAIL` in `.Renviron` and a `blastula` credentials file created with `blastula::create_smtp_creds_file()`; `PhyloCactus` passes the path of that file to `blastula` and does not read it. A notification that cannot be sent is reported and does not fail the run. See `?send_run_notification`.
+This is the longest step that runs on the local machine, and it has no scheduler to send a notification. With `notify_email <- TRUE` in the SETUP block, `automate_treePL()` sends an email when the run ends, with its status, start and end times, elapsed time, host, output paths and, if the run failed, the R error. This requires `MY_EMAIL` in `.Renviron` and a `blastula` credentials file created with `blastula::create_smtp_creds_file()`. `PhyloCactus` passes the path of that file to `blastula` and does not read it. A notification that cannot be sent is reported and does not fail the run. See `?send_run_notification`.
 
 #### Summarizing Dated Temporal Bootstrap Replicates
 
-The dated replicates are summarized with `TreeAnnotator`, the summary program of BEAST 2 (Bouckaert *et al*., 2019; Heled & Bouckaert, 2013), following Maurin (2020).
+The dated replicates are summarized with `TreeAnnotator`, the summary program of BEAST 2.7 (Bouckaert *et al*., 2019; Heled & Bouckaert, 2013), following Maurin, (2020).
 
 All replicates share the maximum-likelihood topology, so the summary estimates the distribution of node ages and does not compare topologies, and the choice of target tree does not change the ages.
 
-`TreeAnnotator` is run with the settings of Maurin (2020): the maximum clade credibility tree as target tree, mean node heights, and 0% burn-in. It computes the mean age of each node and its interval across the dated replicates. The reference run used TreeAnnotator v2.7.7 of BEAST 2, outside R:
+`TreeAnnotator` is run with the settings of Maurin. (2020): the maximum clade credibility tree as target tree, mean node heights, and 0% burn-in. It computes the mean age of each node and its interval across the dated replicates.
 
-```
+```bash
 treeannotator -burnin 0 -height mean -topology MCC 8_Dating/Zuntini2024_young/bsTree_treePL.tree 8_Dating/Zuntini2024_young/dated_summary_hpd.tree
 ```
 
-The distributed summary (`phylocactus_chronogram_hpd.tree`, 2415 nodes) is the output of this command on the 100 dated replicates of scheme 1. Its node ages are the means of the replicates and its intervals the shortest that hold 95% of them, so they differ from the maximum-likelihood ages and percentiles of the table above (crown of Cactaceae 26.60 Ma, 22.87 to 28.93 Ma). If the `treeannotator` found first on the `PATH` is that of BEAST 1 (v1.10), which rejects `-height`, call the program of BEAST 2 by its full path (on macOS, `/Applications/BEAST 2.7.7/bin/treeannotator`). A user of the graphical interface sets the burn-in to 0 (it starts at 10) and the node heights to mean heights.
+The distributed summary (`phylocactus_chronogram_hpd.tree`, 2415 nodes) is the output of this command on the 100 dated replicates of scheme 1. Its node ages are the means of the replicates and its intervals the shortest that hold 95% of them, so they differ from the maximum-likelihood ages and percentiles of the table above. 
 
 `TreeAnnotator` labels these intervals as highest posterior density (HPD) intervals because it is written for Bayesian analyses. Here they are confidence intervals from independently dated bootstrap replicates, not posterior distributions.
+
+Mean ages in Ma on the `TreeAnnotator` summary of each scheme, with the shortest interval that holds 95% of the 100 dated replicates (confidence intervals, not posterior intervals):
+
+| Node | Scheme 1 (53.22 Ma) | Scheme 2 (41.82 Ma) | Scheme 3 (37.0 Ma) |
+|---|---|---|---|
+| Root (ACPT crown) | 57.47 (54.96 to 59.39) | 45.36 (43.21 to 48.39) | 39.97 (38.26 to 41.82) |
+| Cactaceae crown | 26.60 (22.87 to 28.93) | 21.74 (18.44 to 24.80) | 20.16 (16.74 to 23.53) |
+| Cactoideae crown | 21.12 (19.10 to 23.15) | 17.13 (15.28 to 19.31) | 15.62 (13.91 to 18.04) |
+| Cacteae crown | 16.57 (14.85 to 18.76) | 13.28 (11.45 to 14.83) | 12.06 (10.58 to 14.01) |
+| Opuntioideae crown | 12.88 (11.44 to 14.88) | 10.30 (8.72 to 11.69) | 9.28 (8.07 to 10.98) |
 
 #### Selecting the Rate-Smoothing Parameter
 
@@ -532,11 +534,8 @@ Cross-validation (`randomcv`) removes subsets of the data, re-estimates rates an
 2. **Edge.** The lowest value lies at the end of the grid, and the curve is still decreasing there. The optimum lies beyond the grid; `cvstop` has to be extended and the analysis repeated before any age is interpreted (Maurin, 2020).
 3. **Plateau.** The curve decreases and then levels off, so that smoothing values below a threshold fit the data about equally well. The lowest $\chi^2$ is one of several equivalent values, and node ages have to be reported across the plateau.
 
-Some random subsamples fit badly at the intermediate smoothing values, from 0.1 to about $10^{-7}$, and normally at the lowest, so that the sum over every subsample is lowest at the smallest values. In the reference run (scheme 1) the fourth of the ten subsamples added 18 to 31 times the median increment of the subsamples at $10^{-2}$ to $10^{-7}$; under scheme 2 the seventh failed, with a $\chi^2$ of the order of $10^{38}$, at 0.1 to $10^{-5}$ and at $10^{-7}$, and because `treePL` prints a running sum, a failure also hides the subsamples after it at those values. `run_treePL_cv()` therefore leaves out of the selection a subsample that fails, or adds more than `cv_outlier_factor` (default 5) times the median increment of the subsamples, at any value of 0.1 or below, and compares the values on one set of subsamples. It warns when it does so, writes both curves to `cv_<label>_selection.csv` and its account to `cv_<label>_selection.txt`; `cv_outlier_factor = NULL` selects on every subsample. The default of 5 was set after the curves of this run had been read. On the three schemes any factor from 3 to 10 leaves out the same subsamples and selects $10^{-5}$.
+Some random subsamples fit badly at the intermediate smoothing values, from 0.1 to about $10^{-7}$, and normally at the lowest, so that the sum over every subsample is lowest at the smallest values. In the reference run (scheme 1) the fourth of the ten subsamples added 18 to 31 times the median increment of the subsamples at $10^{-2}$ to $10^{-7}$. `run_treePL_cv()` therefore leaves out of the selection a subsample that fails, or adds more than `cv_outlier_factor` (default 5) times the median increment of the subsamples, at any value of 0.1 or below, and compares the values on one set of subsamples. It warns when it does so, writes both curves to `cv_<label>_selection.csv` and its account to `cv_<label>_selection.txt`. `cv_outlier_factor = NULL` selects on every subsample. 
 
-In the reference run (scheme 1) the selection left out the fourth subsample and rests on the other nine. On their sum the curve has an interior minimum at $10^{-5}$: the lowest $\chi^2$, 314.69, lies 0.1% below the value at $10^{-6}$ (315.07) and 2.7% below that at $10^{-4}$ (323.55). Below $10^{-6}$ the $\chi^2$ stays between 319.28 and 345.23; above $10^{-4}$ it is 360.54 at $10^{-3}$, 440.67 at $10^{-2}$ and 715.91 at 0.1. Summed over every subsample, the minimum falls at $10^{-11}$. Each of the three schemes selects $10^{-5}$ in this way (over every subsample, $10^{-9}$ to $10^{-11}$) and is dated at it. `report_smoothing_sensitivity()` dates the same tree at values across the grid and beyond it; under scheme 1, from $10^{-14}$ to $10^{-2}$, the root moves by 1.56 Ma, the crown of Cactaceae by 2.22 Ma, that of Cactoideae by 1.44 Ma, that of Cacteae by 1.31 Ma and that of Opuntioideae by 0.23 Ma. The age of `ACP_root` does not vary, because it is the fixed calibration.
-
-The code for Module 10:
 
 ```{r, eval = FALSE}
 # Resuming here after a restart: run the SETUP block of Module 7, then continue from this line.
@@ -752,28 +751,28 @@ Tutorial 3 adds IUCN Red List assessments and produces the tree, chronogram and 
 
 ## References
 
-- Akaike 1974. A new look at the statistical model identification. *IEEE Transactions on Automatic Control*, 19(6), 716–723. <https://doi.org/10.1109/TAC.1974.1100705>
-- Amaral *et al*. 2022. Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. *Biological Conservation*, 273, 109677. <https://doi.org/10.1016/j.biocon.2022.109677>
-- Arakaki *et al*. 2011. Contemporaneous and recent radiations of the world’s major succulent plant lineages. *Proceedings of the National Academy of Sciences of the United States of America*, 108(20), 8379–8384. <https://doi.org/10.1073/pnas.1100628108>
-- Bouckaert *et al*. 2019. BEAST 2.5: an advanced software platform for Bayesian evolutionary analysis. *PLoS Computational Biology*, 15(4), e1006650. <https://doi.org/10.1371/journal.pcbi.1006650>
-- Darriba *et al*. 2020. ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291–294. <https://doi.org/10.1093/molbev/msz189>
-- de Vos *et al*. 2025. Phylogenomics and classification of Cactaceae based on hundreds of nuclear genes. *Plant Systematics and Evolution*, 311(5), 28. <https://doi.org/10.1007/s00606-025-01948-z>
-- Felsenstein 1981. Evolutionary trees from DNA sequences: A maximum likelihood approach. *Journal of Molecular Evolution*, 17(6), 368–376. <https://doi.org/10.1007/BF01734359>
-- Flouri *et al*. 2015. The Phylogenetic Likelihood Library. *Systematic Biology*, 64(2), 356–362. <https://doi.org/10.1093/sysbio/syu084>
-- Guerrero *et al*. 2019. Phylogenetic relationships and evolutionary trends in the cactus family. *Journal of Heredity*, 110(1), 4–21. <https://doi.org/10.1093/jhered/esy064>
-- Heled & Bouckaert 2013. Looking for trees in the forest: summary tree from posterior samples. *BMC Evolutionary Biology*, 13, 221. <https://doi.org/10.1186/1471-2148-13-221>
-- Hernández-Hernández *et al*. 2014. Beyond aridification: Multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. *New Phytologist*, 202(4), 1382–1397. <https://doi.org/10.1111/nph.12752>
-- Hoang *et al*. 2018. UFBoot2: improving the ultrafast bootstrap approximation. *Molecular Biology and Evolution*, 35(2), 518–522. <https://doi.org/10.1093/molbev/msx281>
-- Hurvich & Tsai 1989. Regression and time series model selection in small samples. *Biometrika*, 76(2), 297–307. <https://doi.org/10.1093/biomet/76.2.297>
-- Kozlov *et al*. 2019. RAxML-NG: A fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305>
-- Lemoine *et al*. 2018. Renewing Felsenstein’s phylogenetic bootstrap in the era of big data. *Nature*, 556(7702), 452–456. <https://doi.org/10.1038/s41586-018-0043-0>
-- Maurin 2020. An empirical guide for producing a dated phylogeny with treePL in a maximum likelihood framework. *arXiv preprint arXiv:2008.07054*. <https://doi.org/10.48550/arXiv.2008.07054>
-- Minh *et al*. 2013. Ultrafast approximation for phylogenetic bootstrap. *Molecular Biology and Evolution*, 30(5), 1188–1195. <https://doi.org/10.1093/molbev/mst024>
-- Pattengale *et al*. 2010. How many bootstrap replicates are necessary?. *Journal of Computational Biology*, 17(3), 337–354. <https://doi.org/10.1089/cmb.2009.0179>
-- Ramírez-Barahona *et al*. 2020. The delayed and geographically heterogeneous diversification of flowering plant families. *Nature Ecology & Evolution*, 4(9), 1232–1238. <https://doi.org/10.1038/s41559-020-1241-3>
-- Robinson & Foulds 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1-2), 131–147. <https://doi.org/10.1016/0025-5564(81)90043-2>
-- Sanderson 2002. Estimating Absolute Rates of Molecular Evolution and Divergence Times: A Penalized Likelihood Approach. *Molecular Biology and Evolution*, 19(1), 101–109. <https://doi.org/10.1093/oxfordjournals.molbev.a003974>
-- Smith & O’Meara 2012. TreePL: Divergence time estimation using penalized likelihood for large phylogenies. *Bioinformatics*, 28(20), 2689–2690. <https://doi.org/10.1093/bioinformatics/bts492>
-- Wu *et al*. 2026. Integrated analysis of fossils and molecular divergence time estimates a latest Jurassic origin of angiosperms. *Nature Plants*, 12(6), 1242–1251. <https://doi.org/10.1038/s41477-026-02311-x>
-- Zuntini *et al*. 2024. Phylogenomics and the rise of the angiosperms. *Nature*, 629(8013), 843–850. <https://doi.org/10.1038/s41586-024-07324-0>
+- Akaike, 1974. A new look at the statistical model identification. *IEEE Transactions on Automatic Control*, 19(6), 716–723. <https://doi.org/10.1109/TAC.1974.1100705>
+- Amaral *et al*., 2022. Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. *Biological Conservation*, 273, 109677. <https://doi.org/10.1016/j.biocon.2022.109677>
+- Arakaki *et al*., 2011. Contemporaneous and recent radiations of the world’s major succulent plant lineages. *Proceedings of the National Academy of Sciences of the United States of America*, 108(20), 8379–8384. <https://doi.org/10.1073/pnas.1100628108>
+- Bouckaert *et al*., 2019. BEAST 2.5: an advanced software platform for Bayesian evolutionary analysis. *PLoS Computational Biology*, 15(4), e1006650. <https://doi.org/10.1371/journal.pcbi.1006650>
+- Darriba *et al*., 2020. ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291–294. <https://doi.org/10.1093/molbev/msz189>
+- de Vos *et al*., 2025. Phylogenomics and classification of Cactaceae based on hundreds of nuclear genes. *Plant Systematics and Evolution*, 311(5), 28. <https://doi.org/10.1007/s00606-025-01948-z>
+- Felsenstein, 1981. Evolutionary trees from DNA sequences: A maximum likelihood approach. *Journal of Molecular Evolution*, 17(6), 368–376. <https://doi.org/10.1007/BF01734359>
+- Flouri *et al*., 2015. The Phylogenetic Likelihood Library. *Systematic Biology*, 64(2), 356–362. <https://doi.org/10.1093/sysbio/syu084>
+- Guerrero *et al*., 2019. Phylogenetic relationships and evolutionary trends in the cactus family. *Journal of Heredity*, 110(1), 4–21. <https://doi.org/10.1093/jhered/esy064>
+- Heled & Bouckaert, 2013. Looking for trees in the forest: summary tree from posterior samples. *BMC Evolutionary Biology*, 13, 221. <https://doi.org/10.1186/1471-2148-13-221>
+- Hernández-Hernández *et al*., 2014. Beyond aridification: Multiple explanations for the elevated diversification of cacti in the New World Succulent Biome. *New Phytologist*, 202(4), 1382–1397. <https://doi.org/10.1111/nph.12752>
+- Hoang *et al*., 2018. UFBoot2: improving the ultrafast bootstrap approximation. *Molecular Biology and Evolution*, 35(2), 518–522. <https://doi.org/10.1093/molbev/msx281>
+- Hurvich & Tsai, 1989. Regression and time series model selection in small samples. *Biometrika*, 76(2), 297–307. <https://doi.org/10.1093/biomet/76.2.297>
+- Kozlov *et al*., 2019. RAxML-NG: A fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305>
+- Lemoine *et al*., 2018. Renewing Felsenstein’s phylogenetic bootstrap in the era of big data. *Nature*, 556(7702), 452–456. <https://doi.org/10.1038/s41586-018-0043-0>
+- Maurin, 2020. An empirical guide for producing a dated phylogeny with treePL in a maximum likelihood framework. *arXiv preprint arXiv:2008.07054*. <https://doi.org/10.48550/arXiv.2008.07054>
+- Minh *et al*., 2013. Ultrafast approximation for phylogenetic bootstrap. *Molecular Biology and Evolution*, 30(5), 1188–1195. <https://doi.org/10.1093/molbev/mst024>
+- Pattengale *et al*., 2010. How many bootstrap replicates are necessary?. *Journal of Computational Biology*, 17(3), 337–354. <https://doi.org/10.1089/cmb.2009.0179>
+- Ramírez-Barahona *et al*., 2020. The delayed and geographically heterogeneous diversification of flowering plant families. *Nature Ecology & Evolution*, 4(9), 1232–1238. <https://doi.org/10.1038/s41559-020-1241-3>
+- Robinson & Foulds, 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1-2), 131–147. <https://doi.org/10.1016/0025-5564(81)90043-2>
+- Sanderson, 2002. Estimating Absolute Rates of Molecular Evolution and Divergence Times: A Penalized Likelihood Approach. *Molecular Biology and Evolution*, 19(1), 101–109. <https://doi.org/10.1093/oxfordjournals.molbev.a003974>
+- Smith & O’Meara, 2012. TreePL: Divergence time estimation using penalized likelihood for large phylogenies. *Bioinformatics*, 28(20), 2689–2690. <https://doi.org/10.1093/bioinformatics/bts492>
+- Wu *et al*., 2026. Integrated analysis of fossils and molecular divergence time estimates a latest Jurassic origin of angiosperms. *Nature Plants*, 12(6), 1242–1251. <https://doi.org/10.1038/s41477-026-02311-x>
+- Zuntini *et al*., 2024. Phylogenomics and the rise of the angiosperms. *Nature*, 629(8013), 843–850. <https://doi.org/10.1038/s41586-024-07324-0>
 
