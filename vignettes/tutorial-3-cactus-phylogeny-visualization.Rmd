@@ -538,7 +538,7 @@ All 1,208 tips with species names and FBP values, on a 36 × 48 in (91.4 × 121.
 if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
   ML_SUPP_LAYER_SPECS <- tibble::tribble(
     ~reg_name, ~fontsize, ~barsize, ~offset, ~offset_text, ~fontface, ~sort_desc, ~angle, ~align,
-    "level_4_supp", 6, 0.60, 0.030, 0.0038, "plain", TRUE, 0, TRUE,
+    "level_4_supp", 4, 0.60, 0.030, 0.0038, "plain", TRUE, 0, TRUE,
     "level_3", 8, 0.65, 0.150, 0.0038, "bold", TRUE, 270, TRUE,
     "level_2", 9, 0.70, 0.200, 0.0100, "bold", TRUE, 270, TRUE,
     "level_1", 10, 0.80, 0.250, 0.0100, "bold", TRUE, 270, TRUE
@@ -632,7 +632,7 @@ All 1,208 tips with the 95% intervals of the node ages and period boundaries, on
 if (file.exists(chrono_file) && nzchar(chrono_file)) {
   CHRONO_SUPP_LAYER_SPECS <- tibble::tribble(
     ~reg_name, ~fontsize, ~barsize, ~offset, ~offset_text, ~fontface, ~sort_desc, ~angle, ~align,
-    "level_4_supp", 6, 0.60, 0.030, 0.0038, "plain", TRUE, 0, TRUE,
+    "level_4_supp", 4, 0.60, 0.030, 0.0038, "plain", TRUE, 0, TRUE,
     "level_3", 8, 0.65, 0.150, 0.0038, "bold", TRUE, 270, TRUE,
     "level_2", 9, 0.70, 0.200, 0.0100, "bold", TRUE, 270, TRUE,
     "level_1", 10, 0.80, 0.250, 0.0100, "bold", TRUE, 270, TRUE

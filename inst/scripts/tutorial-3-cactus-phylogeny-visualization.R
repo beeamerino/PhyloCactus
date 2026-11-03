@@ -427,7 +427,7 @@ if (file.exists(supp_tree_file)) {
     # FIGURE 7: Full-size maximum-likelihood tree (36 x 48 in)
     ML_SUPP_LAYER_SPECS <- tibble::tribble(
       ~reg_name, ~fontsize, ~barsize, ~offset, ~offset_text, ~fontface, ~sort_desc, ~angle, ~align,
-      "level_4_supp", 6, 0.60, 0.030, 0.0038, "plain", TRUE, 0, TRUE,
+      "level_4_supp", 4, 0.60, 0.030, 0.0038, "plain", TRUE, 0, TRUE,
       "level_3", 8, 0.65, 0.150, 0.0038, "bold", TRUE, 270, TRUE,
       "level_2", 9, 0.70, 0.200, 0.0100, "bold", TRUE, 270, TRUE,
       "level_1", 10, 0.80, 0.250, 0.0100, "bold", TRUE, 270, TRUE
@@ -492,7 +492,7 @@ if (file.exists(chrono_file)) {
     # FIGURE 9: Full-size chronogram (36 x 48 in)
     CHRONO_SUPP_LAYER_SPECS <- tibble::tribble(
       ~reg_name, ~fontsize, ~barsize, ~offset, ~offset_text, ~fontface, ~sort_desc, ~angle, ~align,
-      "level_4_supp", 6, 0.60, 0.030, 0.0038, "plain", TRUE, 0, TRUE,
+      "level_4_supp", 4, 0.60, 0.030, 0.0038, "plain", TRUE, 0, TRUE,
       "level_3", 8, 0.65, 0.150, 0.0038, "bold", TRUE, 270, TRUE,
       "level_2", 9, 0.70, 0.200, 0.0100, "bold", TRUE, 270, TRUE,
       "level_1", 10, 0.80, 0.250, 0.0100, "bold", TRUE, 270, TRUE
