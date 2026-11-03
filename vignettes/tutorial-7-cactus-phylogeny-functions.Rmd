@@ -27,9 +27,9 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 
 | Function | Description | Reference |
 |:---|:---|:---|
-| `assemble_ingroup_phylotar()` | Retrieves sequence clusters for the ingroup (Cactaceae, NCBI Taxonomy ID 3593) from GenBank with `phylotaR`. Clusters are formed by sequence similarity, not by GenBank locus annotations; gene-name synonyms are mapped with `genes_map.csv`, clusters with more than `min_species` species are retained, and a curated list of excluded accessions is applied. | Bennett et al., (2018) |
-| `assemble_outgroup_phylotar()` | Retrieves sequence clusters for the outgroup genera of Anacampserotaceae, Portulacaceae and Talinaceae, for the loci selected in the ingroup. | Bennett et al., (2018) |
-| `fetch_genbank_metadata()` | Retrieves the organism name and definition line of each GenBank accession through `ape::read.GenBank()`, in batches with retries, and caches them. | Paradis & Schliep, (2019) |
+| `assemble_ingroup_phylotar()` | Retrieves sequence clusters for the ingroup (Cactaceae, NCBI Taxonomy ID 3593) from GenBank with `phylotaR`. Clusters are formed by sequence similarity, not by GenBank locus annotations; gene-name synonyms are mapped with `genes_map.csv`, clusters with more than `min_species` species are retained, and a curated list of excluded accessions is applied. | Bennett et al. (2018) |
+| `assemble_outgroup_phylotar()` | Retrieves sequence clusters for the outgroup genera of Anacampserotaceae, Portulacaceae and Talinaceae, for the loci selected in the ingroup. | Bennett et al. (2018) |
+| `fetch_genbank_metadata()` | Retrieves the organism name and definition line of each GenBank accession through `ape::read.GenBank()`, in batches with retries, and caches them. | Paradis & Schliep (2019) |
 
 ### Alignment and Quality Control
 

@@ -45,7 +45,7 @@ Module 14 reads:
 
 - **The phylotaR workspace** (`0_phylotaR_raw_Ingroup/`, Tutorial 1). The phylogeny and Module 14 read the same mining. Module 14 adds no download of sequences, only the GenBank metadata of the accessions the phylogeny's cache does not hold.
 - **The curated files of the package:** the target loci (`target_genes.txt`), the dictionary of locus names (`genes_map.csv`), the manual exclusions (`manual_exclusions_ingroup.csv`, which include 21 `ITS` records annotated in GenBank as pseudogenes) and the checklist of Cactaceae of Caryophyllales.org (Korotkova *et al*. 2021), against which every name is checked.
-- **Own sequences, optional.** `own_dir = "0_own"` in step 1 adds the records of `0_own/`: a sample sheet (`SAMPLES.csv`: sample, species of the checklist of Korotkova *et al*. 2021, voucher, publication status) and one FASTA file per locus. What cannot enter is listed with its reason. The default, `own_dir = NULL`, builds the library from GenBank alone.
+- **Own sequences, optional.** `own_dir = "0_own"` in step 1 adds the records of `0_own/`: a sample sheet (`SAMPLES.csv`: sample, species of the checklist, voucher, publication status) and one FASTA file per locus. What cannot enter is listed with its reason. The default, `own_dir = NULL`, builds the library from GenBank alone.
 
 The library is not distributed with the package: the user builds it with steps 1 to 4.
 
@@ -91,7 +91,7 @@ options(phylocactus.tag_suffix = "")
 
 ### Step 1: Assembly
 
-**`assemble_barcoding_dataset()`**. The clusters of the mining are named by locus, records over 2000 bases are cut to the extent the shorter records of their locus cover (most of them trnK-matK records cut to `matK`), and every accession is kept with its name reconciled against the checklist (Korotkova *et al*. 2021).
+**`assemble_barcoding_dataset()`**. The clusters of the mining are named by locus, records over 2000 bases are cut to the extent the shorter records of their locus cover (most of them trnK-matK records cut to `matK`), and every accession is kept with its name reconciled against the checklist.
 
 ```{r, eval = FALSE}
 assemble_barcoding_dataset(
@@ -167,11 +167,11 @@ The library of this version holds 15 loci: `atpB-rbcL`, `ITS`, `matK`, `ndhF-rpl
 Built from GenBank records, as a user builds it, it holds 7607 sequences of 1205 species in 139 genera; own sequences can be added through `own_dir` (step 1).
 In every locus most species hold a single sequence, which limits what a species answer can rest on.
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 2.** Alignment of `matK`in the library."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 2.** Alignment of `matK` in the library."}
 knitr::include_graphics("figures/Figure_TB1_alignment_matK.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 3.** Alignment of `ITS`in the library."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 3.** Alignment of `ITS` in the library."}
 knitr::include_graphics("figures/Figure_TB1_alignment_ITS.png")
 ```
 
@@ -187,13 +187,13 @@ knitr::include_graphics("figures/Figure_TB3_funnel.png")
 knitr::include_graphics("figures/Figure_TB4_lengths_and_replicates.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 7.** Taxonomic coverage of the library against the checklist (Korotkova et al. 2021)."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 7.** Taxonomic coverage of the library against the checklist."}
 knitr::include_graphics("figures/Figure_TB7_taxonomic_coverage.png")
 ```
 
 ### Step 5: Validation Folds
 
-**`build_barcoding_folds()`**. `Scheme E` leaves one sequence out and asks for its species, which stays in the library. `Scheme G` leaves a whole species out and asks for its genus. The folds are deterministic and checked for leakage.
+**`build_barcoding_folds()`**. Scheme E leaves one sequence out and asks for its species, which stays in the library. Scheme G leaves a whole species out and asks for its genus. The folds are deterministic and checked for leakage.
 
 ```{r, eval = FALSE}
 build_barcoding_folds(
@@ -321,7 +321,7 @@ if (!is.null(idtaxa_tables)) {
 
 ### Step 9: Thresholds
 
-**`sweep_barcoding_threshold()`**. For the nearest neighbour, a threshold of remoteness per locus (quantile 0.99 of `Scheme G`). For IdTaxa, the operating threshold is 60, DECIPHER's default, and a species threshold per locus is written for the identification. A species is named only above it. `rbcL` answers at genus rank only (argument `genus_only_loci` of the identification functions): on the library of this version its species answers were right in 11 of 34.
+**`sweep_barcoding_threshold()`**. For the nearest neighbour, a threshold of remoteness per locus (quantile 0.99 of Scheme G). For IdTaxa, the operating threshold is 60, DECIPHER's default, and a species threshold per locus is written for the identification. A species is named only above it. `rbcL` answers at genus rank only (argument `genus_only_loci` of the identification functions): on the library of this version its species answers were right in 11 of 34.
 
 ```{r, eval = FALSE}
 sweep_barcoding_threshold(
@@ -351,7 +351,7 @@ if (!is.null(idtaxa_tables)) {
 
 ### Step 10: Metrics
 
-**`summarise_barcoding_metrics()`**. Per locus and Scheme: species correct, genus correct, wrong species, wrong genus and unassigned.
+**`summarise_barcoding_metrics()`**. Per locus and scheme: species correct, genus correct, wrong species, wrong genus and unassigned.
 
 ```{r, eval = FALSE}
 summarise_barcoding_metrics(
@@ -462,7 +462,7 @@ Module 14 rests on five design decisions:
 
 1. **Loci and combinations.** Each locus is classified on its own; loci are not concatenated and no combination of loci is evaluated as a unit.
 2. **Unit of assignment.** A graded answer per locus: species, genus or none, with the reason for none. A species is named only above the species threshold of its locus.
-3. **Reporting ambiguity.** The candidates under the thresholds are listed as alternatives in the report, never promoted to an answer. Sisagreement between loci is reported as a conflict.
+3. **Reporting ambiguity.** The candidates under the thresholds are listed as alternatives in the report, never promoted to an answer. Disagreement between loci is reported as a conflict.
 4. **Genome skims and other reads.** The library is built from Sanger marker records of GenBank, and genome skims are not a source of it. Illumina reads that a user brings are a query: `identify_barcoding_reads()` assembles their plastome and nuclear ribosomal DNA and identifies them against the library, locus by locus.
 5. **Paralogy and organelle capture.** Possible paralogs (`pepC_like`) and saturation are flagged and kept. Conflict between plastid and nuclear loci is reported as disagreement between loci, not resolved. Per-locus monophyly and the cytonuclear diagnosis are planned work, with no version set.
 

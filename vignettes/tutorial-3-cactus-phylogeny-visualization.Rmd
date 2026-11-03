@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 This tutorial covers the third stage of the phylogenetic workflow: integration of species metadata, figures of the phylogenetic trees, and summaries of conservation status.
 It uses the supermatrix, maximum-likelihood tree, bootstrap support values and chronogram produced in [Tutorial 1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) and [Tutorial 2](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
 
-**Module 11** check the species in the supermatrix with the accepted checklist of Cactaceae (Korotkova *et al*. 2021) and retrieves species-level assessments from the IUCN Red List.
+**Module 11** checks the species in the supermatrix against the accepted checklist of Cactaceae (Korotkova *et al*. 2021) and retrieves species-level assessments from the IUCN Red List.
 The result is one table that records, for each species, its taxonomic status, molecular sampling, placement in the tree, distribution and conservation category.
 
 **Module 12** generates seventeen figures showing the coverage of the molecular dataset, structure of the supermatrix, the tree and the chronogram, the species accounting across pipeline stages, and summaries of IUCN categories, endemism, threats and habitats.
@@ -73,14 +73,14 @@ This module requires the outputs of [Tutorial 2: Phylogenetic Inference and Dive
 #### Species Record
 
 The species record links each accepted species to its molecular sampling, its placement in the tree and its IUCN Red List category.
-With these data, threatened species without sequence data can be included in the list, and the molecular sampling of threatened and non-threatened species can be compared.
+With these data, threatened species without sequence data can be listed (`TABLE_conservation_prioritization_gaps.csv`, below), and the molecular sampling of threatened and non-threatened species can be compared.
 The record can also serve as input for phylogeny-based conservation metrics such as EDGE scores (Isaac *et al*., 2007).
 
-Names are reconciled against the Cactaceae checklist of Caryophyllales.org (Korotkova *et al*. 2021; export of 1 July 2026), which lists 1,965 accepted species.
+Names are reconciled against the Cactaceae checklist of Caryophyllales.org (export of 1 July 2026), which lists 1,965 accepted species.
 With 28 outgroup species from Anacampserotaceae, Portulacaceae and Talinaceae, the record contains 1,993 species.
 The supermatrix includes 1,218 of them (1,190 ingroup, 28 outgroup).
 The maximum-likelihood tree and the chronogram have 1,208 tips (1,180 ingroup, 28 outgroup), because `RAxML-NG` removed 10 ingroup species whose sequences were identical to those of another species.
-The other 775 accepted species have no sequence data, of which 102 of them are listed as threatened (CR, EN or VU) by the IUCN Red List.
+The other 775 accepted species have no sequence data, of which 102 are listed as threatened (CR, EN or VU) by the IUCN Red List.
 
 Load the libraries and the outputs of the previous modules:
 
@@ -265,6 +265,13 @@ TABLE_conservation_prioritization_gaps <- species_summary_iucn %>%
   arrange(factor(iucn_category, levels = c("CR", "EN", "VU")), genus, species)
 
 write_csv(TABLE_conservation_prioritization_gaps, prioritization_file)
+
+# Category of each species and counts: the tables the package distributes. The version and the
+# date of access are those of the assessments in output_file.
+iucn_tables <- summarise_iucn_registry(output_file,
+                                       redlist_version = "2026-1",
+                                       access_date = "2026-10-15",
+                                       output_dir = "9_Visualization/tables")
 ```
 
 ```{r, eval = TRUE, echo = FALSE}
@@ -352,7 +359,7 @@ TABLE_dataset_summary <- tibble(
 knitr::kable(TABLE_dataset_summary, caption = "Table 1. Summary of the dataset: species of the checklist, the supermatrix and the tree, IUCN assessments, threatened and endemic species.")
 ```
 
-##### Figure 1
+#### Figure 1
 
 The supermatrix holds the sequences that GenBank has for each species, so the loci were not sampled evenly. Four plastid loci (`matK`, `rpL16`, `trnL_trnF` and `psbA_trnH`) each have more than 500 species, whereas the two nuclear loci, `ITS` and `pepC_like`, have 310 and 120. Most of the phylogenetic signal therefore comes from the plastid genome, which is inherited as a single non-recombining unit, and the phylogeny is mainly an estimate of plastid relationships.
 
@@ -366,7 +373,7 @@ p1 <- ggplot(marker_stats, aes(x = reorder(marker, n_taxa), y = n_taxa)) +
 p1
 ```
 
-##### Figure 2
+#### Figure 2
 
 Missing data are spread across species as well as across loci. More than half of the tips (669 of 1,208) have three to five loci, and 385 have one or two, so their placement rests on few characters. Tutorial 2 (Module 9) shows that the parent nodes of single-locus terminals have lower FBP than those of terminals with two loci or more, and the weakest placements in Figure 6 are expected among these species.
 
@@ -381,11 +388,11 @@ if ("retained_markers" %in% names(species_summary_iucn)) {
 }
 ```
 
-##### Figure 3
+#### Figure 3
 
 Figures 1 and 2 give the totals of the matrix by locus and by species. In this figure, the heatmap shows how the empty cells are arranged. Rows are sorted by name, so the species of a genus are adjacent, and a block of absent loci shared by a genus shows a lineage sequenced for only some loci. 
 
-```{r marker_heatmap, eval = has_data, fig.width = 8, fig.height = 8, fig.cap = "**Figure 3.** Presence of sequence data for each of the 13 loci in each of the 1,208 tips of the maximum-likelihood tree (rows, in alphabetical order of species name. Names not shown). Dark grey, locus present and light grey locus absent."}
+```{r marker_heatmap, eval = has_data, fig.width = 8, fig.height = 8, fig.cap = "**Figure 3.** Presence of sequence data for each of the 13 loci in each of the 1,208 tips of the maximum-likelihood tree (rows, in alphabetical order of species name; names not shown). Dark grey, locus present; light grey, locus absent."}
 heatmap_data <- species_summary_iucn %>%
   filter(in_ml_tree == TRUE) %>%
   select(species, all_of(marker_cols)) %>%
@@ -408,7 +415,7 @@ p3 <- ggplot(heatmap_data, aes(x = marker, y = fct_rev(species), fill = present)
 p3
 ```
 
-##### Figure 4
+#### Figure 4
 
 Each partition receives its own substitution model in the maximum-likelihood inference (Tutorial 2, Module 7), and the coordinates in Figure 4 are the boundaries of those partitions in the concatenated matrix. They also show how much of the matrix each locus occupies: `matK` and `rbcL` together take 4,018 of the 13,700 positions.
 
@@ -428,7 +435,7 @@ if (file.exists(ranges_file)) {
 }
 ```
 
-##### Figure 5
+#### Figure 5
 
 Aligned length is a poor guide to the information a locus contributes. `rbcL` and `ndhF_rpl32` are among the longest partitions and contribute few parsimony-informative sites, while the 424 positions of `psbA_trnH` hold more informative sites than either. `matK` contributes about a quarter of the informative sites of the matrix and is also the locus with the most species (Figure 1), so much of the resolution of the phylogeny depends on it.
 
@@ -444,11 +451,11 @@ if ("parsimony_informative" %in% names(marker_stats)) {
 }
 ```
 
-##### Figure 6
+#### Figure 6
 
-Figure 6 shows which relationships the supermatrix resolves once the constraint has fixed the backbone. The groups marked at the three upper levels, and seven of the 13 at the finest level (BCT, the three tribes of Opuntioideae, Notocacteae, Rhipsalideae and *Copiapoa*), sit on constrained nodes, so their monophyly is an assumption of the analysis and not a result of it. The other six were estimated from the data, with FBP from 100 (*Eulychnia*) to 40 (*Coryphantha*). Of the 1,171 nodes estimated from the data, 840 have an FBP under 70, and support falls with clade size: 91 of the 344 nodes that unite two terminals have an FBP of 90 or more, whereas 121 of the 141 nodes of more than 20 terminals have an FBP under 70. The data resolve many relationships between closely related species and few among the larger groups within the constrained clades(Tutorial 2, Module 9).
+Figure 6 shows which relationships the supermatrix resolves once the constraint has fixed the backbone. The groups marked at the three upper levels, and seven of the 13 at the finest level (BCT, the three tribes of Opuntioideae, Notocacteae, Rhipsalideae and *Copiapoa*), sit on constrained nodes, so their monophyly is an assumption of the analysis and not a result of it. The other six were estimated from the data, with FBP from 100 (*Eulychnia*) to 40 (*Coryphantha*). Of the 1,171 nodes estimated from the data, 840 have an FBP under 70, and support falls with clade size: 91 of the 344 nodes that unite two terminals have an FBP of 90 or more, whereas 121 of the 141 nodes of more than 20 terminals have an FBP under 70. The data resolve many relationships between closely related species and few among the larger groups within the constrained clades (Tutorial 2, Module 9).
 
-```{r figure_6_ml_tree, eval = has_data, fig.width = 8.5, fig.height = 11, message = FALSE, warning = FALSE, fig.cap = "**Figure 6.** Maximum-likelihood tree of 1,208 terminals (1,180 Cactaceae and 28 outgroup species of Anacampserotaceae, Portulacaceae and Talinaceae), inferred under the topological constraint of Tutorial 2 (Module 8). Tip names are not shown. Branch lengths are in expected substitutions per site (scale bar). Node symbols give the Felsenstein bootstrap proportion (FBP; Tutorial 2, Module 9) of the 1,171 nodes estimated from the data: white, FBP of 90 or more; grey, 70 to 89; black, under 70. Blue, the 34 nodes fixed by the constraint, which carry no FBP. Bars on the right mark, from outside in, Cactaceae; Cactoideae and Opuntioideae; Core Cactoideae I, Core Cactoideae II and Cacteae; and the 13 genera, tribes and subtribes. Genera in italics."}
+```{r figure_6_ml_tree, eval = has_data, fig.width = 8.5, fig.height = 11, message = FALSE, warning = FALSE, fig.cap = "**Figure 6.** Maximum-likelihood tree of 1,208 terminals (1,180 Cactaceae and 28 outgroup species of Anacampserotaceae, Portulacaceae and Talinaceae), inferred under the topological constraint of Tutorial 2 (Module 8). Tip names are not shown. Branch lengths are in expected substitutions per site (scale bar). Node symbols give the Felsenstein bootstrap proportion (FBP; Tutorial 2, Module 9) of the 1,171 nodes estimated from the data: white, FBP of 90 or more; grey, 70 to 89; black, under 70. Blue, the 34 nodes fixed by the constraint, which carry no FBP. Bars on the right mark, from outside in, Cactaceae; Cactoideae and Opuntioideae; Core Cactoideae I, Core Cactoideae II and Cacteae; and the 13 genera, tribes, subtribes and informal clades. Genera in italics."}
 library(ggtree)
 library(ape)
 library(tidytree)
@@ -541,7 +548,7 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
 }
 ```
 
-##### Figure 7
+#### Figure 7
 
 Figure 6 cannot show 1,208 names at a legible size. The full-size tree prints every tip name and the FBP of every node estimated from the data, so that the placement and support of a given species can be looked up.
 
@@ -586,11 +593,11 @@ treeio::write.beast(annotated_treedata, file = "9_Visualization/figures/annotate
 >
 > The same files are in the [`extended_trees/`](https://github.com/beeamerino/PhyloCactus/tree/master/extended_trees) directory of the repository: [Figure_7_ML_Tree_Extended.pdf](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/Figure_7_ML_Tree_Extended.pdf) and [annotated_ml_tree.tree](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/annotated_ml_tree.tree).
 
-##### Figure 8
+#### Figure 8
 
 The chronogram places the clades of Figure 6 in time under calibration scheme 1, the main scheme of the package. It is read for the crown ages of the main clades and the width of their intervals. Tutorial 2 tabulates the ages of the root and four crowns under the three calibration schemes. The intervals come from bootstrap replicates of branch lengths on the fixed maximum-likelihood topology, with the ACP crown fixed, so they contain neither the uncertainty of the topology nor that of the calibration.
 
-```{r figure_8_chronogram, eval = has_data, fig.width = 8.5, fig.height = 11, message = FALSE, warning = FALSE, fig.cap = "**Figure 8.** Chronogram of the 1,208 terminals of Figure 6, estimated by penalized likelihood in `treePL` under calibration scheme 1, the young tree of Zuntini *et al*., (2024), with the crown of the ACP clade (Anacampserotaceae, Cactaceae and Portulacaceae) fixed at 53.22 Ma (Tutorial 2, Module 10). Tip names are not shown. The root, the crown of the four families, is at 57.47 Ma. Node ages are the means over the 100 dated bootstrap replicates, summarized with `TreeAnnotator`. Grey bars: 95% intervals of the node ages over the same replicates (`height_0.95_HPD` in the file). They are confidence intervals from bootstrap replicates, not posterior intervals, and the fixed ACP crown has an interval of zero width."}
+```{r figure_8_chronogram, eval = has_data, fig.width = 8.5, fig.height = 11, message = FALSE, warning = FALSE, fig.cap = "**Figure 8.** Chronogram of the 1,208 terminals of Figure 6, estimated by penalized likelihood in `treePL` under calibration scheme 1, the young tree of Zuntini *et al*. (2024), with the crown of the ACP clade (Anacampserotaceae, Cactaceae and Portulacaceae) fixed at 53.22 Ma (Tutorial 2, Module 10). Tip names are not shown. The root, the crown of the four families, is at 57.47 Ma. Node ages are the means over the 100 dated bootstrap replicates, summarized with `TreeAnnotator`. Grey bars: 95% intervals of the node ages over the same replicates (`height_0.95_HPD` in the file). They are confidence intervals from bootstrap replicates, not posterior intervals, and the fixed ACP crown has an interval of zero width."}
 # Load summary chronogram from Module 10
 chrono_file <- system.file("extdata", "phylocactus_chronogram_hpd.tree", package = "PhyloCactus")
 
@@ -638,7 +645,7 @@ if (file.exists(chrono_file) && nzchar(chrono_file)) {
 }
 ```
 
-##### Figure 9
+#### Figure 9
 
 The full-size chronogram is for looking up the age of a given species: the age of the node that joins it to its closest sampled relative, with the interval of that age. That node is the stem of the species only if its sister species is in the tree; 775 accepted species are not sampled, and when the sister is among them the node is older than the species.
 
@@ -685,7 +692,7 @@ treeio::write.beast(annotated_chrono, file = "9_Visualization/figures/annotated_
 > The same files are in the [`extended_trees/`](https://github.com/beeamerino/PhyloCactus/tree/master/extended_trees) directory of the repository: [Figure_9_Chronogram_Extended.pdf](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/Figure_9_Chronogram_Extended.pdf) and [annotated_chronogram.tree](https://raw.githubusercontent.com/beeamerino/PhyloCactus/master/extended_trees/annotated_chronogram.tree).
 
 
-#### Figure 10 
+#### Figure 10
 
 The species record joins the checklist, the supermatrix and the tree, which do not hold the same species. Figure 10 places every species of the record in one category, and the categories are the bases of the figures that follow: Figures 11, 12 and 14 to 17 count the species sampled and dated in the tree, and Figure 13 counts accepted species without sequence data.
 
@@ -707,7 +714,7 @@ p10
 
 #### Figure 11
 
-Figure 11 gives the conservation status of the species in the tree. Of the 839 assessed species, 221 (26.3%) are threatened (CR, EN or VU). Among the accepted species without sequence data, 266 have an assessment and 102 of them (38.3%) are threatened, so threatened species make up a larger share of what is missing from the tree than of what it contains
+Figure 11 gives the conservation status of the species in the tree. Of the 839 assessed species, 221 (26.3%) are threatened (CR, EN or VU). Among the accepted species without sequence data, 266 have an assessment and 102 of them (38.3%) are threatened, so threatened species make up a larger share of what is missing from the tree than of what it contains.
 
 ```{r figure_11_iucn_categories, eval = has_data, fig.cap = "**Figure 11.** IUCN Red List category of the 839 ingroup species of the tree that have an assessment; the other 341 of the 1,180 have none and are not shown. LC, least concern (532); EN, endangered (94); VU, vulnerable (76); CR, critically endangered (51); DD, data deficient (51); NT, near threatened (35). Colours of the IUCN Red List categories."}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {
@@ -871,7 +878,7 @@ if (any(iucn_classes$field == "habitat")) {
 
 ## Conclusion
 
-This tutorial produced the species registry, the conservation tables, and the figures of the dataset, the tree and the chronogram.
+This tutorial produced the species record, the conservation tables, and the figures of the dataset, the tree and the chronogram.
 
 Tutorial 4 compares the tree with published phylogenies of Cactaceae using Robinson-Foulds distances and multidimensional scaling of tree space.
 
@@ -881,5 +888,5 @@ Tutorial 4 compares the tree with published phylogenies of Cactaceae using Robin
 
 - Gearty & Chamberlain, 2025. rredlist: 'IUCN' Red List Client. R package version 1.1.1. <https://doi.org/10.32614/CRAN.package.rredlist>
 - Isaac *et al*., 2007. Mammals on the EDGE: conservation priorities based on threat and phylogeny. *PLoS ONE*, 2(3), e296. <https://doi.org/10.1371/journal.pone.0000296>
-- IUCN 2026. *The IUCN Red List of Threatened Species*. Version 2026-1. Accessed 2026-10-15. <https://www.iucnredlist.org>
+- IUCN, 2026. *The IUCN Red List of Threatened Species*. Version 2026-1. Accessed 2026-10-15. <https://www.iucnredlist.org>
 - Korotkova *et al*., 2021. Cactaceae at Caryophyllales.org – a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>

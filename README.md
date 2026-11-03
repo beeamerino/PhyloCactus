@@ -27,7 +27,7 @@ The workflow comprises fourteen modules grouped in five stages.
 ![PhyloCactus Workflow Architecture](man/figures/Fig1_PhyloCactus_Workflow.png)
 
 1.  **Stage 1: Data Assembly and Preparation (Modules 1 to 6)**\
-    Retrieves orthologous sequence clusters from GenBank by similarity-based clustering with `phylotaR`, which reduces the dependence on locus annotations. Aligns each locus with `MAFFT` and masks unreliable alignment columns with `DECIPHER`. Check species names against the Caryophyllales.org checklist (Korotkova *et al*., 2021) by matching them to accepted names only. Finally, realigns ingroup (Cactaceae) and outgroup (*Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*, *Talinum*, *Talinella*) sequences jointly, and concatenates the loci into a partitioned supermatrix.
+    Retrieves orthologous sequence clusters from GenBank by similarity-based clustering with `phylotaR`, which reduces the dependence on locus annotations. Aligns each locus with `MAFFT` and masks unreliable alignment columns with `DECIPHER`. Checks species names against the Caryophyllales.org checklist (Korotkova *et al*., 2021) by matching them to accepted names only. Finally, realigns ingroup (Cactaceae) and outgroup (*Portulaca*, *Anacampseros*, *Talinopsis*, *Grahamia*, *Talinum*, *Talinella*) sequences jointly, and concatenates the loci into a partitioned supermatrix.
 
 2.  **Stage 2: Phylogenetic Inference and Dating (Modules 7 to 10)**\
     Selects a substitution model for each partition with `ModelTest-NG` under the corrected Akaike information criterion (AICc). Infers the maximum-likelihood tree with `RAxML-NG` under a topological constraint (`cactus_constraints.csv`) that fixes 34 of the 1205 internal bipartitions of the reference tree. The constraint imposes the monophyly in 15 nodes of Cactaceae and 6 outgroup genera, and the branching order among Cactoideae and Opuntioideae; the remaining 1171 bipartitions are estimated. Node support is estimated with Felsenstein bootstrap proportions (FBP), with the transfer bootstrap expectation (TBE) as a secondary measure. Divergence times are estimated by penalized likelihood in `treePL` with one secondary calibration, a fixed age on the crown of the ACP clade (`calibrations_bounds.csv`), and their confidence intervals from temporal bootstrap replicates.
@@ -83,21 +83,21 @@ The following software must be installed and available on the system `PATH`, or 
 
 | Software | Version of the reference run | Purpose | Needed in | Citation |
 |:--------------|:--------------|:--------------|:--------------|:--------------|
-| [`BLAST+`](https://www.ncbi.nlm.nih.gov/books/NBK279690/) | 2.17.0 | Sequence similarity search for cluster identification | Tutorial 1 | Camacho *et al*., (2009) *BMC Bioinformatics* |
-| [`MAFFT`](https://mafft.cbrc.jp/alignment/software/) | 7.526 | Multiple sequence alignment | Tutorials 1 and 5 | Katoh & Standley, (2013) *Mol. Biol. Evol.* |
-| [`ModelTest-NG`](https://github.com/ddarriba/modeltest) | 0.1.7 | Substitution model selection for partitioned data | Tutorial 2 | Darriba *et al*., (2020) *Mol. Biol. Evol.* |
-| [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | 1.2.2 | Constrained maximum-likelihood inference and bootstrap support | Tutorial 2 | Kozlov *et al*., (2019) *Bioinformatics* |
-| [`treePL`](https://github.com/blackrim/treePL) | build 2022.04.06 of brewsci/bio | Penalized likelihood divergence time estimation | Tutorial 2 | Smith & O'Meara, (2012) *Bioinformatics* |
-| [`TreeAnnotator`](https://www.beast2.org/treeannotator/) | 2.7.7 (BEAST 2.7) | Summary of the dated replicates; run outside the package | Tutorial 2 | Bouckaert *et al*., (2019) *PLoS Comput. Biol.* |
-| [`fastp`](https://github.com/OpenGene/fastp) | 1.3.7 | Read trimming before organelle assembly (identification from Illumina reads only) | Tutorials 5 and 6 | Chen *et al*., (2018) *Bioinformatics* |
-| [`GetOrganelle`](https://github.com/Kinggerm/GetOrganelle) | 1.7.7.1 | Assembly of the plastome and nuclear ribosomal DNA from reads (identification from Illumina reads only) | Tutorials 5 and 6 | Jin *et al*., (2020) *Genome Biol.* |
-| [`minimap2`](https://github.com/lh3/minimap2) | 2.31-r1302 | Mapping of the library loci onto an assembly (identification from an assembly only) | Tutorials 5 and 6 | Li, (2018) *Bioinformatics* |
-| [`samtools`](https://github.com/samtools/samtools) | 1.24 | Extraction of the mapped regions (identification from an assembly only) | Tutorials 5 and 6 | Danecek *et al*., (2021) *GigaScience* |
-| `ASTRAL-III`, with Java | not run by the reference run, which used the distributed summary tree | Optional species-tree summary of the published gene trees | Tutorial 4 (optional step) | Zhang *et al*., (2018) *BMC Bioinformatics* |
+| [`BLAST+`](https://www.ncbi.nlm.nih.gov/books/NBK279690/) | 2.17.0 | Sequence similarity search for cluster identification | Tutorial 1 | Camacho *et al*. (2009) *BMC Bioinformatics* |
+| [`MAFFT`](https://mafft.cbrc.jp/alignment/software/) | 7.526 | Multiple sequence alignment | Tutorials 1 and 5 | Katoh & Standley (2013) *Mol. Biol. Evol.* |
+| [`ModelTest-NG`](https://github.com/ddarriba/modeltest) | 0.1.7 | Substitution model selection for partitioned data | Tutorial 2 | Darriba *et al*. (2020) *Mol. Biol. Evol.* |
+| [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | 1.2.2 | Constrained maximum-likelihood inference and bootstrap support | Tutorial 2 | Kozlov *et al*. (2019) *Bioinformatics* |
+| [`treePL`](https://github.com/blackrim/treePL) | build 2022.04.06 of brewsci/bio | Penalized likelihood divergence time estimation | Tutorial 2 | Smith & O'Meara (2012) *Bioinformatics* |
+| [`TreeAnnotator`](https://www.beast2.org/treeannotator/) | 2.7.7 (BEAST 2.7) | Summary of the dated replicates; run outside the package | Tutorial 2 | Bouckaert *et al*. (2019) *PLoS Comput. Biol.* |
+| [`fastp`](https://github.com/OpenGene/fastp) | 1.3.7 | Read trimming before organelle assembly (identification from Illumina reads only) | Tutorials 5 and 6 | Chen *et al*. (2018) *Bioinformatics* |
+| [`GetOrganelle`](https://github.com/Kinggerm/GetOrganelle) | 1.7.7.1 | Assembly of the plastome and nuclear ribosomal DNA from reads (identification from Illumina reads only) | Tutorials 5 and 6 | Jin *et al*. (2020) *Genome Biol.* |
+| [`minimap2`](https://github.com/lh3/minimap2) | 2.31-r1302 | Mapping of the library loci onto an assembly (identification from an assembly only) | Tutorials 5 and 6 | Li (2018) *Bioinformatics* |
+| [`samtools`](https://github.com/samtools/samtools) | 1.24 | Extraction of the mapped regions (identification from an assembly only) | Tutorials 5 and 6 | Danecek *et al*. (2021) *GigaScience* |
+| `ASTRAL-III`, with Java | not run by the reference run, which used the distributed summary tree | Optional species-tree summary of the published gene trees | Tutorial 4 (optional step) | Zhang *et al*. (2018) *BMC Bioinformatics* |
 
 ## Data Obtained by the User
 
-The checklist of Cactaceae of Caryophyllales.org (Korotkova *et al*. 2021) is not distributed with the package. Request it from the team of Caryophyllales.org (<https://caryophyllales.org>) and set the path of the Excel workbook in `~/.Renviron` as `PHYLOCACTUS_CHECKLIST`. `phylocactus_checklist()` returns it to every module that reads the checklist.
+The checklist of Cactaceae of Caryophyllales.org is not distributed with the package. Request it from the team of Caryophyllales.org (<https://caryophyllales.org>) and set the path of the Excel workbook in `~/.Renviron` as `PHYLOCACTUS_CHECKLIST`. `phylocactus_checklist()` returns it to every module that reads the checklist.
 
 The IUCN Red List assessments of Tutorial 3 are retrieved with the user's own token (`IUCN_REDLIST_KEY`), and the four published trees compared in Tutorial 4 are read from the folder in `PHYLOCACTUS_REFERENCE_TREES` (sources in Tutorial 4). The package distributes the IUCN Red List category of each species and counts by country, threat class and habitat class, not the assessments or their occurrences.
 

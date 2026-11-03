@@ -199,7 +199,7 @@ plot_barcoding_identification(system.file("extdata", "barcoding_example_GCA_0243
 
 ## Example 9. Paired Illumina Reads
 
-`SRR26398994`, a genome skim of *Opuntia comonduensis* (ENA, about 0.56 GB). The plastome and the nuclear ribosomal DNA are assembled with `fastp` and GetOrganelle, then identified locus by locus. The specie is not in the library.
+`SRR26398994`, a genome skim of *Opuntia comonduensis* (ENA, about 0.56 GB). The plastome and the nuclear ribosomal DNA are assembled with `fastp` and GetOrganelle, then identified locus by locus. The species is not in the library.
 
 ```{r, eval = FALSE}
 ena <- utils::read.delim(paste0("https://www.ebi.ac.uk/ena/portal/api/filereport?accession=SRR26398994",

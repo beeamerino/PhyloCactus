@@ -1,7 +1,8 @@
 # ------------------------------------------------------------------------------
 # Module 14, molecular identification (11_barcoding/7_classifier/), step 7 in chunks. PhyloCactus 0.5.0.
 #
-# The full IdTaxa run is about 34 hours of one core and runs on a cluster as a
+# On the library of 15 loci the IdTaxa run took 126 core-hours summed over its tasks, and it runs
+# on a cluster as a
 # job array: the folds are dealt to N chunks, each chunk is one task, and a last job merges the chunk
 # tables into the tables a single run would have written, byte for byte, or refuses.
 # ------------------------------------------------------------------------------

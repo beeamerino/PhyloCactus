@@ -18,9 +18,9 @@ knitr::opts_chunk$set(
 
 ## Abstract
 
-This tutorial compares the tree inferred in Tutorials 1 and 2 with four published phylogenies of Cactaceae. Comparison with independent trees shows which relationships are shared and which differ.
+This tutorial compares the tree inferred in Tutorials 1 and 2 with four published phylogenies of Cactaceae. Comparison with published trees shows which relationships are shared and which differ.
 
-The reference trees are those of Amaral *et al*., (2022), Thompson *et al*., (2024), Zuntini *et al*., (2024) and de Vos *et al*., (2025). The last two are based on hundreds of nuclear genes.
+The reference trees are those of Amaral *et al*. (2022), Thompson *et al*. (2024), Zuntini *et al*. (2024) and de Vos *et al*. (2025). The last two are based on hundreds of nuclear genes.
 
 The trees are compared with the Robinson-Foulds distance (Robinson & Foulds, 1981) and the Different Phylogenetic Information distance (Smith, 2020), and the distances are projected into tree space by multidimensional scaling (MDS).
 
@@ -30,7 +30,7 @@ The trees are compared with the Robinson-Foulds distance (Robinson & Foulds, 198
 
 #### Reference Trees
 
-The four reference trees are those of Amaral *et al*., (2022), Thompson *et al*., (2024) and Zuntini *et al*., (2024), and the species tree that de Vos *et al*., (2025) estimated with `ASTRAL-III` from their gene trees.
+The four reference trees are those of Amaral *et al*. (2022), Thompson *et al*. (2024) and Zuntini *et al*. (2024), and the species tree that de Vos *et al*. (2025) estimated with `ASTRAL-III` from their gene trees.
 
 The user obtains each tree from its source, saves the four in one folder under the names below, and sets the path of the folder in `~/.Renviron` as `PHYLOCACTUS_REFERENCE_TREES`.
 The comparison also reads the checklist of Cactaceae (Korotkova *et al*. 2021) from the local path in `PHYLOCACTUS_CHECKLIST` (`phylocactus_checklist()`; Tutorial 1).
@@ -58,7 +58,7 @@ ape::write.tree(zuntini, file.path(Sys.getenv("PHYLOCACTUS_REFERENCE_TREES"), "r
 #### Species Tree from the Gene Trees of de Vos *et al*. (2025)
 
 Gene trees estimated from multilocus and target-capture data often disagree.
-Part of this discordance has biological causes, such as incomplete lineage sorting and hybridization (Kubatko & Degnan, 2007).
+Part of this discordance has biological causes, such as incomplete lineage sorting (Kubatko & Degnan, 2007) and hybridization.
 
 `ASTRAL-III` (Zhang *et al*., 2018) estimates a species tree from a set of unrooted gene trees under the multispecies coalescent, by finding the species tree that shares the largest number of quartets with the gene trees.
 The `ASTRAL-III` Java archive (`.jar`) must be downloaded separately.
@@ -85,7 +85,7 @@ metadata_file <- Sys.getenv("DEVOS_METADATA_PATH")
 
 #### Running `ASTRAL-III`
 
-de Vos *et al*., (2025) sequenced the Angiosperms353 loci. The reference tree used here is the `ASTRAL-III` species tree the study published (`QC.Species_tree_astral.tree`, Online Resource 4), whose terminals carry species names. It can be estimated again from their gene trees, after the tip labels are converted to species names with the sample metadata of the study.
+de Vos *et al*. (2025) sequenced the Angiosperms353 loci. The reference tree used here is the `ASTRAL-III` species tree the study published (`QC.Species_tree_astral.tree`, Online Resource 4), whose terminals carry species names. It can be estimated again from their gene trees, after the tip labels are converted to species names with the sample metadata of the study.
 
 The chunk below renames the tips of the gene trees, writes them to a file, and runs `ASTRAL-III`.
 With `run_astral_locally <- FALSE`, the default, it copies the species tree saved in the folder of reference trees instead.
@@ -155,7 +155,7 @@ if (run_astral_locally && nzchar(astral_jar) && file.exists(astral_jar) &&
 ### Topological Comparison
 
 The focal tree is the chronogram from Module 10, whose topology is that of the maximum-likelihood tree (all 1205 bipartitions shared).
-`validate_phylogenies()` restricts every tree to Cactaceae and to the names accepted in the checklist (Korotkova *et al*. 2021), then computes pairwise distances on four taxon sets:
+`validate_phylogenies()` restricts every tree to Cactaceae and to the names accepted in the checklist, then computes pairwise distances on four taxon sets:
 
 - **A1:** species shared by all trees
 - **A2:** species shared by the focal tree and the trees of Thompson *et al*. (2024) and Amaral *et al*. (2022)
@@ -169,7 +169,7 @@ The distance matrix is projected onto two dimensions by classical MDS; trees tha
 The Module 10 chronogram is rooted on Talinaceae, but the family filter removes all terminals outside Cactaceae, and *Leuenbergeria* is sister to the rest of the family in the focal tree.
 The genus can be changed with `rooting_genus`; trees without it are left unrooted and flagged in `SUPP_rooting_summary`.
 
-**The constraint.** The focal tree was inferred under the topological constraint of Module 8 (Tutorial 2), so part of its agreement with each reference is imposed by the constraint and not found by the data. On each shared taxon set, 12 to 17 of the bipartitions the focal tree shares with a reference are imposed by the constraint: 27 to 37 % of the shared bipartitions in the small sets A1 and A4, where the deep splits weigh most, and 5 to 8 % in the large sets of Thompson *et al*., (2024) and Amaral *et al*., (2022). The table below gives, for the reference run, the published RF beside the RF without the constrained bipartitions, removed from both trees of the pair. Every distance rises, by 0.010 to 0.100. For example, the RF of A1 against Zuntini *et al*., (2024) rises from 0.254 to 0.312. The order of the references by distance does not change in A1, A2 and A3, and in A4 Zuntini *et al*., (2024) and Thompson *et al*., (2024) exchange places (0.470 and 0.467). Tutorial 2 weighs the constrained bipartitions absent from each reference by the support of the reference clades that contradict them: the two nuclear trees contradict none at the level of a tribe with support, while Amaral *et al*., (2022) contradicts two relationships at that level with support, Tephrocacteae with Opuntieae (ultrafast bootstrap 100) and core Cactoideae I with II (99), and places Rhipsalideae outside the rest of core Cactoideae at ultrafast bootstrap 87, below the 95 at which the documentation of IQ-TREE advises relying on that measure (Minh *et al*., 2013; Hoang *et al*., 2018).
+**The constraint.** The focal tree was inferred under the topological constraint of Module 8 (Tutorial 2), so part of its agreement with each reference is imposed by the constraint and not found by the data. On each shared taxon set, 12 to 17 of the bipartitions the focal tree shares with a reference are imposed by the constraint: 27 to 37 % of the shared bipartitions in the small sets A1 and A4, where the deep splits weigh most, and 5 to 8 % in the large sets of Thompson *et al*. (2024) and Amaral *et al*. (2022). The table below gives, for the reference run, the published RF beside the RF without the constrained bipartitions, removed from both trees of the pair. Every distance rises, by 0.010 to 0.100. For example, the RF of A1 against Zuntini *et al*. (2024) rises from 0.254 to 0.312. The order of the references by distance does not change in A1, A2 and A3, and in A4 Zuntini *et al*. (2024) and Thompson *et al*. (2024) exchange places (0.470 and 0.467). Tutorial 2 weighs the constrained bipartitions absent from each reference by the support of the reference clades that contradict them: the two nuclear trees contradict none at the level of a tribe with support, while Amaral *et al*. (2022) contradicts two relationships at that level with support, Tephrocacteae with Opuntieae (ultrafast bootstrap 100) and core Cactoideae I with II (99), and places Rhipsalideae outside the rest of core Cactoideae at ultrafast bootstrap 87, below the 95 at which the documentation of IQ-TREE advises relying on that measure (Minh *et al*., 2013; Hoang *et al*., 2018).
 
 | Set | Reference | Shared terminals | Imposed and in the reference | RF | RF without the constrained bipartitions |
 |---|---|---|---|---|---|
@@ -188,12 +188,12 @@ The genus can be changed with `rooting_genus`; trees without it are left unroote
 | A4 | Amaral | 78 | 14 | 0.493 | 0.593 |
 | A4 | de Vos | 78 | 14 | 0.360 | 0.424 |
 
-**What each reference can test.** The tree of Zuntini *et al*., (2024) is built on a constrained backbone of at most five samples per family, so its deep relationships within Cactaceae are not an independent test of the constraint (Tutorial 2). The tree of Thompson *et al*., (2024) carries no support values, and its root is set at 37.24 Ma, the upper end of the 95 % HPD interval of the Cactaceae crown in Ramírez-Barahona *et al*., (2020), so its ages are not independent of the source that anchors the chronogram of this package. It is a comparison tree only, and a distance to it says nothing on the support of a conflict.
-The tree of Amaral *et al*., (2022) was inferred from GenBank sequences mined with `phylotaR`, the source of this package too, aligned with MAFFT, concatenated and analysed with IQ-TREE 2.1 under constraints on core Cactoideae and on Cacteae, with five outgroup species. The tree used here is that of their matrix with up to 80 % missing data (`Tree_80MD.tre`, 921 species after their filtering), chosen by the authors among matrices with 40, 60 and 80 % missing data. Its supports are ultrafast bootstrap values of IQ-TREE 2, which are not on the scale of the standard bootstrap. It shares its source of data with the focal tree and is not an independent test of it.
+**What each reference can test.** The tree of Zuntini *et al*. (2024) is built on a constrained backbone of at most five samples per family, so its deep relationships within Cactaceae are not an independent test of the constraint (Tutorial 2). The tree of Thompson *et al*. (2024) carries no support values, and its root is set at 37.24 Ma, the upper end of the 95 % HPD interval of the Cactaceae crown in Ramírez-Barahona *et al*. (2020), so its ages are not independent of calibration scheme 2 (Tutorial 2, Module 10). It is a comparison tree only, and a distance to it says nothing on the support of a conflict.
+The tree of Amaral *et al*. (2022) was inferred from GenBank sequences mined with `phylotaR`, the source of this package too, aligned with MAFFT, concatenated and analysed with IQ-TREE 2.1 under constraints on core Cactoideae and on Cacteae, with five outgroup species. The tree used here is that of their matrix with up to 80 % missing data (`Tree_80MD.tre`, 921 species after their filtering), chosen by the authors among matrices with 40, 60 and 80 % missing data. Its supports are ultrafast bootstrap values of IQ-TREE 2, which are not on the scale of the standard bootstrap. It shares its source of data with the focal tree and is not an independent test of it.
 
-**Trees compared.** The four reference trees are read from the folder in `PHYLOCACTUS_REFERENCE_TREES`. The focal tree is the chronogram produced in Module 10, `8_Dating/dated_summary_hpd.tree`. 
+**Trees compared.** The four reference trees are read from the folder in `PHYLOCACTUS_REFERENCE_TREES`. The focal tree is the chronogram produced in Module 10, `8_Dating/Zuntini2024_young/dated_summary_hpd.tree`. 
 
-The chunk below runs the comparison on the user's machine. Figure 1 and Table 1 are then drawn from the tree-space coordinates and the pairwise distances of the reference run, `plot_tree_space()` draws the figure that `validate_phylogenies()` returns.
+The chunk below runs the comparison on the user's machine. Figure 1 and Table 1 are then drawn from the tree-space coordinates and the pairwise distances of the reference run; `plot_tree_space()` draws the figure that `validate_phylogenies()` returns.
 
 ```{r, eval = FALSE}
 library(PhyloCactus)
@@ -248,7 +248,7 @@ plot_tree_space(tree_space, metric = "RF")
 ```{r, echo=FALSE}
 # Pairwise distances of the reference run (TABLE_pairwise_tree_distances_main.csv of Module 13)
 dist_table <- read.csv(system.file("extdata", "phylocactus_table_tree_distances.csv", package = "PhyloCactus"))
-knitr::kable(head(dist_table), caption = "Table 1. Pairwise tree distances: normalized RF for each pair of trees and taxon set (first rows).")
+knitr::kable(head(dist_table), caption = "Table 1. Pairwise tree distances: normalized RF and DPI for each pair of trees and taxon set (first rows).")
 ```
 
 `TABLE_pairwise_tree_distances_main.csv` lists the distances for every pair of trees and every taxon set, and `FIG_tree_space_main.pdf` shows the tree-space projections.
@@ -256,9 +256,9 @@ The distances summarize overall agreement between topologies; they do not identi
 
 ### Monophyly of the Genera
 
-Of the 102 genera of Cactaceae with two species or more in the tree, 39 are not monophyletic in the maximum-likelihood tree of the reference run (`phylocactus_ml_tree.tree`, rooted on Talinaceae). For 27 of them the non-monophyly rests only on nodes under FBP 70: once those nodes are collapsed, the genus is compatible with the tree, so its split is a soft polytomy, a lack of signal, which the incomplete sampling of the genus and the few, little-variable loci probably explain, and not evidence against the genus. The largest are *Mammillaria* (118 species, 52 of them single-locus), *Pilosocereus* (37 species in 8 loci, whose best-supported contradicting clade has FBP 7), *Selenicereus*, *Cochemiea* and *Parodia*.
+Of the 102 genera of Cactaceae with two species or more in the tree, 39 are not monophyletic in the maximum-likelihood tree of the reference run (`phylocactus_ml_tree.tree`, rooted on Talinaceae). For 27 of them the non-monophyly rests only on nodes under FBP 70: once those nodes are collapsed, the genus is compatible with the tree, so its split is a soft polytomy, a lack of signal, which the incomplete sampling of the genus and the few, little-variable loci probably explain, and not evidence against the genus. The largest are *Mammillaria* (118 species, 52 of them single-locus), *Pilosocereus* (37 species in 8 fragments, whose best-supported contradicting clade has FBP 7), *Selenicereus*, *Cochemiea* and *Parodia*.
 
-The other 12 genra are contradicted by at least one unconstrained clade of FBP 70 or more, and in each case the clade places one or a few species of another accepted genus inside the genus, or a few of its species inside another: *Pachycereus* with *Carnegiea* (FBP 97, a clade of two terminals), *Eriosyce* with *Rimacactus* (96), *Cephalocereus* and *Lophocereus* with each other (89 and 72), *Espostoa* with *Rauhocereus* (87), *Rapicactus* and *Acharagma* with each other (87 and 85), *Homalocephala* with *Astrophytum* and *Echinocactus* (85), *Lophophora* with *Obregonia* (72), *Matucana* with *Borzicactus* (71), and *Echinopsis* and *Chamaecereus* with each other (70). In this tree each conflict rests on few terminals, and this table does not separate a question of generic delimitation from the identification of the sequenced vouchers or from the composite terminals of Tutorial 1. Without the 214 single-locus terminals, 32 genera stay non-monophyletic, 4 become monophyletic (*Homalocephala*, *Cochemiea*, *Parodia*, *Rebutia*) and 3 keep fewer than two species.
+The other 12 genera are contradicted by at least one unconstrained clade of FBP 70 or more, and in each case the clade places one or a few species of another accepted genus inside the genus, or a few of its species inside another: *Pachycereus* with *Carnegiea* (FBP 97, a clade of two terminals), *Eriosyce* with *Rimacactus* (96), *Cephalocereus* and *Lophocereus* with each other (89 and 72), *Espostoa* with *Rauhocereus* (87), *Rapicactus* and *Acharagma* with each other (87 and 85), *Homalocephala* with *Astrophytum* and *Echinocactus* (85), *Lophophora* with *Obregonia* (72), *Matucana* with *Borzicactus* (71), and *Echinopsis* and *Chamaecereus* with each other (70). In this tree each conflict rests on few terminals, and this table does not separate a question of generic delimitation from the identification of the sequenced vouchers or from the composite terminals of Tutorial 1. Without the 214 single-locus terminals, 32 genera stay non-monophyletic, 4 become monophyletic (*Homalocephala*, *Cochemiea*, *Parodia*, *Rebutia*) and 3 keep fewer than two species.
 
 "Fragments" counts the maximal clades made only of species of the genus; "Highest FBP of a contradicting clade" is the support of the best-supported unconstrained clade that holds part of the genus and other terminals, and the next column names the other genera in it.
 
@@ -314,7 +314,7 @@ Stage 5 of the package, molecular identification by DNA barcoding (Module 14), b
 
 ## References
 
-- Amaral *et al*. 2022., Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. *Biological Conservation*, 273, 109677. <https://doi.org/10.1016/j.biocon.2022.109677>
+- Amaral *et al*., 2022. Spatial patterns of evolutionary diversity in Cactaceae show low ecological representation within protected areas. *Biological Conservation*, 273, 109677. <https://doi.org/10.1016/j.biocon.2022.109677>
 - de Vos *et al*., 2025. Phylogenomics and classification of Cactaceae based on hundreds of nuclear genes. *Plant Systematics and Evolution*, 311(5), 28. <https://doi.org/10.1007/s00606-025-01948-z>
 - Hoang *et al*., 2018. UFBoot2: improving the ultrafast bootstrap approximation. *Molecular Biology and Evolution*, 35(2), 518–522. <https://doi.org/10.1093/molbev/msx281>
 - Korotkova *et al*., 2021. Cactaceae at Caryophyllales.org – a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
@@ -322,7 +322,7 @@ Stage 5 of the package, molecular identification by DNA barcoding (Module 14), b
 - Minh *et al*., 2013. Ultrafast approximation for phylogenetic bootstrap. *Molecular Biology and Evolution*, 30(5), 1188–1195. <https://doi.org/10.1093/molbev/mst024>
 - Ramírez-Barahona *et al*., 2020. The delayed and geographically heterogeneous diversification of flowering plant families. *Nature Ecology & Evolution*, 4(9), 1232–1238. <https://doi.org/10.1038/s41559-020-1241-3>
 - Robinson & Foulds, 1981. Comparison of phylogenetic trees. *Mathematical Biosciences*, 53(1–2), 131–147. <https://doi.org/10.1016/0025-5564(81)90043-2>
-- Smith 2020. Information theoretic generalized Robinson–Foulds metrics for comparing phylogenetic trees. *Bioinformatics*, 36(20), 5007–5013. <https://doi.org/10.1093/bioinformatics/btaa614>
+- Smith, 2020. Information theoretic generalized Robinson–Foulds metrics for comparing phylogenetic trees. *Bioinformatics*, 36(20), 5007–5013. <https://doi.org/10.1093/bioinformatics/btaa614>
 - Thompson *et al*., 2024. Identifying the multiple drivers of cactus diversification. *Nature Communications*, 15(1), 7282. <https://doi.org/10.1038/s41467-024-51666-2>
 - Zhang *et al*., 2018. ASTRAL-III: polynomial time species tree reconstruction from partially resolved gene trees. *BMC Bioinformatics*, 19(Suppl 6), 153. <https://doi.org/10.1186/s12859-018-2129-y>
 - Zuntini *et al*., 2024. Phylogenomics and the rise of the angiosperms. *Nature*, 629(8013), 843–850. <https://doi.org/10.1038/s41586-024-07324-0>

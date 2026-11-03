@@ -29,7 +29,7 @@ setwd(tutorial_dir)
 # A notification that cannot be sent is reported and ignored, so it never fails a run.
 notify_email <- FALSE
 
-# IdTaxa retrains once per fold, which on the library of 15 loci took 126 hours summed over the
+# IdTaxa retrains once per fold, which on the library of 15 loci took 126 core-hours summed over the
 # tasks: it is run once, on a computing cluster, on the final library (generate_barcoding_job_scripts() and
 # merge_barcoding_chunks(); the outgroup control with run_barcoding_controls(method = "idtaxa",
 # controls = "CN2")),

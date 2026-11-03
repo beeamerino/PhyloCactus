@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 Multilocus datasets assembled from GenBank inherit the heterogeneity of decades of deposition: inconsistent locus annotations, duplicated accessions, records without vouchers, orthographic variants and nomenclatural synonyms. Converting these records into a phylogenetic matrix requires taxonomic curation against an accepted checklist (Korotkova *et al*., 2021), and quality control of each alignment. The difficulty increases in plant lineages that diversified recently and rapidly, where low plastid divergence, incomplete lineage sorting (ILS) and reticulate evolution increase the risk of erroneous orthology assessment and of alignment error.
 
-**Cactaceae**, one of the largest succulent radiations of the Neotropics combine these properties, and their GenBank record is irregular in taxonomic and locus coverage. `PhyloCactus` was developed on this family and implements its assembly and analysis as a reproducible workflow.
+**Cactaceae**, one of the largest succulent radiations of the Neotropics, combine these properties, and their GenBank record is irregular in taxonomic and locus coverage. `PhyloCactus` was developed on this family and implements its assembly and analysis as a reproducible workflow.
 
 ## Design
 
@@ -143,17 +143,17 @@ The following software must be installed separately and available on the system 
 
 | Software | Version of the reference run | Purpose | Needed in | Citation |
 |:--------------|:--------------|:--------------|:--------------|:--------------|
-| [`BLAST+`](https://www.ncbi.nlm.nih.gov/books/NBK279690/) | 2.17.0 | Sequence similarity search for cluster identification | Tutorial 1 | Camacho *et al*., (2009) *BMC Bioinformatics* |
-| [`MAFFT`](https://mafft.cbrc.jp/alignment/software/) | 7.526 | Multiple sequence alignment | Tutorials 1 and 5 | Katoh & Standley, (2013) *Mol. Biol. Evol.* |
-| [`ModelTest-NG`](https://github.com/ddarriba/modeltest) | 0.1.7 | Substitution model selection for partitioned data | Tutorial 2 | Darriba *et al*., (2020) *Mol. Biol. Evol.* |
-| [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | 1.2.2 | Constrained maximum-likelihood inference and bootstrap support | Tutorial 2 | Kozlov *et al*., (2019) *Bioinformatics* |
-| [`treePL`](https://github.com/blackrim/treePL) | build 2022.04.06 of brewsci/bio | Penalized likelihood divergence time estimation | Tutorial 2 | Smith & O'Meara, (2012) *Bioinformatics* |
-| [`TreeAnnotator`](https://www.beast2.org/treeannotator/) | 2.7.7 (BEAST 2.7) | Summary of the dated replicates; run outside the package | Tutorial 2 | Bouckaert *et al*., (2019) *PLoS Comput. Biol.* |
-| [`fastp`](https://github.com/OpenGene/fastp) | 1.3.7 | Read trimming before organelle assembly (identification from Illumina reads only) | Tutorials 5 and 6 | Chen *et al*., (2018) *Bioinformatics* |
-| [`GetOrganelle`](https://github.com/Kinggerm/GetOrganelle) | 1.7.7.1 | Assembly of the plastome and nuclear ribosomal DNA from reads (identification from Illumina reads only) | Tutorials 5 and 6 | Jin *et al*., (2020) *Genome Biol.* |
-| [`minimap2`](https://github.com/lh3/minimap2) | 2.31-r1302 | Mapping of the library loci onto an assembly (identification from an assembly only) | Tutorials 5 and 6 | Li, (2018) *Bioinformatics* |
-| [`samtools`](https://github.com/samtools/samtools) | 1.24 | Extraction of the mapped regions (identification from an assembly only) | Tutorials 5 and 6 | Danecek *et al*., (2021) *GigaScience* |
-| `ASTRAL-III`, with Java | not run by the reference run, which used the distributed summary tree | Optional species-tree summary of the published gene trees | Tutorial 4 (optional step) | Zhang *et al*., (2018) *BMC Bioinformatics* |
+| [`BLAST+`](https://www.ncbi.nlm.nih.gov/books/NBK279690/) | 2.17.0 | Sequence similarity search for cluster identification | Tutorial 1 | Camacho *et al*. (2009) *BMC Bioinformatics* |
+| [`MAFFT`](https://mafft.cbrc.jp/alignment/software/) | 7.526 | Multiple sequence alignment | Tutorials 1 and 5 | Katoh & Standley (2013) *Mol. Biol. Evol.* |
+| [`ModelTest-NG`](https://github.com/ddarriba/modeltest) | 0.1.7 | Substitution model selection for partitioned data | Tutorial 2 | Darriba *et al*. (2020) *Mol. Biol. Evol.* |
+| [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | 1.2.2 | Constrained maximum-likelihood inference and bootstrap support | Tutorial 2 | Kozlov *et al*. (2019) *Bioinformatics* |
+| [`treePL`](https://github.com/blackrim/treePL) | build 2022.04.06 of brewsci/bio | Penalized likelihood divergence time estimation | Tutorial 2 | Smith & O'Meara (2012) *Bioinformatics* |
+| [`TreeAnnotator`](https://www.beast2.org/treeannotator/) | 2.7.7 (BEAST 2.7) | Summary of the dated replicates; run outside the package | Tutorial 2 | Bouckaert *et al*. (2019) *PLoS Comput. Biol.* |
+| [`fastp`](https://github.com/OpenGene/fastp) | 1.3.7 | Read trimming before organelle assembly (identification from Illumina reads only) | Tutorials 5 and 6 | Chen *et al*. (2018) *Bioinformatics* |
+| [`GetOrganelle`](https://github.com/Kinggerm/GetOrganelle) | 1.7.7.1 | Assembly of the plastome and nuclear ribosomal DNA from reads (identification from Illumina reads only) | Tutorials 5 and 6 | Jin *et al*. (2020) *Genome Biol.* |
+| [`minimap2`](https://github.com/lh3/minimap2) | 2.31-r1302 | Mapping of the library loci onto an assembly (identification from an assembly only) | Tutorials 5 and 6 | Li (2018) *Bioinformatics* |
+| [`samtools`](https://github.com/samtools/samtools) | 1.24 | Extraction of the mapped regions (identification from an assembly only) | Tutorials 5 and 6 | Danecek *et al*. (2021) *GigaScience* |
+| `ASTRAL-III`, with Java | not run by the reference run, which used the distributed summary tree | Optional species-tree summary of the published gene trees | Tutorial 4 (optional step) | Zhang *et al*. (2018) *BMC Bioinformatics* |
 
 ## Package Structure
 
