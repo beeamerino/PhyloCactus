@@ -162,6 +162,8 @@ if(length(existing_trees) > 1) {
     trees_mapping_list = existing_trees,
     checklist_csv = checklist_file,
     constraints_map = constraints_file,
+    min_tips = 4L,                    # Minimum number of shared tips for a pair of trees to be compared
+    pruning_strategy = "common_set",  # "common_set": MDS on the species shared by all trees; "pairwise" also possible
     rooting_genus = "Leuenbergeria",  # Genus that roots every tree after the family filter; change it here
     out_dir = "10_Validation"
   )
