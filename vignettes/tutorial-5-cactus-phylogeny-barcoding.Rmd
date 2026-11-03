@@ -22,7 +22,7 @@ Module 14 of `PhyloCactus`, the fifth stage of the workflow, builds a reference 
 It answers one question: given a sample of a cactus, to which genus and species does it belong, according to the loci the library holds, and how much can that answer be trusted?
 
 The answer is given locus by locus, in one of three states: a species (state 1), a genus without a species (state 2), or no answer (state 3, with its reason).
-Loci are never combined into one verdict; agreement or conflict between loci is reported as such.
+Loci are never combined into one verdict. Agreement or conflict between loci is reported as such.
 Module 14 identifies against a library of multilocus sequence data; it does not place a sample in a phylogeny.
 
 ## Complete Pipeline Execution Workflow
@@ -33,7 +33,7 @@ The script, `tutorial-5-cactus-phylogeny-barcoding.R`, runs the eleven steps in 
 file.edit(system.file("scripts", "tutorial-5-cactus-phylogeny-barcoding.R", package = "PhyloCactus"))
 ```
 
-Module 14 runs in four parts: a reference library built from the multilocus sequence data of the phylogeny (steps 1 to 4), its validation (steps 5 to 8), the thresholds and metrics read from that validation (steps 9 and 10), and the identification of a sample (step 11).
+Module 14 runs in four parts: a reference library built from the multilocus sequence data (steps 1 to 4), its validation (steps 5 to 8), the thresholds and metrics read from that validation (steps 9 and 10), and the identification of a sample (step 11).
 
 ```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 1.** Module 14, molecular identification, from the reference library to the answer for a sample. Steps are numbered as in this tutorial."}
 knitr::include_graphics("figures/Figure_TB8_barcoding_workflow.png")
@@ -43,8 +43,8 @@ knitr::include_graphics("figures/Figure_TB8_barcoding_workflow.png")
 
 Module 14 reads:
 
-- **The phylotaR workspace of the phylogeny** (`0_phylotaR_raw_Ingroup/`, Tutorial 1). The phylogeny and Module 14 read the same mining; Module 14 adds no download of sequences, only the GenBank metadata of the accessions the phylogeny's cache does not hold.
-- **The curated files of the package:** the target loci (`target_genes.txt`), the dictionary of locus names (`genes_map.csv`), the manual exclusions (`manual_exclusions_ingroup.csv`, which include 21 `ITS` records annotated in GenBank as pseudogenes) and the checklist of Cactaceae of Caryophyllales.org (Korotkova *et al*. 2021), against which every name is reconciled.
+- **The phylotaR workspace** (`0_phylotaR_raw_Ingroup/`, Tutorial 1). The phylogeny and Module 14 read the same mining. Module 14 adds no download of sequences, only the GenBank metadata of the accessions the phylogeny's cache does not hold.
+- **The curated files of the package:** the target loci (`target_genes.txt`), the dictionary of locus names (`genes_map.csv`), the manual exclusions (`manual_exclusions_ingroup.csv`, which include 21 `ITS` records annotated in GenBank as pseudogenes) and the checklist of Cactaceae of Caryophyllales.org (Korotkova *et al*. 2021), against which every name is checked.
 - **Own sequences, optional.** `own_dir = "0_own"` in step 1 adds the records of `0_own/`: a sample sheet (`SAMPLES.csv`: sample, species of the checklist of Korotkova *et al*. 2021, voucher, publication status) and one FASTA file per locus. What cannot enter is listed with its reason. The default, `own_dir = NULL`, builds the library from GenBank alone.
 
 The library is not distributed with the package: the user builds it with steps 1 to 4.
@@ -66,7 +66,8 @@ setwd(tutorial_dir)
 # A notification that cannot be sent is reported and ignored, so it never fails a run.
 notify_email <- FALSE
 
-# IdTaxa retrains once per fold, which on the whole library takes tens of core-hours: it is run
+# IdTaxa retrains once per fold, which on the library of 15 loci took 126 core-hours summed over the
+# tasks of the cluster: it is run
 # once, on a computing cluster, on the final library (generate_barcoding_job_scripts() and
 # merge_barcoding_chunks(); the outgroup control with run_barcoding_controls(method = "idtaxa",
 # controls = "CN2")),
@@ -114,7 +115,7 @@ assemble_barcoding_dataset(
 
 ### Step 2: Curation
 
-**`curate_barcoding_markers()`**. Each locus is aligned with `MAFFT`, put on one strand and masked with `DECIPHER`, with the parameters of the phylogeny's ingroup.
+**`curate_barcoding_markers()`**. Each locus is aligned with `MAFFT`, put on one strand and masked with `DECIPHER`.
 
 ```{r, eval = FALSE}
 curate_barcoding_markers(
@@ -166,29 +167,33 @@ The library of this version holds 15 loci: `atpB-rbcL`, `ITS`, `matK`, `ndhF-rpl
 Built from GenBank records, as a user builds it, it holds 7607 sequences of 1205 species in 139 genera; own sequences can be added through `own_dir` (step 1).
 In every locus most species hold a single sequence, which limits what a species answer can rest on.
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 2.** Alignments of `matK` and `ITS` in the library (the script draws one per locus)."}
-knitr::include_graphics(c("figures/Figure_TB1_alignment_matK.png", "figures/Figure_TB1_alignment_ITS.png"))
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 2.** Alignment of `matK`in the library."}
+knitr::include_graphics("figures/Figure_TB1_alignment_matK.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 3.** Presence of each locus in each species of the library, species ordered by genus."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 3.** Alignment of `ITS`in the library."}
+knitr::include_graphics("figures/Figure_TB1_alignment_ITS.png")
+```
+
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 4.** Presence of each locus in each species of the library, species ordered by genus."}
 knitr::include_graphics("figures/Figure_TB2_species_by_locus.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 4.** From assembly to library, per locus."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 5.** From assembly to library, per locus."}
 knitr::include_graphics("figures/Figure_TB3_funnel.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 5.** Lengths and replicates per locus."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 6.** Lengths and replicates per locus."}
 knitr::include_graphics("figures/Figure_TB4_lengths_and_replicates.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 6.** Taxonomic coverage of the library against the checklist (Korotkova et al. 2021)."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 7.** Taxonomic coverage of the library against the checklist (Korotkova et al. 2021)."}
 knitr::include_graphics("figures/Figure_TB7_taxonomic_coverage.png")
 ```
 
 ### Step 5: Validation Folds
 
-**`build_barcoding_folds()`**. Scheme E leaves one sequence out and asks for its species, which stays in the library; scheme G leaves a whole species out and asks for its genus. The folds are deterministic and checked for leakage.
+**`build_barcoding_folds()`**. `Scheme E` leaves one sequence out and asks for its species, which stays in the library. `Scheme G` leaves a whole species out and asks for its genus. The folds are deterministic and checked for leakage.
 
 ```{r, eval = FALSE}
 build_barcoding_folds(
@@ -214,7 +219,7 @@ analyze_barcode_gap(
 
 ### Step 7: Classification of the Folds
 
-**`classify_barcoding_folds()`**. Two classifiers: the nearest neighbour, with each query added to the training alignment of its fold by `MAFFT --add` (hours on a laptop, in parallel processes), and IdTaxa (Murali *et al*. 2018), which retrains once per fold and takes tens of core-hours. IdTaxa is run once, on a computing cluster, on the final library (`generate_barcoding_job_scripts()`, `merge_barcoding_chunks()`); the script reads its merged tables through the switch `idtaxa_tables` and never trains it.
+**`classify_barcoding_folds()`**. Two classifiers: the nearest neighbour, with each query added to the training alignment of its fold by `MAFFT --add` (3 h 14 min for the 15 loci on an Apple M2 Pro with 8 parallel processes), and IdTaxa (Murali *et al*., 2018), which retrains once per fold and took 126 core-hours on the cluster. IdTaxa is run once, on a computing cluster, on the final library (`generate_barcoding_job_scripts()`, `merge_barcoding_chunks()`); the script reads its merged tables through the switch `idtaxa_tables` and never trains it.
 
 ```{r, eval = FALSE}
 # The classifier of the internal validation of Module 14: exact leave-one-out over the distance matrix
@@ -232,8 +237,9 @@ classify_barcoding_folds(
 # gaps, oriented against the training set of its fold and added to it with MAFFT --add --keeplength,
 # one call per query. Writes the tables with the suffix _add and the running time per locus. The
 # folds are split among n_workers processes and merged into the same tables as one process would
-# write. Step 9 reads these tables. Measured on 2026-09-30, Apple M2 Pro, 8 workers, 11 417 queries:
-# 3 h 12 min, 24.7 hours summed over the processes, matK 61 % of them.
+# write. Step 9 reads these tables. Measured on 2026-10-13 on the library of 15 loci, Apple M2 Pro,
+# 8 workers, 11 180 queries of both schemes: 3 h 14 min, 24.1 hours summed over the processes,
+# matK 60 % of them.
 classify_barcoding_folds(
   library_dir = "11_barcoding/4_library",
   folds_dir = "11_barcoding/5_folds",
@@ -255,7 +261,7 @@ if (!is.null(idtaxa_tables)) {
 
 ### IdTaxa on a Computing Cluster
 
-IdTaxa retrains once per fold, so classifying every fold of the library with it takes tens of core-hours, and `LearnTaxa()` differs in floating point between machines: it is run once, on a computing cluster, and its merged tables are the result. **`generate_barcoding_job_scripts()`** writes the job array (one chunk of folds per task, one core each), the merge job, which runs **`merge_barcoding_chunks()`** once every task has finished, and `submit.sh`, which submits both (`bash submit.sh` on the cluster). The paths are those of the cluster. The outgroup control with IdTaxa is run there too, with `run_barcoding_controls(method = "idtaxa", controls = "CN2")`.
+IdTaxa retrains once per fold, so classifying every fold of the library with it took 126 core-hours on the library of 15 loci, and `LearnTaxa()` differs in floating point between machines: it is run once, on a computing cluster, and its merged tables are the result. **`generate_barcoding_job_scripts()`** writes the job array (one chunk of folds per task, one core each), the merge job, which runs **`merge_barcoding_chunks()`** once every task has finished, and `submit.sh`, which submits both (`bash submit.sh` on the cluster). The paths are those of the cluster. The outgroup control with IdTaxa is run there too, with `run_barcoding_controls(method = "idtaxa", controls = "CN2")`.
 
 ```{r, eval = FALSE}
 generate_barcoding_job_scripts(
@@ -271,11 +277,11 @@ generate_barcoding_job_scripts(
 )
 ```
 
-On an earlier library of 12 loci (26-09), the run of all loci took 54.6 core-hours in 88 tasks; the library of this version holds 15. When the merged tables are back, set `idtaxa_tables` in the Setup to their folder (here `11_barcoding/idtaxa_cluster`) and run steps 7 to 10 again: the blocks that read them copy the tables into steps 7 and 8, and steps 9 and 10 then include IdTaxa.
+On the library of 15 loci of this version, the run of all loci took 126 core-hours. When the merged tables are back, set `idtaxa_tables` in the Setup to their folder (here `11_barcoding/idtaxa_cluster`) and run steps 7 to 10 again: the blocks that read them copy the tables into steps 7 and 8, and steps 9 and 10 then include IdTaxa.
 
 ### Step 8: Negative Controls
 
-**`run_barcoding_controls()`** runs the controls before any accuracy is read. The label permutation (`controls = "CN1"`) asks whether the folds leak; the outgroup control (`"CN2"`) asks the library about sequences of the sister lineages (Anacampserotaceae, Portulacaceae, Talinaceae); the resubstitution control (`"CN3"`) measures the bias of classifying a sequence still in the library. IdTaxa rejects every comparable outgroup query; the rule of remoteness of the nearest neighbour rejects them in six loci but not in `ITS`, where cactus and outgroup distances overlap.
+**`run_barcoding_controls()`** runs the controls before any accuracy is read. The label permutation (`controls = "CN1"`) asks whether the folds leak. The outgroup control (`"CN2"`) asks the library about sequences of the sister lineages (Anacampserotaceae, Portulacaceae, Talinaceae). The resubstitution control (`"CN3"`) measures the bias of classifying a sequence still in the library. IdTaxa rejects every comparable outgroup query. The rule of remoteness of the nearest neighbour rejects them in six loci but not in `ITS`, where cactus and outgroup distances overlap.
 
 ```{r, eval = FALSE}
 # The outgroup control needs an outgroup, assembled from the raw phylotaR workspace of the outgroup with the filters
@@ -315,7 +321,7 @@ if (!is.null(idtaxa_tables)) {
 
 ### Step 9: Thresholds
 
-**`sweep_barcoding_threshold()`**. For the nearest neighbour, a threshold of remoteness per locus (quantile 0.99 of scheme G). For IdTaxa, the operating threshold is 60, DECIPHER's default, and a species threshold per locus is written for the identification (the quantile 0.95 of the species confidence of scheme G, never under 60, from 60 in `rbcL` to 91.6 in `trnS-trnG`). A species is named only above it. `rbcL` answers at genus rank only (argument `genus_only_loci` of the identification functions): on the library of this version its species answers were right in 11 of 34.
+**`sweep_barcoding_threshold()`**. For the nearest neighbour, a threshold of remoteness per locus (quantile 0.99 of `Scheme G`). For IdTaxa, the operating threshold is 60, DECIPHER's default, and a species threshold per locus is written for the identification. A species is named only above it. `rbcL` answers at genus rank only (argument `genus_only_loci` of the identification functions): on the library of this version its species answers were right in 11 of 34.
 
 ```{r, eval = FALSE}
 sweep_barcoding_threshold(
@@ -328,9 +334,9 @@ sweep_barcoding_threshold(
 )
 # IdTaxa: the curve runs over its confidence. The operating threshold is 60, DECIPHER's default,
 # and step 10 reads that row; the quantile 0.01 of the genus confidence of
-# scheme G is reported next to it, not used. The sweep also writes
+# Scheme G is reported next to it, not used. The sweep also writes
 # TABLE_barcoding_species_threshold_idtaxa.csv: for each locus, the quantile 0.95 of the species
-# confidence of scheme G (species absent from the library), never under 60. The identification of
+# confidence of Scheme G (species absent from the library), never under 60. The identification of
 # a user query names a species only above it; the validation stays at 60
 if (!is.null(idtaxa_tables)) {
   sweep_barcoding_threshold(
@@ -345,7 +351,7 @@ if (!is.null(idtaxa_tables)) {
 
 ### Step 10: Metrics
 
-**`summarise_barcoding_metrics()`**. Per locus and scheme: species correct, genus correct, wrong species, wrong genus and unassigned, never summed into one error, and precision and recall per class.
+**`summarise_barcoding_metrics()`**. Per locus and Scheme: species correct, genus correct, wrong species, wrong genus and unassigned.
 
 ```{r, eval = FALSE}
 summarise_barcoding_metrics(
@@ -357,18 +363,18 @@ summarise_barcoding_metrics(
 )
 ```
 
-The script then draws the figures of the library and its validation into `11_barcoding/figures/`: the alignment of each locus, species by locus, the funnel from assembly to library, lengths and replicates, accuracy against the sampling of each genus and against missing data, taxonomic coverage against the checklist (Korotkova *et al*. 2021), and the genera native to Chile against *Opuntia* and *Mammillaria*.
+The script then draws the figures of the library and its validation into `11_barcoding/figures/`: the alignment of each locus, species by locus, the funnel from assembly to library, lengths and replicates, accuracy against the sampling of each genus and against missing data, taxonomic coverage against the checklist, and the genera native to Chile against *Opuntia* and *Mammillaria*.
 The figures of the folds describe the library classifying its own sequences: they are more favourable than the identification of new samples (step 11 and Tutorial 6).
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 7.** Accuracy of the folds against the sampling of each genus."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 8.** Accuracy of the folds against the sampling of each genus."}
 knitr::include_graphics("figures/Figure_TB5_accuracy_against_sampling.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 8.** Accuracy of the folds against missing data."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 9.** Accuracy of the folds against missing data."}
 knitr::include_graphics("figures/Figure_TB6_accuracy_against_missing_data.png")
 ```
 
-```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 9.** Genera native to Chile against Opuntia and Mammillaria in the folds."}
+```{r, echo = FALSE, out.width = "100%", fig.cap = "**Figure 10.** Genera native to Chile against Opuntia and Mammillaria in the folds."}
 knitr::include_graphics("figures/Figure_TB9_chilean_genera.png")
 ```
 
@@ -403,9 +409,9 @@ print(utils::read.csv("11_barcoding/10_identify/TABLE_barcoding_identify_MN51761
 
 `identify_barcoding_query()` takes one or more sequences (FASTA, a GenBank flat file, a `DNAStringSet` or a character vector) and, for each locus of the library:
 
-1. finds the locus in the query by its 20-mers, on both strands, and crops it from a long query such as a plastome;
-2. cuts the region to the core of the locus, so that segments held by one or two references cannot name them;
-3. classifies it with IdTaxa trained on the whole library of the locus, and, when a genus is reached, again on the core of that genus;
+1. finds the locus in the query by its 20-mers, on both strands, and crops it from a long query such as a plastome.
+2. cuts the region to the core of the locus, so that segments held by one or two references cannot name them.
+3. classifies it with IdTaxa trained on the whole library of the locus, and, when a genus is reached, again on the core of that genus.
 4. returns state 1 only above the species threshold of the locus, state 2 when the genus confidence reaches 60, and state 3 otherwise, with its reason (`no_overlap`, `short_overlap` or `low_confidence`).
 
 A self-contained HTML report is written beside the table, with the answer per locus, the agreement between loci, the alternatives under the thresholds, the sampling of the genus in the library and the provenance of the run (input, software, library checksums).
@@ -447,8 +453,8 @@ print(utils::read.csv("11_barcoding/11_metrics/TABLE_barcoding_metrics_summary_n
 - **Wrong species.** Rare, not absent; [Tutorial 6](tutorial-6-cactus-barcoding-identification.html#how-well-this-version-identifies) gives the rates of this version for each kind of input. Most are congeners named with high confidence when the true species is absent from the library or shares its haplotype.
 - **Abstention.** The common answer of this version. Plastid loci of closely related cacti differ little, most species are represented by one sequence per locus, and IdTaxa withholds an answer when its confidence does not reach the threshold.
 - **One locus, one answer.** A species answer usually rests on a single locus, mostly `matK`. The agreement between loci, given in the report, is the main check a user has.
-- **`ITS` and the nearest neighbour.** The rule of remoteness of the nearest neighbour does not reject the sister lineages in `ITS`. The identification runs IdTaxa, which rejects them; the nearest neighbour is used only in the internal validation.
-- **Coverage.** The library holds 1205 of the accepted species of the checklist (Korotkova *et al*. 2021); a sample of a species or genus outside a locus library can only be named as something else in that locus (Tutorial 6 gives examples).
+- **`ITS` and the nearest neighbour.** The rule of remoteness of the nearest neighbour does not reject the sister lineages in `ITS`. The identification runs IdTaxa, which rejects them, so the nearest neighbour is used only in the internal validation.
+- **Coverage.** The library holds 1205 of the accepted species of the checklist. A sample of a species or genus outside a locus library can only be named as something else in that locus (Tutorial 6 gives examples).
 
 ## Design Decisions
 
@@ -456,13 +462,13 @@ Module 14 rests on five design decisions:
 
 1. **Loci and combinations.** Each locus is classified on its own; loci are not concatenated and no combination of loci is evaluated as a unit.
 2. **Unit of assignment.** A graded answer per locus: species, genus or none, with the reason for none. A species is named only above the species threshold of its locus.
-3. **Reporting ambiguity.** The candidates under the thresholds are listed as alternatives in the report, never promoted to an answer; disagreement between loci is reported as a conflict.
-4. **Genome skims and other reads.** The library is built from Sanger marker records of GenBank and own sequences, and genome skims are not a source of it. Illumina reads that a user brings are a query: `identify_barcoding_reads()` assembles their plastome and nuclear ribosomal DNA and identifies them against the library, locus by locus.
-5. **Paralogy and organelle capture.** Possible paralogs (`pepC_like`) and saturation are flagged and kept; conflict between plastid and nuclear loci is reported as disagreement between loci, not resolved. Per-locus monophyly and the cytonuclear diagnosis are planned work, with no version set.
+3. **Reporting ambiguity.** The candidates under the thresholds are listed as alternatives in the report, never promoted to an answer. Sisagreement between loci is reported as a conflict.
+4. **Genome skims and other reads.** The library is built from Sanger marker records of GenBank, and genome skims are not a source of it. Illumina reads that a user brings are a query: `identify_barcoding_reads()` assembles their plastome and nuclear ribosomal DNA and identifies them against the library, locus by locus.
+5. **Paralogy and organelle capture.** Possible paralogs (`pepC_like`) and saturation are flagged and kept. Conflict between plastid and nuclear loci is reported as disagreement between loci, not resolved. Per-locus monophyly and the cytonuclear diagnosis are planned work, with no version set.
 
 [Continue to Tutorial 6: Identifying a Sample](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html)
 
 ## References
 
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org – a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
-- Murali *et al*. 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. *Microbiome*, 6. <https://doi.org/10.1186/s40168-018-0521-5>
+- Korotkova *et al*., 2021. Cactaceae at Caryophyllales.org – a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
+- Murali *et al*., 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. *Microbiome*, 6. <https://doi.org/10.1186/s40168-018-0521-5>

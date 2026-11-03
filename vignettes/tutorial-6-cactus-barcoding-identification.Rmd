@@ -24,15 +24,11 @@ Each example has three parts:
 2. **Identification.** The function of the package is called with the path of the file, as for any sample.
 3. **Result.** The answer per locus, drawn with `plot_barcoding_identification()`, one line of reading, and a link to the full HTML report.
 
-The reports on the website were written from the tables of the identification runs, made before the version number of the package was set to 0.5.0: their provenance table gives `0.4.5.9000`, the number the package carried when the samples were identified, and their footer gives 0.5.0, the version that wrote the page.
-
 The script `tutorial-6-cactus-barcoding-identification.R` runs all of it from the tutorial folder:
 
 ```{r, eval = FALSE}
 file.edit(system.file("scripts", "tutorial-6-cactus-barcoding-identification.R", package = "PhyloCactus"))
 ```
-
-The figures on this page are drawn from the answer tables of these examples, distributed with the package in `inst/extdata`; the script draws the same figures from your own run.
 
 ```{r, eval = TRUE, echo = FALSE}
 has_data <- nzchar(system.file("extdata", "barcoding_example_LT745702.1_answer.csv", package = "PhyloCactus"))
@@ -57,7 +53,7 @@ A region identical to library sequences is reported in `identical_to_library`, s
 
 ## Example 1. One Sanger Record
 
-`LT745702.1`, `matK` of *Pseudorhipsalis amazonica* subsp. *panamensis*. The record is named at subspecies rank, so the mining of Tutorial 1 left it out; the library holds its binomial.
+`LT745702.1`, `matK` of *Pseudorhipsalis amazonica* subsp. *panamensis*. The record is named at subspecies rank, so the mining of Tutorial 1 left it out. The library holds its binomial.
 
 ```{r, eval = FALSE}
 # Download (GenBank, 1 record)
@@ -69,11 +65,11 @@ writeLines(rentrez::entrez_fetch("nuccore", id = "LT745702.1", rettype = "gb", r
 identify_barcoding_query("examples/LT745702.1.gb", run_name = "LT745702.1")
 ```
 
-```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 1.** Answer of the Sanger record LT745702.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 1.** Answer of the Sanger record LT745702.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line. Below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_LT745702.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_LT745702.1_sampling.csv", package = "PhyloCactus"))
 ```
 
-**Reading.** `matK` names the genus *Pseudorhipsalis*. IdTaxa reached the right species, *P. amazonica*, with a species confidence of 61.6, under the species threshold of `matK` (66.9): the species is listed as an alternative (`below_species_threshold`), not assigned. `trnQ-rps16` overlaps too little (`short_overlap`). [Full report](https://beeamerino.github.io/PhyloCactus/reports/LT745702.1.html).
+`matK` names the genus *Pseudorhipsalis*. IdTaxa reached the right species, *P. amazonica*, with a species confidence of 61.6, under the species threshold of `matK` (66.9): the species is listed as an alternative (`below_species_threshold`), not assigned. `trnQ-rps16` overlaps too little (`short_overlap`). [Full report](https://beeamerino.github.io/PhyloCactus/reports/LT745702.1.html).
 
 ## Example 2. A Specimen of Unknown Species
 
@@ -85,11 +81,11 @@ writeLines(rentrez::entrez_fetch("nuccore", id = "PZ714536.1", rettype = "gb", r
 identify_barcoding_query("examples/PZ714536.1.gb", run_name = "PZ714536.1")
 ```
 
-```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 2.** Answer of the Sanger record PZ714536.1 (*Opuntia* sp.). IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 2.** Answer of the Sanger record PZ714536.1 (*Opuntia* sp.). IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line. Below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_PZ714536.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_PZ714536.1_sampling.csv", package = "PhyloCactus"))
 ```
 
-**Reading.** *Opuntia* at genus rank (genus confidence 79.2). The region is identical to 17 library records of several species of *Opuntia*, so no species can be told apart at this locus. [Full report](https://beeamerino.github.io/PhyloCactus/reports/PZ714536.1.html).
+*Opuntia* at genus rank (genus confidence 79.2). The region is identical to 17 library records of several species of *Opuntia*, so no species can be told apart at this locus. [Full report](https://beeamerino.github.io/PhyloCactus/reports/PZ714536.1.html).
 
 ## Example 3. One Specimen, Four Loci
 
@@ -102,11 +98,11 @@ identify_barcoding_query("examples/OK340410.1_specimen.gb", sample = "Coryphanth
                          run_name = "OK340410.1")
 ```
 
-```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 3.** Answer of the specimen of *Coryphantha elephantidens* subsp. *bumamma* (four loci). IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 3.** Answer of the specimen of *Coryphantha elephantidens* subsp. *bumamma* (four loci). IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line. Below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_OK340410.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_OK340410.1_sampling.csv", package = "PhyloCactus"))
 ```
 
-**Reading.** `matK` and `rbcL` name *Coryphantha*; `rpL16` and `psbA-trnH` give no answer (low confidence). The two loci that answer agree, and the sample is answered at genus rank. [Full report](https://beeamerino.github.io/PhyloCactus/reports/OK340410.1.html).
+`matK` and `rbcL` name *Coryphantha*. `rpL16` and `psbA-trnH` give no answer (low confidence). The two loci that answer agree, and the sample is answered at genus rank. [Full report](https://beeamerino.github.io/PhyloCactus/reports/OK340410.1.html).
 
 ## Example 4. One Specimen, Four Loci, and a Wrong Species
 
@@ -118,15 +114,15 @@ writeLines(rentrez::entrez_fetch("nuccore", id = c("OP189074.1", "OP188885.1", "
 identify_barcoding_query("examples/OP189074.1_specimen.gb", sample = "Xiquexique_gounellei", run_name = "OP189074.1")
 ```
 
-```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 4.** Answer of the specimen of *Xiquexique gounellei* (four loci). IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 4.** Answer of the specimen of *Xiquexique gounellei* (four loci). IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line. Below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_OP189074.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_OP189074.1_sampling.csv", package = "PhyloCactus"))
 ```
 
-**Reading.** `ITS` names *Xiquexique frewenii* with a species confidence of 62.5, just over its species threshold (60.9); the other three loci give no answer. A species named by one locus, close to its threshold, with every other locus silent, is the pattern of most wrong species of this version: read it as the genus until another locus agrees. [Full report](https://beeamerino.github.io/PhyloCactus/reports/OP189074.1.html).
+`ITS` names *Xiquexique frewenii* with a species confidence of 62.5, just over its species threshold (60.9). The other three loci give no answer. A species named by one locus, close to its threshold, with every other locus silent, is the pattern of most wrong species of this version: read it as the genus until another locus agrees. [Full report](https://beeamerino.github.io/PhyloCactus/reports/OP189074.1.html).
 
 ## Example 5. A GenBank Plastome Named to Species
 
-`MN517611.1`, the plastome of *Mammillaria zephyranthoides*. A GenBank flat file is read as such; each locus is cropped from the plastome.
+`MN517611.1`, the plastome of *Mammillaria zephyranthoides*. A GenBank flat file is read as such: each locus is cropped from the plastome.
 
 ```{r, eval = FALSE}
 writeLines(rentrez::entrez_fetch("nuccore", id = "MN517611.1", rettype = "gb", retmode = "text"),
@@ -134,11 +130,11 @@ writeLines(rentrez::entrez_fetch("nuccore", id = "MN517611.1", rettype = "gb", r
 identify_barcoding_query("examples/MN517611.1.gb", run_name = "MN517611.1")
 ```
 
-```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 5.** Answer of the plastome MN517611.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 5.** Answer of the plastome MN517611.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line. Below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_MN517611.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_MN517611.1_sampling.csv", package = "PhyloCactus"))
 ```
 
-**Reading.** `matK` names *Mammillaria zephyranthoides* (82.8 against 66.9), among the species of *Mammillaria* of its library; the other loci found give no answer. [Full report](https://beeamerino.github.io/PhyloCactus/reports/MN517611.1.html).
+`matK` names *Mammillaria zephyranthoides* (82.8 against 66.9), among the species of *Mammillaria* of its library. The other loci found give no answer. [Full report](https://beeamerino.github.io/PhyloCactus/reports/MN517611.1.html).
 
 ## Example 6. A GenBank Plastome Named as Another Species
 
@@ -150,15 +146,15 @@ writeLines(rentrez::entrez_fetch("nuccore", id = "MT387452.1", rettype = "gb", r
 identify_barcoding_query("examples/MT387452.1.gb", run_name = "MT387452.1")
 ```
 
-```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 6.** Answer of the plastome MT387452.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 6.** Answer of the plastome MT387452.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line. Below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_MT387452.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_MT387452.1_sampling.csv", package = "PhyloCactus"))
 ```
 
-**Reading.** `matK` names *Lepismium lumbricoides* (81.2 against 66.9): the region is identical to FN669720.1, a record under that name (`identical_to_library`). An identical sequence under another name, a misidentified voucher or a haplotype shared across genera, yields a confident wrong answer; the report lists the record so that it can be checked. [Full report](https://beeamerino.github.io/PhyloCactus/reports/MT387452.1.html).
+`matK` names *Lepismium lumbricoides* (81.2 against 66.9): the region is identical to FN669720.1, a record under that name (`identical_to_library`). An identical sequence under another name, a misidentified voucher or a haplotype shared across genera, yields a confident wrong answer. The report lists the record so that it can be checked. [Full report](https://beeamerino.github.io/PhyloCactus/reports/MT387452.1.html).
 
 ## Example 7. Several Samples at Once
 
-A sample sheet has one row per sample: `sample_id`, `input_type` (a row of the matrix of accepted inputs, `barcoding_accepted_inputs.csv`), `file_1`, and optionally `file_2`, `declared_species` and `voucher`. Each sample is routed to its function and gets its report; one index table gathers them.
+A sample sheet has one row per sample: `sample_id`, `input_type` (a row of the matrix of accepted inputs, `barcoding_accepted_inputs.csv`), `file_1`, and optionally `file_2`, `declared_species` and `voucher`. Each sample is routed to its function and gets its report. One index table gathers them.
 
 ```{r, eval = FALSE}
 sheet <- data.frame(sample_id = c("LT745702.1", "PZ714536.1", "MN517611.1"),
@@ -181,7 +177,7 @@ knitr::kable(caption = "Table 1. Index of the sample sheet of Example 7: loci fo
                            "Declared species", "Answer vs declared"))
 ```
 
-**Reading.** `LT745702.1` names the genus *Pseudorhipsalis* and its declared species is not reached (`genus agrees`). `PZ714536.1` names *Opuntia* and declares no species (`not declared`). `MN517611.1` names *Mammillaria zephyranthoides* at one of its 12 loci found (`species agrees`). The sheet gives no voucher, so `voucher_missing` is `TRUE` in the three rows: a sample without a voucher is identified and flagged, since the leakage rule per specimen cannot be applied to it (its report says so).
+`LT745702.1` names the genus *Pseudorhipsalis* and its declared species is not reached (`genus agrees`). `PZ714536.1` names *Opuntia* and declares no species (`not declared`). `MN517611.1` names *Mammillaria zephyranthoides* at one of its 12 loci found (`species agrees`). The sheet gives no voucher, so `voucher_missing` is `TRUE` in the three rows: a sample without a voucher is identified and flagged, since the leakage rule per specimen cannot be applied to it (its report says so).
 
 ## Example 8. A Genome Assembly
 
@@ -195,15 +191,15 @@ utils::download.file(paste0(ftp, "/", basename(ftp), "_genomic.fna.gz"), asm, mo
 identify_barcoding_assembly(asm, run_name = "GCA_024363205.1")
 ```
 
-```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 7.** Answer of the assembly GCA_024363205.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 7.** Answer of the assembly GCA_024363205.1. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line. Below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_GCA_024363205.1_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_GCA_024363205.1_sampling.csv", package = "PhyloCactus"))
 ```
 
-**Reading.** *Cereus* at genus rank from `pepC_like` (its best species at 61.5, under the species threshold of 78.8) and `phyC`; 12 other loci give no answer. `rpl32-trnL` hits two scaffolds with a low mapping quality, which the package reports; the best hit is kept. [Full report](https://beeamerino.github.io/PhyloCactus/reports/GCA_024363205.1.html).
+*Cereus* at genus rank from `pepC_like` (its best species at 61.5, under the species threshold of 78.8) and `phyC`. 12 other loci give no answer. `rpl32-trnL` hits two scaffolds with a low mapping quality, which the package reports. The best hit is kept. [Full report](https://beeamerino.github.io/PhyloCactus/reports/GCA_024363205.1.html).
 
 ## Example 9. Paired Illumina Reads
 
-`SRR26398994`, a genome skim of *Opuntia comonduensis* (ENA, about 0.56 GB). The plastome and the nuclear ribosomal DNA are assembled with `fastp` and GetOrganelle, then identified locus by locus. The species is not in the library.
+`SRR26398994`, a genome skim of *Opuntia comonduensis* (ENA, about 0.56 GB). The plastome and the nuclear ribosomal DNA are assembled with `fastp` and GetOrganelle, then identified locus by locus. The specie is not in the library.
 
 ```{r, eval = FALSE}
 ena <- utils::read.delim(paste0("https://www.ebi.ac.uk/ena/portal/api/filereport?accession=SRR26398994",
@@ -215,15 +211,15 @@ stopifnot(unname(tools::md5sum(fq)) == strsplit(ena$fastq_md5, ";")[[1]])
 identify_barcoding_reads(fq[1], fq[2], run_name = "SRR26398994", threads = 4)
 ```
 
-```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 8.** Answer of the reads SRR26398994. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line; below, the species of the named genus in the library and their sequences per locus."}
+```{r, eval = has_data, echo = FALSE, fig.cap = "**Figure 8.** Answer of the reads SRR26398994. IdTaxa confidence of each locus found, at genus rank (striped bar) and species rank (solid bar), coloured by state (dark blue, species; light blue, genus; grey, no answer), with the threshold as a dashed line. Below, the species of the named genus in the library and their sequences per locus."}
 plot_barcoding_identification(system.file("extdata", "barcoding_example_SRR26398994_answer.csv", package = "PhyloCactus"), sampling = system.file("extdata", "barcoding_example_SRR26398994_sampling.csv", package = "PhyloCactus"))
 ```
 
-**Reading.** *Opuntia* at genus rank from `ndhF-rpl32`; the other ten loci found give no answer. For a species absent from the library, the genus is the right answer. [Full report](https://beeamerino.github.io/PhyloCactus/reports/SRR26398994.html).
+*Opuntia* at genus rank from `ndhF-rpl32`; the other ten loci found give no answer. For a species absent from the library, the genus is the right answer. [Full report](https://beeamerino.github.io/PhyloCactus/reports/SRR26398994.html).
 
 ## The Examples Side by Side
 
-```{r, eval = has_data, echo = FALSE, fig.height = 4.5, fig.cap = "**Figure 9.** The answers of the eight examples with a figure, side by side: one row per example and one column per locus found, coloured by state; a cross marks a locus named at genus rank only (`genus_only_locus`)."}
+```{r, eval = has_data, echo = FALSE, fig.height = 4.5, fig.cap = "**Figure 9.** The answers of the eight examples with a figure, side by side: one row per example and one column per locus found, coloured by state. A cross marks a locus named at genus rank only (`genus_only_locus`)."}
 plot_barcoding_identification_summary(list(
   "LT745702.1 (Sanger)" = system.file("extdata", "barcoding_example_LT745702.1_answer.csv", package = "PhyloCactus"),
   "PZ714536.1 (Sanger, Opuntia sp.)" = system.file("extdata", "barcoding_example_PZ714536.1_answer.csv", package = "PhyloCactus"),
@@ -235,7 +231,7 @@ plot_barcoding_identification_summary(list(
   "SRR26398994 (reads)" = system.file("extdata", "barcoding_example_SRR26398994_answer.csv", package = "PhyloCactus")))
 ```
 
-A plastome or an assembly holds most loci of the library, a Sanger record one; yet in these examples the answer rests on one or two loci in every case, and most loci found give no answer.
+A plastome or an assembly holds most loci of the library, a Sanger record one. Yet in these examples the answer rests on one or two loci in every case, and most loci found give no answer.
 
 ## How Well This Version Identifies
 
@@ -274,7 +270,7 @@ The genus is the answer to expect from this version. A species is named for few 
 
 ## References
 
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org – a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
-- Murali *et al*. 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. *Microbiome*, 6. <https://doi.org/10.1186/s40168-018-0521-5>
+- Korotkova *et al*., 2021. Cactaceae at Caryophyllales.org – a dynamic online species-level taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
+- Murali *et al*., 2018. IDTAXA: a novel approach for accurate taxonomic classification of microbiome sequences. *Microbiome*, 6. <https://doi.org/10.1186/s40168-018-0521-5>
 
 [Continue to Tutorial 7: Core Pipeline Functions and Methodological Dictionary](https://beeamerino.github.io/PhyloCactus/articles/tutorial-7-cactus-phylogeny-functions.html)
