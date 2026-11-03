@@ -333,7 +333,8 @@ message("Rendering Figure 5 (Marker Informativeness)...")
 if ("parsimony_informative" %in% names(marker_stats)) {
   p5 <- ggplot(marker_stats, aes(x = alignment_length, y = parsimony_informative, label = marker)) +
     geom_point(size = 3.5, color = phylocactus_colours("neutral")[["mark"]]) +
-    geom_text(nudge_y = 20, size = 3.2, fontface = "italic", color = phylocactus_colours("neutral")[["text"]]) +
+    ggrepel::geom_text_repel(size = 3.2, fontface = "italic", color = phylocactus_colours("neutral")[["text"]],
+                             min.segment.length = 0, seed = 1) +
     theme_phylocactus(base_size = 12) +
     labs(x = "Aligned length (bp)", y = "Parsimony-informative sites")
   ggsave("9_Visualization/figures/Figure_5_marker_informativeness.pdf", p5, width = 7, height = 5)

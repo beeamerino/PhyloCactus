@@ -44,7 +44,7 @@ IUCN queries use the `rredlist` package.
 To install the required dependencies:
 
 ``` r
-required_pkgs <- c("dplyr", "tidyr", "stringr", "readr", "ggplot2", "forcats", "purrr", "scales", "rredlist")
+required_pkgs <- c("dplyr", "tidyr", "stringr", "readr", "ggplot2", "forcats", "purrr", "scales", "ggrepel", "rredlist")
 new_pkgs <- required_pkgs[!(required_pkgs %in% installed.packages()[,"Package"])]
 if(length(new_pkgs)) install.packages(new_pkgs)
 ```
@@ -426,7 +426,8 @@ Number of parsimony-informative sites against alignment length for each partitio
 if ("parsimony_informative" %in% names(marker_stats)) {
   p5 <- ggplot(marker_stats, aes(x = alignment_length, y = parsimony_informative, label = marker)) +
     geom_point(size = 3.5, color = phylocactus_colours("neutral")[["mark"]]) +
-    geom_text(nudge_y = 20, size = 3.2, fontface = "italic", color = phylocactus_colours("neutral")[["text"]]) +
+    ggrepel::geom_text_repel(size = 3.2, fontface = "italic", color = phylocactus_colours("neutral")[["text"]],
+                             min.segment.length = 0, seed = 1) +
     theme_phylocactus(base_size = 12) +
     labs(x = "Aligned length (bp)", y = "Parsimony-informative sites")
   p5

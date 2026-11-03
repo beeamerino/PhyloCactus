@@ -53,6 +53,7 @@ Suggests:
     phytools,
     forcats,
     scales,
+    ggrepel,
     taxize,
     rredlist,
     knitr,
