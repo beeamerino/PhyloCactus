@@ -55,14 +55,18 @@ assemble_ingroup_phylotar(
 
   Logical. Apply the curated accession exclusion list? **Defaults to
   `TRUE`.** The lists shipped with the package are the product of manual
-  curation by the expert team supporting `PhyloCactus`: each excluded
-  accession was inspected and removed on taxonomic or sequence-quality
-  grounds that are not recoverable from GenBank metadata alone. The
-  lists are keyed by locus and accession (`locus`, `sid`, `reason`,
-  `source`), so that they survive a new mining that renumbers the
-  clusters: an accession is removed from every cluster of the locus
-  named. Across both lists they hold 102 accessions, 60 in 5 ingroup
-  loci and 42 in 13 outgroup loci, and they live in
+  curation by the team supporting `PhyloCactus`. Of their 102
+  accessions, 47 state their ground in the `reason` column (`ITS`
+  sequences not homologous to the cactus locus, `ITS` pseudogenes, a
+  chimeric `matK`), and 55 carry only "manual conflict resolution": of
+  the 44 found in the metadata of the mining, 43 were placed by its
+  clustering in the clusters of more than one locus, and for 36 the
+  GenBank description names another locus or a transcript. The lists are
+  keyed by locus and accession (`locus`, `sid`, `reason`, `source`), so
+  that they survive a new mining that renumbers the clusters: an
+  accession is removed from every cluster of the locus named. Across
+  both lists they hold 102 accessions, 60 in 5 ingroup loci and 42 in 13
+  outgroup loci, and they live in
   `inst/extdata/manual_exclusions_ingroup.csv` and
   `inst/extdata/manual_exclusions_outgroup.csv`. Setting this to `FALSE`
   reproduces the uncurated cluster set, which is the way to quantify

@@ -1,6 +1,6 @@
-# Barcode Gap of the Molecular Diagnostic Branch
+# Barcode Gap of Module 14
 
-Step 6 of the branch. For every locus of the library, computes the
+Step 6 of Module 14. For every locus of the library, computes the
 intraspecific distances by pairs and, for every sequence, the distance
 to its nearest neighbour of another species, with the `raw` and K80
 models. Derives the candidate threshold with this rule: the 95th

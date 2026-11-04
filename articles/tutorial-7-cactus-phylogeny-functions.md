@@ -173,7 +173,7 @@ used.
   Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker,
   A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,
   Nyffeler, R., Sánchez, D., Schlumpberger, B. O., &
-  Berendsohn, W. G. 2021. Cactaceae at Caryophyllales.org - A dynamic
+  Berendsohn, W. G. 2021. Cactaceae at Caryophyllales.org – a dynamic
   online species-level taxonomic backbone for the family. *Willdenowia*,
   51(2), 251-270. <https://doi.org/10.3372/wi.51.51208>
 - Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., &

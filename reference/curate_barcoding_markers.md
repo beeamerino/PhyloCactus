@@ -1,4 +1,4 @@
-# Curate the Loci of the Molecular Diagnostic Branch
+# Curate the Loci of Module 14
 
 Aligns and curates the per-locus FASTA files written by
 [`assemble_barcoding_dataset()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_barcoding_dataset.md)

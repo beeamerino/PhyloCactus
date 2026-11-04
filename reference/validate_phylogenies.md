@@ -83,8 +83,8 @@ validate_phylogenies(
   Named character vector or `NULL`. Legend labels for the trees in the
   tree-space figure, named by the entries of `trees_mapping_list`.
   Labels of the form `"Author et al. (year)"` are typeset with *et al.*
-  in italics. Defaults to `NULL`, which labels the reference trees
-  distributed with the package as `"Zuntini et al. (2024)"`,
+  in italics. Defaults to `NULL`, which labels the four reference trees
+  of Tutorial 4 as `"Zuntini et al. (2024)"`,
   `"Thompson et al. (2024)"`, `"Amaral et al. (2022)"` and
   `"de Vos et al. (2025)"`, and the focal tree as `"This study"`.
   Supplied labels replace the defaults of the same name.
@@ -101,7 +101,7 @@ Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A.,
 Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker, A.,
 Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,
 Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G.
-(2021). Cactaceae at Caryophyllales.org - a dynamic online species-level
+(2021). Cactaceae at Caryophyllales.org – a dynamic online species-level
 taxonomic backbone for the family. *Willdenowia*, 51(2), 251-270.
 [doi:10.3372/wi.51.51208](https://doi.org/10.3372/wi.51.51208)
 

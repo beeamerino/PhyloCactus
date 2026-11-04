@@ -1,4 +1,4 @@
-# Taxonomic IDs of the Outgroup of the Molecular Diagnostic Branch
+# Taxonomic IDs of the Outgroup of Module 14
 
 The six genus-level NCBI Taxonomy IDs that the outgroup control queries
 the library with: the three families that surround Cactaceae.
@@ -27,9 +27,9 @@ the adjacent id. *Amphipetalum* (1835425) is not requested: GenBank
 holds no nucleotide records for it, so the request would only produce an
 empty download.
 
-**This is the branch's own copy**. The phylogeny keeps its list in
+**This is Module 14's own copy**. The phylogeny keeps its list in
 [`assemble_outgroup_phylotar()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_outgroup_phylotar.md)
-and is not touched, so the branch runs without it. A test compares the
+and is not touched, so Module 14 runs without it. A test compares the
 two and fails if they ever drift apart.
 
 ## Examples

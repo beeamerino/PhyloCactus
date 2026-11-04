@@ -63,9 +63,16 @@ trust each locus: the wrong-species rates of the validation and the
 per-genus discrimination of
 [`summarise_barcoding_genus_discrimination()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_genus_discrimination.md);
 (6) sampling of the named genera in the library; (7) reads; (8) library,
-models and software; (9) limits. The figures follow Zeng et al. (2026,
-New Phytologist). The three identification functions call it at the end;
-a report can be rebuilt from saved tables.
+models and software; (9) limits. The figures follow Zeng et al. (2026).
+The three identification functions call it at the end; a report can be
+rebuilt from saved tables.
+
+## References
+
+Zeng, C.-X., Zhou, M.-Y., Twyford, A. D., et al. (2026). Plant species
+identification by genome skimming across the vascular plant tree of
+life. *New Phytologist*, 252(1), 488-502.
+[doi:10.1111/nph.71494](https://doi.org/10.1111/nph.71494)
 
 ## See also
 

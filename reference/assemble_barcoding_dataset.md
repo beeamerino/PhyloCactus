@@ -1,4 +1,4 @@
-# Assemble the Reference Library of the Molecular Diagnostic Branch
+# Assemble the Reference Library of Module 14
 
 Builds the multi-accession reference library of the molecular diagnostic
 section from the `phylotaR` workspace shared with the phylogeny. The
@@ -53,8 +53,8 @@ assemble_barcoding_dataset(
 
 - output_dir:
 
-  Character. Root of the branch. Refused if it lies inside a directory
-  of the phylogeny. Defaults to `"11_barcoding"`.
+  Character. Root of Module 14. Refused if it lies inside a directory of
+  the phylogeny. Defaults to `"11_barcoding"`.
 
 - target_genes_file, genes_map_file:
 
@@ -74,10 +74,12 @@ assemble_barcoding_dataset(
 - checklist_path:
 
   Character. Accepted checklist (Korotkova *et al*. 2021); `NULL`, the
-  default, uses the checklist distributed with the package. `NA` applies
-  no checklist and keeps every GenBank name, cleaned to `Genus_species`:
-  that is what the outgroup of the outgroup control needs, since a
-  checklist of Cactaceae would discard every outgroup name.
+  default, uses the local copy named by
+  [`phylocactus_checklist()`](https://beeamerino.github.io/PhyloCactus/reference/phylocactus_checklist.md).
+  `NA` applies no checklist and keeps every GenBank name, cleaned to
+  `Genus_species`: that is what the outgroup of the outgroup control
+  needs, since a checklist of Cactaceae would discard every outgroup
+  name.
 
 - min_species:
 
@@ -92,8 +94,8 @@ assemble_barcoding_dataset(
 - taxids:
 
   Character vector or `NULL`. What to mine from GenBank when the
-  workspace of `wd_path` does not exist yet, which is what lets the
-  branch run without the phylogeny having run first. `NULL` mines
+  workspace of `wd_path` does not exist yet, which is what lets Module
+  14 run without the phylogeny having run first. `NULL` mines
   `preferred_parent`, the behaviour of earlier versions. Several IDs are
   mined together, as
   [`barcoding_outgroup_taxids()`](https://beeamerino.github.io/PhyloCactus/reference/barcoding_outgroup_taxids.md)
@@ -119,7 +121,7 @@ assemble_barcoding_dataset(
 - phylogeny_map_file:
 
   Character or `NULL`. Cluster-to-locus table of the phylogeny, compared
-  with the branch's own when it exists. Defaults to
+  with Module 14's own when it exists. Defaults to
   `1_phylotaR_out_Ingroup/TABLE_CLUSTER_MARKER_ASSIGNMENT_INGROUP.csv`
   next to `wd_path`.
 
@@ -174,7 +176,7 @@ Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A.,
 Gómez-Hinostrosa, C., Guerrero, P. C., Hernández, H. M., Kohlbecker, A.,
 Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,
 Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G.
-(2021). Cactaceae at Caryophyllales.org - a dynamic online species-level
+(2021). Cactaceae at Caryophyllales.org – a dynamic online species-level
 taxonomic backbone for the family. *Willdenowia*, 51(2), 251-270.
 [doi:10.3372/wi.51.51208](https://doi.org/10.3372/wi.51.51208)
 

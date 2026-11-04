@@ -1,8 +1,8 @@
-# Screen the Curated Loci of the Molecular Diagnostic Branch
+# Screen the Curated Loci of Module 14
 
 For each curated locus, recomputes the five context columns (species,
 species with a replicate, accessions, genera, genera with two or more
-species) on the accessions that survived curation, applies the branch's
+species) on the accessions that survived curation, applies Module 14's
 replication threshold to them, flags saturation (which never excludes a
 locus), and counts identical aligned sequences per species. Inputs are
 read from the directories of the earlier steps, so the screening runs on
@@ -48,8 +48,8 @@ screen_barcoding_markers(
 
 - min_species_with_replica:
 
-  Integer. A locus enters the branch when at least this number of
-  species keep two or more accessions after curation. Defaults to `20L`.
+  Integer. A locus enters Module 14 when at least this number of species
+  keep two or more accessions after curation. Defaults to `20L`.
 
 - saturation_flag_cutoff:
 

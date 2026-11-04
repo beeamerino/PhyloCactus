@@ -14,8 +14,7 @@ extract_barcoding_plastome_loci(
     "(chloroplast OR plastid) AND \"complete genome\" NOT refseq[filter]"),
   library_dir = file.path("11_barcoding", "4_library"),
   output_dir = file.path("0_genomic_raw", "plastomes"),
-  checklist_path = system.file("extdata",
-    "CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx", package = "PhyloCactus"),
+  checklist_path = phylocactus_checklist(),
   min_region = 100L,
   keep_genera = character(0),
   fetch = .bc_fetch_genbank
@@ -39,6 +38,8 @@ extract_barcoding_plastome_loci(
 - checklist_path:
 
   Character. The checklist (a path, or a vector of accepted names).
+  Defaults to the local copy named by
+  [`phylocactus_checklist()`](https://beeamerino.github.io/PhyloCactus/reference/phylocactus_checklist.md).
 
 - min_region:
 

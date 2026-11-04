@@ -17,6 +17,8 @@ Setup local taxonomic databases, pull orthologous sequence clusters via
 Verify nomenclatural spelling, audit duplicates, and reconcile species
 names against accepted botanical checklists.
 
+- [`phylocactus_checklist()`](https://beeamerino.github.io/PhyloCactus/reference/phylocactus_checklist.md)
+  : Path to the checklist of Cactaceae (Korotkova et al. 2021)
 - [`clean_taxonomic_names()`](https://beeamerino.github.io/PhyloCactus/reference/clean_taxonomic_names.md)
   : Reconcile and Validate Taxonomic Nomenclature
 - [`integrate_and_clean_markers()`](https://beeamerino.github.io/PhyloCactus/reference/integrate_and_clean_markers.md)
@@ -128,6 +130,8 @@ Robinson-Foulds distances and multidimensional tree-space projections.
 - [`validate_phylogenies()`](https://beeamerino.github.io/PhyloCactus/reference/validate_phylogenies.md)
   : Comparative Tree-Space Projection and Topological Validation
   Pipeline
+- [`plot_tree_space()`](https://beeamerino.github.io/PhyloCactus/reference/plot_tree_space.md)
+  : Tree Space of a Comparison of Phylogenies
 
 ## Publication Integration & Clade Summaries
 
@@ -144,6 +148,9 @@ standardized IUCN color scales to phylogenetic trees.
 
 - [`get_iucn_data()`](https://beeamerino.github.io/PhyloCactus/reference/get_iucn_data.md)
   : Fetch IUCN Red List Metadata via rredlist API
+- [`summarise_iucn_registry()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_iucn_registry.md)
+  : Reduce the IUCN Red List table of a run to the category of each
+  species and to counts
 - [`scale_fill_iucn()`](https://beeamerino.github.io/PhyloCactus/reference/scale_fill_iucn.md)
   : Standardized IUCN Category Color Scale for ggplot2
 - [`phylocactus_colours()`](https://beeamerino.github.io/PhyloCactus/reference/phylocactus_colours.md)
@@ -155,22 +162,21 @@ standardized IUCN color scales to phylogenetic trees.
 
 ## Barcoding Library
 
-Build the reference library of the barcoding branch from the phylotaR
-mining of the phylogeny and, optionally, own sequences (Tutorial 5,
-steps 1 to 4).
+Build the reference library of Module 14 from the phylotaR mining of the
+phylogeny and, optionally, own sequences (Tutorial 5, steps 1 to 4).
 
 - [`assemble_barcoding_dataset()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_barcoding_dataset.md)
-  : Assemble the Reference Library of the Molecular Diagnostic Branch
+  : Assemble the Reference Library of Module 14
 - [`curate_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/curate_barcoding_markers.md)
-  : Curate the Loci of the Molecular Diagnostic Branch
+  : Curate the Loci of Module 14
 - [`screen_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/screen_barcoding_markers.md)
-  : Screen the Curated Loci of the Molecular Diagnostic Branch
+  : Screen the Curated Loci of Module 14
 - [`finalize_barcoding_library()`](https://beeamerino.github.io/PhyloCactus/reference/finalize_barcoding_library.md)
-  : Build the Final Reference Library of the Molecular Diagnostic Branch
+  : Build the Final Reference Library of Module 14
 - [`extract_barcoding_plastome_loci()`](https://beeamerino.github.io/PhyloCactus/reference/extract_barcoding_plastome_loci.md)
   : Extra library records cropped from GenBank plastomes (step 1)
 - [`barcoding_outgroup_taxids()`](https://beeamerino.github.io/PhyloCactus/reference/barcoding_outgroup_taxids.md)
-  : Taxonomic IDs of the Outgroup of the Molecular Diagnostic Branch
+  : Taxonomic IDs of the Outgroup of Module 14
 
 ## Barcoding Validation
 
@@ -179,21 +185,21 @@ neighbour and IdTaxa (on one machine or a computing cluster), negative
 controls, thresholds and metrics (Tutorial 5, steps 5 to 10).
 
 - [`build_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/build_barcoding_folds.md)
-  : Build the Validation Folds of the Molecular Diagnostic Branch
+  : Build the Validation Folds of Module 14
 - [`analyze_barcode_gap()`](https://beeamerino.github.io/PhyloCactus/reference/analyze_barcode_gap.md)
-  : Barcode Gap of the Molecular Diagnostic Branch
+  : Barcode Gap of Module 14
 - [`classify_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/classify_barcoding_folds.md)
-  : Classify the Validation Folds of the Molecular Diagnostic Branch
+  : Classify the Validation Folds of Module 14
 - [`generate_barcoding_job_scripts()`](https://beeamerino.github.io/PhyloCactus/reference/generate_barcoding_job_scripts.md)
   : Generate the SLURM Job Scripts of a Chunked Run of Step 7
 - [`merge_barcoding_chunks()`](https://beeamerino.github.io/PhyloCactus/reference/merge_barcoding_chunks.md)
   : Merge the Chunks of a Chunked Run of Step 7
 - [`run_barcoding_controls()`](https://beeamerino.github.io/PhyloCactus/reference/run_barcoding_controls.md)
-  : Negative Controls of the Molecular Diagnostic Branch
+  : Negative Controls of Module 14
 - [`sweep_barcoding_threshold()`](https://beeamerino.github.io/PhyloCactus/reference/sweep_barcoding_threshold.md)
-  : Sweep the Threshold of Remoteness of the Molecular Diagnostic Branch
+  : Sweep the Threshold of Remoteness of Module 14
 - [`summarise_barcoding_metrics()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_metrics.md)
-  : Summarise the Per-Class Metrics of the Molecular Diagnostic Branch
+  : Summarise the Per-Class Metrics of Module 14
 - [`summarise_barcoding_genus_discrimination()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_genus_discrimination.md)
   : Per-genus discrimination of each locus in the validation folds
 

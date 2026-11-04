@@ -17,6 +17,7 @@ run_treePL_cv(
   cvstart = 1000,
   cvstop = 1e-14,
   cv_nthreads = 1L,
+  cv_outlier_factor = 5,
   treepl_bin = "treePL",
   work_dir = NULL,
   quiet = FALSE
@@ -84,6 +85,15 @@ run_treePL_cv(
   With one thread the curve is reproducible for a given `seed`, at a
   cost of about 4% in wall-clock time on the reference dataset.
 
+- cv_outlier_factor:
+
+  One number above 1, or `NULL`. A random subsample of the
+  cross-validation that fails, or adds more than this many times the
+  median chi-square increment at any smoothing value of 0.1 or below, is
+  left out of the selection. Defaults to `5`; `NULL` selects on the sum
+  over every subsample, as before 0.5.3. See the section on anomalous
+  subsamples below.
+
 - treepl_bin:
 
   Name or path of the `treePL` binary.
@@ -100,8 +110,13 @@ run_treePL_cv(
 ## Value
 
 Invisibly, a list with `smoothing`, `cv_table`, `cv_at_edge`,
-`cv_shape`, `prime_lines`, `primes`, `tree_file` (the chronogram
-written) and the paths of the three configurations.
+`cv_shape`, `cv_failures` (per smoothing value, the subsamples evaluated
+and how many failed; `NULL` when the log carries no per-subsample line),
+`cv_smoothing_without_failures` (see the section on failed subsamples
+below), `cv_smoothing_all_subsamples`, `cv_excluded_subsamples` and
+`cv_table_selection` (see the section on anomalous subsamples below),
+`prime_lines`, `primes`, `tree_file` (the chronogram written) and the
+paths of the three configurations.
 
 ## Choices relative to the protocol
 
@@ -147,6 +162,57 @@ states it when the function runs:
   the plateau with
   [`report_smoothing_sensitivity()`](https://beeamerino.github.io/PhyloCactus/reference/report_smoothing_sensitivity.md).
   Reported as a message.
+
+## Failed subsamples
+
+Under `randomcv`, `treePL` writes in the log of the cross-validation
+(`cv_<label>.log`) the running chi-square sum after each random
+subsample. A subsample whose contribution is 1e+30 or more has failed,
+and the total at that smoothing value is then of the same order, so the
+value drops out of the selection. The function counts the failed
+subsamples at every value and warns when one or more failed at any value
+of 0.1 or below, the part of the grid where a selection falls in
+practice: the warning names each such value with how many of how many
+subsamples failed there, says whether the selected value is among them,
+and names the smoothing with the lowest chi-square among the values of
+0.1 or below at which no subsample failed, which is also returned as
+`cv_smoothing_without_failures`. With `cv_outlier_factor = NULL`, a
+value with a failed subsample carries a total of the order of the
+failure, so that smoothing is the selected value whenever the selection
+falls at 0.1 or below, and the warning then says so. With the default,
+the failed subsample is left out (see the section on anomalous
+subsamples), the selection can fall on a value where it failed, and the
+warning says that too. Values above 0.1 are left out: on the reference
+dataset no run has selected a value above 0.1, and subsamples fail often
+there. The running sum is printed with eight significant digits, so the
+chi-square of the subsamples after a failure cannot be recovered from
+the log, and the count of failures is a lower bound.
+
+## Anomalous subsamples
+
+A failed subsample is not the only one that can move the selection. In
+the re-dating of the reference dataset under one fixed-age calibration
+(Tutorial 2, Module 10), one or two of the ten subsamples of each
+cross-validation fitted badly from 0.1 down to about 1e-07, or failed,
+and normally below; summed over every subsample, the curves selected the
+smallest values of the grid, and summed without those subsamples each
+had its minimum at 1e-05. The default factor of 5 was set after those
+curves had been read. With `cv_outlier_factor` set, a subsample that
+fails at any value of 0.1 or below, or adds more than
+`cv_outlier_factor` times the median increment of the subsamples at such
+a value, is left out, and the smoothing is selected on the curve of the
+remaining subsamples over the values of 0.1 or below. The values are
+compared on one set of subsamples: because the subsamples after a
+failure are lost at that value, either those values or those subsamples
+are left out, whichever keeps more subsample-by-value cells. The curve
+is classified as the plain sum is (see above). When no subsample is
+anomalous the selection is that of the plain sum. When fewer than five
+subsamples or five values would remain, the function warns and selects
+on the plain sum. A warning names the subsamples left out and why, and
+gives the selection over every subsample, returned as
+`cv_smoothing_all_subsamples`; both curves are written to
+`cv_<label>_selection.csv`, and the account to
+`cv_<label>_selection.txt`.
 
 ## References
 

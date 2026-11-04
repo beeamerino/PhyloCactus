@@ -18,7 +18,8 @@ report_smoothing_sensitivity(
   smoothing_values = c(1e-04, 0.01, 1, 10, 100),
   treepl_bin = "treePL",
   timeout = 1800,
-  work_dir = NULL
+  work_dir = NULL,
+  nodes = NULL
 )
 ```
 
@@ -57,17 +58,31 @@ report_smoothing_sensitivity(
   beside `cfg_file`, so the evidence behind the table survives alongside
   it.
 
+- nodes:
+
+  Named list of character vectors, or `NULL` (the default). Each element
+  is a set of terminal labels, and the age of their most recent common
+  ancestor is reported under its name, after the calibrated nodes. Names
+  must differ from the labels of the `mrca` lines. A set with fewer than
+  two terminals in the chronogram gets no age, with a warning. With
+  `nodes`, a configuration without `mrca` lines is accepted.
+
 ## Value
 
-Invisibly, a data frame with one row per smoothing value and calibrated
-node: `smoothing`, `smoothing_used`, `node`, `age_ma`, `seconds` and
-`converged`.
+Invisibly, a data frame with one row per smoothing value and node
+(calibrated, then those of `nodes`): `smoothing`, `smoothing_used`,
+`node`, `age_ma`, `seconds` and `converged`.
 
 ## Details
 
-The nodes come from the `mrca` lines of the configuration itself, so the
-table covers exactly the nodes the analysis makes claims about and
-cannot drift out of step with them.
+The calibrated nodes come from the `mrca` lines of the configuration
+itself, so the table covers exactly the nodes the analysis constrains
+and cannot drift out of step with them. Under a single fixed-age
+calibration (`min` equal to `max`) that is one node whose age cannot
+move, and the table says nothing about the ages the chronogram
+estimates. `nodes` adds those nodes: each is a set of terminals, and its
+age is that of their most recent common ancestor in each chronogram. A
+set holding every terminal gives the root.
 
 Each run is checked with the same verification applied everywhere else:
 the smoothing treePL reports in its log must match the smoothing
@@ -80,6 +95,14 @@ and not tabulated as a result.
 if (FALSE) { # \dontrun{
 report_smoothing_sensitivity(
   cfg_file = "8_Dating/auto_results/ML_tree/configure_smooth_ML_tree"
+)
+# Under one fixed-age calibration, the ages of uncalibrated crowns
+constraints <- read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
+tips <- ape::read.tree("ml_tree.tree")$tip.label  # the maximum-likelihood tree that was dated
+report_smoothing_sensitivity(
+  cfg_file = "8_Dating/auto_results/ML_tree/configure_smooth_ML_tree",
+  nodes = list(Cactaceae_crown = calibration_tips(constraints, "Family", "Cactaceae", tips),
+               root = tips)
 )
 } # }
 ```

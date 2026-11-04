@@ -37,6 +37,7 @@ automate_treePL(
   cvstart = 1000,
   cvstop = 1e-14,
   cv_nthreads = 1L,
+  cv_outlier_factor = 5,
   wrapper_sh = NULL,
   notify = FALSE,
   notify_to = NULL,
@@ -177,13 +178,24 @@ automate_treePL(
   Ends of the cross-validation smoothing grid, 1e+03 and 1e-14 by
   default. See
   [`run_treePL_cv()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_cv.md)
-  for how the shape of the resulting curve is classified and reported.
+  for how the shape of the resulting curve is classified and reported,
+  and for the warning on failed random subsamples, which is repeated
+  here when the maximum-likelihood stage is read from disk.
 
 - cv_nthreads:
 
   Integer. Number of threads for the cross-validation stage. Defaults to
   `1L`, which makes the cross-validation curve reproducible for a given
   `seed`. See
+  [`run_treePL_cv()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_cv.md).
+
+- cv_outlier_factor:
+
+  One number above 1, or `NULL`. Random subsamples of the
+  cross-validation that fail, or add more than this many times the
+  median chi-square increment at a smoothing value of 0.1 or below, are
+  left out of the selection of the smoothing. Defaults to `5`; `NULL`
+  selects on every subsample. See the section on anomalous subsamples of
   [`run_treePL_cv()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_cv.md).
 
 - wrapper_sh:
@@ -221,7 +233,11 @@ automate_treePL(
 ## Value
 
 Invisibly, the path of the dated maximum-likelihood chronogram written
-into `treePL_out`.
+into `treePL_out`. The failed subsamples of the cross-validation per
+smoothing value (`cv_failures`) are returned by
+[`run_treePL_cv()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_cv.md),
+not by this function, which repeats only their warning when the
+maximum-likelihood stage is read from disk.
 
 ## References
 

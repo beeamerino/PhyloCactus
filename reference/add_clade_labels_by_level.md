@@ -16,7 +16,8 @@ add_clade_labels_by_level(
   fontface = "plain",
   sort_desc = TRUE,
   angle = 0,
-  align = TRUE
+  align = TRUE,
+  hjust = NULL
 )
 ```
 
@@ -50,7 +51,10 @@ add_clade_labels_by_level(
 - fontface:
 
   Character. Font face specification (e.g., `"plain"`, `"bold"`,
-  `"italic"`). Defaults to `"plain"`.
+  `"italic"`). Defaults to `"plain"`. With `"plain"`, a label that is a
+  genus name is set in italics; names ending in `-aceae`, `-oideae`,
+  `-eae` or `-inae`, names in capitals and names starting with `"Core "`
+  stay plain.
 
 - sort_desc:
 
@@ -65,6 +69,12 @@ add_clade_labels_by_level(
 
   Logical. Align clade bars to common rightmost margin? Defaults to
   `TRUE`.
+
+- hjust:
+
+  Numeric or `NULL`. Justification of the label along its own direction.
+  `NULL` (the default) centres a rotated label on its bar (`0.5` when
+  `angle` is not `0`) and starts a horizontal label at its bar (`0`).
 
 ## Value
 

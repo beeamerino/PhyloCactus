@@ -1,6 +1,6 @@
-# Sweep the Threshold of Remoteness of the Molecular Diagnostic Branch
+# Sweep the Threshold of Remoteness of Module 14
 
-Step 9 of the branch. Without a rule of remoteness the nearest neighbour
+Step 9 of Module 14. Without a rule of remoteness the nearest neighbour
 names a cactus species for any query: in the outgroup control, 288 of
 312 outgroup queries came out in state 1. This step applies the rule (a
 query whose distance to its nearest neighbour exceeds a threshold is

@@ -1,13 +1,13 @@
-# Summarise the Per-Class Metrics of the Molecular Diagnostic Branch
+# Summarise the Per-Class Metrics of Module 14
 
-Step 10 of the branch. For each classifier at its operating point of
-step 9, per locus and per scheme, it writes the metrics of the
-validation: per-class recall and precision as distributions (median,
-interquartile range, the classes with recall 0 and the classes never
-assigned), the unassigned rate and the two kinds of misassignment as
-separate figures, and the five context columns of the locus on every
-row. It runs no classifier and computes no operating point: both come
-from steps 7 and 9.
+Step 10 of Module 14. For each classifier at its operating point of step
+9, per locus and per scheme, it writes the metrics of the validation:
+per-class recall and precision as distributions (median, interquartile
+range, the classes with recall 0 and the classes never assigned), the
+unassigned rate and the two kinds of misassignment as separate figures,
+and the five context columns of the locus on every row. It runs no
+classifier and computes no operating point: both come from steps 7 and
+9.
 
 ## Usage
 

@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://beeamerino.github.io/PhyloCactus/404.html</loc></url>
+<url><loc>https://beeamerino.github.io/PhyloCactus/LICENSE-text.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/articles/PhyloCactus.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/articles/index.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html</loc></url>
@@ -60,10 +61,12 @@
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/integrate_publication_tree.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/map_branch_supports.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/merge_barcoding_chunks.html</loc></url>
+<url><loc>https://beeamerino.github.io/PhyloCactus/reference/phylocactus_checklist.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/phylocactus_colours.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/phylocactus_panel_tags.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/plot_barcoding_identification.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/plot_barcoding_identification_summary.html</loc></url>
+<url><loc>https://beeamerino.github.io/PhyloCactus/reference/plot_tree_space.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/prepare_tip_annotation.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/preprocess_partitions.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/report_barcoding_identification.html</loc></url>
@@ -90,6 +93,7 @@
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/standardize_taxon.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_genus_discrimination.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_metrics.html</loc></url>
+<url><loc>https://beeamerino.github.io/PhyloCactus/reference/summarise_iucn_registry.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/sweep_barcoding_threshold.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/theme_phylocactus.html</loc></url>
 <url><loc>https://beeamerino.github.io/PhyloCactus/reference/validate_phylogenies.html</loc></url>

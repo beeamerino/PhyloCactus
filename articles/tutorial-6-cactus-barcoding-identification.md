@@ -18,12 +18,6 @@ Each example has three parts:
     [`plot_barcoding_identification()`](https://beeamerino.github.io/PhyloCactus/reference/plot_barcoding_identification.md),
     one line of reading, and a link to the full HTML report.
 
-The reports on the website were written from the tables of the
-identification runs, made before the version number of the package was
-set to 0.5.0: their provenance table gives `0.4.5.9000`, the number the
-package carried when the samples were identified, and their footer gives
-0.5.0, the version that wrote the page.
-
 The script `tutorial-6-cactus-barcoding-identification.R` runs all of it
 from the tutorial folder:
 
@@ -31,10 +25,6 @@ from the tutorial folder:
 
 file.edit(system.file("scripts", "tutorial-6-cactus-barcoding-identification.R", package = "PhyloCactus"))
 ```
-
-The figures on this page are drawn from the answer tables of these
-examples, distributed with the package in `inst/extdata`; the script
-draws the same figures from your own run.
 
 ## Before You Start
 
@@ -75,7 +65,7 @@ behind a confident answer can be checked.
 
 `LT745702.1`, `matK` of *Pseudorhipsalis amazonica* subsp. *panamensis*.
 The record is named at subspecies rank, so the mining of Tutorial 1 left
-it out; the library holds its binomial.
+it out. The library holds its binomial.
 
 ``` r
 
@@ -92,20 +82,20 @@ identify_barcoding_query("examples/LT745702.1.gb", run_name = "LT745702.1")
 ![\*\*Figure 1.\*\* Answer of the Sanger record LT745702.1. IdTaxa
 confidence of each locus found, at genus rank (striped bar) and species
 rank (solid bar), coloured by state (dark blue, species; light blue,
-genus; grey, no answer), with the threshold as a dashed line; below, the
+genus; grey, no answer), with the threshold as a dashed line. Below, the
 species of the named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-5-1.png)
 
 **Figure 1.** Answer of the Sanger record LT745702.1. IdTaxa confidence
 of each locus found, at genus rank (striped bar) and species rank (solid
 bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line; below, the species of the
+answer), with the threshold as a dashed line. Below, the species of the
 named genus in the library and their sequences per locus.
 
-**Reading.** `matK` names the genus *Pseudorhipsalis*. IdTaxa reached
-the right species, *P. amazonica*, with a species confidence of 61.6,
-under the species threshold of `matK` (66.9): the species is listed as
-an alternative (`below_species_threshold`), not assigned. `trnQ-rps16`
+`matK` names the genus *Pseudorhipsalis*. IdTaxa reached the right
+species, *P. amazonica*, with a species confidence of 61.6, under the
+species threshold of `matK` (66.9): the species is listed as an
+alternative (`below_species_threshold`), not assigned. `trnQ-rps16`
 overlaps too little (`short_overlap`). [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/LT745702.1.html).
 
@@ -125,20 +115,20 @@ identify_barcoding_query("examples/PZ714536.1.gb", run_name = "PZ714536.1")
 sp.). IdTaxa confidence of each locus found, at genus rank (striped bar)
 and species rank (solid bar), coloured by state (dark blue, species;
 light blue, genus; grey, no answer), with the threshold as a dashed
-line; below, the species of the named genus in the library and their
+line. Below, the species of the named genus in the library and their
 sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-7-1.png)
 
 **Figure 2.** Answer of the Sanger record PZ714536.1 (*Opuntia* sp.).
 IdTaxa confidence of each locus found, at genus rank (striped bar) and
 species rank (solid bar), coloured by state (dark blue, species; light
-blue, genus; grey, no answer), with the threshold as a dashed line;
-below, the species of the named genus in the library and their sequences
+blue, genus; grey, no answer), with the threshold as a dashed line.
+Below, the species of the named genus in the library and their sequences
 per locus.
 
-**Reading.** *Opuntia* at genus rank (genus confidence 79.2). The region
-is identical to 17 library records of several species of *Opuntia*, so
-no species can be told apart at this locus. [Full
+*Opuntia* at genus rank (genus confidence 79.2). The region is identical
+to 17 library records of several species of *Opuntia*, so no species can
+be told apart at this locus. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/PZ714536.1.html).
 
 ## Example 3. One Specimen, Four Loci
@@ -160,7 +150,7 @@ identify_barcoding_query("examples/OK340410.1_specimen.gb", sample = "Coryphanth
 elephantidens\* subsp. \*bumamma\* (four loci). IdTaxa confidence of
 each locus found, at genus rank (striped bar) and species rank (solid
 bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line; below, the species of the
+answer), with the threshold as a dashed line. Below, the species of the
 named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-9-1.png)
 
@@ -168,12 +158,12 @@ locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chu
 subsp. *bumamma* (four loci). IdTaxa confidence of each locus found, at
 genus rank (striped bar) and species rank (solid bar), coloured by state
 (dark blue, species; light blue, genus; grey, no answer), with the
-threshold as a dashed line; below, the species of the named genus in the
+threshold as a dashed line. Below, the species of the named genus in the
 library and their sequences per locus.
 
-**Reading.** `matK` and `rbcL` name *Coryphantha*; `rpL16` and
-`psbA-trnH` give no answer (low confidence). The two loci that answer
-agree, and the sample is answered at genus rank. [Full
+`matK` and `rbcL` name *Coryphantha*. `rpL16` and `psbA-trnH` give no
+answer (low confidence). The two loci that answer agree, and the sample
+is answered at genus rank. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/OK340410.1.html).
 
 ## Example 4. One Specimen, Four Loci, and a Wrong Species
@@ -192,7 +182,7 @@ identify_barcoding_query("examples/OP189074.1_specimen.gb", sample = "Xiquexique
 (four loci). IdTaxa confidence of each locus found, at genus rank
 (striped bar) and species rank (solid bar), coloured by state (dark
 blue, species; light blue, genus; grey, no answer), with the threshold
-as a dashed line; below, the species of the named genus in the library
+as a dashed line. Below, the species of the named genus in the library
 and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-11-1.png)
 
@@ -200,20 +190,20 @@ locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chu
 loci). IdTaxa confidence of each locus found, at genus rank (striped
 bar) and species rank (solid bar), coloured by state (dark blue,
 species; light blue, genus; grey, no answer), with the threshold as a
-dashed line; below, the species of the named genus in the library and
+dashed line. Below, the species of the named genus in the library and
 their sequences per locus.
 
-**Reading.** `ITS` names *Xiquexique frewenii* with a species confidence
-of 62.5, just over its species threshold (60.9); the other three loci
-give no answer. A species named by one locus, close to its threshold,
-with every other locus silent, is the pattern of most wrong species of
-this version: read it as the genus until another locus agrees. [Full
+`ITS` names *Xiquexique frewenii* with a species confidence of 62.5,
+just over its species threshold (60.9). The other three loci give no
+answer. A species named by one locus, close to its threshold, with every
+other locus silent, is the pattern of most wrong species of this
+version: read it as the genus until another locus agrees. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/OP189074.1.html).
 
 ## Example 5. A GenBank Plastome Named to Species
 
 `MN517611.1`, the plastome of *Mammillaria zephyranthoides*. A GenBank
-flat file is read as such; each locus is cropped from the plastome.
+flat file is read as such: each locus is cropped from the plastome.
 
 ``` r
 
@@ -225,19 +215,19 @@ identify_barcoding_query("examples/MN517611.1.gb", run_name = "MN517611.1")
 ![\*\*Figure 5.\*\* Answer of the plastome MN517611.1. IdTaxa confidence
 of each locus found, at genus rank (striped bar) and species rank (solid
 bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line; below, the species of the
+answer), with the threshold as a dashed line. Below, the species of the
 named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-13-1.png)
 
 **Figure 5.** Answer of the plastome MN517611.1. IdTaxa confidence of
 each locus found, at genus rank (striped bar) and species rank (solid
 bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line; below, the species of the
+answer), with the threshold as a dashed line. Below, the species of the
 named genus in the library and their sequences per locus.
 
-**Reading.** `matK` names *Mammillaria zephyranthoides* (82.8 against
-66.9), among the species of *Mammillaria* of its library; the other loci
-found give no answer. [Full
+`matK` names *Mammillaria zephyranthoides* (82.8 against 66.9), among
+the species of *Mammillaria* of its library. The other loci found give
+no answer. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/MN517611.1.html).
 
 ## Example 6. A GenBank Plastome Named as Another Species
@@ -254,21 +244,21 @@ identify_barcoding_query("examples/MT387452.1.gb", run_name = "MT387452.1")
 ![\*\*Figure 6.\*\* Answer of the plastome MT387452.1. IdTaxa confidence
 of each locus found, at genus rank (striped bar) and species rank (solid
 bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line; below, the species of the
+answer), with the threshold as a dashed line. Below, the species of the
 named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-15-1.png)
 
 **Figure 6.** Answer of the plastome MT387452.1. IdTaxa confidence of
 each locus found, at genus rank (striped bar) and species rank (solid
 bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line; below, the species of the
+answer), with the threshold as a dashed line. Below, the species of the
 named genus in the library and their sequences per locus.
 
-**Reading.** `matK` names *Lepismium lumbricoides* (81.2 against 66.9):
-the region is identical to FN669720.1, a record under that name
+`matK` names *Lepismium lumbricoides* (81.2 against 66.9): the region is
+identical to FN669720.1, a record under that name
 (`identical_to_library`). An identical sequence under another name, a
 misidentified voucher or a haplotype shared across genera, yields a
-confident wrong answer; the report lists the record so that it can be
+confident wrong answer. The report lists the record so that it can be
 checked. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/MT387452.1.html).
 
@@ -277,7 +267,7 @@ report](https://beeamerino.github.io/PhyloCactus/reports/MT387452.1.html).
 A sample sheet has one row per sample: `sample_id`, `input_type` (a row
 of the matrix of accepted inputs, `barcoding_accepted_inputs.csv`),
 `file_1`, and optionally `file_2`, `declared_species` and `voucher`.
-Each sample is routed to its function and gets its report; one index
+Each sample is routed to its function and gets its report. One index
 table gathers them.
 
 ``` r
@@ -308,14 +298,13 @@ Table 1. Index of the sample sheet of Example 7: loci found, rows per
 state, the genera and species named, and the answer against the declared
 species. {.table}
 
-**Reading.** `LT745702.1` names the genus *Pseudorhipsalis* and its
-declared species is not reached (`genus agrees`). `PZ714536.1` names
-*Opuntia* and declares no species (`not declared`). `MN517611.1` names
-*Mammillaria zephyranthoides* at one of its 12 loci found
-(`species agrees`). The sheet gives no voucher, so `voucher_missing` is
-`TRUE` in the three rows: a sample without a voucher is identified and
-flagged, since the leakage rule per specimen cannot be applied to it
-(its report says so).
+`LT745702.1` names the genus *Pseudorhipsalis* and its declared species
+is not reached (`genus agrees`). `PZ714536.1` names *Opuntia* and
+declares no species (`not declared`). `MN517611.1` names *Mammillaria
+zephyranthoides* at one of its 12 loci found (`species agrees`). The
+sheet gives no voucher, so `voucher_missing` is `TRUE` in the three
+rows: a sample without a voucher is identified and flagged, since the
+leakage rule per specimen cannot be applied to it (its report says so).
 
 ## Example 8. A Genome Assembly
 
@@ -335,20 +324,20 @@ identify_barcoding_assembly(asm, run_name = "GCA_024363205.1")
 ![\*\*Figure 7.\*\* Answer of the assembly GCA_024363205.1. IdTaxa
 confidence of each locus found, at genus rank (striped bar) and species
 rank (solid bar), coloured by state (dark blue, species; light blue,
-genus; grey, no answer), with the threshold as a dashed line; below, the
+genus; grey, no answer), with the threshold as a dashed line. Below, the
 species of the named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-19-1.png)
 
 **Figure 7.** Answer of the assembly GCA_024363205.1. IdTaxa confidence
 of each locus found, at genus rank (striped bar) and species rank (solid
 bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line; below, the species of the
+answer), with the threshold as a dashed line. Below, the species of the
 named genus in the library and their sequences per locus.
 
-**Reading.** *Cereus* at genus rank from `pepC_like` (its best species
-at 61.5, under the species threshold of 78.8) and `phyC`; 12 other loci
-give no answer. `rpl32-trnL` hits two scaffolds with a low mapping
-quality, which the package reports; the best hit is kept. [Full
+*Cereus* at genus rank from `pepC_like` (its best species at 61.5, under
+the species threshold of 78.8) and `phyC`. 12 other loci give no answer.
+`rpl32-trnL` hits two scaffolds with a low mapping quality, which the
+package reports. The best hit is kept. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/GCA_024363205.1.html).
 
 ## Example 9. Paired Illumina Reads
@@ -372,35 +361,35 @@ identify_barcoding_reads(fq[1], fq[2], run_name = "SRR26398994", threads = 4)
 ![\*\*Figure 8.\*\* Answer of the reads SRR26398994. IdTaxa confidence
 of each locus found, at genus rank (striped bar) and species rank (solid
 bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line; below, the species of the
+answer), with the threshold as a dashed line. Below, the species of the
 named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-21-1.png)
 
 **Figure 8.** Answer of the reads SRR26398994. IdTaxa confidence of each
 locus found, at genus rank (striped bar) and species rank (solid bar),
 coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line; below, the species of the
+answer), with the threshold as a dashed line. Below, the species of the
 named genus in the library and their sequences per locus.
 
-**Reading.** *Opuntia* at genus rank from `ndhF-rpl32`; the other ten
-loci found give no answer. For a species absent from the library, the
-genus is the right answer. [Full
+*Opuntia* at genus rank from `ndhF-rpl32`; the other ten loci found give
+no answer. For a species absent from the library, the genus is the right
+answer. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/SRR26398994.html).
 
 ## The Examples Side by Side
 
 ![\*\*Figure 9.\*\* The answers of the eight examples with a figure,
 side by side: one row per example and one column per locus found,
-coloured by state; a cross marks a locus named at genus rank only
+coloured by state. A cross marks a locus named at genus rank only
 (\`genus_only_locus\`).](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-22-1.png)
 
 **Figure 9.** The answers of the eight examples with a figure, side by
 side: one row per example and one column per locus found, coloured by
-state; a cross marks a locus named at genus rank only
+state. A cross marks a locus named at genus rank only
 (`genus_only_locus`).
 
 A plastome or an assembly holds most loci of the library, a Sanger
-record one; yet in these examples the answer rests on one or two loci in
+record one. Yet in these examples the answer rests on one or two loci in
 every case, and most loci found give no answer.
 
 ## How Well This Version Identifies
@@ -409,6 +398,27 @@ The rates below were measured with the library of this version, built
 from GenBank alone on 2026-10-13, with the species thresholds of step 9
 and `rbcL` at genus rank only. They belong to this library: as GenBank
 enriches it, they are measured again and are expected to change.
+
+The estimate to expect for a new sample comes from records that did not
+set the rules. Of 94 Sanger records from outside the library (named at
+subspecies or variety, or with no species name, so left out of the
+mining), identified one by one, none was named at species rank: 48 were
+answered at the right genus and 46 not at all (5 with no locus found).
+Where IdTaxa reached the right species, it did so under the species
+threshold (`below_species_threshold`), as in example 1. Of 23 specimens
+with several of these records, 17 were answered at the right genus, 5
+not at all, and 1 at a wrong species (example 4).
+
+The table below measures the library against its own records. The
+species thresholds of step 9 (the 0.95 quantile of the species
+confidence over the folds of this library) and the rule that `rbcL`
+answers at genus rank only (decided on these same queries, where 11 of
+34 of its species answers were right) were set on the library they are
+evaluated on, and the records of that library are the queries of the
+first row, so that row favours them. Read per answer and not per query,
+59 of the 207 species answers of the first row are wrong (28.5 %), at
+the mix of this measurement (2304 queries of species present, 2507 of
+species absent); the share changes with that mix.
 
 Outcomes, in the order species correct / genus correct / no answer /
 conflict / wrong species / wrong genus (number of queries). A species is
@@ -422,20 +432,39 @@ specimen are set aside.
 | GenBank plastome | plastome | 3 / 51 / 26 / 1 / 1 / 11 (93) | 0 / 2 / 0 / 1 / 0 / 1 (4) |
 | Illumina reads (genome skims) | run | 1 / 2 / 1 / 0 / 0 / 0 (4) | 0 / 1 / 2 / 0 / 0 / 0 (3) |
 
-Records from outside the library are a harder query than library records
-with their own specimen set aside. Of 94 Sanger records from outside the
-library (named at subspecies or variety, or with no species name, so
-left out of the mining), identified one by one, none was named at
-species rank: 48 were answered at the right genus and 46 not at all (5
-with no locus found). Where IdTaxa reached the right species, it did so
-under the species threshold (`below_species_threshold`), as in
-example 1. Of 23 specimens with several of these records, 17 were
-answered at the right genus, 5 not at all, and 1 at a wrong species
-(example 4).
+Two answers without threshold, computed on the same queries of the first
+row, show what the thresholds and the `rbcL` rule do: the top hit of
+BLAST (`blastn` megablast against the training records of each query)
+and the nearest neighbour without threshold (step 7 without the
+remoteness threshold of step 9), each naming a species, or the genus
+when the best matches tie across species of one genus. Outcomes in the
+same order:
+
+| Answer | Species present | Species absent |
+|----|----|----|
+| IdTaxa with thresholds (first row above) | 148 / 402 / 1738 / n.a. / 14 / 2 (2304) | 0 / 252 / 2173 / n.a. / 45 / 37 (2507) |
+| BLAST top hit | 1091 / 345 / 88 / n.a. / 749 / 31 (2304) | 0 / 299 / 78 / n.a. / 1988 / 142 (2507) |
+| Nearest neighbour without threshold | 999 / 424 / 151 / n.a. / 659 / 71 (2304) | 0 / 356 / 144 / n.a. / 1833 / 174 (2507) |
+
+With the species present in the library, the thresholds and the `rbcL`
+rule reduce wrong species answers from about one in three queries (749
+of 2304 with BLAST, 659 with the nearest neighbour) to 14, and raise the
+precision of a species answer from 0.593 (BLAST, 1091 of 1840) and 0.603
+(nearest neighbour, 999 of 1658) to 0.914 (148 of 162). They cost the
+right species: IdTaxa names it for 148 queries, BLAST for 1091. The
+genus is right, at any rank of the answer, for 564 of the 2304 queries
+with IdTaxa, 1929 with BLAST and 1778 with the nearest neighbour; per
+answer, it is right in 0.996 of the answers of IdTaxa and 0.870 of those
+of BLAST. With the species absent, every species answer is wrong: 1988
+with BLAST, 1833 with the nearest neighbour and 45 with IdTaxa. The
+thresholds were set on this library and the baselines have no tuned
+parameter, so the comparison favours IdTaxa.
 
 The genus is the answer to expect from this version. A species is named
-rarely, mostly from `matK` and from plastomes; abstention is the most
-common answer, and a wrong species is rare but possible.
+for few queries, mostly from `matK` and from plastomes, and abstention
+is the most common answer. When a species is named, it is wrong in 14 of
+162 answers if the species is in the library and in every answer if it
+is not, 59 of 207 at the mix of this measurement.
 
 ## Limitations
 
@@ -453,10 +482,10 @@ common answer, and a wrong species is rare but possible.
 
 ## References
 
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic
+- Korotkova *et al*., 2021. Cactaceae at Caryophyllales.org – a dynamic
   online species-level taxonomic backbone for the family. *Willdenowia*,
   51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
-- Murali *et al*. 2018. IDTAXA: a novel approach for accurate taxonomic
+- Murali *et al*., 2018. IDTAXA: a novel approach for accurate taxonomic
   classification of microbiome sequences. *Microbiome*, 6.
   <https://doi.org/10.1186/s40168-018-0521-5>
 

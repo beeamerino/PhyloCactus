@@ -29,7 +29,7 @@ integrate_publication_tree(
 
 - constraints_path:
 
-  Character. Taxonomy constraints CSV path.
+  Not used in this version; accepted so that earlier calls still run.
 
 - out_dir:
 
@@ -39,7 +39,7 @@ integrate_publication_tree(
 
   Numeric. Felsenstein Bootstrap Proportion (FBP) threshold below which
   weakly supported nodes are collapsed into soft polytomies (0.0 to 1.0;
-  default 0.70; collapsing 703 of 987 free nodes in the reference
+  default 0.70; collapsing 840 of 1171 free nodes in the reference
   dataset).
 
 ## Value

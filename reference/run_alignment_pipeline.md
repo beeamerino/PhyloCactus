@@ -180,7 +180,7 @@ software version 7: Improvements in performance and usability.
 
 Wright, E. S. (2024). Fast and Flexible Search for Homologous Biological
 Sequences with DECIPHER v3. *The R Journal*, 16(2), 191-200.
-[doi:10.18129/B9.bioc.DECIPHER](https://doi.org/10.18129/B9.bioc.DECIPHER)
+[doi:10.32614/RJ-2024-022](https://doi.org/10.32614/RJ-2024-022)
 
 ## Examples
 

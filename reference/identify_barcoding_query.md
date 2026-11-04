@@ -2,7 +2,7 @@
 
 Classifies each query against the IdTaxa model of each locus of the
 library, or of the one declared, and answers locus by locus with the
-three states of the branch. It never combines loci into one answer.
+three states of Module 14. It never combines loci into one answer.
 
 ## Usage
 
@@ -123,7 +123,7 @@ Invisibly, the table of answers: one row per query and locus tested.
 For each locus:
 
 1.  The whole query is tested against the 20-mers of the locus on both
-    strands, with the rule of the rest of the branch (share of 0.15,
+    strands, with the rule of the rest of Module 14 (share of 0.15,
     ratio of 3). If it matches, it is classified as it is
     (`path = "whole"`). This is the path of a Sanger sequence.
 

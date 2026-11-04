@@ -1,4 +1,4 @@
-# Build the Final Reference Library of the Molecular Diagnostic Branch
+# Build the Final Reference Library of Module 14
 
 Takes the curated alignments written by
 [`curate_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/curate_barcoding_markers.md)

@@ -65,10 +65,10 @@ run_marker_screening(
 
   This module asks whether a locus resolves the ingroup radiation, and
   the answer cannot depend on how many outgroup accessions exist.
-  `trnT-psbD` is the case that forced the distinction: 50 ingroup
+  `trnT-psbD` is the case that forced the distinction: 57 ingroup
   sequences against a threshold of 100, rejected as an ingroup marker,
-  while carrying 52 *Portulaca* sequences of about 1347 bp, more
-  outgroup sequences than any other marker. Bringing it back is a
+  while carrying 53 outgroup sequences (52 *Portulaca* species and one
+  *Talinopsis*) with a median length of 1347 bp. Bringing it back is a
   decision about connecting the two groups, which belongs to
   [`integrate_and_clean_markers()`](https://beeamerino.github.io/PhyloCactus/reference/integrate_and_clean_markers.md)
   and its `readmit_markers` argument, not to a sequence count here.

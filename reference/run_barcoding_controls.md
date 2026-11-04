@@ -1,6 +1,6 @@
-# Negative Controls of the Molecular Diagnostic Branch
+# Negative Controls of Module 14
 
-Step 8 of the branch, and the gate in front of every real figure. Three
+Step 8 of Module 14, and the gate in front of every real figure. Three
 controls, none of which is a result of the method: the three are the
 condition for a result of the method to be interpretable.
 
@@ -134,7 +134,9 @@ library, it would be a different set of queries, and the two figures
 could not be subtracted. Written with the label
 `irreproducible_resubstitution` in the table itself, so the figure
 cannot travel without it. **Its value is published only next to the
-honest figure**, which does not exist yet.
+honest figure**, the rates of the folds of
+[`build_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/build_barcoding_folds.md)
+on the same queries.
 
 ## Examples
 

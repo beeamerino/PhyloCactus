@@ -22,6 +22,9 @@ apply_clade_label_layers(p, registry, layer_specs)
 - layer_specs:
 
   Data frame defining visual style specifications per annotation layer.
+  An optional `hjust` column sets the justification of each layer;
+  without it, rotated labels are centred on their bars (see
+  [`add_clade_labels_by_level()`](https://beeamerino.github.io/PhyloCactus/reference/add_clade_labels_by_level.md)).
 
 ## Value
 

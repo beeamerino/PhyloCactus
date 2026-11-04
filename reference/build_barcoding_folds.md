@@ -1,6 +1,6 @@
-# Build the Validation Folds of the Molecular Diagnostic Branch
+# Build the Validation Folds of Module 14
 
-Step 5 of the branch. Reads the library written by
+Step 5 of Module 14. Reads the library written by
 [`finalize_barcoding_library()`](https://beeamerino.github.io/PhyloCactus/reference/finalize_barcoding_library.md),
 builds the two partition schemes (E and G), checks the hard rule on
 every fold and writes the fold tables and their summary. The training

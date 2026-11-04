@@ -8,23 +8,22 @@ sequence retrieval from GenBank, quality control, phylogenetic
 inference, divergence time estimation, visualization and comparison with
 published phylogenies.
 
-Multilocus matrices assembled from GenBank inherit the heterogeneity of
+Multilocus datasets assembled from GenBank inherit the heterogeneity of
 decades of deposition: inconsistent locus annotations, duplicated
 accessions, records without vouchers, orthographic variants and
 nomenclatural synonyms. Converting these records into a phylogenetic
-matrix requires curation, taxonomic reconciliation against an accepted
-checklist (Korotkova *et al*. 2021), and quality control of each
-alignment. The difficulty increases in plant lineages that diversified
-recently and rapidly, where low plastid divergence, incomplete lineage
-sorting (ILS) and reticulate evolution increase the risk of erroneous
-orthology assessment and of alignment error.
+matrix requires taxonomic curation against an accepted checklist
+(Korotkova *et al*., 2021), and quality control of each alignment. The
+difficulty increases in plant lineages that diversified recently and
+rapidly, where low plastid divergence, incomplete lineage sorting (ILS)
+and reticulate evolution increase the risk of erroneous orthology
+assessment and of alignment error.
 
-**Cactaceae**, one of the largest succulent radiations of the Neotropics
-(Arakaki *et al*. 2011; Hernández-Hernández *et al*. 2014; Guerrero *et
-al*. 2019), combine these properties, and their GenBank record is uneven
-in taxonomic and locus coverage. `PhyloCactus` was developed on this
-family and implements its assembly and analysis as a reproducible
-workflow.
+**Cactaceae**, one of the largest succulent radiations of the
+Neotropics, combine these properties, and their GenBank record is
+irregular in taxonomic and locus coverage. `PhyloCactus` was developed
+on this family and implements its assembly and analysis as a
+reproducible workflow.
 
 ## Design
 
@@ -39,49 +38,46 @@ from any completed module.
 
 ## Workflow
 
-The workflow comprises thirteen modules grouped in four stages.
+The workflow comprises fourteen modules grouped in five stages.
 
 ![\*\*Figure 1.\*\* Conceptual framework of the PhyloCactus pipeline:
-the phylogenetic branch (Modules 1 to 13) and the molecular diagnostic
-branch (Tutorials 5 and 6) on the same phylotaR
-mining.](figures/Fig1_PhyloCactus_Workflow.png)
+the phylogeny (Stages 1 to 4, Modules 1 to 13) and molecular
+identification (Stage 5, Module
+14).](figures/Fig1_PhyloCactus_Workflow.png)
 
 **Figure 1.** Conceptual framework of the PhyloCactus pipeline: the
-phylogenetic branch (Modules 1 to 13) and the molecular diagnostic
-branch (Tutorials 5 and 6) on the same phylotaR mining.
+phylogeny (Stages 1 to 4, Modules 1 to 13) and molecular identification
+(Stage 5, Module 14).
 
 1.  **Data Assembly and Preparation (Modules 1 to 6)**: retrieval of
     orthologous sequence clusters with `phylotaR`, alignment with
     `MAFFT`, masking of unreliable alignment regions with `DECIPHER`, a
-    saturation screen, taxonomic reconciliation against the
-    Caryophyllales.org checklist
-    (`CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx`; Korotkova *et
-    al*. 2021), and concatenation into a partitioned supermatrix.
+    saturation screen, taxonomic check against the Caryophyllales.org
+    checklist, and concatenation into a partitioned supermatrix.
 2.  **Phylogenetic Inference and Dating (Modules 7 to 10)**:
     substitution model selection per partition with `ModelTest-NG` under
     AICc, constrained maximum-likelihood inference with `RAxML-NG`,
-    Felsenstein bootstrap proportions (FBP) with the transfer bootstrap
-    expectation (TBE) as a secondary measure, temporal bootstrap
+    Felsenstein bootstrap proportions (FBP), temporal bootstrap
     replicates, and penalized likelihood dating with `treePL`.
 3.  **Visualization and Metadata Integration (Modules 11 and 12)**: IUCN
-    Red List assessments retrieved with `rredlist`, collapse of nodes
-    with FBP \< 0.70 into polytomies, and tree, chronogram and
-    conservation figures.
+    Red List assessments retrieved with `rredlist`, and tree, chronogram
+    and conservation figures. Tutorial 3 draws every node with its FBP;
+    [`integrate_publication_tree()`](https://beeamerino.github.io/PhyloCactus/reference/integrate_publication_tree.md),
+    which Tutorial 3 does not call, collapses nodes with FBP \< 70
+    (`collapse_cutoff = 0.70`) into soft polytomies for data
+    visualization.
 4.  **Validation (Module 13)**: Robinson-Foulds and
     information-theoretic distances and multidimensional scaling (MDS)
     of tree space
     ([`validate_phylogenies()`](https://beeamerino.github.io/PhyloCactus/reference/validate_phylogenies.md))
-    against published phylogenies, one of which can optionally be
-    summarized from published gene trees under the multispecies
-    coalescent with `ASTRAL-III`.
+    against published phylogenies.
+5.  **Molecular identification (Module 14)**: builds a reference library
+    of 15 loci from the same phylotaR mining in Stage 1, validates it,
+    and identifies a sample (sequences, an assembly or Illumina reads)
+    against it, locus by locus, in three states: species, genus or no
+    answer.
 
 Each stage can be run on its own, from the outputs of the previous one.
-
-A second branch, molecular identification by DNA barcoding (Tutorials 5
-and 6), builds a reference library of 15 loci from the same phylotaR
-mining, validates it, and identifies a sample (sequences, an assembly or
-Illumina reads) against it, locus by locus, in three states: species,
-genus or no answer.
 
 ## Installation
 
@@ -106,6 +102,24 @@ library(PhyloCactus)
 packageVersion("PhyloCactus")
 ```
 
+### Configuring the System PATH
+
+If R does not find an executable, add its installation directory to
+`PATH` in `.Renviron`:
+
+``` r
+
+usethis::edit_r_environ()
+```
+
+For example:
+
+``` bash
+PATH="/path/to/**your-app**/bin:${PATH}"
+```
+
+Restart the R session after saving the file.
+
 ### R Package Dependencies
 
 `PhyloCactus` depends on packages from CRAN, Bioconductor and GitHub:
@@ -128,10 +142,10 @@ BiocManager::install(c("DECIPHER", "Biostrings", "ggtree"))
 
 #### phylotaR
 
-[`phylotaR`](https://github.com/ropensci/phylotaR) (Bennett *et al.*
-2018) retrieves orthologous DNA sequences from GenBank by BLAST-based
-clustering, which does not depend on the gene names given in the
-records. Install it from GitHub:
+[`phylotaR`](https://github.com/ropensci/phylotaR) (Bennett *et al*.
+2018; Wang *et al*. 2026) retrieves orthologous DNA sequences from
+GenBank by BLAST-based clustering, which does not depend on the gene
+names given in the records. Install it from GitHub:
 
 ``` r
 
@@ -180,38 +194,22 @@ than `~/.blastula_gmail`.
 
 ## External Software
 
-The following command-line programs must be installed separately and
-available on the system `PATH`:
+The following software must be installed separately and available on the
+system `PATH`:
 
-| Software | Purpose | Citation |
-|:---|:---|:---|
-| [`BLAST+`](https://www.ncbi.nlm.nih.gov/books/NBK279690/) | Sequence similarity search for cluster identification | Camacho, C. *et al*. (2009). BLAST+: Architecture and applications. *BMC Bioinformatics*, 10. <https://doi.org/10.1186/1471-2105-10-421> |
-| [`MAFFT`](https://mafft.cbrc.jp/alignment/software/) | Multiple sequence alignment | Katoh, K., & Standley, D. M. (2013). MAFFT multiple sequence alignment software version 7: Improvements in performance and usability. *Molecular Biology and Evolution*, 30(4), 772–780. <https://doi.org/10.1093/molbev/mst010> |
-| [`ModelTest-NG`](https://github.com/ddarriba/modeltest) | Model selection | Darriba, D. *et al*. (2020). ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291-294. <https://doi.org/10.1093/molbev/msz189> |
-| [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | Maximum-likelihood phylogenetic inference | Kozlov, A. M. *et al*. (2019). RAxML-NG: A fast, scalable and user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305> |
-| [`treePL`](https://github.com/blackrim/treePL) | Divergence time estimation | Smith, S. A., & O’Meara, B. C. (2012). TreePL: Divergence time estimation using penalized likelihood for large phylogenies. *Bioinformatics*, 28(20), 2689–2690. <https://doi.org/10.1093/bioinformatics/bts492> |
-| [`fastp`](https://github.com/OpenGene/fastp) | Read trimming (identification from Illumina reads only) | Chen, S., Zhou, Y., Chen, Y., & Gu, J. (2018). fastp: an ultra-fast all-in-one FASTQ preprocessor. *Bioinformatics*, 34(17), i884-i890. |
-| [`GetOrganelle`](https://github.com/Kinggerm/GetOrganelle) | Plastome and nuclear ribosomal DNA assembly (identification from Illumina reads only) | Jin, J.-J. *et al*. (2020). GetOrganelle: a fast and versatile toolkit for accurate de novo assembly of organelle genomes. *Genome Biology*, 21, 241. |
-| [`minimap2`](https://github.com/lh3/minimap2) | Mapping onto an assembly (identification from an assembly only) | Li, H. (2018). Minimap2: pairwise alignment for nucleotide sequences. *Bioinformatics*, 34(18), 3094-3100. |
-| [`samtools`](https://github.com/samtools/samtools) | Extraction of mapped regions (identification from an assembly only) | Danecek, P. *et al*. (2021). Twelve years of SAMtools and BCFtools. *GigaScience*, 10(2), giab008. |
-
-### Configuring the System PATH
-
-If R does not find an executable, add its installation directory to
-`PATH` in `.Renviron`:
-
-``` r
-
-usethis::edit_r_environ()
-```
-
-For example:
-
-``` bash
-PATH="/Users/**your_user**/miniconda3/bin:${PATH}"
-```
-
-Restart the R session after saving the file.
+| Software | Version of the reference run | Purpose | Needed in | Citation |
+|:---|:---|:---|:---|:---|
+| [`BLAST+`](https://www.ncbi.nlm.nih.gov/books/NBK279690/) | 2.17.0 | Sequence similarity search for cluster identification | Tutorial 1 | Camacho *et al*. (2009) *BMC Bioinformatics* |
+| [`MAFFT`](https://mafft.cbrc.jp/alignment/software/) | 7.526 | Multiple sequence alignment | Tutorials 1 and 5 | Katoh & Standley (2013) *Mol. Biol. Evol.* |
+| [`ModelTest-NG`](https://github.com/ddarriba/modeltest) | 0.1.7 | Substitution model selection for partitioned data | Tutorial 2 | Darriba *et al*. (2020) *Mol. Biol. Evol.* |
+| [`RAxML-NG`](https://github.com/amkozlov/raxml-ng) | 1.2.2 | Constrained maximum-likelihood inference and bootstrap support | Tutorial 2 | Kozlov *et al*. (2019) *Bioinformatics* |
+| [`treePL`](https://github.com/blackrim/treePL) | build 2022.04.06 of brewsci/bio | Penalized likelihood divergence time estimation | Tutorial 2 | Smith & O’Meara (2012) *Bioinformatics* |
+| [`TreeAnnotator`](https://www.beast2.org/treeannotator/) | 2.7.7 (BEAST 2.7) | Summary of the dated replicates; run outside the package | Tutorial 2 | Bouckaert *et al*. (2019) *PLoS Comput. Biol.* |
+| [`fastp`](https://github.com/OpenGene/fastp) | 1.3.7 | Read trimming before organelle assembly (identification from Illumina reads only) | Tutorials 5 and 6 | Chen *et al*. (2018) *Bioinformatics* |
+| [`GetOrganelle`](https://github.com/Kinggerm/GetOrganelle) | 1.7.7.1 | Assembly of the plastome and nuclear ribosomal DNA from reads (identification from Illumina reads only) | Tutorials 5 and 6 | Jin *et al*. (2020) *Genome Biol.* |
+| [`minimap2`](https://github.com/lh3/minimap2) | 2.31-r1302 | Mapping of the library loci onto an assembly (identification from an assembly only) | Tutorials 5 and 6 | Li (2018) *Bioinformatics* |
+| [`samtools`](https://github.com/samtools/samtools) | 1.24 | Extraction of the mapped regions (identification from an assembly only) | Tutorials 5 and 6 | Danecek *et al*. (2021) *GigaScience* |
+| `ASTRAL-III`, with Java | not run by the reference run, which used the distributed summary tree | Optional species-tree summary of the published gene trees | Tutorial 4 (optional step) | Zhang *et al*. (2018) *BMC Bioinformatics* |
 
 ## Package Structure
 
@@ -250,20 +248,47 @@ which assembles a curated multilocus dataset from GenBank.
 
 ## References
 
-- Arakaki *et al*. 2011. Contemporaneous and recent radiations of the
-  world’s major succulent plant lineages. *Proceedings of the National
-  Academy of Sciences of the United States of America*, 108(20),
-  8379–8384. <https://doi.org/10.1073/pnas.1100628108>
-- Bennett *et al*. 2018. phylotaR: an automated pipeline for retrieving
+- Bennett *et al*., 2018. phylotaR: an automated pipeline for retrieving
   orthologous DNA sequences from GenBank in R. *Life*, 8(2), 20.
   <https://doi.org/10.3390/life8020020>
-- Guerrero *et al*. 2019. Phylogenetic relationships and evolutionary
-  trends in the cactus family. *Journal of Heredity*, 110(1), 4–21.
-  <https://doi.org/10.1093/jhered/esy064>
-- Hernández-Hernández *et al*. 2014. Beyond aridification: Multiple
-  explanations for the elevated diversification of cacti in the New
-  World Succulent Biome. *New Phytologist*, 202(4), 1382–1397.
-  <https://doi.org/10.1111/nph.12752>
-- Korotkova *et al*. 2021. Cactaceae at Caryophyllales.org - A dynamic
+- Bouckaert *et al*., 2019. BEAST 2.5: an advanced software platform for
+  Bayesian evolutionary analysis. *PLoS Computational Biology*, 15(4),
+  e1006650. <https://doi.org/10.1371/journal.pcbi.1006650>
+- Camacho *et al*., 2009. BLAST+: architecture and applications. *BMC
+  Bioinformatics*, 10, 421. <https://doi.org/10.1186/1471-2105-10-421>
+- Chen *et al*., 2018. fastp: an ultra-fast all-in-one FASTQ
+  preprocessor. *Bioinformatics*, 34(17), i884–i890.
+  <https://doi.org/10.1093/bioinformatics/bty560>
+- Danecek *et al*., 2021. Twelve years of SAMtools and BCFtools.
+  *GigaScience*, 10(2), giab008.
+  <https://doi.org/10.1093/gigascience/giab008>
+- Darriba *et al*., 2020. ModelTest-NG: a new and scalable tool for the
+  selection of DNA and protein evolutionary models. *Molecular Biology
+  and Evolution*, 37(1), 291–294.
+  <https://doi.org/10.1093/molbev/msz189>
+- Jin *et al*., 2020. GetOrganelle: a fast and versatile toolkit for
+  accurate de novo assembly of organelle genomes. *Genome Biology*,
+  21, 241. <https://doi.org/10.1186/s13059-020-02154-5>
+- Katoh & Standley, 2013. MAFFT multiple sequence alignment software
+  version 7: improvements in performance and usability. *Molecular
+  Biology and Evolution*, 30(4), 772–780.
+  <https://doi.org/10.1093/molbev/mst010>
+- Korotkova *et al*., 2021. Cactaceae at Caryophyllales.org – a dynamic
   online species-level taxonomic backbone for the family. *Willdenowia*,
   51(2), 251–270. <https://doi.org/10.3372/wi.51.51208>
+- Kozlov *et al*., 2019. RAxML-NG: a fast, scalable and user-friendly
+  tool for maximum likelihood phylogenetic inference. *Bioinformatics*,
+  35(21), 4453–4455. <https://doi.org/10.1093/bioinformatics/btz305>
+- Li, 2018. Minimap2: pairwise alignment for nucleotide sequences.
+  *Bioinformatics*, 34(18), 3094–3100.
+  <https://doi.org/10.1093/bioinformatics/bty191>
+- Smith & O’Meara, 2012. treePL: divergence time estimation using
+  penalized likelihood for large phylogenies. *Bioinformatics*, 28(20),
+  2689–2690. <https://doi.org/10.1093/bioinformatics/bts492>
+- Wang *et al*., 2026. phylotaR: Automated Phylogenetic Sequence Cluster
+  Identification from ‘GenBank’. *R package version 1.3.0*.
+  <https://docs.ropensci.org/phylotaR/>
+- Zhang *et al*., 2018. ASTRAL-III: polynomial time species tree
+  reconstruction from partially resolved gene trees. *BMC
+  Bioinformatics*, 19(Suppl 6), 153.
+  <https://doi.org/10.1186/s12859-018-2129-y>

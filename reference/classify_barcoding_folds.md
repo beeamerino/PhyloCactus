@@ -1,6 +1,6 @@
-# Classify the Validation Folds of the Molecular Diagnostic Branch
+# Classify the Validation Folds of Module 14
 
-Step 7 of the branch. Reads the library of step 4 and the folds of step
+Step 7 of Module 14. Reads the library of step 4 and the folds of step
 5, classifies every query of every fold and writes the raw predictions,
 one row per query. It aggregates nothing: no accuracy, no rate, no mean.
 The negative controls (step 8) and the metrics (step 10) read these
@@ -51,7 +51,8 @@ classify_barcoding_folds(
 
 - method:
 
-  Character. `"nn"`, the branch classifier, or `"idtaxa"`, the contrast.
+  Character. `"nn"`, the classifier of Module 14, or `"idtaxa"`, the
+  contrast.
 
 - model:
 

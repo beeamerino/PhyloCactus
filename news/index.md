@@ -1,5 +1,171 @@
 # Changelog
 
+## PhyloCactus 0.5.3
+
+This version closes the audit of 26 October 2026. The trees and tables
+of the reference run of 13 to 15 October 2026 are those distributed
+since 0.5.0, except that the registry of species loses columns and three
+tables are added. The chronogram was dated again (Module 10, 30 October
+2026) under three calibration schemes, each one fixed age on the crown
+of the ACP clade and no calibration inside Cactaceae; the
+maximum-likelihood search, the bootstrap and the temporal replicates
+were not run again.
+
+### Dating
+
+- `calibrations_bounds.csv` holds three calibration schemes for
+  `ACP_root`, each a fixed age from a published chronogram: scheme 1,
+  the young tree of Zuntini *et al*. (2024), 53.22 Ma, the stem of
+  Cactaceae, which on this tree is the ACP crown (the active row);
+  scheme 2, Ramírez-Barahona *et al*. (2020), 41.82 Ma, the median
+  height of the stem of Portulacaceae in the BEAST analysis
+  `RC_complete`; scheme 3, Arakaki *et al*. (2011), 37.0 Ma. The ACP and
+  ACPT crowns of Wu et al. (2026) are added as references.
+- Module 10 was run for each scheme from the configuration of the
+  distributed run with only the calibration lines changed: priming,
+  cross-validation, the maximum-likelihood tree and the same 100
+  temporal replicates, at the smoothing each cross-validation selects
+  (1e-05 in all three), with seed 79992967, and TreeAnnotator v2.7.7 of
+  BEAST 2. The distributed chronogram and its summary are those of
+  scheme 1: the crown of Cactaceae is 27.33 Ma (23.51 to 30.37 Ma over
+  the replicates). `PROVENANCE.csv` records the scheme and the
+  smoothing. Tutorial 2 gives the three schemes, why scheme 1 is the
+  main one, and their ages; the dating of 0.5.2 and the analyses of the
+  closure are reported in the supplementary material.
+
+### What left `inst/extdata`, and how to obtain it
+
+- The content of the IUCN Red List assessment of each species.
+  `phylocactus_table_species.csv` keeps 3 of its 36 `iucn_*` columns
+  (`iucn_found`, `iucn_category` and `iucn_category_name`); the other
+  33, with the texts, ranges, threats and habitats of each assessment,
+  are no longer distributed, as sections 3 and 4 of the Terms of Use of
+  the IUCN Red List require. A user obtains them with their own token
+  through
+  [`get_iucn_data()`](https://beeamerino.github.io/PhyloCactus/reference/get_iucn_data.md),
+  as in Tutorial 3, which writes them to
+  `9_Visualization/tables/TABLE_species_all_data.csv`. The new
+  [`summarise_iucn_registry()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_iucn_registry.md)
+  reduces that table to the category of each species and to two count
+  tables, distributed as `phylocactus_table_iucn_endemic_by_country.csv`
+  (`country`, `iucn_category`, `n`) and
+  `phylocactus_table_iucn_classes.csv` (`field`, `class`, `n`: threats,
+  habitats and endemic species in the tree), both with the columns
+  `redlist_version` and `access_date` (version 2026-1, read on 15
+  October 2026). Tutorial 3 draws Figures 14 to 17 and the endemism row
+  of Table 1 from them, with the counts of 0.5.2.
+- The checklist of Caryophyllales.org (Korotkova *et al*. 2021), which
+  may be used but not redistributed. A user requests it from the team of
+  Caryophyllales.org and gives its path in `~/.Renviron` as
+  `PHYLOCACTUS_CHECKLIST`. The new
+  [`phylocactus_checklist()`](https://beeamerino.github.io/PhyloCactus/reference/phylocactus_checklist.md)
+  returns that path, reports the md5 of the file and warns when it is
+  not the file of the reference run, because species counts then differ
+  from those of the tutorials. The tutorials and the default
+  `checklist_path` of
+  [`assemble_barcoding_dataset()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_barcoding_dataset.md)
+  and
+  [`extract_barcoding_plastome_loci()`](https://beeamerino.github.io/PhyloCactus/reference/extract_barcoding_plastome_loci.md)
+  call it; the functions that read the checklist take a path as before,
+  so no analysis changes.
+- The four published trees that Tutorial 4 compares with the focal tree,
+  `reference_amaral_2022.tree`, `reference_thompson_2024.tree`,
+  `reference_zuntini_2024.tree` and `reference_devos_2025_astral.tree`.
+  Tutorial 4 lists, for each, where the file is, its name there and the
+  md5 of the file the reference run read, and gives the pruning of the
+  Kew Tree of Life 4.0 to Cactaceae; a user downloads them into a folder
+  named by `PHYLOCACTUS_REFERENCE_TREES`. Figure 1 of Tutorial 4 is
+  drawn by the new
+  [`plot_tree_space()`](https://beeamerino.github.io/PhyloCactus/reference/plot_tree_space.md)
+  from the tree-space coordinates of the reference run, distributed as
+  `phylocactus_table_tree_space.csv`, and its table of distances from
+  `phylocactus_table_tree_distances.csv`, so the page is built without
+  the trees and without the checklist.
+- The authors, ranks, taxa and identifiers of the checklist in
+  `phylocactus_table_species.csv` (`checklist_fullName`,
+  `checklist_author`, `checklist_rank`, `checklist_taxon` and
+  `checklist_uuid`), which the registry carried for 1965 species;
+  [`summarise_iucn_registry()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_iucn_registry.md)
+  now leaves them out, and the registry keeps the names and the result
+  of the match to the checklist.
+- These files remain in the earlier tags of the repository and in their
+  archives; the history is not rewritten.
+
+### Provenance of the reference run
+
+- `PROVENANCE.csv` records the seeds of the reference run, read from its
+  logs: 1111 for the maximum-likelihood search; 2150, 4300, 6450 and
+  8600 for the four bootstrap tasks; 87786 for the temporal bootstrap;
+  79992967 for treePL. It records the versions of MAFFT, ModelTest-NG,
+  phylotaR, BLAST+, DECIPHER and TreeAnnotator beside those of RAxML-NG,
+  treePL and R; the version of the package installed when the run was
+  first published, 0.5.0 (`run_package_version`), beside the one that
+  republished it (`package_version`); and the name and md5 of the
+  checklist the run read.
+
+### Code
+
+- [`run_treePL_cv()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_cv.md)
+  counts the random subsamples of the cross-validation that failed, read
+  from `cv_<label>.log` (an increment of the running chi-square of 1e+30
+  or more), and warns when one or more failed at a smoothing value of
+  0.1 or below. The warning names each such value with the number of
+  subsamples that failed there, says whether the selected value is among
+  them, and names the value with the lowest chi-square among those at
+  which no subsample failed; the result returns `cv_failures` and
+  `cv_smoothing_without_failures`.
+  [`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)
+  repeats the check on a run read from disk.
+- [`run_treePL_cv()`](https://beeamerino.github.io/PhyloCactus/reference/run_treePL_cv.md)
+  and
+  [`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)
+  gain `cv_outlier_factor` (default 5). A random subsample of the
+  cross-validation that fails, or adds more than that many times the
+  median increment of the subsamples, at any smoothing value of 0.1 or
+  below, is left out of the selection, and the values are compared on
+  one set of subsamples. A warning names the subsamples left out; both
+  curves are written to `cv_<label>_selection.csv` and the account to
+  `cv_<label>_selection.txt`. `cv_outlier_factor = NULL` selects on
+  every subsample. In the re-dating, one subsample of each scheme had
+  moved the selection to 1e-09 to 1e-11. The default of 5 was set after
+  the curves of the re-dating had been read. When the failed subsample
+  is left out, the warning on failed subsamples says so, and the factor
+  must be `NULL` or one number above 1.
+- [`report_smoothing_sensitivity()`](https://beeamerino.github.io/PhyloCactus/reference/report_smoothing_sensitivity.md)
+  gains `nodes`, a named list of terminal sets whose ages are reported
+  beside those of the calibrated nodes. Under one fixed-age calibration
+  the table otherwise holds one constant age; Module 10 passes the root
+  and the crowns of Cactaceae, Cactoideae, Cacteae and Opuntioideae.
+- New exported functions:
+  [`phylocactus_checklist()`](https://beeamerino.github.io/PhyloCactus/reference/phylocactus_checklist.md),
+  [`summarise_iucn_registry()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_iucn_registry.md)
+  and
+  [`plot_tree_space()`](https://beeamerino.github.io/PhyloCactus/reference/plot_tree_space.md)
+  (above).
+
+### Text
+
+- The README, the tutorials, their scripts and the help pages state the
+  numbers of the distributed run, recomputed from `inst/extdata` and
+  pinned by tests: among them the bipartitions the constraint fixes and
+  those the data estimate, the support of the nodes of the
+  maximum-likelihood tree, and the counts of the curation in Tutorial 1,
+  which its script now states as the vignette does. Help pages no longer
+  carry numbers of earlier runs.
+- The intervals of the dated replicates are called HPD only where
+  TreeAnnotator names its column. Tutorial 2 states how many bootstrap
+  replicates were dated, which branches treePL lengthens, and that the
+  fixed age of scheme 2 is the median height of its source.
+- The help page of
+  [`assemble_ingroup_phylotar()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_ingroup_phylotar.md)
+  says which of the distributed exclusions state a ground, and, for
+  those that read only “manual conflict resolution”, what the metadata
+  of the mining show: 43 of the 44 found there were placed in the
+  clusters of more than one locus. Tutorial 1 restricts its claim of
+  generality.
+- The README lists the external programs with the versions of the
+  reference run; `SystemRequirements` names TreeAnnotator.
+
 ## PhyloCactus 0.5.2
 
 - Step 7 in parallel (`classify_barcoding_folds(workers = )`) stops with
@@ -154,7 +320,7 @@ distributed results are those of 0.5.0.
   script and no test called it, and on its documented input (one
   sequence per species) its species monophyly table was always empty.
   Its `checklist_path` argument had no effect. Per-locus monophyly is
-  planned for version 0.6.
+  planned work, with no version set.
   [`extract_species_binomial()`](https://beeamerino.github.io/PhyloCactus/reference/extract_species_binomial.md),
   which it shared with the marker integration step, is kept.
 - Removed the placeholder `evaluate_dna_barcoding()` and the `barcoding`
