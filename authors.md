@@ -16,7 +16,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/beeamerino/PhyloCactus/blob/v0.5.3/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/beeamerino/PhyloCactus/blob/master/DESCRIPTION)
 
 Meriño B, Guerrero P (2026). *PhyloCactus: Phylogenetic Inference,
 Divergence Time Estimation and Molecular Identification for Cactaceae*.

@@ -738,9 +738,6 @@ the 2.5 and 97.5 percentiles over the 100 dated replicates:
 | Cacteae crown | 16.77 (14.54 to 18.66) | 13.76 (11.48 to 15.09) | 12.81 (10.61 to 14.15) |
 | Opuntioideae crown | 12.97 (11.25 to 14.81) | 10.71 (8.80 to 11.85) | 9.51 (7.91 to 10.98) |
 
-The old tree of Zuntini *et al*. (2024) (79.97 Ma), the `treePL` column
-of Ramírez-Barahona *et al*. (2020) (67.01 Ma) and its 95% HPD interval
-(27.81 to 53.37 Ma) are reported in the supplementary material.
 `inst/scripts/analysis-calibration-schemes.R` dates the three schemes.
 
 The

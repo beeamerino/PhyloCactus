@@ -20,7 +20,7 @@ were not run again.
   scheme 2, Ramírez-Barahona *et al*. (2020), 41.82 Ma, the median
   height of the stem of Portulacaceae in the BEAST analysis
   `RC_complete`; scheme 3, Arakaki *et al*. (2011), 37.0 Ma. The ACP and
-  ACPT crowns of Wu et al. (2026) are added as references.
+  ACPT crowns of Wu *et al*. (2026) are added as references.
 - Module 10 was run for each scheme from the configuration of the
   distributed run with only the calibration lines changed: priming,
   cross-validation, the maximum-likelihood tree and the same 100
@@ -30,8 +30,7 @@ were not run again.
   scheme 1: the crown of Cactaceae is 27.33 Ma (23.51 to 30.37 Ma over
   the replicates). `PROVENANCE.csv` records the scheme and the
   smoothing. Tutorial 2 gives the three schemes, why scheme 1 is the
-  main one, and their ages; the dating of 0.5.2 and the analyses of the
-  closure are reported in the supplementary material.
+  main one, and their ages.
 
 ### What left `inst/extdata`, and how to obtain it
 
@@ -146,12 +145,12 @@ were not run again.
 ### Text
 
 - The README, the tutorials, their scripts and the help pages state the
-  numbers of the distributed run, recomputed from `inst/extdata` and
-  pinned by tests: among them the bipartitions the constraint fixes and
-  those the data estimate, the support of the nodes of the
-  maximum-likelihood tree, and the counts of the curation in Tutorial 1,
-  which its script now states as the vignette does. Help pages no longer
-  carry numbers of earlier runs.
+  numbers of the distributed run, recomputed from `inst/extdata`: among
+  them the bipartitions the constraint fixes and those the data
+  estimate, the support of the nodes of the maximum-likelihood tree, and
+  the counts of the curation in Tutorial 1, which its script now states
+  as the vignette does. Help pages no longer carry numbers of earlier
+  runs.
 - The intervals of the dated replicates are called HPD only where
   TreeAnnotator names its column. Tutorial 2 states how many bootstrap
   replicates were dated, which branches treePL lengthens, and that the
@@ -161,8 +160,8 @@ were not run again.
   says which of the distributed exclusions state a ground, and, for
   those that read only “manual conflict resolution”, what the metadata
   of the mining show: 43 of the 44 found there were placed in the
-  clusters of more than one locus. Tutorial 1 restricts its claim of
-  generality.
+  clusters of more than one locus. Tutorial 1 no longer states that
+  other groups can be studied without modifying the package.
 - The README lists the external programs with the versions of the
   reference run; `SystemRequirements` names TreeAnnotator.
 
