@@ -2,8 +2,8 @@
 # treePL priming, cross-validation and dating, in R
 # -------------------------------------------------------------------------------------------------
 # These three stages are driven from R, not by a shell wrapper: the wrapper once used here
-# (github.com/tongjial/treepl_wrapper) carries no licence, so it cannot be redistributed in a
-# GPL-3 package, and it wrote `smoothing = ` where treePL reads `smooth = `, which silently dated
+# (github.com/tongjial/treepl_wrapper) carries no licence, so it cannot be redistributed in
+# this package, and it wrote `smoothing = ` where treePL reads `smooth = `, which silently dated
 # every chronogram at the built-in default of 10.
 #
 # The procedure itself is not the script's: it is the published protocol of Maurin (2020), which is
