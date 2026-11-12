@@ -32,3 +32,23 @@ test_that("each level-4 group of Cacteae in the constraint table is a clade of t
     expect_true(ape::is.monophyletic(phy, tips), info = g)
   }
 })
+
+# BMM, 2026-11-12: Figures 6 and 8 of Tutorial 3 mark the outgroup, which is not a clade of the tree, with a
+# bar over each run of consecutive outgroup terminals, aligned with the bars of the level-4 groups.
+test_that("add_outgroup_bar() draws one bar and one label per run of consecutive outgroup terminals", {
+  skip_if_not_installed("ggtree")
+  tr <- ape::read.tree(text = "((o1:1,(o2:1,(a:1,b:1):1):1):1,o3:1);")
+  p <- ggtree::ggtree(tr)
+  q <- add_outgroup_bar(p, ingroup_tips = c("a", "b"), label = "Outgroup")
+  new <- q$layers[seq.int(length(p$layers) + 1L, length(q$layers))]
+  seg <- Filter(function(l) inherits(l$geom, "GeomSegment"), new)
+  txt <- Filter(function(l) inherits(l$geom, "GeomText"), new)
+  expect_length(seg, 1L)
+  expect_length(txt, 1L)
+  ys <- sort(p$data$y[p$data$isTip & p$data$label %in% c("o1", "o2", "o3")])
+  runs <- split(ys, cumsum(c(1, diff(ys) != 1)))
+  expect_equal(nrow(seg[[1]]$data), length(runs))
+  expect_equal(sort(seg[[1]]$data$y), sort(vapply(runs, min, 0)))
+  expect_equal(unique(txt[[1]]$data$label), "Outgroup")
+  expect_identical(add_outgroup_bar(p, ingroup_tips = tr$tip.label), p)
+})
