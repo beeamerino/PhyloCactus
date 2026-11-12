@@ -299,7 +299,8 @@ augment_treedata_with_registry <- function(treedata_obj, registry) {
 #' @param offset_text Numeric. Offset fraction for label text. Defaults to `0.004`.
 #' @param fontface Character. Font face specification (e.g., `"plain"`, `"bold"`, `"italic"`). Defaults to `"plain"`.
 #'   With `"plain"`, a label that is a genus name is set in italics; names ending in `-aceae`,
-#'   `-oideae`, `-eae` or `-inae`, names in capitals and names starting with `"Core "` stay plain.
+#'   `-oideae`, `-eae` or `-inae`, names in capitals, names starting with `"Core "` and names ending in
+#'   `" clade"` stay plain.
 #' @param sort_desc Logical. Sort clade labels in descending order by tip height? Defaults to `TRUE`.
 #' @param angle Numeric. Rotation angle for text labels in degrees. Defaults to `0`.
 #' @param align Logical. Align clade bars to common rightmost margin? Defaults to `TRUE`.
@@ -325,8 +326,8 @@ add_clade_labels_by_level <- function(p,
   # label half its length off the centre of its clade
   if (is.null(hjust) || is.na(hjust)) hjust <- if (angle != 0) 0.5 else 0
   # A plain label that is a genus name is set in italics; suprageneric names (-aceae, -oideae, -eae,
-  # -inae), informal names in capitals (BCT) and "Core ..." stay as given
-  is_genus <- function(x) !grepl("(aceae|oideae|eae|inae)$|^[A-Z]{2,}$|^Core ", x)
+  # -inae), informal names in capitals (BCT), "Core ..." and names ending in "clade" stay as given
+  is_genus <- function(x) !grepl("(aceae|oideae|eae|inae| clade)$|^[A-Z]{2,}$|^Core ", x)
   
   node_pos <- p$data |>
     dplyr::select(node, x, y)

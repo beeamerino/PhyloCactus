@@ -33,7 +33,8 @@ add_clade_labels_by_level(
 
 \item{fontface}{Character. Font face specification (e.g., \code{"plain"}, \code{"bold"}, \code{"italic"}). Defaults to \code{"plain"}.
 With \code{"plain"}, a label that is a genus name is set in italics; names ending in \code{-aceae},
-\code{-oideae}, \code{-eae} or \code{-inae}, names in capitals and names starting with \code{"Core "} stay plain.}
+\code{-oideae}, \code{-eae} or \code{-inae}, names in capitals, names starting with \code{"Core "} and names ending in
+\code{" clade"} stay plain.}
 
 \item{sort_desc}{Logical. Sort clade labels in descending order by tip height? Defaults to \code{TRUE}.}
 
