@@ -48,10 +48,10 @@ Ariocarpus,Ariocarpus_retusus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cac
 Ariocarpus,Ariocarpus_scaphirostris,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
 Ariocarpus,Ariocarpus_trigonus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
 Armatocereus,Armatocereus_godingianus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Armatocereus
-Armatocereus,Armatocereus_laetus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Armatocereus
-Armatocereus,Armatocereus_matucanensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Armatocereus
+Armatocereus,Armatocereus_laetus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Armatocereus,Armatocereus_matucanensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
 Armatocereus,Armatocereus_procerus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Armatocereus
-Armatocereus,Armatocereus_rauhii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Armatocereus
+Armatocereus,Armatocereus_rauhii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
 Arrojadoa,Arrojadoa_rhodantha,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Arthrocereus,Arthrocereus_glaziovii,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Arthrocereus,Arthrocereus_rondonianus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
@@ -656,19 +656,19 @@ Lepismium,Lepismium_houlletianum,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,
 Lepismium,Lepismium_lorentzianum,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
 Lepismium,Lepismium_lumbricoides,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
 Lepismium,Lepismium_warmingianum,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
-Leptocereus,Leptocereus_arboreus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_assurgens,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_carinatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_ekmanii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_leonii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_maxonii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_nudiflorus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_paniculatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_prostratus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_quadricostatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_scopulophilus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_sylvestris,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_wrightii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
+Leptocereus,Leptocereus_arboreus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_assurgens,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_carinatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_ekmanii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_leonii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_maxonii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_nudiflorus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_paniculatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_prostratus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_quadricostatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_scopulophilus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_sylvestris,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_wrightii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
 Leuchtenbergia,Leuchtenbergia_principis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
 Leucostele,Leucostele_atacamensis,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Leucostele,Leucostele_chiloensis,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
@@ -1274,7 +1274,7 @@ Selenicereus,Selenicereus_costaricensis,Core I,Core I,Cactoideae,Cactaceae,Cacta
 Selenicereus,Selenicereus_dorschianus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Selenicereus,Selenicereus_escuintlensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Selenicereus,Selenicereus_extensus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
-Selenicereus,Selenicereus_grandiflorus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
+Selenicereus,Selenicereus_grandiflorus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
 Selenicereus,Selenicereus_guatemalensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Selenicereus,Selenicereus_hamatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Selenicereus,Selenicereus_inermis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
