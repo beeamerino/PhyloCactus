@@ -373,6 +373,52 @@ add_clade_labels_by_level <- function(p,
   p
 }
 
+#' Mark the Outgroup of a ggtree Plot with Bars
+#'
+#' The terminals outside the ingroup are usually not a clade of the tree, so `geom_cladelabel()` cannot
+#' mark them. This function draws a bar over each run of consecutive outgroup terminals in the plotting
+#' order and writes `label` beside it, at the position the bars of [add_clade_labels_by_level()] take
+#' with `align = TRUE` and the same `offset` and `offset_text`.
+#'
+#' @param p A `ggtree` plot object.
+#' @param ingroup_tips Character vector. Tip labels of the ingroup; every other tip is outgroup.
+#' @param label Character. Text written beside each bar. Defaults to `"Outgroup"`.
+#' @param fontsize Numeric. Font size of the label. Defaults to `3`.
+#' @param barsize Numeric. Line width of the bar. Defaults to `0.45`.
+#' @param offset Numeric. Horizontal offset of the bar, as a fraction of the width of the tree. Defaults to `0.03`.
+#' @param offset_text Numeric. Offset of the label from the bar, as a fraction of the width of the tree.
+#'   Defaults to `0.004`.
+#' @param fontface Character. Font face of the label. Defaults to `"plain"`.
+#' @return The `ggtree` plot with a segment layer and a text layer, or `p` unchanged when no tip is outgroup.
+#' @export
+#' @keywords internal
+add_outgroup_bar <- function(p,
+                             ingroup_tips,
+                             label = "Outgroup",
+                             fontsize = 3,
+                             barsize = 0.45,
+                             offset = 0.03,
+                             offset_text = 0.004,
+                             fontface = "plain") {
+  tips <- p$data[p$data$isTip, c("label", "y")]
+  ys <- sort(tips$y[!tips$label %in% ingroup_tips])
+  if (!length(ys)) return(p)
+  runs <- split(ys, cumsum(c(1, diff(ys) != 1)))
+  span_x <- diff(range(p$data$x, na.rm = TRUE))
+  max_x <- max(p$data$x, na.rm = TRUE)
+  # the positions geom_cladelabel(align = TRUE) gives its bar (max x * 1.02 + offset) and its text (max x * 1.03)
+  x_bar <- max_x * 1.02 + span_x * offset
+  x_text <- max_x * 1.03 + span_x * (offset + offset_text)
+  bars <- data.frame(y = unname(vapply(runs, min, 0)), yend = unname(vapply(runs, max, 0)))
+  bars$ymid <- (bars$y + bars$yend) / 2
+  bars$label <- label
+  p +
+    ggplot2::geom_segment(data = bars, ggplot2::aes(x = x_bar, xend = x_bar, y = .data$y, yend = .data$yend),
+                          linewidth = barsize, inherit.aes = FALSE) +
+    ggplot2::geom_text(data = bars, ggplot2::aes(x = x_text, y = .data$ymid, label = .data$label),
+                       hjust = 0, size = fontsize, fontface = fontface, inherit.aes = FALSE)
+}
+
 #' Apply Multiple Taxonomic Clade Label Layers onto ggtree Plot
 #'
 #' Sequentially overlays hierarchical taxonomic clade annotations (e.g., subfamilies, tribes, genera) onto a `ggtree` plot.

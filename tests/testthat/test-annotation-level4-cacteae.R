@@ -48,7 +48,7 @@ test_that("add_outgroup_bar() draws one bar and one label per run of consecutive
   ys <- sort(p$data$y[p$data$isTip & p$data$label %in% c("o1", "o2", "o3")])
   runs <- split(ys, cumsum(c(1, diff(ys) != 1)))
   expect_equal(nrow(seg[[1]]$data), length(runs))
-  expect_equal(sort(seg[[1]]$data$y), sort(vapply(runs, min, 0)))
+  expect_equal(sort(seg[[1]]$data$y), unname(sort(vapply(runs, min, 0))))
   expect_equal(unique(txt[[1]]$data$label), "Outgroup")
   expect_identical(add_outgroup_bar(p, ingroup_tips = tr$tip.label), p)
 })
