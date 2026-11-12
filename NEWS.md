@@ -1,6 +1,6 @@
 # PhyloCactus 0.5.4
 
-This version adds the dated tree of Carruthers *et al*. (2026) to the comparison with published phylogenies (Module 13, Tutorial 4) and corrects four points of the documentation. No analysis was run again: the supermatrix, the constraint tree, the maximum-likelihood tree, the chronograms and the identification library are those of 0.5.3.
+This version adds the dated tree of Carruthers *et al*. (2026) to the comparison with published phylogenies (Module 13, Tutorial 4) corrects four points of the documentation and names groups of the chronogram that the figures of Tutorial 3 left without a label. No analysis was run again: the supermatrix, the constraint tree, the maximum-likelihood tree, the chronograms and the identification library are those of 0.5.3.
 
 ## Comparison with published phylogenies
 
@@ -13,6 +13,8 @@ This version adds the dated tree of Carruthers *et al*. (2026) to the comparison
 
 * Tutorial 2 no longer gives a running time of the maximum-likelihood search on an Apple M2 Pro, which was not measured on the current supermatrix; it says that the module `raxml-ng/1.1.0-mpi-zen4-n` of the cluster runs RAxML-NG 1.2.2-master, the version in the logs of the run; and it no longer attributes the maximum clade credibility target tree of `TreeAnnotator` to Maurin (2020), who used 0% burn-in and mean node heights.
 * `cactus_constraints.csv` places Rhipsalideae at level 3 (`Annot_level_3`) in Core Cactoideae II, where `build_constraint_scaffold()` places the tribe. The constraint tree built from the table is unchanged.
+* `cactus_constraints.csv` gives level 4 (`Annot_level_4`) names to lineages of Cacteae that had none, with the names of the lineages in Figure 2 of Guerrero *et al*. (2019): Mammilloid clade (*Mammillaria*, *Coryphantha*, *Cochemiea*, *Pelecyphora*, *Cumarinia*), *Turbinicarpus* (with *Ariocarpus* and *Kadenicarpus*), *Rapicactus* (with *Lophophora*, *Acharagma* and *Obregonia*), *Ferocactus* (with *Thelocactus*, *Stenocactus*, *Kroenleinia* and *Leuchtenbergia*) and *Astrophytum*, *Echinocactus* (with two species of *Homalocephala*); *Eulychnia* takes *Austrocactus*. Each group is a clade of the chronogram, so the chronogram and the maximum-likelihood tree of Tutorial 3 now label it; *Coryphantha*, *Cochemiea*, *Ariocarpus*, *Astrophytum* and *Stenocactus* are no longer labelled on their own. Only `Clade` builds the constraint tree, and the tree built from the table is unchanged.
+* `add_clade_labels_by_level()` sets a label that ends in "clade" in roman type, as it does for suprageneric names.
 
 # PhyloCactus 0.5.3
 
