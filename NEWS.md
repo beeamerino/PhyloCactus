@@ -1,3 +1,19 @@
+# PhyloCactus 0.5.4
+
+This version adds the dated tree of Carruthers *et al*. (2026) to the comparison with published phylogenies (Module 13, Tutorial 4) and corrects four points of the documentation. No analysis was run again: the supermatrix, the constraint tree, the maximum-likelihood tree, the chronograms and the identification library are those of 0.5.3.
+
+## Comparison with published phylogenies
+
+* `validate_phylogenies()` and `plot_tree_space()` give the tree of Carruthers *et al*. (2026), named `Carruthers` in `trees_mapping_list`, the sixth colour of the categorical palette, its own shape and the default legend label `"Carruthers et al. (2026)"`.
+* Tutorial 4 compares the focal tree with five published trees. The new one is `best.tre_dated` of the OSF deposit of Carruthers *et al*. (2026) (<https://doi.org/10.17605/OSF.IO/9TBHA>); the tutorial gives its md5, prunes it to its clade of Cactaceae, shortens its labels from `Genus_species__<NCBI taxid>` to `Genus_species`, and gives the md5 of the pruned file the reference run read. Like the other reference trees, it is not distributed with the package.
+* Under `pruning_strategy = "common_set"`, the species shared by every tree of set A3 are those of A1, so panel A3 of the tree-space figure has the points of panel A1. Its label in `SUPP_tree_space_coordinates.csv` now says so; the pairwise distances of A3 keep all the species of the shared genera and their label.
+* A sixth tree changes the species shared by all trees, so `phylocactus_table_tree_distances.csv` and `phylocactus_table_tree_space.csv` were regenerated for every tree, not only for the new one; the distances of set A2 (the focal tree and the trees of Thompson *et al*. 2024 and Amaral *et al*. 2022) do not involve the new tree and are unchanged.
+
+## Text and data
+
+* Tutorial 2 no longer gives a running time of the maximum-likelihood search on an Apple M2 Pro, which was not measured on the current supermatrix; it says that the module `raxml-ng/1.1.0-mpi-zen4-n` of the cluster runs RAxML-NG 1.2.2-master, the version in the logs of the run; and it no longer attributes the maximum clade credibility target tree of `TreeAnnotator` to Maurin (2020), who used 0% burn-in and mean node heights.
+* `cactus_constraints.csv` places Rhipsalideae at level 3 (`Annot_level_3`) in Core Cactoideae II, where `build_constraint_scaffold()` places the tribe. The constraint tree built from the table is unchanged.
+
 # PhyloCactus 0.5.3
 
 This version closes the audit of 26 October 2026. The trees and tables of the reference run of 13 to 15 October 2026 are those distributed since 0.5.0, except that the registry of species loses columns and three tables are added. The chronogram was dated again (Module 10, 30 October 2026) under three calibration schemes, each one fixed age on the crown of the ACP clade and no calibration inside Cactaceae; the maximum-likelihood search, the bootstrap and the temporal replicates were not run again.

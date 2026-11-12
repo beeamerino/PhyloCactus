@@ -2,7 +2,7 @@ Package: PhyloCactus
 Type: Package
 Title: Phylogenetic Inference, Divergence Time Estimation and 
     Molecular Identification for Cactaceae
-Version: 0.5.3
+Version: 0.5.4
 Authors@R: c(
     person("Beatriz M.", "Meriño", email = "beeatrizmerino@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-9518-2331")),
     person("Tania", "Hernández-Hernández", role = "ctb"),
