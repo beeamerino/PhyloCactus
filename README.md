@@ -36,7 +36,7 @@ The workflow comprises fourteen modules grouped in five stages.
     Adds species-level IUCN Red List assessments retrieved with `rredlist` and produces the tree, chronogram and conservation figures with `ggplot2` and `ggtree`. Tutorial 3 draws every node with its FBP; `integrate_publication_tree()` collapses internal nodes with FBP \< 70 (`collapse_cutoff = 0.70`) into soft polytomies for data visualization.
 
 4.  **Stage 4: Validation (Module 13)**\
-    Compares the focal tree with published phylogenies (Amaral *et al*., 2022; Thompson *et al*., 2024; Zuntini *et al*., 2024; de Vos *et al*., 2025) by Robinson-Foulds and information-theoretic distances and by multidimensional scaling (MDS) of tree space (`validate_phylogenies()`).
+    Compares the focal tree with published phylogenies (Amaral *et al*., 2022; Thompson *et al*., 2024; Zuntini *et al*., 2024; de Vos *et al*., 2025; Carruthers *et al*., 2026) by Robinson-Foulds and information-theoretic distances and by multidimensional scaling (MDS) of tree space (`validate_phylogenies()`).
 
 5.  **Stage 5: Molecular identification (Module 14)**\
     Builds a reference library of 15 loci from the same phylotaR mining retrieved in Stage 1, validates it with folds that ask for the species or, with the species left out, for the genus, with negative controls, and identifies a sample locus by locus with `IdTaxa` (Murali *et al*., 2018) in three states: species, genus or no answer. Each identification writes an HTML report (Tutorial 6 identifies samples of each kind of input).
@@ -128,6 +128,7 @@ citation("PhyloCactus")
 - Arakaki *et al*., 2011. Contemporaneous and recent radiations of the world's major succulent plant lineages. *PNAS*, 108(20), 8379–8384. <https://doi.org/10.1073/pnas.1100628108>
 - Bouckaert *et al*., 2019. BEAST 2.5: an advanced software platform for Bayesian evolutionary analysis. *PLoS Computational Biology*, 15(4), e1006650. <https://doi.org/10.1371/journal.pcbi.1006650>
 - Camacho *et al*., 2009. BLAST+: architecture and applications. *BMC Bioinformatics*, 10, 421. <https://doi.org/10.1186/1471-2105-10-421>
+- Carruthers *et al*., 2026. A large phylogenetic tree for euphyllophytes. *Applications in Plant Sciences*, e70092. <https://doi.org/10.1002/aps3.70092>
 - Chen *et al*., 2018. fastp: an ultra-fast all-in-one FASTQ preprocessor. *Bioinformatics*, 34(17), i884–i890. <https://doi.org/10.1093/bioinformatics/bty560>
 - Danecek *et al*., 2021. Twelve years of SAMtools and BCFtools. *GigaScience*, 10(2), giab008. <https://doi.org/10.1093/gigascience/giab008>
 - Darriba *et al*., 2020. ModelTest-NG: a new and scalable tool for the selection of DNA and protein evolutionary models. *Molecular Biology and Evolution*, 37(1), 291–294. <https://doi.org/10.1093/molbev/msz189>

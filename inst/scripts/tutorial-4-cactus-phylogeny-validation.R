@@ -26,8 +26,8 @@ dir.create("10_Validation/logs", recursive = TRUE, showWarnings = FALSE)
 # Reference Phylogenies and Optional ASTRAL-III Re-inference
 # -------------------------------------------------------------
 # The reference trees (Amaral et al. 2022, Thompson et al. 2024, Zuntini et al. 2024,
-# and de Vos et al. 2025) are not distributed with the package. Obtain each from its
-# source (table in Tutorial 4), save the four in one folder and set its path in ~/.Renviron:
+# de Vos et al. 2025 and Carruthers et al. 2026) are not distributed with the package. Obtain each
+# from its source (table in Tutorial 4), save the five in one folder and set its path in ~/.Renviron:
 # - PHYLOCACTUS_REFERENCE_TREES="/path/to/reference_trees", holding
 #   reference_amaral_2022.tree      Amaral et al. 2022: dataset+tree_80MD/Tree_80MD.tre of
 #                                   https://doi.org/10.6084/m9.figshare.17057816
@@ -41,6 +41,10 @@ dir.create("10_Validation/logs", recursive = TRUE, showWarnings = FALSE)
 #                                   319e6985225858b836ab2ff37054b3e5)
 #   reference_devos_2025_astral.tree  de Vos et al. 2025: QC.Species_tree_astral.tree of Online Resource 4,
 #                                   doi:10.1007/s00606-025-01948-z (md5 5ceb901a0555521da1a14f0815787362)
+#   reference_carruthers_2026.tree  Carruthers et al. 2026: best.tre_dated of https://doi.org/10.17605/OSF.IO/9TBHA
+#                                   (md5 8bc0675dc015668dd04cf6d4460ae67f), pruned to its Cactaceae and
+#                                   its labels reduced to Genus_species as Tutorial 4 shows (md5 of the
+#                                   reference run's file cdb7218a73ae92c868ae837d18c3256f)
 # - PHYLOCACTUS_CHECKLIST, the checklist of Korotkova et al. (2021) (Tutorial 1).
 # Re-estimating the de Vos et al. (2025) species tree from its gene trees requires ASTRAL-III and Java:
 # - Set ASTRAL_PATH in ~/.Renviron (e.g., ASTRAL_PATH="/path/to/astral.5.7.8.jar")
@@ -147,7 +151,8 @@ tree_paths <- list(
   Zuntini     = file.path(reference_dir, "reference_zuntini_2024.tree"),
   Thompson    = file.path(reference_dir, "reference_thompson_2024.tree"),
   Amaral      = file.path(reference_dir, "reference_amaral_2022.tree"),
-  deVos       = file.path(reference_dir, "reference_devos_2025_astral.tree")
+  deVos       = file.path(reference_dir, "reference_devos_2025_astral.tree"),
+  Carruthers  = file.path(reference_dir, "reference_carruthers_2026.tree")
 )
 
 # Filter missing trees
