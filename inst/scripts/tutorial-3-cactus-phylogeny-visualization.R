@@ -421,6 +421,9 @@ if (file.exists(supp_tree_file)) {
       theme(legend.position = "bottom")
 
     p6 <- PhyloCactus::apply_clade_label_layers(p6, registry_compact, ML_MAIN_LAYER_SPECS)
+    # The outgroup is not a clade of the tree: a bar over its terminals, aligned with the level-4 bars
+    cactaceae_tips <- ape::extract.clade(ml_tree, registry$level_1$node[registry$level_1$label == "Cactaceae"])$tip.label
+    p6 <- PhyloCactus::add_outgroup_bar(p6, cactaceae_tips, fontsize = 2.5, barsize = 0.34, offset = 0.010, offset_text = 0.0038)
     xmax <- max(p6$data$x, na.rm = TRUE)
     p6 <- p6 + coord_cartesian(xlim = c(0, xmax + xmax * 0.35), clip = "off") + theme(plot.margin = margin(12, 12, 12, 12))
 
@@ -486,6 +489,9 @@ if (file.exists(chrono_file)) {
       theme_tree()
     
     p8 <- PhyloCactus::apply_clade_label_layers(p8, registry_chrono_compact, CHRONO_MAIN_LAYER_SPECS)
+    # The outgroup is not a clade of the tree: a bar over its terminals, aligned with the level-4 bars
+    cactaceae_tips <- ape::extract.clade(tree_phy, registry_chrono$level_1$node[registry_chrono$level_1$label == "Cactaceae"])$tip.label
+    p8 <- PhyloCactus::add_outgroup_bar(p8, cactaceae_tips, fontsize = 2.5, barsize = 0.34, offset = 0.010, offset_text = 0.0038)
     p8 <- PhyloCactus::add_chronogram_axis(p8, tree_phy, by = 5, digits = 0L, segment_size = 3, title_margin_top = 30)
     
     xmax <- max(p8$data$x, na.rm = TRUE)
