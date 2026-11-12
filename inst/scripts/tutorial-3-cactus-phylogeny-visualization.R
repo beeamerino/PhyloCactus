@@ -372,6 +372,8 @@ if (file.exists(supp_tree_file)) {
     # A group is labelled only when it is monophyletic in the tree.
     registry_compact <- registry
     registry_compact$level_4_supp <- dplyr::filter(registry$level_4_supp, n_tips_target >= 10)
+    # A label of two names goes on two lines, so that it clears the bar of level 3
+    registry_compact$level_4_supp$label <- sub(", ", ",\n", registry_compact$level_4_supp$label, fixed = TRUE)
 
     max_raw <- max(suppressWarnings(as.numeric(ml_tree$node.label)), na.rm = TRUE)
     is_proportion <- !is.na(max_raw) && max_raw <= 1.0
@@ -415,7 +417,7 @@ if (file.exists(supp_tree_file)) {
         name = "Support (FBP)",
         na.translate = FALSE
       ) +
-      geom_treescale(fontsize = 3, linesize = 0.4) +
+      geom_treescale(x = 0, y = -25, fontsize = 3, linesize = 0.4) +
       theme(legend.position = "bottom")
 
     p6 <- PhyloCactus::apply_clade_label_layers(p6, registry_compact, ML_MAIN_LAYER_SPECS)
@@ -475,6 +477,8 @@ if (file.exists(chrono_file)) {
     )
     registry_chrono_compact <- registry_chrono
     registry_chrono_compact$level_4_supp <- dplyr::filter(registry_chrono$level_4_supp, n_tips_target >= 10)
+    # A label of two names goes on two lines, so that it clears the bar of level 3
+    registry_chrono_compact$level_4_supp$label <- sub(", ", ",\n", registry_chrono_compact$level_4_supp$label, fixed = TRUE)
 
     p8 <- ggtree(chrono_beast, linewidth = 0.3) +
       theme_tree2() + 
