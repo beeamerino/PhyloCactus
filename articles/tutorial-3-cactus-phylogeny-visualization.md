@@ -571,17 +571,20 @@ each of the 13 loci (one point per locus, labelled).
 
 Figure 6 shows which relationships the supermatrix resolves once the
 constraint has fixed the backbone. The groups marked at the three upper
-levels, and seven of the 13 at the finest level (BCT, the three tribes
+levels, and seven of the 19 at the finest level (BCT, the three tribes
 of Opuntioideae, Notocacteae, Rhipsalideae and *Copiapoa*), sit on
 constrained nodes, so their monophyly is an assumption of the analysis
-and not a result of it. The other six were estimated from the data, with
-FBP from 100 (*Eulychnia*) to 40 (*Coryphantha*). Of the 1,171 nodes
-estimated from the data, 840 have an FBP under 70, and support falls
-with clade size: 91 of the 344 nodes that unite two terminals have an
-FBP of 90 or more, whereas 121 of the 141 nodes of more than 20
-terminals have an FBP under 70. The data resolve many relationships
-between closely related species and few among the larger groups within
-the constrained clades (Tutorial 2, Module 9).
+and not a result of it. The other 12 were estimated from the data, with
+FBP from 100 (*Eulychnia*, *Austrocactus*) to 1 (*Ferocactus*). Five of
+the groups of Cacteae and *Eulychnia*, *Austrocactus* take the names of
+lineages in Figure 2 of Guerrero *et al*. (2019); their membership is
+that of the clades of this tree. Of the 1,171 nodes estimated from the
+data, 840 have an FBP under 70, and support falls with clade size: 91 of
+the 344 nodes that unite two terminals have an FBP of 90 or more,
+whereas 121 of the 141 nodes of more than 20 terminals have an FBP under
+70. The data resolve many relationships between closely related species
+and few among the larger groups within the constrained clades (Tutorial
+2, Module 9).
 
 ``` r
 
@@ -622,6 +625,8 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
     # A group is labelled only when it is monophyletic in the tree.
     registry_compact <- registry
     registry_compact$level_4_supp <- dplyr::filter(registry$level_4_supp, n_tips_target >= 10)
+    # A label of two names goes on two lines, so that it clears the bar of level 3
+    registry_compact$level_4_supp$label <- sub(", ", ",\n", registry_compact$level_4_supp$label, fixed = TRUE)
 
     max_raw <- max(suppressWarnings(as.numeric(ml_tree$node.label)), na.rm = TRUE)
     is_proportion <- !is.na(max_raw) && max_raw <= 1.0
@@ -665,10 +670,13 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
         name = "Support (FBP)",
         na.translate = FALSE
       ) +
-      geom_treescale(fontsize = 3, linesize = 0.4) +
+      geom_treescale(x = 0, y = -25, fontsize = 3, linesize = 0.4) +
       theme(legend.position = "bottom")
 
     p6 <- PhyloCactus::apply_clade_label_layers(p6, registry_compact, ML_MAIN_LAYER_SPECS)
+    # The outgroup is not a clade of the tree: a bar over its terminals, aligned with the level-4 bars
+    cactaceae_tips <- ape::extract.clade(ml_tree, registry$level_1$node[registry$level_1$label == "Cactaceae"])$tip.label
+    p6 <- PhyloCactus::add_outgroup_bar(p6, cactaceae_tips, fontsize = 2.5, barsize = 0.34, offset = 0.010, offset_text = 0.0038)
     xmax <- max(p6$data$x, na.rm = TRUE)
     p6 <- p6 + coord_cartesian(xlim = c(0, xmax + xmax * 0.35), clip = "off") + theme(plot.margin = margin(12, 12, 12, 12))
 
@@ -687,8 +695,15 @@ estimated from the data: white, FBP of 90 or more; grey, 70 to 89;
 black, under 70. Blue, the 34 nodes fixed by the constraint, which carry
 no FBP. Bars on the right mark, from outside in, Cactaceae; Cactoideae
 and Opuntioideae; Core Cactoideae I, Core Cactoideae II and Cacteae; and
-the 13 genera, tribes, subtribes and informal clades. Genera in
-italics.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_6_ml_tree-1.png)
+the 19 genera, tribes, subtribes and informal clades of 10 or more
+terminals. Genera in italics. The names of five groups of Cacteae
+(Mammilloid clade, \*Ferocactus\*, \*Turbinicarpus\*, \*Rapicactus\* and
+\*Astrophytum\*, \*Echinocactus\*) and of \*Eulychnia\*,
+\*Austrocactus\* are those of lineages in Figure 2 of Guerrero \*et
+al\*. (2019); each group is the clade of this tree that holds the genera
+assigned to it in \`cactus_constraints.csv\`. \*Leptocereus\*,
+\*Armatocereus\* is a clade of this tree and not a lineage of that
+figure.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_6_ml_tree-1.png)
 
 **Figure 6.** Maximum-likelihood tree of 1,208 terminals (1,180
 Cactaceae and 28 outgroup species of Anacampserotaceae, Portulacaceae
@@ -700,7 +715,14 @@ estimated from the data: white, FBP of 90 or more; grey, 70 to 89;
 black, under 70. Blue, the 34 nodes fixed by the constraint, which carry
 no FBP. Bars on the right mark, from outside in, Cactaceae; Cactoideae
 and Opuntioideae; Core Cactoideae I, Core Cactoideae II and Cacteae; and
-the 13 genera, tribes, subtribes and informal clades. Genera in italics.
+the 19 genera, tribes, subtribes and informal clades of 10 or more
+terminals. Genera in italics. The names of five groups of Cacteae
+(Mammilloid clade, *Ferocactus*, *Turbinicarpus*, *Rapicactus* and
+*Astrophytum*, *Echinocactus*) and of *Eulychnia*, *Austrocactus* are
+those of lineages in Figure 2 of Guerrero *et al*. (2019); each group is
+the clade of this tree that holds the genera assigned to it in
+`cactus_constraints.csv`. *Leptocereus*, *Armatocereus* is a clade of
+this tree and not a lineage of that figure.
 
 #### Figure 7
 
@@ -738,11 +760,12 @@ if (file.exists(supp_tree_file) && nzchar(supp_tree_file)) {
 printed in italics, with the FBP beside each of the 1,171 nodes
 estimated from the data; the 34 constrained nodes carry no value, and
 there are no node symbols. Bars on the right mark the groups of Figure 6
-at the three upper levels and, at the finest level, the 26 genera,
+at the three upper levels and, at the finest level, the 28 genera,
 tribes, subtribes and informal clades of three or more terminals that
-are monophyletic in the tree. Three groups of `cactus_constraints.csv`
-are not monophyletic in the tree and carry no bar: Hylocereeae,
-*Armatocereus* and *Cochemiea*.
+are monophyletic in the tree, named as in Figure 6. One group of
+`cactus_constraints.csv` is not monophyletic in the tree and carries no
+bar: *Armatocereus*, the two species of the genus outside the clade
+*Leptocereus*, *Armatocereus*.
 
 The annotated `treedata` object can be exported in NEXUS format for
 FigTree or similar programs:
@@ -808,6 +831,8 @@ if (file.exists(chrono_file) && nzchar(chrono_file)) {
     )
     registry_chrono_compact <- registry_chrono
     registry_chrono_compact$level_4_supp <- dplyr::filter(registry_chrono$level_4_supp, n_tips_target >= 10)
+    # A label of two names goes on two lines, so that it clears the bar of level 3
+    registry_chrono_compact$level_4_supp$label <- sub(", ", ",\n", registry_chrono_compact$level_4_supp$label, fixed = TRUE)
 
     p8 <- ggtree(chrono_beast, linewidth = 0.3) +
       theme_tree2() + 
@@ -815,6 +840,9 @@ if (file.exists(chrono_file) && nzchar(chrono_file)) {
       theme_tree()
     
     p8 <- PhyloCactus::apply_clade_label_layers(p8, registry_chrono_compact, CHRONO_MAIN_LAYER_SPECS)
+    # The outgroup is not a clade of the tree: a bar over its terminals, aligned with the level-4 bars
+    cactaceae_tips <- ape::extract.clade(tree_phy, registry_chrono$level_1$node[registry_chrono$level_1$label == "Cactaceae"])$tip.label
+    p8 <- PhyloCactus::add_outgroup_bar(p8, cactaceae_tips, fontsize = 2.5, barsize = 0.34, offset = 0.010, offset_text = 0.0038)
     p8 <- PhyloCactus::add_chronogram_axis(p8, tree_phy, by = 5, digits = 0L, segment_size = 3, title_margin_top = 30)
     
     xmax <- max(p8$data$x, na.rm = TRUE)
@@ -835,8 +863,9 @@ the 100 dated bootstrap replicates, summarized with \`TreeAnnotator\`.
 Grey bars: 95% intervals of the node ages over the same replicates
 (\`height_0.95_HPD\` in the file). They are confidence intervals from
 bootstrap replicates, not posterior intervals, and the fixed ACP crown
-has an interval of zero
-width.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_8_chronogram-1.png)
+has an interval of zero width. Bars on the right mark the groups of
+Figure 6, each a clade of the chronogram, with the names of Figure
+6.](tutorial-3-cactus-phylogeny-visualization_files/figure-html/figure_8_chronogram-1.png)
 
 **Figure 8.** Chronogram of the 1,208 terminals of Figure 6, estimated
 by penalized likelihood in `treePL` under calibration scheme 1, the
@@ -848,7 +877,8 @@ dated bootstrap replicates, summarized with `TreeAnnotator`. Grey bars:
 95% intervals of the node ages over the same replicates
 (`height_0.95_HPD` in the file). They are confidence intervals from
 bootstrap replicates, not posterior intervals, and the fixed ACP crown
-has an interval of zero width.
+has an interval of zero width. Bars on the right mark the groups of
+Figure 6, each a clade of the chronogram, with the names of Figure 6.
 
 #### Figure 9
 
@@ -1275,6 +1305,9 @@ Analyses](https://beeamerino.github.io/PhyloCactus/articles/tutorial-4-cactus-ph
 - Gearty & Chamberlain, 2025. rredlist: ‘IUCN’ Red List Client. R
   package version 1.1.1.
   <https://doi.org/10.32614/CRAN.package.rredlist>
+- Guerrero *et al*., 2019. Phylogenetic relationships and evolutionary
+  trends in the cactus family. *Journal of Heredity*, 110(1), 4–21.
+  <https://doi.org/10.1093/jhered/esy064>
 - Isaac *et al*., 2007. Mammals on the EDGE: conservation priorities
   based on threat and phylogeny. *PLoS ONE*, 2(3), e296.
   <https://doi.org/10.1371/journal.pone.0000296>

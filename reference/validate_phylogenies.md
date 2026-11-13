@@ -2,11 +2,11 @@
 
 Compares the focal tree produced by `PhyloCactus` with published
 phylogenies (e.g., Amaral *et al.* 2022, Thompson *et al.* 2024, Zuntini
-*et al.* 2024, de Vos *et al.* 2025). Pairwise distances are computed
-with the Robinson-Foulds distance (Robinson & Foulds, 1981) and the
-Different Phylogenetic Information distance (`TreeDist`; Smith, 2020),
-both on unrooted trees, and projected into tree space by
-multidimensional scaling (MDS).
+*et al.* 2024, de Vos *et al.* 2025, Carruthers *et al.* 2026). Pairwise
+distances are computed with the Robinson-Foulds distance (Robinson &
+Foulds, 1981) and the Different Phylogenetic Information distance
+(`TreeDist`; Smith, 2020), both on unrooted trees, and projected into
+tree space by multidimensional scaling (MDS).
 
 ## Usage
 
@@ -60,6 +60,9 @@ validate_phylogenies(
   `"common_set"`, the shared intersection across all trees is used for
   the multidimensional scaling (MDS) projection, whereas pairwise tables
   retain all shared tips between each pair. Defaults to `"common_set"`.
+  Under `"common_set"` the species shared by all the trees of set A3 are
+  those of A1, so the projection of A3 is that of A1, and its label in
+  the tree-space coordinates says so.
 
 - rooting_genus:
 
@@ -83,11 +86,12 @@ validate_phylogenies(
   Named character vector or `NULL`. Legend labels for the trees in the
   tree-space figure, named by the entries of `trees_mapping_list`.
   Labels of the form `"Author et al. (year)"` are typeset with *et al.*
-  in italics. Defaults to `NULL`, which labels the four reference trees
+  in italics. Defaults to `NULL`, which labels the five reference trees
   of Tutorial 4 as `"Zuntini et al. (2024)"`,
-  `"Thompson et al. (2024)"`, `"Amaral et al. (2022)"` and
-  `"de Vos et al. (2025)"`, and the focal tree as `"This study"`.
-  Supplied labels replace the defaults of the same name.
+  `"Thompson et al. (2024)"`, `"Amaral et al. (2022)"`,
+  `"de Vos et al. (2025)"` and `"Carruthers et al. (2026)"`, and the
+  focal tree as `"This study"`. Supplied labels replace the defaults of
+  the same name.
 
 ## Value
 

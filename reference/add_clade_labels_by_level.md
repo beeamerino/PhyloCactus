@@ -53,8 +53,8 @@ add_clade_labels_by_level(
   Character. Font face specification (e.g., `"plain"`, `"bold"`,
   `"italic"`). Defaults to `"plain"`. With `"plain"`, a label that is a
   genus name is set in italics; names ending in `-aceae`, `-oideae`,
-  `-eae` or `-inae`, names in capitals and names starting with `"Core "`
-  stay plain.
+  `-eae` or `-inae`, names in capitals, names starting with `"Core "`
+  and names ending in `" clade"` stay plain.
 
 - sort_desc:
 

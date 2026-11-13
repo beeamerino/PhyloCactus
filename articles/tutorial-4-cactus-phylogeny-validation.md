@@ -2,13 +2,14 @@
 
 ## Abstract
 
-This tutorial compares the tree inferred in Tutorials 1 and 2 with four
+This tutorial compares the tree inferred in Tutorials 1 and 2 with five
 published phylogenies of Cactaceae. Comparison with published trees
 shows which relationships are shared and which differ.
 
 The reference trees are those of Amaral *et al*. (2022), Thompson *et
-al*. (2024), Zuntini *et al*. (2024) and de Vos *et al*. (2025). The
-last two are based on hundreds of nuclear genes.
+al*. (2024), Zuntini *et al*. (2024), de Vos *et al*. (2025) and
+Carruthers *et al*. (2026). The trees of Zuntini *et al*. (2024) and de
+Vos *et al*. (2025) are based on hundreds of nuclear genes.
 
 The trees are compared with the Robinson-Foulds distance (Robinson &
 Foulds, 1981) and the Different Phylogenetic Information distance
@@ -21,12 +22,12 @@ multidimensional scaling (MDS).
 
 #### Reference Trees
 
-The four reference trees are those of Amaral *et al*. (2022), Thompson
-*et al*. (2024) and Zuntini *et al*. (2024), and the species tree that
-de Vos *et al*. (2025) estimated with `ASTRAL-III` from their gene
-trees.
+The five reference trees are those of Amaral *et al*. (2022), Thompson
+*et al*. (2024), Zuntini *et al*. (2024) and Carruthers *et al*. (2026),
+and the species tree that de Vos *et al*. (2025) estimated with
+`ASTRAL-III` from their gene trees.
 
-The user obtains each tree from its source, saves the four in one folder
+The user obtains each tree from its source, saves the five in one folder
 under the names below, and sets the path of the folder in `~/.Renviron`
 as `PHYLOCACTUS_REFERENCE_TREES`. The comparison also reads the
 checklist of Cactaceae (Korotkova *et al*. 2021) from the local path in
@@ -40,11 +41,13 @@ Tutorial 1).
 | `reference_thompson_2024.tree` | Thompson *et al*. (2024) | GitHub, <https://github.com/jamie-thompson/cactaceae> | `Alignment, accessions and tree/treepl_cacti.tre` | `df479c182a14028aa710b508aebaa458` |
 | `reference_zuntini_2024.tree` | Zuntini *et al*. (2024) | Kew Tree of Life, release 4.0, SFTP server of Kew (`sftp.kew.org`, folder `pub/treeoflife`) | `treeoflife.all_support_values.4.0.tree`, pruned to Cactaceae (below) | `319e6985225858b836ab2ff37054b3e5` |
 | `reference_devos_2025_astral.tree` | de Vos *et al*. (2025) | Online Resource 4 of the article, <https://doi.org/10.1007/s00606-025-01948-z> | `QC.Species_tree_astral.tree` | `5ceb901a0555521da1a14f0815787362` |
+| `reference_carruthers_2026.tree` | Carruthers *et al*. (2026) | OSF, <https://doi.org/10.17605/OSF.IO/9TBHA> | `best.tre_dated`, pruned to Cactaceae (below) | `cdb7218a73ae92c868ae837d18c3256f` |
 
-Three files are used as their studies deposited them. The tree of Kew is
-pruned to its 218 terminals of Cactaceae, their labels are shortened
-from `Order_Family_Genus_species_<run>` to `Genus_species`, and one of
-the two terminals of *Trichocereus macrogonus* is dropped
+Three files are used as their studies deposited them, and two are pruned
+from larger trees. The tree of Kew is pruned to its 218 terminals of
+Cactaceae, their labels are shortened from
+`Order_Family_Genus_species_<run>` to `Genus_species`, and one of the
+two terminals of *Trichocereus macrogonus* is dropped
 (`Trichocereus_macrogonus_var._pachanoi_ERR13173055`). The chunk below
 does this: its tree has the 217 terminals and the topology of the file
 of the reference run (Robinson-Foulds distance 0), without the node
@@ -60,6 +63,32 @@ cactaceae <- setdiff(cactaceae, "Caryophyllales_Cactaceae_Trichocereus_macrogonu
 zuntini <- ape::keep.tip(kew, cactaceae)
 zuntini$tip.label <- sub("^[^_]+_Cactaceae_([^_]+_[^_]+)_.*$", "\\1", zuntini$tip.label)
 ape::write.tree(zuntini, file.path(Sys.getenv("PHYLOCACTUS_REFERENCE_TREES"), "reference_zuntini_2024.tree"))
+```
+
+The dated tree of Carruthers *et al*. (2026), `best.tre_dated` (md5
+`8bc0675dc015668dd04cf6d4460ae67f`), has 128,270 terminals of
+euphyllophytes labelled `Genus_species__<NCBI taxid>`. The chunk below
+keeps the clade of Cactaceae, the most recent common ancestor of the
+terminals whose genus is accepted in the checklist (1142 terminals, none
+of another family), and shortens the labels to `Genus_species`, with
+hyphens written as underscores as the package writes the names of the
+checklist (*Pereskia diaz-romeroana* becomes `Pereskia_diaz_romeroana`).
+The names are not resolved:
+[`validate_phylogenies()`](https://beeamerino.github.io/PhyloCactus/reference/validate_phylogenies.md)
+keeps those the checklist accepts.
+
+``` r
+
+# The Cactaceae of the dated tree of Carruthers et al. (2026), as reference_carruthers_2026.tree was built
+carruthers <- ape::read.tree("best.tre_dated")
+genus <- sub("_.*$", "", carruthers$tip.label)
+checklist <- readxl::read_excel(phylocactus_checklist(), sheet = "Cactaceae")
+accepted_genera <- checklist$pureName[checklist$RANK == "Genus"]
+crown <- ape::getMRCA(carruthers, carruthers$tip.label[genus %in% accepted_genera])
+cactaceae <- ape::extract.clade(carruthers, crown)
+cactaceae$tip.label <- gsub("-", "_", sub("__[0-9]+$", "", cactaceae$tip.label))
+stopifnot(!anyDuplicated(cactaceae$tip.label))
+ape::write.tree(cactaceae, file.path(Sys.getenv("PHYLOCACTUS_REFERENCE_TREES"), "reference_carruthers_2026.tree"))
 ```
 
 #### Species Tree from the Gene Trees of de Vos *et al*. (2025)
@@ -203,43 +232,45 @@ without it are left unrooted and flagged in `SUPP_rooting_summary`.
 **The constraint.** The focal tree was inferred under the topological
 constraint of Module 8 (Tutorial 2), so part of its agreement with each
 reference is imposed by the constraint and not found by the data. On
-each shared taxon set, 12 to 17 of the bipartitions the focal tree
-shares with a reference are imposed by the constraint: 27 to 37 % of the
-shared bipartitions in the small sets A1 and A4, where the deep splits
-weigh most, and 5 to 8 % in the large sets of Thompson *et al*. (2024)
-and Amaral *et al*. (2022). The table below gives, for the reference
-run, the published RF beside the RF without the constrained
-bipartitions, removed from both trees of the pair. Every distance rises,
-by 0.010 to 0.100. For example, the RF of A1 against Zuntini *et al*.
-(2024) rises from 0.254 to 0.312. The order of the references by
-distance does not change in A1, A2 and A3, and in A4 Zuntini *et al*.
-(2024) and Thompson *et al*. (2024) exchange places (0.470 and 0.467).
-Tutorial 2 weighs the constrained bipartitions absent from each
-reference by the support of the reference clades that contradict them:
-the two nuclear trees contradict none at the level of a tribe with
-support, while Amaral *et al*. (2022) contradicts two relationships at
-that level with support, Tephrocacteae with Opuntieae (ultrafast
-bootstrap 100) and core Cactoideae I with II (99), and places
-Rhipsalideae outside the rest of core Cactoideae at ultrafast bootstrap
-87, below the 95 at which the documentation of IQ-TREE advises relying
-on that measure (Minh *et al*., 2013; Hoang *et al*., 2018).
+each shared taxon set, 9 to 17 of the bipartitions the focal tree shares
+with a reference are imposed by the constraint: 28 to 37 % of the shared
+bipartitions in the small sets A1 and A4, where the deep splits weigh
+most, and 5 to 8 % in the large sets of Thompson *et al*. (2024), Amaral
+*et al*. (2022) and Carruthers *et al*. (2026). The table below gives,
+for the reference run, the published RF beside the RF without the
+constrained bipartitions, removed from both trees of the pair. Every
+distance rises, by 0.010 to 0.100. For example, the RF of A1 against
+Zuntini *et al*. (2024) rises from 0.193 to 0.238. The order of the
+references by distance does not change in any set. Tutorial 2 weighs the
+constrained bipartitions absent from each reference by the support of
+the reference clades that contradict them: the two nuclear trees
+contradict none at the level of a tribe with support, while Amaral *et
+al*. (2022) contradicts two relationships at that level with support,
+Tephrocacteae with Opuntieae (ultrafast bootstrap 100) and core
+Cactoideae I with II (99), and places Rhipsalideae outside the rest of
+core Cactoideae at ultrafast bootstrap 87, below the 95 at which the
+documentation of IQ-TREE advises relying on that measure (Minh *et al*.,
+2013; Hoang *et al*., 2018).
 
 | Set | Reference | Shared terminals | Imposed and in the reference | RF | RF without the constrained bipartitions |
 |----|----|----|----|----|----|
-| A1 | Zuntini | 66 | 14 | 0.254 | 0.312 |
-| A1 | Thompson | 66 | 12 | 0.381 | 0.449 |
-| A1 | Amaral | 66 | 12 | 0.429 | 0.510 |
-| A1 | de Vos | 66 | 14 | 0.270 | 0.333 |
+| A1 | Zuntini | 60 | 14 | 0.193 | 0.238 |
+| A1 | Thompson | 60 | 12 | 0.386 | 0.465 |
+| A1 | Amaral | 60 | 12 | 0.421 | 0.512 |
+| A1 | de Vos | 60 | 14 | 0.228 | 0.286 |
+| A1 | Carruthers | 60 | 9 | 0.509 | 0.573 |
 | A2 | Thompson | 620 | 14 | 0.554 | 0.564 |
 | A2 | Amaral | 620 | 17 | 0.645 | 0.661 |
-| A3 | Zuntini | 119 | 15 | 0.440 | 0.490 |
-| A3 | Thompson | 734 | 14 | 0.628 | 0.638 |
-| A3 | Amaral | 631 | 17 | 0.678 | 0.696 |
-| A3 | de Vos | 88 | 15 | 0.353 | 0.420 |
-| A4 | Zuntini | 78 | 15 | 0.387 | 0.470 |
-| A4 | Thompson | 78 | 12 | 0.413 | 0.467 |
-| A4 | Amaral | 78 | 14 | 0.493 | 0.593 |
-| A4 | de Vos | 78 | 14 | 0.360 | 0.424 |
+| A3 | Zuntini | 117 | 15 | 0.421 | 0.469 |
+| A3 | Thompson | 732 | 14 | 0.627 | 0.637 |
+| A3 | Amaral | 629 | 17 | 0.677 | 0.695 |
+| A3 | de Vos | 86 | 15 | 0.325 | 0.388 |
+| A3 | Carruthers | 734 | 15 | 0.663 | 0.676 |
+| A4 | Zuntini | 76 | 15 | 0.342 | 0.416 |
+| A4 | Thompson | 76 | 12 | 0.425 | 0.483 |
+| A4 | Amaral | 76 | 14 | 0.479 | 0.579 |
+| A4 | de Vos | 76 | 14 | 0.315 | 0.368 |
+| A4 | Carruthers | 76 | 10 | 0.548 | 0.610 |
 
 **What each reference can test.** The tree of Zuntini *et al*. (2024) is
 built on a constrained backbone of at most five samples per family, so
@@ -259,9 +290,16 @@ their filtering), chosen by the authors among matrices with 40, 60 and
 80 % missing data. Its supports are ultrafast bootstrap values of
 IQ-TREE 2, which are not on the scale of the standard bootstrap. It
 shares its source of data with the focal tree and is not an independent
-test of it.
+test of it. The tree of Carruthers *et al*. (2026) grafts species-level
+trees onto the dated backbone of Zuntini *et al*. (2024). Each
+species-level tree was inferred with `RAxML` 8.2.12 from GenBank
+sequences assembled with `PyPHLAWD`, under a topological constraint
+built from the NCBI taxonomy. The monophyly of the genera in that tree
+follows from the constraint, and its sequences come from GenBank, as
+those of the focal tree do, so it is not an independent test of the
+focal tree either.
 
-**Trees compared.** The four reference trees are read from the folder in
+**Trees compared.** The five reference trees are read from the folder in
 `PHYLOCACTUS_REFERENCE_TREES`. The focal tree is the chronogram produced
 in Module 10, `8_Dating/Zuntini2024_young/dated_summary_hpd.tree`.
 
@@ -289,7 +327,8 @@ tree_paths <- list(
   Zuntini     = file.path(reference_dir, "reference_zuntini_2024.tree"),
   Thompson    = file.path(reference_dir, "reference_thompson_2024.tree"),
   Amaral      = file.path(reference_dir, "reference_amaral_2022.tree"),
-  deVos       = file.path(reference_dir, "reference_devos_2025_astral.tree")
+  deVos       = file.path(reference_dir, "reference_devos_2025_astral.tree"),
+  Carruthers  = file.path(reference_dir, "reference_carruthers_2026.tree")
 )
 
 # Drop trees whose files are missing
@@ -325,28 +364,32 @@ tree_space <- read.csv(system.file("extdata", "phylocactus_table_tree_space.csv"
 plot_tree_space(tree_space, metric = "RF")
 ```
 
-![\*\*Figure 1.\*\* Tree space of the focal chronogram and the four
+![\*\*Figure 1.\*\* Tree space of the focal chronogram and the five
 published phylogenies: classical MDS of the normalized Robinson-Foulds
 (RF) distances, one panel per taxon set (A1 to A4). Trees close together
-have similar
-topologies.](tutorial-4-cactus-phylogeny-validation_files/figure-html/unnamed-chunk-6-1.png)
+have similar topologies. Under \`common_set\` each set is pruned to the
+species shared by all its trees before the projection; for A3 these are
+the species of A1, so panels A and C have the same
+points.](tutorial-4-cactus-phylogeny-validation_files/figure-html/unnamed-chunk-7-1.png)
 
-**Figure 1.** Tree space of the focal chronogram and the four published
+**Figure 1.** Tree space of the focal chronogram and the five published
 phylogenies: classical MDS of the normalized Robinson-Foulds (RF)
 distances, one panel per taxon set (A1 to A4). Trees close together have
-similar topologies.
+similar topologies. Under `common_set` each set is pruned to the species
+shared by all its trees before the projection; for A3 these are the
+species of A1, so panels A and C have the same points.
 
 | analysis_id | analysis_label | metric | tree_1 | tree_2 | n_common_tips | distance |
 |:---|:---|:---|:---|:---|---:|---:|
-| A1_species_all4 | A1. Shared species across comparative trees | RF | Zuntini | FocalTree | 66 | 0.2539683 |
-| A1_species_all4 | A1. Shared species across comparative trees | RF | Thompson | FocalTree | 66 | 0.3809524 |
-| A1_species_all4 | A1. Shared species across comparative trees | RF | Amaral | FocalTree | 66 | 0.4285714 |
-| A1_species_all4 | A1. Shared species across comparative trees | RF | deVos | FocalTree | 66 | 0.2698413 |
-| A1_species_all4 | A1. Shared species across comparative trees | RF | Thompson | Zuntini | 66 | 0.3809524 |
-| A1_species_all4 | A1. Shared species across comparative trees | RF | Amaral | Zuntini | 66 | 0.4444444 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | Zuntini | FocalTree | 60 | 0.1929825 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | Thompson | FocalTree | 60 | 0.3859649 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | Amaral | FocalTree | 60 | 0.4210526 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | deVos | FocalTree | 60 | 0.2280702 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | Carruthers | FocalTree | 60 | 0.5087719 |
+| A1_species_all4 | A1. Shared species across comparative trees | RF | Thompson | Zuntini | 60 | 0.3157895 |
 
 Table 1. Pairwise tree distances: normalized RF and DPI for each pair of
-trees and taxon set (first rows). {.table style="width:100%;"}
+trees and taxon set (first rows). {.table}
 
 `TABLE_pairwise_tree_distances_main.csv` lists the distances for every
 pair of trees and every taxon set, and `FIG_tree_space_main.pdf` shows
@@ -453,6 +496,9 @@ Barcoding)](https://beeamerino.github.io/PhyloCactus/articles/tutorial-5-cactus-
   Cactaceae show low ecological representation within protected areas.
   *Biological Conservation*, 273, 109677.
   <https://doi.org/10.1016/j.biocon.2022.109677>
+- Carruthers *et al*., 2026. A large phylogenetic tree for
+  euphyllophytes. *Applications in Plant Sciences*, e70092.
+  <https://doi.org/10.1002/aps3.70092>
 - de Vos *et al*., 2025. Phylogenomics and classification of Cactaceae
   based on hundreds of nuclear genes. *Plant Systematics and Evolution*,
   311(5), 28. <https://doi.org/10.1007/s00606-025-01948-z>

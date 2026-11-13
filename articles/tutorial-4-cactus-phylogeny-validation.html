@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,9 +68,9 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-11-04</h4>
+            <h4 data-toc-skip class="date">2026-11-13</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/v0.5.3/vignettes/tutorial-4-cactus-phylogeny-validation.Rmd" class="external-link"><code>vignettes/tutorial-4-cactus-phylogeny-validation.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-4-cactus-phylogeny-validation.Rmd" class="external-link"><code>vignettes/tutorial-4-cactus-phylogeny-validation.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-4-cactus-phylogeny-validation.Rmd</code></div>
     </div>
 
@@ -80,12 +80,13 @@ Meriño</h4>
 <h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
 </h2>
 <p>This tutorial compares the tree inferred in Tutorials 1 and 2 with
-four published phylogenies of Cactaceae. Comparison with published trees
+five published phylogenies of Cactaceae. Comparison with published trees
 shows which relationships are shared and which differ.</p>
 <p>The reference trees are those of Amaral <em>et al</em>. (2022),
-Thompson <em>et al</em>. (2024), Zuntini <em>et al</em>. (2024) and de
-Vos <em>et al</em>. (2025). The last two are based on hundreds of
-nuclear genes.</p>
+Thompson <em>et al</em>. (2024), Zuntini <em>et al</em>. (2024), de Vos
+<em>et al</em>. (2025) and Carruthers <em>et al</em>. (2026). The trees
+of Zuntini <em>et al</em>. (2024) and de Vos <em>et al</em>. (2025) are
+based on hundreds of nuclear genes.</p>
 <p>The trees are compared with the Robinson-Foulds distance (Robinson
 &amp; Foulds, 1981) and the Different Phylogenetic Information distance
 (Smith, 2020), and the distances are projected into tree space by
@@ -100,11 +101,12 @@ multidimensional scaling (MDS).</p>
 <div class="section level4">
 <h4 id="reference-trees">Reference Trees<a class="anchor" aria-label="anchor" href="#reference-trees"></a>
 </h4>
-<p>The four reference trees are those of Amaral <em>et al</em>. (2022),
-Thompson <em>et al</em>. (2024) and Zuntini <em>et al</em>. (2024), and
-the species tree that de Vos <em>et al</em>. (2025) estimated with
-<code>ASTRAL-III</code> from their gene trees.</p>
-<p>The user obtains each tree from its source, saves the four in one
+<p>The five reference trees are those of Amaral <em>et al</em>. (2022),
+Thompson <em>et al</em>. (2024), Zuntini <em>et al</em>. (2024) and
+Carruthers <em>et al</em>. (2026), and the species tree that de Vos
+<em>et al</em>. (2025) estimated with <code>ASTRAL-III</code> from their
+gene trees.</p>
+<p>The user obtains each tree from its source, saves the five in one
 folder under the names below, and sets the path of the folder in
 <code>~/.Renviron</code> as <code>PHYLOCACTUS_REFERENCE_TREES</code>.
 The comparison also reads the checklist of Cactaceae (Korotkova <em>et
@@ -160,11 +162,21 @@ Cactaceae (below)</td>
 <td><code>QC.Species_tree_astral.tree</code></td>
 <td><code>5ceb901a0555521da1a14f0815787362</code></td>
 </tr>
+<tr class="odd">
+<td><code>reference_carruthers_2026.tree</code></td>
+<td>Carruthers <em>et al</em>. (2026)</td>
+<td>OSF, <a href="https://doi.org/10.17605/OSF.IO/9TBHA" class="external-link uri">https://doi.org/10.17605/OSF.IO/9TBHA</a>
+</td>
+<td>
+<code>best.tre_dated</code>, pruned to Cactaceae (below)</td>
+<td><code>cdb7218a73ae92c868ae837d18c3256f</code></td>
+</tr>
 </tbody>
 </table>
-<p>Three files are used as their studies deposited them. The tree of Kew
-is pruned to its 218 terminals of Cactaceae, their labels are shortened
-from <code>Order_Family_Genus_species_&lt;run&gt;</code> to
+<p>Three files are used as their studies deposited them, and two are
+pruned from larger trees. The tree of Kew is pruned to its 218 terminals
+of Cactaceae, their labels are shortened from
+<code>Order_Family_Genus_species_&lt;run&gt;</code> to
 <code>Genus_species</code>, and one of the two terminals of
 <em>Trichocereus macrogonus</em> is dropped
 (<code>Trichocereus_macrogonus_var._pachanoi_ERR13173055</code>). The
@@ -180,6 +192,29 @@ the node annotations of Kew, so its md5 differs.</p>
 <span><span class="va">zuntini</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/drop.tip.html" class="external-link">keep.tip</a></span><span class="op">(</span><span class="va">kew</span>, <span class="va">cactaceae</span><span class="op">)</span></span>
 <span><span class="va">zuntini</span><span class="op">$</span><span class="va">tip.label</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"^[^_]+_Cactaceae_([^_]+_[^_]+)_.*$"</span>, <span class="st">"\\1"</span>, <span class="va">zuntini</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span></span>
 <span><span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/write.tree.html" class="external-link">write.tree</a></span><span class="op">(</span><span class="va">zuntini</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"PHYLOCACTUS_REFERENCE_TREES"</span><span class="op">)</span>, <span class="st">"reference_zuntini_2024.tree"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The dated tree of Carruthers <em>et al</em>. (2026),
+<code>best.tre_dated</code> (md5
+<code>8bc0675dc015668dd04cf6d4460ae67f</code>), has 128,270 terminals of
+euphyllophytes labelled <code>Genus_species__&lt;NCBI taxid&gt;</code>.
+The chunk below keeps the clade of Cactaceae, the most recent common
+ancestor of the terminals whose genus is accepted in the checklist (1142
+terminals, none of another family), and shortens the labels to
+<code>Genus_species</code>, with hyphens written as underscores as the
+package writes the names of the checklist (<em>Pereskia
+diaz-romeroana</em> becomes <code>Pereskia_diaz_romeroana</code>). The
+names are not resolved: <code><a href="../reference/validate_phylogenies.html">validate_phylogenies()</a></code> keeps those
+the checklist accepts.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># The Cactaceae of the dated tree of Carruthers et al. (2026), as reference_carruthers_2026.tree was built</span></span>
+<span><span class="va">carruthers</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.tree.html" class="external-link">read.tree</a></span><span class="op">(</span><span class="st">"best.tre_dated"</span><span class="op">)</span></span>
+<span><span class="va">genus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"_.*$"</span>, <span class="st">""</span>, <span class="va">carruthers</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span></span>
+<span><span class="va">checklist</span> <span class="op">&lt;-</span> <span class="fu">readxl</span><span class="fu">::</span><span class="fu"><a href="https://readxl.tidyverse.org/reference/read_excel.html" class="external-link">read_excel</a></span><span class="op">(</span><span class="fu"><a href="../reference/phylocactus_checklist.html">phylocactus_checklist</a></span><span class="op">(</span><span class="op">)</span>, sheet <span class="op">=</span> <span class="st">"Cactaceae"</span><span class="op">)</span></span>
+<span><span class="va">accepted_genera</span> <span class="op">&lt;-</span> <span class="va">checklist</span><span class="op">$</span><span class="va">pureName</span><span class="op">[</span><span class="va">checklist</span><span class="op">$</span><span class="va">RANK</span> <span class="op">==</span> <span class="st">"Genus"</span><span class="op">]</span></span>
+<span><span class="va">crown</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/mrca.html" class="external-link">getMRCA</a></span><span class="op">(</span><span class="va">carruthers</span>, <span class="va">carruthers</span><span class="op">$</span><span class="va">tip.label</span><span class="op">[</span><span class="va">genus</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">accepted_genera</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">cactaceae</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/drop.tip.html" class="external-link">extract.clade</a></span><span class="op">(</span><span class="va">carruthers</span>, <span class="va">crown</span><span class="op">)</span></span>
+<span><span class="va">cactaceae</span><span class="op">$</span><span class="va">tip.label</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"-"</span>, <span class="st">"_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"__[0-9]+$"</span>, <span class="st">""</span>, <span class="va">cactaceae</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/duplicated.html" class="external-link">anyDuplicated</a></span><span class="op">(</span><span class="va">cactaceae</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/write.tree.html" class="external-link">write.tree</a></span><span class="op">(</span><span class="va">cactaceae</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"PHYLOCACTUS_REFERENCE_TREES"</span><span class="op">)</span>, <span class="st">"reference_carruthers_2026.tree"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="species-tree-from-the-gene-trees-of-de-vos-et-al--2025">Species Tree from the Gene Trees of de Vos <em>et al</em>.
@@ -200,7 +235,7 @@ archive (<code>.jar</code>) must be downloaded separately.</p>
 </h4>
 <p>Store paths to local software and data in <code>~/.Renviron</code>.
 Shared scripts then contain no local paths.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Add these lines to your ~/.Renviron file (e.g., using usethis::edit_r_environ())</span></span>
 <span><span class="co"># PHYLOCACTUS_REFERENCE_TREES="/path/to/reference_trees"</span></span>
 <span><span class="co"># PHYLOCACTUS_CHECKLIST="/path/to/CactaceaeFullList_2026_07_01_Beatriz_Merino.xlsx"</span></span>
@@ -229,7 +264,7 @@ file, and runs <code>ASTRAL-III</code>. With
 species tree saved in the folder of reference trees instead. Output
 files are written to a temporary directory; change <code>val_dir</code>
 to keep them.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Target output paths in the validation directory</span></span>
 <span><span class="va">val_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"10_Validation"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">val_dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -326,27 +361,26 @@ flagged in <code>SUPP_rooting_summary</code>.</p>
 <p><strong>The constraint.</strong> The focal tree was inferred under
 the topological constraint of Module 8 (Tutorial 2), so part of its
 agreement with each reference is imposed by the constraint and not found
-by the data. On each shared taxon set, 12 to 17 of the bipartitions the
-focal tree shares with a reference are imposed by the constraint: 27 to
+by the data. On each shared taxon set, 9 to 17 of the bipartitions the
+focal tree shares with a reference are imposed by the constraint: 28 to
 37 % of the shared bipartitions in the small sets A1 and A4, where the
 deep splits weigh most, and 5 to 8 % in the large sets of Thompson
-<em>et al</em>. (2024) and Amaral <em>et al</em>. (2022). The table
-below gives, for the reference run, the published RF beside the RF
-without the constrained bipartitions, removed from both trees of the
-pair. Every distance rises, by 0.010 to 0.100. For example, the RF of A1
-against Zuntini <em>et al</em>. (2024) rises from 0.254 to 0.312. The
-order of the references by distance does not change in A1, A2 and A3,
-and in A4 Zuntini <em>et al</em>. (2024) and Thompson <em>et al</em>.
-(2024) exchange places (0.470 and 0.467). Tutorial 2 weighs the
-constrained bipartitions absent from each reference by the support of
-the reference clades that contradict them: the two nuclear trees
-contradict none at the level of a tribe with support, while Amaral
-<em>et al</em>. (2022) contradicts two relationships at that level with
-support, Tephrocacteae with Opuntieae (ultrafast bootstrap 100) and core
-Cactoideae I with II (99), and places Rhipsalideae outside the rest of
-core Cactoideae at ultrafast bootstrap 87, below the 95 at which the
-documentation of IQ-TREE advises relying on that measure (Minh <em>et
-al</em>., 2013; Hoang <em>et al</em>., 2018).</p>
+<em>et al</em>. (2024), Amaral <em>et al</em>. (2022) and Carruthers
+<em>et al</em>. (2026). The table below gives, for the reference run,
+the published RF beside the RF without the constrained bipartitions,
+removed from both trees of the pair. Every distance rises, by 0.010 to
+0.100. For example, the RF of A1 against Zuntini <em>et al</em>. (2024)
+rises from 0.193 to 0.238. The order of the references by distance does
+not change in any set. Tutorial 2 weighs the constrained bipartitions
+absent from each reference by the support of the reference clades that
+contradict them: the two nuclear trees contradict none at the level of a
+tribe with support, while Amaral <em>et al</em>. (2022) contradicts two
+relationships at that level with support, Tephrocacteae with Opuntieae
+(ultrafast bootstrap 100) and core Cactoideae I with II (99), and places
+Rhipsalideae outside the rest of core Cactoideae at ultrafast bootstrap
+87, below the 95 at which the documentation of IQ-TREE advises relying
+on that measure (Minh <em>et al</em>., 2013; Hoang <em>et al</em>.,
+2018).</p>
 <table style="width:100%;" class="table">
 <colgroup>
 <col width="16%">
@@ -368,36 +402,44 @@ al</em>., 2013; Hoang <em>et al</em>., 2018).</p>
 <tr class="odd">
 <td>A1</td>
 <td>Zuntini</td>
-<td>66</td>
+<td>60</td>
 <td>14</td>
-<td>0.254</td>
-<td>0.312</td>
+<td>0.193</td>
+<td>0.238</td>
 </tr>
 <tr class="even">
 <td>A1</td>
 <td>Thompson</td>
-<td>66</td>
+<td>60</td>
 <td>12</td>
-<td>0.381</td>
-<td>0.449</td>
+<td>0.386</td>
+<td>0.465</td>
 </tr>
 <tr class="odd">
 <td>A1</td>
 <td>Amaral</td>
-<td>66</td>
+<td>60</td>
 <td>12</td>
-<td>0.429</td>
-<td>0.510</td>
+<td>0.421</td>
+<td>0.512</td>
 </tr>
 <tr class="even">
 <td>A1</td>
 <td>de Vos</td>
-<td>66</td>
+<td>60</td>
 <td>14</td>
-<td>0.270</td>
-<td>0.333</td>
+<td>0.228</td>
+<td>0.286</td>
 </tr>
 <tr class="odd">
+<td>A1</td>
+<td>Carruthers</td>
+<td>60</td>
+<td>9</td>
+<td>0.509</td>
+<td>0.573</td>
+</tr>
+<tr class="even">
 <td>A2</td>
 <td>Thompson</td>
 <td>620</td>
@@ -405,7 +447,7 @@ al</em>., 2013; Hoang <em>et al</em>., 2018).</p>
 <td>0.554</td>
 <td>0.564</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>A2</td>
 <td>Amaral</td>
 <td>620</td>
@@ -413,69 +455,85 @@ al</em>., 2013; Hoang <em>et al</em>., 2018).</p>
 <td>0.645</td>
 <td>0.661</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>A3</td>
 <td>Zuntini</td>
-<td>119</td>
+<td>117</td>
 <td>15</td>
-<td>0.440</td>
-<td>0.490</td>
+<td>0.421</td>
+<td>0.469</td>
+</tr>
+<tr class="odd">
+<td>A3</td>
+<td>Thompson</td>
+<td>732</td>
+<td>14</td>
+<td>0.627</td>
+<td>0.637</td>
 </tr>
 <tr class="even">
 <td>A3</td>
-<td>Thompson</td>
-<td>734</td>
-<td>14</td>
-<td>0.628</td>
-<td>0.638</td>
-</tr>
-<tr class="odd">
-<td>A3</td>
 <td>Amaral</td>
-<td>631</td>
+<td>629</td>
 <td>17</td>
-<td>0.678</td>
-<td>0.696</td>
+<td>0.677</td>
+<td>0.695</td>
+</tr>
+<tr class="odd">
+<td>A3</td>
+<td>de Vos</td>
+<td>86</td>
+<td>15</td>
+<td>0.325</td>
+<td>0.388</td>
 </tr>
 <tr class="even">
 <td>A3</td>
-<td>de Vos</td>
-<td>88</td>
+<td>Carruthers</td>
+<td>734</td>
 <td>15</td>
-<td>0.353</td>
-<td>0.420</td>
+<td>0.663</td>
+<td>0.676</td>
 </tr>
 <tr class="odd">
 <td>A4</td>
 <td>Zuntini</td>
-<td>78</td>
+<td>76</td>
 <td>15</td>
-<td>0.387</td>
-<td>0.470</td>
+<td>0.342</td>
+<td>0.416</td>
 </tr>
 <tr class="even">
 <td>A4</td>
 <td>Thompson</td>
-<td>78</td>
+<td>76</td>
 <td>12</td>
-<td>0.413</td>
-<td>0.467</td>
+<td>0.425</td>
+<td>0.483</td>
 </tr>
 <tr class="odd">
 <td>A4</td>
 <td>Amaral</td>
-<td>78</td>
+<td>76</td>
 <td>14</td>
-<td>0.493</td>
-<td>0.593</td>
+<td>0.479</td>
+<td>0.579</td>
 </tr>
 <tr class="even">
 <td>A4</td>
 <td>de Vos</td>
-<td>78</td>
+<td>76</td>
 <td>14</td>
-<td>0.360</td>
-<td>0.424</td>
+<td>0.315</td>
+<td>0.368</td>
+</tr>
+<tr class="odd">
+<td>A4</td>
+<td>Carruthers</td>
+<td>76</td>
+<td>10</td>
+<td>0.548</td>
+<td>0.610</td>
 </tr>
 </tbody>
 </table>
@@ -498,8 +556,15 @@ species after their filtering), chosen by the authors among matrices
 with 40, 60 and 80 % missing data. Its supports are ultrafast bootstrap
 values of IQ-TREE 2, which are not on the scale of the standard
 bootstrap. It shares its source of data with the focal tree and is not
-an independent test of it.</p>
-<p><strong>Trees compared.</strong> The four reference trees are read
+an independent test of it. The tree of Carruthers <em>et al</em>. (2026)
+grafts species-level trees onto the dated backbone of Zuntini <em>et
+al</em>. (2024). Each species-level tree was inferred with
+<code>RAxML</code> 8.2.12 from GenBank sequences assembled with
+<code>PyPHLAWD</code>, under a topological constraint built from the
+NCBI taxonomy. The monophyly of the genera in that tree follows from the
+constraint, and its sequences come from GenBank, as those of the focal
+tree do, so it is not an independent test of the focal tree either.</p>
+<p><strong>Trees compared.</strong> The five reference trees are read
 from the folder in <code>PHYLOCACTUS_REFERENCE_TREES</code>. The focal
 tree is the chronogram produced in Module 10,
 <code>8_Dating/Zuntini2024_young/dated_summary_hpd.tree</code>.</p>
@@ -507,7 +572,7 @@ tree is the chronogram produced in Module 10,
 and Table 1 are then drawn from the tree-space coordinates and the
 pairwise distances of the reference run; <code><a href="../reference/plot_tree_space.html">plot_tree_space()</a></code>
 draws the figure that <code><a href="../reference/validate_phylogenies.html">validate_phylogenies()</a></code> returns.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The focal tree is the chronogram of this run; the reference trees and the checklist are read from</span></span>
@@ -522,7 +587,8 @@ draws the figure that <code><a href="../reference/validate_phylogenies.html">val
 <span>  Zuntini     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">reference_dir</span>, <span class="st">"reference_zuntini_2024.tree"</span><span class="op">)</span>,</span>
 <span>  Thompson    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">reference_dir</span>, <span class="st">"reference_thompson_2024.tree"</span><span class="op">)</span>,</span>
 <span>  Amaral      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">reference_dir</span>, <span class="st">"reference_amaral_2022.tree"</span><span class="op">)</span>,</span>
-<span>  deVos       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">reference_dir</span>, <span class="st">"reference_devos_2025_astral.tree"</span><span class="op">)</span></span>
+<span>  deVos       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">reference_dir</span>, <span class="st">"reference_devos_2025_astral.tree"</span><span class="op">)</span>,</span>
+<span>  Carruthers  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">reference_dir</span>, <span class="st">"reference_carruthers_2026.tree"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Drop trees whose files are missing</span></span>
@@ -547,31 +613,34 @@ draws the figure that <code><a href="../reference/validate_phylogenies.html">val
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Set PHYLOCACTUS_REFERENCE_TREES to the folder of the reference trees to run the validation."</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Tree-space coordinates of the reference run (SUPP_tree_space_coordinates.csv of Module 13)</span></span>
 <span><span class="va">tree_space</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"phylocactus_table_tree_space.csv"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_tree_space.html">plot_tree_space</a></span><span class="op">(</span><span class="va">tree_space</span>, metric <span class="op">=</span> <span class="st">"RF"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="tutorial-4-cactus-phylogeny-validation_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="**Figure 1.** Tree space of the focal chronogram and the four published phylogenies: classical MDS of the normalized Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4). Trees close together have similar topologies." width="1122.24"><p class="caption">
+<img src="tutorial-4-cactus-phylogeny-validation_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="**Figure 1.** Tree space of the focal chronogram and the five published phylogenies: classical MDS of the normalized Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4). Trees close together have similar topologies. Under `common_set` each set is pruned to the species shared by all its trees before the projection; for A3 these are the species of A1, so panels A and C have the same points." width="1122.24"><p class="caption">
 <strong>Figure 1.</strong> Tree space of the focal chronogram and the
-four published phylogenies: classical MDS of the normalized
+five published phylogenies: classical MDS of the normalized
 Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4).
-Trees close together have similar topologies.
+Trees close together have similar topologies. Under
+<code>common_set</code> each set is pruned to the species shared by all
+its trees before the projection; for A3 these are the species of A1, so
+panels A and C have the same points.
 </p>
 </div>
-<table style="width:100%;" class="table">
+<table class="table">
 <caption>Table 1. Pairwise tree distances: normalized RF and DPI for
 each pair of trees and taxon set (first rows).</caption>
 <colgroup>
 <col width="14%">
-<col width="40%">
+<col width="39%">
 <col width="6%">
+<col width="9%">
 <col width="8%">
-<col width="9%">
 <col width="12%">
-<col width="9%">
+<col width="8%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">analysis_id</th>
@@ -589,8 +658,8 @@ each pair of trees and taxon set (first rows).</caption>
 <td align="left">RF</td>
 <td align="left">Zuntini</td>
 <td align="left">FocalTree</td>
-<td align="right">66</td>
-<td align="right">0.2539683</td>
+<td align="right">60</td>
+<td align="right">0.1929825</td>
 </tr>
 <tr class="even">
 <td align="left">A1_species_all4</td>
@@ -598,8 +667,8 @@ each pair of trees and taxon set (first rows).</caption>
 <td align="left">RF</td>
 <td align="left">Thompson</td>
 <td align="left">FocalTree</td>
-<td align="right">66</td>
-<td align="right">0.3809524</td>
+<td align="right">60</td>
+<td align="right">0.3859649</td>
 </tr>
 <tr class="odd">
 <td align="left">A1_species_all4</td>
@@ -607,8 +676,8 @@ each pair of trees and taxon set (first rows).</caption>
 <td align="left">RF</td>
 <td align="left">Amaral</td>
 <td align="left">FocalTree</td>
-<td align="right">66</td>
-<td align="right">0.4285714</td>
+<td align="right">60</td>
+<td align="right">0.4210526</td>
 </tr>
 <tr class="even">
 <td align="left">A1_species_all4</td>
@@ -616,26 +685,26 @@ each pair of trees and taxon set (first rows).</caption>
 <td align="left">RF</td>
 <td align="left">deVos</td>
 <td align="left">FocalTree</td>
-<td align="right">66</td>
-<td align="right">0.2698413</td>
+<td align="right">60</td>
+<td align="right">0.2280702</td>
 </tr>
 <tr class="odd">
 <td align="left">A1_species_all4</td>
 <td align="left">A1. Shared species across comparative trees</td>
 <td align="left">RF</td>
-<td align="left">Thompson</td>
-<td align="left">Zuntini</td>
-<td align="right">66</td>
-<td align="right">0.3809524</td>
+<td align="left">Carruthers</td>
+<td align="left">FocalTree</td>
+<td align="right">60</td>
+<td align="right">0.5087719</td>
 </tr>
 <tr class="even">
 <td align="left">A1_species_all4</td>
 <td align="left">A1. Shared species across comparative trees</td>
 <td align="left">RF</td>
-<td align="left">Amaral</td>
+<td align="left">Thompson</td>
 <td align="left">Zuntini</td>
-<td align="right">66</td>
-<td align="right">0.4444444</td>
+<td align="right">60</td>
+<td align="right">0.3157895</td>
 </tr>
 </tbody>
 </table>
@@ -1147,6 +1216,9 @@ to Tutorial 5: Molecular Identification of Cacti (DNA Barcoding)</a></p>
 <li>Amaral <em>et al</em>., 2022. Spatial patterns of evolutionary
 diversity in Cactaceae show low ecological representation within
 protected areas. <em>Biological Conservation</em>, 273, 109677. <a href="https://doi.org/10.1016/j.biocon.2022.109677" class="external-link uri">https://doi.org/10.1016/j.biocon.2022.109677</a>
+</li>
+<li>Carruthers <em>et al</em>., 2026. A large phylogenetic tree for
+euphyllophytes. <em>Applications in Plant Sciences</em>, e70092. <a href="https://doi.org/10.1002/aps3.70092" class="external-link uri">https://doi.org/10.1002/aps3.70092</a>
 </li>
 <li>de Vos <em>et al</em>., 2025. Phylogenomics and classification of
 Cactaceae based on hundreds of nuclear genes. <em>Plant Systematics and

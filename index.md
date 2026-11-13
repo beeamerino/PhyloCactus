@@ -88,8 +88,9 @@ PhyloCactus Workflow Architecture
 4.  **Stage 4: Validation (Module 13)**  
     Compares the focal tree with published phylogenies (Amaral *et al*.,
     2022; Thompson *et al*., 2024; Zuntini *et al*., 2024; de Vos *et
-    al*., 2025) by Robinson-Foulds and information-theoretic distances
-    and by multidimensional scaling (MDS) of tree space
+    al*., 2025; Carruthers *et al*., 2026) by Robinson-Foulds and
+    information-theoretic distances and by multidimensional scaling
+    (MDS) of tree space
     ([`validate_phylogenies()`](https://beeamerino.github.io/PhyloCactus/reference/validate_phylogenies.md)).
 
 5.  **Stage 5: Molecular identification (Module 14)**  
@@ -214,6 +215,9 @@ citation("PhyloCactus")
   e1006650. <https://doi.org/10.1371/journal.pcbi.1006650>
 - Camacho *et al*., 2009. BLAST+: architecture and applications. *BMC
   Bioinformatics*, 10, 421. <https://doi.org/10.1186/1471-2105-10-421>
+- Carruthers *et al*., 2026. A large phylogenetic tree for
+  euphyllophytes. *Applications in Plant Sciences*, e70092.
+  <https://doi.org/10.1002/aps3.70092>
 - Chen *et al*., 2018. fastp: an ultra-fast all-in-one FASTQ
   preprocessor. *Bioinformatics*, 34(17), i884–i890.
   <https://doi.org/10.1093/bioinformatics/bty560>

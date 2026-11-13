@@ -248,11 +248,10 @@ The wall-clock time of this stage depends mainly on `n_workers`.
 `RAxML-NG` gives each worker `threads / workers` threads and one
 starting tree at a time, so the search takes
 `ceiling(n_init_trees / workers)` rounds: 50 starting trees take 50
-rounds on one worker and two rounds on 25 workers. On an Apple M2 Pro
-with one worker and 8 threads, 50 starting trees took 47115 s (about
-13.1 h, 942.3 s per tree). On an AMD EPYC 9754 node with 25 workers and
-75 threads (3 per worker), 50 starting trees took 4468 s (about 75
-minutes), corresponding to an average of 89.4 s per tree.
+rounds on one worker and two rounds on 25 workers. On an AMD EPYC 9754
+node with 25 workers and 75 threads (3 per worker), 50 starting trees
+took 4468 s (about 75 minutes), corresponding to an average of 89.4 s
+per tree.
 
 With `n_workers = NULL` the worker count is chosen as a divisor of the
 number of starting trees, so that no worker is idle in the last round;
@@ -388,7 +387,7 @@ if (run_local_ml) {
     cluster_mem = "24G",                              # RAM memory allocation (--mem; 15.5 GB used, 1208 terminals)
     cluster_time = "02:00:00",                        # Walltime limit (--time HH:MM:SS; 1 h 15 min used, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
-    load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
+    load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules; on Leftraru this module runs RAxML-NG 1.2.2-master, as its logs report
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
     # --- Search Tuning ---
     workers = NULL,
@@ -538,7 +537,7 @@ if (run_local_bs) {
     cluster_mem = "16G",                              # RAM memory allocation per task (--mem; 6.0 GiB used, 250 replicates, 1208 terminals)
     cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS; 13 h 05 min used at most, 250 replicates, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
-    load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
+    load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules; on Leftraru this module runs RAxML-NG 1.2.2-master, as its logs report
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
     # --- Bootstrap Array Settings ---
     bs_per_rep = 250,                                 # Bootstrap replicates per array task
@@ -793,10 +792,11 @@ All replicates share the maximum-likelihood topology, so the summary
 estimates the distribution of node ages and does not compare topologies,
 and the choice of target tree does not change the ages.
 
-`TreeAnnotator` is run with the settings of Maurin (2020): the maximum
-clade credibility tree as target tree, mean node heights, and 0%
-burn-in. It computes the mean age of each node and its interval across
-the dated replicates.
+`TreeAnnotator` is run with the settings of Maurin (2020), 0% burn-in
+and mean node heights, and with the maximum clade credibility tree as
+target tree; Maurin (2020) notes that the other settings do not matter
+when every replicate has the same topology. It computes the mean age of
+each node and its interval across the dated replicates.
 
 ``` bash
 treeannotator -burnin 0 -height mean -topology MCC 8_Dating/Zuntini2024_young/bsTree_treePL.tree 8_Dating/Zuntini2024_young/dated_summary_hpd.tree

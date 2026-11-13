@@ -16,16 +16,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/beeamerino/PhyloCactus/blob/v0.5.3/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/beeamerino/PhyloCactus/blob/master/DESCRIPTION)
 
 Meriño B, Guerrero P (2026). *PhyloCactus: Phylogenetic Inference,
 Divergence Time Estimation and Molecular Identification for Cactaceae*.
-R package version 0.5.3, <https://github.com/beeamerino/PhyloCactus>.
+R package version 0.5.4, <https://github.com/beeamerino/PhyloCactus>.
 
     @Manual{,
       title = {PhyloCactus: Phylogenetic Inference, Divergence Time Estimation and Molecular Identification for Cactaceae},
       author = {Beatriz M. Meriño and Pablo C. Guerrero},
       year = {2026},
-      note = {R package version 0.5.3},
+      note = {R package version 0.5.4},
       url = {https://github.com/beeamerino/PhyloCactus},
     }
