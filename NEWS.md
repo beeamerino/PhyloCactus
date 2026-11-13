@@ -1,6 +1,6 @@
 # PhyloCactus 0.5.4
 
-This version adds the dated tree of Carruthers *et al*. (2026) to the comparison with published phylogenies (Module 13, Tutorial 4) corrects four points of the documentation and names groups of the chronogram that the figures of Tutorial 3 left without a label. No analysis was run again: the supermatrix, the constraint tree, the maximum-likelihood tree, the chronograms and the identification library are those of 0.5.3.
+This version adds the dated tree of Carruthers *et al*. (2026) to the comparison with published phylogenies (Module 13, Tutorial 4), corrects four points of the documentation, names groups of the chronogram that the figures of Tutorial 3 left without a label, and adds `add_outgroup_bar()`, which marks the outgroup in two of those figures. No analysis was run again: the supermatrix, the constraint tree, the maximum-likelihood tree, the chronograms and the identification library are those of 0.5.3.
 
 ## Comparison with published phylogenies
 
@@ -16,6 +16,7 @@ This version adds the dated tree of Carruthers *et al*. (2026) to the comparison
 * `cactus_constraints.csv` gives level 4 (`Annot_level_4`) names to lineages of Cacteae that had none, with the names of the lineages in Figure 2 of Guerrero *et al*. (2019): Mammilloid clade (*Mammillaria*, *Coryphantha*, *Cochemiea*, *Pelecyphora*, *Cumarinia*), *Turbinicarpus* (with *Ariocarpus* and *Kadenicarpus*), *Rapicactus* (with *Lophophora*, *Acharagma* and *Obregonia*), *Ferocactus* (with *Thelocactus*, *Stenocactus*, *Kroenleinia* and *Leuchtenbergia*) and *Astrophytum*, *Echinocactus* (with two species of *Homalocephala*); *Eulychnia* takes *Austrocactus*. Each group is a clade of the chronogram, so the chronogram and the maximum-likelihood tree of Tutorial 3 now label it; *Coryphantha*, *Cochemiea*, *Ariocarpus*, *Astrophytum* and *Stenocactus* are no longer labelled on their own. Only `Clade` builds the constraint tree, and the tree built from the table is unchanged.
 * In Core Cactoideae I, *Selenicereus grandiflorus* no longer carries the level 4 name Hylocereeae, so that the tribe, a clade of the chronogram and of the maximum-likelihood tree without that species, is labelled in Tutorial 3. *Leptocereus* and three species of *Armatocereus* form the level 4 group *Leptocereus*, *Armatocereus*, a clade of both trees; it is part of the lineage that Figure 2 of Guerrero *et al*. (2019) names after five genera, which is not monophyletic in these trees, and its name is not taken from that figure.
 * `add_clade_labels_by_level()` sets a label that ends in "clade" in roman type, as it does for suprageneric names.
+* `add_outgroup_bar()` (new) draws a bar and a label over each run of consecutive terminals outside a given ingroup, at the position of the aligned bars of `add_clade_labels_by_level()`. Figures 6 and 8 of Tutorial 3 use it to mark the outgroup, which is not a clade of the rooted trees. In the same figures a level 4 label of two names is set on two lines, and the scale bar of Figure 6 is placed below the tree.
 
 # PhyloCactus 0.5.3
 
