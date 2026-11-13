@@ -9,8 +9,8 @@
   f
 }
 
-test_that("the package is version 0.5.3", {
-  expect_identical(as.character(utils::packageVersion("PhyloCactus")), "0.5.3")
+test_that("the package is version 0.5.4", {
+  expect_identical(as.character(utils::packageVersion("PhyloCactus")), "0.5.4")
 })
 
 test_that("PROVENANCE.csv records the seeds of the reference run read from its logs (M10)", {

@@ -12,8 +12,8 @@ Acanthocereus,Acanthocereus_oaxacensis,Core I,Core I,Cactoideae,Cactaceae,Cactac
 Acanthocereus,Acanthocereus_rosei,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Acanthocereus,Acanthocereus_tepalcatepecanus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Acanthocereus,Acanthocereus_tetragonus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
-Acharagma,Acharagma_aguirreanum,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Acharagma,Acharagma_roseanum,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Acharagma,Acharagma_aguirreanum,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Rapicactus
+Acharagma,Acharagma_roseanum,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Rapicactus
 Airampoa,Airampoa_corrugata,Opuntieae,Opuntieae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Opuntieae
 Airampoa,Airampoa_erectoclada,Opuntieae,Opuntieae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Opuntieae
 Airampoa,Airampoa_orurensis,Opuntieae,Opuntieae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Opuntieae
@@ -40,33 +40,33 @@ Anacampseros,Anacampseros_telephiastrum,Anacampseros,Anacampseros,Outgroup,Anaca
 Anacampseros,Anacampseros_vulcanensis,Anacampseros,Anacampseros,Outgroup,Anacampserotaceae,,,,Anacampseros
 Aporocactus,Aporocactus_flagelliformis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
 Aporocactus,Aporocactus_martianus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Ariocarpus,Ariocarpus_agavoides,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ariocarpus
-Ariocarpus,Ariocarpus_bravoanus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ariocarpus
-Ariocarpus,Ariocarpus_fissuratus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ariocarpus
-Ariocarpus,Ariocarpus_kotschoubeyanus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ariocarpus
-Ariocarpus,Ariocarpus_retusus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ariocarpus
-Ariocarpus,Ariocarpus_scaphirostris,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ariocarpus
-Ariocarpus,Ariocarpus_trigonus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ariocarpus
+Ariocarpus,Ariocarpus_agavoides,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Ariocarpus,Ariocarpus_bravoanus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Ariocarpus,Ariocarpus_fissuratus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Ariocarpus,Ariocarpus_kotschoubeyanus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Ariocarpus,Ariocarpus_retusus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Ariocarpus,Ariocarpus_scaphirostris,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Ariocarpus,Ariocarpus_trigonus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
 Armatocereus,Armatocereus_godingianus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Armatocereus
-Armatocereus,Armatocereus_laetus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Armatocereus
-Armatocereus,Armatocereus_matucanensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Armatocereus
+Armatocereus,Armatocereus_laetus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Armatocereus,Armatocereus_matucanensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
 Armatocereus,Armatocereus_procerus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Armatocereus
-Armatocereus,Armatocereus_rauhii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Armatocereus
+Armatocereus,Armatocereus_rauhii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
 Arrojadoa,Arrojadoa_rhodantha,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Arthrocereus,Arthrocereus_glaziovii,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Arthrocereus,Arthrocereus_rondonianus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Arthrocereus,Arthrocereus_spinosissimus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
-Astrophytum,Astrophytum_asterias,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Astrophytum
-Astrophytum,Astrophytum_capricorne,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Astrophytum
-Astrophytum,Astrophytum_caput_medusae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Astrophytum
-Astrophytum,Astrophytum_coahuilense,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Astrophytum
-Astrophytum,Astrophytum_myriostigma,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Astrophytum
-Astrophytum,Astrophytum_ornatum,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Astrophytum
-Austrocactus,Austrocactus_bertinii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Austrocactus
-Austrocactus,Austrocactus_coxii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Austrocactus
-Austrocactus,Austrocactus_philippii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Austrocactus
-Austrocactus,Austrocactus_spiniflorus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Austrocactus
-Austrocactus,Austrocactus_subandinus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Austrocactus
+Astrophytum,Astrophytum_asterias,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,"Astrophytum, Echinocactus"
+Astrophytum,Astrophytum_capricorne,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,"Astrophytum, Echinocactus"
+Astrophytum,Astrophytum_caput_medusae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,"Astrophytum, Echinocactus"
+Astrophytum,Astrophytum_coahuilense,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,"Astrophytum, Echinocactus"
+Astrophytum,Astrophytum_myriostigma,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,"Astrophytum, Echinocactus"
+Astrophytum,Astrophytum_ornatum,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,"Astrophytum, Echinocactus"
+Austrocactus,Austrocactus_bertinii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Austrocactus,Austrocactus_coxii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Austrocactus,Austrocactus_philippii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Austrocactus,Austrocactus_spiniflorus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Austrocactus,Austrocactus_subandinus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
 Austrocylindropuntia,Austrocylindropuntia_cylindrica,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
 Austrocylindropuntia,Austrocylindropuntia_exaltata,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
 Austrocylindropuntia,Austrocylindropuntia_floccosa,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
@@ -160,32 +160,32 @@ Cleistocactus,Cleistocactus_ritteri,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,C
 Cleistocactus,Cleistocactus_samaipatanus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Cleistocactus,Cleistocactus_smaragdiflorus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Cleistocactus,Cleistocactus_winteri,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
-Cochemiea,Cochemiea_albicans,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_armillata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_barbata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_blossfeldiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_boolii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_capensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_cerralboa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_conoidea,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_dioica,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_fraileana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_grahamii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_guelzowiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_hutchisoniana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_macdougallii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_mainiae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_mazatlanensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_phitauiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_pondii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_poselgeri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_saboae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_schumannii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_tetrancistra,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_theresae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_thornberi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_goodridgei,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
-Cochemiea,Cochemiea_insularis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Cochemiea
+Cochemiea,Cochemiea_albicans,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_armillata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_barbata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_blossfeldiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_boolii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_capensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_cerralboa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_conoidea,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_dioica,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_fraileana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_grahamii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_guelzowiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_hutchisoniana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_macdougallii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_mainiae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_mazatlanensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_phitauiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_pondii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_poselgeri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_saboae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_schumannii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_tetrancistra,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_theresae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_thornberi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_goodridgei,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Cochemiea,Cochemiea_insularis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
 Coleocephalocereus,Coleocephalocereus_aureus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Coleocephalocereus,Coleocephalocereus_fluminensis,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Coleocephalocereus,Coleocephalocereus_goebelianus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
@@ -232,53 +232,53 @@ Corryocactus,Corryocactus_brachypetalus,Core I,Core I,Cactoideae,Cactaceae,Cacta
 Corryocactus,Corryocactus_brevistylus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Corryocactus
 Corryocactus,Corryocactus_melanotrichus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Corryocactus
 Corryocactus,Corryocactus_squarrosus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Corryocactus
-Coryphantha,Coryphantha_calipensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_clavata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_compacta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_cornifera,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_delaetiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_delicata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_difficilis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_durangensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_echinoidea,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_echinus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_elephantidens,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_erecta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_georgii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_glanduligera,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_glassii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_greenwoodii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_hintoniorum,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_jalpanensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_kracikii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_longicornis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_maiz_tablasensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_neglecta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_nickelsiae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_octacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_ottonis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_pallida,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_poselgeriana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_potosiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_pseudoechinus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_pseudonickelsiae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_pseudoradians,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_pulleineana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_pulleineana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_pycnacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_ramillosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_recurvata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_retusa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_robustispina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_salinensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_sulcata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_tripugionacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_vaupeliana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_vogtherriana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_werdermannii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
-Coryphantha,Coryphantha_wohlschlageri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Coryphantha
+Coryphantha,Coryphantha_calipensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_clavata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_compacta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_cornifera,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_delaetiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_delicata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_difficilis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_durangensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_echinoidea,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_echinus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_elephantidens,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_erecta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_georgii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_glanduligera,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_glassii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_greenwoodii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_hintoniorum,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_jalpanensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_kracikii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_longicornis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_maiz_tablasensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_neglecta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_nickelsiae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_octacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_ottonis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_pallida,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_poselgeriana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_potosiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_pseudoechinus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_pseudonickelsiae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_pseudoradians,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_pulleineana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_pulleineana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_pycnacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_ramillosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_recurvata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_retusa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_robustispina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_salinensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_sulcata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_tripugionacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_vaupeliana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_vogtherriana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_werdermannii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Coryphantha,Coryphantha_wohlschlageri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
 Cremnocereus,Cremnocereus_albipilosus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
-Cumarinia,Cumarinia_odorata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Cumarinia,Cumarinia_odorata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
 Cumulopuntia,Cumulopuntia_boliviana,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
 Cumulopuntia,Cumulopuntia_chichensis,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
 Cumulopuntia,Cumulopuntia_corotilla,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
@@ -343,8 +343,8 @@ Disocactus,Disocactus_nelsonii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cact
 Disocactus,Disocactus_phyllanthoides,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Disocactus,Disocactus_quezaltecus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Disocactus,Disocactus_speciosus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
-Echinocactus,Echinocactus_horizonthalonius,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Echinocactus,Echinocactus_platyacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Echinocactus,Echinocactus_horizonthalonius,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,"Astrophytum, Echinocactus"
+Echinocactus,Echinocactus_platyacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,"Astrophytum, Echinocactus"
 Echinocereus,Echinocereus_acifer,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Echinocereus
 Echinocereus,Echinocereus_adustus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Echinocereus
 Echinocereus,Echinocereus_arizonicus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Echinocereus
@@ -495,46 +495,46 @@ Espostoa,Espostoa_senilis,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,
 Espostoa,Espostoa_superba,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Espostoa,Espostoa_utcubambensis,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Espostoopsis,Espostoopsis_dybowskii,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
-Eulychnia,Eulychnia_acida,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Eulychnia
-Eulychnia,Eulychnia_barquitensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Eulychnia
-Eulychnia,Eulychnia_breviflora,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Eulychnia
-Eulychnia,Eulychnia_castanea,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Eulychnia
-Eulychnia,Eulychnia_chorosensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Eulychnia
-Eulychnia,Eulychnia_iquiquensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Eulychnia
-Eulychnia,Eulychnia_ritteri,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Eulychnia
-Eulychnia,Eulychnia_saint_pieana,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Eulychnia
-Eulychnia,Eulychnia_taltalensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Eulychnia
-Eulychnia,Eulychnia_vallenarensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Eulychnia
+Eulychnia,Eulychnia_acida,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Eulychnia,Eulychnia_barquitensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Eulychnia,Eulychnia_breviflora,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Eulychnia,Eulychnia_castanea,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Eulychnia,Eulychnia_chorosensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Eulychnia,Eulychnia_iquiquensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Eulychnia,Eulychnia_ritteri,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Eulychnia,Eulychnia_saint_pieana,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Eulychnia,Eulychnia_taltalensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
+Eulychnia,Eulychnia_vallenarensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Eulychnia, Austrocactus"
 Facheiroa,Facheiroa_squamosa,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Facheiroa,Facheiroa_ulei,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
-Ferocactus,Ferocactus_acanthodes,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_alamosanus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_chrysacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_diguetii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_echidne,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_emoryi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_flavovirens,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_fordii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_glaucescens,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_gracilis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_haematacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_hamatacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_herrerae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_histrix,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_johnstonianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_latispinus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_lindsayi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_macrodiscus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_peninsulae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_pilosus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_pottsii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_recurvus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_robustus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_schwarzii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_townsendianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_uncinatus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_viridescens,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Ferocactus,Ferocactus_wislizeni,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Ferocactus,Ferocactus_acanthodes,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_alamosanus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_chrysacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_diguetii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_echidne,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_emoryi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_flavovirens,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_fordii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_glaucescens,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_gracilis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_haematacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_hamatacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_herrerae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_histrix,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_johnstonianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_latispinus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_lindsayi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_macrodiscus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_peninsulae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_pilosus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_pottsii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_recurvus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_robustus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_schwarzii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_townsendianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_uncinatus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_viridescens,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Ferocactus,Ferocactus_wislizeni,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
 Frailea,Frailea_chiquitana,Frailea,Frailea,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Frailea
 Frailea,Frailea_gracillima,Frailea,Frailea,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Frailea
 Frailea,Frailea_mammifera,Frailea,Frailea,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Frailea
@@ -634,42 +634,42 @@ Harrisia,Harrisia_regelii,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,
 Harrisia,Harrisia_taetra,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Harrisia,Harrisia_tetracantha,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Harrisia,Harrisia_tortuosa,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
-Hatiora,Hatiora_cylindrica,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Hatiora,Hatiora_herminiae,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Hatiora,Hatiora_salicornioides,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Homalocephala,Homalocephala_parryi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Hatiora,Hatiora_cylindrica,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Hatiora,Hatiora_herminiae,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Hatiora,Hatiora_salicornioides,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Homalocephala,Homalocephala_parryi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,"Astrophytum, Echinocactus"
 Homalocephala,Homalocephala_polycephala,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Homalocephala,Homalocephala_texensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Homalocephala,Homalocephala_texensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,"Astrophytum, Echinocactus"
 Isolatocereus,Isolatocereus_dumortieri,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
 Jasminocereus,Jasminocereus_thouarsii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Kadenicarpus,Kadenicarpus_horripilus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Kadenicarpus,Kadenicarpus_pseudomacrochele,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Kadenicarpus,Kadenicarpus_horripilus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Kadenicarpus,Kadenicarpus_pseudomacrochele,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
 Kimnachia,Kimnachia_ramulosa,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
-Kroenleinia,Kroenleinia_grusonii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Kroenleinia,Kroenleinia_grusonii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
 Lasiocereus,Lasiocereus_fulvus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Lasiocereus,Lasiocereus_rupicola,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Lemaireocereus,Lemaireocereus_hollianus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Pachycerinae
 Lemaireocereus,Lemaireocereus_lepidanthus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Pachycerinae
 Leocereus,Leocereus_bahiensis,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
-Lepismium,Lepismium_cruciforme,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Lepismium,Lepismium_houlletianum,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Lepismium,Lepismium_lorentzianum,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Lepismium,Lepismium_lumbricoides,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Lepismium,Lepismium_warmingianum,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Leptocereus,Leptocereus_arboreus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_assurgens,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_carinatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_ekmanii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_leonii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_maxonii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_nudiflorus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_paniculatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_prostratus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_quadricostatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_scopulophilus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_sylvestris,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leptocereus,Leptocereus_wrightii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
-Leuchtenbergia,Leuchtenbergia_principis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Lepismium,Lepismium_cruciforme,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Lepismium,Lepismium_houlletianum,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Lepismium,Lepismium_lorentzianum,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Lepismium,Lepismium_lumbricoides,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Lepismium,Lepismium_warmingianum,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Leptocereus,Leptocereus_arboreus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_assurgens,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_carinatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_ekmanii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_leonii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_maxonii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_nudiflorus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_paniculatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_prostratus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_quadricostatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_scopulophilus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_sylvestris,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leptocereus,Leptocereus_wrightii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,"Leptocereus, Armatocereus"
+Leuchtenbergia,Leuchtenbergia_principis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
 Leucostele,Leucostele_atacamensis,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Leucostele,Leucostele_chiloensis,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Leucostele,Leucostele_deserticola,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
@@ -705,9 +705,9 @@ Lobivia,Lobivia_tiegeliana,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae
 Lophocereus,Lophocereus_gatesii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Pachycerinae
 Lophocereus,Lophocereus_marginatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Pachycerinae
 Lophocereus,Lophocereus_schottii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Pachycerinae
-Lophophora,Lophophora_diffusa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Lophophora,Lophophora_fricii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Lophophora,Lophophora_williamsii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Lophophora,Lophophora_diffusa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Rapicactus
+Lophophora,Lophophora_fricii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Rapicactus
+Lophophora,Lophophora_williamsii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Rapicactus
 Lymanbensonia,Lymanbensonia_brevispina,Calymmanthium,Calymmanthium,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Calymmanthium
 Lymanbensonia,Lymanbensonia_incachacana,Calymmanthium,Calymmanthium,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Calymmanthium
 Lymanbensonia,Lymanbensonia_micrantha,Calymmanthium,Calymmanthium,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Calymmanthium
@@ -727,132 +727,132 @@ Maihueniopsis,Maihueniopsis_minuta,Tephrocacteae,Tephrocacteae,Opuntioideae,Cact
 Maihueniopsis,Maihueniopsis_molfinoi,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
 Maihueniopsis,Maihueniopsis_ovata,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
 Maihueniopsis,Maihueniopsis_platyacantha,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
-Mammillaria,Mammillaria_albicoma,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_albiflora,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_albilanata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_anniana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_aureilanata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_backebergiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_baumii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_beneckei,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_bocasana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_bocensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_bombycina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_brandegeei,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_candida,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_carmenae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_carnea,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_carretii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_coahuilensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_columbiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_compressa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_crinita,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_crucigera,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_decipiens,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_deherdtiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_densispina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_discolor,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_dixanthocentron,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_duoformis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_duwei,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_elongata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_eriacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_erythrosperma,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_evermanniana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_fittkaui,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_flavicentra,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_formosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_gasseriana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_geminispina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_gigantea,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_glassii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_grusonii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_guerreronis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_guillauminiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_haageana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_hahniana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_halbingeri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_hernandezii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_herrerae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_heyderi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_huitzilopochtli,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_humboldtii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_jaliscana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_karwinskiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_klissingiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_knippeliana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_lasiacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_laui,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_lenta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_longiflora,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_longimamma,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_luethyi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_magnifica,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_magnimamma,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_mammillaris,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_marcosii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_marksiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_mathildae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_matudae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_melaleuca,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_melanocentra,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_mercadensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_meyranii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_microhelia,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_moelleriana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_morganiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_muehlenpfordtii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_mystax,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_nana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_napina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_nunezii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_orcuttii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_oteroi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_painteri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_parkinsonii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_pectinifera,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_peninsularis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_pennispinosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_perbella,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_petrophila,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_petterssonii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_picta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_pilispina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_plumosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_polyedra,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_polythele,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_pottsii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_prolifera,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_rekoi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_rettigiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_rhodantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_roseoalba,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_sanchez_mejoradae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_sartorii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_schiedeana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_schwarzii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_scrippsiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_senilis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_sinistrohamata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_sonorensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_sphacelata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_spinosissima,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_standleyi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_supertexta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_surculosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_tayloriorum,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_tonalensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_uncinata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_varieaculeata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_vetula,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_wagneriana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_weingartiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_wiesingeri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_winterae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_xaltianguensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_zeilmanniana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_zephyranthoides,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Mammillaria,Mammillaria_zublerae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Mammillaria,Mammillaria_albicoma,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_albiflora,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_albilanata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_anniana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_aureilanata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_backebergiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_baumii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_beneckei,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_bocasana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_bocensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_bombycina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_brandegeei,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_candida,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_carmenae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_carnea,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_carretii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_coahuilensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_columbiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_compressa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_crinita,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_crucigera,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_decipiens,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_deherdtiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_densispina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_discolor,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_dixanthocentron,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_duoformis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_duwei,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_elongata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_eriacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_erythrosperma,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_evermanniana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_fittkaui,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_flavicentra,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_formosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_gasseriana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_geminispina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_gigantea,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_glassii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_grusonii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_guerreronis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_guillauminiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_haageana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_hahniana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_halbingeri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_hernandezii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_herrerae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_heyderi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_huitzilopochtli,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_humboldtii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_jaliscana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_karwinskiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_klissingiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_knippeliana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_lasiacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_laui,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_lenta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_longiflora,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_longimamma,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_luethyi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_magnifica,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_magnimamma,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_mammillaris,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_marcosii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_marksiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_mathildae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_matudae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_melaleuca,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_melanocentra,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_mercadensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_meyranii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_microhelia,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_moelleriana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_morganiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_muehlenpfordtii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_mystax,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_nana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_napina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_nunezii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_orcuttii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_oteroi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_painteri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_parkinsonii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_pectinifera,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_peninsularis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_pennispinosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_perbella,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_petrophila,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_petterssonii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_picta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_pilispina,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_plumosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_polyedra,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_polythele,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_pottsii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_prolifera,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_rekoi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_rettigiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_rhodantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_roseoalba,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_sanchez_mejoradae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_sartorii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_schiedeana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_schwarzii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_scrippsiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_senilis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_sinistrohamata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_sonorensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_sphacelata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_spinosissima,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_standleyi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_supertexta,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_surculosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_tayloriorum,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_tonalensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_uncinata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_varieaculeata,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_vetula,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_wagneriana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_weingartiana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_wiesingeri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_winterae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_xaltianguensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_zeilmanniana,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_zephyranthoides,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Mammillaria,Mammillaria_zublerae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
 Marshallocereus,Marshallocereus_aragonii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Pachycerinae
 Matucana,Matucana_aurantiaca,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Matucana,Matucana_aureiflora,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
@@ -894,7 +894,7 @@ Neoraimondia,Neoraimondia_herzogiana,Core I,Core I,Cactoideae,Cactaceae,Cactacea
 Neowerdermannia,Neowerdermannia_chilensis,Core II,Notocacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Notocacteae
 Neowerdermannia,Neowerdermannia_vorwerkii,Core II,Notocacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Notocacteae
 Nyctocereus,Nyctocereus_serpentinus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Pachycerinae
-Obregonia,Obregonia_denegrii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Obregonia,Obregonia_denegrii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Rapicactus
 Opuntia,Opuntia_abjecta,Opuntieae,Opuntieae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Opuntieae
 Opuntia,Opuntia_anacantha,Opuntieae,Opuntieae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Opuntieae
 Opuntia,Opuntia_arechavaletae,Opuntieae,Opuntieae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Opuntieae
@@ -1061,17 +1061,17 @@ Parodia,Parodia_subterranea,Core II,Notocacteae,Cactoideae,Cactaceae,Cactaceae,C
 Parodia,Parodia_tenuicylindrica,Core II,Notocacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Notocacteae
 Pediocactus,Pediocactus_peeblesianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
 Pediocactus,Pediocactus_simpsonii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Pelecyphora,Pelecyphora_alversonii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Pelecyphora,Pelecyphora_aselliformis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Pelecyphora,Pelecyphora_dasyacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Pelecyphora,Pelecyphora_duncanii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Pelecyphora,Pelecyphora_hesteri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Pelecyphora,Pelecyphora_laredoi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Pelecyphora,Pelecyphora_macromeris,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Pelecyphora,Pelecyphora_missouriensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Pelecyphora,Pelecyphora_strobiliformis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Pelecyphora,Pelecyphora_tuberculosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Pelecyphora,Pelecyphora_vivipara,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Pelecyphora,Pelecyphora_alversonii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Pelecyphora,Pelecyphora_aselliformis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Pelecyphora,Pelecyphora_dasyacantha,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Pelecyphora,Pelecyphora_duncanii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Pelecyphora,Pelecyphora_hesteri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Pelecyphora,Pelecyphora_laredoi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Pelecyphora,Pelecyphora_macromeris,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Pelecyphora,Pelecyphora_missouriensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Pelecyphora,Pelecyphora_strobiliformis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Pelecyphora,Pelecyphora_tuberculosa,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
+Pelecyphora,Pelecyphora_vivipara,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Mammilloid clade
 Peniocereus,Peniocereus_greggii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Pachycerinae
 Peniocereus,Peniocereus_johnstonii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Pachycerinae
 Peniocereus,Peniocereus_lazaro_cardenasii,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Pachycerinae
@@ -1193,69 +1193,69 @@ Pygmaeocereus,Pygmaeocereus_bieblii,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,C
 Pygmaeocereus,Pygmaeocereus_bylesianus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Quiabentia,Quiabentia_verticillata,Cylindropuntieae,Cylindropuntieae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Cylindropuntieae
 Quiabentia,Quiabentia_zehntneri,Cylindropuntieae,Cylindropuntieae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Cylindropuntieae
-Rapicactus,Rapicactus_beguinii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Rapicactus,Rapicactus_booleanus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Rapicactus,Rapicactus_mandragora,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Rapicactus,Rapicactus_subterraneus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Rapicactus,Rapicactus_zaragosae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Rapicactus,Rapicactus_beguinii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Rapicactus
+Rapicactus,Rapicactus_booleanus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Rapicactus
+Rapicactus,Rapicactus_mandragora,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Rapicactus
+Rapicactus,Rapicactus_subterraneus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Rapicactus
+Rapicactus,Rapicactus_zaragosae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Rapicactus
 Rauhocereus,Rauhocereus_riosaniensis,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Rebutia,Rebutia_fabrisii,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Rebutia,Rebutia_minuscula,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Rebutia,Rebutia_padcayensis,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Rebutia,Rebutia_steinbachii,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Reicheocactus,Reicheocactus_bonnieae,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
-Rhipsalidopsis,Rhipsalidopsis_gaertneri,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalidopsis,Rhipsalidopsis_rosea,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_agudoensis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_baccifera,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_barthlottii,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_burchellii,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_campos_portoana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_cereoides,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_cereuscula,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_clavata,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_crispata,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_cuneata,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_dissimilis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_elliptica,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_ewaldiana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_flagelliformis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_floccosa,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_goebeliana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_grandiflora,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_hoelleri,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_juengeri,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_lindbergiana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_mesembryanthemoides,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_micrantha,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_neves_armondii,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_oblonga,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_occidentalis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_olivifera,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_ormindoi,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_pacheco_leonis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_pachyptera,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_paradoxa,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_pentaptera,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_pilocarpa,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_pulchra,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_puniceodiscus,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_rhombea,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_russellii,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_sulcata,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_teres,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Rhipsalis,Rhipsalis_triangularis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
+Rhipsalidopsis,Rhipsalidopsis_gaertneri,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalidopsis,Rhipsalidopsis_rosea,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_agudoensis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_baccifera,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_barthlottii,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_burchellii,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_campos_portoana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_cereoides,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_cereuscula,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_clavata,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_crispata,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_cuneata,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_dissimilis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_elliptica,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_ewaldiana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_flagelliformis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_floccosa,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_goebeliana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_grandiflora,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_hoelleri,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_juengeri,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_lindbergiana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_mesembryanthemoides,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_micrantha,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_neves_armondii,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_oblonga,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_occidentalis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_olivifera,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_ormindoi,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_pacheco_leonis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_pachyptera,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_paradoxa,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_pentaptera,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_pilocarpa,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_pulchra,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_puniceodiscus,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_rhombea,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_russellii,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_sulcata,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_teres,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Rhipsalis,Rhipsalis_triangularis,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
 Rimacactus,Rimacactus_laui,Core II,Notocacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Notocacteae
 Salmonopuntia,Salmonopuntia_salmiana,Opuntieae,Opuntieae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Opuntieae
 Salmonopuntia,Salmonopuntia_schickendantzii,Opuntieae,Opuntieae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Opuntieae
 Samaipaticereus,Samaipaticereus_corroanus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
-Schlumbergera,Schlumbergera_kautskyi,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Schlumbergera,Schlumbergera_lutea,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Schlumbergera,Schlumbergera_microsphaerica,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Schlumbergera,Schlumbergera_opuntioides,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Schlumbergera,Schlumbergera_orssichiana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Schlumbergera,Schlumbergera_russelliana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
-Schlumbergera,Schlumbergera_truncata,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,,Rhipsalideae
+Schlumbergera,Schlumbergera_kautskyi,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Schlumbergera,Schlumbergera_lutea,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Schlumbergera,Schlumbergera_microsphaerica,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Schlumbergera,Schlumbergera_opuntioides,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Schlumbergera,Schlumbergera_orssichiana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Schlumbergera,Schlumbergera_russelliana,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
+Schlumbergera,Schlumbergera_truncata,Rhipsalideae,Rhipsalideae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,Rhipsalideae
 Sclerocactus,Sclerocactus_brevihamatus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
 Sclerocactus,Sclerocactus_glaucus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
 Sclerocactus,Sclerocactus_intertextus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
@@ -1274,7 +1274,7 @@ Selenicereus,Selenicereus_costaricensis,Core I,Core I,Cactoideae,Cactaceae,Cacta
 Selenicereus,Selenicereus_dorschianus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Selenicereus,Selenicereus_escuintlensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Selenicereus,Selenicereus_extensus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
-Selenicereus,Selenicereus_grandiflorus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
+Selenicereus,Selenicereus_grandiflorus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,
 Selenicereus,Selenicereus_guatemalensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Selenicereus,Selenicereus_hamatus,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
 Selenicereus,Selenicereus_inermis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Hylocereeae
@@ -1309,13 +1309,13 @@ Soehrensia,Soehrensia_thelegona,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cacto
 Soehrensia,Soehrensia_thelegonoides,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Soehrensia,Soehrensia_vasquezii,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Soehrensia,Soehrensia_volliana,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
-Stenocactus,Stenocactus_coptonogonus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Stenocactus
-Stenocactus,Stenocactus_crispatus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Stenocactus
-Stenocactus,Stenocactus_multicostatus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Stenocactus
-Stenocactus,Stenocactus_obvallatus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Stenocactus
-Stenocactus,Stenocactus_ochoterenianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Stenocactus
-Stenocactus,Stenocactus_phyllacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Stenocactus
-Stenocactus,Stenocactus_vaupelianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Stenocactus
+Stenocactus,Stenocactus_coptonogonus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Stenocactus,Stenocactus_crispatus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Stenocactus,Stenocactus_multicostatus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Stenocactus,Stenocactus_obvallatus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Stenocactus,Stenocactus_ochoterenianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Stenocactus,Stenocactus_phyllacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Stenocactus,Stenocactus_vaupelianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
 Stenocereus,Stenocereus_alamosensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Stenocerinae
 Stenocereus,Stenocereus_beneckei,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Stenocerinae
 Stenocereus,Stenocereus_chacalapensis,Core I,Core I,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae I,Stenocerinae
@@ -1360,35 +1360,35 @@ Tephrocactus,Tephrocactus_paediophilus,Tephrocacteae,Tephrocacteae,Opuntioideae,
 Tephrocactus,Tephrocactus_recurvatus,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
 Tephrocactus,Tephrocactus_verschaffeltii,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
 Tephrocactus,Tephrocactus_weberi,Tephrocacteae,Tephrocacteae,Opuntioideae,Cactaceae,Cactaceae,Opuntioideae,,Tephrocacteae
-Thelocactus,Thelocactus_bicolor,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Thelocactus,Thelocactus_conothelos,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Thelocactus,Thelocactus_hastifer,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Thelocactus,Thelocactus_hexaedrophorus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Thelocactus,Thelocactus_lausseri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Thelocactus,Thelocactus_leucacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Thelocactus,Thelocactus_macdowellii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Thelocactus,Thelocactus_rinconensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Thelocactus,Thelocactus_setispinus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Thelocactus,Thelocactus_tulensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Thelocactus,Thelocactus_bicolor,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Thelocactus,Thelocactus_conothelos,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Thelocactus,Thelocactus_hastifer,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Thelocactus,Thelocactus_hexaedrophorus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Thelocactus,Thelocactus_lausseri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Thelocactus,Thelocactus_leucacanthus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Thelocactus,Thelocactus_macdowellii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Thelocactus,Thelocactus_rinconensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Thelocactus,Thelocactus_setispinus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
+Thelocactus,Thelocactus_tulensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Ferocactus
 Trichocereus,Trichocereus_bridgesii,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Trichocereus,Trichocereus_macrogonus,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
-Turbinicarpus,Turbinicarpus_alonsoi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_bonatzii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_gielsdorfianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_graminispinus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_hoferi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_jauernigii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_laui,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_lophophoroides,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_nieblae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_pseudopectinatus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_rioverdensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_roseiflorus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_saueri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_schmiedickeanus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_swobodae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_valdezianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
-Turbinicarpus,Turbinicarpus_viereckii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,
+Turbinicarpus,Turbinicarpus_alonsoi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_bonatzii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_gielsdorfianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_graminispinus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_hoferi,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_jauernigii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_laui,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_lophophoroides,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_nieblae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_pseudopectinatus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_rioverdensis,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_roseiflorus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_saueri,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_schmiedickeanus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_swobodae,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_valdezianus,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
+Turbinicarpus,Turbinicarpus_viereckii,Cacteae,Cacteae,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Cacteae,Turbinicarpus
 Uebelmannia,Uebelmannia_pectinifera,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Vatricania,Vatricania_guentheri,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT
 Weberbauerocereus,Weberbauerocereus_cephalomacrostibas,Core II,BCT,Cactoideae,Cactaceae,Cactaceae,Cactoideae,Core Cactoideae II,BCT

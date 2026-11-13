@@ -30,7 +30,9 @@ Excel checklist, or the rows whose \code{Family} column is Cactaceae in a CSV ch
 
 \item{min_tips}{Integer. Minimum number of tips for comparisons. Defaults to 4L.}
 
-\item{pruning_strategy}{Character. Strategy for pruning trees before metric computation. Under \code{"common_set"}, the shared intersection across all trees is used for the multidimensional scaling (MDS) projection, whereas pairwise tables retain all shared tips between each pair. Defaults to \code{"common_set"}.}
+\item{pruning_strategy}{Character. Strategy for pruning trees before metric computation. Under \code{"common_set"}, the shared intersection across all trees is used for the multidimensional scaling (MDS) projection, whereas pairwise tables retain all shared tips between each pair. Defaults to \code{"common_set"}.
+Under \code{"common_set"} the species shared by all the trees of set A3 are those of A1, so the
+projection of A3 is that of A1, and its label in the tree-space coordinates says so.}
 
 \item{rooting_genus}{Character. Genus whose terminals root every tree after the family filter. Defaults to \code{"Leuenbergeria"}.
 
@@ -44,9 +46,10 @@ given in \code{resolve_rooting_outgroup()}. Trees lacking the genus are left unr
 
 \item{tree_labels}{Named character vector or \code{NULL}. Legend labels for the trees in the tree-space
 figure, named by the entries of \code{trees_mapping_list}. Labels of the form \code{"Author et al. (year)"}
-are typeset with \emph{et al.} in italics. Defaults to \code{NULL}, which labels the four reference trees
+are typeset with \emph{et al.} in italics. Defaults to \code{NULL}, which labels the five reference trees
 of Tutorial 4 as \code{"Zuntini et al. (2024)"}, \code{"Thompson et al. (2024)"},
-\code{"Amaral et al. (2022)"} and \code{"de Vos et al. (2025)"}, and the focal tree as \code{"This study"}.
+\code{"Amaral et al. (2022)"}, \code{"de Vos et al. (2025)"} and \code{"Carruthers et al. (2026)"}, and the
+focal tree as \code{"This study"}.
 Supplied labels replace the defaults of the same name.}
 }
 \value{
@@ -54,7 +57,7 @@ A named list containing file paths for generated tables (\code{tables}), figures
 }
 \description{
 Compares the focal tree produced by \code{PhyloCactus} with published phylogenies (e.g., Amaral \emph{et al.} 2022,
-Thompson \emph{et al.} 2024, Zuntini \emph{et al.} 2024, de Vos \emph{et al.} 2025). Pairwise distances are computed with the
+Thompson \emph{et al.} 2024, Zuntini \emph{et al.} 2024, de Vos \emph{et al.} 2025, Carruthers \emph{et al.} 2026). Pairwise distances are computed with the
 Robinson-Foulds distance (Robinson & Foulds, 1981) and the Different Phylogenetic Information distance
 (\code{TreeDist}; Smith, 2020), both on unrooted trees, and projected into tree space by multidimensional scaling (MDS).
 }

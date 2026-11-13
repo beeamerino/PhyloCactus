@@ -202,7 +202,7 @@ if (run_local_ml) {
     cluster_mem = "24G",                              # RAM memory allocation (--mem; 15.5 GB used, 1208 terminals)
     cluster_time = "02:00:00",                        # Walltime limit (--time HH:MM:SS; 1 h 15 min used, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
-    load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
+    load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules; on Leftraru this module runs RAxML-NG 1.2.2-master, as its logs report
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
     # --- Search Tuning ---
     workers = NULL,
@@ -273,7 +273,7 @@ if (run_local_bs) {
     cluster_mem = "16G",                              # RAM memory allocation per task (--mem; 6.0 GiB used, 250 replicates, 1208 terminals)
     cluster_time = "24:00:00",                        # Walltime limit per task (--time HH:MM:SS; 13 h 05 min used at most, 250 replicates, 1208 terminals)
     cluster_mail_user = Sys.getenv("MY_EMAIL", ""),   # Notification email address (reads MY_EMAIL from .Renviron)
-    load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules
+    load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"), # Cluster environment modules; on Leftraru this module runs RAxML-NG 1.2.2-master, as its logs report
     raxml_exec = "raxml-ng-mpi",                      # Executable binary in $PATH
     # --- Bootstrap Array Settings ---
     bs_per_rep = 250,                                 # Bootstrap replicates per array task
@@ -553,7 +553,8 @@ automate_treePL(
 )
 
 # The dated replicates are summarized outside R with TreeAnnotator v2.7.7 of BEAST 2, with the
-# settings of Maurin (2020): maximum clade credibility target tree, mean node heights, 0% burn-in.
+# settings of Maurin (2020), mean node heights and 0% burn-in, and the maximum clade credibility tree
+# as target tree.
 # The reference run (scheme 1) used this command, whose output is the distributed summary:
 #   treeannotator -burnin 0 -height mean -topology MCC 8_Dating/Zuntini2024_young/bsTree_treePL.tree 8_Dating/Zuntini2024_young/dated_summary_hpd.tree
 # If the treeannotator first on the PATH is that of BEAST 1 (v1.10), which rejects -height, call the

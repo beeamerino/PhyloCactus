@@ -78,7 +78,7 @@ compute_pairwise_metric <- function(tree_list, FUN, min_tips = 4L) {
 #' Comparative Tree-Space Projection and Topological Validation Pipeline
 #'
 #' Compares the focal tree produced by `PhyloCactus` with published phylogenies (e.g., Amaral *et al.* 2022,
-#' Thompson *et al.* 2024, Zuntini *et al.* 2024, de Vos *et al.* 2025). Pairwise distances are computed with the
+#' Thompson *et al.* 2024, Zuntini *et al.* 2024, de Vos *et al.* 2025, Carruthers *et al.* 2026). Pairwise distances are computed with the
 #' Robinson-Foulds distance (Robinson & Foulds, 1981) and the Different Phylogenetic Information distance
 #' (`TreeDist`; Smith, 2020), both on unrooted trees, and projected into tree space by multidimensional scaling (MDS).
 #'
@@ -92,11 +92,14 @@ compute_pairwise_metric <- function(tree_list, FUN, min_tips = 4L) {
 #' @param out_dir Character. Destination directory path to save validation output tables, tree-space plots, and logs.
 #' @param min_tips Integer. Minimum number of tips for comparisons. Defaults to 4L.
 #' @param pruning_strategy Character. Strategy for pruning trees before metric computation. Under `"common_set"`, the shared intersection across all trees is used for the multidimensional scaling (MDS) projection, whereas pairwise tables retain all shared tips between each pair. Defaults to `"common_set"`.
+#'   Under `"common_set"` the species shared by all the trees of set A3 are those of A1, so the
+#'   projection of A3 is that of A1, and its label in the tree-space coordinates says so.
 #' @param tree_labels Named character vector or `NULL`. Legend labels for the trees in the tree-space
 #'   figure, named by the entries of `trees_mapping_list`. Labels of the form `"Author et al. (year)"`
-#'   are typeset with *et al.* in italics. Defaults to `NULL`, which labels the four reference trees
+#'   are typeset with *et al.* in italics. Defaults to `NULL`, which labels the five reference trees
 #'   of Tutorial 4 as `"Zuntini et al. (2024)"`, `"Thompson et al. (2024)"`,
-#'   `"Amaral et al. (2022)"` and `"de Vos et al. (2025)"`, and the focal tree as `"This study"`.
+#'   `"Amaral et al. (2022)"`, `"de Vos et al. (2025)"` and `"Carruthers et al. (2026)"`, and the
+#'   focal tree as `"This study"`.
 #'   Supplied labels replace the defaults of the same name.
 #' @param rooting_genus Character. Genus whose terminals root every tree after the family filter. Defaults to `"Leuenbergeria"`.
 #'
@@ -688,11 +691,20 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
     dplyr::mutate(analysis_label = unname(analysis_labels[analysis_id])) |>
     dplyr::select(analysis_id, analysis_label, metric, tree_1, tree_2, n_common_tips, distance)
   
+  # Under common_set every tree of A3 is pruned to the species shared by all of them, which are the
+  # species of A1: the projection of A3 is that of A1, and its panel label says so. The pairwise
+  # table of A3 keeps all the species of the shared genera and its own label.
+  space_labels <- analysis_labels
+  if (pruning_strategy == "common_set") {
+    space_labels[["A3_all_species_in_shared_genera"]] <-
+      "A3. Species within shared genera, projected on the species of A1"
+  }
+
   SUPP_tree_space_coordinates_rf <- dplyr::bind_rows(tree_space_coords_rf) |>
-    dplyr::mutate(metric = "RF", analysis_label = unname(analysis_labels[analysis_id]))
+    dplyr::mutate(metric = "RF", analysis_label = unname(space_labels[analysis_id]))
   
   SUPP_tree_space_coordinates_dpi <- dplyr::bind_rows(tree_space_coords_dpi) |>
-    dplyr::mutate(metric = "DPI", analysis_label = unname(analysis_labels[analysis_id]))
+    dplyr::mutate(metric = "DPI", analysis_label = unname(space_labels[analysis_id]))
   
   SUPP_tree_space_coordinates <- dplyr::bind_rows(
     SUPP_tree_space_coordinates_rf,
@@ -808,19 +820,20 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
 #' @return A list with `palette`, `shapes`, `labels` (an expression vector) and `theme`.
 #' @noRd
 .tree_space_style <- function(tree_labels = NULL) {
-  # The first five categorical colours of the package palette, in their fixed order
-  tree_palette <- stats::setNames(unname(phylocactus_colours("categorical")[1:5]),
-                                  c("FocalTree", "Zuntini", "Thompson", "Amaral", "deVos"))
-  # Shapes as well as colours, so that the five trees remain distinguishable in greyscale print and
+  # The first six categorical colours of the package palette, in their fixed order
+  tree_palette <- stats::setNames(unname(phylocactus_colours("categorical")[1:6]),
+                                  c("FocalTree", "Zuntini", "Thompson", "Amaral", "deVos", "Carruthers"))
+  # Shapes as well as colours, so that the six trees remain distinguishable in greyscale print and
   # when two points overlap.
-  tree_shapes <- c(FocalTree = 16, Zuntini = 17, Thompson = 15, Amaral = 18, deVos = 4)
+  tree_shapes <- c(FocalTree = 16, Zuntini = 17, Thompson = 15, Amaral = 18, deVos = 4, Carruthers = 8)
 
   reference_labels <- c(
     FocalTree = "This study",
     Zuntini   = "Zuntini et al. (2024)",
     Thompson  = "Thompson et al. (2024)",
     Amaral    = "Amaral et al. (2022)",
-    deVos     = "de Vos et al. (2025)"
+    deVos     = "de Vos et al. (2025)",
+    Carruthers = "Carruthers et al. (2026)"
   )
   if (!is.null(tree_labels)) {
     if (!is.character(tree_labels) || is.null(names(tree_labels)) || any(!nzchar(names(tree_labels)))) {
