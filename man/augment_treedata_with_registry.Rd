@@ -17,3 +17,13 @@ An augmented \code{treedata} object.
 \description{
 Joins multi-level taxonomic clade annotations from a registry onto a \code{treedata} object.
 }
+\examples{
+# A pruned copy of the distributed chronogram and the constraint table
+tree <- ape::read.tree(system.file("extdata", "phylocactus_chronogram_ml.tree", package = "PhyloCactus"))
+tree <- ape::keep.tip(tree, grep("^(Talinum|Portulaca|Leuenbergeria|Pereskia|Opuntia|Cylindropuntia|Tephrocactus|Maihuenia)_",
+                                 tree$tip.label, value = TRUE))
+constraints_tbl <- utils::read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
+registry <- build_annotation_registry(tree, constraints_tbl, supp_level4_min_tips = 3L)
+annotated <- augment_treedata_with_registry(tree, registry)
+head(tidytree::as_tibble(annotated))
+}

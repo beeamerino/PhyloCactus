@@ -55,3 +55,9 @@ TBE is not thereby converged under FBP. The default is FBP, matching \code{map_b
 that the convergence statement and the reported support values refer to the same quantity. Run the
 test under whichever metric is being reported, and under both when both are tabulated.
 }
+\examples{
+# Needs the external program and the files of a run
+\dontrun{
+check_bs_convergence("raxml-ng", "cactus_ALL_bootstraps.tree", bs_cutoff = 0.03)
+}
+}

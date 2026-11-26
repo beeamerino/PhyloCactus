@@ -168,6 +168,11 @@ root_on_clade <- function(phy, outgroup) {
 #' @references
 #' Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
 #' for large phylogenies. *Bioinformatics*, 28(20), 2689-2690. \doi{10.1093/bioinformatics/bts492}
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' run_treePL_direct("configure_smooth_ML_tree", label = "ML_tree", cwd = "8_Dating/ML_tree")
+#' }
 #' @export
 run_treePL_direct <- function(cfg_file, label, cwd = NULL, treepl_bin = "treePL"){
   if (!is.null(cwd)) {

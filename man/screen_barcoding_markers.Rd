@@ -45,3 +45,9 @@ saturation (which never excludes a locus), and counts identical aligned sequence
 Inputs are read from the directories of the earlier steps, so the screening runs on its own
 whenever those directories exist.
 }
+\examples{
+# Needs the folders of a run
+\dontrun{
+screen_barcoding_markers()
+}
+}

@@ -161,6 +161,11 @@ curate_barcoding_markers <- function(input_dir = file.path("11_barcoding", "1_as
 #'   `possible_paralog` of every table; the flag never excludes a locus. Defaults to `"pepC_like"`.
 #' @return Invisibly, a list with `screening` and `identical`. Writes
 #'   `TABLE_barcoding_marker_screening.csv` and `TABLE_barcoding_identical_sequences.csv`.
+#' @examples
+#' # Needs the folders of a run
+#' \dontrun{
+#' screen_barcoding_markers()
+#' }
 #' @export
 screen_barcoding_markers <- function(assembly_dir = file.path("11_barcoding", "1_assembly"),
                                      curated_dir = file.path("11_barcoding", "2_curated"),

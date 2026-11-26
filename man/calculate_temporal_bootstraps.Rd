@@ -52,3 +52,10 @@ Generates non-parametric bootstrap tree replicates where branch lengths are re-e
 Temporal bootstraps propagate branch length uncertainty into downstream penalized likelihood divergence time estimation (\code{treePL}),
 providing empirical confidence intervals for node ages without introducing topological variance.
 }
+\examples{
+# Needs the external program and the files of a run
+\dontrun{
+calculate_temporal_bootstraps("raxml-ng", "supermatrix.phy", "cactus_modeltest.part.aicc",
+                              "cactus_ml.raxml.bestTree", bs_trees = 100, seed = 87786)
+}
+}

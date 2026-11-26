@@ -17,4 +17,13 @@ Data frame of tip annotations filtered to matching tree tips.
 \description{
 Matches and standardizes taxonomic metadata from a classification table against tree tip labels.
 }
+\examples{
+# A pruned copy of the distributed chronogram and the constraint table
+tree <- ape::read.tree(system.file("extdata", "phylocactus_chronogram_ml.tree", package = "PhyloCactus"))
+tree <- ape::keep.tip(tree, grep("^(Talinum|Portulaca|Leuenbergeria|Pereskia|Opuntia|Cylindropuntia|Tephrocactus|Maihuenia)_",
+                                 tree$tip.label, value = TRUE))
+constraints_tbl <- utils::read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
+tips <- prepare_tip_annotation(tree, constraints_tbl)
+table(tips$Annot_level_2)
+}
 \keyword{internal}

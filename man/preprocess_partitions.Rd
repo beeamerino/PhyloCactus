@@ -46,6 +46,12 @@ Character path to the validated partition map file ready for model evaluation.
 Validates PHYLIP alignment syntax and partition file coordinates using \code{RAxML-NG} (Kozlov \emph{et al.}, 2019).
 Verifies site ranges, formatting compatibility, and data integrity prior to substitution model evaluation.
 }
+\examples{
+# Needs the external program and the files of a run
+\dontrun{
+preprocess_partitions("supermatrix.phy", "PARTITION_raxml_style.txt", "raxml-ng")
+}
+}
 \references{
 Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
 user-friendly tool for maximum likelihood phylogenetic inference. \emph{Bioinformatics}, 35(21), 4453-4455.

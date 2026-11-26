@@ -15,4 +15,8 @@ Numeric scalar representing maximum tree depth.
 \description{
 Calculates the maximum root-to-tip temporal distance of an ultrametric tree in Millions of Years ago (Ma).
 }
+\examples{
+tree <- ape::read.tree(system.file("extdata", "phylocactus_chronogram_ml.tree", package = "PhyloCactus"))
+get_tree_max_depth(tree)   # the root age in Ma
+}
 \keyword{internal}

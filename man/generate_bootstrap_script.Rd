@@ -96,3 +96,7 @@ memory and CPU allocation. This ratio is dataset- and hardware-dependent (it tra
 parallel); if you migrate to different node hardware or a markedly different supermatrix size, re-validate it
 empirically with a short trial run before committing a full job array to it.
 }
+\examples{
+generate_bootstrap_script("supermatrix.phy", "partitions.txt", "constraints.tree",
+                          base_seed = 2150, output_dir = tempdir(), cluster_mail_user = "")
+}

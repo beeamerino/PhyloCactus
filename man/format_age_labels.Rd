@@ -17,4 +17,7 @@ Character vector of formatted age labels.
 \description{
 Formats numerical node age breaks into clean text strings for timeline axes.
 }
+\examples{
+format_age_labels(c(27.33, 12.968), digits = 1L)
+}
 \keyword{internal}

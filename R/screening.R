@@ -519,6 +519,12 @@ run_marker_screening <- function(
 #' Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G. (2021). Cactaceae at
 #' Caryophyllales.org – a dynamic online species-level taxonomic backbone for the family.
 #' *Willdenowia*, 51(2), 251–270. \doi{10.3372/wi.51.51208}
+#' @examples
+#' # Needs the folders of a run
+#' \dontrun{
+#' integrate_and_clean_markers("3_Saturation/filtered_markers", "3_Saturation_Outgroup/filtered_markers",
+#'                             output_dir = "4_Cleaned")
+#' }
 #' @export
 integrate_and_clean_markers <- function(
   ingroup_dir,

@@ -88,3 +88,7 @@ using MPI-enabled \code{RAxML-NG} (\code{raxml-ng-mpi}) on a compute cluster. Te
 tree topology and re-estimate branch lengths across bootstrap matrices, generating empirical distributions of branch
 lengths for downstream divergence time estimation (\code{treePL}) without introducing topological discordance.
 }
+\examples{
+generate_temporal_bootstrap_script("supermatrix.phy", "partitions.txt", "best.tree",
+                                   base_seed = 87786, output_dir = tempdir(), cluster_mail_user = "")
+}

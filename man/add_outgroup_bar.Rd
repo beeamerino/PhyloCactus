@@ -42,4 +42,13 @@ mark them. This function draws a bar over each run of consecutive outgroup termi
 order and writes \code{label} beside it, at the position the bars of \code{\link[=add_clade_labels_by_level]{add_clade_labels_by_level()}} take
 with \code{align = TRUE} and the same \code{offset} and \code{offset_text}.
 }
+\examples{
+# A pruned copy of the distributed chronogram and the constraint table
+tree <- ape::read.tree(system.file("extdata", "phylocactus_chronogram_ml.tree", package = "PhyloCactus"))
+tree <- ape::keep.tip(tree, grep("^(Talinum|Portulaca|Leuenbergeria|Pereskia|Opuntia|Cylindropuntia|Tephrocactus|Maihuenia)_",
+                                 tree$tip.label, value = TRUE))
+constraints_tbl <- utils::read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
+cactaceae <- grep("^(Talinum|Portulaca)_", tree$tip.label, value = TRUE, invert = TRUE)
+p <- add_outgroup_bar(ggtree::ggtree(tree), cactaceae)
+}
 \keyword{internal}

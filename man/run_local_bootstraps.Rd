@@ -62,6 +62,13 @@ the \code{threads_per_worker = 4L} default here has not been empirically validat
 Silicon specifically (the only timings measured on that hardware are of single-threaded maximum-likelihood searches). Treat this default as a reasonable starting heuristic and re-validate empirically (e.g., time a
 short run with \code{bs_trees} set low, at a couple of \code{threads_per_worker} values) before committing to a long local run.
 }
+\examples{
+# Needs the external program and the files of a run
+\dontrun{
+run_local_bootstraps("raxml-ng", "supermatrix.phy", "cactus_modeltest.part.aicc",
+                     "cactus_constraints.tree", bs_trees = 100, seed = 2150)
+}
+}
 \references{
 Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
 user-friendly tool for maximum likelihood phylogenetic inference. \emph{Bioinformatics}, 35(21), 4453-4455.

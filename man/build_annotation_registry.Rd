@@ -29,4 +29,13 @@ A named list of annotation node data frames organized by taxonomic level.
 \description{
 Builds a registry mapping internal nodes to multi-level taxonomic annotations (subfamilies, tribes, subtribes, genera).
 }
+\examples{
+# A pruned copy of the distributed chronogram and the constraint table
+tree <- ape::read.tree(system.file("extdata", "phylocactus_chronogram_ml.tree", package = "PhyloCactus"))
+tree <- ape::keep.tip(tree, grep("^(Talinum|Portulaca|Leuenbergeria|Pereskia|Opuntia|Cylindropuntia|Tephrocactus|Maihuenia)_",
+                                 tree$tip.label, value = TRUE))
+constraints_tbl <- utils::read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
+registry <- build_annotation_registry(tree, constraints_tbl, supp_level4_min_tips = 3L)
+registry$level_4_supp
+}
 \keyword{internal}

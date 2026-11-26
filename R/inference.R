@@ -72,6 +72,11 @@
 #' Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
 #' user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
 #' \doi{10.1093/bioinformatics/btz305}
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' preprocess_partitions("supermatrix.phy", "PARTITION_raxml_style.txt", "raxml-ng")
+#' }
 #' @export
 preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir = dirname(phy_matrix), prefix = "cactus", force_check = FALSE, model_handling = c("force_dna", "preserve"), threads = 4) {
   model_handling <- match.arg(model_handling)
@@ -1026,6 +1031,11 @@ map_branch_supports <- function(raxml_bin, best_tree, bootstraps_file, metric = 
 #' @param output_dir Character. Output directory for RF distance calculations. Defaults to `dirname(ml_trees_file)`.
 #' @param prefix Character. Output file prefix. Defaults to `"cactus_RF"`.
 #' @return Character path to the resulting RF distance output file (`.raxml.rfdist`).
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' calculate_rf_distances("raxml-ng", "cactus_ml.raxml.mlTrees")
+#' }
 #' @export
 calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = dirname(ml_trees_file), prefix = "cactus_RF") {
   if (Sys.which(raxml_bin_path) == "") {
@@ -1106,6 +1116,12 @@ calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = d
 #' Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
 #' user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
 #' \doi{10.1093/bioinformatics/btz305}
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' run_local_bootstraps("raxml-ng", "supermatrix.phy", "cactus_modeltest.part.aicc",
+#'                      "cactus_constraints.tree", bs_trees = 100, seed = 2150)
+#' }
 #' @export
 run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, constraint_file,
                                  bs_trees = 500, outgroup = NULL, seed = NULL,
@@ -1224,6 +1240,9 @@ run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, con
 #' @param load_module Character vector or string. Environment module(s) to load prior to execution. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or `NULL` to load none.
 #' @param raxml_exec Character. Executable `RAxML-NG` binary command. Defaults to `"raxml-ng-mpi"`.
 #' @return Character path to the generated SLURM batch script file.
+#' @examples
+#' generate_bootstrap_script("supermatrix.phy", "partitions.txt", "constraints.tree",
+#'                           base_seed = 2150, output_dir = tempdir(), cluster_mail_user = "")
 #' @export
 generate_bootstrap_script <- function(alignment_file, partition_file, constraint_file,
                                       outgroup = NULL, bs_per_rep = 500, max_reps = 2,
@@ -1388,6 +1407,13 @@ generate_bootstrap_script <- function(alignment_file, partition_file, constraint
 #' @param prefix Character. File output prefix. Defaults to `"cactus_ALL_bootstraps"`.
 #' @param expected_trees Integer. Optional expected total count of bootstrap tree replicates (e.g., `1000`). If provided, verifies that the concatenated tree count exactly matches this value. Defaults to `NULL`.
 #' @return Character path to the concatenated bootstrap tree file (`.tree`).
+#' @examples
+#' # Two chunks of replicates, as two array tasks of the cluster would write them
+#' bs_dir <- file.path(tempdir(), "bs_chunks")
+#' dir.create(bs_dir, showWarnings = FALSE)
+#' writeLines(c("((A,B),(C,D));", "((A,C),(B,D));"), file.path(bs_dir, "run1.raxml.bootstraps"))
+#' writeLines("((A,B),(C,D));", file.path(bs_dir, "run2.raxml.bootstraps"))
+#' collect_bootstraps(bs_dir, expected_trees = 3)
 #' @export
 collect_bootstraps <- function(bs_dir, output_dir = bs_dir, prefix = "cactus_ALL_bootstraps", expected_trees = NULL) {
   
@@ -1523,6 +1549,11 @@ collect_bootstraps <- function(bs_dir, output_dir = bs_dir, prefix = "cactus_ALL
 #'   \item `metric`: Support metric used (`"fbp"` or `"tbe"`).
 #'   \item `log_file`: Character path to the resulting RAxML-NG convergence log file (`.raxml.log`).
 #' }
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' check_bs_convergence("raxml-ng", "cactus_ALL_bootstraps.tree", bs_cutoff = 0.03)
+#' }
 #' @export
 check_bs_convergence <- function(raxml_bin_path, bs_trees_file, bs_cutoff = 0.03,
                                  bs_metric = c("fbp", "tbe"), seed = NULL, threads = 4,
@@ -1645,6 +1676,12 @@ as.character.cactus_bs_convergence <- function(x, ...) {
 #' @param output_dir Character. Directory path to save output temporal bootstrap trees. Defaults to `dirname(aln_file)`.
 #' @param prefix Character. Output file prefix. Defaults to `"cactus_temporal"`.
 #' @return Character path to the resulting temporal bootstrap trees file (`.raxml.bootstraps`).
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' calculate_temporal_bootstraps("raxml-ng", "supermatrix.phy", "cactus_modeltest.part.aicc",
+#'                               "cactus_ml.raxml.bestTree", bs_trees = 100, seed = 87786)
+#' }
 #' @export
 calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, best_tree_file,
                                           bs_trees = 500, outgroup = NULL, seed = NULL,
@@ -1737,6 +1774,9 @@ calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, b
 #'   run (`RAxML-NG` 1.2.2-master on the cluster) were estimated with `NR-FAST`, as their log
 #'   records; pass `blopt = "nr_fast"` to reproduce them.
 #' @return Character path to the generated SLURM batch script file, which is made executable.
+#' @examples
+#' generate_temporal_bootstrap_script("supermatrix.phy", "partitions.txt", "best.tree",
+#'                                    base_seed = 87786, output_dir = tempdir(), cluster_mail_user = "")
 #' @export
 generate_temporal_bootstrap_script <- function(alignment_file, partition_file, best_tree_file,
                                                outgroup = NULL, bs_trees = 500,

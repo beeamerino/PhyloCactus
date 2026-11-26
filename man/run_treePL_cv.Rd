@@ -161,6 +161,12 @@ subsample, returned as \code{cv_smoothing_all_subsamples}; both curves are writt
 \verb{cv_<label>_selection.csv}, and the account to \verb{cv_<label>_selection.txt}.
 }
 
+\examples{
+# Needs the external program and the files of a run
+\dontrun{
+run_treePL_cv("calibrations.cfg", "ml_tree_rooted.tree", label = "ML_tree")
+}
+}
 \references{
 Maurin, K. J. L. (2020). An empirical guide for producing a dated phylogeny with treePL in a
 maximum likelihood framework. \emph{arXiv}:2008.07054. \doi{10.48550/arXiv.2008.07054}

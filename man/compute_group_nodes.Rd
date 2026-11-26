@@ -29,4 +29,13 @@ A \code{tibble} containing group names, MRCA node numbers, tip counts, and monop
 \description{
 Identifies internal MRCA node numbers and evaluates monophyly for specified taxonomic groups within a phylogenetic tree.
 }
+\examples{
+# A pruned copy of the distributed chronogram and the constraint table
+tree <- ape::read.tree(system.file("extdata", "phylocactus_chronogram_ml.tree", package = "PhyloCactus"))
+tree <- ape::keep.tip(tree, grep("^(Talinum|Portulaca|Leuenbergeria|Pereskia|Opuntia|Cylindropuntia|Tephrocactus|Maihuenia)_",
+                                 tree$tip.label, value = TRUE))
+constraints_tbl <- utils::read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
+tips <- prepare_tip_annotation(tree, constraints_tbl)
+compute_group_nodes(tree, tips, "Annot_level_4")
+}
 \keyword{internal}

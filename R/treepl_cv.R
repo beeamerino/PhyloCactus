@@ -567,6 +567,11 @@
 #' Smith, S. A., & O'Meara, B. C. (2012). treePL: divergence time estimation using penalized
 #' likelihood for large phylogenies. *Bioinformatics*, 28(20), 2689-2690.
 #' \doi{10.1093/bioinformatics/bts492}
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' run_treePL_cv("calibrations.cfg", "ml_tree_rooted.tree", label = "ML_tree")
+#' }
 #' @export
 run_treePL_cv <- function(cfg_file, tree_file, label,
                           n_prime = 10L,

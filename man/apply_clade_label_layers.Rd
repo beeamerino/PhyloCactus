@@ -21,4 +21,16 @@ Updated \code{ggtree} plot object.
 \description{
 Sequentially overlays hierarchical taxonomic clade annotations (e.g., subfamilies, tribes, genera) onto a \code{ggtree} plot.
 }
+\examples{
+# A pruned copy of the distributed chronogram and the constraint table
+tree <- ape::read.tree(system.file("extdata", "phylocactus_chronogram_ml.tree", package = "PhyloCactus"))
+tree <- ape::keep.tip(tree, grep("^(Talinum|Portulaca|Leuenbergeria|Pereskia|Opuntia|Cylindropuntia|Tephrocactus|Maihuenia)_",
+                                 tree$tip.label, value = TRUE))
+constraints_tbl <- utils::read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
+registry <- build_annotation_registry(tree, constraints_tbl, supp_level4_min_tips = 3L)
+specs <- data.frame(reg_name = c("level_4_supp", "level_2"), fontsize = c(2.5, 3), barsize = c(0.3, 0.5),
+                    offset = c(0.01, 0.15), offset_text = c(0.004, 0.006), fontface = c("plain", "bold"),
+                    sort_desc = TRUE, angle = c(0, 270), align = TRUE)
+p <- apply_clade_label_layers(ggtree::ggtree(tree), registry, specs)
+}
 \keyword{internal}

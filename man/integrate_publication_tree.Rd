@@ -31,3 +31,10 @@ Maps statistical support values (e.g., Felsenstein Bootstrap Proportions, FBP) o
 final chronogram and maximum-likelihood phylogeny. Nodes with support below \code{collapse_cutoff} are
 collapsed into soft polytomies in the figures.
 }
+\examples{
+# Needs the folders of a run
+\dontrun{
+integrate_publication_tree("cactus_support.raxml.support", "dated_summary_hpd.tree",
+                           out_dir = "9_Visualization")
+}
+}
