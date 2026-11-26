@@ -467,7 +467,10 @@
 #'   `nthreads`/`seed` lines. The `treefile` line is written by this function.
 #' @param tree_file Path to the rooted tree to date.
 #' @param label Run label. Every file this function writes carries it.
-#' @param n_prime Integer. Priming repeats. The default is 10.
+#' @param n_prime Integer. Priming repeats. The default is 10. Each repeat runs with its own seed:
+#'   with `seed = s` in `cfg_file`, the repeats use s, s + 1, ..., s + `n_prime` - 1, so the first
+#'   repeat is the run a single priming would be, and `prime_<label>.csv` records the seed of each
+#'   row. Without a seed line `treePL` draws one for each repeat.
 #'
 #'   **`n_prime` and `prime_rule` interact, and not symmetrically.** Under `"modal"` the selection
 #'   is stable in `n_prime`: more repeats sharpen an estimate of the most frequent combination.
@@ -603,18 +606,34 @@ run_treePL_cv <- function(cfg_file, tree_file, label,
     user_lines)]
 
   # ---- Stage 1: priming -------------------------------------------------------------------------
+  # Each repeat runs with its own seed. A configuration with `seed = s` gives the repeats s, s + 1,
+  # ..., s + n_prime - 1, so the first repeat is the run a single priming would be; without a seed
+  # line treePL draws one for each run. With one seed for every repeat (0.5.4 and earlier), the
+  # repeats were identical and `prime_rule` could not change the selection.
   prime_cfg <- paste0("configure_prime_", label)
-  writeLines(c(paste0("treefile = ", tree_abs), base_lines, "thorough", "prime"), prime_cfg)
+  seed_rx <- "^\\s*seed\\s*=\\s*([0-9]+)\\s*$"
+  seed_line <- grep(seed_rx, base_lines)
+  base_seed <- if (length(seed_line)) as.numeric(sub(seed_rx, "\\1", base_lines[seed_line[1]])) else NA_real_
 
-  say("Priming ", n_prime, " times (", label, ")")
+  say("Priming ", n_prime, " times (", label, ")",
+      if (!is.na(base_seed)) paste0(", seeds ", format(base_seed, scientific = FALSE), " to ",
+                                    format(base_seed + n_prime - 1, scientific = FALSE)) else "")
   primes <- vector("list", n_prime)
   for (i in seq_len(n_prime)) {
+    prime_lines_i <- base_lines
+    if (!is.na(base_seed)) {
+      prime_lines_i <- prime_lines_i[-seed_line]
+      prime_lines_i <- c(prime_lines_i, paste0("seed = ", format(base_seed + i - 1, scientific = FALSE)))
+    }
+    writeLines(c(paste0("treefile = ", tree_abs), prime_lines_i, "thorough", "prime"), prime_cfg)
     out <- suppressWarnings(tryCatch(
       system2(treepl_bin, args = shQuote(prime_cfg),
               stdout = TRUE, stderr = TRUE),
       error = function(e) character(0)
     ))
-    primes[[i]] <- .parse_treepl_prime(out)
+    parsed <- .parse_treepl_prime(out)
+    if (!is.null(parsed)) parsed$seed <- if (is.na(base_seed)) NA_real_ else base_seed + i - 1
+    primes[[i]] <- parsed
   }
   primes <- do.call(rbind, Filter(Negate(is.null), primes))
   if (is.null(primes) || nrow(primes) == 0L) {

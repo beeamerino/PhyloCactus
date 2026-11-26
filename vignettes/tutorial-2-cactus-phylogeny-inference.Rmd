@@ -655,7 +655,9 @@ cat("   Calibrations compiled successfully to:", calibrations_cfg_path, "\n")
 cat("\nRunning automated `treePL` wrapper script over maximum-likelihood tree and bootstrap replicates...\n")
 
 # Priming, cross-validation and dating follow the protocol of Maurin (2020, arXiv:2008.07054) and
-# run through run_treePL_cv(). The priming parameters are the lowest of the repeats,
+# run through run_treePL_cv(). Priming is repeated with consecutive seeds from the seed of the run
+# (0.5.5; up to 0.5.4 every repeat had the same seed and gave the same parameters), and the
+# priming parameters are the lowest of the repeats,
 # cross-validation uses `randomcv`, and the smoothing grid runs from 1e+03 to 1e-14, one value per
 # order of magnitude. The grid extends well below the 1e-06 to 1e-08 range reported by Maurin, so
 # that a plateau can be distinguished from a search that stopped at the edge of the grid.

@@ -28,7 +28,10 @@ run_treePL_cv(
 
 \item{label}{Run label. Every file this function writes carries it.}
 
-\item{n_prime}{Integer. Priming repeats. The default is 10.
+\item{n_prime}{Integer. Priming repeats. The default is 10. Each repeat runs with its own seed:
+with \code{seed = s} in \code{cfg_file}, the repeats use s, s + 1, ..., s + \code{n_prime} - 1, so the first
+repeat is the run a single priming would be, and \verb{prime_<label>.csv} records the seed of each
+row. Without a seed line \code{treePL} draws one for each repeat.
 
 \strong{\code{n_prime} and \code{prime_rule} interact, and not symmetrically.} Under \code{"modal"} the selection
 is stable in \code{n_prime}: more repeats sharpen an estimate of the most frequent combination.
