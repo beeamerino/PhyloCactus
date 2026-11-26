@@ -198,6 +198,6 @@ trial run before committing a full job array to it.
 ``` r
 generate_bootstrap_script("supermatrix.phy", "partitions.txt", "constraints.tree",
                           base_seed = 2150, output_dir = tempdir(), cluster_mail_user = "")
-#> Bash SLURM array script generated: /tmp/RtmpKhg5x5/bs_chunks/run_bs_chunks.sh
-#> [1] "/tmp/RtmpKhg5x5/bs_chunks/run_bs_chunks.sh"
+#> Bash SLURM array script generated: /tmp/Rtmpm6nY9T/bs_chunks/run_bs_chunks.sh
+#> [1] "/tmp/Rtmpm6nY9T/bs_chunks/run_bs_chunks.sh"
 ```

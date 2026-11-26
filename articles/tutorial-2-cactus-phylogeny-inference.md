@@ -234,7 +234,10 @@ and `cactus_constraints.csv` only assigns each species to one of 21
 groups in its `Clade` column. The relationships among groups follow
 published phylogenies, principally Hernández-Hernández *et al*. (2014),
 Guerrero *et al*. (2019), Zuntini *et al*. (2024) and de Vos *et al*.
-(2025). Published analyses contest one of them, core Cactoideae II,
+(2025). Published analyses contest two of them: the relationships among
+the three tribes of Opuntioideae, where the constraint follows
+transcriptome trees and plastome trees place Opuntieae sister to the
+other two tribes (Majure *et al*., 2019, 2023), and core Cactoideae II,
 which conflicts with Amaral *et al*. (2022) and is weakly supported in
 Zuntini *et al*. (2024).
 
@@ -1193,6 +1196,16 @@ Integration](https://beeamerino.github.io/PhyloCactus/articles/tutorial-3-cactus
 - Lemoine *et al*., 2018. Renewing Felsenstein’s phylogenetic bootstrap
   in the era of big data. *Nature*, 556(7702), 452–456.
   <https://doi.org/10.1038/s41586-018-0043-0>
+- Majure *et al*., 2019. Phylogenomics in Cactaceae: a case study using
+  the chollas sensu lato (Cylindropuntieae, Opuntioideae) reveals a
+  common pattern out of the Chihuahuan and Sonoran deserts. *American
+  Journal of Botany*, 106(10), 1327–1345.
+  <https://doi.org/10.1002/ajb2.1364>
+- Majure *et al*., 2023. Phylogenomics of one of the world’s most
+  intriguing groups of CAM plants, the opuntioids (Opuntioideae:
+  Cactaceae): adaptation to tropical dry forests helped drive prominent
+  morphological features in the clade. *Diversity*, 15(4), 570.
+  <https://doi.org/10.3390/d15040570>
 - Maurin, 2020. An empirical guide for producing a dated phylogeny with
   treePL in a maximum likelihood framework. *arXiv preprint
   arXiv:2008.07054*. <https://doi.org/10.48550/arXiv.2008.07054>

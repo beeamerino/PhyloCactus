@@ -180,6 +180,6 @@ executable.
 generate_temporal_bootstrap_script("supermatrix.phy", "partitions.txt", "best.tree",
                                    base_seed = 87786, output_dir = tempdir(),
                                    cluster_mail_user = "")
-#> Generated temporal bootstrap HPC SLURM script: /tmp/RtmpKhg5x5/cactus_temporal_bs/run_temporal_bs.sh
-#> [1] "/tmp/RtmpKhg5x5/cactus_temporal_bs/run_temporal_bs.sh"
+#> Generated temporal bootstrap HPC SLURM script: /tmp/Rtmpm6nY9T/cactus_temporal_bs/run_temporal_bs.sh
+#> [1] "/tmp/Rtmpm6nY9T/cactus_temporal_bs/run_temporal_bs.sh"
 ```
