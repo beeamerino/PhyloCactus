@@ -599,8 +599,8 @@ if (file.exists(cv_file)) {
 
 # 5. Smoothing sensitivity
 # The same tree dated across the grid and beyond it. ACP_root is the only calibrated node, and its
-# age is fixed, so the ages read are those of the root and of the crowns of Cactaceae, Cactoideae,
-# Cacteae and Opuntioideae, given to `nodes` as sets of terminals. Read the range of each node from
+# age is fixed, so the ages read are those of the root and of the crowns of Cactaceae, Cactoideae
+# without Blossfeldia (Subfam of Blossfeldia is "Blossfeldia"), Cacteae and Opuntioideae, given to `nodes` as sets of terminals. Read the range of each node from
 # 1e-14 to 1e-02; values of 1 and above lie outside the part of the curve the selection reads.
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")
 if (file.exists(sensitivity_cfg)) {
@@ -612,7 +612,7 @@ if (file.exists(sensitivity_cfg)) {
     nodes = list(
       root = tip_labels,
       Cactaceae_crown = tips_for("Family", "Cactaceae"),
-      Cactoideae_crown = tips_for("Subfam", "Cactoideae"),
+      Cactoideae_without_Blossfeldia_crown = tips_for("Subfam", "Cactoideae"),
       Cacteae_crown = tips_for("Clade", "Cacteae"),
       Opuntioideae_crown = tips_for("Subfam", "Opuntioideae")
     )
