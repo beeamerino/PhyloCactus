@@ -54,7 +54,8 @@ test_that("automate_treePL() extracts the smoothing value from configure_smooth_
       treePL_out = file.path(tmp_dir, "out"),
       outgroup = "Portulaca_fulgens",
       num_bs = 1,
-      seed = 1L
+      seed = 1L,
+      reuse_unverified = TRUE
     )
   )), silent = TRUE)
 
@@ -121,7 +122,7 @@ test_that("numsites and the branch-length rescaling stay coupled whatever the fa
       cfg_file = cfg_file, ml_tree_file = ml_tree_file,
       bs_trees_file = bs_trees_file, results_dir = results_dir,
       treePL_out = file.path(tmp_dir, "out"), outgroup = "Portulaca_fulgens",
-      num_bs = 1, seed = 1L, rescale_factor = factor
+      num_bs = 1, seed = 1L, rescale_factor = factor, reuse_unverified = TRUE
     ))), silent = TRUE)
 
     list(
@@ -191,8 +192,9 @@ test_that("automate_treePL() falls back to parsing cv_ML_tree and selects the sm
       results_dir = results_dir,
       treePL_out = file.path(tmp_dir, "out"),
       outgroup = "Portulaca_fulgens",
-      num_bs = 0
-    ),
+      num_bs = 0,
+      reuse_unverified = TRUE
+    ) |> suppressWarnings(),
     "Best smoothing strategy chosen: 1\\b"
   )
 })
@@ -229,8 +231,9 @@ test_that("automate_treePL() stops with an informative error when no smoothing v
       results_dir = results_dir,
       treePL_out = file.path(tmp_dir, "out"),
       outgroup = "Portulaca_fulgens",
-      num_bs = 0
-    ),
+      num_bs = 0,
+      reuse_unverified = TRUE
+    ) |> suppressWarnings(),
     "Failed to extract optimal smoothing parameter"
   )
 })

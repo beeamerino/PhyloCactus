@@ -47,3 +47,16 @@ test_that("the dating restores the session's random state and reads indented cal
   # Only the folders of the call are run and collected.
   expect_match(cuerpo, "bs_labels", fixed = TRUE)
 })
+
+test_that("reuse_unverified = TRUE reuses results without a record, with a warning, and never a mismatch", {
+  dir <- withr::local_tempdir()
+  path <- file.path(dir, "run_parameters_ML_tree.csv")
+  expect_warning(PhyloCactus:::.check_treepl_signature(path, list(seed = "7"), "the chronogram", dir,
+                                                        reuse_unverified = TRUE),
+                 "reuse_unverified = TRUE")
+  PhyloCactus:::.write_treepl_signature(path, list(seed = "7"))
+  expect_error(PhyloCactus:::.check_treepl_signature(path, list(seed = "8"), "the chronogram", dir,
+                                                      reuse_unverified = TRUE),
+               "seed: 7, now 8")
+  expect_false(eval(formals(automate_treePL)$reuse_unverified))
+})

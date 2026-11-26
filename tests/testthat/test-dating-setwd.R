@@ -136,7 +136,7 @@ test_that("automate_treePL runs the binary it is handed, down in the bootstrap s
     cfg_file = cfg, ml_tree_file = ml, bs_trees_file = bs,
     results_dir = file.path(tmp, "res"), treePL_out = file.path(tmp, "out"),
     num_bs = 1, numsites = 1000, outgroup = c("C", "D"), seed = 12345L,
-    treepl_bin = falso))), silent = TRUE)
+    treepl_bin = falso, reuse_unverified = TRUE))), silent = TRUE)
 
   expect_true(file.exists(marca))
 })

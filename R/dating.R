@@ -355,8 +355,11 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL, treepl_bin = "treePL"
 #'   replicates, the md5 of `bs_trees_file`, the number of replicates, the smoothing and the
 #'   optimization lines, to `ML_tree/run_parameters_ML_tree.csv` and
 #'   `BS_tree/run_parameters_BS_tree.csv`. A call whose values differ, or a folder with results and
-#'   no such table (written before 0.5.5), stops. Only the folders `BS_1` to `BS_<num_bs>` of the
-#'   call are dated and collected.
+#'   no such table (written before 0.5.5), stops, unless `reuse_unverified = TRUE`. Only the folders
+#'   `BS_1` to `BS_<num_bs>` of the call are dated and collected.
+#' @param reuse_unverified Logical. `TRUE` reuses results in `results_dir` that carry no record of
+#'   the parameters they were produced with (written before 0.5.5), with a warning; results whose
+#'   record differs from the call are never reused. Defaults to `FALSE`.
 #' @param treePL_out Character. Destination directory path for final output chronograms.
 #' @param num_bs Integer or NULL. Maximum number of temporal bootstrap trees to evaluate. If `NULL`, processes all available trees.
 #' @param numsites Integer or NULL. Alignment length, in sites, of the supermatrix actually analyzed. If `NULL`, the `numsites` line already present in `cfg_file` is used. This must be the length of the matrix `RAxML-NG` analyzed (typically the `*.raxml.reduced.phy` produced by `preprocess_partitions()`), not a rounded figure: `treePL` uses it to convert branch lengths into expected substitution counts, so an incorrect value biases the rate smoothing. Declare the true alignment length here; the division by `rescale_factor` is applied internally.
@@ -424,7 +427,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             cv_method = c("randomcv", "cv"),
                             cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, cv_outlier_factor = 5,
                             wrapper_sh = NULL, notify = FALSE, notify_to = NULL, notify_credentials = NULL,
-                            treepl_bin = "treePL") {
+                            treepl_bin = "treePL", reuse_unverified = FALSE) {
 
   .check_cv_outlier_factor(cv_outlier_factor)
 
@@ -440,7 +443,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
       numsites = numsites, outgroup = outgroup, seed = seed,
       rescale_factor = rescale_factor, n_prime = n_prime, prime_rule = prime_rule,
       cv_method = cv_method, cvstart = cvstart, cvstop = cvstop, cv_nthreads = cv_nthreads,
-      cv_outlier_factor = cv_outlier_factor, wrapper_sh = wrapper_sh, treepl_bin = treepl_bin
+      cv_outlier_factor = cv_outlier_factor, wrapper_sh = wrapper_sh, treepl_bin = treepl_bin,
+      reuse_unverified = reuse_unverified
     )
   }
 
@@ -492,7 +496,12 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
 }
 
 #' @noRd
-.check_treepl_signature <- function(path, signature, what, dir) {
+.check_treepl_signature <- function(path, signature, what, dir, reuse_unverified = FALSE) {
+  if (!file.exists(path) && isTRUE(reuse_unverified)) {
+    warning(dir, " holds ", what, " with no record of the parameters it was produced with (results ",
+            "written before PhyloCactus 0.5.5); reused because reuse_unverified = TRUE.", call. = FALSE)
+    return(invisible(FALSE))
+  }
   if (!file.exists(path)) {
     stop(dir, " already holds ", what, ", but no record of the parameters it was produced with (",
          basename(path), "; results written before PhyloCactus 0.5.5). It cannot be told apart from ",
@@ -524,7 +533,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             prime_rule = c("lowest", "modal"),
                             cv_method = c("randomcv", "cv"),
                             cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, cv_outlier_factor = 5,
-                            wrapper_sh = NULL, treepl_bin = "treePL") {
+                            wrapper_sh = NULL, treepl_bin = "treePL", reuse_unverified = FALSE) {
 
   prime_rule <- match.arg(prime_rule)
   cv_method <- match.arg(cv_method)
@@ -681,7 +690,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
   ml_signature_file <- file.path(ml_dir, "run_parameters_ML_tree.csv")
   ml_cached <- file.exists(file.path(ml_dir, "treepl_ML_tree.tre"))
   if (ml_cached) {
-    .check_treepl_signature(ml_signature_file, ml_signature, "the maximum-likelihood chronogram", ml_dir)
+    .check_treepl_signature(ml_signature_file, ml_signature, "the maximum-likelihood chronogram", ml_dir,
+                            reuse_unverified = reuse_unverified)
   }
   if (!ml_cached) {
     run_treePL_cv(cfg_file = cfg_ml_scaled_abs,
@@ -787,7 +797,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
   bs_labels <- paste0("BS_", seq_len(num_bs_to_use))
   bs_done <- list.files(bs_out_dir, pattern = "^treepl_BS_[0-9]+\\.tre$", recursive = TRUE)
   if (length(bs_done)) {
-    .check_treepl_signature(bs_signature_file, bs_signature, "the dated bootstrap replicates", bs_out_dir)
+    .check_treepl_signature(bs_signature_file, bs_signature, "the dated bootstrap replicates", bs_out_dir,
+                            reuse_unverified = reuse_unverified)
   } else {
     .write_treepl_signature(bs_signature_file, bs_signature)
   }

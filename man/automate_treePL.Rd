@@ -26,7 +26,8 @@ automate_treePL(
   notify = FALSE,
   notify_to = NULL,
   notify_credentials = NULL,
-  treepl_bin = "treePL"
+  treepl_bin = "treePL",
+  reuse_unverified = FALSE
 )
 }
 \arguments{
@@ -43,8 +44,8 @@ rescaled maximum-likelihood tree, the priming and cross-validation settings and,
 replicates, the md5 of \code{bs_trees_file}, the number of replicates, the smoothing and the
 optimization lines, to \code{ML_tree/run_parameters_ML_tree.csv} and
 \code{BS_tree/run_parameters_BS_tree.csv}. A call whose values differ, or a folder with results and
-no such table (written before 0.5.5), stops. Only the folders \code{BS_1} to \verb{BS_<num_bs>} of the
-call are dated and collected.}
+no such table (written before 0.5.5), stops, unless \code{reuse_unverified = TRUE}. Only the folders
+\code{BS_1} to \verb{BS_<num_bs>} of the call are dated and collected.}
 
 \item{treePL_out}{Character. Destination directory path for final output chronograms.}
 
@@ -110,6 +111,10 @@ environment variables.}
 \item{treepl_bin}{Character. Name or path of the \code{treePL} binary, handed down to both stages,
 the cross-validation and the dating of the bootstrap replicates. Defaults to \code{"treePL"}, which
 is the name both stages used to run with written into the code.}
+
+\item{reuse_unverified}{Logical. \code{TRUE} reuses results in \code{results_dir} that carry no record of
+the parameters they were produced with (written before 0.5.5), with a warning; results whose
+record differs from the call are never reused. Defaults to \code{FALSE}.}
 }
 \value{
 Invisibly, the path of the dated maximum-likelihood chronogram written into
