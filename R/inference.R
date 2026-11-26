@@ -293,10 +293,8 @@ run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = 
 #' `build_constraint_scaffold()`), and `cactus_constraints.csv` only assigns each species to one of
 #' 21 groups in its `Clade` column. The relationships among groups follow published phylogenies,
 #' principally Hernández-Hernández *et al*. (2014), Guerrero *et al*. (2019), Zuntini *et al*. (2024)
-#' and de Vos *et al*. (2025). Published analyses leave two of them unresolved or contested: the
-#' relationships among the three tribes of Opuntioideae, which Guerrero *et al*. (2019) report as
-#' unresolved or poorly supported in most analyses, and core Cactoideae II, which conflicts with
-#' Amaral *et al*. (2022) and is weakly supported in Zuntini *et al*. (2024).
+#' and de Vos *et al*. (2025). Published analyses contest one of them, core Cactoideae II, which
+#' conflicts with Amaral *et al*. (2022) and is weakly supported in Zuntini *et al*. (2024).
 #'
 #' The list of groups and the topology are fixed in the code; a different backbone requires editing
 #' the function. Talinaceae are optional: without *Talinum* and *Talinella* in the alignment the
