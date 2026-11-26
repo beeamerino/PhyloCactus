@@ -2,11 +2,11 @@
 
 <!-- badges: start -->
 
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental) [![R-CMD-check](https://github.com/beeamerino/PhyloCactus/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/beeamerino/PhyloCactus/actions/workflows/R-CMD-check.yaml)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable) [![R-CMD-check](https://github.com/beeamerino/PhyloCactus/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/beeamerino/PhyloCactus/actions/workflows/R-CMD-check.yaml)
 
 <!-- badges: end -->
 
-**Reproducible R workflows for multilocus data assembly, evolutionary modeling, maximum-likelihood inference, and divergence time estimation in Cactaceae**
+**Reproducible R workflows for multilocus data assembly, evolutionary modeling, maximum-likelihood inference, divergence time estimation and molecular identification in Cactaceae**
 
 ## Overview
 
@@ -101,7 +101,7 @@ The following software must be installed and available on the system `PATH`, or 
 
 The checklist of Cactaceae of Caryophyllales.org is not distributed with the package. Request it from the team of Caryophyllales.org (<https://caryophyllales.org>) and set the path of the Excel workbook in `~/.Renviron` as `PHYLOCACTUS_CHECKLIST`. `phylocactus_checklist()` returns it to every module that reads the checklist.
 
-The IUCN Red List assessments of Tutorial 3 are retrieved with the user's own token (`IUCN_REDLIST_KEY`), and the four published trees compared in Tutorial 4 are read from the folder in `PHYLOCACTUS_REFERENCE_TREES` (sources in Tutorial 4). The package distributes the IUCN Red List category of each species and counts by country, threat class and habitat class, not the assessments or their occurrences.
+The IUCN Red List assessments of Tutorial 3 are retrieved with the user's own token (`IUCN_REDLIST_KEY`), and the five published trees compared in Tutorial 4 are read from the folder in `PHYLOCACTUS_REFERENCE_TREES` (sources in Tutorial 4). The package distributes the IUCN Red List category of each species and counts by country, threat class and habitat class, not the assessments or their occurrences.
 
 ## Documentation
 
