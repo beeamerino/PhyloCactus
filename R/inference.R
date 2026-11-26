@@ -15,6 +15,23 @@
   paste(outgroup, collapse = ",")
 }
 
+#' Stop when an input file of a RAxML-NG wrapper is missing, naming each missing one
+#'
+#' The wrappers of the phylogeny check their inputs the same way (closure review of 0.5.4, AP-19):
+#' a named character vector of paths, `NULL` entries skipped, one error that lists every missing
+#' file with the argument that gave it.
+#' @noRd
+.check_input_files <- function(...) {
+  files <- unlist(list(...))
+  if (is.null(files) || !length(files)) return(invisible(TRUE))
+  missing <- files[!file.exists(files)]
+  if (length(missing)) {
+    stop("Input file(s) not found: ", paste(sprintf("%s = '%s'", names(missing), missing), collapse = "; "),
+         call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
 #' @noRd
 .check_cli_exit <- function(status, tool_name, args = NULL) {
   exit_code <- if (is.integer(status)) status else attr(status, "status")
@@ -182,6 +199,7 @@ run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = 
   if (!file.exists(part_file)) {
     stop("Partition map not found: ", part_file, call. = FALSE)
   }
+  .check_input_files(aln_file = aln_file)
 
   # ModelTest-NG 0.1.7 reports an unparseable model field and then crashes while unwinding, so the
   # exit status reads as a segmentation fault rather than a format error. Rejecting the input here
@@ -603,6 +621,7 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
     stop("Executable '", raxml_bin_path, "' not found in your system's PATH.\n",
          "Please ensure RAxML-NG is installed and available, or provide the full absolute path.")
   }
+  .check_input_files(aln_file = aln_file, part_file = part_file, constraint_file = constraint_file)
 
   if (!dir.exists(output_dir)) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
@@ -729,18 +748,19 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
 #'   `n_init_trees` and `min_threads_per_worker` so that workers divide the starting tree count evenly.
 #' @param min_threads_per_worker Integer. Lower bound on threads per worker when `workers` is derived. Defaults to `3L`.
 #' @param preparse Logical. Pre-parse the alignment into compressed binary `.rba` format before the search? Defaults to `TRUE`.
-#' @param output_dir Character. Destination directory for the script and its outputs. Defaults to `getwd()`.
+#' @param output_dir Character. Parent directory of the job. The script and the outputs of the search
+#'   are written to its subfolder `ml_search/` (`file.path(output_dir, "ml_search")`), created if
+#'   needed. Defaults to `getwd()`.
 #' @param script_name Character. Name of the generated Bash script. Defaults to `"run_ml_search.sh"`.
 #' @param prefix Character. RAxML-NG output prefix inside the job. Defaults to `"cactus_search"`.
 #' @param cluster_job_name Character. SLURM job name. Defaults to `"cactus_ml"`.
-#' @param cluster_partition Character. SLURM partition. Defaults to `"main"`.
+#' @param cluster_partition Character. SLURM partition. Defaults to `"main"`, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.
 #' @param cluster_nodes Integer. Number of compute nodes requested (\verb{--nodes}). Defaults to \code{1L}.
 #' @param cluster_mem Character. Memory allocation (`--mem`). Defaults to `"16G"`.
 #' @param cluster_time Character. Time limit (`--time`). Defaults to `"02:00:00"`.
 #' @param cluster_queue Character. Optional SLURM queue / QoS. Defaults to `NULL`.
 #' @param cluster_mail_user Character. Notification recipient email address for SLURM (\verb{--mail-user}). Defaults to \code{Sys.getenv("MY_EMAIL", "")}.
-#' @param load_module Character vector. Environment modules to load. Defaults to the NLHPC Leftraru
-#'   `RAxML-NG` toolchain.
+#' @param load_module Character vector. Environment modules to load. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or `NULL` to load none.
 #' @param raxml_exec Character. `RAxML-NG` executable invoked inside the job. Defaults to `"raxml-ng-mpi"`.
 #' @return Character path to the generated SLURM batch script, carrying the resolved parallel plan
 #'   as the `ml_plan` attribute.
@@ -975,6 +995,7 @@ map_branch_supports <- function(raxml_bin, best_tree, bootstraps_file, metric = 
     stop("Executable '", raxml_bin, "' not found in your system's PATH.\n",
          "Please ensure RAxML-NG is installed and available, or provide the full absolute path.")
   }
+  .check_input_files(best_tree = best_tree, bootstraps_file = bootstraps_file)
 
   if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   out_prefix <- file.path(output_dir, prefix)
@@ -989,7 +1010,7 @@ map_branch_supports <- function(raxml_bin, best_tree, bootstraps_file, metric = 
   )
   
   ml_status <- system2(command = raxml_bin, args = args)
-  .check_cli_exit(ml_status, "RAxML-NG ML")
+  .check_cli_exit(ml_status, "RAxML-NG support mapping (map_branch_supports)")
   support_file <- paste0(out_prefix, ".raxml.support")
   message("Branch support values (", toupper(metric), ") mapped onto best tree: ", support_file)
   return(support_file)
@@ -1007,7 +1028,12 @@ map_branch_supports <- function(raxml_bin, best_tree, bootstraps_file, metric = 
 #' @return Character path to the resulting RF distance output file (`.raxml.rfdist`).
 #' @export
 calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = dirname(ml_trees_file), prefix = "cactus_RF") {
-  
+  if (Sys.which(raxml_bin_path) == "") {
+    stop("Executable '", raxml_bin_path, "' not found in your system's PATH.\n",
+         "Please ensure RAxML-NG is installed and available, or provide the full absolute path.")
+  }
+  .check_input_files(ml_trees_file = ml_trees_file)
+
   if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   out_prefix <- file.path(output_dir, prefix)
   
@@ -1068,7 +1094,8 @@ calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = d
 #' @param bs_trees Integer. Total number of non-parametric bootstrap trees to generate. Defaults to `500`.
 #' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()`; do not name a terminal by hand.
 #' @param seed Integer. Random seed for reproducible bootstrap initialization. Defaults to `NULL` (random).
-#' @param threads Integer. Number of CPU threads. Defaults to `8` (or detected P-cores).
+#' @param threads Integer. Number of CPU threads. Defaults to `8`, which is used as given; the
+#'   performance cores of the machine are detected only when `threads = NULL` (or `NA`).
 #' @param workers Integer. Parallel worker process count. If `NULL` (default), automatically calculated as `max(1L, as.integer(threads / threads_per_worker))`.
 #' @param threads_per_worker Integer. Thread-to-worker ratio used to derive `workers` when `workers = NULL`. Defaults to `4L`
 #'   (unvalidated heuristic for local bootstrap workloads; see Details). Ignored if `workers` is set explicitly.
@@ -1188,13 +1215,13 @@ run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, con
 #' @param output_dir Character. Destination directory for script and chunk logs. Defaults to `getwd()`.
 #' @param script_name Character. Name of output Bash script file. Defaults to `"run_bs_chunks.sh"`.
 #' @param cluster_job_name Character. SLURM job name identifier. Defaults to `"cactus_bs"`.
-#' @param cluster_partition Character. SLURM partition name. Defaults to `"main"` (Leftraru Epu AMD EPYC 9754 partition).
+#' @param cluster_partition Character. SLURM partition name. Defaults to `"main"`, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.
 #' @param cluster_nodes Integer. Number of compute nodes requested (\verb{--nodes}). Defaults to \code{1L}.
 #' @param cluster_mem Character. Memory allocation string for SLURM (`--mem`). Defaults to `"10G"`.
 #' @param cluster_time Character. Time limit allocation string for SLURM (`--time`). Defaults to `"24:00:00"`.
 #' @param cluster_queue Character. Optional SLURM queue / QoS name. Defaults to `NULL`.
 #' @param cluster_mail_user Character. Notification recipient email address for SLURM (\verb{--mail-user}). Defaults to \code{Sys.getenv("MY_EMAIL", "")}.
-#' @param load_module Character vector or string. Environment module(s) to load prior to execution. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`.
+#' @param load_module Character vector or string. Environment module(s) to load prior to execution. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or `NULL` to load none.
 #' @param raxml_exec Character. Executable `RAxML-NG` binary command. Defaults to `"raxml-ng-mpi"`.
 #' @return Character path to the generated SLURM batch script file.
 #' @export
@@ -1634,6 +1661,7 @@ calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, b
     stop("Executable '", raxml_bin_path, "' not found in your system's PATH.\n",
          "Please ensure RAxML-NG is installed and available, or provide the full absolute path.")
   }
+  .check_input_files(aln_file = aln_file, part_file = part_file, best_tree_file = best_tree_file)
 
   threads <- as.integer(threads)
   if (is.null(workers)) {
@@ -1694,13 +1722,13 @@ calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, b
 #' @param output_dir Character. Destination directory for script and outputs. Defaults to `getwd()`.
 #' @param script_name Character. Name of output Bash script file. Defaults to `"run_temporal_bs.sh"`.
 #' @param cluster_job_name Character. SLURM job name identifier. Defaults to `"cactus_temp_bs"`.
-#' @param cluster_partition Character. SLURM partition name. Defaults to `"main"`.
+#' @param cluster_partition Character. SLURM partition name. Defaults to `"main"`, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.
 #' @param cluster_nodes Integer. Number of compute nodes requested (`--nodes`). Defaults to `1L`.
 #' @param cluster_mem Character. Memory allocation string for SLURM (`--mem`). Defaults to `"16G"`.
 #' @param cluster_time Character. Time limit allocation string for SLURM (`--time`). Defaults to `"04:00:00"`.
 #' @param cluster_queue Character. Optional SLURM queue / QoS name. Defaults to `NULL`.
 #' @param cluster_mail_user Character. Notification recipient email address for SLURM (`--mail-user`). Defaults to `Sys.getenv("MY_EMAIL", "")`.
-#' @param load_module Character vector or string. Environment module(s) to load prior to execution. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`.
+#' @param load_module Character vector or string. Environment module(s) to load prior to execution. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or `NULL` to load none.
 #' @param raxml_exec Character. Executable `RAxML-NG` binary command. Defaults to `"raxml-ng-mpi"`.
 #' @param blopt Character. Branch length optimization method written as `--blopt` (`"nr_safe"` or
 #'   `"nr_fast"`). Defaults to `"nr_safe"`, the default of [calculate_temporal_bootstraps()], so that

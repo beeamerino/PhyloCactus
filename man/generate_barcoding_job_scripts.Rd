@@ -42,7 +42,7 @@ generate_barcoding_job_scripts(
 \item{cluster_job_name}{Character. SLURM job name; the merge job adds \verb{_merge}. Defaults to
 \code{"cactus_idtaxa"}.}
 
-\item{cluster_partition}{Character. SLURM partition. Defaults to \code{"main"}.}
+\item{cluster_partition}{Character. SLURM partition. Defaults to \code{"main"}, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.}
 
 \item{cluster_mem}{Character. Memory per task (\code{--mem}). Defaults to \code{"4G"}.}
 

@@ -34,7 +34,8 @@ run_local_bootstraps(
 
 \item{seed}{Integer. Random seed for reproducible bootstrap initialization. Defaults to \code{NULL} (random).}
 
-\item{threads}{Integer. Number of CPU threads. Defaults to \code{8} (or detected P-cores).}
+\item{threads}{Integer. Number of CPU threads. Defaults to \code{8}, which is used as given; the
+performance cores of the machine are detected only when \code{threads = NULL} (or \code{NA}).}
 
 \item{workers}{Integer. Parallel worker process count. If \code{NULL} (default), automatically calculated as \code{max(1L, as.integer(threads / threads_per_worker))}.}
 

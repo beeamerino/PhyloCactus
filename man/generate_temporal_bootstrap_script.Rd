@@ -56,7 +56,7 @@ generate_temporal_bootstrap_script(
 
 \item{cluster_job_name}{Character. SLURM job name identifier. Defaults to \code{"cactus_temp_bs"}.}
 
-\item{cluster_partition}{Character. SLURM partition name. Defaults to \code{"main"}.}
+\item{cluster_partition}{Character. SLURM partition name. Defaults to \code{"main"}, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.}
 
 \item{cluster_nodes}{Integer. Number of compute nodes requested (\code{--nodes}). Defaults to \code{1L}.}
 
@@ -68,7 +68,7 @@ generate_temporal_bootstrap_script(
 
 \item{cluster_mail_user}{Character. Notification recipient email address for SLURM (\code{--mail-user}). Defaults to \code{Sys.getenv("MY_EMAIL", "")}.}
 
-\item{load_module}{Character vector or string. Environment module(s) to load prior to execution. Defaults to \code{c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")}.}
+\item{load_module}{Character vector or string. Environment module(s) to load prior to execution. Defaults to \code{c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")}, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or \code{NULL} to load none.}
 
 \item{raxml_exec}{Character. Executable \code{RAxML-NG} binary command. Defaults to \code{"raxml-ng-mpi"}.}
 
