@@ -54,7 +54,7 @@ The functions below are grouped by the stage of the workflow in which they run.
 |:---|:---|:---|
 | `preprocess_partitions()` | Checks the supermatrix and partition map with `RAxML-NG` before model selection. | Kozlov et al. (2019) |
 | `run_modeltest_ng()` | Selects a substitution model for each partition with `ModelTest-NG` under the AICc. | Darriba et al. (2020) |
-| `build_constraint_scaffold()` | Builds a multifurcating constraint tree that enforces the monophyly of subfamilies and major clades of Cactaceae established in published phylogenies. | Guerrero et al. (2019) |
+| `build_constraint_scaffold()` | Builds the multifurcating constraint tree of the maximum-likelihood search: the monophyly of 21 groups, the backbone of Cactaceae, the arrangement within Opuntioideae and Cactoideae and the outgroup families, taken from published phylogenies; its help page lists each imposed relationship and those left to the data. | Guerrero et al. (2019) |
 | `calculate_ml_tree()` | Estimates the maximum-likelihood tree with `RAxML-NG` under the partition models and the constraint tree, from 25 random and 25 parsimony starting trees by default. | Kozlov et al. (2019) |
 | `map_branch_supports()` | Maps Felsenstein bootstrap proportions (FBP) or transfer bootstrap expectation (TBE) from the bootstrap replicates onto the maximum-likelihood tree. | Felsenstein (1985); Lemoine et al. (2018) |
 
