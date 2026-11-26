@@ -11,7 +11,8 @@ preprocess_partitions(
   output_dir = dirname(phy_matrix),
   prefix = "cactus",
   force_check = FALSE,
-  model_handling = c("force_dna", "preserve")
+  model_handling = c("force_dna", "preserve"),
+  threads = 4
 )
 }
 \arguments{
@@ -26,13 +27,17 @@ preprocess_partitions(
 
 \item{prefix}{Character. Basename prefix for every file written by this step. Defaults to \code{"cactus"}.}
 
-\item{force_check}{Logical. Re-run validation even if the validated partition file already exists? Defaults to \code{FALSE}.}
+\item{force_check}{Logical. Re-run validation even if the validated partition file already exists? Defaults to \code{FALSE}.
+A new check first removes the \verb{<prefix>.raxml.reduced.*} files of an earlier check in
+\code{output_dir}, so the reduction reported is that of the matrix checked in this call.}
 
 \item{model_handling}{Character. Model field written to the validated partition map. \code{"force_dna"}
 (default) writes the datatype token \code{DNA}, leaving the substitution model to be selected by
 \code{\link[=run_modeltest_ng]{run_modeltest_ng()}}. \code{"preserve"} keeps whatever model string \code{RAxML-NG} emitted, which is only
 appropriate when the partition map is passed straight to \code{RAxML-NG} without model selection.
 \code{ModelTest-NG} cannot parse the \code{RAxML-NG} model syntax and aborts on it.}
+
+\item{threads}{Integer. Threads given to \code{RAxML-NG --check}. Defaults to \code{4}.}
 }
 \value{
 Character path to the validated partition map file ready for model evaluation.

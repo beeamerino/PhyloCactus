@@ -40,6 +40,9 @@
 #' @param output_dir Character. Output directory for validated partition outputs. Defaults to `dirname(phy_matrix)`.
 #' @param prefix Character. Basename prefix for every file written by this step. Defaults to `"cactus"`.
 #' @param force_check Logical. Re-run validation even if the validated partition file already exists? Defaults to `FALSE`.
+#'   A new check first removes the `<prefix>.raxml.reduced.*` files of an earlier check in
+#'   `output_dir`, so the reduction reported is that of the matrix checked in this call.
+#' @param threads Integer. Threads given to `RAxML-NG --check`. Defaults to `4`.
 #' @param model_handling Character. Model field written to the validated partition map. `"force_dna"`
 #'   (default) writes the datatype token `DNA`, leaving the substitution model to be selected by
 #'   [run_modeltest_ng()]. `"preserve"` keeps whatever model string `RAxML-NG` emitted, which is only
@@ -53,8 +56,12 @@
 #' user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
 #' \doi{10.1093/bioinformatics/btz305}
 #' @export
-preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir = dirname(phy_matrix), prefix = "cactus", force_check = FALSE, model_handling = c("force_dna", "preserve")) {
+preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir = dirname(phy_matrix), prefix = "cactus", force_check = FALSE, model_handling = c("force_dna", "preserve"), threads = 4) {
   model_handling <- match.arg(model_handling)
+  threads <- as.integer(threads)
+  if (length(threads) != 1L || is.na(threads) || threads < 1L) {
+    stop("`threads` must be a positive integer.", call. = FALSE)
+  }
 
   if (Sys.which(raxml_path) == "") {
     stop("Executable '", raxml_path, "' not found in your system's PATH.\n",
@@ -77,6 +84,15 @@ preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir 
     return(clean_part)
   }
 
+  # A reduced matrix left by an earlier check would be reported as the reduction of this one, and
+  # returned as the analysed alignment (closure review of 0.5.4, AP-05), so it is removed first.
+  stale <- paste0(prefix_check, ".raxml.reduced.", c("phy", "partition"))
+  stale <- stale[file.exists(stale)]
+  if (length(stale)) {
+    message("Removing the reduced files of an earlier check: ", paste(basename(stale), collapse = ", "))
+    file.remove(stale)
+  }
+
   # Run system raxmlcheck validation
   aln_check <- system2(
     raxml_path,
@@ -85,7 +101,7 @@ preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir 
       "--msa", shQuote(phy_matrix),
       "--model", shQuote(part_file),
       "--prefix", shQuote(prefix_check),
-      "--threads", "4"
+      "--threads", as.character(threads)
     ),
     stdout = "",
     stderr = ""
@@ -136,6 +152,11 @@ preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir 
 #'   model syntax such as `GTR+FC+G4m+B` and aborts with a segmentation fault on it.
 #' @param prefix Character. Output filename prefix. Defaults to `"MODELTEST_cactus_phylo"`.
 #' @param threads Integer. Number of processing threads. Defaults to `4`.
+#' @param output_dir Character or `NULL`. Directory for the outputs of `ModelTest-NG`, created if
+#'   needed. `NULL` (default) writes them, as before 0.5.5, relative to the working directory.
+#' @param seed Integer or `NULL`. Seed of the random number generator of `ModelTest-NG`
+#'   (`--rngseed`). `NULL` (default) leaves it to the program, as before 0.5.5; give a value to make
+#'   the run reproducible and record it.
 #' @return Character path to the resulting partition file containing selected model parameters (`.part.aicc`).
 #' @references
 #' Darriba, D., Posada, D., Kozlov, A. M., Stamatakis, A., Morel, B., & Flouri, T. (2020). ModelTest-NG: a new and
@@ -150,7 +171,8 @@ preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir 
 #' )
 #' }
 #' @export
-run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = "MODELTEST_cactus_phylo", threads = 4) {
+run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = "MODELTEST_cactus_phylo", threads = 4,
+                             output_dir = NULL, seed = NULL) {
   
   if (Sys.which(modeltest_exec_path) == "") {
     stop("Executable '", modeltest_exec_path, "' not found in your system's PATH.\n",
@@ -175,6 +197,11 @@ run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = 
          call. = FALSE)
   }
 
+  if (!is.null(output_dir)) {
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+    prefix <- file.path(output_dir, prefix)
+  }
+
   # Invocation parameters setup
   args <- c(
     "--datatype", "nt",
@@ -184,6 +211,11 @@ run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = 
     "--processes", as.character(threads),
     "--template", "raxml"
   )
+  if (!is.null(seed)) {
+    seed <- as.integer(seed)
+    if (length(seed) != 1L || is.na(seed) || seed < 1L) stop("`seed` must be a positive integer.", call. = FALSE)
+    args <- c(args, "--rngseed", as.character(seed))
+  }
   
   message("Executing ModelTest-NG over partitions database...")
   exit_status <- system2(
