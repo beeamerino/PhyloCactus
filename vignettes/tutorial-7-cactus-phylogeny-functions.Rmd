@@ -21,9 +21,11 @@ knitr::opts_chunk$set(
 This page lists the main functions of the `PhyloCactus` workflow, grouped by stage, with the method each one implements and its primary reference.
 Arguments and return values are documented in the manual pages and in the `pkgdown` reference index.
 
-## Functions by Stage
+## Complete pipeline execution workflow
 
-### Sequence Assembly
+The functions below are grouped by the stage of the workflow in which they run.
+
+### Sequence assembly
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -31,7 +33,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `assemble_outgroup_phylotar()` | Retrieves sequence clusters for the outgroup genera of Anacampserotaceae, Portulacaceae and Talinaceae, for the loci selected in the ingroup. | Bennett et al. (2018) |
 | `fetch_genbank_metadata()` | Retrieves the organism name and definition line of each GenBank accession through `ape::read.GenBank()`, in batches with retries, and caches them. | Paradis & Schliep (2019) |
 
-### Alignment and Quality Control
+### Alignment and quality control
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -46,7 +48,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 |:---|:---|:---|
 | `run_concatenation_pipeline()` | Concatenates the locus alignments into a supermatrix and writes partition maps in RAxML format (read by `RAxML-NG`, `ModelTest-NG` and `IQ-TREE`) and NEXUS format, with configuration files for `PartitionFinder2` and `MrBayes`. | Not applicable |
 
-### Model Selection and Maximum-Likelihood Inference
+### Model selection and maximum-likelihood inference
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -56,7 +58,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `calculate_ml_tree()` | Estimates the maximum-likelihood tree with `RAxML-NG` under the partition models and the constraint tree, from 25 random and 25 parsimony starting trees by default. | Kozlov et al. (2019) |
 | `map_branch_supports()` | Maps Felsenstein bootstrap proportions (FBP) or transfer bootstrap expectation (TBE) from the bootstrap replicates onto the maximum-likelihood tree. | Felsenstein (1985); Lemoine et al. (2018) |
 
-### Divergence Time Estimation
+### Divergence time estimation
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -66,7 +68,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `automate_treePL()` | Selects the optimization parameters and the smoothing value by cross-validation on the maximum-likelihood tree, dates it, and applies them to every temporal bootstrap replicate. | Smith & O'Meara (2012); Maurin (2020) |
 | `send_run_notification()` | Sends an email when a long analysis ends, reporting status, timings and output paths. A failure to send does not stop the analysis. | `blastula` R package, <https://github.com/rstudio/blastula> |
 
-### Comparison, Figures and IUCN Data
+### Comparison, figures and IUCN data
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -75,7 +77,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `get_iucn_data()` | Retrieves the IUCN Red List assessment of a species through `rredlist`: category, criteria, population trend, countries of occurrence, endemism, habitats and threats. | IUCN (2026) |
 | `scale_fill_iucn()` | `ggplot2` fill scale with the standard IUCN Red List category colors. | IUCN (2026) |
 
-### Molecular Identification: the Library (Tutorial 5, Steps 1 to 4)
+### Molecular identification: the library (Tutorial 5, steps 1 to 4)
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -86,7 +88,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `extract_barcoding_plastome_loci()` | Crops the library loci from GenBank plastomes as extra records; a plastome does not add a locus that a library record of the same specimen already holds. | |
 | `barcoding_outgroup_taxids()` | The NCBI Taxonomy IDs of the six genera of Anacampserotaceae, Portulacaceae and Talinaceae that the outgroup control asks the library about. | |
 
-### Molecular Identification: Validation (Tutorial 5, Steps 5 to 10)
+### Molecular identification: validation (Tutorial 5, steps 5 to 10)
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -100,7 +102,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `summarise_barcoding_metrics()` | Per locus and scheme: species correct, genus correct, wrong species, wrong genus and unassigned, and precision and recall per class. | |
 | `summarise_barcoding_genus_discrimination()` | How well each locus tells apart the species of each genus in the folds, shown in the identification report beside the answer. | |
 
-### Molecular Identification: Identifying a Sample (Tutorial 5, Step 11)
+### Molecular identification: identifying a sample (Tutorial 5, step 11)
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -112,7 +114,9 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `plot_barcoding_identification()` | Draws the answer per locus of an identification, and the sampling of the named genera, from the tables of its report. | |
 | `plot_barcoding_identification_summary()` | Draws the answers of several identifications side by side, one row per identification and one column per locus. | |
 
-### Help Pages
+## Conclusion
+
+Each function has a manual page with its arguments, defaults, return value and references:
 
 ```{r, eval = FALSE}
 library(PhyloCactus)

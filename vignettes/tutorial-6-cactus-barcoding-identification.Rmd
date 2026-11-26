@@ -36,13 +36,15 @@ file.edit(system.file("scripts", "tutorial-6-cactus-barcoding-identification.R",
 has_data <- nzchar(system.file("extdata", "barcoding_example_LT745702.1_answer.csv", package = "PhyloCactus"))
 ```
 
-## Before You Start
+## Complete pipeline execution workflow
+
+### Before you start
 
 - **The library of Tutorial 5**, in the same tutorial folder: `11_barcoding/4_library/` (step 4), `11_barcoding/9_threshold/` (step 9) and `11_barcoding/11_metrics/` (step 10).
 - `rentrez`, for the GenBank downloads.
 - `minimap2` and `samtools` for the assembly, `fastp` and `GetOrganelle` (with its seed databases `embplant_pt` and `embplant_nr`) for the reads. If they live in a conda environment, activate it in the terminal before starting R there.
 
-## Reading an Answer
+### Reading an answer
 
 Every locus of the library is looked for in the sample and answered on its own, in one of three states:
 
@@ -53,7 +55,7 @@ Every locus of the library is looked for in the sample and answered on its own, 
 Loci are never combined into one verdict. When several loci answer, the report shows whether they agree; when they name different taxa, the answer of the sample is a conflict.
 A region identical to library sequences is reported in `identical_to_library`, so that the records behind a confident answer can be checked.
 
-## Example 1. One Sanger Record
+### Example 1. One Sanger record
 
 `LT745702.1`, `matK` of *Pseudorhipsalis amazonica* subsp. *panamensis*. The record is named at subspecies rank, so the mining of Tutorial 1 left it out. The library holds its binomial.
 
@@ -73,7 +75,7 @@ plot_barcoding_identification(system.file("extdata", "barcoding_example_LT745702
 
 `matK` names the genus *Pseudorhipsalis*. `IdTaxa` reached the right species, *P. amazonica*, with a species confidence of 61.6, under the species threshold of `matK` (66.9): the species is listed as an alternative (`below_species_threshold`), not assigned. `trnQ-rps16` overlaps too little (`short_overlap`). [Full report](https://beeamerino.github.io/PhyloCactus/reports/LT745702.1.html).
 
-## Example 2. A Specimen of Unknown Species
+### Example 2. A specimen of unknown species
 
 `PZ714536.1`, `matK` of *Opuntia* sp., published after the mining of Tutorial 1.
 
@@ -89,7 +91,7 @@ plot_barcoding_identification(system.file("extdata", "barcoding_example_PZ714536
 
 *Opuntia* at genus rank (genus confidence 79.2). The region is identical to 17 library records of several species of *Opuntia*, so no species can be told apart at this locus. [Full report](https://beeamerino.github.io/PhyloCactus/reports/PZ714536.1.html).
 
-## Example 3. One Specimen, Four Loci
+### Example 3. One specimen, four loci
 
 *Coryphantha elephantidens* subsp. *bumamma*, voucher Vázquez 2628: `OK340410.1`, `OK340349.1`, `OK340287.1`, `OK340224.1`. Given with `sample =`, the four records are one sample, read together in one report.
 
@@ -106,7 +108,7 @@ plot_barcoding_identification(system.file("extdata", "barcoding_example_OK340410
 
 `matK` and `rbcL` name *Coryphantha*. `rpL16` and `psbA-trnH` give no answer (low confidence). The two loci that answer agree, and the sample is answered at genus rank. [Full report](https://beeamerino.github.io/PhyloCactus/reports/OK340410.1.html).
 
-## Example 4. One Specimen, Four Loci, and a Wrong Species
+### Example 4. One specimen, four loci, and a wrong species
 
 *Xiquexique gounellei*: `OP189074.1`, `OP188885.1`, `OP188764.1`, `OP187233.1`.
 
@@ -122,7 +124,7 @@ plot_barcoding_identification(system.file("extdata", "barcoding_example_OP189074
 
 `ITS` names *Xiquexique frewenii* with a species confidence of 62.5, just over its species threshold (60.9). The other three loci give no answer. A species named by one locus, close to its threshold, with every other locus silent, is the pattern of most wrong species of this version: read it as the genus until another locus agrees. [Full report](https://beeamerino.github.io/PhyloCactus/reports/OP189074.1.html).
 
-## Example 5. A GenBank Plastome Named to Species
+### Example 5. A GenBank plastome named to species
 
 `MN517611.1`, the plastome of *Mammillaria zephyranthoides*. A GenBank flat file is read as such: each locus is cropped from the plastome.
 
@@ -138,7 +140,7 @@ plot_barcoding_identification(system.file("extdata", "barcoding_example_MN517611
 
 `matK` names *Mammillaria zephyranthoides* (82.8 against 66.9), among the species of *Mammillaria* of its library. The other loci found give no answer. [Full report](https://beeamerino.github.io/PhyloCactus/reports/MN517611.1.html).
 
-## Example 6. A GenBank Plastome Named as Another Species
+### Example 6. A GenBank plastome named as another species
 
 `MT387452.1`, the plastome of *Rhipsalis teres*.
 
@@ -154,7 +156,7 @@ plot_barcoding_identification(system.file("extdata", "barcoding_example_MT387452
 
 `matK` names *Lepismium lumbricoides* (81.2 against 66.9): the region is identical to FN669720.1, a record under that name (`identical_to_library`). An identical sequence under another name, a misidentified voucher or a haplotype shared across genera, yields a confident wrong answer. The report lists the record so that it can be checked. [Full report](https://beeamerino.github.io/PhyloCactus/reports/MT387452.1.html).
 
-## Example 7. Several Samples at Once
+### Example 7. Several samples at once
 
 A sample sheet has one row per sample: `sample_id`, `input_type` (a row of the matrix of accepted inputs, `barcoding_accepted_inputs.csv`), `file_1`, and optionally `file_2`, `declared_species` and `voucher`. Each sample is routed to its function and gets its report. One index table gathers them.
 
@@ -181,7 +183,7 @@ knitr::kable(caption = "Table 1. Index of the sample sheet of Example 7: loci fo
 
 `LT745702.1` names the genus *Pseudorhipsalis* and its declared species is not reached (`genus agrees`). `PZ714536.1` names *Opuntia* and declares no species (`not declared`). `MN517611.1` names *Mammillaria zephyranthoides* at one of its 12 loci found (`species agrees`). The sheet gives no voucher, so `voucher_missing` is `TRUE` in the three rows: a sample without a voucher is identified and flagged, since the leakage rule per specimen cannot be applied to it (its report says so).
 
-## Example 8. A Genome Assembly
+### Example 8. A genome assembly
 
 `GCA_024363205.1`, *Cereus fernambucensis* (NCBI Assembly, about 0.9 Gb). The loci of the library are mapped onto the assembly with `minimap2` and cut with `samtools`.
 
@@ -199,7 +201,7 @@ plot_barcoding_identification(system.file("extdata", "barcoding_example_GCA_0243
 
 *Cereus* at genus rank from `pepC_like` (its best species at 61.5, under the species threshold of 78.8) and `phyC`. 12 other loci give no answer. `rpl32-trnL` hits two scaffolds with a low mapping quality, which the package reports. The best hit is kept. [Full report](https://beeamerino.github.io/PhyloCactus/reports/GCA_024363205.1.html).
 
-## Example 9. Paired Illumina Reads
+### Example 9. Paired Illumina reads
 
 `SRR26398994`, a genome skim of *Opuntia comonduensis* (ENA, about 0.56 GB). The plastome and the nuclear ribosomal DNA are assembled with `fastp` and `GetOrganelle`, then identified locus by locus. The species is not in the library.
 
@@ -219,7 +221,7 @@ plot_barcoding_identification(system.file("extdata", "barcoding_example_SRR26398
 
 *Opuntia* at genus rank from `ndhF-rpl32`; the other ten loci found give no answer. For a species absent from the library, the genus is the right answer. [Full report](https://beeamerino.github.io/PhyloCactus/reports/SRR26398994.html).
 
-## The Examples Side by Side
+### The examples side by side
 
 ```{r, eval = has_data, echo = FALSE, fig.height = 4.5, fig.cap = "**Figure 9.** The answers of the eight examples with a figure, side by side: one row per example and one column per locus found, coloured by state. A cross marks a locus named at genus rank only (`genus_only_locus`)."}
 plot_barcoding_identification_summary(list(
@@ -235,7 +237,9 @@ plot_barcoding_identification_summary(list(
 
 A plastome or an assembly holds most loci of the library, a Sanger record one. Yet in these examples the answer rests on one or two loci in every case, and most loci found give no answer.
 
-## How Well This Version Identifies
+## Conclusion
+
+### How well this version identifies
 
 The rates below were measured with the library of this version, built from GenBank alone on 2026-10-13, with the species thresholds of step 9 and `rbcL` at genus rank only. They belong to this library: as GenBank enriches it, they are measured again and are expected to change.
 
@@ -264,7 +268,7 @@ With the species present in the library, the thresholds and the `rbcL` rule redu
 
 The genus is the answer to expect from this version. A species is named for few queries, mostly from `matK` and from plastomes, and abstention is the most common answer. When a species is named, it is wrong in 14 of 162 answers if the species is in the library and in every answer if it is not, 59 of 207 at the mix of this measurement.
 
-## Limitations
+### Limitations
 
 - **Coverage of the library.** A sample of a species absent from a locus library can only be named as something else at that locus, or not at all. The library holds part of the accepted species of the checklist of Korotkova *et al*. (2021), unevenly across loci; Tutorial 5 draws its taxonomic coverage.
 - **Shared sequences.** Identical sequences under different names (shared haplotypes, misidentified vouchers) give confident wrong answers; `identical_to_library` names them.
