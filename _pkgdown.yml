@@ -160,12 +160,12 @@ reference:
   - resolve_rooting_outgroup
   - root_on_clade
   - add_clade_labels_by_level
+  - add_outgroup_bar
   - apply_clade_label_layers
   - assert_constraint_columns
   - augment_treedata_with_registry
   - build_annotation_registry
   - compute_group_nodes
-  - extract_species_binomial
   - get_annotation_nodes
   - prepare_tip_annotation
   - standardize_taxon

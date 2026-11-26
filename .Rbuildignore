@@ -27,3 +27,4 @@
 ^tests/testthat/.*\.log$
 ^extended_trees($|/)
 ^\.claude$
+^LICENSE\.md$

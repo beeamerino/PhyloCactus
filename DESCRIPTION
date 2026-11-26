@@ -41,6 +41,7 @@ Imports:
     ggtree,
     patchwork,
     TreeDist,
+    parallel,
     cowplot,
     tibble,
     seqinr,
@@ -62,7 +63,6 @@ Suggests:
     pkgdown,
     treeio
 VignetteBuilder: knitr
-biocViews:
 Remotes: ropensci/phylotaR
 Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.1.0
