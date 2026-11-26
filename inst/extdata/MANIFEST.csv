@@ -1,7 +1,7 @@
 canonical,legacy_name,role,produced_by,source_path,validator,loaded_by_code,description,expected_tips
 MANIFEST.csv,,manifest,09_publication_scripts/publish_run_outputs.R,,none,TRUE,Declares every file distributed in inst/extdata and where it comes from,
 PROVENANCE.csv,,manifest,09_publication_scripts/publish_run_outputs.R,,none,FALSE,Run identity of the last publication: tool versions seeds sizes and checksums,
-cactus_constraints.csv,,input,curated,,none,TRUE,Taxonomic scaffold mapping species to clades subfamilies and families,
+cactus_constraints.csv,,input,curated,,none,TRUE,Species table: Clade assigns each species to one of the 21 groups of the constraint tree and the annotation levels label the figures,
 calibrations_bounds.csv,,input,curated,,none,TRUE,Secondary calibration bounds with node_type and provenance per row,
 genes_map.csv,,input,curated,,none,TRUE,Locus name harmonisation map for GenBank annotations,
 target_genes.txt,,input,curated,,none,TRUE,Target locus list mined by the assembly modules,
