@@ -309,14 +309,14 @@ build_constraint_scaffold <- function(alignment_path, constraints_csv_path, outp
     error = function(e) stop("Could not read constraints table at ", constraints_csv_path, " | ", conditionMessage(e))
   )
   
-  required_cols <- c("Specie_name", "Clade", "Subfam", "Family")
+  # Only Specie_name and Clade build the scaffold; the other columns of the table (Subfam, Family and
+  # the annotation levels) are read by the figure and dating functions, not here.
+  required_cols <- c("Specie_name", "Clade")
   missing_cols <- setdiff(required_cols, colnames(cf_all))
   if (length(missing_cols) > 0) stop("Missing required columns in constraints table: ", paste(missing_cols, collapse = ", "))
   
   cf_all$Specie_name <- trimws(cf_all$Specie_name)
   cf_all$Clade       <- trimws(cf_all$Clade)
-  cf_all$Subfam      <- trimws(cf_all$Subfam)
-  cf_all$Family      <- trimws(cf_all$Family)
   
   if (any(is.na(cf_all$Specie_name)) || any(cf_all$Specie_name == "")) stop("Constraints table contains empty or NA values in Specie_name.")
   if (any(is.na(cf_all$Clade)) || any(cf_all$Clade == "")) stop("Constraints table contains empty or NA values in Clade.")
@@ -350,22 +350,6 @@ build_constraint_scaffold <- function(alignment_path, constraints_csv_path, outp
   
   # 4. FILTER TO ALIGNMENT TAXA
   cf <- unique(cf_align)
-  cf$Genus <- sub("_.*$", "", cf$Specie_name)
-  
-  genus_to_constraint <- character(0)
-  target_genera <- sort(intersect(unique(cf$Genus), genus_to_constraint))
-  log_message("Genera with additional genus-level constraints: ",
-              ifelse(length(target_genera) == 0, "none", paste(target_genera, collapse = ", ")))
-  
-  genus_newick_lut <- NULL
-  if (length(target_genera) > 0) {
-    # Emulate group_by collapse
-    spp_by_genus <- split(cf$Specie_name, cf$Genus)
-    spp_by_genus <- spp_by_genus[names(spp_by_genus) %in% target_genera]
-    genus_newick_lut <- sapply(spp_by_genus, function(spp) {
-      paste0("(", paste(sort(unique(spp)), collapse = ","), ")")
-    })
-  }
   
   # Helper
   extract_required_clade <- function(df, clade_name) {
@@ -380,26 +364,11 @@ build_constraint_scaffold <- function(alignment_path, constraints_csv_path, outp
     sort(unique(df$Specie_name[df$Clade == clade_name]))
   }
   
-  collapse_clade <- function(x, genus_newick_lut = NULL) {
+  # Each group becomes one polytomy of its species (or a single terminal). The list of 21 groups
+  # below and the topology of step 7 are fixed in the code, as the help page states.
+  collapse_clade <- function(x) {
     if (length(x) == 0) return("")
-    
     x <- sort(unique(x))
-    genus_vec <- sub("_.*$", "", x)
-    
-    if (!is.null(genus_newick_lut) && length(genus_newick_lut) > 0) {
-      grouped <- split(x, genus_vec)
-      new_elements <- character(0)
-      
-      for (g in sort(names(grouped))) {
-        if (g %in% names(genus_newick_lut)) {
-          new_elements <- c(new_elements, genus_newick_lut[[g]])
-        } else {
-          new_elements <- c(new_elements, sort(grouped[[g]]))
-        }
-      }
-      x <- sort(unique(new_elements))
-    }
-    
     if (length(x) == 1) return(x)
     return(paste0("(", paste(x, collapse = ","), ")"))
   }
@@ -439,29 +408,29 @@ build_constraint_scaffold <- function(alignment_path, constraints_csv_path, outp
   log_message("Clade size summary written to: ", out_clade_sizes)
   
   # 6. COLLAPSE CLADES TO NEWICK STRINGS
-  s_tal   <- collapse_clade(clades$talinopsis, genus_newick_lut)
-  s_gra   <- collapse_clade(clades$grahamia, genus_newick_lut)
-  s_ana   <- collapse_clade(clades$anacampseros, genus_newick_lut)
-  s_por   <- collapse_clade(clades$portulaca, genus_newick_lut)
+  s_tal   <- collapse_clade(clades$talinopsis)
+  s_gra   <- collapse_clade(clades$grahamia)
+  s_ana   <- collapse_clade(clades$anacampseros)
+  s_por   <- collapse_clade(clades$portulaca)
   
-  s_leu   <- collapse_clade(clades$leuenbergeria, genus_newick_lut)
-  s_per   <- collapse_clade(clades$pereskia, genus_newick_lut)
-  s_teph  <- collapse_clade(clades$tephrocacteae, genus_newick_lut)
-  s_cyl   <- collapse_clade(clades$cylindropuntieae, genus_newick_lut)
-  s_opu   <- collapse_clade(clades$opuntieae, genus_newick_lut)
-  s_mai   <- collapse_clade(clades$maihuenia, genus_newick_lut)
-  s_blo   <- collapse_clade(clades$blossfeldia, genus_newick_lut)
-  s_coreI  <- collapse_clade(clades$core_I, genus_newick_lut)
-  s_rhip <- collapse_clade(clades$rhipsalideae, genus_newick_lut)
-  s_noto <- collapse_clade(clades$notocacteae, genus_newick_lut)
-  s_bct <- collapse_clade(clades$bct_core, genus_newick_lut)
-  s_caly  <- collapse_clade(clades$calymmanthium, genus_newick_lut)
-  s_copi  <- collapse_clade(clades$copiapoa, genus_newick_lut)
-  s_frai  <- collapse_clade(clades$frailea, genus_newick_lut)
-  s_cact  <- collapse_clade(clades$cacteae, genus_newick_lut)
+  s_leu   <- collapse_clade(clades$leuenbergeria)
+  s_per   <- collapse_clade(clades$pereskia)
+  s_teph  <- collapse_clade(clades$tephrocacteae)
+  s_cyl   <- collapse_clade(clades$cylindropuntieae)
+  s_opu   <- collapse_clade(clades$opuntieae)
+  s_mai   <- collapse_clade(clades$maihuenia)
+  s_blo   <- collapse_clade(clades$blossfeldia)
+  s_coreI  <- collapse_clade(clades$core_I)
+  s_rhip <- collapse_clade(clades$rhipsalideae)
+  s_noto <- collapse_clade(clades$notocacteae)
+  s_bct <- collapse_clade(clades$bct_core)
+  s_caly  <- collapse_clade(clades$calymmanthium)
+  s_copi  <- collapse_clade(clades$copiapoa)
+  s_frai  <- collapse_clade(clades$frailea)
+  s_cact  <- collapse_clade(clades$cacteae)
   
-  s_talinum   <- collapse_clade(clades$talinum, genus_newick_lut)
-  s_talinella <- collapse_clade(clades$talinella, genus_newick_lut)
+  s_talinum   <- collapse_clade(clades$talinum)
+  s_talinella <- collapse_clade(clades$talinella)
 
   # 7. BUILD FIXED TOPOLOGY
   #
