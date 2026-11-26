@@ -101,6 +101,9 @@ compute_pairwise_metric <- function(tree_list, FUN, min_tips = 4L) {
 #'   `"Amaral et al. (2022)"`, `"de Vos et al. (2025)"` and `"Carruthers et al. (2026)"`, and the
 #'   focal tree as `"This study"`.
 #'   Supplied labels replace the defaults of the same name.
+#' @param family Character. The family the comparison is restricted to: the terminals of each tree
+#'   are kept only if the checklist places them in it, and the constraint table is read for its
+#'   species. Defaults to `"Cactaceae"`.
 #' @param rooting_genus Character. Genus whose terminals root every tree after the family filter. Defaults to `"Leuenbergeria"`.
 #'
 #'   This differs from the rooting used elsewhere in `PhyloCactus`. The comparison is restricted to
@@ -108,7 +111,8 @@ compute_pairwise_metric <- function(tree_list, FUN, min_tips = 4L) {
 #'   *Leuenbergeria* is sister to the rest of the family in the focal tree. The distances and the
 #'   tree-space projection are computed on unrooted trees and do not depend on this choice; the
 #'   rooting affects only the exported trees. All terminals of the genus are used, not one, for the reasons
-#'   given in `resolve_rooting_outgroup()`. Trees lacking the genus are left unrooted and flagged in
+#'   given in `resolve_rooting_outgroup()`, and the root is placed by `root_on_clade()`, which roots on
+#'   the stem of the genus even when the tree as read is rooted inside it. Trees lacking the genus are left unrooted and flagged in
 #'   `SUPP_rooting_summary`.
 #' @return A named list containing file paths for generated tables (`tables`), figures (`figures`), trees (`trees`), and the combined ggplot object (`plot`).
 #' @references
@@ -135,7 +139,8 @@ compute_pairwise_metric <- function(tree_list, FUN, min_tips = 4L) {
 #' )
 #' }
 #' @export
-validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_map, out_dir, min_tips = 4L, pruning_strategy = c("common_set", "pairwise"), rooting_genus = "Leuenbergeria", tree_labels = NULL) {
+validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_map, out_dir, min_tips = 4L, pruning_strategy = c("common_set", "pairwise"), rooting_genus = "Leuenbergeria", tree_labels = NULL,
+                                 family = "Cactaceae") {
   pruning_strategy <- match.arg(pruning_strategy)
   
   
@@ -331,11 +336,9 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
   
   # The species of the family, from the checklist: the family filter keeps them whether or not the
   # focal tree samples them
-  family_tips <- .checklist_family_names(checklist_csv, family = "Cactaceae")
+  family_tips <- .checklist_family_names(checklist_csv, family = family)
   constraints <- readr::read_csv(constraints_map, show_col_types = FALSE)
-  cactaceae_tips <- constraints |>
-    dplyr::filter(Family == "Cactaceae") |>
-    dplyr::pull(Specie_name) |>
+  cactaceae_tips <- constraints$Specie_name[constraints$Family %in% family] |>
     standardize_taxon() |>
     unique() |>
     sort()
@@ -410,7 +413,7 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
   species_removed_family <- list()
   genera_removed_family  <- list()
   
-  message("Filtering Cactaceae family and rooting...")
+  message("Filtering ", family, " and rooting...")
   for (nm in names(trees_checklist)) {
     tr_before <- trees_checklist[[nm]]
     
@@ -430,7 +433,7 @@ validate_phylogenies <- function(trees_mapping_list, checklist_csv, constraints_
     } else {
       root_error <- FALSE
       tr_after <- tryCatch(
-        ape::root(tr_family, outgroup = genus_tips, resolve.root = TRUE),
+        root_on_clade(tr_family, genus_tips),
         error = function(e) {
           root_notes <<- paste("Rooting failed:", e$message)
           root_error <<- TRUE
