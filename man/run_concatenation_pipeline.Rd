@@ -9,7 +9,8 @@ run_concatenation_pipeline(
   output_dir,
   outgroup_pattern = NULL,
   min_coverage = 0.2,
-  exclude_markers = NULL
+  exclude_markers = NULL,
+  registry_file = NULL
 )
 }
 \arguments{
@@ -28,6 +29,17 @@ other analyses; only this supermatrix is built without it. The excluded markers 
 the run log and listed in \code{logs_and_qc/TABLE_markers_excluded.csv}. A name that matches no
 alignment raises a warning, not an error, so a typo is visible.
 Defaults to \code{NULL}.}
+
+\item{registry_file}{Character or \code{NULL}. The sequence registry of Module 4
+(\code{TABLE_sequence_registry_with_acceptance.csv}), read for the acceptance status and accession of
+each terminal in the species-marker summary. \code{NULL} (default) looks for it where the tutorials
+write it, \verb{4_Cleaned/tables/} or \verb{4_Cleaned/} two levels above \code{input_dir}; without it the
+summary has no status or accession columns.
+
+Terminal labels are the species names with every character other than a letter or a digit
+turned into an underscore, so a hyphenated epithet is written with an underscore
+(\code{Opuntia_ficus_indica}), the convention of \code{\link[=standardize_taxon]{standardize_taxon()}}, of the constraint table and of
+the distributed trees.}
 }
 \value{
 A data frame containing supermatrix dimensions, taxon coverage, and locus partition bounds.

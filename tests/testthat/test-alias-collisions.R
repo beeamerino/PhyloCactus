@@ -108,10 +108,10 @@ test_that("the resolution does not depend on the order the files were listed in"
 # .resolve_alias_collisions(), whose single real call passes extract_species(). That is why nothing
 # downstream changes, and why this is a latent defect rather than a wrong result already published.
 
-test_that("extract_species_binomial keeps a hyphenated epithet whole", {
-  expect_equal(extract_species_binomial("Opuntia_ficus-indica|KJ773783.1"), "Opuntia_ficus-indica")
-  expect_equal(extract_species_binomial("Astrophytum_caput-medusae|X1.1"), "Astrophytum_caput-medusae")
-  expect_equal(extract_species_binomial("Pachycereus pecten-aboriginum"), "Pachycereus_pecten-aboriginum")
+test_that("extract_species_binomial keeps a hyphenated epithet whole, with an underscore (0.5.5, AP-26)", {
+  expect_equal(extract_species_binomial("Opuntia_ficus-indica|KJ773783.1"), "Opuntia_ficus_indica")
+  expect_equal(extract_species_binomial("Astrophytum_caput-medusae|X1.1"), "Astrophytum_caput_medusae")
+  expect_equal(extract_species_binomial("Pachycereus pecten-aboriginum"), "Pachycereus_pecten_aboriginum")
 })
 
 test_that("extract_species_binomial still does everything else it did", {
@@ -128,7 +128,7 @@ test_that("extract_species_binomial still does everything else it did", {
   expect_true(is.na(extract_species_binomial("|AY1.1")))
   # Vectorised, without names
   expect_equal(extract_species_binomial(c("Opuntia_ficus-indica|A", "Opuntia robusta|B")),
-               c("Opuntia_ficus-indica", "Opuntia_robusta"))
+               c("Opuntia_ficus_indica", "Opuntia_robusta"))
 })
 
 test_that("the rule separates the thirteen hyphenated species instead of truncating them", {
@@ -138,6 +138,6 @@ test_that("the rule separates the thirteen hyphenated species instead of truncat
              "Pereskia_diaz-romeroana", "Rhipsalis_campos-portoana", "Rhipsalis_neves-armondii",
              "Rhipsalis_pacheco-leonis")
   salida <- extract_species_binomial(paste0(trece, "|sid.1"))
-  expect_equal(salida, trece)
+  expect_equal(salida, gsub("-", "_", trece, fixed = TRUE))
   expect_equal(length(unique(salida)), 13L)
 })

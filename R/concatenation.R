@@ -84,6 +84,16 @@
 #'   the run log and listed in `logs_and_qc/TABLE_markers_excluded.csv`. A name that matches no
 #'   alignment raises a warning, not an error, so a typo is visible.
 #'   Defaults to `NULL`.
+#' @param registry_file Character or `NULL`. The sequence registry of Module 4
+#'   (`TABLE_sequence_registry_with_acceptance.csv`), read for the acceptance status and accession of
+#'   each terminal in the species-marker summary. `NULL` (default) looks for it where the tutorials
+#'   write it, `4_Cleaned/tables/` or `4_Cleaned/` two levels above `input_dir`; without it the
+#'   summary has no status or accession columns.
+#'
+#'   Terminal labels are the species names with every character other than a letter or a digit
+#'   turned into an underscore, so a hyphenated epithet is written with an underscore
+#'   (`Opuntia_ficus_indica`), the convention of [standardize_taxon()], of the constraint table and of
+#'   the distributed trees.
 #' @return A data frame containing supermatrix dimensions, taxon coverage, and locus partition bounds.
 #' @examples
 #' \dontrun{
@@ -101,7 +111,7 @@
 #' }
 #' @export
 run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern = NULL, min_coverage = 0.2,
-                                       exclude_markers = NULL) {
+                                       exclude_markers = NULL, registry_file = NULL) {
   ind_dir     <- file.path(output_dir, "individual_markers")
   concat_dir  <- file.path(output_dir, "concatenated_alignments")
   logs_dir    <- file.path(output_dir, "logs_and_qc")
@@ -257,9 +267,15 @@ run_concatenation_pipeline <- function(input_dir, output_dir, outgroup_pattern =
 
 
   # Build the comprehensive species-marker alignment summary
-  registry_file_tables <- file.path(dirname(dirname(input_dir)), "4_Cleaned", "tables", "TABLE_sequence_registry_with_acceptance.csv")
-  registry_file_root   <- file.path(dirname(dirname(input_dir)), "4_Cleaned", "TABLE_sequence_registry_with_acceptance.csv")
-  registry_file <- if (file.exists(registry_file_tables)) registry_file_tables else registry_file_root
+  # The registry is an argument (AP-26); NULL keeps the tutorial layout as the place to look.
+  if (is.null(registry_file)) {
+    registry_file_tables <- file.path(dirname(dirname(input_dir)), "4_Cleaned", "tables", "TABLE_sequence_registry_with_acceptance.csv")
+    registry_file_root   <- file.path(dirname(dirname(input_dir)), "4_Cleaned", "TABLE_sequence_registry_with_acceptance.csv")
+    registry_file <- if (file.exists(registry_file_tables)) registry_file_tables else registry_file_root
+  } else if (!file.exists(registry_file)) {
+    stop("registry_file not found: ", registry_file, call. = FALSE)
+  }
+  log_message("Sequence registry: ", if (file.exists(registry_file)) registry_file else "none found")
   if (file.exists(registry_file)) {
     registry_df <- readr::read_csv(registry_file, show_col_types = FALSE)
     status_map <- dplyr::distinct(registry_df, species, source_branch, accepted_or_outgroup) |>

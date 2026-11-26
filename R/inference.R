@@ -1898,8 +1898,9 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
 #'
 #' @param header Character string of the sequence header.
 #' @return Standardized species binomial formatted with underscores (e.g., `Copiapoa_cinerea`).
-#'   A hyphenated epithet is kept whole, so `Opuntia_ficus-indica|KJ773783.1` returns
-#'   `Opuntia_ficus-indica` and not `Opuntia_ficus`.
+#'   A hyphenated epithet is kept whole and its hyphen written as an underscore, the convention of
+#'   the terminal labels and of [standardize_taxon()] (0.5.5): `Opuntia_ficus-indica|KJ773783.1`
+#'   returns `Opuntia_ficus_indica`, not `Opuntia_ficus`.
 #' @keywords internal
 extract_species_binomial <- function(header) {
   vapply(header, function(h) {
@@ -1911,10 +1912,8 @@ extract_species_binomial <- function(header) {
     # fields taken below cut a hyphenated epithet in half (Cereus pierre-braunianus, for example).
     clean_field <- stringr::str_replace_all(first_field, "[ ]+", "_")
     parts <- strsplit(clean_field, "_", fixed = TRUE)[[1]]
-    if (length(parts) >= 2) {
-      paste0(parts[1], "_", parts[2])
-    } else {
-      clean_field
-    }
+    out <- if (length(parts) >= 2) paste0(parts[1], "_", parts[2]) else clean_field
+    # The two fields are taken before the hyphen becomes an underscore, so the epithet stays whole.
+    gsub("-", "_", out, fixed = TRUE)
   }, character(1), USE.NAMES = FALSE)
 }
