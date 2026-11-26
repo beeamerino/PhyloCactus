@@ -13,3 +13,7 @@ docs/* linguist-vendored
 *.png linguist-generated
 *.svg linguist-generated
 
+
+# Distributed data and figures: never convert line endings, so that their md5 match PROVENANCE.csv and annex C on every platform (git on Windows turns LF into CRLF otherwise)
+inst/extdata/** -text
+extended_trees/** -text
