@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 ## Abstract
 
-Multilocus datasets assembled from GenBank inherit the heterogeneity of decades of deposition: inconsistent locus annotations, duplicated accessions, records without vouchers, orthographic variants and nomenclatural synonyms. In plant lineages that diversified recently and rapidly, such as **Cactaceae** (Guerrero *et al*., 2019), low plastid divergence, incomplete lineage sorting (ILS) and reticulate evolution add to these problems the risk of erroneous orthology assessment and alignment error.
+Multilocus datasets assembled from GenBank inherit the heterogeneity of decades of deposition: inconsistent locus annotations, duplicated accessions, records without vouchers, orthographic variants and nomenclatural synonyms. Plant lineages that diversified recently and rapidly, such as **Cactaceae** (Guerrero *et al*., 2019), add problems of their own. Low plastid divergence leaves few informative sites per locus. Incomplete lineage sorting (ILS) and reticulate evolution make the histories of loci differ from each other and from the species tree, a discordance that a concatenated analysis does not model. Errors of orthology assessment have other sources: paralogous copies, and homeologous copies left by hybridization or polyploidy, as in the nuclear ribosomal ITS region.
 
 This tutorial covers the first stage of the `PhyloCactus` workflow (Modules 1 to 6): orthology-based sequence retrieval with `phylotaR`, taxonomic curation against the Caryophyllales.org checklist (Korotkova *et al*., 2021), alignment with `MAFFT`, masking with `DECIPHER`, a saturation screen, and concatenation of the curated loci into a partitioned supermatrix. The supermatrix and its partition scheme are the input of Tutorial 2.
 

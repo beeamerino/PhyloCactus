@@ -26,6 +26,8 @@ knitr::opts_chunk$set(
 
 ## Abstract
 
+A phylogeny of more than a thousand species is read through what is known of each terminal: its accepted name, the loci that represent it, its place in the tree and its conservation status. These facts come from different sources, which do not always use the same name for the same species.
+
 This tutorial covers the third stage of the phylogenetic workflow: integration of species metadata, figures of the phylogenetic trees, and summaries of conservation status.
 It uses the supermatrix, maximum-likelihood tree, bootstrap support values and chronogram produced in [Tutorial 1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) and [Tutorial 2](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
 

@@ -18,7 +18,9 @@ knitr::opts_chunk$set(
 
 ## Abstract
 
-This tutorial compares the tree inferred in Tutorials 1 and 2 with five published phylogenies of Cactaceae. Comparison with published trees shows which relationships are shared and which differ.
+A tree inferred from public sequences can differ from published phylogenies because of its taxon sampling, its loci or its topological constraint, and the published trees differ among themselves in the same respects. Comparing them shows which relationships are shared and which differ.
+
+This tutorial compares the tree inferred in Tutorials 1 and 2 with five published phylogenies of Cactaceae.
 
 The reference trees are those of Amaral *et al*. (2022), Thompson *et al*. (2024), Zuntini *et al*. (2024), de Vos *et al*. (2025) and Carruthers *et al*. (2026). The trees of Zuntini *et al*. (2024) and de Vos *et al*. (2025) are based on hundreds of nuclear genes.
 

@@ -12,7 +12,7 @@
 
 Multilocus sequence datasets assembled from public repositories such as GenBank inherit the heterogeneity of decades of deposition: inconsistent locus annotations, duplicated accessions, records without vouchers, orthographic variants and nomenclatural synonyms. Converting these records into a phylogenetic matrix requires taxonomic curation and quality control of each alignment.
 
-The difficulty increases in plant lineages that diversified recently and rapidly. Low plastid divergence, incomplete lineage sorting (ILS) and reticulate evolution increase the risk of erroneous orthology assessment and alignment error, and both can bias the inferred topology.
+The difficulty increases in plant lineages that diversified recently and rapidly. Low plastid divergence leaves few informative sites per locus. Incomplete lineage sorting (ILS) and reticulate evolution make the histories of loci differ from each other and from the species tree, a discordance that a concatenated analysis does not model. Errors of orthology assessment have other sources: paralogous copies, and homeologous copies left by hybridization or polyploidy, as in the nuclear ribosomal ITS region. Both kinds of problem can bias the inferred topology.
 
 **Cactaceae** combine these properties. The family is one of the largest succulent radiations of the Neotropics (Arakaki *et al*., 2011; Hernández-Hernández *et al*., 2014; Guerrero *et al*., 2019), and its GenBank record is irregular in taxonomic and locus coverage.
 

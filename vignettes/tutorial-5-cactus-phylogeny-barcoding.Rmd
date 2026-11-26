@@ -18,6 +18,8 @@ knitr::opts_chunk$set(
 
 ## Abstract
 
+Identifying a cactus from a DNA sequence requires a reference library whose records are correctly named and whose loci tell the genera and species of the family apart. Public records of Cactaceae cover species and loci irregularly, and closely related species can share the same sequence at a locus, so an identification is only as good as the library and the locus allow.
+
 Module 14 of `PhyloCactus`, the fifth stage of the workflow, builds a reference library of Cactaceae from Sanger marker records of GenBank (and, optionally, the user's own sequences), measures how well that library tells genera and species apart, and identifies a sample against it.
 It answers one question: given a sample of a cactus, to which genus and species does it belong, according to the loci the library holds, and how much can that answer be trusted?
 

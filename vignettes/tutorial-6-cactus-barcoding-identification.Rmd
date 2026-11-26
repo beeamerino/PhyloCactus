@@ -16,6 +16,8 @@ library(PhyloCactus)
 
 ## Abstract
 
+A sample to identify reaches the user in one of several forms (a Sanger sequence, a genome assembly or a set of sequencing reads), and each form needs its own route to the loci of a reference library.
+
 Tutorial 5 builds the reference library of 15 loci and validates it. This tutorial uses that library to identify samples: one worked example for each kind of input the package accepts, all of them public records that are **not** in the library, so that each answer is what a user would get for a sample of their own.
 
 Each example has three parts:
