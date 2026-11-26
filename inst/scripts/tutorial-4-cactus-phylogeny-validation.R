@@ -181,3 +181,46 @@ if(length(existing_trees) > 1) {
 } else {
   cat("Fewer than two trees found: set PHYLOCACTUS_REFERENCE_TREES to the folder of the reference trees.\n")
 }
+
+# ------------------------------------------------------------------------------
+# RF with and without the constrained bipartitions (the table of the section "The constraint" of
+# Tutorial 4), from the outputs of validate_phylogenies() above and the distributed constraint tree.
+# ------------------------------------------------------------------------------
+if (dir.exists(file.path("10_Validation", "trees"))) {
+  library(ape)
+  val_out <- "10_Validation"    # out_dir of validate_phylogenies() in the run of this tutorial
+  con <- read.tree(system.file("extdata", "phylocactus_constraint_tree.tree", package = "PhyloCactus"))
+
+  bipartitions <- function(tr) {
+    tr <- unroot(tr); pp <- prop.part(tr); lab <- attr(pp, "labels"); ref <- sort(lab)[1]; n <- length(lab)
+    k <- vapply(pp, function(i) {
+      s <- lab[i]; if (ref %in% s) s <- setdiff(lab, s)
+      if (length(s) < 2 || length(s) > n - 2) NA_character_ else paste(sort(s), collapse = "|")
+    }, "")
+    unique(stats::na.omit(k))
+  }
+  rf_norm <- function(a, b) length(c(setdiff(a, b), setdiff(b, a))) / (length(a) + length(b))
+
+  dist_tab <- read.csv(file.path(val_out, "tables", "TABLE_pairwise_tree_distances_main.csv"))
+  reps <- read.csv(file.path(val_out, "tables", "SUPP_genus_representatives.csv"))
+  reps <- reps[reps$tree == "FocalTree", ]
+  pairs <- dist_tab[dist_tab$metric == "RF" & (dist_tab$tree_1 == "FocalTree" | dist_tab$tree_2 == "FocalTree"), ]
+  pairs$reference <- ifelse(pairs$tree_1 == "FocalTree", pairs$tree_2, pairs$tree_1)
+
+  rf_without_constraint <- do.call(rbind, lapply(seq_len(nrow(pairs)), function(i) {
+    a <- pairs$analysis_id[i]; ref <- pairs$reference[i]
+    f <- read.tree(file.path(val_out, "trees", sprintf("TREE_FocalTree_%s.tre", a)))
+    r <- read.tree(file.path(val_out, "trees", sprintf("TREE_%s_%s.tre", ref, a)))
+    common <- intersect(f$tip.label, r$tip.label)
+    fp <- keep.tip(f, common); rp <- keep.tip(r, common)
+    if (grepl("^A4", a)) {   # genera: the constraint is pruned to the species that represents each genus
+      sp <- reps$representative_species_original[match(common, reps$genus)]
+      cp <- keep.tip(con, sp); cp$tip.label <- common[match(cp$tip.label, sp)]
+    } else cp <- keep.tip(con, common)
+    Fb <- bipartitions(fp); Rb <- bipartitions(rp); Cb <- bipartitions(cp)
+    data.frame(set = substr(a, 1, 2), reference = ref, shared_terminals = length(common),
+               imposed_in_reference = sum(Cb %in% Rb), RF = rf_norm(Fb, Rb),
+               RF_without_constraint = rf_norm(setdiff(Fb, Cb), setdiff(Rb, Cb)))
+  }))
+  print(rf_without_constraint, digits = 3, row.names = FALSE)
+}
