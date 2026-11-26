@@ -57,8 +57,10 @@ collapsed groups. The topology is written in the code of the function (\code{R/i
 \code{build_constraint_scaffold()}), and \code{cactus_constraints.csv} only assigns each species to one of
 21 groups in its \code{Clade} column. The relationships among groups follow published phylogenies,
 principally Hernández-Hernández \emph{et al}. (2014), Guerrero \emph{et al}. (2019), Zuntini \emph{et al}. (2024)
-and de Vos \emph{et al}. (2025). Published analyses contest one of them, core Cactoideae II, which
-conflicts with Amaral \emph{et al}. (2022) and is weakly supported in Zuntini \emph{et al}. (2024).
+and de Vos \emph{et al}. (2025). Published analyses contest two of them: the relationships among the
+three tribes of Opuntioideae, where the constraint follows transcriptome trees and plastome trees
+place Opuntieae sister to the other two tribes (Majure \emph{et al}., 2019, 2023), and core Cactoideae
+II, which conflicts with Amaral \emph{et al}. (2022) and is weakly supported in Zuntini \emph{et al}. (2024).
 
 The list of groups and the topology are fixed in the code; a different backbone requires editing
 the function. Talinaceae are optional: without \emph{Talinum} and \emph{Talinella} in the alignment the
