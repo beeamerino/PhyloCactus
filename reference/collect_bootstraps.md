@@ -51,8 +51,8 @@ dir.create(bs_dir, showWarnings = FALSE)
 writeLines(c("((A,B),(C,D));", "((A,C),(B,D));"), file.path(bs_dir, "run1.raxml.bootstraps"))
 writeLines("((A,B),(C,D));", file.path(bs_dir, "run2.raxml.bootstraps"))
 collect_bootstraps(bs_dir, expected_trees = 3)
-#> Found 2 bootstrap chunk file(s) in: /tmp/RtmppaEIe3/bs_chunks
+#> Found 2 bootstrap chunk file(s) in: /tmp/RtmpEwNJsu/bs_chunks
 #> Bootstrap integrity verified: 3 of 3 expected trees collected.
-#> Concatenated bootstrap trees saved to: /tmp/RtmppaEIe3/bs_chunks/cactus_ALL_bootstraps.tree
-#> [1] "/tmp/RtmppaEIe3/bs_chunks/cactus_ALL_bootstraps.tree"
+#> Concatenated bootstrap trees saved to: /tmp/RtmpEwNJsu/bs_chunks/cactus_ALL_bootstraps.tree
+#> [1] "/tmp/RtmpEwNJsu/bs_chunks/cactus_ALL_bootstraps.tree"
 ```
