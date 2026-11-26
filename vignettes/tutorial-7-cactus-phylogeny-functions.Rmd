@@ -79,7 +79,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 
 | Function | Description | Reference |
 |:---|:---|:---|
-| `assemble_barcoding_dataset()` | Names the clusters of the phylotaR mining of the phylogeny by locus, cuts records over 2000 bases to the extent of the shorter records of their locus, reconciles every name against the checklist and, optionally, adds the user's own sequences. | Bennett et al. (2018); Korotkova et al. (2021) |
+| `assemble_barcoding_dataset()` | Names the clusters of the phylotaR mining of the phylogeny by locus, cuts records over 2000 bases to the extent of the shorter records of their locus, reconciles every name against the checklist and, optionally, adds the user's own sequences. | Bennett et al. (2018) |
 | `curate_barcoding_markers()` | Aligns each locus with `MAFFT`, puts every sequence on one strand and masks poorly aligned columns, with the parameters of the phylogeny's ingroup. | Katoh & Standley (2013); Wright (2024) |
 | `screen_barcoding_markers()` | Decides which loci enter the library by the number of species with two or more sequences, and flags saturation and possible paralogy without excluding. | |
 | `finalize_barcoding_library()` | Excludes and declares non-homologous sequences, collapses identical sequences of one species and writes the library, one alignment per locus. | |
