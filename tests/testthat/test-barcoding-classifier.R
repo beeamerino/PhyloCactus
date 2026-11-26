@@ -265,7 +265,8 @@ test_that("step 7 closes with the banner of the package, the cactus included", {
   banner_text <- paste(out_path, collapse = "\n")
 
   expect_match(banner_text, "Barcoding Classification Complete", fixed = TRUE)
-  expect_match(banner_text, "\U0001f335", fixed = TRUE)
+  # Outside a UTF-8 locale R writes the cactus as <U+0001F335> (AP-39), so it is checked only there.
+  if (isTRUE(l10n_info()$`UTF-8`)) expect_match(banner_text, "\U0001f335", fixed = TRUE)
   expect_match(banner_text, out_dir, fixed = TRUE)
   expect_match(banner_text, "nn", fixed = TRUE)
   # The banner counts rows written, which is not a measure of anything: this phase has no accuracy
