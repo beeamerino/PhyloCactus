@@ -10,7 +10,8 @@ fetch_genbank_metadata(
   batch_size = 200,
   sleep_time = 0.5,
   max_retries = 5,
-  force_download = FALSE
+  force_download = FALSE,
+  max_failed_fraction = 0.05
 )
 }
 \arguments{
@@ -24,10 +25,17 @@ fetch_genbank_metadata(
 
 \item{max_retries}{Integer. Maximum retry attempts permitted per batch before failing. Defaults to \code{5}.}
 
-\item{force_download}{Logical. Not used in this version: records already in \code{cache_file} are always reused. Defaults to \code{FALSE}.}
+\item{force_download}{Deprecated and ignored: records already in \code{cache_file} are always reused.
+Defaults to \code{FALSE}; \code{TRUE} gives a warning. Delete \code{cache_file} to download every record again.}
+
+\item{max_failed_fraction}{Numeric between 0 and 1. A batch whose \code{max_retries} attempts all fail
+is logged and its accessions counted; when the failed accessions exceed this fraction of those
+requested, the function stops instead of returning a table in which they would lack a species
+and description. Defaults to \code{0.05}.}
 }
 \value{
-A data frame with columns \code{sid}, \code{Species_gb} and \code{Description_gb}.
+A data frame with columns \code{sid}, \code{Species_gb} and \code{Description_gb}, with the accessions
+of failed batches in its attribute \code{failed_sids}.
 }
 \description{
 Retrieves the organism name and the definition line of each GenBank sequence identifier (SID)
