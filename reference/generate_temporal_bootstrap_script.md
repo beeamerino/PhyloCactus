@@ -32,7 +32,8 @@ generate_temporal_bootstrap_script(
   cluster_queue = NULL,
   cluster_mail_user = Sys.getenv("MY_EMAIL", ""),
   load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"),
-  raxml_exec = "raxml-ng-mpi"
+  raxml_exec = "raxml-ng-mpi",
+  blopt = "nr_safe"
 )
 ```
 
@@ -114,7 +115,9 @@ generate_temporal_bootstrap_script(
 
 - cluster_partition:
 
-  Character. SLURM partition name. Defaults to `"main"`.
+  Character. SLURM partition name. Defaults to `"main"`, the partition
+  of the NLHPC cluster (Leftraru, Chile) on which the reference run ran;
+  give the partition of your own cluster.
 
 - cluster_nodes:
 
@@ -144,13 +147,39 @@ generate_temporal_bootstrap_script(
 
   Character vector or string. Environment module(s) to load prior to
   execution. Defaults to
-  `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`.
+  `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`,
+  the modules of the NLHPC cluster (Leftraru, Chile) on which the
+  reference run ran; give the modules of your own cluster, or `NULL` to
+  load none.
 
 - raxml_exec:
 
   Character. Executable `RAxML-NG` binary command. Defaults to
   `"raxml-ng-mpi"`.
 
+- blopt:
+
+  Character. Branch length optimization method written as `--blopt`
+  (`"nr_safe"` or `"nr_fast"`). Defaults to `"nr_safe"`, the default of
+  [`calculate_temporal_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_temporal_bootstraps.md),
+  so that the cluster and the local routes optimize branch lengths the
+  same way. Until 0.5.4 the script wrote no `--blopt`, and `RAxML-NG`
+  used its own default: the temporal replicates of the reference run
+  (`RAxML-NG` 1.2.2-master on the cluster) were estimated with
+  `NR-FAST`, as their log records; pass `blopt = "nr_fast"` to reproduce
+  them.
+
 ## Value
 
-Character path to the generated SLURM batch script file.
+Character path to the generated SLURM batch script file, which is made
+executable.
+
+## Examples
+
+``` r
+generate_temporal_bootstrap_script("supermatrix.phy", "partitions.txt", "best.tree",
+                                   base_seed = 87786, output_dir = tempdir(),
+                                   cluster_mail_user = "")
+#> Generated temporal bootstrap HPC SLURM script: /tmp/RtmppaEIe3/cactus_temporal_bs/run_temporal_bs.sh
+#> [1] "/tmp/RtmppaEIe3/cactus_temporal_bs/run_temporal_bs.sh"
+```

@@ -18,3 +18,11 @@ assert_constraint_columns(constraints_tbl)
 ## Value
 
 Invisible `TRUE` if validation passes; throws error otherwise.
+
+## Examples
+
+``` r
+ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+assert_constraint_columns(constraints_tbl)
+```

@@ -77,7 +77,9 @@ run_local_bootstraps(
 
 - threads:
 
-  Integer. Number of CPU threads. Defaults to `8` (or detected P-cores).
+  Integer. Number of CPU threads. Defaults to `8`, which is used as
+  given; the performance cores of the machine are detected only when
+  `threads = NULL` (or `NA`).
 
 - workers:
 
@@ -124,3 +126,13 @@ Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A.
 (2019). RAxML-NG: a fast, scalable and user-friendly tool for maximum
 likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
 [doi:10.1093/bioinformatics/btz305](https://doi.org/10.1093/bioinformatics/btz305)
+
+## Examples
+
+``` r
+# Needs the external program and the files of a run
+if (FALSE) { # \dontrun{
+run_local_bootstraps("raxml-ng", "supermatrix.phy", "cactus_modeltest.part.aicc",
+                     "cactus_constraints.tree", bs_trees = 100, seed = 2150)
+} # }
+```

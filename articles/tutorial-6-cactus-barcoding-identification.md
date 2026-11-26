@@ -2,6 +2,10 @@
 
 ## Abstract
 
+A sample to identify reaches the user in one of several forms (a Sanger
+sequence, a genome assembly or a set of sequencing reads), and each form
+needs its own route to the loci of a reference library.
+
 Tutorial 5 builds the reference library of 15 loci and validates it.
 This tutorial uses that library to identify samples: one worked example
 for each kind of input the package accepts, all of them public records
@@ -26,23 +30,25 @@ from the tutorial folder:
 file.edit(system.file("scripts", "tutorial-6-cactus-barcoding-identification.R", package = "PhyloCactus"))
 ```
 
-## Before You Start
+## Complete pipeline execution workflow
+
+### Before you start
 
 - **The library of Tutorial 5**, in the same tutorial folder:
   `11_barcoding/4_library/` (step 4), `11_barcoding/9_threshold/`
   (step 9) and `11_barcoding/11_metrics/` (step 10).
-- **`rentrez`**, for the GenBank downloads.
-- **`minimap2` and `samtools`** for the assembly, **`fastp` and
-  GetOrganelle** (with its seed databases `embplant_pt` and
-  `embplant_nr`) for the reads. If they live in a conda environment,
-  activate it in the terminal before starting R there.
+- `rentrez`, for the GenBank downloads.
+- `minimap2` and `samtools` for the assembly, `fastp` and `GetOrganelle`
+  (with its seed databases `embplant_pt` and `embplant_nr`) for the
+  reads. If they live in a conda environment, activate it in the
+  terminal before starting R there.
 
-## Reading an Answer
+### Reading an answer
 
 Every locus of the library is looked for in the sample and answered on
 its own, in one of three states:
 
-- **State 1, species.** IdTaxa names a species and its species
+- **State 1, species.** `IdTaxa` names a species and its species
   confidence reaches the species threshold of the locus (set in step 9
   of Tutorial 5 from the validation queries whose species was absent
   from the library).
@@ -61,7 +67,7 @@ answer of the sample is a conflict. A region identical to library
 sequences is reported in `identical_to_library`, so that the records
 behind a confident answer can be checked.
 
-## Example 1. One Sanger Record
+### Example 1. One Sanger record
 
 `LT745702.1`, `matK` of *Pseudorhipsalis amazonica* subsp. *panamensis*.
 The record is named at subspecies rank, so the mining of Tutorial 1 left
@@ -92,14 +98,14 @@ bar), coloured by state (dark blue, species; light blue, genus; grey, no
 answer), with the threshold as a dashed line. Below, the species of the
 named genus in the library and their sequences per locus.
 
-`matK` names the genus *Pseudorhipsalis*. IdTaxa reached the right
+`matK` names the genus *Pseudorhipsalis*. `IdTaxa` reached the right
 species, *P. amazonica*, with a species confidence of 61.6, under the
 species threshold of `matK` (66.9): the species is listed as an
 alternative (`below_species_threshold`), not assigned. `trnQ-rps16`
 overlaps too little (`short_overlap`). [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/LT745702.1.html).
 
-## Example 2. A Specimen of Unknown Species
+### Example 2. A specimen of unknown species
 
 `PZ714536.1`, `matK` of *Opuntia* sp., published after the mining of
 Tutorial 1.
@@ -131,7 +137,7 @@ to 17 library records of several species of *Opuntia*, so no species can
 be told apart at this locus. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/PZ714536.1.html).
 
-## Example 3. One Specimen, Four Loci
+### Example 3. One specimen, four loci
 
 *Coryphantha elephantidens* subsp. *bumamma*, voucher Vázquez 2628:
 `OK340410.1`, `OK340349.1`, `OK340287.1`, `OK340224.1`. Given with
@@ -166,7 +172,7 @@ answer (low confidence). The two loci that answer agree, and the sample
 is answered at genus rank. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/OK340410.1.html).
 
-## Example 4. One Specimen, Four Loci, and a Wrong Species
+### Example 4. One specimen, four loci, and a wrong species
 
 *Xiquexique gounellei*: `OP189074.1`, `OP188885.1`, `OP188764.1`,
 `OP187233.1`.
@@ -200,7 +206,7 @@ other locus silent, is the pattern of most wrong species of this
 version: read it as the genus until another locus agrees. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/OP189074.1.html).
 
-## Example 5. A GenBank Plastome Named to Species
+### Example 5. A GenBank plastome named to species
 
 `MN517611.1`, the plastome of *Mammillaria zephyranthoides*. A GenBank
 flat file is read as such: each locus is cropped from the plastome.
@@ -230,7 +236,7 @@ the species of *Mammillaria* of its library. The other loci found give
 no answer. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/MN517611.1.html).
 
-## Example 6. A GenBank Plastome Named as Another Species
+### Example 6. A GenBank plastome named as another species
 
 `MT387452.1`, the plastome of *Rhipsalis teres*.
 
@@ -262,7 +268,7 @@ confident wrong answer. The report lists the record so that it can be
 checked. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/MT387452.1.html).
 
-## Example 7. Several Samples at Once
+### Example 7. Several samples at once
 
 A sample sheet has one row per sample: `sample_id`, `input_type` (a row
 of the matrix of accepted inputs, `barcoding_accepted_inputs.csv`),
@@ -306,7 +312,7 @@ sheet gives no voucher, so `voucher_missing` is `TRUE` in the three
 rows: a sample without a voucher is identified and flagged, since the
 leakage rule per specimen cannot be applied to it (its report says so).
 
-## Example 8. A Genome Assembly
+### Example 8. A genome assembly
 
 `GCA_024363205.1`, *Cereus fernambucensis* (NCBI Assembly, about 0.9
 Gb). The loci of the library are mapped onto the assembly with
@@ -340,12 +346,12 @@ the species threshold of 78.8) and `phyC`. 12 other loci give no answer.
 package reports. The best hit is kept. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/GCA_024363205.1.html).
 
-## Example 9. Paired Illumina Reads
+### Example 9. Paired Illumina reads
 
 `SRR26398994`, a genome skim of *Opuntia comonduensis* (ENA, about 0.56
 GB). The plastome and the nuclear ribosomal DNA are assembled with
-`fastp` and GetOrganelle, then identified locus by locus. The species is
-not in the library.
+`fastp` and `GetOrganelle`, then identified locus by locus. The species
+is not in the library.
 
 ``` r
 
@@ -376,7 +382,7 @@ no answer. For a species absent from the library, the genus is the right
 answer. [Full
 report](https://beeamerino.github.io/PhyloCactus/reports/SRR26398994.html).
 
-## The Examples Side by Side
+### The examples side by side
 
 ![\*\*Figure 9.\*\* The answers of the eight examples with a figure,
 side by side: one row per example and one column per locus found,
@@ -392,7 +398,9 @@ A plastome or an assembly holds most loci of the library, a Sanger
 record one. Yet in these examples the answer rests on one or two loci in
 every case, and most loci found give no answer.
 
-## How Well This Version Identifies
+## Conclusion
+
+### How well this version identifies
 
 The rates below were measured with the library of this version, built
 from GenBank alone on 2026-10-13, with the species thresholds of step 9
@@ -404,7 +412,7 @@ set the rules. Of 94 Sanger records from outside the library (named at
 subspecies or variety, or with no species name, so left out of the
 mining), identified one by one, none was named at species rank: 48 were
 answered at the right genus and 46 not at all (5 with no locus found).
-Where IdTaxa reached the right species, it did so under the species
+Where `IdTaxa` reached the right species, it did so under the species
 threshold (`below_species_threshold`), as in example 1. Of 23 specimens
 with several of these records, 17 were answered at the right genus, 5
 not at all, and 1 at a wrong species (example 4).
@@ -442,7 +450,7 @@ same order:
 
 | Answer | Species present | Species absent |
 |----|----|----|
-| IdTaxa with thresholds (first row above) | 148 / 402 / 1738 / n.a. / 14 / 2 (2304) | 0 / 252 / 2173 / n.a. / 45 / 37 (2507) |
+| `IdTaxa` with thresholds (first row above) | 148 / 402 / 1738 / n.a. / 14 / 2 (2304) | 0 / 252 / 2173 / n.a. / 45 / 37 (2507) |
 | BLAST top hit | 1091 / 345 / 88 / n.a. / 749 / 31 (2304) | 0 / 299 / 78 / n.a. / 1988 / 142 (2507) |
 | Nearest neighbour without threshold | 999 / 424 / 151 / n.a. / 659 / 71 (2304) | 0 / 356 / 144 / n.a. / 1833 / 174 (2507) |
 
@@ -451,14 +459,14 @@ rule reduce wrong species answers from about one in three queries (749
 of 2304 with BLAST, 659 with the nearest neighbour) to 14, and raise the
 precision of a species answer from 0.593 (BLAST, 1091 of 1840) and 0.603
 (nearest neighbour, 999 of 1658) to 0.914 (148 of 162). They cost the
-right species: IdTaxa names it for 148 queries, BLAST for 1091. The
+right species: `IdTaxa` names it for 148 queries, BLAST for 1091. The
 genus is right, at any rank of the answer, for 564 of the 2304 queries
-with IdTaxa, 1929 with BLAST and 1778 with the nearest neighbour; per
-answer, it is right in 0.996 of the answers of IdTaxa and 0.870 of those
-of BLAST. With the species absent, every species answer is wrong: 1988
-with BLAST, 1833 with the nearest neighbour and 45 with IdTaxa. The
-thresholds were set on this library and the baselines have no tuned
-parameter, so the comparison favours IdTaxa.
+with `IdTaxa`, 1929 with BLAST and 1778 with the nearest neighbour; per
+answer, it is right in 0.996 of the answers of `IdTaxa` and 0.870 of
+those of BLAST. With the species absent, every species answer is wrong:
+1988 with BLAST, 1833 with the nearest neighbour and 45 with `IdTaxa`.
+The thresholds were set on this library and the baselines have no tuned
+parameter, so the comparison favours `IdTaxa`.
 
 The genus is the answer to expect from this version. A species is named
 for few queries, mostly from `matK` and from plastomes, and abstention
@@ -466,7 +474,7 @@ is the most common answer. When a species is named, it is wrong in 14 of
 162 answers if the species is in the library and in every answer if it
 is not, 59 of 207 at the mix of this measurement.
 
-## Limitations
+### Limitations
 
 - **Coverage of the library.** A sample of a species absent from a locus
   library can only be named as something else at that locus, or not at

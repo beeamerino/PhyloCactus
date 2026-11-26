@@ -13,7 +13,7 @@ Robinson-Foulds distance (Robinson &amp;amp; Foulds, 1981) and the Different Phy
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,8 @@ Robinson-Foulds distance (Robinson &amp; Foulds, 1981) and the Different Phyloge
 <span>  min_tips <span class="op">=</span> <span class="fl">4L</span>,</span>
 <span>  pruning_strategy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"common_set"</span>, <span class="st">"pairwise"</span><span class="op">)</span>,</span>
 <span>  rooting_genus <span class="op">=</span> <span class="st">"Leuenbergeria"</span>,</span>
-<span>  tree_labels <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  tree_labels <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  family <span class="op">=</span> <span class="st">"Cactaceae"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -109,7 +110,8 @@ projection of A3 is that of A1, and its label in the tree-space coordinates says
 <em>Leuenbergeria</em> is sister to the rest of the family in the focal tree. The distances and the
 tree-space projection are computed on unrooted trees and do not depend on this choice; the
 rooting affects only the exported trees. All terminals of the genus are used, not one, for the reasons
-given in <code><a href="resolve_rooting_outgroup.html">resolve_rooting_outgroup()</a></code>. Trees lacking the genus are left unrooted and flagged in
+given in <code><a href="resolve_rooting_outgroup.html">resolve_rooting_outgroup()</a></code>, and the root is placed by <code><a href="root_on_clade.html">root_on_clade()</a></code>, which roots on
+the stem of the genus even when the tree as read is rooted inside it. Trees lacking the genus are left unrooted and flagged in
 <code>SUPP_rooting_summary</code>.</p></dd>
 
 
@@ -121,6 +123,12 @@ of Tutorial 4 as <code>"Zuntini et al. (2024)"</code>, <code>"Thompson et al. (2
 <code>"Amaral et al. (2022)"</code>, <code>"de Vos et al. (2025)"</code> and <code>"Carruthers et al. (2026)"</code>, and the
 focal tree as <code>"This study"</code>.
 Supplied labels replace the defaults of the same name.</p></dd>
+
+
+<dt id="arg-family">family<a class="anchor" aria-label="anchor" href="#arg-family"></a></dt>
+<dd><p>Character. The family the comparison is restricted to: the terminals of each tree
+are kept only if the checklist places them in it, and the constraint table is read for its
+species. Defaults to <code>"Cactaceae"</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

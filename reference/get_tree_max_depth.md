@@ -18,3 +18,12 @@ get_tree_max_depth(tree)
 ## Value
 
 Numeric scalar representing maximum tree depth.
+
+## Examples
+
+``` r
+ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+get_tree_max_depth(tree)   # the root age in Ma
+#> [1] 58.10159
+```

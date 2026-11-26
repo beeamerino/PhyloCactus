@@ -99,3 +99,13 @@ calculate_temporal_bootstraps(
 
 Character path to the resulting temporal bootstrap trees file
 (`.raxml.bootstraps`).
+
+## Examples
+
+``` r
+# Needs the external program and the files of a run
+if (FALSE) { # \dontrun{
+calculate_temporal_bootstraps("raxml-ng", "supermatrix.phy", "cactus_modeltest.part.aicc",
+                              "cactus_ml.raxml.bestTree", bs_trees = 100, seed = 87786)
+} # }
+```

@@ -2,6 +2,12 @@
 
 ## Abstract
 
+A phylogeny of more than a thousand species is read through what is
+known of each terminal: its accepted name, the loci that represent it,
+its place in the tree and its conservation status. These facts come from
+different sources, which do not always use the same name for the same
+species.
+
 This tutorial covers the third stage of the phylogenetic workflow:
 integration of species metadata, figures of the phylogenetic trees, and
 summaries of conservation status. It uses the supermatrix,
@@ -119,7 +125,7 @@ marker_stats_file <- "6_Concatenated/final_tables/TABLE_marker_statistics.csv"
 marker_ranges_file <- "6_Concatenated/final_tables/TABLE_marker_ranges.tsv"
 
 # Canonical inputs that do not change across runs
-# The checklist (Korotkova et al. 2021) is read from the local path in PHYLOCACTUS_CHECKLIST
+# The checklist is read from the local path in PHYLOCACTUS_CHECKLIST
 accepted_list_file <- phylocactus_checklist()
 constraints_csv_path <- system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus")
 
@@ -987,9 +993,12 @@ sequences were identical to those of another species (10).
 
 Figure 11 gives the conservation status of the species in the tree. Of
 the 839 assessed species, 221 (26.3%) are threatened (CR, EN or VU).
-Among the accepted species without sequence data, 266 have an assessment
-and 102 of them (38.3%) are threatened, so threatened species make up a
-larger share of what is missing from the tree than of what it contains.
+Among the accepted species without sequence data, 265 have an
+assessment, leaving out the one species Not Evaluated, and 102 of them
+(38.5%) are threatened. Among assessed species, threatened species
+therefore make up a larger share of those missing from the tree than of
+those it contains; most species without sequence data have no
+assessment, and the comparison says nothing about them.
 
 ``` r
 

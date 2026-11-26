@@ -13,7 +13,7 @@ to optimize disk I/O, dynamic per-task seed multiplication for statistical indep
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -149,7 +149,7 @@ is not sufficient by itself; increase <code>max_reps</code> and re-run <code><a 
 
 
 <dt id="arg-cluster-partition">cluster_partition<a class="anchor" aria-label="anchor" href="#arg-cluster-partition"></a></dt>
-<dd><p>Character. SLURM partition name. Defaults to <code>"main"</code> (Leftraru Epu AMD EPYC 9754 partition).</p></dd>
+<dd><p>Character. SLURM partition name. Defaults to <code>"main"</code>, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.</p></dd>
 
 
 <dt id="arg-cluster-nodes">cluster_nodes<a class="anchor" aria-label="anchor" href="#arg-cluster-nodes"></a></dt>
@@ -173,7 +173,7 @@ is not sufficient by itself; increase <code>max_reps</code> and re-run <code><a 
 
 
 <dt id="arg-load-module">load_module<a class="anchor" aria-label="anchor" href="#arg-load-module"></a></dt>
-<dd><p>Character vector or string. Environment module(s) to load prior to execution. Defaults to <code>c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")</code>.</p></dd>
+<dd><p>Character vector or string. Environment module(s) to load prior to execution. Defaults to <code>c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")</code>, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or <code>NULL</code> to load none.</p></dd>
 
 
 <dt id="arg-raxml-exec">raxml_exec<a class="anchor" aria-label="anchor" href="#arg-raxml-exec"></a></dt>
@@ -193,6 +193,14 @@ parallel); if you migrate to different node hardware or a markedly different sup
 empirically with a short trial run before committing a full job array to it.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">generate_bootstrap_script</span><span class="op">(</span><span class="st">"supermatrix.phy"</span>, <span class="st">"partitions.txt"</span>, <span class="st">"constraints.tree"</span>,</span></span>
+<span class="r-in"><span>                          base_seed <span class="op">=</span> <span class="fl">2150</span>, output_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, cluster_mail_user <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Bash SLURM array script generated: /tmp/RtmppaEIe3/bs_chunks/run_bs_chunks.sh</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmppaEIe3/bs_chunks/run_bs_chunks.sh"</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

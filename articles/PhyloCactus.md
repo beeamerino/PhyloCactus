@@ -2,12 +2,6 @@
 
 ## Overview
 
-`PhyloCactus` is an R package for assembling, curating and analyzing
-multilocus sequence datasets built from public DNA sequences. It covers
-sequence retrieval from GenBank, quality control, phylogenetic
-inference, divergence time estimation, visualization and comparison with
-published phylogenies.
-
 Multilocus datasets assembled from GenBank inherit the heterogeneity of
 decades of deposition: inconsistent locus annotations, duplicated
 accessions, records without vouchers, orthographic variants and
@@ -15,15 +9,26 @@ nomenclatural synonyms. Converting these records into a phylogenetic
 matrix requires taxonomic curation against an accepted checklist
 (Korotkova *et al*., 2021), and quality control of each alignment. The
 difficulty increases in plant lineages that diversified recently and
-rapidly, where low plastid divergence, incomplete lineage sorting (ILS)
-and reticulate evolution increase the risk of erroneous orthology
-assessment and of alignment error.
+rapidly. Low plastid divergence leaves few informative sites per locus.
+Incomplete lineage sorting (ILS) and reticulate evolution make the
+histories of loci differ from each other and from the species tree, a
+discordance that a concatenated analysis does not model. Errors of
+orthology assessment have other sources: paralogous copies, and
+homeologous copies left by hybridization or polyploidy, as in the
+nuclear ribosomal ITS region. Both kinds of problem can bias the
+inferred topology.
 
 **Cactaceae**, one of the largest succulent radiations of the
 Neotropics, combine these properties, and their GenBank record is
 irregular in taxonomic and locus coverage. `PhyloCactus` was developed
 on this family and implements its assembly and analysis as a
 reproducible workflow.
+
+`PhyloCactus` is an R package for assembling, curating and analyzing
+multilocus sequence datasets built from public DNA sequences. It covers
+sequence retrieval from GenBank, quality control, phylogenetic
+inference, divergence time estimation, visualization and comparison with
+published phylogenies.
 
 ## Design
 
@@ -72,7 +77,7 @@ phylogeny (Stages 1 to 4, Modules 1 to 13) and molecular identification
     ([`validate_phylogenies()`](https://beeamerino.github.io/PhyloCactus/reference/validate_phylogenies.md))
     against published phylogenies.
 5.  **Molecular identification (Module 14)**: builds a reference library
-    of 15 loci from the same phylotaR mining in Stage 1, validates it,
+    of 15 loci from the same `phylotaR` mining in Stage 1, validates it,
     and identifies a sample (sequences, an assembly or Illumina reads)
     against it, locus by locus, in three states: species, genus or no
     answer.

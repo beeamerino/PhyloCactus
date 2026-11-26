@@ -15,7 +15,8 @@ preprocess_partitions(
   output_dir = dirname(phy_matrix),
   prefix = "cactus",
   force_check = FALSE,
-  model_handling = c("force_dna", "preserve")
+  model_handling = c("force_dna", "preserve"),
+  threads = 4
 )
 ```
 
@@ -49,7 +50,9 @@ preprocess_partitions(
 - force_check:
 
   Logical. Re-run validation even if the validated partition file
-  already exists? Defaults to `FALSE`.
+  already exists? Defaults to `FALSE`. A new check first removes the
+  `<prefix>.raxml.reduced.*` files of an earlier check in `output_dir`,
+  so the reduction reported is that of the matrix checked in this call.
 
 - model_handling:
 
@@ -61,6 +64,10 @@ preprocess_partitions(
   only appropriate when the partition map is passed straight to
   `RAxML-NG` without model selection. `ModelTest-NG` cannot parse the
   `RAxML-NG` model syntax and aborts on it.
+
+- threads:
+
+  Integer. Threads given to `RAxML-NG --check`. Defaults to `4`.
 
 ## Value
 
@@ -80,3 +87,12 @@ likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
 for the partition map this function consumes, and
 [`run_modeltest_ng()`](https://beeamerino.github.io/PhyloCactus/reference/run_modeltest_ng.md)
 for the model selection step that consumes its output.
+
+## Examples
+
+``` r
+# Needs the external program and the files of a run
+if (FALSE) { # \dontrun{
+preprocess_partitions("supermatrix.phy", "PARTITION_raxml_style.txt", "raxml-ng")
+} # }
+```

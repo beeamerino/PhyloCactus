@@ -20,7 +20,8 @@ run_marker_screening(
   saturation_keep_cutoff = 0.5,
   iqr_multiplier = 1.5,
   saturation_method = c("corrected", "legacy"),
-  gap_handling = c("iupac", "legacy")
+  gap_handling = c("iupac", "legacy"),
+  gamma_shape = 1
 )
 ```
 
@@ -103,6 +104,17 @@ run_marker_screening(
 
   Character. Method for handling ambiguous and gap characters. Defaults
   to `"iupac"`.
+
+- gamma_shape:
+
+  Numeric. Shape (alpha) of the gamma distribution of rates in the
+  corrected K80 distance
+  (`ape::dist.dna(model = "K80", gamma = gamma_shape)`). Defaults to
+  `1`. Up to 0.5.4 the code passed `gamma = TRUE`, which `ape` takes as
+  a shape of 1, without declaring it; the reference run used that value,
+  and the thresholds `saturation_flag_cutoff` (0.3) and
+  `saturation_keep_cutoff` (0.5) were set with it. The slope depends on
+  the shape: a smaller value corrects more and lowers the slope.
 
 ## Value
 

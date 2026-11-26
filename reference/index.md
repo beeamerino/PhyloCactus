@@ -239,6 +239,8 @@ Internal functions for phylogenetic visualization and data preparation.
   : Root a Tree on a Clade of Terminals, Tolerating a Basal Polytomy
 - [`add_clade_labels_by_level()`](https://beeamerino.github.io/PhyloCactus/reference/add_clade_labels_by_level.md)
   : Add Clade Labels to ggtree Plot by Taxonomic Level
+- [`add_outgroup_bar()`](https://beeamerino.github.io/PhyloCactus/reference/add_outgroup_bar.md)
+  : Mark the Outgroup of a ggtree Plot with Bars
 - [`apply_clade_label_layers()`](https://beeamerino.github.io/PhyloCactus/reference/apply_clade_label_layers.md)
   : Apply Multiple Taxonomic Clade Label Layers onto ggtree Plot
 - [`assert_constraint_columns()`](https://beeamerino.github.io/PhyloCactus/reference/assert_constraint_columns.md)
@@ -249,8 +251,6 @@ Internal functions for phylogenetic visualization and data preparation.
   : Build Taxonomic Annotation Registry across Tree Levels
 - [`compute_group_nodes()`](https://beeamerino.github.io/PhyloCactus/reference/compute_group_nodes.md)
   : Compute Most Recent Common Ancestor (MRCA) Nodes for Taxon Groups
-- [`extract_species_binomial()`](https://beeamerino.github.io/PhyloCactus/reference/extract_species_binomial.md)
-  : Extract Standardized Species Binomial from Sequence Header
 - [`get_annotation_nodes()`](https://beeamerino.github.io/PhyloCactus/reference/get_annotation_nodes.md)
   : Extract Monophyletic Internal Annotation Nodes
 - [`prepare_tip_annotation()`](https://beeamerino.github.io/PhyloCactus/reference/prepare_tip_annotation.md)

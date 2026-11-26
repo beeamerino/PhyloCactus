@@ -42,7 +42,11 @@ run_treePL_cv(
 
 - n_prime:
 
-  Integer. Priming repeats. The default is 10.
+  Integer. Priming repeats. The default is 10. Each repeat runs with its
+  own seed: with `seed = s` in `cfg_file`, the repeats use s, s + 1,
+  ..., s + `n_prime` - 1, so the first repeat is the run a single
+  priming would be, and `prime_<label>.csv` records the seed of each
+  row. Without a seed line `treePL` draws one for each repeat.
 
   **`n_prime` and `prime_rule` interact, and not symmetrically.** Under
   `"modal"` the selection is stable in `n_prime`: more repeats sharpen
@@ -230,3 +234,12 @@ Smith, S. A., & O'Meara, B. C. (2012). treePL: divergence time
 estimation using penalized likelihood for large phylogenies.
 *Bioinformatics*, 28(20), 2689-2690.
 [doi:10.1093/bioinformatics/bts492](https://doi.org/10.1093/bioinformatics/bts492)
+
+## Examples
+
+``` r
+# Needs the external program and the files of a run
+if (FALSE) { # \dontrun{
+run_treePL_cv("calibrations.cfg", "ml_tree_rooted.tree", label = "ML_tree")
+} # }
+```

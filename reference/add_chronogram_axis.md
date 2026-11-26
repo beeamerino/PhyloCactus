@@ -67,3 +67,16 @@ add_chronogram_axis(
 ## Value
 
 Updated `ggtree` plot object containing the geological age axis layer.
+
+## Examples
+
+``` r
+# A pruned copy of the distributed chronogram and the constraint table
+ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+            "Cylindropuntia", "Tephrocactus", "Maihuenia")
+tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+p <- add_chronogram_axis(ggtree::ggtree(tree), tree, by = 10)
+```

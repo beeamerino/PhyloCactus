@@ -9,7 +9,7 @@ Genus_species|accession|sid or Genus species."><meta property="og:image" content
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,8 +64,9 @@ Genus_species|accession|sid or Genus species."><meta property="og:image" content
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Standardized species binomial formatted with underscores (e.g., <code>Copiapoa_cinerea</code>).
-A hyphenated epithet is kept whole, so <code>Opuntia_ficus-indica|KJ773783.1</code> returns
-<code>Opuntia_ficus-indica</code> and not <code>Opuntia_ficus</code>.</p>
+A hyphenated epithet is kept whole and its hyphen written as an underscore, the convention of
+the terminal labels and of <code><a href="standardize_taxon.html">standardize_taxon()</a></code> (0.5.5): <code>Opuntia_ficus-indica|KJ773783.1</code>
+returns <code>Opuntia_ficus_indica</code>, not <code>Opuntia_ficus</code>.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

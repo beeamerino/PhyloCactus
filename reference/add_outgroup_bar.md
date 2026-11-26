@@ -63,3 +63,17 @@ add_outgroup_bar(
 
 The `ggtree` plot with a segment layer and a text layer, or `p`
 unchanged when no tip is outgroup.
+
+## Examples
+
+``` r
+# A pruned copy of the distributed chronogram and the constraint table
+ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+            "Cylindropuntia", "Tephrocactus", "Maihuenia")
+tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+cactaceae <- grep("^(Talinum|Portulaca)_", tree$tip.label, value = TRUE, invert = TRUE)
+p <- add_outgroup_bar(ggtree::ggtree(tree), cactaceae)
+```

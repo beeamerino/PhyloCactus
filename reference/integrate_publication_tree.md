@@ -45,3 +45,13 @@ integrate_publication_tree(
 ## Value
 
 A data frame listing exported figure files and threshold parameters.
+
+## Examples
+
+``` r
+# Needs the folders of a run
+if (FALSE) { # \dontrun{
+integrate_publication_tree("cactus_support.raxml.support", "dated_summary_hpd.tree",
+                           out_dir = "9_Visualization")
+} # }
+```

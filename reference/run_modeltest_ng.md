@@ -13,7 +13,9 @@ run_modeltest_ng(
   aln_file,
   part_file,
   prefix = "MODELTEST_cactus_phylo",
-  threads = 4
+  threads = 4,
+  output_dir = NULL,
+  seed = NULL
 )
 ```
 
@@ -44,6 +46,19 @@ run_modeltest_ng(
 - threads:
 
   Integer. Number of processing threads. Defaults to `4`.
+
+- output_dir:
+
+  Character or `NULL`. Directory for the outputs of `ModelTest-NG`,
+  created if needed. `NULL` (default) writes them, as before 0.5.5,
+  relative to the working directory.
+
+- seed:
+
+  Integer or `NULL`. Seed of the random number generator of
+  `ModelTest-NG` (`--rngseed`). `NULL` (default) leaves it to the
+  program, as before 0.5.5; give a value to make the run reproducible
+  and record it.
 
 ## Value
 

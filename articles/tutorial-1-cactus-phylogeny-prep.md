@@ -5,11 +5,15 @@
 Multilocus datasets assembled from GenBank inherit the heterogeneity of
 decades of deposition: inconsistent locus annotations, duplicated
 accessions, records without vouchers, orthographic variants and
-nomenclatural synonyms. In plant lineages that diversified recently and
-rapidly, such as **Cactaceae** (Guerrero *et al*., 2019), low plastid
-divergence, incomplete lineage sorting (ILS) and reticulate evolution
-add to these problems the risk of erroneous orthology assessment and
-alignment error.
+nomenclatural synonyms. Plant lineages that diversified recently and
+rapidly, such as **Cactaceae** (Guerrero *et al*., 2019), add problems
+of their own. Low plastid divergence leaves few informative sites per
+locus. Incomplete lineage sorting (ILS) and reticulate evolution make
+the histories of loci differ from each other and from the species tree,
+a discordance that a concatenated analysis does not model. Errors of
+orthology assessment have other sources: paralogous copies, and
+homeologous copies left by hybridization or polyploidy, as in the
+nuclear ribosomal ITS region.
 
 This tutorial covers the first stage of the `PhyloCactus` workflow
 (Modules 1 to 6): orthology-based sequence retrieval with `phylotaR`,
@@ -371,10 +375,11 @@ saturation is evaluated first using regression-based statistics to
 identify loci in which multiple substitutions may have eroded the
 underlying phylogenetic signal. The function screens each locus with a
 regression of uncorrected p-distance against a Gamma-corrected K80
-distance (Kimura, 1980; Jin & Nei, 1990), and rejects loci whose slope
-falls below the retention threshold. The function then removes, in each
-locus, every sequence whose mean maximum-likelihood distance to the
-other sequences of the locus
+distance (Kimura, 1980; Jin & Nei, 1990) with a gamma shape of 1
+(`gamma_shape`), and rejects loci whose slope falls below the retention
+threshold; the thresholds of 0.3 and 0.5 were set with that shape. The
+function then removes, in each locus, every sequence whose mean
+maximum-likelihood distance to the other sequences of the locus
 ([`phangorn::dist.ml`](https://klausvigo.github.io/phangorn/reference/dist.hamming.html))
 is above Q3 + 1.5 IQR of those means (`detect_outlier_sequences()`). In
 the reference run it removed 290 sequences from the 14 loci retained

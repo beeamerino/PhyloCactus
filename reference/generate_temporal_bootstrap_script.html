@@ -13,7 +13,7 @@ lengths for downstream divergence time estimation (treePL) without introducing t
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,7 +77,8 @@ lengths for downstream divergence time estimation (<code>treePL</code>) without 
 <span>  cluster_queue <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cluster_mail_user <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"MY_EMAIL"</span>, <span class="st">""</span><span class="op">)</span>,</span>
 <span>  load_module <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gcc/14.2.0-nlhpc"</span>, <span class="st">"openmpi/5.0.3-o"</span>, <span class="st">"raxml-ng/1.1.0-mpi-zen4-n"</span><span class="op">)</span>,</span>
-<span>  raxml_exec <span class="op">=</span> <span class="st">"raxml-ng-mpi"</span></span>
+<span>  raxml_exec <span class="op">=</span> <span class="st">"raxml-ng-mpi"</span>,</span>
+<span>  blopt <span class="op">=</span> <span class="st">"nr_safe"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -138,7 +139,7 @@ lengths for downstream divergence time estimation (<code>treePL</code>) without 
 
 
 <dt id="arg-cluster-partition">cluster_partition<a class="anchor" aria-label="anchor" href="#arg-cluster-partition"></a></dt>
-<dd><p>Character. SLURM partition name. Defaults to <code>"main"</code>.</p></dd>
+<dd><p>Character. SLURM partition name. Defaults to <code>"main"</code>, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.</p></dd>
 
 
 <dt id="arg-cluster-nodes">cluster_nodes<a class="anchor" aria-label="anchor" href="#arg-cluster-nodes"></a></dt>
@@ -162,18 +163,36 @@ lengths for downstream divergence time estimation (<code>treePL</code>) without 
 
 
 <dt id="arg-load-module">load_module<a class="anchor" aria-label="anchor" href="#arg-load-module"></a></dt>
-<dd><p>Character vector or string. Environment module(s) to load prior to execution. Defaults to <code>c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")</code>.</p></dd>
+<dd><p>Character vector or string. Environment module(s) to load prior to execution. Defaults to <code>c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")</code>, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or <code>NULL</code> to load none.</p></dd>
 
 
 <dt id="arg-raxml-exec">raxml_exec<a class="anchor" aria-label="anchor" href="#arg-raxml-exec"></a></dt>
 <dd><p>Character. Executable <code>RAxML-NG</code> binary command. Defaults to <code>"raxml-ng-mpi"</code>.</p></dd>
 
+
+<dt id="arg-blopt">blopt<a class="anchor" aria-label="anchor" href="#arg-blopt"></a></dt>
+<dd><p>Character. Branch length optimization method written as <code>--blopt</code> (<code>"nr_safe"</code> or
+<code>"nr_fast"</code>). Defaults to <code>"nr_safe"</code>, the default of <code><a href="calculate_temporal_bootstraps.html">calculate_temporal_bootstraps()</a></code>, so that
+the cluster and the local routes optimize branch lengths the same way. Until 0.5.4 the script
+wrote no <code>--blopt</code>, and <code>RAxML-NG</code> used its own default: the temporal replicates of the reference
+run (<code>RAxML-NG</code> 1.2.2-master on the cluster) were estimated with <code>NR-FAST</code>, as their log
+records; pass <code>blopt = "nr_fast"</code> to reproduce them.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Character path to the generated SLURM batch script file.</p>
+    <p>Character path to the generated SLURM batch script file, which is made executable.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">generate_temporal_bootstrap_script</span><span class="op">(</span><span class="st">"supermatrix.phy"</span>, <span class="st">"partitions.txt"</span>, <span class="st">"best.tree"</span>,</span></span>
+<span class="r-in"><span>                                   base_seed <span class="op">=</span> <span class="fl">87786</span>, output_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                                   cluster_mail_user <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Generated temporal bootstrap HPC SLURM script: /tmp/RtmppaEIe3/cactus_temporal_bs/run_temporal_bs.sh</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmppaEIe3/cactus_temporal_bs/run_temporal_bs.sh"</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -17,7 +17,7 @@ PartitionFinder2 and MrBayes are exported separately under their program names."
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,8 @@ and a NEXUS SETS block (<code>PARTITION_nexus_charset.nex</code>). Configuration
 <span>  <span class="va">output_dir</span>,</span>
 <span>  outgroup_pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  min_coverage <span class="op">=</span> <span class="fl">0.2</span>,</span>
-<span>  exclude_markers <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  exclude_markers <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  registry_file <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,6 +100,18 @@ other analyses; only this supermatrix is built without it. The excluded markers 
 the run log and listed in <code>logs_and_qc/TABLE_markers_excluded.csv</code>. A name that matches no
 alignment raises a warning, not an error, so a typo is visible.
 Defaults to <code>NULL</code>.</p></dd>
+
+
+<dt id="arg-registry-file">registry_file<a class="anchor" aria-label="anchor" href="#arg-registry-file"></a></dt>
+<dd><p>Character or <code>NULL</code>. The sequence registry of Module 4
+(<code>TABLE_sequence_registry_with_acceptance.csv</code>), read for the acceptance status and accession of
+each terminal in the species-marker summary. <code>NULL</code> (default) looks for it where the tutorials
+write it, <code>4_Cleaned/tables/</code> or <code>4_Cleaned/</code> two levels above <code>input_dir</code>; without it the
+summary has no status or accession columns.</p>
+<p>Terminal labels are the species names with every character other than a letter or a digit
+turned into an underscore, so a hyphenated epithet is written with an underscore
+(<code>Opuntia_ficus_indica</code>), the convention of <code><a href="standardize_taxon.html">standardize_taxon()</a></code>, of the constraint table and of
+the distributed trees.</p></dd>
 
 </dl></div>
     <div class="section level2">

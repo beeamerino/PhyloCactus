@@ -18,3 +18,10 @@ standardize_taxon(x)
 ## Value
 
 Character vector of formatted taxon names.
+
+## Examples
+
+``` r
+standardize_taxon(c("Opuntia ficus-indica", " Pereskia  aculeata "))
+#> [1] "Opuntia_ficus_indica" "Pereskia_aculeata"   
+```

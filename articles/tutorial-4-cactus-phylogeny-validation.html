@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,7 +68,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-11-13</h4>
+            <h4 data-toc-skip class="date">2026-11-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-4-cactus-phylogeny-validation.Rmd" class="external-link"><code>vignettes/tutorial-4-cactus-phylogeny-validation.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-4-cactus-phylogeny-validation.Rmd</code></div>
@@ -79,9 +79,13 @@ Meriño</h4>
 <div class="section level2">
 <h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
 </h2>
+<p>A tree inferred from public sequences can differ from published
+phylogenies because of its taxon sampling, its loci or its topological
+constraint, and the published trees differ among themselves in the same
+respects. Comparing them shows which relationships are shared and which
+differ.</p>
 <p>This tutorial compares the tree inferred in Tutorials 1 and 2 with
-five published phylogenies of Cactaceae. Comparison with published trees
-shows which relationships are shared and which differ.</p>
+five published phylogenies of Cactaceae.</p>
 <p>The reference trees are those of Amaral <em>et al</em>. (2022),
 Thompson <em>et al</em>. (2024), Zuntini <em>et al</em>. (2024), de Vos
 <em>et al</em>. (2025) and Carruthers <em>et al</em>. (2026). The trees
@@ -112,13 +116,14 @@ folder under the names below, and sets the path of the folder in
 The comparison also reads the checklist of Cactaceae (Korotkova <em>et
 al</em>. 2021) from the local path in <code>PHYLOCACTUS_CHECKLIST</code>
 (<code><a href="../reference/phylocactus_checklist.html">phylocactus_checklist()</a></code>; Tutorial 1).</p>
-<table class="table">
+<table style="width:100%;" class="table">
 <colgroup>
-<col width="20%">
-<col width="20%">
-<col width="20%">
-<col width="20%">
-<col width="20%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
+<col width="16%">
 </colgroup>
 <thead><tr class="header">
 <th>File in the folder</th>
@@ -126,6 +131,7 @@ al</em>. 2021) from the local path in <code>PHYLOCACTUS_CHECKLIST</code>
 <th>Where the file is</th>
 <th>File there</th>
 <th>md5 of the file the reference run read</th>
+<th>Licence of the source</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -135,6 +141,7 @@ al</em>. 2021) from the local path in <code>PHYLOCACTUS_CHECKLIST</code>
 </td>
 <td><code>dataset+tree_80MD/Tree_80MD.tre</code></td>
 <td><code>185926b62a0a01b3187750e664e0fcf7</code></td>
+<td>CC BY 4.0 (Figshare record)</td>
 </tr>
 <tr class="even">
 <td><code>reference_thompson_2024.tree</code></td>
@@ -143,6 +150,7 @@ al</em>. 2021) from the local path in <code>PHYLOCACTUS_CHECKLIST</code>
 </td>
 <td><code>Alignment, accessions and tree/treepl_cacti.tre</code></td>
 <td><code>df479c182a14028aa710b508aebaa458</code></td>
+<td>None stated in the repository</td>
 </tr>
 <tr class="odd">
 <td><code>reference_zuntini_2024.tree</code></td>
@@ -153,6 +161,7 @@ al</em>. 2021) from the local path in <code>PHYLOCACTUS_CHECKLIST</code>
 <code>treeoflife.all_support_values.4.0.tree</code>, pruned to
 Cactaceae (below)</td>
 <td><code>319e6985225858b836ab2ff37054b3e5</code></td>
+<td>CC BY 4.0 (release notes of release 4.0)</td>
 </tr>
 <tr class="even">
 <td><code>reference_devos_2025_astral.tree</code></td>
@@ -161,6 +170,8 @@ Cactaceae (below)</td>
 </td>
 <td><code>QC.Species_tree_astral.tree</code></td>
 <td><code>5ceb901a0555521da1a14f0815787362</code></td>
+<td>Article under CC BY 4.0; no separate licence for Online Resource
+4</td>
 </tr>
 <tr class="odd">
 <td><code>reference_carruthers_2026.tree</code></td>
@@ -170,9 +181,15 @@ Cactaceae (below)</td>
 <td>
 <code>best.tre_dated</code>, pruned to Cactaceae (below)</td>
 <td><code>cdb7218a73ae92c868ae837d18c3256f</code></td>
+<td>CC0 1.0 Universal (OSF project page)</td>
 </tr>
 </tbody>
 </table>
+<p>The licences were read on the pages of the sources (OSF on 13
+November 2026; the others on 26 November 2026); the repository of
+Thompson <em>et al</em>. (2024) has no licence file, so its terms are
+those of the authors. The package distributes none of the five
+trees.</p>
 <p>Three files are used as their studies deposited them, and two are
 pruned from larger trees. The tree of Kew is pruned to its 218 terminals
 of Cactaceae, their labels are shortened from
@@ -378,9 +395,9 @@ tribe with support, while Amaral <em>et al</em>. (2022) contradicts two
 relationships at that level with support, Tephrocacteae with Opuntieae
 (ultrafast bootstrap 100) and core Cactoideae I with II (99), and places
 Rhipsalideae outside the rest of core Cactoideae at ultrafast bootstrap
-87, below the 95 at which the documentation of IQ-TREE advises relying
-on that measure (Minh <em>et al</em>., 2013; Hoang <em>et al</em>.,
-2018).</p>
+87, below the 95 at which the documentation of <code>IQ-TREE</code>
+advises relying on that measure (Minh <em>et al</em>., 2013; Hoang
+<em>et al</em>., 2018).</p>
 <table style="width:100%;" class="table">
 <colgroup>
 <col width="16%">
@@ -537,6 +554,53 @@ on that measure (Minh <em>et al</em>., 2013; Hoang <em>et al</em>.,
 </tr>
 </tbody>
 </table>
+<p>The chunk below computes this table from the outputs of
+<code><a href="../reference/validate_phylogenies.html">validate_phylogenies()</a></code> (the pruned trees in
+<code>trees/</code> and the distance table in <code>tables/</code> of
+its <code>out_dir</code>) and the distributed constraint tree. For each
+pair of the focal tree and a reference on a shared taxon set, it takes
+the bipartitions of the two pruned trees and those the constraint
+imposes on the shared terminals (the constraint tree pruned to them; in
+set A4, to the species that represents each genus), and computes the
+normalized RF with and without the constrained bipartitions, removed
+from both trees.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/emmanuelparadis/ape" class="external-link">ape</a></span><span class="op">)</span></span>
+<span><span class="va">val_out</span> <span class="op">&lt;-</span> <span class="st">"10_Validation"</span>    <span class="co"># out_dir of validate_phylogenies() in the run of this tutorial</span></span>
+<span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.tree.html" class="external-link">read.tree</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"phylocactus_constraint_tree.tree"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">bipartitions</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tr</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/root.html" class="external-link">unroot</a></span><span class="op">(</span><span class="va">tr</span><span class="op">)</span>; <span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/boot.phylo.html" class="external-link">prop.part</a></span><span class="op">(</span><span class="va">tr</span><span class="op">)</span>; <span class="va">lab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">pp</span>, <span class="st">"labels"</span><span class="op">)</span>; <span class="va">ref</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">lab</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>; <span class="va">n</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">lab</span><span class="op">)</span></span>
+<span>  <span class="va">k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">pp</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">s</span> <span class="op">&lt;-</span> <span class="va">lab</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>; <span class="kw">if</span> <span class="op">(</span><span class="va">ref</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">s</span><span class="op">)</span> <span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">lab</span>, <span class="va">s</span><span class="op">)</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">2</span> <span class="op">||</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span> <span class="op">&gt;</span> <span class="va">n</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span> <span class="cn">NA_character_</span> <span class="kw">else</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">s</span><span class="op">)</span>, collapse <span class="op">=</span> <span class="st">"|"</span><span class="op">)</span></span>
+<span>  <span class="op">}</span>, <span class="st">""</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></span><span class="op">(</span><span class="va">k</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">rf_norm</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">a</span>, <span class="va">b</span><span class="op">)</span>, <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">b</span>, <span class="va">a</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">dist_tab</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">val_out</span>, <span class="st">"tables"</span>, <span class="st">"TABLE_pairwise_tree_distances_main.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">reps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">val_out</span>, <span class="st">"tables"</span>, <span class="st">"SUPP_genus_representatives.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">reps</span> <span class="op">&lt;-</span> <span class="va">reps</span><span class="op">[</span><span class="va">reps</span><span class="op">$</span><span class="va">tree</span> <span class="op">==</span> <span class="st">"FocalTree"</span>, <span class="op">]</span></span>
+<span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="va">dist_tab</span><span class="op">[</span><span class="va">dist_tab</span><span class="op">$</span><span class="va">metric</span> <span class="op">==</span> <span class="st">"RF"</span> <span class="op">&amp;</span> <span class="op">(</span><span class="va">dist_tab</span><span class="op">$</span><span class="va">tree_1</span> <span class="op">==</span> <span class="st">"FocalTree"</span> <span class="op">|</span> <span class="va">dist_tab</span><span class="op">$</span><span class="va">tree_2</span> <span class="op">==</span> <span class="st">"FocalTree"</span><span class="op">)</span>, <span class="op">]</span></span>
+<span><span class="va">pairs</span><span class="op">$</span><span class="va">reference</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">pairs</span><span class="op">$</span><span class="va">tree_1</span> <span class="op">==</span> <span class="st">"FocalTree"</span>, <span class="va">pairs</span><span class="op">$</span><span class="va">tree_2</span>, <span class="va">pairs</span><span class="op">$</span><span class="va">tree_1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rf_without_constraint</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pairs</span><span class="op">)</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">a</span> <span class="op">&lt;-</span> <span class="va">pairs</span><span class="op">$</span><span class="va">analysis_id</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>; <span class="va">ref</span> <span class="op">&lt;-</span> <span class="va">pairs</span><span class="op">$</span><span class="va">reference</span><span class="op">[</span><span class="va">i</span><span class="op">]</span></span>
+<span>  <span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.tree.html" class="external-link">read.tree</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">val_out</span>, <span class="st">"trees"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"TREE_FocalTree_%s.tre"</span>, <span class="va">a</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.tree.html" class="external-link">read.tree</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">val_out</span>, <span class="st">"trees"</span>, <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"TREE_%s_%s.tre"</span>, <span class="va">ref</span>, <span class="va">a</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">common</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">f</span><span class="op">$</span><span class="va">tip.label</span>, <span class="va">r</span><span class="op">$</span><span class="va">tip.label</span><span class="op">)</span></span>
+<span>  <span class="va">fp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/drop.tip.html" class="external-link">keep.tip</a></span><span class="op">(</span><span class="va">f</span>, <span class="va">common</span><span class="op">)</span>; <span class="va">rp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/drop.tip.html" class="external-link">keep.tip</a></span><span class="op">(</span><span class="va">r</span>, <span class="va">common</span><span class="op">)</span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^A4"</span>, <span class="va">a</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>   <span class="co"># genera: the constraint is pruned to the species that represents each genus</span></span>
+<span>    <span class="va">sp</span> <span class="op">&lt;-</span> <span class="va">reps</span><span class="op">$</span><span class="va">representative_species_original</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">common</span>, <span class="va">reps</span><span class="op">$</span><span class="va">genus</span><span class="op">)</span><span class="op">]</span></span>
+<span>    <span class="va">cp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/drop.tip.html" class="external-link">keep.tip</a></span><span class="op">(</span><span class="va">con</span>, <span class="va">sp</span><span class="op">)</span>; <span class="va">cp</span><span class="op">$</span><span class="va">tip.label</span> <span class="op">&lt;-</span> <span class="va">common</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">cp</span><span class="op">$</span><span class="va">tip.label</span>, <span class="va">sp</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="op">}</span> <span class="kw">else</span> <span class="va">cp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/ape/man/drop.tip.html" class="external-link">keep.tip</a></span><span class="op">(</span><span class="va">con</span>, <span class="va">common</span><span class="op">)</span></span>
+<span>  <span class="va">Fb</span> <span class="op">&lt;-</span> <span class="fu">bipartitions</span><span class="op">(</span><span class="va">fp</span><span class="op">)</span>; <span class="va">Rb</span> <span class="op">&lt;-</span> <span class="fu">bipartitions</span><span class="op">(</span><span class="va">rp</span><span class="op">)</span>; <span class="va">Cb</span> <span class="op">&lt;-</span> <span class="fu">bipartitions</span><span class="op">(</span><span class="va">cp</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>set <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="va">a</span>, <span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, reference <span class="op">=</span> <span class="va">ref</span>, shared_terminals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">common</span><span class="op">)</span>,</span>
+<span>             imposed_in_reference <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Cb</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">Rb</span><span class="op">)</span>, RF <span class="op">=</span> <span class="fu">rf_norm</span><span class="op">(</span><span class="va">Fb</span>, <span class="va">Rb</span><span class="op">)</span>,</span>
+<span>             RF_without_constraint <span class="op">=</span> <span class="fu">rf_norm</span><span class="op">(</span><span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">Fb</span>, <span class="va">Cb</span><span class="op">)</span>, <span class="fu"><a href="https://generics.r-lib.org/reference/setops.html" class="external-link">setdiff</a></span><span class="op">(</span><span class="va">Rb</span>, <span class="va">Cb</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">rf_without_constraint</span>, digits <span class="op">=</span> <span class="fl">3</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><strong>What each reference can test.</strong> The tree of Zuntini
 <em>et al</em>. (2024) is built on a constrained backbone of at most
 five samples per family, so its deep relationships within Cactaceae are
@@ -548,13 +612,14 @@ are not independent of calibration scheme 2 (Tutorial 2, Module 10). It
 is a comparison tree only, and a distance to it says nothing on the
 support of a conflict. The tree of Amaral <em>et al</em>. (2022) was
 inferred from GenBank sequences mined with <code>phylotaR</code>, the
-source of this package too, aligned with MAFFT, concatenated and
-analysed with IQ-TREE 2.1 under constraints on core Cactoideae and on
-Cacteae, with five outgroup species. The tree used here is that of their
-matrix with up to 80 % missing data (<code>Tree_80MD.tre</code>, 921
-species after their filtering), chosen by the authors among matrices
-with 40, 60 and 80 % missing data. Its supports are ultrafast bootstrap
-values of IQ-TREE 2, which are not on the scale of the standard
+source of this package too, aligned with <code>MAFFT</code>,
+concatenated and analysed with <code>IQ-TREE</code> 2.1 under
+constraints on core Cactoideae and on Cacteae, with five outgroup
+species. The tree used here is that of their matrix with up to 80 %
+missing data (<code>Tree_80MD.tre</code>, 921 species after their
+filtering), chosen by the authors among matrices with 40, 60 and 80 %
+missing data. Its supports are ultrafast bootstrap values of
+<code>IQ-TREE</code> 2, which are not on the scale of the standard
 bootstrap. It shares its source of data with the focal tree and is not
 an independent test of it. The tree of Carruthers <em>et al</em>. (2026)
 grafts species-level trees onto the dated backbone of Zuntini <em>et
@@ -572,7 +637,7 @@ tree is the chronogram produced in Module 10,
 and Table 1 are then drawn from the tree-space coordinates and the
 pairwise distances of the reference run; <code><a href="../reference/plot_tree_space.html">plot_tree_space()</a></code>
 draws the figure that <code><a href="../reference/validate_phylogenies.html">validate_phylogenies()</a></code> returns.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The focal tree is the chronogram of this run; the reference trees and the checklist are read from</span></span>
@@ -613,14 +678,14 @@ draws the figure that <code><a href="../reference/validate_phylogenies.html">val
 <span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Set PHYLOCACTUS_REFERENCE_TREES to the folder of the reference trees to run the validation."</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Tree-space coordinates of the reference run (SUPP_tree_space_coordinates.csv of Module 13)</span></span>
 <span><span class="va">tree_space</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"phylocactus_table_tree_space.csv"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/plot_tree_space.html">plot_tree_space</a></span><span class="op">(</span><span class="va">tree_space</span>, metric <span class="op">=</span> <span class="st">"RF"</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="tutorial-4-cactus-phylogeny-validation_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="**Figure 1.** Tree space of the focal chronogram and the five published phylogenies: classical MDS of the normalized Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4). Trees close together have similar topologies. Under `common_set` each set is pruned to the species shared by all its trees before the projection; for A3 these are the species of A1, so panels A and C have the same points." width="1122.24"><p class="caption">
+<img src="tutorial-4-cactus-phylogeny-validation_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="**Figure 1.** Tree space of the focal chronogram and the five published phylogenies: classical MDS of the normalized Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4). Trees close together have similar topologies. Under `common_set` each set is pruned to the species shared by all its trees before the projection; for A3 these are the species of A1, so panels A and C have the same points." width="1122.24"><p class="caption">
 <strong>Figure 1.</strong> Tree space of the focal chronogram and the
 five published phylogenies: classical MDS of the normalized
 Robinson-Foulds (RF) distances, one panel per taxon set (A1 to A4).

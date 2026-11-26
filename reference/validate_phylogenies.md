@@ -19,7 +19,8 @@ validate_phylogenies(
   min_tips = 4L,
   pruning_strategy = c("common_set", "pairwise"),
   rooting_genus = "Leuenbergeria",
-  tree_labels = NULL
+  tree_labels = NULL,
+  family = "Cactaceae"
 )
 ```
 
@@ -77,9 +78,12 @@ validate_phylogenies(
   trees and do not depend on this choice; the rooting affects only the
   exported trees. All terminals of the genus are used, not one, for the
   reasons given in
-  [`resolve_rooting_outgroup()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_rooting_outgroup.md).
-  Trees lacking the genus are left unrooted and flagged in
-  `SUPP_rooting_summary`.
+  [`resolve_rooting_outgroup()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_rooting_outgroup.md),
+  and the root is placed by
+  [`root_on_clade()`](https://beeamerino.github.io/PhyloCactus/reference/root_on_clade.md),
+  which roots on the stem of the genus even when the tree as read is
+  rooted inside it. Trees lacking the genus are left unrooted and
+  flagged in `SUPP_rooting_summary`.
 
 - tree_labels:
 
@@ -92,6 +96,12 @@ validate_phylogenies(
   `"de Vos et al. (2025)"` and `"Carruthers et al. (2026)"`, and the
   focal tree as `"This study"`. Supplied labels replace the defaults of
   the same name.
+
+- family:
+
+  Character. The family the comparison is restricted to: the terminals
+  of each tree are kept only if the checklist places them in it, and the
+  constraint table is read for its species. Defaults to `"Cactaceae"`.
 
 ## Value
 

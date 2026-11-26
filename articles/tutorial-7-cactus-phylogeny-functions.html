@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,7 +68,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-11-13</h4>
+            <h4 data-toc-skip class="date">2026-11-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-7-cactus-phylogeny-functions.Rmd" class="external-link"><code>vignettes/tutorial-7-cactus-phylogeny-functions.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-7-cactus-phylogeny-functions.Rmd</code></div>
@@ -85,10 +85,12 @@ primary reference. Arguments and return values are documented in the
 manual pages and in the <code>pkgdown</code> reference index.</p>
 </div>
 <div class="section level2">
-<h2 id="functions-by-stage">Functions by Stage<a class="anchor" aria-label="anchor" href="#functions-by-stage"></a>
+<h2 id="complete-pipeline-execution-workflow">Complete pipeline execution workflow<a class="anchor" aria-label="anchor" href="#complete-pipeline-execution-workflow"></a>
 </h2>
+<p>The functions below are grouped by the stage of the workflow in which
+they run.</p>
 <div class="section level3">
-<h3 id="sequence-assembly">Sequence Assembly<a class="anchor" aria-label="anchor" href="#sequence-assembly"></a>
+<h3 id="sequence-assembly">Sequence assembly<a class="anchor" aria-label="anchor" href="#sequence-assembly"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -130,7 +132,7 @@ with retries, and caches them.</td>
 </table>
 </div>
 <div class="section level3">
-<h3 id="alignment-and-quality-control">Alignment and Quality Control<a class="anchor" aria-label="anchor" href="#alignment-and-quality-control"></a>
+<h3 id="alignment-and-quality-control">Alignment and quality control<a class="anchor" aria-label="anchor" href="#alignment-and-quality-control"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -154,10 +156,11 @@ poorly aligned columns with <code><a href="https://rdrr.io/pkg/DECIPHER/man/Mask
 <td align="left"><code><a href="../reference/run_marker_screening.html">run_marker_screening()</a></code></td>
 <td align="left">Screens each locus alignment for coverage, length and
 substitution saturation, by regressing uncorrected p-distance against
-the gamma-corrected K80 distance. The slope threshold below which a
-locus is rejected is a <code>PhyloCactus</code> criterion, not a
-published saturation test; the references cover the distance model
-only.</td>
+the gamma-corrected K80 distance, with a gamma shape of 1
+(<code>gamma_shape</code>). The slope thresholds (0.3 to flag, 0.5 to
+keep) were set with that shape. The slope threshold below which a locus
+is rejected is a <code>PhyloCactus</code> criterion, not a published
+saturation test; the references cover the distance model only.</td>
 <td align="left">Kimura (1980); Jin &amp; Nei (1990)</td>
 </tr>
 <tr class="odd">
@@ -202,7 +205,7 @@ and writes partition maps in RAxML format (read by
 </table>
 </div>
 <div class="section level3">
-<h3 id="model-selection-and-maximum-likelihood-inference">Model Selection and Maximum-Likelihood Inference<a class="anchor" aria-label="anchor" href="#model-selection-and-maximum-likelihood-inference"></a>
+<h3 id="model-selection-and-maximum-likelihood-inference">Model selection and maximum-likelihood inference<a class="anchor" aria-label="anchor" href="#model-selection-and-maximum-likelihood-inference"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -230,9 +233,11 @@ and writes partition maps in RAxML format (read by
 </tr>
 <tr class="odd">
 <td align="left"><code><a href="../reference/build_constraint_scaffold.html">build_constraint_scaffold()</a></code></td>
-<td align="left">Builds a multifurcating constraint tree that enforces
-the monophyly of subfamilies and major clades of Cactaceae established
-in published phylogenies.</td>
+<td align="left">Builds the multifurcating constraint tree of the
+maximum-likelihood search: the monophyly of 21 groups, the backbone of
+Cactaceae, the arrangement within Opuntioideae and Cactoideae and the
+outgroup families, taken from published phylogenies; its help page lists
+each imposed relationship and those left to the data.</td>
 <td align="left">Guerrero et al. (2019)</td>
 </tr>
 <tr class="even">
@@ -253,7 +258,7 @@ the maximum-likelihood tree.</td>
 </table>
 </div>
 <div class="section level3">
-<h3 id="divergence-time-estimation">Divergence Time Estimation<a class="anchor" aria-label="anchor" href="#divergence-time-estimation"></a>
+<h3 id="divergence-time-estimation">Divergence time estimation<a class="anchor" aria-label="anchor" href="#divergence-time-estimation"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -309,7 +314,7 @@ analysis.</td>
 </table>
 </div>
 <div class="section level3">
-<h3 id="comparison-figures-and-iucn-data">Comparison, Figures and IUCN Data<a class="anchor" aria-label="anchor" href="#comparison-figures-and-iucn-data"></a>
+<h3 id="comparison-figures-and-iucn-data">Comparison, figures and IUCN data<a class="anchor" aria-label="anchor" href="#comparison-figures-and-iucn-data"></a>
 </h3>
 <table class="table">
 <colgroup>
@@ -355,7 +360,7 @@ Red List category colors.</td>
 </table>
 </div>
 <div class="section level3">
-<h3 id="molecular-identification-the-library-tutorial-5-steps-1-to-4">Molecular Identification: the Library (Tutorial 5, Steps 1 to
+<h3 id="molecular-identification-the-library-tutorial-5-steps-1-to-4">Molecular identification: the library (Tutorial 5, steps 1 to
 4)<a class="anchor" aria-label="anchor" href="#molecular-identification-the-library-tutorial-5-steps-1-to-4"></a>
 </h3>
 <table class="table">
@@ -376,7 +381,7 @@ Red List category colors.</td>
 phylogeny by locus, cuts records over 2000 bases to the extent of the
 shorter records of their locus, reconciles every name against the
 checklist and, optionally, adds the user’s own sequences.</td>
-<td align="left">Bennett et al. (2018); Korotkova et al. (2021)</td>
+<td align="left">Bennett et al. (2018)</td>
 </tr>
 <tr class="even">
 <td align="left"><code><a href="../reference/curate_barcoding_markers.html">curate_barcoding_markers()</a></code></td>
@@ -417,7 +422,7 @@ control asks the library about.</td>
 </table>
 </div>
 <div class="section level3">
-<h3 id="molecular-identification-validation-tutorial-5-steps-5-to-10">Molecular Identification: Validation (Tutorial 5, Steps 5 to
+<h3 id="molecular-identification-validation-tutorial-5-steps-5-to-10">Molecular identification: validation (Tutorial 5, steps 5 to
 10)<a class="anchor" aria-label="anchor" href="#molecular-identification-validation-tutorial-5-steps-5-to-10"></a>
 </h3>
 <table class="table">
@@ -497,7 +502,7 @@ answer.</td>
 </table>
 </div>
 <div class="section level3">
-<h3 id="molecular-identification-identifying-a-sample-tutorial-5-step-11">Molecular Identification: Identifying a Sample (Tutorial 5, Step
+<h3 id="molecular-identification-identifying-a-sample-tutorial-5-step-11">Molecular identification: identifying a sample (Tutorial 5, step
 11)<a class="anchor" aria-label="anchor" href="#molecular-identification-identifying-a-sample-tutorial-5-step-11"></a>
 </h3>
 <table class="table">
@@ -561,9 +566,12 @@ side, one row per identification and one column per locus.</td>
 </tbody>
 </table>
 </div>
-<div class="section level3">
-<h3 id="help-pages">Help Pages<a class="anchor" aria-label="anchor" href="#help-pages"></a>
-</h3>
+</div>
+<div class="section level2">
+<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+</h2>
+<p>Each function has a manual page with its arguments, defaults, return
+value and references:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span></span>
@@ -577,7 +585,6 @@ side, one row per identification and one column per locus.</td>
 <code><a href="../reference/audit_calibration_support.html">audit_calibration_support()</a></code> and
 <code><a href="../reference/report_smoothing_sensitivity.html">report_smoothing_sensitivity()</a></code>, are documented in their
 manual pages and in the tutorials where they are used.</p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

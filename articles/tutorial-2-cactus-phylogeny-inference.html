@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,7 +68,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-11-13</h4>
+            <h4 data-toc-skip class="date">2026-11-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-2-cactus-phylogeny-inference.Rmd" class="external-link"><code>vignettes/tutorial-2-cactus-phylogeny-inference.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-2-cactus-phylogeny-inference.Rmd</code></div>
@@ -79,28 +79,29 @@ Meriño</h4>
 <div class="section level2">
 <h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
 </h2>
+<p>Taxon sampling and sequence availability are irregular across a
+supermatrix assembled from public sequences. The maximum-likelihood
+search is therefore run under a topological constraint built from
+<code>cactus_constraints.csv</code>, which assigns the sampled species
+to 21 groups. The constraint takes the relationships among the major
+lineages of <strong>Cactaceae</strong> from published trees and
+summaries, some of which published analyses leave unresolved or contest
+(Module 8 lists them), and leaves the relationships within the groups to
+be estimated from the data.</p>
+<p>Cactaceae lack fossils suitable for calibrating the family directly.
+Divergence times are estimated with one secondary calibration, a fixed
+age on the crown of the clade of Anacampserotaceae, Cactaceae and
+Portulacaceae taken from a published chronogram
+(<code>calibrations_bounds.csv</code>; three calibration schemes, the
+main one from the young tree of Zuntini <em>et al</em>., 2024). The
+resulting chronogram is conditional on that age and on the models
+selected here.</p>
 <p>This tutorial covers the second stage of the <code>PhyloCactus</code>
 workflow (Modules 7 to 10): substitution model selection per partition,
 constrained maximum-likelihood inference, bootstrap support, and
 divergence time estimation by penalized likelihood, starting from the
 supermatrix assembled in <a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html">Tutorial
 1</a>.</p>
-<p>Taxon sampling and sequence availability are irregular across a
-matrix of this size, while relationships among the major lineages of
-<strong>Cactaceae</strong> are established by previous phylogenetic
-studies. The maximum-likelihood search is therefore run under a
-topological constraint derived from <code>cactus_constraints.csv</code>,
-which assigns the sampled species to higher clades and subfamilies. The
-constraint fixes the relationships among those clades and leaves the
-relationships within them to be estimated from the data.</p>
-<p><strong>Cactaceae</strong> lack fossils suitable for calibrating the
-family directly. Divergence times are estimated with one secondary
-calibration, a fixed age on the crown of the clade of Anacampserotaceae,
-Cactaceae and Portulacaceae taken from a published chronogram
-(<code>calibrations_bounds.csv</code>; three calibration schemes, the
-main one from the young tree of Zuntini <em>et al</em>., 2024). The
-resulting chronogram is conditional on that age and on the models
-selected here.</p>
 </div>
 <div class="section level2">
 <h2 id="complete-pipeline-execution-workflow">Complete Pipeline Execution Workflow<a class="anchor" aria-label="anchor" href="#complete-pipeline-execution-workflow"></a>
@@ -256,20 +257,58 @@ maximum-likelihood search.</p>
 <p>The maximum-likelihood tree is the topology that maximizes the
 likelihood of the alignment under the selected models and the
 topological constraint. Taxon sampling is incomplete and irregular, so
-previously established relationships among major lineages are used to
-restrict the search to the part of tree space that remains
-unresolved.</p>
+relationships among major lineages taken from published phylogenies
+restrict the search to the rest of tree space.</p>
 <p>The <strong><code><a href="../reference/build_constraint_scaffold.html">build_constraint_scaffold()</a></code></strong>
 function builds the constraint tree from
-<code>cactus_constraints.csv</code>, which assigns the sampled species
-to subfamilies and major clades of <strong>Cactaceae</strong> following
-published phylogenies, principally Hernández-Hernández <em>et al</em>.
-(2014), Guerrero <em>et al</em>. (2019), Zuntini <em>et al</em>. (2024)
-and de Vos <em>et al</em>. (2025).</p>
-<p>The constraint does not impose a complete topology. In the reference
-dataset it fixes 34 of the 1205 internal bipartitions and leaves the
-other 1171 to be estimated from the data, including the placement of
-every species within its clade.</p>
+<code>cactus_constraints.csv</code>, which assigns each sampled species
+to one of 21 groups.</p>
+<p>The constraint tree written by
+<code><a href="../reference/build_constraint_scaffold.html">build_constraint_scaffold()</a></code> fixes four kinds of
+relationship. The first is the monophyly of the groups whose terminals
+the scaffold collapses into one polytomy each: 14 in Cactaceae
+(<em>Leuenbergeria</em>, <em>Pereskia</em>, Cylindropuntieae,
+Tephrocacteae, Opuntieae, <em>Maihuenia</em>, Cacteae, <em>Frailea</em>,
+<em>Calymmanthium</em>, <em>Copiapoa</em>, core Cactoideae I,
+Rhipsalideae, Notocacteae and BCT) and five genera of the outgroup
+(<em>Portulaca</em>, <em>Grahamia</em>, <em>Anacampseros</em>,
+<em>Talinum</em> and <em>Talinella</em>); <em>Blossfeldia</em> and
+<em>Talinopsis</em> are single terminals and add no bipartition. The
+second is the backbone of Cactaceae: the monophyly of the family, the
+order <em>Leuenbergeria</em>, <em>Pereskia</em>, Opuntioideae,
+<em>Maihuenia</em>, Cactoideae, in which each lineage is sister to all
+those after it, and <em>Blossfeldia</em> as sister to the rest of
+Cactoideae. The third is the arrangement within the two large
+subfamilies, (Cylindropuntieae, (Tephrocacteae, Opuntieae)) in
+Opuntioideae and, in Cactoideae without <em>Blossfeldia</em>, Cacteae
+sister to core Cactoideae, core Cactoideae I sister to core Cactoideae
+II, and (Rhipsalideae, (Notocacteae, BCT)) within core Cactoideae II.
+The fourth is the outgroup families: the monophyly of Anacampserotaceae
+with the order (<em>Talinopsis</em>, (<em>Grahamia</em>,
+<em>Anacampseros</em>)), and the monophyly of Talinaceae
+(<em>Talinum</em> and <em>Talinella</em>), the bipartition that
+separates Talinaceae from the clade of Anacampserotaceae, Cactaceae and
+Portulacaceae (ACP). In the reference run these are 34 bipartitions, 19
+of groups, 6 of the backbone, 6 within subfamilies and 3 of the outgroup
+families (26 in Cactaceae and 8 in the outgroup). The data decide the
+other 1171 of the 1205 internal bipartitions of the reference
+maximum-likelihood tree: the relationships among Anacampserotaceae,
+Cactaceae and Portulacaceae, which the scaffold leaves as a trichotomy;
+the base of core Cactoideae, a polytomy of <em>Frailea</em>,
+<em>Calymmanthium</em>, <em>Copiapoa</em> and core Cactoideae I plus II;
+and every relationship within the collapsed groups. The topology is
+written in the code of the function (<code>R/inference.R</code>, step 7
+of <code><a href="../reference/build_constraint_scaffold.html">build_constraint_scaffold()</a></code>), and
+<code>cactus_constraints.csv</code> only assigns each species to one of
+21 groups in its <code>Clade</code> column. The relationships among
+groups follow published phylogenies, principally Hernández-Hernández
+<em>et al</em>. (2014), Guerrero <em>et al</em>. (2019), Zuntini <em>et
+al</em>. (2024) and de Vos <em>et al</em>. (2025). Published analyses
+leave two of them unresolved or contested: the relationships among the
+three tribes of Opuntioideae, which Guerrero <em>et al</em>. (2019)
+report as unresolved or poorly supported in most analyses, and core
+Cactoideae II, which conflicts with Amaral <em>et al</em>. (2022) and is
+weakly supported in Zuntini <em>et al</em>. (2024).</p>
 <p>In the reference run, the constrained tree differs slightly from the
 reference trees in Stage 4 at shared terminals. Of the eleven
 constrained bipartitions absent from Zuntini <em>et al</em>. (2024) and
@@ -287,16 +326,17 @@ relationships do not provide an independent test. The constrained
 placement of Rhipsalideae as sister to Notocacteae + BCT (core
 Cactoideae II, following Guerrero <em>et al</em>., 2019) conflicts with
 Amaral <em>et al</em>. (2022) (ultrafast bootstrap 87, below the
-threshold of 95 recommended for IQ-TREE; Minh <em>et al</em>., 2013;
-Hoang <em>et al</em>., 2018) and receives weak support from Zuntini
-<em>et al</em>. (2024) (local posterior probability 0.58–0.93). Amaral
-<em>et al</em>. (2022) also differs in supported tribe relationships
-within Opuntioideae and in the placement of <em>Copiapoa</em> and
-<em>Calymmanthium</em>. Core Cactoideae II was then tested on this
-matrix by repeating the maximum-likelihood search with that bipartition
-removed from the constraint and everything else unchanged: the relaxed
-search recovered core Cactoideae II, with Rhipsalideae (56 terminals)
-monophyletic and sister to BCT (250) plus Notocacteae (64).</p>
+threshold of 95 recommended for <code>IQ-TREE</code>; Minh <em>et
+al</em>., 2013; Hoang <em>et al</em>., 2018) and receives weak support
+from Zuntini <em>et al</em>. (2024) (local posterior probability
+0.58–0.93). Amaral <em>et al</em>. (2022) also differs in supported
+tribe relationships within Opuntioideae and in the placement of
+<em>Copiapoa</em> and <em>Calymmanthium</em>. Core Cactoideae II was
+then checked on this matrix by repeating the maximum-likelihood search
+with that bipartition removed from the constraint and everything else
+unchanged: the relaxed search recovered core Cactoideae II, with
+Rhipsalideae (56 terminals) sister to BCT (250) plus Notocacteae
+(64).</p>
 <p>The <strong><code><a href="../reference/calculate_ml_tree.html">calculate_ml_tree()</a></code></strong> function runs
 the constrained search in <code>RAxML-NG</code> (Kozlov <em>et al</em>.,
 2019) with the partition models selected in Module 7. The search runs on
@@ -516,6 +556,15 @@ generated for dating, to measure the uncertainty in branch lengths.</p>
 <p>The <strong><code><a href="../reference/calculate_temporal_bootstraps.html">calculate_temporal_bootstraps()</a></code></strong>
 function resamples the alignment and estimates branch lengths for each
 replicate with the topology fixed to the maximum-likelihood tree.</p>
+<p>In the reference run the 500 temporal replicates were estimated on
+the cluster by <code>RAxML-NG</code> 1.2.2-master with its default
+branch length optimization, <code>NR-FAST</code>, as
+<code>cactus_temporal.raxml.log</code> records. From 0.5.5 the cluster
+script of <code><a href="../reference/generate_temporal_bootstrap_script.html">generate_temporal_bootstrap_script()</a></code> writes
+<code>--blopt</code> with the same default as
+<code><a href="../reference/calculate_temporal_bootstraps.html">calculate_temporal_bootstraps()</a></code>, <code>nr_safe</code>; the
+calls below pass <code>blopt = "nr_fast"</code> to reproduce the
+reference run.</p>
 <p>Because the topology is fixed, the dated replicates measure
 uncertainty in branch lengths only. The confidence intervals of node
 ages do not include topological uncertainty, which is measured
@@ -665,6 +714,7 @@ dating.</p>
 <span>    bs_trees <span class="op">=</span> <span class="fl">100</span>, <span class="co"># Adjust to 500 or 1000 for production.</span></span>
 <span>    threads <span class="op">=</span> <span class="fl">8</span>,</span>
 <span>    workers <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    blopt <span class="op">=</span> <span class="st">"nr_fast"</span>,                                <span class="co"># As the replicates of the reference run (NR-FAST in their log)</span></span>
 <span>    output_dir <span class="op">=</span> <span class="va">paths</span><span class="op">$</span><span class="va">temporal_bs_dir</span>,</span>
 <span>    prefix <span class="op">=</span> <span class="va">paths</span><span class="op">$</span><span class="va">temporal_bs_prefix</span></span>
 <span>  <span class="op">)</span></span>
@@ -688,7 +738,8 @@ dating.</p>
 <span>    cluster_nodes <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>    cluster_mem <span class="op">=</span> <span class="st">"24G"</span>,                              <span class="co"># RAM memory allocation (--mem; 6.0 GiB used, 500 replicates, 1208 terminals)</span></span>
 <span>    cluster_time <span class="op">=</span> <span class="st">"04:00:00"</span>,                        <span class="co"># Walltime limit (--time HH:MM:SS; 1 h 08 min used, 500 replicates, 1208 terminals)</span></span>
-<span>    cluster_mail_user <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"MY_EMAIL"</span>, <span class="st">""</span><span class="op">)</span></span>
+<span>    cluster_mail_user <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"MY_EMAIL"</span>, <span class="st">""</span><span class="op">)</span>,</span>
+<span>    blopt <span class="op">=</span> <span class="st">"nr_fast"</span>                                 <span class="co"># As the replicates of the reference run (NR-FAST in their log)</span></span>
 <span>  <span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"   Temporal bootstrap HPC script generated at:"</span>, <span class="va">hpc_temp_bs_script</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"   Submit on cluster: cd cactus_temporal_bs &amp;&amp; sbatch run_temporal_bs.sh\n"</span><span class="op">)</span></span>
@@ -718,8 +769,9 @@ sister, and is therefore always older. Assigning a stem age to a crown
 node inflates the node by construction, and propagates that inflation to
 every node below it.</p>
 <p>No calibration is placed inside Cactaceae. The crown ages of
-Opuntioideae, Cactoideae and Cacteae from Hernández-Hernández <em>et
-al</em>. (2014), are kept in <code>calibrations_bounds.csv</code> with
+Opuntioideae, of Cactoideae after the split of <em>Blossfeldia</em> and
+of Cacteae from Hernández-Hernández <em>et al</em>. (2014) are kept in
+<code>calibrations_bounds.csv</code> with
 <code>used_in_analysis = FALSE</code>, as references against which the
 estimated ages can be read.</p>
 <p>Cactaceae lack a macrofossil record suitable for calibrating internal
@@ -743,12 +795,11 @@ this tree is the ACP crown. Their tree was inferred from the
 Angiosperms353 loci, samples 117 terminals of Cactaceae, recovers the
 relationships among the three families found here, and was dated with
 <code>treePL</code>.</li>
-<li>Ramírez-Barahona <em>et al</em>. (2020): 41.82 Ma, the median height
-of the stem node of Portulacaceae on the maximum clade credibility tree
-of the <code>RC_complete</code> BEAST analysis
-(<code>Data4_Ages.xlsx</code>, column <code>Stem_BEAST</code>). In their
-tree, where Cactaceae is sister to Anacampserotaceae, that node is the
-ACP crown.</li>
+<li>Ramírez-Barahona <em>et al</em>. (2020): 41.82 Ma, the height of the
+stem node of Portulacaceae on the maximum clade credibility tree of the
+<code>RC_complete</code> BEAST analysis (<code>Data4_Ages.xlsx</code>,
+column <code>Stem_BEAST</code>). In their tree, where Cactaceae is
+sister to Anacampserotaceae, that node is the ACP crown.</li>
 <li>Arakaki <em>et al</em>. (2011): 37.0 Ma, their age for this node
 (Table S4), applied as a fixed age and not as the interval of 31.90 to
 42.10 Ma (mean ± 1.96 SD).</li>
@@ -758,11 +809,13 @@ ACP crown.</li>
 Portulacaceae, as this tree does, while Ramírez-Barahona <em>et al</em>.
 (2020) place Cactaceae sister to Anacampserotaceae. Of six published
 crown ages that come from none of the three sources (the crowns of
-Cactaceae, Cactoideae, Cacteae and Opuntioideae of Hernández-Hernández
-<em>et al</em>., 2014, and the ACP crown and the root of Wu <em>et
-al</em>., 2026), scheme 1 places five inside their intervals, and five
-of its six ages are 1.2 to 1.4 times the point estimates; scheme 2
-places all six, and scheme 3 all six.</p>
+Cactaceae, of Cactoideae without <em>Blossfeldia</em> (Cacteae plus core
+Cactoideae), of Cacteae and of Opuntioideae of Hernández-Hernández
+<em>et al</em>., 2014, and, of Wu <em>et al</em>., 2026, the most recent
+common ancestor of Cactaceae and Portulacaceae in a sampling without
+Anacampserotaceae, and the root), scheme 1 places five inside their
+intervals, and five of its six ages are 1.2 to 1.4 times the point
+estimates; scheme 2 places all six, and scheme 3 all six.</p>
 <p>Each scheme fixes one age, and every age of its chronogram is
 conditional on that age, so the chronogram does not carry the
 uncertainty of the study the age was taken from. Ages in Ma on the
@@ -796,7 +849,8 @@ with the 2.5 and 97.5 percentiles over the 100 dated replicates:</p>
 <td>20.71 (16.54 to 23.41)</td>
 </tr>
 <tr class="odd">
-<td>Cactoideae crown</td>
+<td>Cacteae plus core Cactoideae (Cactoideae without
+<em>Blossfeldia</em>)</td>
 <td>21.54 (18.99 to 23.14)</td>
 <td>17.90 (15.13 to 19.26)</td>
 <td>16.42 (13.60 to 17.97)</td>
@@ -910,7 +964,8 @@ replicates (confidence intervals, not posterior intervals):</p>
 <td>20.16 (16.74 to 23.53)</td>
 </tr>
 <tr class="odd">
-<td>Cactoideae crown</td>
+<td>Cacteae plus core Cactoideae (Cactoideae without
+<em>Blossfeldia</em>)</td>
 <td>21.12 (19.10 to 23.15)</td>
 <td>17.13 (15.28 to 19.31)</td>
 <td>15.62 (13.91 to 18.04)</td>
@@ -1112,7 +1167,9 @@ warns when it does so, writes both curves to
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nRunning automated `treePL` wrapper script over maximum-likelihood tree and bootstrap replicates...\n"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Priming, cross-validation and dating follow the protocol of Maurin (2020, arXiv:2008.07054) and</span></span>
-<span><span class="co"># run through run_treePL_cv(). The priming parameters are the lowest of the repeats,</span></span>
+<span><span class="co"># run through run_treePL_cv(). Priming is repeated with consecutive seeds from the seed of the run</span></span>
+<span><span class="co"># (0.5.5; up to 0.5.4 every repeat had the same seed and gave the same parameters), and the</span></span>
+<span><span class="co"># priming parameters are the lowest of the repeats,</span></span>
 <span><span class="co"># cross-validation uses `randomcv`, and the smoothing grid runs from 1e+03 to 1e-14, one value per</span></span>
 <span><span class="co"># order of magnitude. The grid extends well below the 1e-06 to 1e-08 range reported by Maurin, so</span></span>
 <span><span class="co"># that a plateau can be distinguished from a search that stopped at the edge of the grid.</span></span>
@@ -1174,8 +1231,8 @@ warns when it does so, writes both curves to
 <span></span>
 <span><span class="co"># 5. Smoothing sensitivity</span></span>
 <span><span class="co"># The same tree dated across the grid and beyond it. ACP_root is the only calibrated node, and its</span></span>
-<span><span class="co"># age is fixed, so the ages read are those of the root and of the crowns of Cactaceae, Cactoideae,</span></span>
-<span><span class="co"># Cacteae and Opuntioideae, given to `nodes` as sets of terminals. Read the range of each node from</span></span>
+<span><span class="co"># age is fixed, so the ages read are those of the root and of the crowns of Cactaceae, Cactoideae</span></span>
+<span><span class="co"># without Blossfeldia (Subfam of Blossfeldia is "Blossfeldia"), Cacteae and Opuntioideae, given to `nodes` as sets of terminals. Read the range of each node from</span></span>
 <span><span class="co"># 1e-14 to 1e-02; values of 1 and above lie outside the part of the curve the selection reads.</span></span>
 <span><span class="va">sensitivity_cfg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">dating_dir</span>, <span class="st">"auto_results"</span>, <span class="st">"ML_tree"</span>, <span class="st">"configure_smooth_ML_tree"</span><span class="op">)</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">sensitivity_cfg</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
@@ -1187,7 +1244,7 @@ warns when it does so, writes both curves to
 <span>    nodes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>      root <span class="op">=</span> <span class="va">tip_labels</span>,</span>
 <span>      Cactaceae_crown <span class="op">=</span> <span class="fu">tips_for</span><span class="op">(</span><span class="st">"Family"</span>, <span class="st">"Cactaceae"</span><span class="op">)</span>,</span>
-<span>      Cactoideae_crown <span class="op">=</span> <span class="fu">tips_for</span><span class="op">(</span><span class="st">"Subfam"</span>, <span class="st">"Cactoideae"</span><span class="op">)</span>,</span>
+<span>      Cactoideae_without_Blossfeldia_crown <span class="op">=</span> <span class="fu">tips_for</span><span class="op">(</span><span class="st">"Subfam"</span>, <span class="st">"Cactoideae"</span><span class="op">)</span>,</span>
 <span>      Cacteae_crown <span class="op">=</span> <span class="fu">tips_for</span><span class="op">(</span><span class="st">"Clade"</span>, <span class="st">"Cacteae"</span><span class="op">)</span>,</span>
 <span>      Opuntioideae_crown <span class="op">=</span> <span class="fu">tips_for</span><span class="op">(</span><span class="st">"Subfam"</span>, <span class="st">"Opuntioideae"</span><span class="op">)</span></span>
 <span>    <span class="op">)</span></span>

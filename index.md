@@ -1,8 +1,8 @@
 # PhyloCactus
 
 **Reproducible R workflows for multilocus data assembly, evolutionary
-modeling, maximum-likelihood inference, and divergence time estimation
-in Cactaceae**
+modeling, maximum-likelihood inference, divergence time estimation and
+molecular identification in Cactaceae**
 
 ## Overview
 
@@ -14,9 +14,14 @@ records into a phylogenetic matrix requires taxonomic curation and
 quality control of each alignment.
 
 The difficulty increases in plant lineages that diversified recently and
-rapidly. Low plastid divergence, incomplete lineage sorting (ILS) and
-reticulate evolution increase the risk of erroneous orthology assessment
-and alignment error, and both can bias the inferred topology.
+rapidly. Low plastid divergence leaves few informative sites per locus.
+Incomplete lineage sorting (ILS) and reticulate evolution make the
+histories of loci differ from each other and from the species tree, a
+discordance that a concatenated analysis does not model. Errors of
+orthology assessment have other sources: paralogous copies, and
+homeologous copies left by hybridization or polyploidy, as in the
+nuclear ribosomal ITS region. Both kinds of problem can bias the
+inferred topology.
 
 **Cactaceae** combine these properties. The family is one of the largest
 succulent radiations of the Neotropics (Arakaki *et al*., 2011;
@@ -64,16 +69,14 @@ PhyloCactus Workflow Architecture
     under the corrected Akaike information criterion (AICc). Infers the
     maximum-likelihood tree with `RAxML-NG` under a topological
     constraint (`cactus_constraints.csv`) that fixes 34 of the 1205
-    internal bipartitions of the reference tree. The constraint imposes
-    the monophyly in 15 nodes of Cactaceae and 6 outgroup genera, and
-    the branching order among Cactoideae and Opuntioideae; the remaining
-    1171 bipartitions are estimated. Node support is estimated with
-    Felsenstein bootstrap proportions (FBP), with the transfer bootstrap
-    expectation (TBE) as a secondary measure. Divergence times are
-    estimated by penalized likelihood in `treePL` with one secondary
-    calibration, a fixed age on the crown of the ACP clade
-    (`calibrations_bounds.csv`), and their confidence intervals from
-    temporal bootstrap replicates.
+    internal bipartitions of the reference tree. The constraint is
+    described in the paragraph after this list. Node support is
+    estimated with Felsenstein bootstrap proportions (FBP), with the
+    transfer bootstrap expectation (TBE) as a secondary measure.
+    Divergence times are estimated by penalized likelihood in `treePL`
+    with one secondary calibration, a fixed age on the crown of the ACP
+    clade (`calibrations_bounds.csv`), and their confidence intervals
+    from temporal bootstrap replicates.
 
 3.  **Stage 3: Visualization and Metadata Integration (Modules 11 and
     12)**  
@@ -101,6 +104,50 @@ PhyloCactus Workflow Architecture
     (Murali *et al*., 2018) in three states: species, genus or no
     answer. Each identification writes an HTML report (Tutorial 6
     identifies samples of each kind of input).
+
+The constraint tree written by
+[`build_constraint_scaffold()`](https://beeamerino.github.io/PhyloCactus/reference/build_constraint_scaffold.md)
+fixes four kinds of relationship. The first is the monophyly of the
+groups whose terminals the scaffold collapses into one polytomy each: 14
+in Cactaceae (*Leuenbergeria*, *Pereskia*, Cylindropuntieae,
+Tephrocacteae, Opuntieae, *Maihuenia*, Cacteae, *Frailea*,
+*Calymmanthium*, *Copiapoa*, core Cactoideae I, Rhipsalideae,
+Notocacteae and BCT) and five genera of the outgroup (*Portulaca*,
+*Grahamia*, *Anacampseros*, *Talinum* and *Talinella*); *Blossfeldia*
+and *Talinopsis* are single terminals and add no bipartition. The second
+is the backbone of Cactaceae: the monophyly of the family, the order
+*Leuenbergeria*, *Pereskia*, Opuntioideae, *Maihuenia*, Cactoideae, in
+which each lineage is sister to all those after it, and *Blossfeldia* as
+sister to the rest of Cactoideae. The third is the arrangement within
+the two large subfamilies, (Cylindropuntieae, (Tephrocacteae,
+Opuntieae)) in Opuntioideae and, in Cactoideae without *Blossfeldia*,
+Cacteae sister to core Cactoideae, core Cactoideae I sister to core
+Cactoideae II, and (Rhipsalideae, (Notocacteae, BCT)) within core
+Cactoideae II. The fourth is the outgroup families: the monophyly of
+Anacampserotaceae with the order (*Talinopsis*, (*Grahamia*,
+*Anacampseros*)), and the monophyly of Talinaceae (*Talinum* and
+*Talinella*), the bipartition that separates Talinaceae from the clade
+of Anacampserotaceae, Cactaceae and Portulacaceae (ACP). In the
+reference run these are 34 bipartitions, 19 of groups, 6 of the
+backbone, 6 within subfamilies and 3 of the outgroup families (26 in
+Cactaceae and 8 in the outgroup). The data decide the other 1171 of the
+1205 internal bipartitions of the reference maximum-likelihood tree: the
+relationships among Anacampserotaceae, Cactaceae and Portulacaceae,
+which the scaffold leaves as a trichotomy; the base of core Cactoideae,
+a polytomy of *Frailea*, *Calymmanthium*, *Copiapoa* and core Cactoideae
+I plus II; and every relationship within the collapsed groups. The
+topology is written in the code of the function (`R/inference.R`, step 7
+of
+[`build_constraint_scaffold()`](https://beeamerino.github.io/PhyloCactus/reference/build_constraint_scaffold.md)),
+and `cactus_constraints.csv` only assigns each species to one of 21
+groups in its `Clade` column. The relationships among groups follow
+published phylogenies, principally Hernández-Hernández *et al*. (2014),
+Guerrero *et al*. (2019), Zuntini *et al*. (2024) and de Vos *et al*.
+(2025). Published analyses leave two of them unresolved or contested:
+the relationships among the three tribes of Opuntioideae, which Guerrero
+*et al*. (2019) report as unresolved or poorly supported in most
+analyses, and core Cactoideae II, which conflicts with Amaral *et al*.
+(2022) and is weakly supported in Zuntini *et al*. (2024).
 
 ## Installation
 
@@ -172,7 +219,7 @@ the package. Request it from the team of Caryophyllales.org
 returns it to every module that reads the checklist.
 
 The IUCN Red List assessments of Tutorial 3 are retrieved with the
-user’s own token (`IUCN_REDLIST_KEY`), and the four published trees
+user’s own token (`IUCN_REDLIST_KEY`), and the five published trees
 compared in Tutorial 4 are read from the folder in
 `PHYLOCACTUS_REFERENCE_TREES` (sources in Tutorial 4). The package
 distributes the IUCN Red List category of each species and counts by

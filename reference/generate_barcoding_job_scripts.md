@@ -72,7 +72,9 @@ generate_barcoding_job_scripts(
 
 - cluster_partition:
 
-  Character. SLURM partition. Defaults to `"main"`.
+  Character. SLURM partition. Defaults to `"main"`, the partition of the
+  NLHPC cluster (Leftraru, Chile) on which the reference run ran; give
+  the partition of your own cluster.
 
 - cluster_mem:
 

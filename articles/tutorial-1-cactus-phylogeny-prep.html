@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,7 +68,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-11-13</h4>
+            <h4 data-toc-skip class="date">2026-11-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-1-cactus-phylogeny-prep.Rmd" class="external-link"><code>vignettes/tutorial-1-cactus-phylogeny-prep.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-1-cactus-phylogeny-prep.Rmd</code></div>
@@ -82,11 +82,15 @@ Meriño</h4>
 <p>Multilocus datasets assembled from GenBank inherit the heterogeneity
 of decades of deposition: inconsistent locus annotations, duplicated
 accessions, records without vouchers, orthographic variants and
-nomenclatural synonyms. In plant lineages that diversified recently and
+nomenclatural synonyms. Plant lineages that diversified recently and
 rapidly, such as <strong>Cactaceae</strong> (Guerrero <em>et al</em>.,
-2019), low plastid divergence, incomplete lineage sorting (ILS) and
-reticulate evolution add to these problems the risk of erroneous
-orthology assessment and alignment error.</p>
+2019), add problems of their own. Low plastid divergence leaves few
+informative sites per locus. Incomplete lineage sorting (ILS) and
+reticulate evolution make the histories of loci differ from each other
+and from the species tree, a discordance that a concatenated analysis
+does not model. Errors of orthology assessment have other sources:
+paralogous copies, and homeologous copies left by hybridization or
+polyploidy, as in the nuclear ribosomal ITS region.</p>
 <p>This tutorial covers the first stage of the <code>PhyloCactus</code>
 workflow (Modules 1 to 6): orthology-based sequence retrieval with
 <code>phylotaR</code>, taxonomic curation against the Caryophyllales.org
@@ -442,15 +446,16 @@ using regression-based statistics to identify loci in which multiple
 substitutions may have eroded the underlying phylogenetic signal. The
 function screens each locus with a regression of uncorrected p-distance
 against a Gamma-corrected K80 distance (Kimura, 1980; Jin &amp; Nei,
-1990), and rejects loci whose slope falls below the retention threshold.
-The function then removes, in each locus, every sequence whose mean
-maximum-likelihood distance to the other sequences of the locus
-(<code><a href="https://klausvigo.github.io/phangorn/reference/dist.hamming.html" class="external-link">phangorn::dist.ml</a></code>) is above Q3 + 1.5 IQR of those means
-(<code>detect_outlier_sequences()</code>). In the reference run it
-removed 290 sequences from the 14 loci retained (<code>rbcL</code> 52,
-<code>psbA-trnH</code> 39, <code>trnS-trnG</code> 33, <code>ITS</code>
-29, <code>trnQ-rps16</code> 29, <code>rpL16</code> 27, and 81 in the
-other eight), under 250 species of 66 genera, most in
+1990) with a gamma shape of 1 (<code>gamma_shape</code>), and rejects
+loci whose slope falls below the retention threshold; the thresholds of
+0.3 and 0.5 were set with that shape. The function then removes, in each
+locus, every sequence whose mean maximum-likelihood distance to the
+other sequences of the locus (<code><a href="https://klausvigo.github.io/phangorn/reference/dist.hamming.html" class="external-link">phangorn::dist.ml</a></code>) is above
+Q3 + 1.5 IQR of those means (<code>detect_outlier_sequences()</code>).
+In the reference run it removed 290 sequences from the 14 loci retained
+(<code>rbcL</code> 52, <code>psbA-trnH</code> 39, <code>trnS-trnG</code>
+33, <code>ITS</code> 29, <code>trnQ-rps16</code> 29, <code>rpL16</code>
+27, and 81 in the other eight), under 250 species of 66 genera, most in
 <em>Echinocereus</em> (35), <em>Gymnocalycium</em> (21),
 <em>Mammillaria</em> (20), <em>Epithelantha</em> (15) and
 <em>Opuntia</em> (15). The removed sequences are listed in

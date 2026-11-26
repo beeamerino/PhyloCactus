@@ -2,6 +2,13 @@
 
 ## Abstract
 
+Identifying a cactus from a DNA sequence requires a reference library
+whose records are correctly named and whose loci tell the genera and
+species of the family apart. Public records of Cactaceae cover species
+and loci irregularly, and closely related species can share the same
+sequence at a locus, so an identification is only as good as the library
+and the locus allow.
+
 Module 14 of `PhyloCactus`, the fifth stage of the workflow, builds a
 reference library of Cactaceae from Sanger marker records of GenBank
 (and, optionally, the user’s own sequences), measures how well that
@@ -17,7 +24,7 @@ conflict between loci is reported as such. Module 14 identifies against
 a library of multilocus sequence data; it does not place a sample in a
 phylogeny.
 
-## Complete Pipeline Execution Workflow
+## Complete pipeline execution workflow
 
 The script, `tutorial-5-cactus-phylogeny-barcoding.R`, runs the eleven
 steps in order from the tutorial folder of Tutorials 1 to 4 and writes
@@ -44,7 +51,7 @@ this tutorial.](figures/Figure_TB8_barcoding_workflow.png)
 library to the answer for a sample. Steps are numbered as in this
 tutorial.
 
-### Setup: Creating a Clean Workspace
+### Setup: creating a clean workspace
 
 Module 14 reads:
 
@@ -69,7 +76,7 @@ steps 1 to 4.
 
 The script loads the package, moves to the tutorial folder and declares,
 once, the three switches of its long steps: mail at the end of steps 1
-and 7, the folder of the IdTaxa tables computed on a cluster, and the
+and 7, the folder of the `IdTaxa` tables computed on a cluster, and the
 number of parallel processes of step 7.
 
 ``` r
@@ -111,7 +118,7 @@ n_workers <- max(1L, parallel::detectCores() - 2L)
 options(phylocactus.tag_suffix = "")
 ```
 
-### Step 1: Assembly
+### Step 1: assembly
 
 **[`assemble_barcoding_dataset()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_barcoding_dataset.md)**.
 The clusters of the mining are named by locus, records over 2000 bases
@@ -140,7 +147,7 @@ assemble_barcoding_dataset(
 )
 ```
 
-### Step 2: Curation
+### Step 2: curation
 
 **[`curate_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/curate_barcoding_markers.md)**.
 Each locus is aligned with `MAFFT`, put on one strand and masked with
@@ -162,7 +169,7 @@ curate_barcoding_markers(
 )
 ```
 
-### Step 3: Screening
+### Step 3: screening
 
 **[`screen_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/screen_barcoding_markers.md)**.
 A locus enters the library when 20 or more species hold two or more
@@ -181,7 +188,7 @@ screen_barcoding_markers(
 )
 ```
 
-### Step 4: Final Library
+### Step 4: final library
 
 **[`finalize_barcoding_library()`](https://beeamerino.github.io/PhyloCactus/reference/finalize_barcoding_library.md)**.
 Non-homologous sequences are excluded and declared, identical sequences
@@ -241,7 +248,7 @@ checklist.](figures/Figure_TB7_taxonomic_coverage.png)
 
 **Figure 7.** Taxonomic coverage of the library against the checklist.
 
-### Step 5: Validation Folds
+### Step 5: validation folds
 
 **[`build_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/build_barcoding_folds.md)**.
 Scheme E leaves one sequence out and asks for its species, which stays
@@ -256,7 +263,7 @@ build_barcoding_folds(
 )
 ```
 
-### Step 6: Barcode Gap
+### Step 6: barcode gap
 
 **[`analyze_barcode_gap()`](https://beeamerino.github.io/PhyloCactus/reference/analyze_barcode_gap.md)**.
 Intraspecific distances and the distance to the nearest neighbour of
@@ -275,14 +282,14 @@ analyze_barcode_gap(
 )
 ```
 
-### Step 7: Classification of the Folds
+### Step 7: classification of the folds
 
 **[`classify_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/classify_barcoding_folds.md)**.
 Two classifiers: the nearest neighbour, with each query added to the
 training alignment of its fold by `MAFFT --add` (3 h 14 min for the 15
-loci on an Apple M2 Pro with 8 parallel processes), and IdTaxa (Murali
+loci on an Apple M2 Pro with 8 parallel processes), and `IdTaxa` (Murali
 *et al*., 2018), which retrains once per fold and took 126 core-hours on
-the cluster. IdTaxa is run once, on a computing cluster, on the final
+the cluster. `IdTaxa` is run once, on a computing cluster, on the final
 library
 ([`generate_barcoding_job_scripts()`](https://beeamerino.github.io/PhyloCactus/reference/generate_barcoding_job_scripts.md),
 [`merge_barcoding_chunks()`](https://beeamerino.github.io/PhyloCactus/reference/merge_barcoding_chunks.md));
@@ -328,19 +335,19 @@ if (!is.null(idtaxa_tables)) {
 }
 ```
 
-### IdTaxa on a Computing Cluster
+### `IdTaxa` on a computing cluster
 
-IdTaxa retrains once per fold, so classifying every fold of the library
-with it took 126 core-hours on the library of 15 loci, and `LearnTaxa()`
-differs in floating point between machines: it is run once, on a
-computing cluster, and its merged tables are the result.
+`IdTaxa` retrains once per fold, so classifying every fold of the
+library with it took 126 core-hours on the library of 15 loci, and
+`LearnTaxa()` differs in floating point between machines: it is run
+once, on a computing cluster, and its merged tables are the result.
 **[`generate_barcoding_job_scripts()`](https://beeamerino.github.io/PhyloCactus/reference/generate_barcoding_job_scripts.md)**
 writes the job array (one chunk of folds per task, one core each), the
 merge job, which runs
 **[`merge_barcoding_chunks()`](https://beeamerino.github.io/PhyloCactus/reference/merge_barcoding_chunks.md)**
 once every task has finished, and `submit.sh`, which submits both
 (`bash submit.sh` on the cluster). The paths are those of the cluster.
-The outgroup control with IdTaxa is run there too, with
+The outgroup control with `IdTaxa` is run there too, with
 `run_barcoding_controls(method = "idtaxa", controls = "CN2")`.
 
 ``` r
@@ -362,9 +369,9 @@ On the library of 15 loci of this version, the run of all loci took 126
 core-hours. When the merged tables are back, set `idtaxa_tables` in the
 Setup to their folder (here `11_barcoding/idtaxa_cluster`) and run steps
 7 to 10 again: the blocks that read them copy the tables into steps 7
-and 8, and steps 9 and 10 then include IdTaxa.
+and 8, and steps 9 and 10 then include `IdTaxa`.
 
-### Step 8: Negative Controls
+### Step 8: negative controls
 
 **[`run_barcoding_controls()`](https://beeamerino.github.io/PhyloCactus/reference/run_barcoding_controls.md)**
 runs the controls before any accuracy is read. The label permutation
@@ -372,9 +379,9 @@ runs the controls before any accuracy is read. The label permutation
 (`"CN2"`) asks the library about sequences of the sister lineages
 (Anacampserotaceae, Portulacaceae, Talinaceae). The resubstitution
 control (`"CN3"`) measures the bias of classifying a sequence still in
-the library. IdTaxa rejects every comparable outgroup query. The rule of
-remoteness of the nearest neighbour rejects them in six loci but not in
-`ITS`, where cactus and outgroup distances overlap.
+the library. `IdTaxa` rejects every comparable outgroup query. The rule
+of remoteness of the nearest neighbour rejects them in six loci but not
+in `ITS`, where cactus and outgroup distances overlap.
 
 ``` r
 
@@ -413,12 +420,12 @@ if (!is.null(idtaxa_tables)) {
 }
 ```
 
-### Step 9: Thresholds
+### Step 9: thresholds
 
 **[`sweep_barcoding_threshold()`](https://beeamerino.github.io/PhyloCactus/reference/sweep_barcoding_threshold.md)**.
 For the nearest neighbour, a threshold of remoteness per locus (quantile
-0.99 of Scheme G). For IdTaxa, the operating threshold is 60, DECIPHER’s
-default, and a species threshold per locus is written for the
+0.99 of Scheme G). For `IdTaxa`, the operating threshold is 60,
+DECIPHER’s default, and a species threshold per locus is written for the
 identification. A species is named only above it. `rbcL` answers at
 genus rank only (argument `genus_only_loci` of the identification
 functions): on the library of this version its species answers were
@@ -451,7 +458,7 @@ if (!is.null(idtaxa_tables)) {
 }
 ```
 
-### Step 10: Metrics
+### Step 10: metrics
 
 **[`summarise_barcoding_metrics()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_metrics.md)**.
 Per locus and scheme: species correct, genus correct, wrong species,
@@ -493,11 +500,11 @@ Mammillaria in the folds.](figures/Figure_TB9_chilean_genera.png)
 **Figure 10.** Genera native to Chile against Opuntia and Mammillaria in
 the folds.
 
-### Step 11: Identification of a Sample
+### Step 11: identification of a sample
 
 **[`identify_barcoding_query()`](https://beeamerino.github.io/PhyloCactus/reference/identify_barcoding_query.md)**
-cuts each locus of the library from the query, classifies it with IdTaxa
-against the library and gives it one of three states.
+cuts each locus of the library from the query, classifies it with
+`IdTaxa` against the library and gives it one of three states.
 
 ``` r
 
@@ -534,8 +541,9 @@ library:
     crops it from a long query such as a plastome.
 2.  cuts the region to the core of the locus, so that segments held by
     one or two references cannot name them.
-3.  classifies it with IdTaxa trained on the whole library of the locus,
-    and, when a genus is reached, again on the core of that genus.
+3.  classifies it with `IdTaxa` trained on the whole library of the
+    locus, and, when a genus is reached, again on the core of that
+    genus.
 4.  returns state 1 only above the species threshold of the locus, state
     2 when the genus confidence reaches 60, and state 3 otherwise, with
     its reason (`no_overlap`, `short_overlap` or `low_confidence`).
@@ -558,7 +566,7 @@ The same answer is available for other kinds of input:
 - **Paired Illumina reads** (genome skim or whole-genome sequencing):
   [`identify_barcoding_reads()`](https://beeamerino.github.io/PhyloCactus/reference/identify_barcoding_reads.md),
   which assembles the plastome and the nuclear ribosomal DNA with
-  `fastp` and GetOrganelle, then identifies them locus by locus. Reads
+  `fastp` and `GetOrganelle`, then identifies them locus by locus. Reads
   are a query, not a source of the library.
 
 [Tutorial
@@ -566,7 +574,7 @@ The same answer is available for other kinds of input:
 identifies public samples of each of these kinds of input, shows their
 reports, and gives the rates measured with this version.
 
-### Tables of the Run
+### Tables of the run
 
 The script prints the tables of each step: the screening, the library
 and its funnel, the folds, the barcode gap, the controls, the thresholds
@@ -592,7 +600,14 @@ print(utils::read.csv("11_barcoding/9_threshold/TABLE_barcoding_threshold_operat
 print(utils::read.csv("11_barcoding/11_metrics/TABLE_barcoding_metrics_summary_nn_add.csv"))
 ```
 
-## Limitations
+## Conclusion
+
+Module 14 ends with a reference library of 15 loci, the validation of
+that library, and the thresholds and metrics of each locus, which
+Tutorial 6 uses to identify samples. Its limits and the decisions it
+rests on follow.
+
+### Limitations
 
 - **Wrong species.** Rare, not absent; [Tutorial
   6](https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html#how-well-this-version-identifies)
@@ -601,21 +616,21 @@ print(utils::read.csv("11_barcoding/11_metrics/TABLE_barcoding_metrics_summary_n
   from the library or shares its haplotype.
 - **Abstention.** The common answer of this version. Plastid loci of
   closely related cacti differ little, most species are represented by
-  one sequence per locus, and IdTaxa withholds an answer when its
+  one sequence per locus, and `IdTaxa` withholds an answer when its
   confidence does not reach the threshold.
 - **One locus, one answer.** A species answer usually rests on a single
   locus, mostly `matK`. The agreement between loci, given in the report,
   is the main check a user has.
 - **`ITS` and the nearest neighbour.** The rule of remoteness of the
   nearest neighbour does not reject the sister lineages in `ITS`. The
-  identification runs IdTaxa, which rejects them, so the nearest
+  identification runs `IdTaxa`, which rejects them, so the nearest
   neighbour is used only in the internal validation.
 - **Coverage.** The library holds 1205 of the accepted species of the
   checklist. A sample of a species or genus outside a locus library can
   only be named as something else in that locus (Tutorial 6 gives
   examples).
 
-## Design Decisions
+### Design decisions
 
 Module 14 rests on five design decisions:
 

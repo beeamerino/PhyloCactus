@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,7 +68,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-11-13</h4>
+            <h4 data-toc-skip class="date">2026-11-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-5-cactus-phylogeny-barcoding.Rmd" class="external-link"><code>vignettes/tutorial-5-cactus-phylogeny-barcoding.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-5-cactus-phylogeny-barcoding.Rmd</code></div>
@@ -79,6 +79,12 @@ Meriño</h4>
 <div class="section level2">
 <h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
 </h2>
+<p>Identifying a cactus from a DNA sequence requires a reference library
+whose records are correctly named and whose loci tell the genera and
+species of the family apart. Public records of Cactaceae cover species
+and loci irregularly, and closely related species can share the same
+sequence at a locus, so an identification is only as good as the library
+and the locus allow.</p>
 <p>Module 14 of <code>PhyloCactus</code>, the fifth stage of the
 workflow, builds a reference library of Cactaceae from Sanger marker
 records of GenBank (and, optionally, the user’s own sequences), measures
@@ -94,7 +100,7 @@ a library of multilocus sequence data; it does not place a sample in a
 phylogeny.</p>
 </div>
 <div class="section level2">
-<h2 id="complete-pipeline-execution-workflow">Complete Pipeline Execution Workflow<a class="anchor" aria-label="anchor" href="#complete-pipeline-execution-workflow"></a>
+<h2 id="complete-pipeline-execution-workflow">Complete pipeline execution workflow<a class="anchor" aria-label="anchor" href="#complete-pipeline-execution-workflow"></a>
 </h2>
 <p>The script, <code>tutorial-5-cactus-phylogeny-barcoding.R</code>,
 runs the eleven steps in order from the tutorial folder of Tutorials 1
@@ -117,7 +123,7 @@ this tutorial.
 </p>
 </div>
 <div class="section level3">
-<h3 id="setup-creating-a-clean-workspace">Setup: Creating a Clean Workspace<a class="anchor" aria-label="anchor" href="#setup-creating-a-clean-workspace"></a>
+<h3 id="setup-creating-a-clean-workspace">Setup: creating a clean workspace<a class="anchor" aria-label="anchor" href="#setup-creating-a-clean-workspace"></a>
 </h3>
 <p>Module 14 reads:</p>
 <ul>
@@ -148,8 +154,8 @@ alone.</li>
 with steps 1 to 4.</p>
 <p>The script loads the package, moves to the tutorial folder and
 declares, once, the three switches of its long steps: mail at the end of
-steps 1 and 7, the folder of the IdTaxa tables computed on a cluster,
-and the number of parallel processes of step 7.</p>
+steps 1 and 7, the folder of the <code>IdTaxa</code> tables computed on
+a cluster, and the number of parallel processes of step 7.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span></span>
@@ -188,7 +194,7 @@ and the number of parallel processes of step 7.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>phylocactus.tag_suffix <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-1-assembly">Step 1: Assembly<a class="anchor" aria-label="anchor" href="#step-1-assembly"></a>
+<h3 id="step-1-assembly">Step 1: assembly<a class="anchor" aria-label="anchor" href="#step-1-assembly"></a>
 </h3>
 <p><strong><code><a href="../reference/assemble_barcoding_dataset.html">assemble_barcoding_dataset()</a></code></strong>. The
 clusters of the mining are named by locus, records over 2000 bases are
@@ -215,7 +221,7 @@ with its name reconciled against the checklist.</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-2-curation">Step 2: Curation<a class="anchor" aria-label="anchor" href="#step-2-curation"></a>
+<h3 id="step-2-curation">Step 2: curation<a class="anchor" aria-label="anchor" href="#step-2-curation"></a>
 </h3>
 <p><strong><code><a href="../reference/curate_barcoding_markers.html">curate_barcoding_markers()</a></code></strong>. Each locus
 is aligned with <code>MAFFT</code>, put on one strand and masked with
@@ -235,7 +241,7 @@ is aligned with <code>MAFFT</code>, put on one strand and masked with
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-3-screening">Step 3: Screening<a class="anchor" aria-label="anchor" href="#step-3-screening"></a>
+<h3 id="step-3-screening">Step 3: screening<a class="anchor" aria-label="anchor" href="#step-3-screening"></a>
 </h3>
 <p><strong><code><a href="../reference/screen_barcoding_markers.html">screen_barcoding_markers()</a></code></strong>. A locus
 enters the library when 20 or more species hold two or more sequences of
@@ -252,7 +258,7 @@ flagged, never used to exclude.</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-4-final-library">Step 4: Final Library<a class="anchor" aria-label="anchor" href="#step-4-final-library"></a>
+<h3 id="step-4-final-library">Step 4: final library<a class="anchor" aria-label="anchor" href="#step-4-final-library"></a>
 </h3>
 <p><strong><code><a href="../reference/finalize_barcoding_library.html">finalize_barcoding_library()</a></code></strong>.
 Non-homologous sequences are excluded and declared, identical sequences
@@ -313,7 +319,7 @@ checklist.
 </div>
 </div>
 <div class="section level3">
-<h3 id="step-5-validation-folds">Step 5: Validation Folds<a class="anchor" aria-label="anchor" href="#step-5-validation-folds"></a>
+<h3 id="step-5-validation-folds">Step 5: validation folds<a class="anchor" aria-label="anchor" href="#step-5-validation-folds"></a>
 </h3>
 <p><strong><code><a href="../reference/build_barcoding_folds.html">build_barcoding_folds()</a></code></strong>. Scheme E
 leaves one sequence out and asks for its species, which stays in the
@@ -326,7 +332,7 @@ folds are deterministic and checked for leakage.</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-6-barcode-gap">Step 6: Barcode Gap<a class="anchor" aria-label="anchor" href="#step-6-barcode-gap"></a>
+<h3 id="step-6-barcode-gap">Step 6: barcode gap<a class="anchor" aria-label="anchor" href="#step-6-barcode-gap"></a>
 </h3>
 <p><strong><code><a href="../reference/analyze_barcode_gap.html">analyze_barcode_gap()</a></code></strong>. Intraspecific
 distances and the distance to the nearest neighbour of another species,
@@ -343,15 +349,15 @@ distance threshold is used anywhere in Module 14.</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-7-classification-of-the-folds">Step 7: Classification of the Folds<a class="anchor" aria-label="anchor" href="#step-7-classification-of-the-folds"></a>
+<h3 id="step-7-classification-of-the-folds">Step 7: classification of the folds<a class="anchor" aria-label="anchor" href="#step-7-classification-of-the-folds"></a>
 </h3>
 <p><strong><code><a href="../reference/classify_barcoding_folds.html">classify_barcoding_folds()</a></code></strong>. Two
 classifiers: the nearest neighbour, with each query added to the
 training alignment of its fold by <code>MAFFT --add</code> (3 h 14 min
 for the 15 loci on an Apple M2 Pro with 8 parallel processes), and
-IdTaxa (Murali <em>et al</em>., 2018), which retrains once per fold and
-took 126 core-hours on the cluster. IdTaxa is run once, on a computing
-cluster, on the final library
+<code>IdTaxa</code> (Murali <em>et al</em>., 2018), which retrains once
+per fold and took 126 core-hours on the cluster. <code>IdTaxa</code> is
+run once, on a computing cluster, on the final library
 (<code><a href="../reference/generate_barcoding_job_scripts.html">generate_barcoding_job_scripts()</a></code>,
 <code><a href="../reference/merge_barcoding_chunks.html">merge_barcoding_chunks()</a></code>); the script reads its merged
 tables through the switch <code>idtaxa_tables</code> and never trains
@@ -394,19 +400,21 @@ it.</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="idtaxa-on-a-computing-cluster">IdTaxa on a Computing Cluster<a class="anchor" aria-label="anchor" href="#idtaxa-on-a-computing-cluster"></a>
+<h3 id="idtaxa-on-a-computing-cluster">
+<code>IdTaxa</code> on a computing cluster<a class="anchor" aria-label="anchor" href="#idtaxa-on-a-computing-cluster"></a>
 </h3>
-<p>IdTaxa retrains once per fold, so classifying every fold of the
-library with it took 126 core-hours on the library of 15 loci, and
-<code>LearnTaxa()</code> differs in floating point between machines: it
-is run once, on a computing cluster, and its merged tables are the
+<p><code>IdTaxa</code> retrains once per fold, so classifying every fold
+of the library with it took 126 core-hours on the library of 15 loci,
+and <code>LearnTaxa()</code> differs in floating point between machines:
+it is run once, on a computing cluster, and its merged tables are the
 result. <strong><code><a href="../reference/generate_barcoding_job_scripts.html">generate_barcoding_job_scripts()</a></code></strong>
 writes the job array (one chunk of folds per task, one core each), the
 merge job, which runs
 <strong><code><a href="../reference/merge_barcoding_chunks.html">merge_barcoding_chunks()</a></code></strong> once every task
 has finished, and <code>submit.sh</code>, which submits both
 (<code>bash submit.sh</code> on the cluster). The paths are those of the
-cluster. The outgroup control with IdTaxa is run there too, with
+cluster. The outgroup control with <code>IdTaxa</code> is run there too,
+with
 <code>run_barcoding_controls(method = "idtaxa", controls = "CN2")</code>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/generate_barcoding_job_scripts.html">generate_barcoding_job_scripts</a></span><span class="op">(</span></span>
@@ -425,10 +433,10 @@ cluster. The outgroup control with IdTaxa is run there too, with
 <code>idtaxa_tables</code> in the Setup to their folder (here
 <code>11_barcoding/idtaxa_cluster</code>) and run steps 7 to 10 again:
 the blocks that read them copy the tables into steps 7 and 8, and steps
-9 and 10 then include IdTaxa.</p>
+9 and 10 then include <code>IdTaxa</code>.</p>
 </div>
 <div class="section level3">
-<h3 id="step-8-negative-controls">Step 8: Negative Controls<a class="anchor" aria-label="anchor" href="#step-8-negative-controls"></a>
+<h3 id="step-8-negative-controls">Step 8: negative controls<a class="anchor" aria-label="anchor" href="#step-8-negative-controls"></a>
 </h3>
 <p><strong><code><a href="../reference/run_barcoding_controls.html">run_barcoding_controls()</a></code></strong> runs the
 controls before any accuracy is read. The label permutation
@@ -436,8 +444,8 @@ controls before any accuracy is read. The label permutation
 outgroup control (<code>"CN2"</code>) asks the library about sequences
 of the sister lineages (Anacampserotaceae, Portulacaceae, Talinaceae).
 The resubstitution control (<code>"CN3"</code>) measures the bias of
-classifying a sequence still in the library. IdTaxa rejects every
-comparable outgroup query. The rule of remoteness of the nearest
+classifying a sequence still in the library. <code>IdTaxa</code> rejects
+every comparable outgroup query. The rule of remoteness of the nearest
 neighbour rejects them in six loci but not in <code>ITS</code>, where
 cactus and outgroup distances overlap.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -476,12 +484,12 @@ cactus and outgroup distances overlap.</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-9-thresholds">Step 9: Thresholds<a class="anchor" aria-label="anchor" href="#step-9-thresholds"></a>
+<h3 id="step-9-thresholds">Step 9: thresholds<a class="anchor" aria-label="anchor" href="#step-9-thresholds"></a>
 </h3>
 <p><strong><code><a href="../reference/sweep_barcoding_threshold.html">sweep_barcoding_threshold()</a></code></strong>. For the
 nearest neighbour, a threshold of remoteness per locus (quantile 0.99 of
-Scheme G). For IdTaxa, the operating threshold is 60, DECIPHER’s
-default, and a species threshold per locus is written for the
+Scheme G). For <code>IdTaxa</code>, the operating threshold is 60,
+DECIPHER’s default, and a species threshold per locus is written for the
 identification. A species is named only above it. <code>rbcL</code>
 answers at genus rank only (argument <code>genus_only_loci</code> of the
 identification functions): on the library of this version its species
@@ -512,7 +520,7 @@ answers were right in 11 of 34.</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="step-10-metrics">Step 10: Metrics<a class="anchor" aria-label="anchor" href="#step-10-metrics"></a>
+<h3 id="step-10-metrics">Step 10: metrics<a class="anchor" aria-label="anchor" href="#step-10-metrics"></a>
 </h3>
 <p><strong><code><a href="../reference/summarise_barcoding_metrics.html">summarise_barcoding_metrics()</a></code></strong>. Per
 locus and scheme: species correct, genus correct, wrong species, wrong
@@ -553,11 +561,12 @@ Mammillaria in the folds.
 </div>
 </div>
 <div class="section level3">
-<h3 id="step-11-identification-of-a-sample">Step 11: Identification of a Sample<a class="anchor" aria-label="anchor" href="#step-11-identification-of-a-sample"></a>
+<h3 id="step-11-identification-of-a-sample">Step 11: identification of a sample<a class="anchor" aria-label="anchor" href="#step-11-identification-of-a-sample"></a>
 </h3>
 <p><strong><code><a href="../reference/identify_barcoding_query.html">identify_barcoding_query()</a></code></strong> cuts each
-locus of the library from the query, classifies it with IdTaxa against
-the library and gives it one of three states.</p>
+locus of the library from the query, classifies it with
+<code>IdTaxa</code> against the library and gives it one of three
+states.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/identify_barcoding_query.html">identify_barcoding_query</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"barcoding_example_plastome_MN517611.1.gb"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span>,</span>
@@ -589,8 +598,9 @@ vector) and, for each locus of the library:</p>
 crops it from a long query such as a plastome.</li>
 <li>cuts the region to the core of the locus, so that segments held by
 one or two references cannot name them.</li>
-<li>classifies it with IdTaxa trained on the whole library of the locus,
-and, when a genus is reached, again on the core of that genus.</li>
+<li>classifies it with <code>IdTaxa</code> trained on the whole library
+of the locus, and, when a genus is reached, again on the core of that
+genus.</li>
 <li>returns state 1 only above the species threshold of the locus, state
 2 when the genus confidence reaches 60, and state 3 otherwise, with its
 reason (<code>no_overlap</code>, <code>short_overlap</code> or
@@ -616,15 +626,15 @@ with <code>minimap2</code> and <code>samtools</code>.</li>
 <strong>Paired Illumina reads</strong> (genome skim or whole-genome
 sequencing): <code><a href="../reference/identify_barcoding_reads.html">identify_barcoding_reads()</a></code>, which assembles
 the plastome and the nuclear ribosomal DNA with <code>fastp</code> and
-GetOrganelle, then identifies them locus by locus. Reads are a query,
-not a source of the library.</li>
+<code>GetOrganelle</code>, then identifies them locus by locus. Reads
+are a query, not a source of the library.</li>
 </ul>
 <p><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html">Tutorial
 6</a> identifies public samples of each of these kinds of input, shows
 their reports, and gives the rates measured with this version.</p>
 </div>
 <div class="section level3">
-<h3 id="tables-of-the-run">Tables of the Run<a class="anchor" aria-label="anchor" href="#tables-of-the-run"></a>
+<h3 id="tables-of-the-run">Tables of the run<a class="anchor" aria-label="anchor" href="#tables-of-the-run"></a>
 </h3>
 <p>The script prints the tables of each step: the screening, the library
 and its funnel, the folds, the barcode gap, the controls, the thresholds
@@ -649,8 +659,15 @@ and the metrics.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
+<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
+<p>Module 14 ends with a reference library of 15 loci, the validation of
+that library, and the thresholds and metrics of each locus, which
+Tutorial 6 uses to identify samples. Its limits and the decisions it
+rests on follow.</p>
+<div class="section level3">
+<h3 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
+</h3>
 <ul>
 <li>
 <strong>Wrong species.</strong> Rare, not absent; <a href="tutorial-6-cactus-barcoding-identification.html#how-well-this-version-identifies">Tutorial
@@ -660,8 +677,8 @@ from the library or shares its haplotype.</li>
 <li>
 <strong>Abstention.</strong> The common answer of this version.
 Plastid loci of closely related cacti differ little, most species are
-represented by one sequence per locus, and IdTaxa withholds an answer
-when its confidence does not reach the threshold.</li>
+represented by one sequence per locus, and <code>IdTaxa</code> withholds
+an answer when its confidence does not reach the threshold.</li>
 <li>
 <strong>One locus, one answer.</strong> A species answer usually
 rests on a single locus, mostly <code>matK</code>. The agreement between
@@ -669,9 +686,9 @@ loci, given in the report, is the main check a user has.</li>
 <li>
 <strong><code>ITS</code> and the nearest neighbour.</strong> The
 rule of remoteness of the nearest neighbour does not reject the sister
-lineages in <code>ITS</code>. The identification runs IdTaxa, which
-rejects them, so the nearest neighbour is used only in the internal
-validation.</li>
+lineages in <code>ITS</code>. The identification runs
+<code>IdTaxa</code>, which rejects them, so the nearest neighbour is
+used only in the internal validation.</li>
 <li>
 <strong>Coverage.</strong> The library holds 1205 of the accepted
 species of the checklist. A sample of a species or genus outside a locus
@@ -679,9 +696,9 @@ library can only be named as something else in that locus (Tutorial 6
 gives examples).</li>
 </ul>
 </div>
-<div class="section level2">
-<h2 id="design-decisions">Design Decisions<a class="anchor" aria-label="anchor" href="#design-decisions"></a>
-</h2>
+<div class="section level3">
+<h3 id="design-decisions">Design decisions<a class="anchor" aria-label="anchor" href="#design-decisions"></a>
+</h3>
 <p>Module 14 rests on five design decisions:</p>
 <ol style="list-style-type: decimal">
 <li>
@@ -712,6 +729,7 @@ are planned work, with no version set.</li>
 </ol>
 <p><a href="https://beeamerino.github.io/PhyloCactus/articles/tutorial-6-cactus-barcoding-identification.html">Continue
 to Tutorial 6: Identifying a Sample</a></p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

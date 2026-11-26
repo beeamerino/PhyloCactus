@@ -9,7 +9,7 @@ Loci with strong saturation or anomalous sequence lengths are excluded from the 
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,8 @@ Loci with strong saturation or anomalous sequence lengths are excluded from the 
 <span>  saturation_keep_cutoff <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  iqr_multiplier <span class="op">=</span> <span class="fl">1.5</span>,</span>
 <span>  saturation_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"corrected"</span>, <span class="st">"legacy"</span><span class="op">)</span>,</span>
-<span>  gap_handling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"iupac"</span>, <span class="st">"legacy"</span><span class="op">)</span></span>
+<span>  gap_handling <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"iupac"</span>, <span class="st">"legacy"</span><span class="op">)</span>,</span>
+<span>  gamma_shape <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -117,6 +118,15 @@ Loci with strong saturation or anomalous sequence lengths are excluded from the 
 
 <dt id="arg-gap-handling">gap_handling<a class="anchor" aria-label="anchor" href="#arg-gap-handling"></a></dt>
 <dd><p>Character. Method for handling ambiguous and gap characters. Defaults to <code>"iupac"</code>.</p></dd>
+
+
+<dt id="arg-gamma-shape">gamma_shape<a class="anchor" aria-label="anchor" href="#arg-gamma-shape"></a></dt>
+<dd><p>Numeric. Shape (alpha) of the gamma distribution of rates in the corrected K80
+distance (<code>ape::dist.dna(model = "K80", gamma = gamma_shape)</code>). Defaults to <code>1</code>. Up to 0.5.4 the
+code passed <code>gamma = TRUE</code>, which <code>ape</code> takes as a shape of 1, without declaring it; the
+reference run used that value, and the thresholds <code>saturation_flag_cutoff</code> (0.3) and
+<code>saturation_keep_cutoff</code> (0.5) were set with it. The slope depends on the shape: a smaller value
+corrects more and lowers the slope.</p></dd>
 
 </dl></div>
     <div class="section level2">

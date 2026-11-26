@@ -17,7 +17,8 @@ run_concatenation_pipeline(
   output_dir,
   outgroup_pattern = NULL,
   min_coverage = 0.2,
-  exclude_markers = NULL
+  exclude_markers = NULL,
+  registry_file = NULL
 )
 ```
 
@@ -63,6 +64,22 @@ run_concatenation_pipeline(
   `logs_and_qc/TABLE_markers_excluded.csv`. A name that matches no
   alignment raises a warning, not an error, so a typo is visible.
   Defaults to `NULL`.
+
+- registry_file:
+
+  Character or `NULL`. The sequence registry of Module 4
+  (`TABLE_sequence_registry_with_acceptance.csv`), read for the
+  acceptance status and accession of each terminal in the species-marker
+  summary. `NULL` (default) looks for it where the tutorials write it,
+  `4_Cleaned/tables/` or `4_Cleaned/` two levels above `input_dir`;
+  without it the summary has no status or accession columns.
+
+  Terminal labels are the species names with every character other than
+  a letter or a digit turned into an underscore, so a hyphenated epithet
+  is written with an underscore (`Opuntia_ficus_indica`), the convention
+  of
+  [`standardize_taxon()`](https://beeamerino.github.io/PhyloCactus/reference/standardize_taxon.md),
+  of the constraint table and of the distributed trees.
 
 ## Value
 

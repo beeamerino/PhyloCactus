@@ -101,8 +101,10 @@ generate_ml_search_script(
 
 - output_dir:
 
-  Character. Destination directory for the script and its outputs.
-  Defaults to [`getwd()`](https://rdrr.io/r/base/getwd.html).
+  Character. Parent directory of the job. The script and the outputs of
+  the search are written to its subfolder `ml_search/`
+  (`file.path(output_dir, "ml_search")`), created if needed. Defaults to
+  [`getwd()`](https://rdrr.io/r/base/getwd.html).
 
 - script_name:
 
@@ -120,7 +122,9 @@ generate_ml_search_script(
 
 - cluster_partition:
 
-  Character. SLURM partition. Defaults to `"main"`.
+  Character. SLURM partition. Defaults to `"main"`, the partition of the
+  NLHPC cluster (Leftraru, Chile) on which the reference run ran; give
+  the partition of your own cluster.
 
 - cluster_nodes:
 
@@ -146,8 +150,11 @@ generate_ml_search_script(
 
 - load_module:
 
-  Character vector. Environment modules to load. Defaults to the NLHPC
-  Leftraru `RAxML-NG` toolchain.
+  Character vector. Environment modules to load. Defaults to
+  `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`,
+  the modules of the NLHPC cluster (Leftraru, Chile) on which the
+  reference run ran; give the modules of your own cluster, or `NULL` to
+  load none.
 
 - raxml_exec:
 

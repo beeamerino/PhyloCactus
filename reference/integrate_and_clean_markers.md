@@ -148,3 +148,14 @@ Nyffeler, R., Sánchez, D., Schlumpberger, B. O., & Berendsohn, W. G.
 (2021). Cactaceae at Caryophyllales.org – a dynamic online species-level
 taxonomic backbone for the family. *Willdenowia*, 51(2), 251–270.
 [doi:10.3372/wi.51.51208](https://doi.org/10.3372/wi.51.51208)
+
+## Examples
+
+``` r
+# Needs the folders of a run
+if (FALSE) { # \dontrun{
+integrate_and_clean_markers("3_Saturation/filtered_markers",
+                            "3_Saturation_Outgroup/filtered_markers",
+                            output_dir = "4_Cleaned")
+} # }
+```

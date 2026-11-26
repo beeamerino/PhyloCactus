@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhyloCactus</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,7 +68,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-11-13</h4>
+            <h4 data-toc-skip class="date">2026-11-26</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-3-cactus-phylogeny-visualization.Rmd" class="external-link"><code>vignettes/tutorial-3-cactus-phylogeny-visualization.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-3-cactus-phylogeny-visualization.Rmd</code></div>
@@ -79,6 +79,11 @@ Meriño</h4>
 <div class="section level2">
 <h2 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
 </h2>
+<p>A phylogeny of more than a thousand species is read through what is
+known of each terminal: its accepted name, the loci that represent it,
+its place in the tree and its conservation status. These facts come from
+different sources, which do not always use the same name for the same
+species.</p>
 <p>This tutorial covers the third stage of the phylogenetic workflow:
 integration of species metadata, figures of the phylogenetic trees, and
 summaries of conservation status. It uses the supermatrix,
@@ -186,7 +191,7 @@ listed as threatened (CR, EN or VU) by the IUCN Red List.</p>
 <span><span class="va">marker_ranges_file</span> <span class="op">&lt;-</span> <span class="st">"6_Concatenated/final_tables/TABLE_marker_ranges.tsv"</span></span>
 <span></span>
 <span><span class="co"># Canonical inputs that do not change across runs</span></span>
-<span><span class="co"># The checklist (Korotkova et al. 2021) is read from the local path in PHYLOCACTUS_CHECKLIST</span></span>
+<span><span class="co"># The checklist is read from the local path in PHYLOCACTUS_CHECKLIST</span></span>
 <span><span class="va">accepted_list_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phylocactus_checklist.html">phylocactus_checklist</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">constraints_csv_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"cactus_constraints.csv"</span>, package <span class="op">=</span> <span class="st">"PhyloCactus"</span><span class="op">)</span></span>
 <span></span>
@@ -1034,10 +1039,12 @@ species (10).
 </h4>
 <p>Figure 11 gives the conservation status of the species in the tree.
 Of the 839 assessed species, 221 (26.3%) are threatened (CR, EN or VU).
-Among the accepted species without sequence data, 266 have an assessment
-and 102 of them (38.3%) are threatened, so threatened species make up a
-larger share of what is missing from the tree than of what it
-contains.</p>
+Among the accepted species without sequence data, 265 have an
+assessment, leaving out the one species Not Evaluated, and 102 of them
+(38.5%) are threatened. Among assessed species, threatened species
+therefore make up a larger share of those missing from the tree than of
+those it contains; most species without sequence data have no
+assessment, and the comparison says nothing about them.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">species_summary_iucn</span><span class="op">$</span><span class="va">iucn_found</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">TABLE_iucn_categories</span> <span class="op">&lt;-</span> <span class="va">species_summary_iucn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>

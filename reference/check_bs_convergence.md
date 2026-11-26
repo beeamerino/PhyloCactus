@@ -89,3 +89,12 @@ converged under FBP. The default is FBP, matching
 so that the convergence statement and the reported support values refer
 to the same quantity. Run the test under whichever metric is being
 reported, and under both when both are tabulated.
+
+## Examples
+
+``` r
+# Needs the external program and the files of a run
+if (FALSE) { # \dontrun{
+check_bs_convergence("raxml-ng", "cactus_ALL_bootstraps.tree", bs_cutoff = 0.03)
+} # }
+```

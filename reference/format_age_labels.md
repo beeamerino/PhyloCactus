@@ -22,3 +22,10 @@ format_age_labels(x, digits = 1L)
 ## Value
 
 Character vector of formatted age labels.
+
+## Examples
+
+``` r
+format_age_labels(c(27.33, 12.968), digits = 1L)
+#> [1] "27.3" "13.0"
+```

@@ -135,8 +135,9 @@ generate_bootstrap_script(
 
 - cluster_partition:
 
-  Character. SLURM partition name. Defaults to `"main"` (Leftraru Epu
-  AMD EPYC 9754 partition).
+  Character. SLURM partition name. Defaults to `"main"`, the partition
+  of the NLHPC cluster (Leftraru, Chile) on which the reference run ran;
+  give the partition of your own cluster.
 
 - cluster_nodes:
 
@@ -166,7 +167,10 @@ generate_bootstrap_script(
 
   Character vector or string. Environment module(s) to load prior to
   execution. Defaults to
-  `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`.
+  `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`,
+  the modules of the NLHPC cluster (Leftraru, Chile) on which the
+  reference run ran; give the modules of your own cluster, or `NULL` to
+  load none.
 
 - raxml_exec:
 
@@ -188,3 +192,12 @@ per-worker single-tree search speed against the number of trees searched
 in parallel); if you migrate to different node hardware or a markedly
 different supermatrix size, re-validate it empirically with a short
 trial run before committing a full job array to it.
+
+## Examples
+
+``` r
+generate_bootstrap_script("supermatrix.phy", "partitions.txt", "constraints.tree",
+                          base_seed = 2150, output_dir = tempdir(), cluster_mail_user = "")
+#> Bash SLURM array script generated: /tmp/RtmppaEIe3/bs_chunks/run_bs_chunks.sh
+#> [1] "/tmp/RtmppaEIe3/bs_chunks/run_bs_chunks.sh"
+```

@@ -79,3 +79,19 @@ add_clade_labels_by_level(
 ## Value
 
 Updated `ggtree` plot object containing clade label layers.
+
+## Examples
+
+``` r
+# A pruned copy of the distributed chronogram and the constraint table
+ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+            "Cylindropuntia", "Tephrocactus", "Maihuenia")
+tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+registry <- build_annotation_registry(tree, constraints_tbl, supp_level4_min_tips = 3L)
+p <- add_clade_labels_by_level(ggtree::ggtree(tree), registry$level_4_supp)
+#> ℹ invalid tbl_tree object. Missing column: parent,label.
+#> ℹ invalid tbl_tree object. Missing column: parent,label.
+```

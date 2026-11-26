@@ -7,9 +7,12 @@ grouped by stage, with the method each one implements and its primary
 reference. Arguments and return values are documented in the manual
 pages and in the `pkgdown` reference index.
 
-## Functions by Stage
+## Complete pipeline execution workflow
 
-### Sequence Assembly
+The functions below are grouped by the stage of the workflow in which
+they run.
+
+### Sequence assembly
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -17,12 +20,12 @@ pages and in the `pkgdown` reference index.
 | [`assemble_outgroup_phylotar()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_outgroup_phylotar.md) | Retrieves sequence clusters for the outgroup genera of Anacampserotaceae, Portulacaceae and Talinaceae, for the loci selected in the ingroup. | Bennett et al. (2018) |
 | [`fetch_genbank_metadata()`](https://beeamerino.github.io/PhyloCactus/reference/fetch_genbank_metadata.md) | Retrieves the organism name and definition line of each GenBank accession through [`ape::read.GenBank()`](https://rdrr.io/pkg/ape/man/read.GenBank.html), in batches with retries, and caches them. | Paradis & Schliep (2019) |
 
-### Alignment and Quality Control
+### Alignment and quality control
 
 | Function | Description | Reference |
 |:---|:---|:---|
 | [`run_alignment_pipeline()`](https://beeamerino.github.io/PhyloCactus/reference/run_alignment_pipeline.md) | Aligns each locus with `MAFFT` and masks poorly aligned columns with [`DECIPHER::MaskAlignment()`](https://rdrr.io/pkg/DECIPHER/man/MaskAlignment.html). | Katoh & Standley (2013); Wright (2024) |
-| [`run_marker_screening()`](https://beeamerino.github.io/PhyloCactus/reference/run_marker_screening.md) | Screens each locus alignment for coverage, length and substitution saturation, by regressing uncorrected p-distance against the gamma-corrected K80 distance. The slope threshold below which a locus is rejected is a `PhyloCactus` criterion, not a published saturation test; the references cover the distance model only. | Kimura (1980); Jin & Nei (1990) |
+| [`run_marker_screening()`](https://beeamerino.github.io/PhyloCactus/reference/run_marker_screening.md) | Screens each locus alignment for coverage, length and substitution saturation, by regressing uncorrected p-distance against the gamma-corrected K80 distance, with a gamma shape of 1 (`gamma_shape`). The slope thresholds (0.3 to flag, 0.5 to keep) were set with that shape. The slope threshold below which a locus is rejected is a `PhyloCactus` criterion, not a published saturation test; the references cover the distance model only. | Kimura (1980); Jin & Nei (1990) |
 | [`clean_taxonomic_names()`](https://beeamerino.github.io/PhyloCactus/reference/clean_taxonomic_names.md) | Keeps the sequences whose name is in the checklist of Cactaceae, ignoring differences in spaces, hyphens and underscores, and renames them to the spelling of the checklist. | Korotkova et al. (2021) |
 | [`run_joint_realignment()`](https://beeamerino.github.io/PhyloCactus/reference/run_joint_realignment.md) | Realigns each locus with `MAFFT` after the ingroup and outgroup sequences are combined. | Katoh & Standley (2013) |
 
@@ -32,17 +35,17 @@ pages and in the `pkgdown` reference index.
 |:---|:---|:---|
 | [`run_concatenation_pipeline()`](https://beeamerino.github.io/PhyloCactus/reference/run_concatenation_pipeline.md) | Concatenates the locus alignments into a supermatrix and writes partition maps in RAxML format (read by `RAxML-NG`, `ModelTest-NG` and `IQ-TREE`) and NEXUS format, with configuration files for `PartitionFinder2` and `MrBayes`. | Not applicable |
 
-### Model Selection and Maximum-Likelihood Inference
+### Model selection and maximum-likelihood inference
 
 | Function | Description | Reference |
 |:---|:---|:---|
 | [`preprocess_partitions()`](https://beeamerino.github.io/PhyloCactus/reference/preprocess_partitions.md) | Checks the supermatrix and partition map with `RAxML-NG` before model selection. | Kozlov et al. (2019) |
 | [`run_modeltest_ng()`](https://beeamerino.github.io/PhyloCactus/reference/run_modeltest_ng.md) | Selects a substitution model for each partition with `ModelTest-NG` under the AICc. | Darriba et al. (2020) |
-| [`build_constraint_scaffold()`](https://beeamerino.github.io/PhyloCactus/reference/build_constraint_scaffold.md) | Builds a multifurcating constraint tree that enforces the monophyly of subfamilies and major clades of Cactaceae established in published phylogenies. | Guerrero et al. (2019) |
+| [`build_constraint_scaffold()`](https://beeamerino.github.io/PhyloCactus/reference/build_constraint_scaffold.md) | Builds the multifurcating constraint tree of the maximum-likelihood search: the monophyly of 21 groups, the backbone of Cactaceae, the arrangement within Opuntioideae and Cactoideae and the outgroup families, taken from published phylogenies; its help page lists each imposed relationship and those left to the data. | Guerrero et al. (2019) |
 | [`calculate_ml_tree()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_ml_tree.md) | Estimates the maximum-likelihood tree with `RAxML-NG` under the partition models and the constraint tree, from 25 random and 25 parsimony starting trees by default. | Kozlov et al. (2019) |
 | [`map_branch_supports()`](https://beeamerino.github.io/PhyloCactus/reference/map_branch_supports.md) | Maps Felsenstein bootstrap proportions (FBP) or transfer bootstrap expectation (TBE) from the bootstrap replicates onto the maximum-likelihood tree. | Felsenstein (1985); Lemoine et al. (2018) |
 
-### Divergence Time Estimation
+### Divergence time estimation
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -52,7 +55,7 @@ pages and in the `pkgdown` reference index.
 | [`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md) | Selects the optimization parameters and the smoothing value by cross-validation on the maximum-likelihood tree, dates it, and applies them to every temporal bootstrap replicate. | Smith & O’Meara (2012); Maurin (2020) |
 | [`send_run_notification()`](https://beeamerino.github.io/PhyloCactus/reference/send_run_notification.md) | Sends an email when a long analysis ends, reporting status, timings and output paths. A failure to send does not stop the analysis. | `blastula` R package, <https://github.com/rstudio/blastula> |
 
-### Comparison, Figures and IUCN Data
+### Comparison, figures and IUCN data
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -61,18 +64,18 @@ pages and in the `pkgdown` reference index.
 | [`get_iucn_data()`](https://beeamerino.github.io/PhyloCactus/reference/get_iucn_data.md) | Retrieves the IUCN Red List assessment of a species through `rredlist`: category, criteria, population trend, countries of occurrence, endemism, habitats and threats. | IUCN (2026) |
 | [`scale_fill_iucn()`](https://beeamerino.github.io/PhyloCactus/reference/scale_fill_iucn.md) | `ggplot2` fill scale with the standard IUCN Red List category colors. | IUCN (2026) |
 
-### Molecular Identification: the Library (Tutorial 5, Steps 1 to 4)
+### Molecular identification: the library (Tutorial 5, steps 1 to 4)
 
 | Function | Description | Reference |
 |:---|:---|:---|
-| [`assemble_barcoding_dataset()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_barcoding_dataset.md) | Names the clusters of the phylotaR mining of the phylogeny by locus, cuts records over 2000 bases to the extent of the shorter records of their locus, reconciles every name against the checklist and, optionally, adds the user’s own sequences. | Bennett et al. (2018); Korotkova et al. (2021) |
+| [`assemble_barcoding_dataset()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_barcoding_dataset.md) | Names the clusters of the phylotaR mining of the phylogeny by locus, cuts records over 2000 bases to the extent of the shorter records of their locus, reconciles every name against the checklist and, optionally, adds the user’s own sequences. | Bennett et al. (2018) |
 | [`curate_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/curate_barcoding_markers.md) | Aligns each locus with `MAFFT`, puts every sequence on one strand and masks poorly aligned columns, with the parameters of the phylogeny’s ingroup. | Katoh & Standley (2013); Wright (2024) |
 | [`screen_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/screen_barcoding_markers.md) | Decides which loci enter the library by the number of species with two or more sequences, and flags saturation and possible paralogy without excluding. |  |
 | [`finalize_barcoding_library()`](https://beeamerino.github.io/PhyloCactus/reference/finalize_barcoding_library.md) | Excludes and declares non-homologous sequences, collapses identical sequences of one species and writes the library, one alignment per locus. |  |
 | [`extract_barcoding_plastome_loci()`](https://beeamerino.github.io/PhyloCactus/reference/extract_barcoding_plastome_loci.md) | Crops the library loci from GenBank plastomes as extra records; a plastome does not add a locus that a library record of the same specimen already holds. |  |
 | [`barcoding_outgroup_taxids()`](https://beeamerino.github.io/PhyloCactus/reference/barcoding_outgroup_taxids.md) | The NCBI Taxonomy IDs of the six genera of Anacampserotaceae, Portulacaceae and Talinaceae that the outgroup control asks the library about. |  |
 
-### Molecular Identification: Validation (Tutorial 5, Steps 5 to 10)
+### Molecular identification: validation (Tutorial 5, steps 5 to 10)
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -86,7 +89,7 @@ pages and in the `pkgdown` reference index.
 | [`summarise_barcoding_metrics()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_metrics.md) | Per locus and scheme: species correct, genus correct, wrong species, wrong genus and unassigned, and precision and recall per class. |  |
 | [`summarise_barcoding_genus_discrimination()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_genus_discrimination.md) | How well each locus tells apart the species of each genus in the folds, shown in the identification report beside the answer. |  |
 
-### Molecular Identification: Identifying a Sample (Tutorial 5, Step 11)
+### Molecular identification: identifying a sample (Tutorial 5, step 11)
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -98,7 +101,10 @@ pages and in the `pkgdown` reference index.
 | [`plot_barcoding_identification()`](https://beeamerino.github.io/PhyloCactus/reference/plot_barcoding_identification.md) | Draws the answer per locus of an identification, and the sampling of the named genera, from the tables of its report. |  |
 | [`plot_barcoding_identification_summary()`](https://beeamerino.github.io/PhyloCactus/reference/plot_barcoding_identification_summary.md) | Draws the answers of several identifications side by side, one row per identification and one column per locus. |  |
 
-### Help Pages
+## Conclusion
+
+Each function has a manual page with its arguments, defaults, return
+value and references:
 
 ``` r
 

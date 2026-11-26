@@ -42,7 +42,8 @@ automate_treePL(
   notify = FALSE,
   notify_to = NULL,
   notify_credentials = NULL,
-  treepl_bin = "treePL"
+  treepl_bin = "treePL",
+  reuse_unverified = FALSE
 )
 ```
 
@@ -64,6 +65,17 @@ automate_treePL(
 - results_dir:
 
   Character. Directory path to save intermediate optimization results.
+  Results already in it are reused only when they were produced with the
+  same inputs and parameters: each stage writes its seed,
+  `rescale_factor`, scaled `numsites`, the md5 of `cfg_file` and of the
+  rescaled maximum-likelihood tree, the priming and cross-validation
+  settings and, for the replicates, the md5 of `bs_trees_file`, the
+  number of replicates, the smoothing and the optimization lines, to
+  `ML_tree/run_parameters_ML_tree.csv` and
+  `BS_tree/run_parameters_BS_tree.csv`. A call whose values differ, or a
+  folder with results and no such table (written before 0.5.5), stops,
+  unless `reuse_unverified = TRUE`. Only the folders `BS_1` to
+  `BS_<num_bs>` of the call are dated and collected.
 
 - treePL_out:
 
@@ -113,7 +125,9 @@ automate_treePL(
 
   Bootstrap replicates are handled with the intersection of this set and
   each replicate's tip labels, so a replicate missing some terminals is
-  still rooted; only a replicate missing all of them is an error.
+  still rooted; only a replicate missing all of them is an error. A
+  maximum-likelihood tree that is already rooted is dated with its own
+  root, and a message says that `outgroup` is not applied to it.
 
   **Topological assumption.** Placing the root on the outgroup lineage
   (Talinaceae or Portulacaceae) establishes the basal split for dating.
@@ -134,7 +148,7 @@ automate_treePL(
   reproduces the run when cross-validation uses one thread, which is the
   default of `cv_nthreads`. Defaults to `NULL`, which draws one and
   reports it; record the reported value, as it is required to reproduce
-  the run.
+  the run. The random state of the session is restored on exit.
 
 - rescale_factor:
 
@@ -229,6 +243,13 @@ automate_treePL(
   stages, the cross-validation and the dating of the bootstrap
   replicates. Defaults to `"treePL"`, which is the name both stages used
   to run with written into the code.
+
+- reuse_unverified:
+
+  Logical. `TRUE` reuses results in `results_dir` that carry no record
+  of the parameters they were produced with (written before 0.5.5), with
+  a warning; results whose record differs from the call are never
+  reused. Defaults to `FALSE`.
 
 ## Value
 

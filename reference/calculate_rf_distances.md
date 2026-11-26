@@ -41,3 +41,12 @@ calculate_rf_distances(
 
 Character path to the resulting RF distance output file
 (`.raxml.rfdist`).
+
+## Examples
+
+``` r
+# Needs the external program and the files of a run
+if (FALSE) { # \dontrun{
+calculate_rf_distances("raxml-ng", "cactus_ml.raxml.mlTrees")
+} # }
+```

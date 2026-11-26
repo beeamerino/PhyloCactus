@@ -14,7 +14,8 @@ fetch_genbank_metadata(
   batch_size = 200,
   sleep_time = 0.5,
   max_retries = 5,
-  force_download = FALSE
+  force_download = FALSE,
+  max_failed_fraction = 0.05
 )
 ```
 
@@ -45,12 +46,22 @@ fetch_genbank_metadata(
 
 - force_download:
 
-  Logical. Not used in this version: records already in `cache_file` are
-  always reused. Defaults to `FALSE`.
+  Deprecated and ignored: records already in `cache_file` are always
+  reused. Defaults to `FALSE`; `TRUE` gives a warning. Delete
+  `cache_file` to download every record again.
+
+- max_failed_fraction:
+
+  Numeric between 0 and 1. A batch whose `max_retries` attempts all fail
+  is logged and its accessions counted; when the failed accessions
+  exceed this fraction of those requested, the function stops instead of
+  returning a table in which they would lack a species and description.
+  Defaults to `0.05`.
 
 ## Value
 
-A data frame with columns `sid`, `Species_gb` and `Description_gb`.
+A data frame with columns `sid`, `Species_gb` and `Description_gb`, with
+the accessions of failed batches in its attribute `failed_sids`.
 
 ## Examples
 
