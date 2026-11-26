@@ -15,6 +15,23 @@
   paste(outgroup, collapse = ",")
 }
 
+#' Stop when an input file of a RAxML-NG wrapper is missing, naming each missing one
+#'
+#' The wrappers of the phylogeny check their inputs the same way (closure review of 0.5.4, AP-19):
+#' a named character vector of paths, `NULL` entries skipped, one error that lists every missing
+#' file with the argument that gave it.
+#' @noRd
+.check_input_files <- function(...) {
+  files <- unlist(list(...))
+  if (is.null(files) || !length(files)) return(invisible(TRUE))
+  missing <- files[!file.exists(files)]
+  if (length(missing)) {
+    stop("Input file(s) not found: ", paste(sprintf("%s = '%s'", names(missing), missing), collapse = "; "),
+         call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
 #' @noRd
 .check_cli_exit <- function(status, tool_name, args = NULL) {
   exit_code <- if (is.integer(status)) status else attr(status, "status")
@@ -40,6 +57,9 @@
 #' @param output_dir Character. Output directory for validated partition outputs. Defaults to `dirname(phy_matrix)`.
 #' @param prefix Character. Basename prefix for every file written by this step. Defaults to `"cactus"`.
 #' @param force_check Logical. Re-run validation even if the validated partition file already exists? Defaults to `FALSE`.
+#'   A new check first removes the `<prefix>.raxml.reduced.*` files of an earlier check in
+#'   `output_dir`, so the reduction reported is that of the matrix checked in this call.
+#' @param threads Integer. Threads given to `RAxML-NG --check`. Defaults to `4`.
 #' @param model_handling Character. Model field written to the validated partition map. `"force_dna"`
 #'   (default) writes the datatype token `DNA`, leaving the substitution model to be selected by
 #'   [run_modeltest_ng()]. `"preserve"` keeps whatever model string `RAxML-NG` emitted, which is only
@@ -52,9 +72,18 @@
 #' Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
 #' user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
 #' \doi{10.1093/bioinformatics/btz305}
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' preprocess_partitions("supermatrix.phy", "PARTITION_raxml_style.txt", "raxml-ng")
+#' }
 #' @export
-preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir = dirname(phy_matrix), prefix = "cactus", force_check = FALSE, model_handling = c("force_dna", "preserve")) {
+preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir = dirname(phy_matrix), prefix = "cactus", force_check = FALSE, model_handling = c("force_dna", "preserve"), threads = 4) {
   model_handling <- match.arg(model_handling)
+  threads <- as.integer(threads)
+  if (length(threads) != 1L || is.na(threads) || threads < 1L) {
+    stop("`threads` must be a positive integer.", call. = FALSE)
+  }
 
   if (Sys.which(raxml_path) == "") {
     stop("Executable '", raxml_path, "' not found in your system's PATH.\n",
@@ -77,6 +106,15 @@ preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir 
     return(clean_part)
   }
 
+  # A reduced matrix left by an earlier check would be reported as the reduction of this one, and
+  # returned as the analysed alignment (closure review of 0.5.4, AP-05), so it is removed first.
+  stale <- paste0(prefix_check, ".raxml.reduced.", c("phy", "partition"))
+  stale <- stale[file.exists(stale)]
+  if (length(stale)) {
+    message("Removing the reduced files of an earlier check: ", paste(basename(stale), collapse = ", "))
+    file.remove(stale)
+  }
+
   # Run system raxmlcheck validation
   aln_check <- system2(
     raxml_path,
@@ -85,7 +123,7 @@ preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir 
       "--msa", shQuote(phy_matrix),
       "--model", shQuote(part_file),
       "--prefix", shQuote(prefix_check),
-      "--threads", "4"
+      "--threads", as.character(threads)
     ),
     stdout = "",
     stderr = ""
@@ -136,6 +174,11 @@ preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir 
 #'   model syntax such as `GTR+FC+G4m+B` and aborts with a segmentation fault on it.
 #' @param prefix Character. Output filename prefix. Defaults to `"MODELTEST_cactus_phylo"`.
 #' @param threads Integer. Number of processing threads. Defaults to `4`.
+#' @param output_dir Character or `NULL`. Directory for the outputs of `ModelTest-NG`, created if
+#'   needed. `NULL` (default) writes them, as before 0.5.5, relative to the working directory.
+#' @param seed Integer or `NULL`. Seed of the random number generator of `ModelTest-NG`
+#'   (`--rngseed`). `NULL` (default) leaves it to the program, as before 0.5.5; give a value to make
+#'   the run reproducible and record it.
 #' @return Character path to the resulting partition file containing selected model parameters (`.part.aicc`).
 #' @references
 #' Darriba, D., Posada, D., Kozlov, A. M., Stamatakis, A., Morel, B., & Flouri, T. (2020). ModelTest-NG: a new and
@@ -150,7 +193,8 @@ preprocess_partitions <- function(phy_matrix, part_file, raxml_path, output_dir 
 #' )
 #' }
 #' @export
-run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = "MODELTEST_cactus_phylo", threads = 4) {
+run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = "MODELTEST_cactus_phylo", threads = 4,
+                             output_dir = NULL, seed = NULL) {
   
   if (Sys.which(modeltest_exec_path) == "") {
     stop("Executable '", modeltest_exec_path, "' not found in your system's PATH.\n",
@@ -160,6 +204,7 @@ run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = 
   if (!file.exists(part_file)) {
     stop("Partition map not found: ", part_file, call. = FALSE)
   }
+  .check_input_files(aln_file = aln_file)
 
   # ModelTest-NG 0.1.7 reports an unparseable model field and then crashes while unwinding, so the
   # exit status reads as a segmentation fault rather than a format error. Rejecting the input here
@@ -175,6 +220,11 @@ run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = 
          call. = FALSE)
   }
 
+  if (!is.null(output_dir)) {
+    dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+    prefix <- file.path(output_dir, prefix)
+  }
+
   # Invocation parameters setup
   args <- c(
     "--datatype", "nt",
@@ -184,6 +234,11 @@ run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = 
     "--processes", as.character(threads),
     "--template", "raxml"
   )
+  if (!is.null(seed)) {
+    seed <- as.integer(seed)
+    if (length(seed) != 1L || is.na(seed) || seed < 1L) stop("`seed` must be a positive integer.", call. = FALSE)
+    args <- c(args, "--rngseed", as.character(seed))
+  }
   
   message("Executing ModelTest-NG over partitions database...")
   exit_status <- system2(
@@ -207,9 +262,47 @@ run_modeltest_ng <- function(modeltest_exec_path, aln_file, part_file, prefix = 
 
 #' Synthesize Multifurcating Monophyly Constraint Scaffold
 #'
-#' Constructs a Newick multifurcating constraint tree enforcing monophyly of established higher taxonomic ranks (e.g., subfamilies, tribes).
-#' The constrained search keeps these clades monophyletic and estimates all other relationships from the data,
-#' which limits the effect of sparse and uneven sampling on the backbone.
+#' Writes the multifurcating Newick constraint tree of the maximum-likelihood search. The tree fixes
+#' the monophyly of 21 groups of species, the backbone of Cactaceae, the arrangement within
+#' Opuntioideae and Cactoideae, and the outgroup families; the search estimates every other
+#' relationship. Details lists each relationship the scaffold imposes and those it leaves to the data.
+#'
+#' @details
+#' The constraint tree written by `build_constraint_scaffold()` fixes four kinds of relationship.
+#' The first is the monophyly of the groups whose terminals the scaffold collapses into one polytomy
+#' each: 14 in Cactaceae (*Leuenbergeria*, *Pereskia*, Cylindropuntieae, Tephrocacteae, Opuntieae,
+#' *Maihuenia*, Cacteae, *Frailea*, *Calymmanthium*, *Copiapoa*, core Cactoideae I, Rhipsalideae,
+#' Notocacteae and BCT) and five genera of the outgroup (*Portulaca*, *Grahamia*, *Anacampseros*,
+#' *Talinum* and *Talinella*); *Blossfeldia* and *Talinopsis* are single terminals and add no
+#' bipartition. The second is the backbone of Cactaceae: the monophyly of the family, the order
+#' *Leuenbergeria*, *Pereskia*, Opuntioideae, *Maihuenia*, Cactoideae, in which each lineage is sister
+#' to all those after it, and *Blossfeldia* as sister to the rest of Cactoideae. The third is the
+#' arrangement within the two large subfamilies, (Cylindropuntieae, (Tephrocacteae, Opuntieae)) in
+#' Opuntioideae and, in Cactoideae without *Blossfeldia*, Cacteae sister to core Cactoideae, core
+#' Cactoideae I sister to core Cactoideae II, and (Rhipsalideae, (Notocacteae, BCT)) within core
+#' Cactoideae II. The fourth is the outgroup families: the monophyly of Anacampserotaceae with the
+#' order (*Talinopsis*, (*Grahamia*, *Anacampseros*)), and the monophyly of Talinaceae (*Talinum* and
+#' *Talinella*), the bipartition that separates Talinaceae from the clade of Anacampserotaceae,
+#' Cactaceae and Portulacaceae (ACP). In the reference run these are 34 bipartitions, 19 of groups,
+#' 6 of the backbone, 6 within subfamilies and 3 of the outgroup families (26 in Cactaceae and 8 in
+#' the outgroup). The data decide the other 1171 of the 1205 internal bipartitions of the reference
+#' maximum-likelihood tree: the relationships among Anacampserotaceae, Cactaceae and Portulacaceae,
+#' which the scaffold leaves as a trichotomy; the base of core Cactoideae, a polytomy of *Frailea*,
+#' *Calymmanthium*, *Copiapoa* and core Cactoideae I plus II; and every relationship within the
+#' collapsed groups. The topology is written in the code of the function (`R/inference.R`, step 7 of
+#' `build_constraint_scaffold()`), and `cactus_constraints.csv` only assigns each species to one of
+#' 21 groups in its `Clade` column. The relationships among groups follow published phylogenies,
+#' principally Hernández-Hernández *et al*. (2014), Guerrero *et al*. (2019), Zuntini *et al*. (2024)
+#' and de Vos *et al*. (2025). Published analyses leave two of them unresolved or contested: the
+#' relationships among the three tribes of Opuntioideae, which Guerrero *et al*. (2019) report as
+#' unresolved or poorly supported in most analyses, and core Cactoideae II, which conflicts with
+#' Amaral *et al*. (2022) and is weakly supported in Zuntini *et al*. (2024).
+#'
+#' The list of groups and the topology are fixed in the code; a different backbone requires editing
+#' the function. Talinaceae are optional: without *Talinum* and *Talinella* in the alignment the
+#' scaffold has no Talinaceae bipartition, and with one of the two genera that bipartition is the
+#' monophyly of the genus. Every other group of the 21 must have at least one species in the
+#' alignment.
 #'
 #' @param alignment_path Character. Path to input PHYLIP supermatrix alignment file.
 #' @param constraints_csv_path Character. Path to taxonomy CSV table mapping species binomials to taxonomic ranks.
@@ -271,14 +364,14 @@ build_constraint_scaffold <- function(alignment_path, constraints_csv_path, outp
     error = function(e) stop("Could not read constraints table at ", constraints_csv_path, " | ", conditionMessage(e))
   )
   
-  required_cols <- c("Specie_name", "Clade", "Subfam", "Family")
+  # Only Specie_name and Clade build the scaffold; the other columns of the table (Subfam, Family and
+  # the annotation levels) are read by the figure and dating functions, not here.
+  required_cols <- c("Specie_name", "Clade")
   missing_cols <- setdiff(required_cols, colnames(cf_all))
   if (length(missing_cols) > 0) stop("Missing required columns in constraints table: ", paste(missing_cols, collapse = ", "))
   
   cf_all$Specie_name <- trimws(cf_all$Specie_name)
   cf_all$Clade       <- trimws(cf_all$Clade)
-  cf_all$Subfam      <- trimws(cf_all$Subfam)
-  cf_all$Family      <- trimws(cf_all$Family)
   
   if (any(is.na(cf_all$Specie_name)) || any(cf_all$Specie_name == "")) stop("Constraints table contains empty or NA values in Specie_name.")
   if (any(is.na(cf_all$Clade)) || any(cf_all$Clade == "")) stop("Constraints table contains empty or NA values in Clade.")
@@ -312,22 +405,6 @@ build_constraint_scaffold <- function(alignment_path, constraints_csv_path, outp
   
   # 4. FILTER TO ALIGNMENT TAXA
   cf <- unique(cf_align)
-  cf$Genus <- sub("_.*$", "", cf$Specie_name)
-  
-  genus_to_constraint <- character(0)
-  target_genera <- sort(intersect(unique(cf$Genus), genus_to_constraint))
-  log_message("Genera with additional genus-level constraints: ",
-              ifelse(length(target_genera) == 0, "none", paste(target_genera, collapse = ", ")))
-  
-  genus_newick_lut <- NULL
-  if (length(target_genera) > 0) {
-    # Emulate group_by collapse
-    spp_by_genus <- split(cf$Specie_name, cf$Genus)
-    spp_by_genus <- spp_by_genus[names(spp_by_genus) %in% target_genera]
-    genus_newick_lut <- sapply(spp_by_genus, function(spp) {
-      paste0("(", paste(sort(unique(spp)), collapse = ","), ")")
-    })
-  }
   
   # Helper
   extract_required_clade <- function(df, clade_name) {
@@ -342,26 +419,11 @@ build_constraint_scaffold <- function(alignment_path, constraints_csv_path, outp
     sort(unique(df$Specie_name[df$Clade == clade_name]))
   }
   
-  collapse_clade <- function(x, genus_newick_lut = NULL) {
+  # Each group becomes one polytomy of its species (or a single terminal). The list of 21 groups
+  # below and the topology of step 7 are fixed in the code, as the help page states.
+  collapse_clade <- function(x) {
     if (length(x) == 0) return("")
-    
     x <- sort(unique(x))
-    genus_vec <- sub("_.*$", "", x)
-    
-    if (!is.null(genus_newick_lut) && length(genus_newick_lut) > 0) {
-      grouped <- split(x, genus_vec)
-      new_elements <- character(0)
-      
-      for (g in sort(names(grouped))) {
-        if (g %in% names(genus_newick_lut)) {
-          new_elements <- c(new_elements, genus_newick_lut[[g]])
-        } else {
-          new_elements <- c(new_elements, sort(grouped[[g]]))
-        }
-      }
-      x <- sort(unique(new_elements))
-    }
-    
     if (length(x) == 1) return(x)
     return(paste0("(", paste(x, collapse = ","), ")"))
   }
@@ -401,29 +463,29 @@ build_constraint_scaffold <- function(alignment_path, constraints_csv_path, outp
   log_message("Clade size summary written to: ", out_clade_sizes)
   
   # 6. COLLAPSE CLADES TO NEWICK STRINGS
-  s_tal   <- collapse_clade(clades$talinopsis, genus_newick_lut)
-  s_gra   <- collapse_clade(clades$grahamia, genus_newick_lut)
-  s_ana   <- collapse_clade(clades$anacampseros, genus_newick_lut)
-  s_por   <- collapse_clade(clades$portulaca, genus_newick_lut)
+  s_tal   <- collapse_clade(clades$talinopsis)
+  s_gra   <- collapse_clade(clades$grahamia)
+  s_ana   <- collapse_clade(clades$anacampseros)
+  s_por   <- collapse_clade(clades$portulaca)
   
-  s_leu   <- collapse_clade(clades$leuenbergeria, genus_newick_lut)
-  s_per   <- collapse_clade(clades$pereskia, genus_newick_lut)
-  s_teph  <- collapse_clade(clades$tephrocacteae, genus_newick_lut)
-  s_cyl   <- collapse_clade(clades$cylindropuntieae, genus_newick_lut)
-  s_opu   <- collapse_clade(clades$opuntieae, genus_newick_lut)
-  s_mai   <- collapse_clade(clades$maihuenia, genus_newick_lut)
-  s_blo   <- collapse_clade(clades$blossfeldia, genus_newick_lut)
-  s_coreI  <- collapse_clade(clades$core_I, genus_newick_lut)
-  s_rhip <- collapse_clade(clades$rhipsalideae, genus_newick_lut)
-  s_noto <- collapse_clade(clades$notocacteae, genus_newick_lut)
-  s_bct <- collapse_clade(clades$bct_core, genus_newick_lut)
-  s_caly  <- collapse_clade(clades$calymmanthium, genus_newick_lut)
-  s_copi  <- collapse_clade(clades$copiapoa, genus_newick_lut)
-  s_frai  <- collapse_clade(clades$frailea, genus_newick_lut)
-  s_cact  <- collapse_clade(clades$cacteae, genus_newick_lut)
+  s_leu   <- collapse_clade(clades$leuenbergeria)
+  s_per   <- collapse_clade(clades$pereskia)
+  s_teph  <- collapse_clade(clades$tephrocacteae)
+  s_cyl   <- collapse_clade(clades$cylindropuntieae)
+  s_opu   <- collapse_clade(clades$opuntieae)
+  s_mai   <- collapse_clade(clades$maihuenia)
+  s_blo   <- collapse_clade(clades$blossfeldia)
+  s_coreI  <- collapse_clade(clades$core_I)
+  s_rhip <- collapse_clade(clades$rhipsalideae)
+  s_noto <- collapse_clade(clades$notocacteae)
+  s_bct <- collapse_clade(clades$bct_core)
+  s_caly  <- collapse_clade(clades$calymmanthium)
+  s_copi  <- collapse_clade(clades$copiapoa)
+  s_frai  <- collapse_clade(clades$frailea)
+  s_cact  <- collapse_clade(clades$cacteae)
   
-  s_talinum   <- collapse_clade(clades$talinum, genus_newick_lut)
-  s_talinella <- collapse_clade(clades$talinella, genus_newick_lut)
+  s_talinum   <- collapse_clade(clades$talinum)
+  s_talinella <- collapse_clade(clades$talinella)
 
   # 7. BUILD FIXED TOPOLOGY
   #
@@ -564,6 +626,7 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
     stop("Executable '", raxml_bin_path, "' not found in your system's PATH.\n",
          "Please ensure RAxML-NG is installed and available, or provide the full absolute path.")
   }
+  .check_input_files(aln_file = aln_file, part_file = part_file, constraint_file = constraint_file)
 
   if (!dir.exists(output_dir)) {
     dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
@@ -690,18 +753,19 @@ calculate_ml_tree <- function(raxml_bin_path, aln_file, part_file, constraint_fi
 #'   `n_init_trees` and `min_threads_per_worker` so that workers divide the starting tree count evenly.
 #' @param min_threads_per_worker Integer. Lower bound on threads per worker when `workers` is derived. Defaults to `3L`.
 #' @param preparse Logical. Pre-parse the alignment into compressed binary `.rba` format before the search? Defaults to `TRUE`.
-#' @param output_dir Character. Destination directory for the script and its outputs. Defaults to `getwd()`.
+#' @param output_dir Character. Parent directory of the job. The script and the outputs of the search
+#'   are written to its subfolder `ml_search/` (`file.path(output_dir, "ml_search")`), created if
+#'   needed. Defaults to `getwd()`.
 #' @param script_name Character. Name of the generated Bash script. Defaults to `"run_ml_search.sh"`.
 #' @param prefix Character. RAxML-NG output prefix inside the job. Defaults to `"cactus_search"`.
 #' @param cluster_job_name Character. SLURM job name. Defaults to `"cactus_ml"`.
-#' @param cluster_partition Character. SLURM partition. Defaults to `"main"`.
+#' @param cluster_partition Character. SLURM partition. Defaults to `"main"`, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.
 #' @param cluster_nodes Integer. Number of compute nodes requested (\verb{--nodes}). Defaults to \code{1L}.
 #' @param cluster_mem Character. Memory allocation (`--mem`). Defaults to `"16G"`.
 #' @param cluster_time Character. Time limit (`--time`). Defaults to `"02:00:00"`.
 #' @param cluster_queue Character. Optional SLURM queue / QoS. Defaults to `NULL`.
 #' @param cluster_mail_user Character. Notification recipient email address for SLURM (\verb{--mail-user}). Defaults to \code{Sys.getenv("MY_EMAIL", "")}.
-#' @param load_module Character vector. Environment modules to load. Defaults to the NLHPC Leftraru
-#'   `RAxML-NG` toolchain.
+#' @param load_module Character vector. Environment modules to load. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or `NULL` to load none.
 #' @param raxml_exec Character. `RAxML-NG` executable invoked inside the job. Defaults to `"raxml-ng-mpi"`.
 #' @return Character path to the generated SLURM batch script, carrying the resolved parallel plan
 #'   as the `ml_plan` attribute.
@@ -936,6 +1000,7 @@ map_branch_supports <- function(raxml_bin, best_tree, bootstraps_file, metric = 
     stop("Executable '", raxml_bin, "' not found in your system's PATH.\n",
          "Please ensure RAxML-NG is installed and available, or provide the full absolute path.")
   }
+  .check_input_files(best_tree = best_tree, bootstraps_file = bootstraps_file)
 
   if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   out_prefix <- file.path(output_dir, prefix)
@@ -950,7 +1015,7 @@ map_branch_supports <- function(raxml_bin, best_tree, bootstraps_file, metric = 
   )
   
   ml_status <- system2(command = raxml_bin, args = args)
-  .check_cli_exit(ml_status, "RAxML-NG ML")
+  .check_cli_exit(ml_status, "RAxML-NG support mapping (map_branch_supports)")
   support_file <- paste0(out_prefix, ".raxml.support")
   message("Branch support values (", toupper(metric), ") mapped onto best tree: ", support_file)
   return(support_file)
@@ -966,9 +1031,19 @@ map_branch_supports <- function(raxml_bin, best_tree, bootstraps_file, metric = 
 #' @param output_dir Character. Output directory for RF distance calculations. Defaults to `dirname(ml_trees_file)`.
 #' @param prefix Character. Output file prefix. Defaults to `"cactus_RF"`.
 #' @return Character path to the resulting RF distance output file (`.raxml.rfdist`).
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' calculate_rf_distances("raxml-ng", "cactus_ml.raxml.mlTrees")
+#' }
 #' @export
 calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = dirname(ml_trees_file), prefix = "cactus_RF") {
-  
+  if (Sys.which(raxml_bin_path) == "") {
+    stop("Executable '", raxml_bin_path, "' not found in your system's PATH.\n",
+         "Please ensure RAxML-NG is installed and available, or provide the full absolute path.")
+  }
+  .check_input_files(ml_trees_file = ml_trees_file)
+
   if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   out_prefix <- file.path(output_dir, prefix)
   
@@ -1029,7 +1104,8 @@ calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = d
 #' @param bs_trees Integer. Total number of non-parametric bootstrap trees to generate. Defaults to `500`.
 #' @param outgroup Character vector of terminals passed to `RAxML-NG --outgroup`, or `NULL` (default); multiple terminals are joined with commas. `RAxML-NG` writes an unrooted topology with these terminals placed first, so this argument orders the output and does not root the tree: the root is imposed downstream by `automate_treePL()` via `ape::root(..., resolve.root = TRUE)`. Declaring the same set at every stage keeps the output ordering consistent across the maximum-likelihood search, the bootstrap replicates and the temporal bootstraps. Derive it with `resolve_rooting_outgroup()`; do not name a terminal by hand.
 #' @param seed Integer. Random seed for reproducible bootstrap initialization. Defaults to `NULL` (random).
-#' @param threads Integer. Number of CPU threads. Defaults to `8` (or detected P-cores).
+#' @param threads Integer. Number of CPU threads. Defaults to `8`, which is used as given; the
+#'   performance cores of the machine are detected only when `threads = NULL` (or `NA`).
 #' @param workers Integer. Parallel worker process count. If `NULL` (default), automatically calculated as `max(1L, as.integer(threads / threads_per_worker))`.
 #' @param threads_per_worker Integer. Thread-to-worker ratio used to derive `workers` when `workers = NULL`. Defaults to `4L`
 #'   (unvalidated heuristic for local bootstrap workloads; see Details). Ignored if `workers` is set explicitly.
@@ -1040,6 +1116,12 @@ calculate_rf_distances <- function(raxml_bin_path, ml_trees_file, output_dir = d
 #' Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and
 #' user-friendly tool for maximum likelihood phylogenetic inference. *Bioinformatics*, 35(21), 4453-4455.
 #' \doi{10.1093/bioinformatics/btz305}
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' run_local_bootstraps("raxml-ng", "supermatrix.phy", "cactus_modeltest.part.aicc",
+#'                      "cactus_constraints.tree", bs_trees = 100, seed = 2150)
+#' }
 #' @export
 run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, constraint_file,
                                  bs_trees = 500, outgroup = NULL, seed = NULL,
@@ -1149,15 +1231,18 @@ run_local_bootstraps <- function(raxml_bin_path, aln_file, part_file = NULL, con
 #' @param output_dir Character. Destination directory for script and chunk logs. Defaults to `getwd()`.
 #' @param script_name Character. Name of output Bash script file. Defaults to `"run_bs_chunks.sh"`.
 #' @param cluster_job_name Character. SLURM job name identifier. Defaults to `"cactus_bs"`.
-#' @param cluster_partition Character. SLURM partition name. Defaults to `"main"` (Leftraru Epu AMD EPYC 9754 partition).
+#' @param cluster_partition Character. SLURM partition name. Defaults to `"main"`, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.
 #' @param cluster_nodes Integer. Number of compute nodes requested (\verb{--nodes}). Defaults to \code{1L}.
 #' @param cluster_mem Character. Memory allocation string for SLURM (`--mem`). Defaults to `"10G"`.
 #' @param cluster_time Character. Time limit allocation string for SLURM (`--time`). Defaults to `"24:00:00"`.
 #' @param cluster_queue Character. Optional SLURM queue / QoS name. Defaults to `NULL`.
 #' @param cluster_mail_user Character. Notification recipient email address for SLURM (\verb{--mail-user}). Defaults to \code{Sys.getenv("MY_EMAIL", "")}.
-#' @param load_module Character vector or string. Environment module(s) to load prior to execution. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`.
+#' @param load_module Character vector or string. Environment module(s) to load prior to execution. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or `NULL` to load none.
 #' @param raxml_exec Character. Executable `RAxML-NG` binary command. Defaults to `"raxml-ng-mpi"`.
 #' @return Character path to the generated SLURM batch script file.
+#' @examples
+#' generate_bootstrap_script("supermatrix.phy", "partitions.txt", "constraints.tree",
+#'                           base_seed = 2150, output_dir = tempdir(), cluster_mail_user = "")
 #' @export
 generate_bootstrap_script <- function(alignment_file, partition_file, constraint_file,
                                       outgroup = NULL, bs_per_rep = 500, max_reps = 2,
@@ -1322,6 +1407,13 @@ generate_bootstrap_script <- function(alignment_file, partition_file, constraint
 #' @param prefix Character. File output prefix. Defaults to `"cactus_ALL_bootstraps"`.
 #' @param expected_trees Integer. Optional expected total count of bootstrap tree replicates (e.g., `1000`). If provided, verifies that the concatenated tree count exactly matches this value. Defaults to `NULL`.
 #' @return Character path to the concatenated bootstrap tree file (`.tree`).
+#' @examples
+#' # Two chunks of replicates, as two array tasks of the cluster would write them
+#' bs_dir <- file.path(tempdir(), "bs_chunks")
+#' dir.create(bs_dir, showWarnings = FALSE)
+#' writeLines(c("((A,B),(C,D));", "((A,C),(B,D));"), file.path(bs_dir, "run1.raxml.bootstraps"))
+#' writeLines("((A,B),(C,D));", file.path(bs_dir, "run2.raxml.bootstraps"))
+#' collect_bootstraps(bs_dir, expected_trees = 3)
 #' @export
 collect_bootstraps <- function(bs_dir, output_dir = bs_dir, prefix = "cactus_ALL_bootstraps", expected_trees = NULL) {
   
@@ -1457,6 +1549,11 @@ collect_bootstraps <- function(bs_dir, output_dir = bs_dir, prefix = "cactus_ALL
 #'   \item `metric`: Support metric used (`"fbp"` or `"tbe"`).
 #'   \item `log_file`: Character path to the resulting RAxML-NG convergence log file (`.raxml.log`).
 #' }
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' check_bs_convergence("raxml-ng", "cactus_ALL_bootstraps.tree", bs_cutoff = 0.03)
+#' }
 #' @export
 check_bs_convergence <- function(raxml_bin_path, bs_trees_file, bs_cutoff = 0.03,
                                  bs_metric = c("fbp", "tbe"), seed = NULL, threads = 4,
@@ -1579,6 +1676,12 @@ as.character.cactus_bs_convergence <- function(x, ...) {
 #' @param output_dir Character. Directory path to save output temporal bootstrap trees. Defaults to `dirname(aln_file)`.
 #' @param prefix Character. Output file prefix. Defaults to `"cactus_temporal"`.
 #' @return Character path to the resulting temporal bootstrap trees file (`.raxml.bootstraps`).
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' calculate_temporal_bootstraps("raxml-ng", "supermatrix.phy", "cactus_modeltest.part.aicc",
+#'                               "cactus_ml.raxml.bestTree", bs_trees = 100, seed = 87786)
+#' }
 #' @export
 calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, best_tree_file,
                                           bs_trees = 500, outgroup = NULL, seed = NULL,
@@ -1595,6 +1698,7 @@ calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, b
     stop("Executable '", raxml_bin_path, "' not found in your system's PATH.\n",
          "Please ensure RAxML-NG is installed and available, or provide the full absolute path.")
   }
+  .check_input_files(aln_file = aln_file, part_file = part_file, best_tree_file = best_tree_file)
 
   threads <- as.integer(threads)
   if (is.null(workers)) {
@@ -1655,15 +1759,25 @@ calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, b
 #' @param output_dir Character. Destination directory for script and outputs. Defaults to `getwd()`.
 #' @param script_name Character. Name of output Bash script file. Defaults to `"run_temporal_bs.sh"`.
 #' @param cluster_job_name Character. SLURM job name identifier. Defaults to `"cactus_temp_bs"`.
-#' @param cluster_partition Character. SLURM partition name. Defaults to `"main"`.
+#' @param cluster_partition Character. SLURM partition name. Defaults to `"main"`, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.
 #' @param cluster_nodes Integer. Number of compute nodes requested (`--nodes`). Defaults to `1L`.
 #' @param cluster_mem Character. Memory allocation string for SLURM (`--mem`). Defaults to `"16G"`.
 #' @param cluster_time Character. Time limit allocation string for SLURM (`--time`). Defaults to `"04:00:00"`.
 #' @param cluster_queue Character. Optional SLURM queue / QoS name. Defaults to `NULL`.
 #' @param cluster_mail_user Character. Notification recipient email address for SLURM (`--mail-user`). Defaults to `Sys.getenv("MY_EMAIL", "")`.
-#' @param load_module Character vector or string. Environment module(s) to load prior to execution. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`.
+#' @param load_module Character vector or string. Environment module(s) to load prior to execution. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or `NULL` to load none.
 #' @param raxml_exec Character. Executable `RAxML-NG` binary command. Defaults to `"raxml-ng-mpi"`.
-#' @return Character path to the generated SLURM batch script file.
+#' @param blopt Character. Branch length optimization method written as `--blopt` (`"nr_safe"` or
+#'   `"nr_fast"`). Defaults to `"nr_safe"`, the default of [calculate_temporal_bootstraps()], so that
+#'   the cluster and the local routes optimize branch lengths the same way. Until 0.5.4 the script
+#'   wrote no `--blopt`, and `RAxML-NG` used its own default: the temporal replicates of the reference
+#'   run (`RAxML-NG` 1.2.2-master on the cluster) were estimated with `NR-FAST`, as their log
+#'   records; pass `blopt = "nr_fast"` to reproduce them.
+#' @return Character path to the generated SLURM batch script file, which is made executable.
+#' @examples
+#' generate_temporal_bootstrap_script("supermatrix.phy", "partitions.txt", "best.tree",
+#'                                    base_seed = 87786, output_dir = tempdir(),
+#'                                    cluster_mail_user = "")
 #' @export
 generate_temporal_bootstrap_script <- function(alignment_file, partition_file, best_tree_file,
                                                outgroup = NULL, bs_trees = 500,
@@ -1679,8 +1793,12 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
                                                cluster_queue = NULL,
                                                cluster_mail_user = Sys.getenv("MY_EMAIL", ""),
                                                load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"),
-                                               raxml_exec = "raxml-ng-mpi") {
-  
+                                               raxml_exec = "raxml-ng-mpi", blopt = "nr_safe") {
+
+  if (!is.character(blopt) || length(blopt) != 1L || !nzchar(blopt)) {
+    stop("`blopt` must be one RAxML-NG branch length optimization method, such as \"nr_safe\".",
+         call. = FALSE)
+  }
   if (is.null(base_seed)) {
     base_seed <- sample.int(100000L, 1L)
     message("Using generated base seed: ", base_seed)
@@ -1750,7 +1868,8 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
   cat(paste0("  BEST_TREE_FILE=\"${RUN_DIR}/", tree_basename, "\"\n"), file = bash_script, append = TRUE)
   cat("fi\n\n", file = bash_script, append = TRUE)
 
-  cat(paste0("TOTAL_THREADS=", threads, "\n"), file = bash_script, append = TRUE)
+  # The threads granted by SLURM, as in the other two generators (AP-22).
+  cat(paste0("TOTAL_THREADS=${SLURM_CPUS_PER_TASK:-", threads, "}\n"), file = bash_script, append = TRUE)
   cat(paste0("NUM_WORKERS=", workers_val, "\n"), file = bash_script, append = TRUE)
   cat(paste0("SEED=", base_seed, "\n\n"), file = bash_script, append = TRUE)
 
@@ -1780,6 +1899,7 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
     "--threads ${TOTAL_THREADS} ",
     "--workers ${NUM_WORKERS} ",
     "--seed ${SEED} ",
+    "--blopt ", blopt, " ",
     "--force perf_threads ",
     "--extra thread-nopin "
   )
@@ -1799,6 +1919,7 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
   cat(cmd, file = bash_script, append = TRUE)
   cat("\necho \"Temporal bootstrap inference complete. Output saved to: ${TEMP_DIR}/cactus_temporal.raxml.bootstraps\"\n", file = bash_script, append = TRUE)
 
+  Sys.chmod(bash_script, mode = "0755")
   message("Generated temporal bootstrap HPC SLURM script: ", bash_script)
   return(bash_script)
 }
@@ -1818,8 +1939,9 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
 #'
 #' @param header Character string of the sequence header.
 #' @return Standardized species binomial formatted with underscores (e.g., `Copiapoa_cinerea`).
-#'   A hyphenated epithet is kept whole, so `Opuntia_ficus-indica|KJ773783.1` returns
-#'   `Opuntia_ficus-indica` and not `Opuntia_ficus`.
+#'   A hyphenated epithet is kept whole and its hyphen written as an underscore, the convention of
+#'   the terminal labels and of [standardize_taxon()] (0.5.5): `Opuntia_ficus-indica|KJ773783.1`
+#'   returns `Opuntia_ficus_indica`, not `Opuntia_ficus`.
 #' @keywords internal
 extract_species_binomial <- function(header) {
   vapply(header, function(h) {
@@ -1831,10 +1953,8 @@ extract_species_binomial <- function(header) {
     # fields taken below cut a hyphenated epithet in half (Cereus pierre-braunianus, for example).
     clean_field <- stringr::str_replace_all(first_field, "[ ]+", "_")
     parts <- strsplit(clean_field, "_", fixed = TRUE)[[1]]
-    if (length(parts) >= 2) {
-      paste0(parts[1], "_", parts[2])
-    } else {
-      clean_field
-    }
+    out <- if (length(parts) >= 2) paste0(parts[1], "_", parts[2]) else clean_field
+    # The two fields are taken before the hyphen becomes an underscore, so the epithet stays whole.
+    gsub("-", "_", out, fixed = TRUE)
   }, character(1), USE.NAMES = FALSE)
 }

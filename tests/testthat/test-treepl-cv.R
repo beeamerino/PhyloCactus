@@ -443,7 +443,7 @@ test_that("automate_treePL() repeats the check on a cross-validation read from d
       cfg_file = cfg, ml_tree_file = ml, bs_trees_file = bs,
       results_dir = file.path(tmp, "res"), treePL_out = file.path(tmp, "out"),
       num_bs = 1, numsites = 1000, outgroup = c("C", "D"), seed = 1L, n_prime = 1L,
-      treepl_bin = file.path(tmp, "absent_treePL"))), silent = TRUE),
+      treepl_bin = file.path(tmp, "absent_treePL"), reuse_unverified = TRUE)), silent = TRUE),
     warning = function(x) { w <<- c(w, conditionMessage(x)); invokeRestart("muffleWarning") })
   expect_true(any(grepl("1e-04 (1 of 10)", w, fixed = TRUE)))
 })

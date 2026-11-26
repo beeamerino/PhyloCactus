@@ -1,3 +1,55 @@
+# PhyloCactus 0.5.5
+
+This version closes the package part of the final closure review of 0.5.4 (25 November 2026). It corrects the help page of `build_constraint_scaffold()`, which described relationships the constraint imposes as estimated from the data, and fixes the other findings whose destination was the package. No analysis was run again: the supermatrix, the constraint tree, the maximum-likelihood tree, the chronograms and the identification library are those of 0.5.3. The finding of the review that each change closes is given in brackets.
+
+## What the constraint imposes
+
+* The help of `build_constraint_scaffold()` said that the constrained search estimates every relationship except the monophyly of higher ranks; the function writes a fixed topology. One description, in the help page, README (Stage 2) and Tutorial 2 (Module 8), lists what the 34 constrained bipartitions of the reference run fix: the monophyly of 19 groups (14 in Cactaceae, 5 outgroup genera), 6 bipartitions of the backbone of Cactaceae (*Leuenbergeria*, *Pereskia*, Opuntioideae, *Maihuenia*, Cactoideae, and *Blossfeldia* sister to the rest of Cactoideae), 6 within Opuntioideae and Cactoideae, and 3 of the outgroup families (Anacampserotaceae and its internal order, Talinaceae). It names the relationships left to the data (the trichotomy of Anacampserotaceae, Cactaceae and Portulacaceae, the base of core Cactoideae, everything within the groups), says that the topology is written in step 7 of the function in `R/inference.R`, and names the imposed relationships that published analyses leave unresolved or contest (the tribes of Opuntioideae, core Cactoideae II). Tutorial 2 no longer calls the relationships among the major lineages "established"; Tutorial 7 describes the function the same way [AP-01, AM-04, AB-07].
+* `build_constraint_scaffold()` loses an unreachable genus-constraint block and requires only `Specie_name` and `Clade`; its help says that the 21 groups and the topology are fixed in the code. The scaffold of the reference run is identical to `phylocactus_constraint_tree.tree` [AP-18].
+
+## Dating
+
+* `run_treePL_cv()`: each priming repeat runs with its own seed, s to s + `n_prime` - 1 from the seed of the configuration, recorded in `prime_<label>.csv`. Up to 0.5.4 the repeats used one seed, gave the same parameters, and `prime_rule` could not change the selection. The distributed chronogram was dated with the earlier behaviour [AP-02].
+* `automate_treePL()` reuses results already in `results_dir` only when they were produced with the same seed, `rescale_factor`, scaled `numsites`, calibration file, maximum-likelihood tree, priming and cross-validation settings and, for the replicates, replicate file, number of replicates, smoothing and optimization lines; each stage records them in `run_parameters_ML_tree.csv` or `run_parameters_BS_tree.csv`. A call that differs stops; a folder with results and no such record (written before 0.5.5) stops too, unless `reuse_unverified = TRUE`, which reuses it with a warning. Only the folders `BS_1` to `BS_<num_bs>` of the call are dated and collected [AP-03].
+* `automate_treePL()` restores the random state of the session on exit, reads indented calibration lines, and says when it dates an already rooted tree without applying `outgroup` [AP-20].
+* `generate_temporal_bootstrap_script()` takes `blopt`, with the default of `calculate_temporal_bootstraps()`, `nr_safe`; the temporal replicates of the reference run were estimated with `NR-FAST`, the default of `RAxML-NG` 1.2.2-master, as their log records, and Tutorial 2 passes `blopt = "nr_fast"` to reproduce them [AP-04]. The script reads its threads from `SLURM_CPUS_PER_TASK` and is made executable [AP-22].
+* Row 8 of `calibrations_bounds.csv` and Tutorial 2 name the reference node of Wu *et al*. (2026) as the most recent common ancestor of Cactaceae and Portulacaceae in a sampling without Anacampserotaceae, not the crown of the ACP clade; row 9 (ACPT) is unchanged [AP-12, C-01].
+* Tutorial 2 names the node dated as "Cactoideae crown" in its two age tables, the MRCA of the terminals of Cactoideae without *Blossfeldia*, as Cacteae plus core Cactoideae (Cactoideae without *Blossfeldia*), as do the smoothing-sensitivity chunk and `inst/scripts` [AB-02].
+* Tutorial 2 names 41.82 Ma without "median", says that core Cactoideae II was checked, not tested, by the search that released it, and no longer calls Rhipsalideae monophyletic in that search, where its monophyly stayed imposed (BMM's answers 3, 4 and 5 to the review) [AB-13, AB-05, AB-04].
+
+## Inference and data assembly
+
+* `preprocess_partitions()` removes the reduced files of an earlier check before `RAxML-NG --check`, so the reduction it reports is that of the matrix checked in the call, and takes `threads` [AP-05].
+* `run_modeltest_ng()` takes `output_dir` and `seed` (`--rngseed`); both default to the earlier behaviour [AP-23].
+* `run_marker_screening()` takes `gamma_shape`, the shape of the gamma distribution of rates in the corrected K80 distance of the saturation test, default 1, the value `ape` used for `gamma = TRUE` in earlier versions; the help, the log, Tutorial 1 and Tutorial 7 say that the thresholds 0.3 and 0.5 were set with it [AP-06].
+* A batch of GenBank metadata whose retries all fail is logged and counted, its accessions are left out of the cache so that a new call retries them, and the call stops when they exceed `max_failed_fraction` (default 0.05) of those requested; an error of `phylotaR::run()` is logged and given as a warning [AP-07]. `fetch_genbank_metadata()` deprecates `force_download`, which did nothing [AP-30].
+* `cp_normalize_marker()` turns typographic dashes into hyphens; its pattern replaced a hyphen with a hyphen [AP-25].
+* `run_concatenation_pipeline()` takes `registry_file`; `NULL` keeps the lookup in the tutorial layout. Hyphenated epithets are written with an underscore in terminal labels and by `extract_species_binomial()`, as `standardize_taxon()`, the constraint table and the distributed trees write them [AP-26].
+* `calculate_ml_tree()`, `map_branch_supports()`, `calculate_temporal_bootstraps()`, `calculate_rf_distances()` and `run_modeltest_ng()` check their input files and name each missing one; `calculate_rf_distances()` checks its binary; `map_branch_supports()` reports its own name when `RAxML-NG` fails [AP-19].
+* The help of every SLURM generator says that the default partition and modules are those of the NLHPC cluster of the reference run [AP-21]; the help of `run_local_bootstraps()` says that performance cores are detected only when `threads = NULL` [AP-28], and that of `generate_ml_search_script()` names the `ml_search/` subfolder [AP-29].
+* `validate_phylogenies()` takes `family` and roots through `root_on_clade()`; distances are computed on unrooted trees and do not change [AP-24].
+
+## Distributed data
+
+* The full-size Figures 7 and 9 (`extended_trees/` and `inst/extdata/phylocactus_figure_*.pdf`) and the annotated trees of `extended_trees/` carry the 28 groups of 0.5.4 instead of those of 0.5.3; their trees, supports and ages are unchanged [AP-09].
+* `PROVENANCE.csv` was republished with `publish_run_outputs.R` on the reference run: its row of `cactus_constraints.csv` described the file of 0.5.3, and the rows of the two figures and of `calibrations_bounds.csv` now match the files. A test compares every md5 and size of `PROVENANCE.csv` with the distributed file [AP-08].
+
+## Documentation
+
+* README, the overview and Tutorial 1 attributed errors of orthology assessment and alignment to incomplete lineage sorting and reticulation. They now say that ILS and reticulation make the histories of loci discordant, which concatenation does not model, and that orthology errors come from paralogous copies and from homeologous copies left by hybridization or polyploidy [AP-32].
+* The overview and Tutorials 2 to 6 open with the problem they address [AP-31].
+* README and the workflow figure of the package give five published trees, as Tutorial 4 compares since 0.5.4 [AP-10, AM-03]; the line under the README title names molecular identification [AP-38]; the lifecycle badge is stable (BMM's answer 7) [AP-43].
+* Tutorial 3 restricts the comparison of threatened species inside and outside the tree to assessed species, and counts 265 assessed species without sequence data (38.5% threatened), leaving out the one Not Evaluated as the manuscript does [AB-08, AB-09].
+* Tutorial 4 records the licence of the source of each reference tree, and a chunk computes its table of RF with and without the constrained bipartitions from the outputs of `validate_phylogenies()` [AP-11, AP-13].
+* Tutorials 5 to 7 follow the section structure of the other tutorials and have headings in sentence case (BMM's answer 8) [AP-45].
+* Software names are set in backticks, without bold, in the vignettes [AP-34]; Cactaceae is bold once in Tutorial 2 [AP-35]; Tutorials 3 and 7 cite Korotkova *et al*. (2021) once [AP-33].
+* Every exported function has examples; 16 of the 26 that had none run on distributed data [AP-27]. `add_outgroup_bar()` is in the reference index of the site and the internal `extract_species_binomial()` is not [AP-14, AP-30].
+
+## Package metadata and tests
+
+* `LICENSE.md` holds the full MIT text, excluded from the build, so that GitHub detects the licence [AP-16]; `parallel` is in Imports [AP-17]; the empty `biocViews` field is gone [AP-36].
+* The two tests of the cactus emoji in the classifier banner and the report run only in a UTF-8 locale [AP-39].
+
 # PhyloCactus 0.5.4
 
 This version adds the dated tree of Carruthers *et al*. (2026) to the comparison with published phylogenies (Module 13, Tutorial 4), corrects four points of the documentation, names groups of the chronogram that the figures of Tutorial 3 left without a label, and adds `add_outgroup_bar()`, which marks the outgroup in two of those figures. No analysis was run again: the supermatrix, the constraint tree, the maximum-likelihood tree, the chronograms and the identification library are those of 0.5.3.

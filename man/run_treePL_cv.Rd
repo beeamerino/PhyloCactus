@@ -28,7 +28,10 @@ run_treePL_cv(
 
 \item{label}{Run label. Every file this function writes carries it.}
 
-\item{n_prime}{Integer. Priming repeats. The default is 10.
+\item{n_prime}{Integer. Priming repeats. The default is 10. Each repeat runs with its own seed:
+with \code{seed = s} in \code{cfg_file}, the repeats use s, s + 1, ..., s + \code{n_prime} - 1, so the first
+repeat is the run a single priming would be, and \verb{prime_<label>.csv} records the seed of each
+row. Without a seed line \code{treePL} draws one for each repeat.
 
 \strong{\code{n_prime} and \code{prime_rule} interact, and not symmetrically.} Under \code{"modal"} the selection
 is stable in \code{n_prime}: more repeats sharpen an estimate of the most frequent combination.
@@ -158,6 +161,12 @@ subsample, returned as \code{cv_smoothing_all_subsamples}; both curves are writt
 \verb{cv_<label>_selection.csv}, and the account to \verb{cv_<label>_selection.txt}.
 }
 
+\examples{
+# Needs the external program and the files of a run
+\dontrun{
+run_treePL_cv("calibrations.cfg", "ml_tree_rooted.tree", label = "ML_tree")
+}
+}
 \references{
 Maurin, K. J. L. (2020). An empirical guide for producing a dated phylogeny with treePL in a
 maximum likelihood framework. \emph{arXiv}:2008.07054. \doi{10.48550/arXiv.2008.07054}

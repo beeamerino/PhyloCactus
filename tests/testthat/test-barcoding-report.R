@@ -386,6 +386,8 @@ test_that("the report names the kind of data at its start and the library it use
 
 test_that("the report carries the cactus of PhyloCactus in its title", {
   skip_if_not_installed("Biostrings")
+  # Outside a UTF-8 locale R writes the cactus as <U+0001F335> (AP-39).
+  skip_if_not(isTRUE(l10n_info()$`UTF-8`), "not a UTF-8 locale")
   f <- .rep_fixture(withr::local_tempdir())
   .rep_run(f)
   h <- .rep_html(f)

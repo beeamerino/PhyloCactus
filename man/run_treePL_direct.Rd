@@ -30,6 +30,12 @@ the binary is invoked, because \code{treePL} fails opaquely on an unrooted tree.
 configuration declares no \code{treefile}, or the declared path cannot be resolved, the check is
 skipped with a warning and the run continues.
 }
+\examples{
+# Needs the external program and the files of a run
+\dontrun{
+run_treePL_direct("configure_smooth_ML_tree", label = "ML_tree", cwd = "8_Dating/ML_tree")
+}
+}
 \references{
 Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
 for large phylogenies. \emph{Bioinformatics}, 28(20), 2689-2690. \doi{10.1093/bioinformatics/bts492}

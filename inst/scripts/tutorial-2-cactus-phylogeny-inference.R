@@ -374,6 +374,7 @@ if (run_local_temporal_bs) {
     bs_trees = 100, # Adjust to 500 or 1000 for production.
     threads = 8,
     workers = 2,
+    blopt = "nr_fast",                                # As the replicates of the reference run (NR-FAST in their log)
     output_dir = paths$temporal_bs_dir,
     prefix = paths$temporal_bs_prefix
   )
@@ -397,7 +398,8 @@ if (run_local_temporal_bs) {
     cluster_nodes = 1L,
     cluster_mem = "24G",                              # RAM memory allocation (--mem; 6.0 GiB used, 500 replicates, 1208 terminals)
     cluster_time = "04:00:00",                        # Walltime limit (--time HH:MM:SS; 1 h 08 min used, 500 replicates, 1208 terminals)
-    cluster_mail_user = Sys.getenv("MY_EMAIL", "")
+    cluster_mail_user = Sys.getenv("MY_EMAIL", ""),
+    blopt = "nr_fast"                                 # As the replicates of the reference run (NR-FAST in their log)
   )
   cat("   Temporal bootstrap HPC script generated at:", hpc_temp_bs_script, "\n")
   cat("   Submit on cluster: cd cactus_temporal_bs && sbatch run_temporal_bs.sh\n")
@@ -528,7 +530,9 @@ cat("   Calibrations compiled successfully to:", calibrations_cfg_path, "\n")
 cat("\nRunning automated `treePL` wrapper script over maximum-likelihood tree and bootstrap replicates...\n")
 
 # Priming, cross-validation and dating follow the protocol of Maurin (2020, arXiv:2008.07054) and
-# run through run_treePL_cv(). The priming parameters are the lowest of the repeats,
+# run through run_treePL_cv(). Priming is repeated with consecutive seeds from the seed of the run
+# (0.5.5; up to 0.5.4 every repeat had the same seed and gave the same parameters), and the
+# priming parameters are the lowest of the repeats,
 # cross-validation uses `randomcv`, and the smoothing grid runs from 1e+03 to 1e-14, one value per
 # order of magnitude. The grid extends well below the 1e-06 to 1e-08 range reported by Maurin, so
 # that a plateau can be distinguished from a search that stopped at the edge of the grid.
@@ -599,8 +603,8 @@ if (file.exists(cv_file)) {
 
 # 5. Smoothing sensitivity
 # The same tree dated across the grid and beyond it. ACP_root is the only calibrated node, and its
-# age is fixed, so the ages read are those of the root and of the crowns of Cactaceae, Cactoideae,
-# Cacteae and Opuntioideae, given to `nodes` as sets of terminals. Read the range of each node from
+# age is fixed, so the ages read are those of the root and of the crowns of Cactaceae, Cactoideae
+# without Blossfeldia (Subfam of Blossfeldia is "Blossfeldia"), Cacteae and Opuntioideae, given to `nodes` as sets of terminals. Read the range of each node from
 # 1e-14 to 1e-02; values of 1 and above lie outside the part of the curve the selection reads.
 sensitivity_cfg <- file.path(dating_dir, "auto_results", "ML_tree", "configure_smooth_ML_tree")
 if (file.exists(sensitivity_cfg)) {
@@ -612,7 +616,7 @@ if (file.exists(sensitivity_cfg)) {
     nodes = list(
       root = tip_labels,
       Cactaceae_crown = tips_for("Family", "Cactaceae"),
-      Cactoideae_crown = tips_for("Subfam", "Cactoideae"),
+      Cactoideae_without_Blossfeldia_crown = tips_for("Subfam", "Cactoideae"),
       Cacteae_crown = tips_for("Clade", "Cacteae"),
       Opuntioideae_crown = tips_for("Subfam", "Opuntioideae")
     )

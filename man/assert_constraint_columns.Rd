@@ -15,4 +15,9 @@ Invisible \code{TRUE} if validation passes; throws error otherwise.
 \description{
 Verifies that the input taxonomic constraint data frame contains required classification columns.
 }
+\examples{
+ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+assert_constraint_columns(constraints_tbl)
+}
 \keyword{internal}

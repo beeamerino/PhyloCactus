@@ -168,6 +168,11 @@ root_on_clade <- function(phy, outgroup) {
 #' @references
 #' Smith, S. A., & O’Meara, B. C. (2012). treePL: divergence time estimation using penalized likelihood
 #' for large phylogenies. *Bioinformatics*, 28(20), 2689-2690. \doi{10.1093/bioinformatics/bts492}
+#' @examples
+#' # Needs the external program and the files of a run
+#' \dontrun{
+#' run_treePL_direct("configure_smooth_ML_tree", label = "ML_tree", cwd = "8_Dating/ML_tree")
+#' }
 #' @export
 run_treePL_direct <- function(cfg_file, label, cwd = NULL, treepl_bin = "treePL"){
   if (!is.null(cwd)) {
@@ -343,7 +348,18 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL, treepl_bin = "treePL"
 #'   maximum-likelihood stage is read from disk.
 #' @param ml_tree_file Character. Path to input maximum-likelihood reference tree file.
 #' @param bs_trees_file Character. Path to input temporal bootstrap trees file.
-#' @param results_dir Character. Directory path to save intermediate optimization results.
+#' @param results_dir Character. Directory path to save intermediate optimization results. Results
+#'   already in it are reused only when they were produced with the same inputs and parameters:
+#'   each stage writes its seed, `rescale_factor`, scaled `numsites`, the md5 of `cfg_file` and of the
+#'   rescaled maximum-likelihood tree, the priming and cross-validation settings and, for the
+#'   replicates, the md5 of `bs_trees_file`, the number of replicates, the smoothing and the
+#'   optimization lines, to `ML_tree/run_parameters_ML_tree.csv` and
+#'   `BS_tree/run_parameters_BS_tree.csv`. A call whose values differ, or a folder with results and
+#'   no such table (written before 0.5.5), stops, unless `reuse_unverified = TRUE`. Only the folders
+#'   `BS_1` to `BS_<num_bs>` of the call are dated and collected.
+#' @param reuse_unverified Logical. `TRUE` reuses results in `results_dir` that carry no record of
+#'   the parameters they were produced with (written before 0.5.5), with a warning; results whose
+#'   record differs from the call are never reused. Defaults to `FALSE`.
 #' @param treePL_out Character. Destination directory path for final output chronograms.
 #' @param num_bs Integer or NULL. Maximum number of temporal bootstrap trees to evaluate. If `NULL`, processes all available trees.
 #' @param numsites Integer or NULL. Alignment length, in sites, of the supermatrix actually analyzed. If `NULL`, the `numsites` line already present in `cfg_file` is used. This must be the length of the matrix `RAxML-NG` analyzed (typically the `*.raxml.reduced.phy` produced by `preprocess_partitions()`), not a rounded figure: `treePL` uses it to convert branch lengths into expected substitution counts, so an incorrect value biases the rate smoothing. Declare the true alignment length here; the division by `rescale_factor` is applied internally.
@@ -354,7 +370,7 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL, treepl_bin = "treePL"
 #'
 #'   **Why a clade and not a terminal.** Rooting is imposed after the search: `RAxML-NG` returns an unrooted topology and the root is placed on a chosen edge. Naming a single terminal of a sampled outgroup clade places the root *inside* that clade, leaving it paraphyletic in the final tree and collapsing its crown node onto the root. Any calibration addressed by the MRCA of that clade then lands on the root instead of on the node it was written for. Supplying the whole clade places the root on its stem edge, which is the intended edge. Rooting is performed by `root_on_clade()`, which also handles the basal polytomy `RAxML-NG` writes.
 #'
-#'   Bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error.
+#'   Bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error. A maximum-likelihood tree that is already rooted is dated with its own root, and a message says that `outgroup` is not applied to it.
 #'
 #'   **Topological assumption.** Placing the root on the outgroup lineage (Talinaceae or Portulacaceae) establishes the basal split for dating. In the reference dataset, Talinaceae roots the tree, placing the root on the stem of the ACP clade (Anacampserotaceae, Cactaceae, Portulacaceae) and allowing maximum-likelihood inference to test alternative topological resolutions among the three core families (Ramirez-Barahona et al., 2020; Zuntini et al., 2024). State this assumption in Methods, and treat the root age as conditional on it.
 #' @param seed Integer or NULL. Seed for every stochastic step of the run: R's choice of which
@@ -363,7 +379,7 @@ run_treePL_direct <- function(cfg_file, label, cwd = NULL, treepl_bin = "treePL"
 #'   `treePL` seeds itself from the clock when the keyword is absent. A fixed `seed` reproduces the
 #'   run when cross-validation uses one thread, which is the default of `cv_nthreads`. Defaults to
 #'   `NULL`, which draws one and reports it; record the reported value, as it is required to
-#'   reproduce the run.
+#'   reproduce the run. The random state of the session is restored on exit.
 #' @param cv_nthreads Integer. Number of threads for the cross-validation stage. Defaults to `1L`,
 #'   which makes the cross-validation curve reproducible for a given `seed`. See [run_treePL_cv()].
 #' @param cv_outlier_factor One number above 1, or `NULL`. Random subsamples of the cross-validation that fail, or
@@ -411,7 +427,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             cv_method = c("randomcv", "cv"),
                             cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, cv_outlier_factor = 5,
                             wrapper_sh = NULL, notify = FALSE, notify_to = NULL, notify_credentials = NULL,
-                            treepl_bin = "treePL") {
+                            treepl_bin = "treePL", reuse_unverified = FALSE) {
 
   .check_cv_outlier_factor(cv_outlier_factor)
 
@@ -427,7 +443,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
       numsites = numsites, outgroup = outgroup, seed = seed,
       rescale_factor = rescale_factor, n_prime = n_prime, prime_rule = prime_rule,
       cv_method = cv_method, cvstart = cvstart, cvstop = cvstop, cv_nthreads = cv_nthreads,
-      cv_outlier_factor = cv_outlier_factor, wrapper_sh = wrapper_sh, treepl_bin = treepl_bin
+      cv_outlier_factor = cv_outlier_factor, wrapper_sh = wrapper_sh, treepl_bin = treepl_bin,
+      reuse_unverified = reuse_unverified
     )
   }
 
@@ -463,6 +480,48 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
   invisible(result)
 }
 
+#' Run parameters of a treePL stage, written beside its results and checked before they are reused
+#'
+#' `.automate_treePL_run()` writes one `key,value` table per stage (`run_parameters_ML_tree.csv` in
+#' `ML_tree/`, `run_parameters_BS_tree.csv` in `BS_tree/`). A later call on the same `results_dir`
+#' reuses the results only when every value is the same; otherwise, or when results exist without
+#' the table (runs of 0.5.4 and earlier), it stops and says which values differ.
+#' @noRd
+.write_treepl_signature <- function(path, signature) {
+  utils::write.csv(data.frame(key = names(signature),
+                              value = vapply(signature, function(v) paste(as.character(v), collapse = "; "), ""),
+                              stringsAsFactors = FALSE),
+                   path, row.names = FALSE)
+  invisible(path)
+}
+
+#' @noRd
+.check_treepl_signature <- function(path, signature, what, dir, reuse_unverified = FALSE) {
+  if (!file.exists(path) && isTRUE(reuse_unverified)) {
+    warning(dir, " holds ", what, " with no record of the parameters it was produced with (results ",
+            "written before PhyloCactus 0.5.5); reused because reuse_unverified = TRUE.", call. = FALSE)
+    return(invisible(FALSE))
+  }
+  if (!file.exists(path)) {
+    stop(dir, " already holds ", what, ", but no record of the parameters it was produced with (",
+         basename(path), "; results written before PhyloCactus 0.5.5). It cannot be told apart from ",
+         "a run with other calibrations, seed or settings. Give a new `results_dir`, or remove ", dir,
+         " to date again.", call. = FALSE)
+  }
+  old <- utils::read.csv(path, stringsAsFactors = FALSE, colClasses = "character")
+  new <- vapply(signature, function(v) paste(as.character(v), collapse = "; "), "")
+  old_v <- stats::setNames(old$value, old$key)[names(new)]
+  differ <- names(new)[is.na(old_v) | old_v != new]
+  if (length(differ)) {
+    stop(dir, " already holds ", what, " produced with other parameters (",
+         paste(sprintf("%s: %s, now %s", differ, old_v[differ], new[differ]), collapse = "; "),
+         "). Give a new `results_dir`, or remove ", dir, " to date again.", call. = FALSE)
+  }
+  message("Reusing ", what, " in ", dir, ": same parameters as the run that produced them.")
+  invisible(TRUE)
+}
+
+
 #' Body of automate_treePL(), unchanged
 #'
 #' Separated from the exported function so that the notification wrapper can time the run and catch
@@ -474,7 +533,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                             prime_rule = c("lowest", "modal"),
                             cv_method = c("randomcv", "cv"),
                             cvstart = 1e3, cvstop = 1e-14, cv_nthreads = 1L, cv_outlier_factor = 5,
-                            wrapper_sh = NULL, treepl_bin = "treePL") {
+                            wrapper_sh = NULL, treepl_bin = "treePL", reuse_unverified = FALSE) {
 
   prime_rule <- match.arg(prime_rule)
   cv_method <- match.arg(cv_method)
@@ -505,6 +564,14 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
 
   # STEP 0: Fix and rescale maximum-likelihood tree
   ml_tree <- ape::read.tree(ml_tree_file)
+
+  # An already rooted maximum-likelihood tree is dated with its own root, and a rooting set given
+  # by the user is then not applied to it; the user is told (closure review of 0.5.4, AP-20). The
+  # set is still used to root the bootstrap replicates that come unrooted.
+  if (ape::is.rooted(ml_tree) && !is.null(outgroup)) {
+    message("The maximum-likelihood tree is already rooted and is dated with its own root; ",
+            "`outgroup` is not applied to it, only to unrooted bootstrap replicates.")
+  }
 
   # A clade-level rooting set cannot be a package constant: it depends on what the supermatrix
   # actually sampled. With `outgroup = NULL` it is derived from the tree itself.
@@ -610,7 +677,22 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
   # Carried out by run_treePL_cv(), which implements the protocol of Maurin (2020) in R. Until
   # 2026-09-02 this called out to a vendored copy of an unlicensed shell script; see the notes in
   # R/treepl_cv.R for why that had to go and what the shell script got wrong.
+  # A chronogram already in results_dir is reused only if it was produced with the same inputs and
+  # parameters (closure review of 0.5.4, AP-03): until 0.5.4 its mere presence was enough, so a call
+  # with other calibrations or another seed returned the old chronogram.
+  ml_signature <- list(
+    seed = format(seed, scientific = FALSE), rescale_factor = rescale_factor,
+    numsites_scaled = numsites_scaled, cfg_file_md5 = unname(tools::md5sum(cfg_file_abs)),
+    ml_tree_md5 = unname(tools::md5sum(ml_tree_fixed_file_abs)), n_prime = n_prime,
+    prime_rule = prime_rule, cv_method = cv_method, cvstart = cvstart, cvstop = cvstop,
+    cv_outlier_factor = if (is.null(cv_outlier_factor)) "NULL" else cv_outlier_factor
+  )
+  ml_signature_file <- file.path(ml_dir, "run_parameters_ML_tree.csv")
   ml_cached <- file.exists(file.path(ml_dir, "treepl_ML_tree.tre"))
+  if (ml_cached) {
+    .check_treepl_signature(ml_signature_file, ml_signature, "the maximum-likelihood chronogram", ml_dir,
+                            reuse_unverified = reuse_unverified)
+  }
   if (!ml_cached) {
     run_treePL_cv(cfg_file = cfg_ml_scaled_abs,
                   tree_file = ml_tree_fixed_file_abs,
@@ -624,6 +706,7 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
                   cv_outlier_factor = cv_outlier_factor,
                   treepl_bin = treepl_bin,
                   work_dir = ml_dir)
+    .write_treepl_signature(ml_signature_file, ml_signature)
   } else {
     cat("treePL results for the maximum-likelihood tree already exist! Skipping treePL run.\n")
   }
@@ -697,8 +780,28 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
   # Resolved above, before the maximum-likelihood configuration was written. Used here for R's own
   # choice of which replicates to date, and written into each replicate's configuration below so
   # that treePL's annealing is seeded too.
+  # The session's generator is given back on exit (AP-20), as Module 14 does.
+  restore_rng <- .bc_rng_state()
+  on.exit(restore_rng(), add = TRUE)
   set.seed(seed)
   bs_subset <- sample(bs_all, num_bs_to_use)
+
+  # Replicates already dated in BS_tree/ are reused only if they come from the same maximum-
+  # likelihood stage, replicate file, number of replicates and dating parameters (AP-03).
+  bs_signature <- c(ml_signature, list(
+    bs_trees_md5 = unname(tools::md5sum(normalizePath(bs_trees_file, mustWork = TRUE))),
+    num_bs = num_bs_to_use, smoothing = format(best_smoothing, scientific = FALSE),
+    opt_lines = paste(opt_lines, collapse = "; ")
+  ))
+  bs_signature_file <- file.path(bs_out_dir, "run_parameters_BS_tree.csv")
+  bs_labels <- paste0("BS_", seq_len(num_bs_to_use))
+  bs_done <- list.files(bs_out_dir, pattern = "^treepl_BS_[0-9]+\\.tre$", recursive = TRUE)
+  if (length(bs_done)) {
+    .check_treepl_signature(bs_signature_file, bs_signature, "the dated bootstrap replicates", bs_out_dir,
+                            reuse_unverified = reuse_unverified)
+  } else {
+    .write_treepl_signature(bs_signature_file, bs_signature)
+  }
   
   # Detect local Performance-core count once (constant across all bootstrap replicates) for
   # consistency with the dynamic P-core thread allocation used elsewhere for RAxML-NG steps,
@@ -745,7 +848,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
       # across replicates would correlate their annealing, and no seed at all would leave each to
       # the clock and make the confidence interval unreproducible.
       paste0("seed = ", format((as.numeric(seed) + i) %% 2147483647, scientific = FALSE)),
-      grep("^mrca|^min|^max", readLines(cfg_file_abs), value = TRUE),
+      # Calibration lines may be indented, as numsites and seed may (AP-20).
+      trimws(grep("^\\s*(mrca|min|max)\\s*=", readLines(cfg_file_abs), value = TRUE)),
       paste0("nthreads = ", treepl_threads),
       "thorough",
       opt_lines,
@@ -758,8 +862,9 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
     writeLines(cfg_content, bs_cfg_file)
   }
   
-  # STEP 5: Execute treePL for each bootstrap tree
-  bs_folders <- list.dirs(bs_out_dir, recursive = FALSE)
+  # STEP 5: Execute treePL for each bootstrap tree. Only the folders of this call, BS_1 to
+  # BS_<num_bs>, are run and collected; folders of an earlier, larger call are left out (AP-03).
+  bs_folders <- file.path(bs_out_dir, bs_labels)
   for(bs_folder in bs_folders){
     label <- basename(bs_folder)
     out_tree <- file.path(bs_folder, paste0("treepl_", label, ".tre"))
@@ -796,7 +901,6 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
     message(Sys.time(), " - treePL chronogram for maximum-likelihood tree copied to: ", ml_results_dir)
   }
   
-  bs_folders <- list.dirs(bs_out_dir, recursive = FALSE)
   for(bs_folder in bs_folders){
     bs_treepl <- list.files(bs_folder, pattern = "^treepl_.*\\.tre$", full.names = TRUE)
     if(length(bs_treepl) == 1){
@@ -811,6 +915,8 @@ automate_treePL <- function(cfg_file, ml_tree_file, bs_trees_file, results_dir, 
     recursive = TRUE,
     full.names = TRUE
   )
+  # Same order as before 0.5.5 (that of list.files()), restricted to the replicates of this call.
+  bs_treepl_files <- bs_treepl_files[basename(dirname(bs_treepl_files)) %in% bs_labels]
   
   out_bs_all <- file.path(treePL_out, "bsTree_treePL.tree")
   file.create(out_bs_all)

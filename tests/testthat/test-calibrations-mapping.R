@@ -188,9 +188,14 @@ test_that("calibrations_bounds.csv carries the three calibration schemes, with s
     expect_false(grepl("_calibration_scheme_[0-9]+$", r$reference), info = age)
   }
 
-  # The ACP and ACPT crowns of Wu et al. (2026) as reference rows (doi:10.1038/s41477-026-02311-x).
+  # Two reference rows of Wu et al. (2026) (doi:10.1038/s41477-026-02311-x): the MRCA of Cactaceae and
+  # Portulacaceae in a tree without Anacampserotaceae, compared with ACP_root, and the ACPT crown.
+  # The first is not shown to be the ACP crown and its label does not call it so (0.5.5, AP-12).
   wu <- calibs[startsWith(calibs$reference, "Wu_2026"), ]
   expect_setequal(wu$mrca, c("ACP_root", "ACPT_root"))
+  wu_acp <- wu$reference[wu$mrca == "ACP_root"]
+  expect_false(grepl("ACP_crown", wu_acp))
+  expect_true(grepl("MRCA_Cactaceae_Portulacaceae_no_Anacampserotaceae_sampled", wu_acp))
   expect_equal(unname(unlist(wu[wu$mrca == "ACP_root", c("min", "max")])), c(28.90, 54.67))
   expect_equal(unname(unlist(wu[wu$mrca == "ACPT_root", c("min", "max")])), c(31.18, 56.57))
   expect_false(any(wu$used_in_analysis))

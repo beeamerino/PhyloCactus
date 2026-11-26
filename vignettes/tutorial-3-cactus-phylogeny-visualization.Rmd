@@ -26,6 +26,8 @@ knitr::opts_chunk$set(
 
 ## Abstract
 
+A phylogeny of more than a thousand species is read through what is known of each terminal: its accepted name, the loci that represent it, its place in the tree and its conservation status. These facts come from different sources, which do not always use the same name for the same species.
+
 This tutorial covers the third stage of the phylogenetic workflow: integration of species metadata, figures of the phylogenetic trees, and summaries of conservation status.
 It uses the supermatrix, maximum-likelihood tree, bootstrap support values and chronogram produced in [Tutorial 1](https://beeamerino.github.io/PhyloCactus/articles/tutorial-1-cactus-phylogeny-prep.html) and [Tutorial 2](https://beeamerino.github.io/PhyloCactus/articles/tutorial-2-cactus-phylogeny-inference.html).
 
@@ -111,7 +113,7 @@ marker_stats_file <- "6_Concatenated/final_tables/TABLE_marker_statistics.csv"
 marker_ranges_file <- "6_Concatenated/final_tables/TABLE_marker_ranges.tsv"
 
 # Canonical inputs that do not change across runs
-# The checklist (Korotkova et al. 2021) is read from the local path in PHYLOCACTUS_CHECKLIST
+# The checklist is read from the local path in PHYLOCACTUS_CHECKLIST
 accepted_list_file <- phylocactus_checklist()
 constraints_csv_path <- system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus")
 
@@ -724,7 +726,7 @@ p10
 
 #### Figure 11
 
-Figure 11 gives the conservation status of the species in the tree. Of the 839 assessed species, 221 (26.3%) are threatened (CR, EN or VU). Among the accepted species without sequence data, 266 have an assessment and 102 of them (38.3%) are threatened, so threatened species make up a larger share of what is missing from the tree than of what it contains.
+Figure 11 gives the conservation status of the species in the tree. Of the 839 assessed species, 221 (26.3%) are threatened (CR, EN or VU). Among the accepted species without sequence data, 265 have an assessment, leaving out the one species Not Evaluated, and 102 of them (38.5%) are threatened. Among assessed species, threatened species therefore make up a larger share of those missing from the tree than of those it contains; most species without sequence data have no assessment, and the comparison says nothing about them.
 
 ```{r figure_11_iucn_categories, eval = has_data, fig.cap = "**Figure 11.** IUCN Red List category of the 839 ingroup species of the tree that have an assessment; the other 341 of the 1,180 have none and are not shown. LC, least concern (532); EN, endangered (94); VU, vulnerable (76); CR, critically endangered (51); DD, data deficient (51); NT, near threatened (35). Colours of the IUCN Red List categories."}
 if (any(species_summary_iucn$iucn_found, na.rm = TRUE)) {

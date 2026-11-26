@@ -16,7 +16,8 @@ run_marker_screening(
   saturation_keep_cutoff = 0.5,
   iqr_multiplier = 1.5,
   saturation_method = c("corrected", "legacy"),
-  gap_handling = c("iupac", "legacy")
+  gap_handling = c("iupac", "legacy"),
+  gamma_shape = 1
 )
 }
 \arguments{
@@ -45,6 +46,13 @@ This module asks whether a locus resolves the ingroup radiation, and the answer 
 \item{saturation_method}{Character. Method for saturation test distance calculation. Defaults to \code{"corrected"}.}
 
 \item{gap_handling}{Character. Method for handling ambiguous and gap characters. Defaults to \code{"iupac"}.}
+
+\item{gamma_shape}{Numeric. Shape (alpha) of the gamma distribution of rates in the corrected K80
+distance (\code{ape::dist.dna(model = "K80", gamma = gamma_shape)}). Defaults to \code{1}. Up to 0.5.4 the
+code passed \code{gamma = TRUE}, which \code{ape} takes as a shape of 1, without declaring it; the
+reference run used that value, and the thresholds \code{saturation_flag_cutoff} (0.3) and
+\code{saturation_keep_cutoff} (0.5) were set with it. The slope depends on the shape: a smaller value
+corrects more and lowers the slope.}
 }
 \value{
 A data frame summarizing saturation statistics, alignment dimensions, and retention decisions across screened loci.

@@ -15,4 +15,7 @@ Character vector of formatted taxon names.
 \description{
 Standardizes scientific taxon binomials by replacing whitespace, dashes, and duplicate underscores with single underscores.
 }
+\examples{
+standardize_taxon(c("Opuntia ficus-indica", " Pereskia  aculeata "))
+}
 \keyword{internal}

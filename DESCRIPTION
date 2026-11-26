@@ -2,7 +2,7 @@ Package: PhyloCactus
 Type: Package
 Title: Phylogenetic Inference, Divergence Time Estimation and 
     Molecular Identification for Cactaceae
-Version: 0.5.4
+Version: 0.5.5
 Authors@R: c(
     person("Beatriz M.", "Meriño", email = "beeatrizmerino@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-9518-2331")),
     person("Tania", "Hernández-Hernández", role = "ctb"),
@@ -41,6 +41,7 @@ Imports:
     ggtree,
     patchwork,
     TreeDist,
+    parallel,
     cowplot,
     tibble,
     seqinr,
@@ -62,7 +63,6 @@ Suggests:
     pkgdown,
     treeio
 VignetteBuilder: knitr
-biocViews:
 Remotes: ropensci/phylotaR
 Roxygen: list(markdown = TRUE)
 Config/roxygen2/version: 8.1.0

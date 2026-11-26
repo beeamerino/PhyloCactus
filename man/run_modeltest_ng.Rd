@@ -9,7 +9,9 @@ run_modeltest_ng(
   aln_file,
   part_file,
   prefix = "MODELTEST_cactus_phylo",
-  threads = 4
+  threads = 4,
+  output_dir = NULL,
+  seed = NULL
 )
 }
 \arguments{
@@ -24,6 +26,13 @@ model syntax such as \code{GTR+FC+G4m+B} and aborts with a segmentation fault on
 \item{prefix}{Character. Output filename prefix. Defaults to \code{"MODELTEST_cactus_phylo"}.}
 
 \item{threads}{Integer. Number of processing threads. Defaults to \code{4}.}
+
+\item{output_dir}{Character or \code{NULL}. Directory for the outputs of \code{ModelTest-NG}, created if
+needed. \code{NULL} (default) writes them, as before 0.5.5, relative to the working directory.}
+
+\item{seed}{Integer or \code{NULL}. Seed of the random number generator of \code{ModelTest-NG}
+(\code{--rngseed}). \code{NULL} (default) leaves it to the program, as before 0.5.5; give a value to make
+the run reproducible and record it.}
 }
 \value{
 Character path to the resulting partition file containing selected model parameters (\code{.part.aicc}).

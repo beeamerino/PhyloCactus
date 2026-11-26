@@ -27,3 +27,9 @@ Character path to the resulting RF distance output file (\code{.raxml.rfdist}).
 Computes pairwise Robinson-Foulds (RF) topological distances across tree topologies generated during maximum-likelihood search in \code{RAxML-NG}.
 Quantifying topological variance evaluates whether independent search runs converged on identical tree topologies.
 }
+\examples{
+# Needs the external program and the files of a run
+\dontrun{
+calculate_rf_distances("raxml-ng", "cactus_ml.raxml.mlTrees")
+}
+}

@@ -51,7 +51,9 @@ generate_ml_search_script(
 
 \item{preparse}{Logical. Pre-parse the alignment into compressed binary \code{.rba} format before the search? Defaults to \code{TRUE}.}
 
-\item{output_dir}{Character. Destination directory for the script and its outputs. Defaults to \code{getwd()}.}
+\item{output_dir}{Character. Parent directory of the job. The script and the outputs of the search
+are written to its subfolder \verb{ml_search/} (\code{file.path(output_dir, "ml_search")}), created if
+needed. Defaults to \code{getwd()}.}
 
 \item{script_name}{Character. Name of the generated Bash script. Defaults to \code{"run_ml_search.sh"}.}
 
@@ -59,7 +61,7 @@ generate_ml_search_script(
 
 \item{cluster_job_name}{Character. SLURM job name. Defaults to \code{"cactus_ml"}.}
 
-\item{cluster_partition}{Character. SLURM partition. Defaults to \code{"main"}.}
+\item{cluster_partition}{Character. SLURM partition. Defaults to \code{"main"}, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.}
 
 \item{cluster_nodes}{Integer. Number of compute nodes requested (\verb{--nodes}). Defaults to \code{1L}.}
 
@@ -71,8 +73,7 @@ generate_ml_search_script(
 
 \item{cluster_mail_user}{Character. Notification recipient email address for SLURM (\verb{--mail-user}). Defaults to \code{Sys.getenv("MY_EMAIL", "")}.}
 
-\item{load_module}{Character vector. Environment modules to load. Defaults to the NLHPC Leftraru
-\code{RAxML-NG} toolchain.}
+\item{load_module}{Character vector. Environment modules to load. Defaults to \code{c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")}, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or \code{NULL} to load none.}
 
 \item{raxml_exec}{Character. \code{RAxML-NG} executable invoked inside the job. Defaults to \code{"raxml-ng-mpi"}.}
 }

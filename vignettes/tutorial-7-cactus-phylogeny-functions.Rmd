@@ -21,9 +21,11 @@ knitr::opts_chunk$set(
 This page lists the main functions of the `PhyloCactus` workflow, grouped by stage, with the method each one implements and its primary reference.
 Arguments and return values are documented in the manual pages and in the `pkgdown` reference index.
 
-## Functions by Stage
+## Complete pipeline execution workflow
 
-### Sequence Assembly
+The functions below are grouped by the stage of the workflow in which they run.
+
+### Sequence assembly
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -31,12 +33,12 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `assemble_outgroup_phylotar()` | Retrieves sequence clusters for the outgroup genera of Anacampserotaceae, Portulacaceae and Talinaceae, for the loci selected in the ingroup. | Bennett et al. (2018) |
 | `fetch_genbank_metadata()` | Retrieves the organism name and definition line of each GenBank accession through `ape::read.GenBank()`, in batches with retries, and caches them. | Paradis & Schliep (2019) |
 
-### Alignment and Quality Control
+### Alignment and quality control
 
 | Function | Description | Reference |
 |:---|:---|:---|
 | `run_alignment_pipeline()` | Aligns each locus with `MAFFT` and masks poorly aligned columns with `DECIPHER::MaskAlignment()`. | Katoh & Standley (2013); Wright (2024) |
-| `run_marker_screening()` | Screens each locus alignment for coverage, length and substitution saturation, by regressing uncorrected p-distance against the gamma-corrected K80 distance. The slope threshold below which a locus is rejected is a `PhyloCactus` criterion, not a published saturation test; the references cover the distance model only. | Kimura (1980); Jin & Nei (1990) |
+| `run_marker_screening()` | Screens each locus alignment for coverage, length and substitution saturation, by regressing uncorrected p-distance against the gamma-corrected K80 distance, with a gamma shape of 1 (`gamma_shape`). The slope thresholds (0.3 to flag, 0.5 to keep) were set with that shape. The slope threshold below which a locus is rejected is a `PhyloCactus` criterion, not a published saturation test; the references cover the distance model only. | Kimura (1980); Jin & Nei (1990) |
 | `clean_taxonomic_names()` | Keeps the sequences whose name is in the checklist of Cactaceae, ignoring differences in spaces, hyphens and underscores, and renames them to the spelling of the checklist. | Korotkova et al. (2021) |
 | `run_joint_realignment()` | Realigns each locus with `MAFFT` after the ingroup and outgroup sequences are combined. | Katoh & Standley (2013) |
 
@@ -46,17 +48,17 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 |:---|:---|:---|
 | `run_concatenation_pipeline()` | Concatenates the locus alignments into a supermatrix and writes partition maps in RAxML format (read by `RAxML-NG`, `ModelTest-NG` and `IQ-TREE`) and NEXUS format, with configuration files for `PartitionFinder2` and `MrBayes`. | Not applicable |
 
-### Model Selection and Maximum-Likelihood Inference
+### Model selection and maximum-likelihood inference
 
 | Function | Description | Reference |
 |:---|:---|:---|
 | `preprocess_partitions()` | Checks the supermatrix and partition map with `RAxML-NG` before model selection. | Kozlov et al. (2019) |
 | `run_modeltest_ng()` | Selects a substitution model for each partition with `ModelTest-NG` under the AICc. | Darriba et al. (2020) |
-| `build_constraint_scaffold()` | Builds a multifurcating constraint tree that enforces the monophyly of subfamilies and major clades of Cactaceae established in published phylogenies. | Guerrero et al. (2019) |
+| `build_constraint_scaffold()` | Builds the multifurcating constraint tree of the maximum-likelihood search: the monophyly of 21 groups, the backbone of Cactaceae, the arrangement within Opuntioideae and Cactoideae and the outgroup families, taken from published phylogenies; its help page lists each imposed relationship and those left to the data. | Guerrero et al. (2019) |
 | `calculate_ml_tree()` | Estimates the maximum-likelihood tree with `RAxML-NG` under the partition models and the constraint tree, from 25 random and 25 parsimony starting trees by default. | Kozlov et al. (2019) |
 | `map_branch_supports()` | Maps Felsenstein bootstrap proportions (FBP) or transfer bootstrap expectation (TBE) from the bootstrap replicates onto the maximum-likelihood tree. | Felsenstein (1985); Lemoine et al. (2018) |
 
-### Divergence Time Estimation
+### Divergence time estimation
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -66,7 +68,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `automate_treePL()` | Selects the optimization parameters and the smoothing value by cross-validation on the maximum-likelihood tree, dates it, and applies them to every temporal bootstrap replicate. | Smith & O'Meara (2012); Maurin (2020) |
 | `send_run_notification()` | Sends an email when a long analysis ends, reporting status, timings and output paths. A failure to send does not stop the analysis. | `blastula` R package, <https://github.com/rstudio/blastula> |
 
-### Comparison, Figures and IUCN Data
+### Comparison, figures and IUCN data
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -75,18 +77,18 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `get_iucn_data()` | Retrieves the IUCN Red List assessment of a species through `rredlist`: category, criteria, population trend, countries of occurrence, endemism, habitats and threats. | IUCN (2026) |
 | `scale_fill_iucn()` | `ggplot2` fill scale with the standard IUCN Red List category colors. | IUCN (2026) |
 
-### Molecular Identification: the Library (Tutorial 5, Steps 1 to 4)
+### Molecular identification: the library (Tutorial 5, steps 1 to 4)
 
 | Function | Description | Reference |
 |:---|:---|:---|
-| `assemble_barcoding_dataset()` | Names the clusters of the phylotaR mining of the phylogeny by locus, cuts records over 2000 bases to the extent of the shorter records of their locus, reconciles every name against the checklist and, optionally, adds the user's own sequences. | Bennett et al. (2018); Korotkova et al. (2021) |
+| `assemble_barcoding_dataset()` | Names the clusters of the phylotaR mining of the phylogeny by locus, cuts records over 2000 bases to the extent of the shorter records of their locus, reconciles every name against the checklist and, optionally, adds the user's own sequences. | Bennett et al. (2018) |
 | `curate_barcoding_markers()` | Aligns each locus with `MAFFT`, puts every sequence on one strand and masks poorly aligned columns, with the parameters of the phylogeny's ingroup. | Katoh & Standley (2013); Wright (2024) |
 | `screen_barcoding_markers()` | Decides which loci enter the library by the number of species with two or more sequences, and flags saturation and possible paralogy without excluding. | |
 | `finalize_barcoding_library()` | Excludes and declares non-homologous sequences, collapses identical sequences of one species and writes the library, one alignment per locus. | |
 | `extract_barcoding_plastome_loci()` | Crops the library loci from GenBank plastomes as extra records; a plastome does not add a locus that a library record of the same specimen already holds. | |
 | `barcoding_outgroup_taxids()` | The NCBI Taxonomy IDs of the six genera of Anacampserotaceae, Portulacaceae and Talinaceae that the outgroup control asks the library about. | |
 
-### Molecular Identification: Validation (Tutorial 5, Steps 5 to 10)
+### Molecular identification: validation (Tutorial 5, steps 5 to 10)
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -100,7 +102,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `summarise_barcoding_metrics()` | Per locus and scheme: species correct, genus correct, wrong species, wrong genus and unassigned, and precision and recall per class. | |
 | `summarise_barcoding_genus_discrimination()` | How well each locus tells apart the species of each genus in the folds, shown in the identification report beside the answer. | |
 
-### Molecular Identification: Identifying a Sample (Tutorial 5, Step 11)
+### Molecular identification: identifying a sample (Tutorial 5, step 11)
 
 | Function | Description | Reference |
 |:---|:---|:---|
@@ -112,7 +114,9 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | `plot_barcoding_identification()` | Draws the answer per locus of an identification, and the sampling of the named genera, from the tables of its report. | |
 | `plot_barcoding_identification_summary()` | Draws the answers of several identifications side by side, one row per identification and one column per locus. | |
 
-### Help Pages
+## Conclusion
+
+Each function has a manual page with its arguments, defaults, return value and references:
 
 ```{r, eval = FALSE}
 library(PhyloCactus)

@@ -213,7 +213,7 @@ merge_barcoding_chunks <- function(library_dir = file.path("11_barcoding", "4_li
 #'   `classifier_dir`.
 #' @param cluster_job_name Character. SLURM job name; the merge job adds `_merge`. Defaults to
 #'   `"cactus_idtaxa"`.
-#' @param cluster_partition Character. SLURM partition. Defaults to `"main"`.
+#' @param cluster_partition Character. SLURM partition. Defaults to `"main"`, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.
 #' @param cluster_mem Character. Memory per task (`--mem`). Defaults to `"4G"`.
 #' @param cluster_time Character. Time limit per task (`-t`). Defaults to `"04:00:00"`.
 #' @param cluster_queue Character. Optional SLURM QoS (`-q`). Defaults to `NULL`.

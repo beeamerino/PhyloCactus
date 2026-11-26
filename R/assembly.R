@@ -697,8 +697,14 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
 #' @param batch_size Integer. Number of sequence IDs requested per HTTP batch query. Defaults to `200`.
 #' @param sleep_time Numeric. Pause duration in seconds between consecutive batch requests to respect NCBI rate limits. Defaults to `0.5`.
 #' @param max_retries Integer. Maximum retry attempts permitted per batch before failing. Defaults to `5`.
-#' @param force_download Logical. Not used in this version: records already in `cache_file` are always reused. Defaults to `FALSE`.
-#' @return A data frame with columns `sid`, `Species_gb` and `Description_gb`.
+#' @param force_download Deprecated and ignored: records already in `cache_file` are always reused.
+#'   Defaults to `FALSE`; `TRUE` gives a warning. Delete `cache_file` to download every record again.
+#' @param max_failed_fraction Numeric between 0 and 1. A batch whose `max_retries` attempts all fail
+#'   is logged and its accessions counted; when the failed accessions exceed this fraction of those
+#'   requested, the function stops instead of returning a table in which they would lack a species
+#'   and description. Defaults to `0.05`.
+#' @return A data frame with columns `sid`, `Species_gb` and `Description_gb`, with the accessions
+#'   of failed batches in its attribute `failed_sids`.
 #' @examples
 #' \dontrun{
 #' fetch_genbank_metadata(
@@ -707,8 +713,14 @@ assemble_outgroup_phylotar <- function(wd_path, target_genes_file = NULL, genes_
 #' )
 #' }
 #' @export
-fetch_genbank_metadata <- function(sids, cache_file, batch_size = 200, sleep_time = 0.5, max_retries = 5, force_download = FALSE) {
-  cp_download_all_metadata(sids, cache_file, batch_size, sleep_time, max_retries, log_message = message)
+fetch_genbank_metadata <- function(sids, cache_file, batch_size = 200, sleep_time = 0.5, max_retries = 5, force_download = FALSE,
+                                   max_failed_fraction = 0.05) {
+  if (isTRUE(force_download)) {
+    warning("`force_download` is deprecated and ignored: records in `cache_file` are always reused. ",
+            "Delete the cache to download them again.", call. = FALSE)
+  }
+  cp_download_all_metadata(sids, cache_file, batch_size, sleep_time, max_retries, log_message = message,
+                           max_failed_fraction = max_failed_fraction)
 }
 
 # --- Shared Utilities (Unexported) ---
@@ -717,8 +729,10 @@ cp_clean_species_name <- function(x) {
   trimws(gsub("\\s+", "_", gsub("\\.", "", x)))
 }
 
+# Typographic dashes and hyphens (U+2010 to U+2015, U+2212) become an ASCII hyphen. Up to 0.5.4 the
+# pattern was "-|-", a hyphen for a hyphen, which did nothing (AP-25).
 cp_normalize_marker <- function(x) {
-  stringr::str_replace_all(stringr::str_replace_all(trimws(x), "\\s+", " "), "-|-", "-")
+  stringr::str_replace_all(stringr::str_replace_all(trimws(x), "\\s+", " "), "[\u2010-\u2015\u2212]", "-")
 }
 
 cp_build_pattern <- function(markers) {
@@ -731,7 +745,11 @@ cp_get_cluster_parent <- function(phylota_obj, cid) {
   as.character(phylota_obj@clstrs@clstrs[[cid_chr]]@prnt)
 }
 
-cp_download_all_metadata <- function(sid_vector, cache_csv, batch_size = 200L, sleep_time = 0.5, max_retries = 5L, log_message = function(...) {}) {
+# A batch whose retries all fail is logged and counted, and the call stops when the failed accessions
+# exceed max_failed_fraction of those requested (AP-07): until 0.5.4 such a batch was dropped without
+# a message and its sequences reached the cluster table without species or description.
+cp_download_all_metadata <- function(sid_vector, cache_csv, batch_size = 200L, sleep_time = 0.5, max_retries = 5L, log_message = function(...) {},
+                                     max_failed_fraction = 0.05) {
   sid_vector <- sort(unique(as.character(sid_vector)))
   if (length(sid_vector) == 0) return(tibble::tibble(sid = character(), Species_gb = character(), Description_gb = character()))
   
@@ -742,6 +760,7 @@ cp_download_all_metadata <- function(sid_vector, cache_csv, batch_size = 200L, s
   
   missing_sids <- setdiff(sid_vector, cached$sid)
   new_metadata <- list()
+  failed_sids <- character(0)
   if (length(missing_sids) > 0) {
     blocks <- split(missing_sids, ceiling(seq_along(missing_sids) / batch_size))
     for (i in seq_along(blocks)) {
@@ -754,16 +773,33 @@ cp_download_all_metadata <- function(sid_vector, cache_csv, batch_size = 200L, s
         Sys.sleep(pause)
         pause <- pause * 2
       }
-      if (!is.null(gb)) {
+      if (!is.null(gb) && !is.null(attr(gb, "species"))) {
         new_metadata[[i]] <- tibble::tibble(sid = names(gb), Species_gb = attr(gb, "species"), Description_gb = attr(gb, "description"))
+      } else {
+        failed_sids <- c(failed_sids, blocks[[i]])
+        log_message("Metadata batch ", i, "/", length(blocks), " unrecovered after ", max_retries,
+                    " attempts (", length(blocks[[i]]), " accessions).")
       }
     }
   }
-  
+
   all_metadata <- dplyr::bind_rows(cached, dplyr::bind_rows(new_metadata)) |> dplyr::distinct(sid, .keep_all = TRUE)
   if(nrow(all_metadata) > 0) readr::write_csv(all_metadata, cache_csv)
-  
-  all_metadata |> dplyr::filter(sid %in% sid_vector)
+
+  if (length(failed_sids) > 0) {
+    frac <- length(failed_sids) / length(sid_vector)
+    log_message("Metadata not retrieved for ", length(failed_sids), " of ", length(sid_vector),
+                " accessions (", sprintf("%.1f%%", 100 * frac), "); they are not cached and a new call retries them.")
+    if (frac > max_failed_fraction) {
+      stop("GenBank metadata could not be retrieved for ", length(failed_sids), " of ", length(sid_vector),
+           " accessions (", sprintf("%.1f%%", 100 * frac), "), above max_failed_fraction = ", max_failed_fraction,
+           ". The records retrieved are cached in ", cache_csv, "; run again to retry the rest.", call. = FALSE)
+    }
+  }
+
+  out <- all_metadata |> dplyr::filter(sid %in% sid_vector)
+  attr(out, "failed_sids") <- failed_sids
+  out
 }
 
 cp_fetch_seed_metadata <- function(sids, batch_size = 200L, sleep_time = 0.5, max_retries = 5L, log_message = function(...) {}) {
@@ -986,10 +1022,16 @@ cp_write_cluster_fastas <- function(phylota_obj, outdir) {
     )
 
     log_message("Executing phylotaR::run()...")
+    # An error of phylotaR::run() is logged and warned; the workspace read afterwards may hold only
+    # the stages completed before it (AP-07).
+    run_error <- NULL
     tryCatch({
       run_fn(wd = wd_path)
     }, error = function(erun) {
-      log_message("Error in phylotaR::run(): ", erun$message)
+      run_error <<- conditionMessage(erun)
+      log_message("Error in phylotaR::run(): ", run_error)
+      warning("phylotaR::run() failed (", run_error, "); the workspace is read as it stands and may be ",
+              "incomplete. See the log of the run.", call. = FALSE)
     })
 
     log_message("Attempting to load phylota object after run()...")

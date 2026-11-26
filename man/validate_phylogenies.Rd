@@ -12,7 +12,8 @@ validate_phylogenies(
   min_tips = 4L,
   pruning_strategy = c("common_set", "pairwise"),
   rooting_genus = "Leuenbergeria",
-  tree_labels = NULL
+  tree_labels = NULL,
+  family = "Cactaceae"
 )
 }
 \arguments{
@@ -41,7 +42,8 @@ This differs from the rooting used elsewhere in \code{PhyloCactus}. The comparis
 \emph{Leuenbergeria} is sister to the rest of the family in the focal tree. The distances and the
 tree-space projection are computed on unrooted trees and do not depend on this choice; the
 rooting affects only the exported trees. All terminals of the genus are used, not one, for the reasons
-given in \code{resolve_rooting_outgroup()}. Trees lacking the genus are left unrooted and flagged in
+given in \code{resolve_rooting_outgroup()}, and the root is placed by \code{root_on_clade()}, which roots on
+the stem of the genus even when the tree as read is rooted inside it. Trees lacking the genus are left unrooted and flagged in
 \code{SUPP_rooting_summary}.}
 
 \item{tree_labels}{Named character vector or \code{NULL}. Legend labels for the trees in the tree-space
@@ -51,6 +53,10 @@ of Tutorial 4 as \code{"Zuntini et al. (2024)"}, \code{"Thompson et al. (2024)"}
 \code{"Amaral et al. (2022)"}, \code{"de Vos et al. (2025)"} and \code{"Carruthers et al. (2026)"}, and the
 focal tree as \code{"This study"}.
 Supplied labels replace the defaults of the same name.}
+
+\item{family}{Character. The family the comparison is restricted to: the terminals of each tree
+are kept only if the checklist places them in it, and the constraint table is read for its
+species. Defaults to \code{"Cactaceae"}.}
 }
 \value{
 A named list containing file paths for generated tables (\code{tables}), figures (\code{figures}), trees (\code{trees}), and the combined ggplot object (\code{plot}).

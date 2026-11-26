@@ -34,7 +34,8 @@ run_local_bootstraps(
 
 \item{seed}{Integer. Random seed for reproducible bootstrap initialization. Defaults to \code{NULL} (random).}
 
-\item{threads}{Integer. Number of CPU threads. Defaults to \code{8} (or detected P-cores).}
+\item{threads}{Integer. Number of CPU threads. Defaults to \code{8}, which is used as given; the
+performance cores of the machine are detected only when \code{threads = NULL} (or \code{NA}).}
 
 \item{workers}{Integer. Parallel worker process count. If \code{NULL} (default), automatically calculated as \code{max(1L, as.integer(threads / threads_per_worker))}.}
 
@@ -60,6 +61,13 @@ Unlike \code{generate_bootstrap_script()}'s HPC-oriented default (empirically ca
 the \code{threads_per_worker = 4L} default here has not been empirically validated for bootstrap workloads on Apple
 Silicon specifically (the only timings measured on that hardware are of single-threaded maximum-likelihood searches). Treat this default as a reasonable starting heuristic and re-validate empirically (e.g., time a
 short run with \code{bs_trees} set low, at a couple of \code{threads_per_worker} values) before committing to a long local run.
+}
+\examples{
+# Needs the external program and the files of a run
+\dontrun{
+run_local_bootstraps("raxml-ng", "supermatrix.phy", "cactus_modeltest.part.aicc",
+                     "cactus_constraints.tree", bs_trees = 100, seed = 2150)
+}
 }
 \references{
 Kozlov, A. M., Darriba, D., Flouri, T., Morel, B., & Stamatakis, A. (2019). RAxML-NG: a fast, scalable and

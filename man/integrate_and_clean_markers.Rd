@@ -70,6 +70,14 @@ written to \code{tables/TABLE_alias_collisions_resolved.csv} with its source fil
 whether it was retained, and a warning names the affected headers.
 }
 
+\examples{
+# Needs the folders of a run
+\dontrun{
+integrate_and_clean_markers("3_Saturation/filtered_markers",
+                            "3_Saturation_Outgroup/filtered_markers",
+                            output_dir = "4_Cleaned")
+}
+}
 \references{
 Korotkova, N., Aquino, D., Arias, S., Eggli, U., Franck, A., Gómez-Hinostrosa, C., Guerrero, P. C.,
 Hernández, H. M., Kohlbecker, A., Köhler, M., Luther, K., Majure, L. C., Müller, A., Metzing, D.,

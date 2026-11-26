@@ -29,7 +29,7 @@
 # (anomalous random subsamples left out of the selection, cv_outlier_factor = 5), the
 # maximum-likelihood tree and 100 temporal replicates at the selected smoothing, and
 # report_smoothing_sensitivity() over eleven values, reading the root and the crowns of Cactaceae,
-# Cactoideae, Cacteae and Opuntioideae. Each scheme is written to the folder Tutorial 2 uses for it,
+# Cactoideae without Blossfeldia (Cacteae plus core Cactoideae), Cacteae and Opuntioideae. Each scheme is written to the folder Tutorial 2 uses for it,
 # 8_Dating/<scheme folder>; a scheme whose folder already holds BestTree_treePL.tree is not dated
 # again. The seed is that of the reference run, so scheme 1 reproduces the distributed chronogram.
 # The re-dating of the reference run took 3.1 h on the Mac for four schemes, three at a time.
@@ -71,7 +71,7 @@ rooting_outgroup <- resolve_rooting_outgroup(tip_labels, pattern = "^(Talinum|Ta
 nodes <- list(
   root = tip_labels,
   Cactaceae_crown = tips_for("Family", "Cactaceae"),
-  Cactoideae_crown = tips_for("Subfam", "Cactoideae"),
+  Cactoideae_without_Blossfeldia_crown = tips_for("Subfam", "Cactoideae"),
   Cacteae_crown = tips_for("Clade", "Cacteae"),
   Opuntioideae_crown = tips_for("Subfam", "Opuntioideae")
 )
@@ -141,7 +141,8 @@ print(age_table)
 # The fossil pollen of Ramirez-Arriaga et al. (2026), from 15.6 Ma evaporites of the Tehuacan
 # Formation, includes tricolpate grains that the authors compare with Cephalocereus and Mammillaria.
 # Placed on the clade joining those genera, it implies a minimum for the common ancestor of
-# Pachycereeae and Cacteae, which on this tree is the crown of Cactoideae, and a scheme returning that
+# Pachycereeae and Cacteae, which on this tree is the crown of Cactoideae without Blossfeldia
+# (Cacteae plus core Cactoideae), and a scheme returning that
 # node younger than 15.6 Ma would conflict with it. The placement is an assumption: the paper gives
 # an affinity, not an assignment to a clade. It is not the only fossil of the family: the same paper
 # cites Eopuntia douglassii, an Eocene macrofossil of the Green River Formation compared with Opuntia,

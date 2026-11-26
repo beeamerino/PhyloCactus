@@ -83,6 +83,12 @@
 #' @param out_dir Character. Publication figures directory.
 #' @param collapse_cutoff Numeric. Felsenstein Bootstrap Proportion (FBP) threshold below which weakly supported nodes are collapsed into soft polytomies (0.0 to 1.0; default 0.70; collapsing 840 of 1171 free nodes in the reference dataset).
 #' @return A data frame listing exported figure files and threshold parameters.
+#' @examples
+#' # Needs the folders of a run
+#' \dontrun{
+#' integrate_publication_tree("cactus_support.raxml.support", "dated_summary_hpd.tree",
+#'                            out_dir = "9_Visualization")
+#' }
 #' @export
 integrate_publication_tree <- function(ml_support_tree_path, summary_chronogram_path, constraints_path = NULL, out_dir, collapse_cutoff = 0.70) {
 

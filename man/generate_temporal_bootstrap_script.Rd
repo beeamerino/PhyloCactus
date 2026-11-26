@@ -25,7 +25,8 @@ generate_temporal_bootstrap_script(
   cluster_queue = NULL,
   cluster_mail_user = Sys.getenv("MY_EMAIL", ""),
   load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"),
-  raxml_exec = "raxml-ng-mpi"
+  raxml_exec = "raxml-ng-mpi",
+  blopt = "nr_safe"
 )
 }
 \arguments{
@@ -55,7 +56,7 @@ generate_temporal_bootstrap_script(
 
 \item{cluster_job_name}{Character. SLURM job name identifier. Defaults to \code{"cactus_temp_bs"}.}
 
-\item{cluster_partition}{Character. SLURM partition name. Defaults to \code{"main"}.}
+\item{cluster_partition}{Character. SLURM partition name. Defaults to \code{"main"}, the partition of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the partition of your own cluster.}
 
 \item{cluster_nodes}{Integer. Number of compute nodes requested (\code{--nodes}). Defaults to \code{1L}.}
 
@@ -67,16 +68,28 @@ generate_temporal_bootstrap_script(
 
 \item{cluster_mail_user}{Character. Notification recipient email address for SLURM (\code{--mail-user}). Defaults to \code{Sys.getenv("MY_EMAIL", "")}.}
 
-\item{load_module}{Character vector or string. Environment module(s) to load prior to execution. Defaults to \code{c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")}.}
+\item{load_module}{Character vector or string. Environment module(s) to load prior to execution. Defaults to \code{c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")}, the modules of the NLHPC cluster (Leftraru, Chile) on which the reference run ran; give the modules of your own cluster, or \code{NULL} to load none.}
 
 \item{raxml_exec}{Character. Executable \code{RAxML-NG} binary command. Defaults to \code{"raxml-ng-mpi"}.}
+
+\item{blopt}{Character. Branch length optimization method written as \code{--blopt} (\code{"nr_safe"} or
+\code{"nr_fast"}). Defaults to \code{"nr_safe"}, the default of \code{\link[=calculate_temporal_bootstraps]{calculate_temporal_bootstraps()}}, so that
+the cluster and the local routes optimize branch lengths the same way. Until 0.5.4 the script
+wrote no \code{--blopt}, and \code{RAxML-NG} used its own default: the temporal replicates of the reference
+run (\code{RAxML-NG} 1.2.2-master on the cluster) were estimated with \code{NR-FAST}, as their log
+records; pass \code{blopt = "nr_fast"} to reproduce them.}
 }
 \value{
-Character path to the generated SLURM batch script file.
+Character path to the generated SLURM batch script file, which is made executable.
 }
 \description{
 Writes a self-contained SLURM batch script for running high-throughput temporal bootstrap replicate inference
 using MPI-enabled \code{RAxML-NG} (\code{raxml-ng-mpi}) on a compute cluster. Temporal bootstraps constrain the maximum-likelihood
 tree topology and re-estimate branch lengths across bootstrap matrices, generating empirical distributions of branch
 lengths for downstream divergence time estimation (\code{treePL}) without introducing topological discordance.
+}
+\examples{
+generate_temporal_bootstrap_script("supermatrix.phy", "partitions.txt", "best.tree",
+                                   base_seed = 87786, output_dir = tempdir(),
+                                   cluster_mail_user = "")
 }

@@ -32,4 +32,14 @@ A \code{tibble} of node annotations.
 \description{
 Retrieves internal node numbers for monophyletic taxonomic groups across a phylogenetic tree.
 }
+\examples{
+# A pruned copy of the distributed chronogram and the constraint table
+ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+            "Cylindropuntia", "Tephrocactus", "Maihuenia")
+tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) \%in\% genera])
+constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+get_annotation_nodes(tree, constraints_tbl, "Annot_level_2")
+}
 \keyword{internal}

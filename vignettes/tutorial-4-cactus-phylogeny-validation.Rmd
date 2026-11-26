@@ -18,7 +18,9 @@ knitr::opts_chunk$set(
 
 ## Abstract
 
-This tutorial compares the tree inferred in Tutorials 1 and 2 with five published phylogenies of Cactaceae. Comparison with published trees shows which relationships are shared and which differ.
+A tree inferred from public sequences can differ from published phylogenies because of its taxon sampling, its loci or its topological constraint, and the published trees differ among themselves in the same respects. Comparing them shows which relationships are shared and which differ.
+
+This tutorial compares the tree inferred in Tutorials 1 and 2 with five published phylogenies of Cactaceae.
 
 The reference trees are those of Amaral *et al*. (2022), Thompson *et al*. (2024), Zuntini *et al*. (2024), de Vos *et al*. (2025) and Carruthers *et al*. (2026). The trees of Zuntini *et al*. (2024) and de Vos *et al*. (2025) are based on hundreds of nuclear genes.
 
@@ -35,13 +37,15 @@ The five reference trees are those of Amaral *et al*. (2022), Thompson *et al*. 
 The user obtains each tree from its source, saves the five in one folder under the names below, and sets the path of the folder in `~/.Renviron` as `PHYLOCACTUS_REFERENCE_TREES`.
 The comparison also reads the checklist of Cactaceae (Korotkova *et al*. 2021) from the local path in `PHYLOCACTUS_CHECKLIST` (`phylocactus_checklist()`; Tutorial 1).
 
-| File in the folder | Study | Where the file is | File there | md5 of the file the reference run read |
-|---|---|---|---|---|
-| `reference_amaral_2022.tree` | Amaral *et al*. (2022) | Figshare, <https://doi.org/10.6084/m9.figshare.17057816> | `dataset+tree_80MD/Tree_80MD.tre` | `185926b62a0a01b3187750e664e0fcf7` |
-| `reference_thompson_2024.tree` | Thompson *et al*. (2024) | GitHub, <https://github.com/jamie-thompson/cactaceae> | `Alignment, accessions and tree/treepl_cacti.tre` | `df479c182a14028aa710b508aebaa458` |
-| `reference_zuntini_2024.tree` | Zuntini *et al*. (2024) | Kew Tree of Life, release 4.0, SFTP server of Kew (`sftp.kew.org`, folder `pub/treeoflife`) | `treeoflife.all_support_values.4.0.tree`, pruned to Cactaceae (below) | `319e6985225858b836ab2ff37054b3e5` |
-| `reference_devos_2025_astral.tree` | de Vos *et al*. (2025) | Online Resource 4 of the article, <https://doi.org/10.1007/s00606-025-01948-z> | `QC.Species_tree_astral.tree` | `5ceb901a0555521da1a14f0815787362` |
-| `reference_carruthers_2026.tree` | Carruthers *et al*. (2026) | OSF, <https://doi.org/10.17605/OSF.IO/9TBHA> | `best.tre_dated`, pruned to Cactaceae (below) | `cdb7218a73ae92c868ae837d18c3256f` |
+| File in the folder | Study | Where the file is | File there | md5 of the file the reference run read | Licence of the source |
+|---|---|---|---|---|---|
+| `reference_amaral_2022.tree` | Amaral *et al*. (2022) | Figshare, <https://doi.org/10.6084/m9.figshare.17057816> | `dataset+tree_80MD/Tree_80MD.tre` | `185926b62a0a01b3187750e664e0fcf7` | CC BY 4.0 (Figshare record) |
+| `reference_thompson_2024.tree` | Thompson *et al*. (2024) | GitHub, <https://github.com/jamie-thompson/cactaceae> | `Alignment, accessions and tree/treepl_cacti.tre` | `df479c182a14028aa710b508aebaa458` | None stated in the repository |
+| `reference_zuntini_2024.tree` | Zuntini *et al*. (2024) | Kew Tree of Life, release 4.0, SFTP server of Kew (`sftp.kew.org`, folder `pub/treeoflife`) | `treeoflife.all_support_values.4.0.tree`, pruned to Cactaceae (below) | `319e6985225858b836ab2ff37054b3e5` | CC BY 4.0 (release notes of release 4.0) |
+| `reference_devos_2025_astral.tree` | de Vos *et al*. (2025) | Online Resource 4 of the article, <https://doi.org/10.1007/s00606-025-01948-z> | `QC.Species_tree_astral.tree` | `5ceb901a0555521da1a14f0815787362` | Article under CC BY 4.0; no separate licence for Online Resource 4 |
+| `reference_carruthers_2026.tree` | Carruthers *et al*. (2026) | OSF, <https://doi.org/10.17605/OSF.IO/9TBHA> | `best.tre_dated`, pruned to Cactaceae (below) | `cdb7218a73ae92c868ae837d18c3256f` | CC0 1.0 Universal (OSF project page) |
+
+The licences were read on the pages of the sources (OSF on 13 November 2026; the others on 26 November 2026); the repository of Thompson *et al*. (2024) has no licence file, so its terms are those of the authors. The package distributes none of the five trees.
 
 Three files are used as their studies deposited them, and two are pruned from larger trees. The tree of Kew is pruned to its 218 terminals of Cactaceae, their labels are shortened from `Order_Family_Genus_species_<run>` to `Genus_species`, and one of the two terminals of *Trichocereus macrogonus* is dropped (`Trichocereus_macrogonus_var._pachanoi_ERR13173055`). The chunk below does this: its tree has the 217 terminals and the topology of the file of the reference run (Robinson-Foulds distance 0), without the node annotations of Kew, so its md5 differs.
 
@@ -185,7 +189,7 @@ The distance matrix is projected onto two dimensions by classical MDS; trees tha
 The Module 10 chronogram is rooted on Talinaceae, but the family filter removes all terminals outside Cactaceae, and *Leuenbergeria* is sister to the rest of the family in the focal tree.
 The genus can be changed with `rooting_genus`; trees without it are left unrooted and flagged in `SUPP_rooting_summary`.
 
-**The constraint.** The focal tree was inferred under the topological constraint of Module 8 (Tutorial 2), so part of its agreement with each reference is imposed by the constraint and not found by the data. On each shared taxon set, 9 to 17 of the bipartitions the focal tree shares with a reference are imposed by the constraint: 28 to 37 % of the shared bipartitions in the small sets A1 and A4, where the deep splits weigh most, and 5 to 8 % in the large sets of Thompson *et al*. (2024), Amaral *et al*. (2022) and Carruthers *et al*. (2026). The table below gives, for the reference run, the published RF beside the RF without the constrained bipartitions, removed from both trees of the pair. Every distance rises, by 0.010 to 0.100. For example, the RF of A1 against Zuntini *et al*. (2024) rises from 0.193 to 0.238. The order of the references by distance does not change in any set. Tutorial 2 weighs the constrained bipartitions absent from each reference by the support of the reference clades that contradict them: the two nuclear trees contradict none at the level of a tribe with support, while Amaral *et al*. (2022) contradicts two relationships at that level with support, Tephrocacteae with Opuntieae (ultrafast bootstrap 100) and core Cactoideae I with II (99), and places Rhipsalideae outside the rest of core Cactoideae at ultrafast bootstrap 87, below the 95 at which the documentation of IQ-TREE advises relying on that measure (Minh *et al*., 2013; Hoang *et al*., 2018).
+**The constraint.** The focal tree was inferred under the topological constraint of Module 8 (Tutorial 2), so part of its agreement with each reference is imposed by the constraint and not found by the data. On each shared taxon set, 9 to 17 of the bipartitions the focal tree shares with a reference are imposed by the constraint: 28 to 37 % of the shared bipartitions in the small sets A1 and A4, where the deep splits weigh most, and 5 to 8 % in the large sets of Thompson *et al*. (2024), Amaral *et al*. (2022) and Carruthers *et al*. (2026). The table below gives, for the reference run, the published RF beside the RF without the constrained bipartitions, removed from both trees of the pair. Every distance rises, by 0.010 to 0.100. For example, the RF of A1 against Zuntini *et al*. (2024) rises from 0.193 to 0.238. The order of the references by distance does not change in any set. Tutorial 2 weighs the constrained bipartitions absent from each reference by the support of the reference clades that contradict them: the two nuclear trees contradict none at the level of a tribe with support, while Amaral *et al*. (2022) contradicts two relationships at that level with support, Tephrocacteae with Opuntieae (ultrafast bootstrap 100) and core Cactoideae I with II (99), and places Rhipsalideae outside the rest of core Cactoideae at ultrafast bootstrap 87, below the 95 at which the documentation of `IQ-TREE` advises relying on that measure (Minh *et al*., 2013; Hoang *et al*., 2018).
 
 | Set | Reference | Shared terminals | Imposed and in the reference | RF | RF without the constrained bipartitions |
 |---|---|---|---|---|---|
@@ -207,8 +211,49 @@ The genus can be changed with `rooting_genus`; trees without it are left unroote
 | A4 | de Vos | 76 | 14 | 0.315 | 0.368 |
 | A4 | Carruthers | 76 | 10 | 0.548 | 0.610 |
 
+The chunk below computes this table from the outputs of `validate_phylogenies()` (the pruned trees in `trees/` and the distance table in `tables/` of its `out_dir`) and the distributed constraint tree. For each pair of the focal tree and a reference on a shared taxon set, it takes the bipartitions of the two pruned trees and those the constraint imposes on the shared terminals (the constraint tree pruned to them; in set A4, to the species that represents each genus), and computes the normalized RF with and without the constrained bipartitions, removed from both trees.
+
+```{r, eval = FALSE}
+library(ape)
+val_out <- "10_Validation"    # out_dir of validate_phylogenies() in the run of this tutorial
+con <- read.tree(system.file("extdata", "phylocactus_constraint_tree.tree", package = "PhyloCactus"))
+
+bipartitions <- function(tr) {
+  tr <- unroot(tr); pp <- prop.part(tr); lab <- attr(pp, "labels"); ref <- sort(lab)[1]; n <- length(lab)
+  k <- vapply(pp, function(i) {
+    s <- lab[i]; if (ref %in% s) s <- setdiff(lab, s)
+    if (length(s) < 2 || length(s) > n - 2) NA_character_ else paste(sort(s), collapse = "|")
+  }, "")
+  unique(stats::na.omit(k))
+}
+rf_norm <- function(a, b) length(c(setdiff(a, b), setdiff(b, a))) / (length(a) + length(b))
+
+dist_tab <- read.csv(file.path(val_out, "tables", "TABLE_pairwise_tree_distances_main.csv"))
+reps <- read.csv(file.path(val_out, "tables", "SUPP_genus_representatives.csv"))
+reps <- reps[reps$tree == "FocalTree", ]
+pairs <- dist_tab[dist_tab$metric == "RF" & (dist_tab$tree_1 == "FocalTree" | dist_tab$tree_2 == "FocalTree"), ]
+pairs$reference <- ifelse(pairs$tree_1 == "FocalTree", pairs$tree_2, pairs$tree_1)
+
+rf_without_constraint <- do.call(rbind, lapply(seq_len(nrow(pairs)), function(i) {
+  a <- pairs$analysis_id[i]; ref <- pairs$reference[i]
+  f <- read.tree(file.path(val_out, "trees", sprintf("TREE_FocalTree_%s.tre", a)))
+  r <- read.tree(file.path(val_out, "trees", sprintf("TREE_%s_%s.tre", ref, a)))
+  common <- intersect(f$tip.label, r$tip.label)
+  fp <- keep.tip(f, common); rp <- keep.tip(r, common)
+  if (grepl("^A4", a)) {   # genera: the constraint is pruned to the species that represents each genus
+    sp <- reps$representative_species_original[match(common, reps$genus)]
+    cp <- keep.tip(con, sp); cp$tip.label <- common[match(cp$tip.label, sp)]
+  } else cp <- keep.tip(con, common)
+  Fb <- bipartitions(fp); Rb <- bipartitions(rp); Cb <- bipartitions(cp)
+  data.frame(set = substr(a, 1, 2), reference = ref, shared_terminals = length(common),
+             imposed_in_reference = sum(Cb %in% Rb), RF = rf_norm(Fb, Rb),
+             RF_without_constraint = rf_norm(setdiff(Fb, Cb), setdiff(Rb, Cb)))
+}))
+print(rf_without_constraint, digits = 3, row.names = FALSE)
+```
+
 **What each reference can test.** The tree of Zuntini *et al*. (2024) is built on a constrained backbone of at most five samples per family, so its deep relationships within Cactaceae are not an independent test of the constraint (Tutorial 2). The tree of Thompson *et al*. (2024) carries no support values, and its root is set at 37.24 Ma, the upper end of the 95 % HPD interval of the Cactaceae crown in Ramírez-Barahona *et al*. (2020), so its ages are not independent of calibration scheme 2 (Tutorial 2, Module 10). It is a comparison tree only, and a distance to it says nothing on the support of a conflict.
-The tree of Amaral *et al*. (2022) was inferred from GenBank sequences mined with `phylotaR`, the source of this package too, aligned with MAFFT, concatenated and analysed with IQ-TREE 2.1 under constraints on core Cactoideae and on Cacteae, with five outgroup species. The tree used here is that of their matrix with up to 80 % missing data (`Tree_80MD.tre`, 921 species after their filtering), chosen by the authors among matrices with 40, 60 and 80 % missing data. Its supports are ultrafast bootstrap values of IQ-TREE 2, which are not on the scale of the standard bootstrap. It shares its source of data with the focal tree and is not an independent test of it.
+The tree of Amaral *et al*. (2022) was inferred from GenBank sequences mined with `phylotaR`, the source of this package too, aligned with `MAFFT`, concatenated and analysed with `IQ-TREE` 2.1 under constraints on core Cactoideae and on Cacteae, with five outgroup species. The tree used here is that of their matrix with up to 80 % missing data (`Tree_80MD.tre`, 921 species after their filtering), chosen by the authors among matrices with 40, 60 and 80 % missing data. Its supports are ultrafast bootstrap values of `IQ-TREE` 2, which are not on the scale of the standard bootstrap. It shares its source of data with the focal tree and is not an independent test of it.
 The tree of Carruthers *et al*. (2026) grafts species-level trees onto the dated backbone of Zuntini *et al*. (2024). Each species-level tree was inferred with `RAxML` 8.2.12 from GenBank sequences assembled with `PyPHLAWD`, under a topological constraint built from the NCBI taxonomy. The monophyly of the genera in that tree follows from the constraint, and its sequences come from GenBank, as those of the focal tree do, so it is not an independent test of the focal tree either.
 
 **Trees compared.** The five reference trees are read from the folder in `PHYLOCACTUS_REFERENCE_TREES`. The focal tree is the chronogram produced in Module 10, `8_Dating/Zuntini2024_young/dated_summary_hpd.tree`. 

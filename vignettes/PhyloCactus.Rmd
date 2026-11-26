@@ -17,11 +17,11 @@ knitr::opts_chunk$set(
 ```
 ## Overview
 
-`PhyloCactus` is an R package for assembling, curating and analyzing multilocus sequence datasets built from public DNA sequences. It covers sequence retrieval from GenBank, quality control, phylogenetic inference, divergence time estimation, visualization and comparison with published phylogenies.
-
-Multilocus datasets assembled from GenBank inherit the heterogeneity of decades of deposition: inconsistent locus annotations, duplicated accessions, records without vouchers, orthographic variants and nomenclatural synonyms. Converting these records into a phylogenetic matrix requires taxonomic curation against an accepted checklist (Korotkova *et al*., 2021), and quality control of each alignment. The difficulty increases in plant lineages that diversified recently and rapidly, where low plastid divergence, incomplete lineage sorting (ILS) and reticulate evolution increase the risk of erroneous orthology assessment and of alignment error.
+Multilocus datasets assembled from GenBank inherit the heterogeneity of decades of deposition: inconsistent locus annotations, duplicated accessions, records without vouchers, orthographic variants and nomenclatural synonyms. Converting these records into a phylogenetic matrix requires taxonomic curation against an accepted checklist (Korotkova *et al*., 2021), and quality control of each alignment. The difficulty increases in plant lineages that diversified recently and rapidly. Low plastid divergence leaves few informative sites per locus. Incomplete lineage sorting (ILS) and reticulate evolution make the histories of loci differ from each other and from the species tree, a discordance that a concatenated analysis does not model. Errors of orthology assessment have other sources: paralogous copies, and homeologous copies left by hybridization or polyploidy, as in the nuclear ribosomal ITS region. Both kinds of problem can bias the inferred topology.
 
 **Cactaceae**, one of the largest succulent radiations of the Neotropics, combine these properties, and their GenBank record is irregular in taxonomic and locus coverage. `PhyloCactus` was developed on this family and implements its assembly and analysis as a reproducible workflow.
+
+`PhyloCactus` is an R package for assembling, curating and analyzing multilocus sequence datasets built from public DNA sequences. It covers sequence retrieval from GenBank, quality control, phylogenetic inference, divergence time estimation, visualization and comparison with published phylogenies.
 
 ## Design
 
@@ -39,7 +39,7 @@ knitr::include_graphics("figures/Fig1_PhyloCactus_Workflow.png")
 2. **Phylogenetic Inference and Dating (Modules 7 to 10)**: substitution model selection per partition with `ModelTest-NG` under AICc, constrained maximum-likelihood inference with `RAxML-NG`, Felsenstein bootstrap proportions (FBP), temporal bootstrap replicates, and penalized likelihood dating with `treePL`.
 3. **Visualization and Metadata Integration (Modules 11 and 12)**: IUCN Red List assessments retrieved with `rredlist`, and tree, chronogram and conservation figures. Tutorial 3 draws every node with its FBP; `integrate_publication_tree()`, which Tutorial 3 does not call, collapses nodes with FBP < 70 (`collapse_cutoff = 0.70`) into soft polytomies for data visualization.
 4. **Validation (Module 13)**: Robinson-Foulds and information-theoretic distances and multidimensional scaling (MDS) of tree space (`validate_phylogenies()`) against published phylogenies.
-5. **Molecular identification (Module 14)**: builds a reference library of 15 loci from the same phylotaR mining in Stage 1, validates it, and identifies a sample (sequences, an assembly or Illumina reads) against it, locus by locus, in three states: species, genus or no answer.
+5. **Molecular identification (Module 14)**: builds a reference library of 15 loci from the same `phylotaR` mining in Stage 1, validates it, and identifies a sample (sequences, an assembly or Illumina reads) against it, locus by locus, in three states: species, genus or no answer.
 
 Each stage can be run on its own, from the outputs of the previous one.
 

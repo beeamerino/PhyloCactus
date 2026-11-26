@@ -4,6 +4,8 @@
 #'
 #' @param x Character vector of taxon binomial strings.
 #' @return Character vector of formatted taxon names.
+#' @examples
+#' standardize_taxon(c("Opuntia ficus-indica", " Pereskia  aculeata "))
 #' @export
 #' @keywords internal
 standardize_taxon <- function(x) {
@@ -18,6 +20,10 @@ standardize_taxon <- function(x) {
 #'
 #' @param constraints_tbl Data frame containing taxonomic classification hierarchy.
 #' @return Invisible `TRUE` if validation passes; throws error otherwise.
+#' @examples
+#' ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+#' constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+#' assert_constraint_columns(constraints_tbl)
 #' @export
 #' @keywords internal
 assert_constraint_columns <- function(constraints_tbl) {
@@ -43,6 +49,16 @@ assert_constraint_columns <- function(constraints_tbl) {
 #' @param tree Object of class `phylo` representing a phylogenetic tree.
 #' @param constraints_tbl Data frame containing taxonomic constraint annotations.
 #' @return Data frame of tip annotations filtered to matching tree tips.
+#' @examples
+#' # A pruned copy of the distributed chronogram and the constraint table
+#' ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+#' tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+#' genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+#'             "Cylindropuntia", "Tephrocactus", "Maihuenia")
+#' tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+#' constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+#' tips <- prepare_tip_annotation(tree, constraints_tbl)
+#' table(tips$Annot_level_2)
 #' @export
 #' @keywords internal
 prepare_tip_annotation <- function(tree, constraints_tbl) {
@@ -77,6 +93,16 @@ prepare_tip_annotation <- function(tree, constraints_tbl) {
 #' @param group_values Character vector. Optional subset of group values to evaluate. Defaults to `NULL`.
 #' @param min_tips Integer. Minimum required tips per group. Defaults to `2L`.
 #' @return A `tibble` containing group names, MRCA node numbers, tip counts, and monophyly logical indicators.
+#' @examples
+#' # A pruned copy of the distributed chronogram and the constraint table
+#' ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+#' tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+#' genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+#'             "Cylindropuntia", "Tephrocactus", "Maihuenia")
+#' tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+#' constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+#' tips <- prepare_tip_annotation(tree, constraints_tbl)
+#' compute_group_nodes(tree, tips, "Annot_level_4")
 #' @export
 #' @keywords internal
 compute_group_nodes <- function(tree, tip_tbl, group_col, group_values = NULL, min_tips = 2L) {
@@ -148,6 +174,15 @@ compute_group_nodes <- function(tree, tip_tbl, group_col, group_values = NULL, m
 #' @param min_tips Integer. Minimum tip count. Defaults to `2L`.
 #' @param require_monophyly Logical. Exclude non-monophyletic groups? Defaults to `TRUE`.
 #' @return A `tibble` of node annotations.
+#' @examples
+#' # A pruned copy of the distributed chronogram and the constraint table
+#' ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+#' tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+#' genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+#'             "Cylindropuntia", "Tephrocactus", "Maihuenia")
+#' tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+#' constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+#' get_annotation_nodes(tree, constraints_tbl, "Annot_level_2")
 #' @export
 #' @keywords internal
 get_annotation_nodes <- function(tree,
@@ -183,6 +218,16 @@ get_annotation_nodes <- function(tree,
 #' @param supp_level4_min_tips Integer. Minimum tip threshold for secondary level 4 annotations. Defaults to `10L`.
 #' @param require_monophyly Logical. Enforce monophyly constraint? Defaults to `TRUE`.
 #' @return A named list of annotation node data frames organized by taxonomic level.
+#' @examples
+#' # A pruned copy of the distributed chronogram and the constraint table
+#' ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+#' tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+#' genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+#'             "Cylindropuntia", "Tephrocactus", "Maihuenia")
+#' tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+#' constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+#' registry <- build_annotation_registry(tree, constraints_tbl, supp_level4_min_tips = 3L)
+#' registry$level_4_supp
 #' @export
 #' @keywords internal
 build_annotation_registry <- function(tree, constraints_tbl,
@@ -249,6 +294,17 @@ build_annotation_registry <- function(tree, constraints_tbl,
 #' @param treedata_obj An object of class `treedata` or `phylo`.
 #' @param registry A named list of annotation registry data frames.
 #' @return An augmented `treedata` object.
+#' @examples
+#' # A pruned copy of the distributed chronogram and the constraint table
+#' ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+#' tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+#' genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+#'             "Cylindropuntia", "Tephrocactus", "Maihuenia")
+#' tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+#' constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+#' registry <- build_annotation_registry(tree, constraints_tbl, supp_level4_min_tips = 3L)
+#' annotated <- augment_treedata_with_registry(tree, registry)
+#' head(tidytree::as_tibble(annotated))
 #' @export
 augment_treedata_with_registry <- function(treedata_obj, registry) {
   if (!inherits(treedata_obj, "treedata")) {
@@ -308,6 +364,16 @@ augment_treedata_with_registry <- function(treedata_obj, registry) {
 #'   default) centres a rotated label on its bar (`0.5` when `angle` is not `0`) and starts a
 #'   horizontal label at its bar (`0`).
 #' @return Updated `ggtree` plot object containing clade label layers.
+#' @examples
+#' # A pruned copy of the distributed chronogram and the constraint table
+#' ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+#' tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+#' genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+#'             "Cylindropuntia", "Tephrocactus", "Maihuenia")
+#' tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+#' constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+#' registry <- build_annotation_registry(tree, constraints_tbl, supp_level4_min_tips = 3L)
+#' p <- add_clade_labels_by_level(ggtree::ggtree(tree), registry$level_4_supp)
 #' @export
 #' @keywords internal
 add_clade_labels_by_level <- function(p,
@@ -390,6 +456,16 @@ add_clade_labels_by_level <- function(p,
 #'   Defaults to `0.004`.
 #' @param fontface Character. Font face of the label. Defaults to `"plain"`.
 #' @return The `ggtree` plot with a segment layer and a text layer, or `p` unchanged when no tip is outgroup.
+#' @examples
+#' # A pruned copy of the distributed chronogram and the constraint table
+#' ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+#' tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+#' genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+#'             "Cylindropuntia", "Tephrocactus", "Maihuenia")
+#' tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+#' constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+#' cactaceae <- grep("^(Talinum|Portulaca)_", tree$tip.label, value = TRUE, invert = TRUE)
+#' p <- add_outgroup_bar(ggtree::ggtree(tree), cactaceae)
 #' @export
 #' @keywords internal
 add_outgroup_bar <- function(p,
@@ -429,6 +505,21 @@ add_outgroup_bar <- function(p,
 #'   optional `hjust` column sets the justification of each layer; without it, rotated labels are
 #'   centred on their bars (see [add_clade_labels_by_level()]).
 #' @return Updated `ggtree` plot object.
+#' @examples
+#' # A pruned copy of the distributed chronogram and the constraint table
+#' ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+#' tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+#' genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+#'             "Cylindropuntia", "Tephrocactus", "Maihuenia")
+#' tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+#' constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+#' registry <- build_annotation_registry(tree, constraints_tbl, supp_level4_min_tips = 3L)
+#' specs <- data.frame(reg_name = c("level_4_supp", "level_2"),
+#'                     fontsize = c(2.5, 3), barsize = c(0.3, 0.5),
+#'                     offset = c(0.01, 0.15), offset_text = c(0.004, 0.006),
+#'                     fontface = c("plain", "bold"), sort_desc = TRUE,
+#'                     angle = c(0, 270), align = TRUE)
+#' p <- apply_clade_label_layers(ggtree::ggtree(tree), registry, specs)
 #' @export
 #' @keywords internal
 apply_clade_label_layers <- function(p, registry, layer_specs) {
@@ -469,6 +560,10 @@ apply_clade_label_layers <- function(p, registry, layer_specs) {
 #'
 #' @param tree Object of class `phylo`.
 #' @return Numeric scalar representing maximum tree depth.
+#' @examples
+#' ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+#' tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+#' get_tree_max_depth(tree)   # the root age in Ma
 #' @export
 #' @keywords internal
 get_tree_max_depth <- function(tree) {
@@ -483,6 +578,8 @@ get_tree_max_depth <- function(tree) {
 #' @param x Numeric vector of geological age values in Ma.
 #' @param digits Integer. Decimal precision for rounding. Defaults to `1L`.
 #' @return Character vector of formatted age labels.
+#' @examples
+#' format_age_labels(c(27.33, 12.968), digits = 1L)
 #' @export
 #' @keywords internal
 format_age_labels <- function(x, digits = 1L) {
@@ -510,6 +607,15 @@ format_age_labels <- function(x, digits = 1L) {
 #' @param bar_size Numeric. Axis title font size. Defaults to `12`.
 #' @param segment_size Numeric. Text font size for age labels. Defaults to `2.5`.
 #' @return Updated `ggtree` plot object containing the geological age axis layer.
+#' @examples
+#' # A pruned copy of the distributed chronogram and the constraint table
+#' ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+#' tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+#' genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+#'             "Cylindropuntia", "Tephrocactus", "Maihuenia")
+#' tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) %in% genera])
+#' constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
+#' p <- add_chronogram_axis(ggtree::ggtree(tree), tree, by = 10)
 #' @export
 #' @keywords internal
 add_chronogram_axis <- function(p, tree, by = 5, digits = 0L,
