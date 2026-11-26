@@ -36,7 +36,7 @@ Arguments and return values are documented in the manual pages and in the `pkgdo
 | Function | Description | Reference |
 |:---|:---|:---|
 | `run_alignment_pipeline()` | Aligns each locus with `MAFFT` and masks poorly aligned columns with `DECIPHER::MaskAlignment()`. | Katoh & Standley (2013); Wright (2024) |
-| `run_marker_screening()` | Screens each locus alignment for coverage, length and substitution saturation, by regressing uncorrected p-distance against the gamma-corrected K80 distance. The slope threshold below which a locus is rejected is a `PhyloCactus` criterion, not a published saturation test; the references cover the distance model only. | Kimura (1980); Jin & Nei (1990) |
+| `run_marker_screening()` | Screens each locus alignment for coverage, length and substitution saturation, by regressing uncorrected p-distance against the gamma-corrected K80 distance, with a gamma shape of 1 (`gamma_shape`). The slope thresholds (0.3 to flag, 0.5 to keep) were set with that shape. The slope threshold below which a locus is rejected is a `PhyloCactus` criterion, not a published saturation test; the references cover the distance model only. | Kimura (1980); Jin & Nei (1990) |
 | `clean_taxonomic_names()` | Keeps the sequences whose name is in the checklist of Cactaceae, ignoring differences in spaces, hyphens and underscores, and renames them to the spelling of the checklist. | Korotkova et al. (2021) |
 | `run_joint_realignment()` | Realigns each locus with `MAFFT` after the ingroup and outgroup sequences are combined. | Katoh & Standley (2013) |
 

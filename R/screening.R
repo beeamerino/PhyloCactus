@@ -12,18 +12,22 @@
 #'   (retained for backward comparability; sensitive to a known mathematical artifact inflating the slope
 #'   toward >= 1.0). Defaults to `"corrected"`.
 #' @param saturation_flag_cutoff Numeric. Slope threshold below which the locus is flagged as saturated. Defaults to `0.3`.
+#' @param gamma_shape Numeric. Shape (alpha) of the gamma distribution of rates in the corrected K80
+#'   distance, passed to `ape::dist.dna(gamma = )`. Defaults to `1`, the value `ape` used for
+#'   `gamma = TRUE` in 0.5.4 and earlier.
 #' @return A list with `slope` (numeric regression slope or `NA`), `saturated` (logical or `NA`), and
 #'   `reason` (character diagnostic code: `"ok"`, `"insufficient_data"`, `"variance_na"`,
 #'   `"regression_failed"`, or `"degenerate_fit"`).
 #' @noRd
-.test_saturation_proxy <- function(dna_bin, saturation_method = c("corrected", "legacy"), saturation_flag_cutoff = 0.3) {
+.test_saturation_proxy <- function(dna_bin, saturation_method = c("corrected", "legacy"), saturation_flag_cutoff = 0.3,
+                                   gamma_shape = 1) {
   saturation_method <- match.arg(saturation_method)
 
   if (saturation_method == "legacy") {
     dist_1 <- tryCatch(as.numeric(ape::dist.dna(dna_bin, model = "K80", pairwise.deletion = TRUE)), error = function(e) NA_real_)
-    dist_2 <- tryCatch(as.numeric(ape::dist.dna(dna_bin, model = "K80", pairwise.deletion = TRUE, gamma = TRUE)), error = function(e) NA_real_)
+    dist_2 <- tryCatch(as.numeric(ape::dist.dna(dna_bin, model = "K80", pairwise.deletion = TRUE, gamma = gamma_shape)), error = function(e) NA_real_)
   } else {
-    dist_1 <- tryCatch(as.numeric(ape::dist.dna(dna_bin, model = "K80", pairwise.deletion = TRUE, gamma = TRUE)), error = function(e) NA_real_)
+    dist_1 <- tryCatch(as.numeric(ape::dist.dna(dna_bin, model = "K80", pairwise.deletion = TRUE, gamma = gamma_shape)), error = function(e) NA_real_)
     dist_2 <- tryCatch(as.numeric(ape::dist.dna(dna_bin, model = "raw", pairwise.deletion = TRUE)), error = function(e) NA_real_)
   }
 
@@ -192,6 +196,12 @@
 #'   This module asks whether a locus resolves the ingroup radiation, and the answer cannot depend on how many outgroup accessions exist. `trnT-psbD` is the case that forced the distinction: 57 ingroup sequences against a threshold of 100, rejected as an ingroup marker, while carrying 53 outgroup sequences (52 *Portulaca* species and one *Talinopsis*) with a median length of 1347 bp. Bringing it back is a decision about connecting the two groups, which belongs to [integrate_and_clean_markers()] and its `readmit_markers` argument, not to a sequence count here.
 #' @param max_marker_missing Numeric. Maximum allowable missing data fraction per locus. Defaults to `0.7`.
 #' @param saturation_flag_cutoff Numeric. Slope threshold below which the locus is flagged. The regression is uncorrected p-distance against a Gamma-corrected K80 distance, as documented in `saturation_method`. Defaults to `0.3`.
+#' @param gamma_shape Numeric. Shape (alpha) of the gamma distribution of rates in the corrected K80
+#'   distance (`ape::dist.dna(model = "K80", gamma = gamma_shape)`). Defaults to `1`. Up to 0.5.4 the
+#'   code passed `gamma = TRUE`, which `ape` takes as a shape of 1, without declaring it; the
+#'   reference run used that value, and the thresholds `saturation_flag_cutoff` (0.3) and
+#'   `saturation_keep_cutoff` (0.5) were set with it. The slope depends on the shape: a smaller value
+#'   corrects more and lowers the slope.
 #' @param saturation_keep_cutoff Numeric. Saturation slope cutoff threshold below which saturated loci are excluded. Defaults to `0.5`.
 #' @param iqr_multiplier Numeric. Interquartile range (IQR) multiplier for identifying site-length outlier bounds. Defaults to `1.5`.
 #' @param saturation_method Character. Method for saturation test distance calculation. Defaults to `"corrected"`.
@@ -219,8 +229,12 @@ run_marker_screening <- function(
   saturation_keep_cutoff = 0.5,
   iqr_multiplier = 1.5,
   saturation_method = c("corrected", "legacy"),
-  gap_handling = c("iupac", "legacy")
+  gap_handling = c("iupac", "legacy"),
+  gamma_shape = 1
 ) {
+  if (!is.numeric(gamma_shape) || length(gamma_shape) != 1L || is.na(gamma_shape) || gamma_shape <= 0) {
+    stop("`gamma_shape` must be one positive number.", call. = FALSE)
+  }
   saturation_method <- match.arg(saturation_method)
   gap_handling <- match.arg(gap_handling)
   
@@ -243,6 +257,8 @@ run_marker_screening <- function(
   
   log_message("Starting ingroup marker screening.")
   log_message("Input directory: ", fasta_folder)
+  log_message("Saturation: ", saturation_method, " regression, gamma shape of the K80 distance ", gamma_shape,
+              ", flag below ", saturation_flag_cutoff, ", keep from ", saturation_keep_cutoff)
   
   fasta_files <- list.files(
     fasta_folder,
@@ -275,11 +291,11 @@ run_marker_screening <- function(
   plot_saturation_proxy <- function(dna_bin, marker, title_suffix = "") {
     if (saturation_method == "legacy") {
       dist_1 <- ape::dist.dna(dna_bin, model = "K80", pairwise.deletion = TRUE)
-      dist_2 <- ape::dist.dna(dna_bin, model = "K80", pairwise.deletion = TRUE, gamma = TRUE)
+      dist_2 <- ape::dist.dna(dna_bin, model = "K80", pairwise.deletion = TRUE, gamma = gamma_shape)
       xlab_txt <- "K80 pairwise distance"
       ylab_txt <- "K80 pairwise distance (gamma)"
     } else {
-      dist_1 <- ape::dist.dna(dna_bin, model = "K80", pairwise.deletion = TRUE, gamma = TRUE)
+      dist_1 <- ape::dist.dna(dna_bin, model = "K80", pairwise.deletion = TRUE, gamma = gamma_shape)
       dist_2 <- ape::dist.dna(dna_bin, model = "raw", pairwise.deletion = TRUE)
       xlab_txt <- "Model-corrected distance (K80+Gamma)"
       ylab_txt <- "Uncorrected p-distance"
@@ -339,7 +355,8 @@ run_marker_screening <- function(
   # (outside this function) for independent testability; bind it here to the already-validated
   # saturation_method so downstream call sites are unchanged.
   test_saturation_proxy <- function(dna_bin, saturation_flag_cutoff = 0.3) {
-    .test_saturation_proxy(dna_bin, saturation_method = saturation_method, saturation_flag_cutoff = saturation_flag_cutoff)
+    .test_saturation_proxy(dna_bin, saturation_method = saturation_method, saturation_flag_cutoff = saturation_flag_cutoff,
+                           gamma_shape = gamma_shape)
   }
 
   alignment_stats <- function(dna_bin) {
