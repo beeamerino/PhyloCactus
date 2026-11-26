@@ -1776,7 +1776,8 @@ calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, b
 #' @return Character path to the generated SLURM batch script file, which is made executable.
 #' @examples
 #' generate_temporal_bootstrap_script("supermatrix.phy", "partitions.txt", "best.tree",
-#'                                    base_seed = 87786, output_dir = tempdir(), cluster_mail_user = "")
+#'                                    base_seed = 87786, output_dir = tempdir(),
+#'                                    cluster_mail_user = "")
 #' @export
 generate_temporal_bootstrap_script <- function(alignment_file, partition_file, best_tree_file,
                                                outgroup = NULL, bs_trees = 500,

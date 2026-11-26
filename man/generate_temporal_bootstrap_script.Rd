@@ -90,5 +90,6 @@ lengths for downstream divergence time estimation (\code{treePL}) without introd
 }
 \examples{
 generate_temporal_bootstrap_script("supermatrix.phy", "partitions.txt", "best.tree",
-                                   base_seed = 87786, output_dir = tempdir(), cluster_mail_user = "")
+                                   base_seed = 87786, output_dir = tempdir(),
+                                   cluster_mail_user = "")
 }

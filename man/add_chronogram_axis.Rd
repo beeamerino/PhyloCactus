@@ -46,10 +46,12 @@ Draws a standardized geological timeline axis (Ma before present) beneath an ult
 }
 \examples{
 # A pruned copy of the distributed chronogram and the constraint table
-tree <- ape::read.tree(system.file("extdata", "phylocactus_chronogram_ml.tree", package = "PhyloCactus"))
-tree <- ape::keep.tip(tree, grep("^(Talinum|Portulaca|Leuenbergeria|Pereskia|Opuntia|Cylindropuntia|Tephrocactus|Maihuenia)_",
-                                 tree$tip.label, value = TRUE))
-constraints_tbl <- utils::read.csv(system.file("extdata", "cactus_constraints.csv", package = "PhyloCactus"))
+ext <- function(f) system.file("extdata", f, package = "PhyloCactus")
+tree <- ape::read.tree(ext("phylocactus_chronogram_ml.tree"))
+genera <- c("Talinum", "Portulaca", "Leuenbergeria", "Pereskia", "Opuntia",
+            "Cylindropuntia", "Tephrocactus", "Maihuenia")
+tree <- ape::keep.tip(tree, tree$tip.label[sub("_.*", "", tree$tip.label) \%in\% genera])
+constraints_tbl <- utils::read.csv(ext("cactus_constraints.csv"))
 p <- add_chronogram_axis(ggtree::ggtree(tree), tree, by = 10)
 }
 \keyword{internal}
