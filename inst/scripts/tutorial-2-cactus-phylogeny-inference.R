@@ -374,6 +374,7 @@ if (run_local_temporal_bs) {
     bs_trees = 100, # Adjust to 500 or 1000 for production.
     threads = 8,
     workers = 2,
+    blopt = "nr_fast",                                # As the replicates of the reference run (NR-FAST in their log)
     output_dir = paths$temporal_bs_dir,
     prefix = paths$temporal_bs_prefix
   )
@@ -397,7 +398,8 @@ if (run_local_temporal_bs) {
     cluster_nodes = 1L,
     cluster_mem = "24G",                              # RAM memory allocation (--mem; 6.0 GiB used, 500 replicates, 1208 terminals)
     cluster_time = "04:00:00",                        # Walltime limit (--time HH:MM:SS; 1 h 08 min used, 500 replicates, 1208 terminals)
-    cluster_mail_user = Sys.getenv("MY_EMAIL", "")
+    cluster_mail_user = Sys.getenv("MY_EMAIL", ""),
+    blopt = "nr_fast"                                 # As the replicates of the reference run (NR-FAST in their log)
   )
   cat("   Temporal bootstrap HPC script generated at:", hpc_temp_bs_script, "\n")
   cat("   Submit on cluster: cd cactus_temporal_bs && sbatch run_temporal_bs.sh\n")

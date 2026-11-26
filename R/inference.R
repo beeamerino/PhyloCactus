@@ -1670,7 +1670,13 @@ calculate_temporal_bootstraps <- function(raxml_bin_path, aln_file, part_file, b
 #' @param cluster_mail_user Character. Notification recipient email address for SLURM (`--mail-user`). Defaults to `Sys.getenv("MY_EMAIL", "")`.
 #' @param load_module Character vector or string. Environment module(s) to load prior to execution. Defaults to `c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n")`.
 #' @param raxml_exec Character. Executable `RAxML-NG` binary command. Defaults to `"raxml-ng-mpi"`.
-#' @return Character path to the generated SLURM batch script file.
+#' @param blopt Character. Branch length optimization method written as `--blopt` (`"nr_safe"` or
+#'   `"nr_fast"`). Defaults to `"nr_safe"`, the default of [calculate_temporal_bootstraps()], so that
+#'   the cluster and the local routes optimize branch lengths the same way. Until 0.5.4 the script
+#'   wrote no `--blopt`, and `RAxML-NG` used its own default: the temporal replicates of the reference
+#'   run (`RAxML-NG` 1.2.2-master on the cluster) were estimated with `NR-FAST`, as their log
+#'   records; pass `blopt = "nr_fast"` to reproduce them.
+#' @return Character path to the generated SLURM batch script file, which is made executable.
 #' @export
 generate_temporal_bootstrap_script <- function(alignment_file, partition_file, best_tree_file,
                                                outgroup = NULL, bs_trees = 500,
@@ -1686,8 +1692,12 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
                                                cluster_queue = NULL,
                                                cluster_mail_user = Sys.getenv("MY_EMAIL", ""),
                                                load_module = c("gcc/14.2.0-nlhpc", "openmpi/5.0.3-o", "raxml-ng/1.1.0-mpi-zen4-n"),
-                                               raxml_exec = "raxml-ng-mpi") {
-  
+                                               raxml_exec = "raxml-ng-mpi", blopt = "nr_safe") {
+
+  if (!is.character(blopt) || length(blopt) != 1L || !nzchar(blopt)) {
+    stop("`blopt` must be one RAxML-NG branch length optimization method, such as \"nr_safe\".",
+         call. = FALSE)
+  }
   if (is.null(base_seed)) {
     base_seed <- sample.int(100000L, 1L)
     message("Using generated base seed: ", base_seed)
@@ -1757,7 +1767,8 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
   cat(paste0("  BEST_TREE_FILE=\"${RUN_DIR}/", tree_basename, "\"\n"), file = bash_script, append = TRUE)
   cat("fi\n\n", file = bash_script, append = TRUE)
 
-  cat(paste0("TOTAL_THREADS=", threads, "\n"), file = bash_script, append = TRUE)
+  # The threads granted by SLURM, as in the other two generators (AP-22).
+  cat(paste0("TOTAL_THREADS=${SLURM_CPUS_PER_TASK:-", threads, "}\n"), file = bash_script, append = TRUE)
   cat(paste0("NUM_WORKERS=", workers_val, "\n"), file = bash_script, append = TRUE)
   cat(paste0("SEED=", base_seed, "\n\n"), file = bash_script, append = TRUE)
 
@@ -1787,6 +1798,7 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
     "--threads ${TOTAL_THREADS} ",
     "--workers ${NUM_WORKERS} ",
     "--seed ${SEED} ",
+    "--blopt ", blopt, " ",
     "--force perf_threads ",
     "--extra thread-nopin "
   )
@@ -1806,6 +1818,7 @@ generate_temporal_bootstrap_script <- function(alignment_file, partition_file, b
   cat(cmd, file = bash_script, append = TRUE)
   cat("\necho \"Temporal bootstrap inference complete. Output saved to: ${TEMP_DIR}/cactus_temporal.raxml.bootstraps\"\n", file = bash_script, append = TRUE)
 
+  Sys.chmod(bash_script, mode = "0755")
   message("Generated temporal bootstrap HPC SLURM script: ", bash_script)
   return(bash_script)
 }

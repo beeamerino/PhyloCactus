@@ -282,6 +282,8 @@ Following Maurin (2020), a second set of bootstrap replicates is generated for d
 
 The **`calculate_temporal_bootstraps()`** function resamples the alignment and estimates branch lengths for each replicate with the topology fixed to the maximum-likelihood tree.
 
+In the reference run the 500 temporal replicates were estimated on the cluster by `RAxML-NG` 1.2.2-master with its default branch length optimization, `NR-FAST`, as `cactus_temporal.raxml.log` records. From 0.5.5 the cluster script of `generate_temporal_bootstrap_script()` writes `--blopt` with the same default as `calculate_temporal_bootstraps()`, `nr_safe`; the calls below pass `blopt = "nr_fast"` to reproduce the reference run.
+
 Because the topology is fixed, the dated replicates measure uncertainty in branch lengths only. The confidence intervals of node ages do not include topological uncertainty, which is measured separately by the bootstrap support of Module 9.
 
 Following Maurin (2020), the penalized likelihood parameters and the smoothing value are selected on the maximum-likelihood tree with `treePL` (Smith & O’Meara, 2012) and then applied to the temporal replicates, whose dated trees give the confidence intervals of node ages.
@@ -424,6 +426,7 @@ if (run_local_temporal_bs) {
     bs_trees = 100, # Adjust to 500 or 1000 for production.
     threads = 8,
     workers = 2,
+    blopt = "nr_fast",                                # As the replicates of the reference run (NR-FAST in their log)
     output_dir = paths$temporal_bs_dir,
     prefix = paths$temporal_bs_prefix
   )
@@ -447,7 +450,8 @@ if (run_local_temporal_bs) {
     cluster_nodes = 1L,
     cluster_mem = "24G",                              # RAM memory allocation (--mem; 6.0 GiB used, 500 replicates, 1208 terminals)
     cluster_time = "04:00:00",                        # Walltime limit (--time HH:MM:SS; 1 h 08 min used, 500 replicates, 1208 terminals)
-    cluster_mail_user = Sys.getenv("MY_EMAIL", "")
+    cluster_mail_user = Sys.getenv("MY_EMAIL", ""),
+    blopt = "nr_fast"                                 # As the replicates of the reference run (NR-FAST in their log)
   )
   cat("   Temporal bootstrap HPC script generated at:", hpc_temp_bs_script, "\n")
   cat("   Submit on cluster: cd cactus_temporal_bs && sbatch run_temporal_bs.sh\n")
