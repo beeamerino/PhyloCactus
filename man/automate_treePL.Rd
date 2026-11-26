@@ -36,7 +36,15 @@ automate_treePL(
 
 \item{bs_trees_file}{Character. Path to input temporal bootstrap trees file.}
 
-\item{results_dir}{Character. Directory path to save intermediate optimization results.}
+\item{results_dir}{Character. Directory path to save intermediate optimization results. Results
+already in it are reused only when they were produced with the same inputs and parameters:
+each stage writes its seed, \code{rescale_factor}, scaled \code{numsites}, the md5 of \code{cfg_file} and of the
+rescaled maximum-likelihood tree, the priming and cross-validation settings and, for the
+replicates, the md5 of \code{bs_trees_file}, the number of replicates, the smoothing and the
+optimization lines, to \code{ML_tree/run_parameters_ML_tree.csv} and
+\code{BS_tree/run_parameters_BS_tree.csv}. A call whose values differ, or a folder with results and
+no such table (written before 0.5.5), stops. Only the folders \code{BS_1} to \verb{BS_<num_bs>} of the
+call are dated and collected.}
 
 \item{treePL_out}{Character. Destination directory path for final output chronograms.}
 
@@ -48,7 +56,7 @@ automate_treePL(
 
 \strong{Why a clade and not a terminal.} Rooting is imposed after the search: \code{RAxML-NG} returns an unrooted topology and the root is placed on a chosen edge. Naming a single terminal of a sampled outgroup clade places the root \emph{inside} that clade, leaving it paraphyletic in the final tree and collapsing its crown node onto the root. Any calibration addressed by the MRCA of that clade then lands on the root instead of on the node it was written for. Supplying the whole clade places the root on its stem edge, which is the intended edge. Rooting is performed by \code{root_on_clade()}, which also handles the basal polytomy \code{RAxML-NG} writes.
 
-Bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error.
+Bootstrap replicates are handled with the intersection of this set and each replicate's tip labels, so a replicate missing some terminals is still rooted; only a replicate missing all of them is an error. A maximum-likelihood tree that is already rooted is dated with its own root, and a message says that \code{outgroup} is not applied to it.
 
 \strong{Topological assumption.} Placing the root on the outgroup lineage (Talinaceae or Portulacaceae) establishes the basal split for dating. In the reference dataset, Talinaceae roots the tree, placing the root on the stem of the ACP clade (Anacampserotaceae, Cactaceae, Portulacaceae) and allowing maximum-likelihood inference to test alternative topological resolutions among the three core families (Ramirez-Barahona et al., 2020; Zuntini et al., 2024). State this assumption in Methods, and treat the root age as conditional on it.}
 
@@ -58,7 +66,7 @@ maximum-likelihood configuration and, offset by the replicate index, into each r
 \code{treePL} seeds itself from the clock when the keyword is absent. A fixed \code{seed} reproduces the
 run when cross-validation uses one thread, which is the default of \code{cv_nthreads}. Defaults to
 \code{NULL}, which draws one and reports it; record the reported value, as it is required to
-reproduce the run.}
+reproduce the run. The random state of the session is restored on exit.}
 
 \item{rescale_factor}{Numeric. Multiplier applied to every branch length before dating, and the divisor applied to \code{numsites} in the configurations written for \code{treePL}. Defaults to \code{100}.
 
