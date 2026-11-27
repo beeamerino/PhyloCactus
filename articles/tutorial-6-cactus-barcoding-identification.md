@@ -85,18 +85,18 @@ writeLines(rentrez::entrez_fetch("nuccore", id = "LT745702.1", rettype = "gb", r
 identify_barcoding_query("examples/LT745702.1.gb", run_name = "LT745702.1")
 ```
 
-![\*\*Figure 1.\*\* Answer of the Sanger record LT745702.1. IdTaxa
+![\*\*Figure 1.\*\* Answer of the Sanger record LT745702.1. \`IdTaxa\`
 confidence of each locus found, at genus rank (striped bar) and species
 rank (solid bar), coloured by state (dark blue, species; light blue,
 genus; grey, no answer), with the threshold as a dashed line. Below, the
 species of the named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-5-1.png)
 
-**Figure 1.** Answer of the Sanger record LT745702.1. IdTaxa confidence
-of each locus found, at genus rank (striped bar) and species rank (solid
-bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line. Below, the species of the
-named genus in the library and their sequences per locus.
+**Figure 1.** Answer of the Sanger record LT745702.1. `IdTaxa`
+confidence of each locus found, at genus rank (striped bar) and species
+rank (solid bar), coloured by state (dark blue, species; light blue,
+genus; grey, no answer), with the threshold as a dashed line. Below, the
+species of the named genus in the library and their sequences per locus.
 
 `matK` names the genus *Pseudorhipsalis*. `IdTaxa` reached the right
 species, *P. amazonica*, with a species confidence of 61.6, under the
@@ -118,15 +118,15 @@ identify_barcoding_query("examples/PZ714536.1.gb", run_name = "PZ714536.1")
 ```
 
 ![\*\*Figure 2.\*\* Answer of the Sanger record PZ714536.1 (\*Opuntia\*
-sp.). IdTaxa confidence of each locus found, at genus rank (striped bar)
-and species rank (solid bar), coloured by state (dark blue, species;
-light blue, genus; grey, no answer), with the threshold as a dashed
-line. Below, the species of the named genus in the library and their
-sequences per
+sp.). \`IdTaxa\` confidence of each locus found, at genus rank (striped
+bar) and species rank (solid bar), coloured by state (dark blue,
+species; light blue, genus; grey, no answer), with the threshold as a
+dashed line. Below, the species of the named genus in the library and
+their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-7-1.png)
 
 **Figure 2.** Answer of the Sanger record PZ714536.1 (*Opuntia* sp.).
-IdTaxa confidence of each locus found, at genus rank (striped bar) and
+`IdTaxa` confidence of each locus found, at genus rank (striped bar) and
 species rank (solid bar), coloured by state (dark blue, species; light
 blue, genus; grey, no answer), with the threshold as a dashed line.
 Below, the species of the named genus in the library and their sequences
@@ -153,7 +153,7 @@ identify_barcoding_query("examples/OK340410.1_specimen.gb", sample = "Coryphanth
 ```
 
 ![\*\*Figure 3.\*\* Answer of the specimen of \*Coryphantha
-elephantidens\* subsp. \*bumamma\* (four loci). IdTaxa confidence of
+elephantidens\* subsp. \*bumamma\* (four loci). \`IdTaxa\` confidence of
 each locus found, at genus rank (striped bar) and species rank (solid
 bar), coloured by state (dark blue, species; light blue, genus; grey, no
 answer), with the threshold as a dashed line. Below, the species of the
@@ -161,9 +161,9 @@ named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-9-1.png)
 
 **Figure 3.** Answer of the specimen of *Coryphantha elephantidens*
-subsp. *bumamma* (four loci). IdTaxa confidence of each locus found, at
-genus rank (striped bar) and species rank (solid bar), coloured by state
-(dark blue, species; light blue, genus; grey, no answer), with the
+subsp. *bumamma* (four loci). `IdTaxa` confidence of each locus found,
+at genus rank (striped bar) and species rank (solid bar), coloured by
+state (dark blue, species; light blue, genus; grey, no answer), with the
 threshold as a dashed line. Below, the species of the named genus in the
 library and their sequences per locus.
 
@@ -185,7 +185,7 @@ identify_barcoding_query("examples/OP189074.1_specimen.gb", sample = "Xiquexique
 ```
 
 ![\*\*Figure 4.\*\* Answer of the specimen of \*Xiquexique gounellei\*
-(four loci). IdTaxa confidence of each locus found, at genus rank
+(four loci). \`IdTaxa\` confidence of each locus found, at genus rank
 (striped bar) and species rank (solid bar), coloured by state (dark
 blue, species; light blue, genus; grey, no answer), with the threshold
 as a dashed line. Below, the species of the named genus in the library
@@ -193,7 +193,7 @@ and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-11-1.png)
 
 **Figure 4.** Answer of the specimen of *Xiquexique gounellei* (four
-loci). IdTaxa confidence of each locus found, at genus rank (striped
+loci). `IdTaxa` confidence of each locus found, at genus rank (striped
 bar) and species rank (solid bar), coloured by state (dark blue,
 species; light blue, genus; grey, no answer), with the threshold as a
 dashed line. Below, the species of the named genus in the library and
@@ -218,14 +218,14 @@ writeLines(rentrez::entrez_fetch("nuccore", id = "MN517611.1", rettype = "gb", r
 identify_barcoding_query("examples/MN517611.1.gb", run_name = "MN517611.1")
 ```
 
-![\*\*Figure 5.\*\* Answer of the plastome MN517611.1. IdTaxa confidence
-of each locus found, at genus rank (striped bar) and species rank (solid
-bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line. Below, the species of the
-named genus in the library and their sequences per
+![\*\*Figure 5.\*\* Answer of the plastome MN517611.1. \`IdTaxa\`
+confidence of each locus found, at genus rank (striped bar) and species
+rank (solid bar), coloured by state (dark blue, species; light blue,
+genus; grey, no answer), with the threshold as a dashed line. Below, the
+species of the named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-13-1.png)
 
-**Figure 5.** Answer of the plastome MN517611.1. IdTaxa confidence of
+**Figure 5.** Answer of the plastome MN517611.1. `IdTaxa` confidence of
 each locus found, at genus rank (striped bar) and species rank (solid
 bar), coloured by state (dark blue, species; light blue, genus; grey, no
 answer), with the threshold as a dashed line. Below, the species of the
@@ -247,14 +247,14 @@ writeLines(rentrez::entrez_fetch("nuccore", id = "MT387452.1", rettype = "gb", r
 identify_barcoding_query("examples/MT387452.1.gb", run_name = "MT387452.1")
 ```
 
-![\*\*Figure 6.\*\* Answer of the plastome MT387452.1. IdTaxa confidence
-of each locus found, at genus rank (striped bar) and species rank (solid
-bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line. Below, the species of the
-named genus in the library and their sequences per
+![\*\*Figure 6.\*\* Answer of the plastome MT387452.1. \`IdTaxa\`
+confidence of each locus found, at genus rank (striped bar) and species
+rank (solid bar), coloured by state (dark blue, species; light blue,
+genus; grey, no answer), with the threshold as a dashed line. Below, the
+species of the named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-15-1.png)
 
-**Figure 6.** Answer of the plastome MT387452.1. IdTaxa confidence of
+**Figure 6.** Answer of the plastome MT387452.1. `IdTaxa` confidence of
 each locus found, at genus rank (striped bar) and species rank (solid
 bar), coloured by state (dark blue, species; light blue, genus; grey, no
 answer), with the threshold as a dashed line. Below, the species of the
@@ -327,18 +327,18 @@ utils::download.file(paste0(ftp, "/", basename(ftp), "_genomic.fna.gz"), asm, mo
 identify_barcoding_assembly(asm, run_name = "GCA_024363205.1")
 ```
 
-![\*\*Figure 7.\*\* Answer of the assembly GCA_024363205.1. IdTaxa
+![\*\*Figure 7.\*\* Answer of the assembly GCA_024363205.1. \`IdTaxa\`
 confidence of each locus found, at genus rank (striped bar) and species
 rank (solid bar), coloured by state (dark blue, species; light blue,
 genus; grey, no answer), with the threshold as a dashed line. Below, the
 species of the named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-19-1.png)
 
-**Figure 7.** Answer of the assembly GCA_024363205.1. IdTaxa confidence
-of each locus found, at genus rank (striped bar) and species rank (solid
-bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line. Below, the species of the
-named genus in the library and their sequences per locus.
+**Figure 7.** Answer of the assembly GCA_024363205.1. `IdTaxa`
+confidence of each locus found, at genus rank (striped bar) and species
+rank (solid bar), coloured by state (dark blue, species; light blue,
+genus; grey, no answer), with the threshold as a dashed line. Below, the
+species of the named genus in the library and their sequences per locus.
 
 *Cereus* at genus rank from `pepC_like` (its best species at 61.5, under
 the species threshold of 78.8) and `phyC`. 12 other loci give no answer.
@@ -364,16 +364,16 @@ stopifnot(unname(tools::md5sum(fq)) == strsplit(ena$fastq_md5, ";")[[1]])
 identify_barcoding_reads(fq[1], fq[2], run_name = "SRR26398994", threads = 4)
 ```
 
-![\*\*Figure 8.\*\* Answer of the reads SRR26398994. IdTaxa confidence
-of each locus found, at genus rank (striped bar) and species rank (solid
-bar), coloured by state (dark blue, species; light blue, genus; grey, no
-answer), with the threshold as a dashed line. Below, the species of the
-named genus in the library and their sequences per
+![\*\*Figure 8.\*\* Answer of the reads SRR26398994. \`IdTaxa\`
+confidence of each locus found, at genus rank (striped bar) and species
+rank (solid bar), coloured by state (dark blue, species; light blue,
+genus; grey, no answer), with the threshold as a dashed line. Below, the
+species of the named genus in the library and their sequences per
 locus.](tutorial-6-cactus-barcoding-identification_files/figure-html/unnamed-chunk-21-1.png)
 
-**Figure 8.** Answer of the reads SRR26398994. IdTaxa confidence of each
-locus found, at genus rank (striped bar) and species rank (solid bar),
-coloured by state (dark blue, species; light blue, genus; grey, no
+**Figure 8.** Answer of the reads SRR26398994. `IdTaxa` confidence of
+each locus found, at genus rank (striped bar) and species rank (solid
+bar), coloured by state (dark blue, species; light blue, genus; grey, no
 answer), with the threshold as a dashed line. Below, the species of the
 named genus in the library and their sequences per locus.
 

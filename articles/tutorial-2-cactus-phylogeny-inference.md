@@ -62,7 +62,7 @@ bias likelihood-based inference. Each partition of the supermatrix is
 therefore assigned its own substitution model.
 
 The
-**[`preprocess_partitions()`](https://beeamerino.github.io/PhyloCactus/reference/preprocess_partitions.md)**
+[`preprocess_partitions()`](https://beeamerino.github.io/PhyloCactus/reference/preprocess_partitions.md)
 function reads the supermatrix and partition file produced in Module 6,
 checks their compatibility with the `RAxML-NG` parser, and writes the
 input files for model selection and maximum-likelihood inference.
@@ -74,7 +74,7 @@ the file names at each call site lets them drift out of step with the
 run prefix.
 
 The
-**[`resolve_run_paths()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_run_paths.md)**
+[`resolve_run_paths()`](https://beeamerino.github.io/PhyloCactus/reference/resolve_run_paths.md)
 function reconstructs the path of every file of the run from the output
 directory, the run prefix and the supermatrix location, and each module
 below starts by calling it. Two entries depend on what happened in the
@@ -86,7 +86,7 @@ argument names the entries a module needs, so that a missing input
 raises an error naming the module that produces it.
 
 The
-**[`run_modeltest_ng()`](https://beeamerino.github.io/PhyloCactus/reference/run_modeltest_ng.md)**
+[`run_modeltest_ng()`](https://beeamerino.github.io/PhyloCactus/reference/run_modeltest_ng.md)
 function selects a substitution model for each partition with
 `ModelTest-NG` (Darriba *et al*., 2020; Flouri *et al*., 2015) under the
 corrected Akaike information criterion (AICc; Akaike, 1974; Hurvich &
@@ -192,7 +192,7 @@ relationships among major lineages taken from published phylogenies
 restrict the search to the rest of tree space.
 
 The
-**[`build_constraint_scaffold()`](https://beeamerino.github.io/PhyloCactus/reference/build_constraint_scaffold.md)**
+[`build_constraint_scaffold()`](https://beeamerino.github.io/PhyloCactus/reference/build_constraint_scaffold.md)
 function builds the constraint tree from `cactus_constraints.csv`, which
 assigns each sampled species to one of 21 groups.
 
@@ -269,13 +269,13 @@ the relaxed search recovered core Cactoideae II, with Rhipsalideae (56
 terminals) sister to BCT (250) plus Notocacteae (64).
 
 The
-**[`calculate_ml_tree()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_ml_tree.md)**
+[`calculate_ml_tree()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_ml_tree.md)
 function runs the constrained search in `RAxML-NG` (Kozlov *et al*.,
 2019) with the partition models selected in Module 7. The search runs on
 a local workstation with
 [`calculate_ml_tree()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_ml_tree.md),
 or on a cluster with
-**[`generate_ml_search_script()`](https://beeamerino.github.io/PhyloCactus/reference/generate_ml_search_script.md)**,
+[`generate_ml_search_script()`](https://beeamerino.github.io/PhyloCactus/reference/generate_ml_search_script.md),
 which writes a SLURM batch script for the same constrained search. The
 `run_local_ml` flag below selects between them, as `run_local_bs` does
 for the bootstrap replicates of Module 9. The search is a single job:
@@ -301,7 +301,7 @@ sets that floor; on unfamiliar hardware it can be checked with a short
 trial search (`n_init_trees = "rand{2}"`).
 
 The
-**[`calculate_rf_distances()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_rf_distances.md)**
+[`calculate_rf_distances()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_rf_distances.md)
 function computes Robinson-Foulds distances (Robinson & Foulds, 1981)
 among the trees of independent searches, as a measure of their
 convergence.
@@ -458,23 +458,23 @@ Bootstrap analysis measures how consistently each clade of the
 maximum-likelihood tree is recovered when the alignment is resampled.
 
 The
-**[`generate_bootstrap_script()`](https://beeamerino.github.io/PhyloCactus/reference/generate_bootstrap_script.md)**
+[`generate_bootstrap_script()`](https://beeamerino.github.io/PhyloCactus/reference/generate_bootstrap_script.md)
 and
-**[`run_local_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/run_local_bootstraps.md)**
+[`run_local_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/run_local_bootstraps.md)
 functions run the bootstrap searches in `RAxML-NG` with the same models,
 constraint and partition scheme as the maximum-likelihood search.
 
 The
-**[`collect_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/collect_bootstraps.md)**
+[`collect_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/collect_bootstraps.md)
 function gathers the replicates, and
-**[`check_bs_convergence()`](https://beeamerino.github.io/PhyloCactus/reference/check_bs_convergence.md)**
+[`check_bs_convergence()`](https://beeamerino.github.io/PhyloCactus/reference/check_bs_convergence.md)
 tests whether their number is sufficient with the autoMRE bootstopping
 criterion (Pattengale *et al*., 2010) on Felsenstein bootstrap
 proportions (FBP), with a cutoff of 0.03. In the reference run the
 criterion was met after 550 of 1000 replicates.
 
 The
-**[`map_branch_supports()`](https://beeamerino.github.io/PhyloCactus/reference/map_branch_supports.md)**
+[`map_branch_supports()`](https://beeamerino.github.io/PhyloCactus/reference/map_branch_supports.md)
 function maps the bootstrap support onto the maximum-likelihood tree.
 FBP is the primary measure, as in published phylogenies of Cactaceae,
 which report bipartition frequencies or posterior probabilities (Arakaki
@@ -509,7 +509,7 @@ Following Maurin (2020), a second set of bootstrap replicates is
 generated for dating, to measure the uncertainty in branch lengths.
 
 The
-**[`calculate_temporal_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_temporal_bootstraps.md)**
+[`calculate_temporal_bootstraps()`](https://beeamerino.github.io/PhyloCactus/reference/calculate_temporal_bootstraps.md)
 function resamples the alignment and estimates branch lengths for each
 replicate with the topology fixed to the maximum-likelihood tree.
 
@@ -793,7 +793,7 @@ the 2.5 and 97.5 percentiles over the 100 dated replicates:
 `inst/scripts/analysis-calibration-schemes.R` dates the three schemes.
 
 The
-**[`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)**
+[`automate_treePL()`](https://beeamerino.github.io/PhyloCactus/reference/automate_treePL.md)
 function runs the dating: it prepares the maximum-likelihood tree and
 the calibrations for `treePL`, selects the optimization parameters and
 the smoothing value, and dates the maximum-likelihood tree and the

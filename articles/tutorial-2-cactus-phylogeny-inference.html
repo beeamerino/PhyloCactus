@@ -68,7 +68,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-11-26</h4>
+            <h4 data-toc-skip class="date">2026-11-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-2-cactus-phylogeny-inference.Rmd" class="external-link"><code>vignettes/tutorial-2-cactus-phylogeny-inference.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-2-cactus-phylogeny-inference.Rmd</code></div>
@@ -136,33 +136,32 @@ directory:</p>
 single model applied to the whole matrix can describe them poorly and
 bias likelihood-based inference. Each partition of the supermatrix is
 therefore assigned its own substitution model.</p>
-<p>The <strong><code><a href="../reference/preprocess_partitions.html">preprocess_partitions()</a></code></strong> function
-reads the supermatrix and partition file produced in Module 6, checks
-their compatibility with the <code>RAxML-NG</code> parser, and writes
-the input files for model selection and maximum-likelihood
-inference.</p>
+<p>The <code><a href="../reference/preprocess_partitions.html">preprocess_partitions()</a></code> function reads the
+supermatrix and partition file produced in Module 6, checks their
+compatibility with the <code>RAxML-NG</code> parser, and writes the
+input files for model selection and maximum-likelihood inference.</p>
 <p>The modules of this tutorial run for hours, and a complete analysis
 spans several R sessions, so each module has to run on its own. Passing
 results between modules in variables fails after a restart, and typing
 the file names at each call site lets them drift out of step with the
 run prefix.</p>
-<p>The <strong><code><a href="../reference/resolve_run_paths.html">resolve_run_paths()</a></code></strong> function
-reconstructs the path of every file of the run from the output
-directory, the run prefix and the supermatrix location, and each module
-below starts by calling it. Two entries depend on what happened in the
-run: <code>analysed_phy</code> points to the reduced matrix when
+<p>The <code><a href="../reference/resolve_run_paths.html">resolve_run_paths()</a></code> function reconstructs the path
+of every file of the run from the output directory, the run prefix and
+the supermatrix location, and each module below starts by calling it.
+Two entries depend on what happened in the run:
+<code>analysed_phy</code> points to the reduced matrix when
 <code>RAxML-NG</code> collapsed identical terminals and to the
 supermatrix otherwise, and <code>best_tree</code> points to
 <code>ml_search/</code> when the maximum-likelihood search ran on a
 cluster and to the run root when it ran locally. The
 <code>require</code> argument names the entries a module needs, so that
 a missing input raises an error naming the module that produces it.</p>
-<p>The <strong><code><a href="../reference/run_modeltest_ng.html">run_modeltest_ng()</a></code></strong> function selects
-a substitution model for each partition with <code>ModelTest-NG</code>
-(Darriba <em>et al</em>., 2020; Flouri <em>et al</em>., 2015) under the
-corrected Akaike information criterion (AICc; Akaike, 1974; Hurvich
-&amp; Tsai, 1989). The selected scheme is the model used in the
-maximum-likelihood search.</p>
+<p>The <code><a href="../reference/run_modeltest_ng.html">run_modeltest_ng()</a></code> function selects a substitution
+model for each partition with <code>ModelTest-NG</code> (Darriba <em>et
+al</em>., 2020; Flouri <em>et al</em>., 2015) under the corrected Akaike
+information criterion (AICc; Akaike, 1974; Hurvich &amp; Tsai, 1989).
+The selected scheme is the model used in the maximum-likelihood
+search.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/beeamerino/PhyloCactus" class="external-link">PhyloCactus</a></span><span class="op">)</span></span>
 <span></span>
@@ -259,10 +258,9 @@ likelihood of the alignment under the selected models and the
 topological constraint. Taxon sampling is incomplete and irregular, so
 relationships among major lineages taken from published phylogenies
 restrict the search to the rest of tree space.</p>
-<p>The <strong><code><a href="../reference/build_constraint_scaffold.html">build_constraint_scaffold()</a></code></strong>
-function builds the constraint tree from
-<code>cactus_constraints.csv</code>, which assigns each sampled species
-to one of 21 groups.</p>
+<p>The <code><a href="../reference/build_constraint_scaffold.html">build_constraint_scaffold()</a></code> function builds the
+constraint tree from <code>cactus_constraints.csv</code>, which assigns
+each sampled species to one of 21 groups.</p>
 <p>The constraint tree written by
 <code><a href="../reference/build_constraint_scaffold.html">build_constraint_scaffold()</a></code> fixes four kinds of
 relationship. The first is the monophyly of the groups whose terminals
@@ -338,17 +336,16 @@ with that bipartition removed from the constraint and everything else
 unchanged: the relaxed search recovered core Cactoideae II, with
 Rhipsalideae (56 terminals) sister to BCT (250) plus Notocacteae
 (64).</p>
-<p>The <strong><code><a href="../reference/calculate_ml_tree.html">calculate_ml_tree()</a></code></strong> function runs
-the constrained search in <code>RAxML-NG</code> (Kozlov <em>et al</em>.,
-2019) with the partition models selected in Module 7. The search runs on
-a local workstation with <code><a href="../reference/calculate_ml_tree.html">calculate_ml_tree()</a></code>, or on a
-cluster with <strong><code><a href="../reference/generate_ml_search_script.html">generate_ml_search_script()</a></code></strong>,
-which writes a SLURM batch script for the same constrained search. The
-<code>run_local_ml</code> flag below selects between them, as
-<code>run_local_bs</code> does for the bootstrap replicates of Module 9.
-The search is a single job: <code>RAxML-NG</code> distributes the
-starting trees among workers within the job and writes one best
-tree.</p>
+<p>The <code><a href="../reference/calculate_ml_tree.html">calculate_ml_tree()</a></code> function runs the constrained
+search in <code>RAxML-NG</code> (Kozlov <em>et al</em>., 2019) with the
+partition models selected in Module 7. The search runs on a local
+workstation with <code><a href="../reference/calculate_ml_tree.html">calculate_ml_tree()</a></code>, or on a cluster with
+<code><a href="../reference/generate_ml_search_script.html">generate_ml_search_script()</a></code>, which writes a SLURM batch
+script for the same constrained search. The <code>run_local_ml</code>
+flag below selects between them, as <code>run_local_bs</code> does for
+the bootstrap replicates of Module 9. The search is a single job:
+<code>RAxML-NG</code> distributes the starting trees among workers
+within the job and writes one best tree.</p>
 <p>The wall-clock time of this stage depends mainly on
 <code>n_workers</code>. <code>RAxML-NG</code> gives each worker
 <code>threads / workers</code> threads and one starting tree at a time,
@@ -366,10 +363,9 @@ thread, below which parallel efficiency within a worker saturates.
 <code>min_threads_per_worker</code> sets that floor; on unfamiliar
 hardware it can be checked with a short trial search
 (<code>n_init_trees = "rand{2}"</code>).</p>
-<p>The <strong><code><a href="../reference/calculate_rf_distances.html">calculate_rf_distances()</a></code></strong> function
-computes Robinson-Foulds distances (Robinson &amp; Foulds, 1981) among
-the trees of independent searches, as a measure of their
-convergence.</p>
+<p>The <code><a href="../reference/calculate_rf_distances.html">calculate_rf_distances()</a></code> function computes
+Robinson-Foulds distances (Robinson &amp; Foulds, 1981) among the trees
+of independent searches, as a measure of their convergence.</p>
 <p>In the reference run the 50 searches ended in 50 distinct topologies
 (mean relative RF 0.2246; log-likelihoods from -132207.2 to -132294.1;
 <code>cactus_RF.raxml.log</code> and
@@ -512,29 +508,28 @@ constrained).</p>
 <p>Bootstrap analysis measures how consistently each clade of the
 maximum-likelihood tree is recovered when the alignment is
 resampled.</p>
-<p>The <strong><code><a href="../reference/generate_bootstrap_script.html">generate_bootstrap_script()</a></code></strong> and
-<strong><code><a href="../reference/run_local_bootstraps.html">run_local_bootstraps()</a></code></strong> functions run the
-bootstrap searches in <code>RAxML-NG</code> with the same models,
-constraint and partition scheme as the maximum-likelihood search.</p>
-<p>The <strong><code><a href="../reference/collect_bootstraps.html">collect_bootstraps()</a></code></strong> function
-gathers the replicates, and
-<strong><code><a href="../reference/check_bs_convergence.html">check_bs_convergence()</a></code></strong> tests whether their
+<p>The <code><a href="../reference/generate_bootstrap_script.html">generate_bootstrap_script()</a></code> and
+<code><a href="../reference/run_local_bootstraps.html">run_local_bootstraps()</a></code> functions run the bootstrap searches
+in <code>RAxML-NG</code> with the same models, constraint and partition
+scheme as the maximum-likelihood search.</p>
+<p>The <code><a href="../reference/collect_bootstraps.html">collect_bootstraps()</a></code> function gathers the
+replicates, and <code><a href="../reference/check_bs_convergence.html">check_bs_convergence()</a></code> tests whether their
 number is sufficient with the autoMRE bootstopping criterion (Pattengale
 <em>et al</em>., 2010) on Felsenstein bootstrap proportions (FBP), with
 a cutoff of 0.03. In the reference run the criterion was met after 550
 of 1000 replicates.</p>
-<p>The <strong><code><a href="../reference/map_branch_supports.html">map_branch_supports()</a></code></strong> function maps
-the bootstrap support onto the maximum-likelihood tree. FBP is the
-primary measure, as in published phylogenies of Cactaceae, which report
-bipartition frequencies or posterior probabilities (Arakaki <em>et
-al</em>., 2011; Hernández-Hernández <em>et al</em>., 2014). The transfer
-bootstrap expectation (TBE; Lemoine <em>et al</em>., 2018) is computed
-as a secondary measure. TBE is less sensitive to unstable terminals in
-large matrices with missing data, but it is higher than FBP on large
-clades: on the 1171 unconstrained nodes of the reference tree, clades of
-51 to 200 terminals have a median FBP of 8 (in percent, as the tree
-labels it) and a median TBE of 0.930. FBP is reported for comparability
-with published studies, and TBE as a measure of the stability of taxon
+<p>The <code><a href="../reference/map_branch_supports.html">map_branch_supports()</a></code> function maps the bootstrap
+support onto the maximum-likelihood tree. FBP is the primary measure, as
+in published phylogenies of Cactaceae, which report bipartition
+frequencies or posterior probabilities (Arakaki <em>et al</em>., 2011;
+Hernández-Hernández <em>et al</em>., 2014). The transfer bootstrap
+expectation (TBE; Lemoine <em>et al</em>., 2018) is computed as a
+secondary measure. TBE is less sensitive to unstable terminals in large
+matrices with missing data, but it is higher than FBP on large clades:
+on the 1171 unconstrained nodes of the reference tree, clades of 51 to
+200 terminals have a median FBP of 8 (in percent, as the tree labels it)
+and a median TBE of 0.930. FBP is reported for comparability with
+published studies, and TBE as a measure of the stability of taxon
 placement.</p>
 <p>Nodes imposed by the constraint
 (<code>cactus_constraints.tree</code>) are recovered in every bootstrap
@@ -554,9 +549,9 @@ of lineages (a hard polytomy), which only more loci could test.</p>
 </h4>
 <p>Following Maurin (2020), a second set of bootstrap replicates is
 generated for dating, to measure the uncertainty in branch lengths.</p>
-<p>The <strong><code><a href="../reference/calculate_temporal_bootstraps.html">calculate_temporal_bootstraps()</a></code></strong>
-function resamples the alignment and estimates branch lengths for each
-replicate with the topology fixed to the maximum-likelihood tree.</p>
+<p>The <code><a href="../reference/calculate_temporal_bootstraps.html">calculate_temporal_bootstraps()</a></code> function resamples
+the alignment and estimates branch lengths for each replicate with the
+topology fixed to the maximum-likelihood tree.</p>
 <p>In the reference run the 500 temporal replicates were estimated on
 the cluster by <code>RAxML-NG</code> 1.2.2-master with its default
 branch length optimization, <code>NR-FAST</code>, as
@@ -872,8 +867,8 @@ with the 2.5 and 97.5 percentiles over the 100 dated replicates:</p>
 </table>
 <p><code>inst/scripts/analysis-calibration-schemes.R</code> dates the
 three schemes.</p>
-<p>The <strong><code><a href="../reference/automate_treePL.html">automate_treePL()</a></code></strong> function runs the
-dating: it prepares the maximum-likelihood tree and the calibrations for
+<p>The <code><a href="../reference/automate_treePL.html">automate_treePL()</a></code> function runs the dating: it
+prepares the maximum-likelihood tree and the calibrations for
 <code>treePL</code>, selects the optimization parameters and the
 smoothing value, and dates the maximum-likelihood tree and the temporal
 replicates.</p>

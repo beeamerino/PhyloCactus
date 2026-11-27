@@ -120,7 +120,7 @@ options(phylocactus.tag_suffix = "")
 
 ### Step 1: assembly
 
-**[`assemble_barcoding_dataset()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_barcoding_dataset.md)**.
+[`assemble_barcoding_dataset()`](https://beeamerino.github.io/PhyloCactus/reference/assemble_barcoding_dataset.md).
 The clusters of the mining are named by locus, records over 2000 bases
 are cut to the extent the shorter records of their locus cover (most of
 them trnK-matK records cut to `matK`), and every accession is kept with
@@ -149,7 +149,7 @@ assemble_barcoding_dataset(
 
 ### Step 2: curation
 
-**[`curate_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/curate_barcoding_markers.md)**.
+[`curate_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/curate_barcoding_markers.md).
 Each locus is aligned with `MAFFT`, put on one strand and masked with
 `DECIPHER`.
 
@@ -171,7 +171,7 @@ curate_barcoding_markers(
 
 ### Step 3: screening
 
-**[`screen_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/screen_barcoding_markers.md)**.
+[`screen_barcoding_markers()`](https://beeamerino.github.io/PhyloCactus/reference/screen_barcoding_markers.md).
 A locus enters the library when 20 or more species hold two or more
 sequences of it. Saturation and possible paralogy (`pepC_like`) are
 flagged, never used to exclude.
@@ -190,7 +190,7 @@ screen_barcoding_markers(
 
 ### Step 4: final library
 
-**[`finalize_barcoding_library()`](https://beeamerino.github.io/PhyloCactus/reference/finalize_barcoding_library.md)**.
+[`finalize_barcoding_library()`](https://beeamerino.github.io/PhyloCactus/reference/finalize_barcoding_library.md).
 Non-homologous sequences are excluded and declared, identical sequences
 of one species are collapsed, and the replication rule is evaluated
 again on distinct sequences.
@@ -250,7 +250,7 @@ checklist.](figures/Figure_TB7_taxonomic_coverage.png)
 
 ### Step 5: validation folds
 
-**[`build_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/build_barcoding_folds.md)**.
+[`build_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/build_barcoding_folds.md).
 Scheme E leaves one sequence out and asks for its species, which stays
 in the library. Scheme G leaves a whole species out and asks for its
 genus. The folds are deterministic and checked for leakage.
@@ -265,7 +265,7 @@ build_barcoding_folds(
 
 ### Step 6: barcode gap
 
-**[`analyze_barcode_gap()`](https://beeamerino.github.io/PhyloCactus/reference/analyze_barcode_gap.md)**.
+[`analyze_barcode_gap()`](https://beeamerino.github.io/PhyloCactus/reference/analyze_barcode_gap.md).
 Intraspecific distances and the distance to the nearest neighbour of
 another species, per locus, uncorrected and K80. No locus shows a gap,
 so no fixed distance threshold is used anywhere in Module 14.
@@ -284,7 +284,7 @@ analyze_barcode_gap(
 
 ### Step 7: classification of the folds
 
-**[`classify_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/classify_barcoding_folds.md)**.
+[`classify_barcoding_folds()`](https://beeamerino.github.io/PhyloCactus/reference/classify_barcoding_folds.md).
 Two classifiers: the nearest neighbour, with each query added to the
 training alignment of its fold by `MAFFT --add` (3 h 14 min for the 15
 loci on an Apple M2 Pro with 8 parallel processes), and `IdTaxa` (Murali
@@ -341,10 +341,10 @@ if (!is.null(idtaxa_tables)) {
 library with it took 126 core-hours on the library of 15 loci, and
 `LearnTaxa()` differs in floating point between machines: it is run
 once, on a computing cluster, and its merged tables are the result.
-**[`generate_barcoding_job_scripts()`](https://beeamerino.github.io/PhyloCactus/reference/generate_barcoding_job_scripts.md)**
+[`generate_barcoding_job_scripts()`](https://beeamerino.github.io/PhyloCactus/reference/generate_barcoding_job_scripts.md)
 writes the job array (one chunk of folds per task, one core each), the
 merge job, which runs
-**[`merge_barcoding_chunks()`](https://beeamerino.github.io/PhyloCactus/reference/merge_barcoding_chunks.md)**
+[`merge_barcoding_chunks()`](https://beeamerino.github.io/PhyloCactus/reference/merge_barcoding_chunks.md)
 once every task has finished, and `submit.sh`, which submits both
 (`bash submit.sh` on the cluster). The paths are those of the cluster.
 The outgroup control with `IdTaxa` is run there too, with
@@ -373,7 +373,7 @@ and 8, and steps 9 and 10 then include `IdTaxa`.
 
 ### Step 8: negative controls
 
-**[`run_barcoding_controls()`](https://beeamerino.github.io/PhyloCactus/reference/run_barcoding_controls.md)**
+[`run_barcoding_controls()`](https://beeamerino.github.io/PhyloCactus/reference/run_barcoding_controls.md)
 runs the controls before any accuracy is read. The label permutation
 (`controls = "CN1"`) asks whether the folds leak. The outgroup control
 (`"CN2"`) asks the library about sequences of the sister lineages
@@ -422,7 +422,7 @@ if (!is.null(idtaxa_tables)) {
 
 ### Step 9: thresholds
 
-**[`sweep_barcoding_threshold()`](https://beeamerino.github.io/PhyloCactus/reference/sweep_barcoding_threshold.md)**.
+[`sweep_barcoding_threshold()`](https://beeamerino.github.io/PhyloCactus/reference/sweep_barcoding_threshold.md).
 For the nearest neighbour, a threshold of remoteness per locus (quantile
 0.99 of Scheme G). For `IdTaxa`, the operating threshold is 60,
 DECIPHER’s default, and a species threshold per locus is written for the
@@ -460,7 +460,7 @@ if (!is.null(idtaxa_tables)) {
 
 ### Step 10: metrics
 
-**[`summarise_barcoding_metrics()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_metrics.md)**.
+[`summarise_barcoding_metrics()`](https://beeamerino.github.io/PhyloCactus/reference/summarise_barcoding_metrics.md).
 Per locus and scheme: species correct, genus correct, wrong species,
 wrong genus and unassigned.
 
@@ -502,7 +502,7 @@ the folds.
 
 ### Step 11: identification of a sample
 
-**[`identify_barcoding_query()`](https://beeamerino.github.io/PhyloCactus/reference/identify_barcoding_query.md)**
+[`identify_barcoding_query()`](https://beeamerino.github.io/PhyloCactus/reference/identify_barcoding_query.md)
 cuts each locus of the library from the query, classifies it with
 `IdTaxa` against the library and gives it one of three states.
 

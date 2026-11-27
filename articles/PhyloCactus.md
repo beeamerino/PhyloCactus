@@ -145,7 +145,7 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install(c("DECIPHER", "Biostrings", "ggtree"))
 ```
 
-#### phylotaR
+#### `phylotaR`
 
 [`phylotaR`](https://github.com/ropensci/phylotaR) (Bennett *et al*.
 2018; Wang *et al*. 2026) retrieves orthologous DNA sequences from

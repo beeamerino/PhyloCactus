@@ -68,7 +68,7 @@
                         <h4 data-toc-skip class="author">Beatriz M.
 Meriño</h4>
             
-            <h4 data-toc-skip class="date">2026-11-26</h4>
+            <h4 data-toc-skip class="date">2026-11-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/beeamerino/PhyloCactus/blob/master/vignettes/tutorial-7-cactus-phylogeny-functions.Rmd" class="external-link"><code>vignettes/tutorial-7-cactus-phylogeny-functions.Rmd</code></a></small>
       <div class="d-none name"><code>tutorial-7-cactus-phylogeny-functions.Rmd</code></div>
@@ -377,9 +377,9 @@ Red List category colors.</td>
 <tbody>
 <tr class="odd">
 <td align="left"><code><a href="../reference/assemble_barcoding_dataset.html">assemble_barcoding_dataset()</a></code></td>
-<td align="left">Names the clusters of the phylotaR mining of the
-phylogeny by locus, cuts records over 2000 bases to the extent of the
-shorter records of their locus, reconciles every name against the
+<td align="left">Names the clusters of the <code>phylotaR</code> mining
+of the phylogeny by locus, cuts records over 2000 bases to the extent of
+the shorter records of their locus, reconciles every name against the
 checklist and, optionally, adds the user’s own sequences.</td>
 <td align="left">Bennett et al. (2018)</td>
 </tr>
@@ -455,7 +455,8 @@ candidate threshold reported, never imposed.</td>
 <td align="left"><code><a href="../reference/classify_barcoding_folds.html">classify_barcoding_folds()</a></code></td>
 <td align="left">Classifies the folds by nearest neighbour (each query
 added to the training alignment with <code>MAFFT --add</code>) or by
-IdTaxa, in three states, in parallel processes of one machine.</td>
+<code>IdTaxa</code>, in three states, in parallel processes of one
+machine.</td>
 <td align="left">Katoh &amp; Frith (2012); Murali et al. (2018)</td>
 </tr>
 <tr class="even">
@@ -480,8 +481,8 @@ process would write, and checks that every query appears once.</td>
 <tr class="odd">
 <td align="left"><code><a href="../reference/sweep_barcoding_threshold.html">sweep_barcoding_threshold()</a></code></td>
 <td align="left">Sweeps the threshold of remoteness of the nearest
-neighbour, or the confidence of IdTaxa, and writes the species threshold
-of each locus used by the identification.</td>
+neighbour, or the confidence of <code>IdTaxa</code>, and writes the
+species threshold of each locus used by the identification.</td>
 <td align="left"></td>
 </tr>
 <tr class="even">
@@ -520,8 +521,8 @@ answer.</td>
 <tr class="odd">
 <td align="left"><code><a href="../reference/identify_barcoding_query.html">identify_barcoding_query()</a></code></td>
 <td align="left">Identifies sequences (FASTA, GenBank flat file or
-character vector) against the library, locus by locus, with IdTaxa, in
-three states, and writes the report.</td>
+character vector) against the library, locus by locus, with
+<code>IdTaxa</code>, in three states, and writes the report.</td>
 <td align="left">Murali et al. (2018)</td>
 </tr>
 <tr class="even">
@@ -540,8 +541,8 @@ identifies them.</td>
 <tr class="even">
 <td align="left"><code><a href="../reference/identify_barcoding_reads.html">identify_barcoding_reads()</a></code></td>
 <td align="left">Assembles the plastome and the nuclear ribosomal DNA
-from paired Illumina reads with <code>fastp</code> and GetOrganelle,
-then identifies them.</td>
+from paired Illumina reads with <code>fastp</code> and
+<code>GetOrganelle</code>, then identifies them.</td>
 <td align="left">Chen et al. (2018); Jin et al. (2020)</td>
 </tr>
 <tr class="odd">
