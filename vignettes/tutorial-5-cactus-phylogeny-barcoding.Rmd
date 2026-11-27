@@ -93,7 +93,7 @@ options(phylocactus.tag_suffix = "")
 
 ### Step 1: assembly
 
-**`assemble_barcoding_dataset()`**. The clusters of the mining are named by locus, records over 2000 bases are cut to the extent the shorter records of their locus cover (most of them trnK-matK records cut to `matK`), and every accession is kept with its name reconciled against the checklist.
+`assemble_barcoding_dataset()`. The clusters of the mining are named by locus, records over 2000 bases are cut to the extent the shorter records of their locus cover (most of them trnK-matK records cut to `matK`), and every accession is kept with its name reconciled against the checklist.
 
 ```{r, eval = FALSE}
 assemble_barcoding_dataset(
@@ -117,7 +117,7 @@ assemble_barcoding_dataset(
 
 ### Step 2: curation
 
-**`curate_barcoding_markers()`**. Each locus is aligned with `MAFFT`, put on one strand and masked with `DECIPHER`.
+`curate_barcoding_markers()`. Each locus is aligned with `MAFFT`, put on one strand and masked with `DECIPHER`.
 
 ```{r, eval = FALSE}
 curate_barcoding_markers(
@@ -136,7 +136,7 @@ curate_barcoding_markers(
 
 ### Step 3: screening
 
-**`screen_barcoding_markers()`**. A locus enters the library when 20 or more species hold two or more sequences of it. Saturation and possible paralogy (`pepC_like`) are flagged, never used to exclude.
+`screen_barcoding_markers()`. A locus enters the library when 20 or more species hold two or more sequences of it. Saturation and possible paralogy (`pepC_like`) are flagged, never used to exclude.
 
 ```{r, eval = FALSE}
 screen_barcoding_markers(
@@ -151,7 +151,7 @@ screen_barcoding_markers(
 
 ### Step 4: final library
 
-**`finalize_barcoding_library()`**. Non-homologous sequences are excluded and declared, identical sequences of one species are collapsed, and the replication rule is evaluated again on distinct sequences.
+`finalize_barcoding_library()`. Non-homologous sequences are excluded and declared, identical sequences of one species are collapsed, and the replication rule is evaluated again on distinct sequences.
 
 ```{r, eval = FALSE}
 finalize_barcoding_library(
@@ -195,7 +195,7 @@ knitr::include_graphics("figures/Figure_TB7_taxonomic_coverage.png")
 
 ### Step 5: validation folds
 
-**`build_barcoding_folds()`**. Scheme E leaves one sequence out and asks for its species, which stays in the library. Scheme G leaves a whole species out and asks for its genus. The folds are deterministic and checked for leakage.
+`build_barcoding_folds()`. Scheme E leaves one sequence out and asks for its species, which stays in the library. Scheme G leaves a whole species out and asks for its genus. The folds are deterministic and checked for leakage.
 
 ```{r, eval = FALSE}
 build_barcoding_folds(
@@ -206,7 +206,7 @@ build_barcoding_folds(
 
 ### Step 6: barcode gap
 
-**`analyze_barcode_gap()`**. Intraspecific distances and the distance to the nearest neighbour of another species, per locus, uncorrected and K80. No locus shows a gap, so no fixed distance threshold is used anywhere in Module 14.
+`analyze_barcode_gap()`. Intraspecific distances and the distance to the nearest neighbour of another species, per locus, uncorrected and K80. No locus shows a gap, so no fixed distance threshold is used anywhere in Module 14.
 
 ```{r, eval = FALSE}
 analyze_barcode_gap(
@@ -221,7 +221,7 @@ analyze_barcode_gap(
 
 ### Step 7: classification of the folds
 
-**`classify_barcoding_folds()`**. Two classifiers: the nearest neighbour, with each query added to the training alignment of its fold by `MAFFT --add` (3 h 14 min for the 15 loci on an Apple M2 Pro with 8 parallel processes), and `IdTaxa` (Murali *et al*., 2018), which retrains once per fold and took 126 core-hours on the cluster. `IdTaxa` is run once, on a computing cluster, on the final library (`generate_barcoding_job_scripts()`, `merge_barcoding_chunks()`); the script reads its merged tables through the switch `idtaxa_tables` and never trains it.
+`classify_barcoding_folds()`. Two classifiers: the nearest neighbour, with each query added to the training alignment of its fold by `MAFFT --add` (3 h 14 min for the 15 loci on an Apple M2 Pro with 8 parallel processes), and `IdTaxa` (Murali *et al*., 2018), which retrains once per fold and took 126 core-hours on the cluster. `IdTaxa` is run once, on a computing cluster, on the final library (`generate_barcoding_job_scripts()`, `merge_barcoding_chunks()`); the script reads its merged tables through the switch `idtaxa_tables` and never trains it.
 
 ```{r, eval = FALSE}
 # The classifier of the internal validation of Module 14: exact leave-one-out over the distance matrix
@@ -263,7 +263,7 @@ if (!is.null(idtaxa_tables)) {
 
 ### `IdTaxa` on a computing cluster
 
-`IdTaxa` retrains once per fold, so classifying every fold of the library with it took 126 core-hours on the library of 15 loci, and `LearnTaxa()` differs in floating point between machines: it is run once, on a computing cluster, and its merged tables are the result. **`generate_barcoding_job_scripts()`** writes the job array (one chunk of folds per task, one core each), the merge job, which runs **`merge_barcoding_chunks()`** once every task has finished, and `submit.sh`, which submits both (`bash submit.sh` on the cluster). The paths are those of the cluster. The outgroup control with `IdTaxa` is run there too, with `run_barcoding_controls(method = "idtaxa", controls = "CN2")`.
+`IdTaxa` retrains once per fold, so classifying every fold of the library with it took 126 core-hours on the library of 15 loci, and `LearnTaxa()` differs in floating point between machines: it is run once, on a computing cluster, and its merged tables are the result. `generate_barcoding_job_scripts()` writes the job array (one chunk of folds per task, one core each), the merge job, which runs `merge_barcoding_chunks()` once every task has finished, and `submit.sh`, which submits both (`bash submit.sh` on the cluster). The paths are those of the cluster. The outgroup control with `IdTaxa` is run there too, with `run_barcoding_controls(method = "idtaxa", controls = "CN2")`.
 
 ```{r, eval = FALSE}
 generate_barcoding_job_scripts(
@@ -283,7 +283,7 @@ On the library of 15 loci of this version, the run of all loci took 126 core-hou
 
 ### Step 8: negative controls
 
-**`run_barcoding_controls()`** runs the controls before any accuracy is read. The label permutation (`controls = "CN1"`) asks whether the folds leak. The outgroup control (`"CN2"`) asks the library about sequences of the sister lineages (Anacampserotaceae, Portulacaceae, Talinaceae). The resubstitution control (`"CN3"`) measures the bias of classifying a sequence still in the library. `IdTaxa` rejects every comparable outgroup query. The rule of remoteness of the nearest neighbour rejects them in six loci but not in `ITS`, where cactus and outgroup distances overlap.
+`run_barcoding_controls()` runs the controls before any accuracy is read. The label permutation (`controls = "CN1"`) asks whether the folds leak. The outgroup control (`"CN2"`) asks the library about sequences of the sister lineages (Anacampserotaceae, Portulacaceae, Talinaceae). The resubstitution control (`"CN3"`) measures the bias of classifying a sequence still in the library. `IdTaxa` rejects every comparable outgroup query. The rule of remoteness of the nearest neighbour rejects them in six loci but not in `ITS`, where cactus and outgroup distances overlap.
 
 ```{r, eval = FALSE}
 # The outgroup control needs an outgroup, assembled from the raw phylotaR workspace of the outgroup with the filters
@@ -323,7 +323,7 @@ if (!is.null(idtaxa_tables)) {
 
 ### Step 9: thresholds
 
-**`sweep_barcoding_threshold()`**. For the nearest neighbour, a threshold of remoteness per locus (quantile 0.99 of Scheme G). For `IdTaxa`, the operating threshold is 60, DECIPHER's default, and a species threshold per locus is written for the identification. A species is named only above it. `rbcL` answers at genus rank only (argument `genus_only_loci` of the identification functions): on the library of this version its species answers were right in 11 of 34.
+`sweep_barcoding_threshold()`. For the nearest neighbour, a threshold of remoteness per locus (quantile 0.99 of Scheme G). For `IdTaxa`, the operating threshold is 60, DECIPHER's default, and a species threshold per locus is written for the identification. A species is named only above it. `rbcL` answers at genus rank only (argument `genus_only_loci` of the identification functions): on the library of this version its species answers were right in 11 of 34.
 
 ```{r, eval = FALSE}
 sweep_barcoding_threshold(
@@ -353,7 +353,7 @@ if (!is.null(idtaxa_tables)) {
 
 ### Step 10: metrics
 
-**`summarise_barcoding_metrics()`**. Per locus and scheme: species correct, genus correct, wrong species, wrong genus and unassigned.
+`summarise_barcoding_metrics()`. Per locus and scheme: species correct, genus correct, wrong species, wrong genus and unassigned.
 
 ```{r, eval = FALSE}
 summarise_barcoding_metrics(
@@ -382,7 +382,7 @@ knitr::include_graphics("figures/Figure_TB9_chilean_genera.png")
 
 ### Step 11: identification of a sample
 
-**`identify_barcoding_query()`** cuts each locus of the library from the query, classifies it with `IdTaxa` against the library and gives it one of three states.
+`identify_barcoding_query()` cuts each locus of the library from the query, classifies it with `IdTaxa` against the library and gives it one of three states.
 
 ```{r, eval = FALSE}
 identify_barcoding_query(
